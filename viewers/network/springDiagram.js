@@ -34,7 +34,7 @@ function parseRecSet() {
         // Construct node
         var node = {id: parseInt(id), name: name, image: image, count: 1, depth: depth, selected: selected};
         nodes[id] = node;    
-        console.log("Node #" + id);    
+        //console.log("Node #" + id);    
     }
     
     
@@ -53,7 +53,7 @@ function parseRecSet() {
                 if(ids !== undefined && ids.length > 0) {
                     for(var i = 0; i < ids.length; i++) {
                         // Define relation    
-                        console.log("Relation #" + i + " ID: " + ids[i]);        
+                        //console.log("Relation #" + i + " ID: " + ids[i]);        
                         var relation = nodes[ids[i]];
                         if(relation === undefined) {
                             relation = {id: ids[i], name: type, image: "unknown.png", count: 1, pointer: type.indexOf("ointer")>0};
@@ -83,8 +83,8 @@ function parseRecSet() {
                        
             for(var key in map) {
                 var object = results.recSet[id][key];
-                console.log(key + " for recSet["+id+"]");
-                console.log(object);
+                //console.log(key + " for recSet["+id+"]");
+                //console.log(object);
                 if(object !== undefined) {
                     findLinks(source, object, map[key]);
                 }
@@ -125,6 +125,7 @@ function visualize(data) {
         getData: function(data) { return getData(data); },
         getLineLength: function(record) { return getLineLength(record); },
         
+        showCounts: false,
         showEntitySettings: false,
         showLineWidth: false,
         showFormula: false

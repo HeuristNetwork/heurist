@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# uopdate_heurist.sh: update script for Heurist, creates new copy
+# update_heurist.sh: update script for Heurist, creates new copy
 
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
@@ -26,20 +26,23 @@ if [ -z $1 ]
    then
       echo -e "\n\n"
       echo "Please supply version eg. h3.x.x-alpha or h3-alpha, h3-beta, h3-latest (this MUST exist as a tar.bz2 file "
-      echo "on HeuristScholar.org/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
+      echo "on HeuristScholar.org/html/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
       exit
    fi
 
 # Test download package is valid before we get half way and can't find it ...
-curl --range 0-100 http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
+curl --range 0-100 http://heuristscholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
 
 rc=$?
 if [ $rc -ne 0 ]
      then
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
-        echo "Please check for the latest version at http://heuristscholar.org/HEURIST/DISTRIBUTION"
+        echo "Please check for the latest version at http://heuristscholar.org/html/HEURIST/DISTRIBUTION"
         echo "The parameter should be eg. h3.2.0-beta as given - DO NOT include the url path or .tar.bz2"
+        echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
+        echo
+        echo "       ./update_heurist.sh h3.2.0-beta sudo"
         exit
      fi
 
@@ -48,42 +51,48 @@ echo
 echo "----------------------- Installing Heurist Version 3 ---------------------------"
 echo
 echo
-echo -e "Fetching Heurist code from HeuristScholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2"
+echo -e "Fetching Heurist code from HeuristScholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2"
 echo
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2
-sudo tar -xjf $1.tar.bz2
-sudo rm $1.tar.bz2
-sudo cp -r $1/ /var/www/html/HEURIST/$1
+$2 rm $1.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 tar -xjf $1.tar.bz2
+$2 rm $1.tar.bz2
+$2 mkdir /var/www/html/HEURIST/$1
+$2 cp -R $1/* /var/www/html/HEURIST/$1
 
 echo
-echo Obtaining updated support files (external, exemplars and help files)
+echo Obtaining updated support files - external, exemplars and help files
 echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
-sudo tar -xjf external.tar.bz2
-sudo rm external.tar.bz2
+$2 rm external.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
+$2 tar -xjf external.tar.bz2
+$2 rm external.tar.bz2
 
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external-h4.tar.bz2
-sudo tar -xjf external-h4.tar.bz2
-sudo rm external-h4.tar.bz2
+$2 rm external_h4.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
+$2 tar -xjf external_h4.tar.bz2
+$2 rm external_h4.tar.bz2
 
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
-sudo tar -xjf help.tar.bz2
-sudo rm help.tar.bz2
+$2 rm help.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+$2 tar -xjf help.tar.bz2
+$2 rm help.tar.bz2
 
-sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
-sudo tar -xjf exemplars.tar.bz2
-sudo rm exemplars.tar.bz2
+$2 rm exemplars.tar.bz2
+$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
+$2 tar -xjf exemplars.tar.bz2
+$2 rm exemplars.tar.bz2
 
 echo "Heurist unpacked"
 
 # This installation of elaastic search generated a number of security holes rated HIGH RISK
-# We are therefore ewmoving it peding investigation. Sept 2014
-# sudo mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+# We are therefore removing it pending investigation. Sept 2014
+# $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-# sudo wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
-# sudo tar -zxvf elasticsearch-1.3.2.tar.gz
+# $2 wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
+# $2 tar -zxvf elasticsearch-1.3.2.tar.gz
 # cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 # ./bin/elasticsearch -d
 

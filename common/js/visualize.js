@@ -40,6 +40,7 @@ var svg;        // The SVG where the visualisation will be executed on
             // Custom functions
             getData: $.noop(),
             getLineLength: function() { return getSetting(setting_linelength); },
+            showCounts: true,
             
             // UI setting controls
             showLineSettings: true,
@@ -84,6 +85,10 @@ var svg;        // The SVG where the visualisation will be executed on
             
             gravity: "touch",
             attraction: -700,
+            
+            translatex: 0,
+            translatey: 0,
+            scale: 1
         }, options );
  
         console.log("CALLING FUNCTIONS");
@@ -94,8 +99,7 @@ var svg;        // The SVG where the visualisation will be executed on
         // Transform
         console.log("CALLING VISUALIZE DATA");
         visualizeData();
-        
-        
+ 
         return this;
     };
 }( jQuery ));
@@ -117,6 +121,9 @@ var setting_formula       = "setting_formula";
 var setting_gravity       = "setting_gravity";
 var setting_attraction    = "setting_attraction";
 var setting_fisheye       = "setting_fisheye";
+var setting_translatex    = "setting_translatex";
+var setting_translatey    = "setting_translatey";
+var setting_scale         = "setting_scale";  
 
 /**
 * Returns a URL parameter
@@ -180,6 +187,9 @@ function checkStoredSettings() {
     checkSetting(   setting_gravity,       settings.gravity     );
     checkSetting(   setting_attraction,    settings.attraction  );
     checkSetting(   setting_fisheye,       settings.fisheye     );
+    checkSetting(   setting_translatex,    settings.translatex  );
+    checkSetting(   setting_translatey,    settings.translatey  );
+    checkSetting(   setting_scale,         settings.scale       );
 }
 
 /**
@@ -535,26 +545,53 @@ function visualizeData() {
     var gravity = getSetting(setting_gravity);
     var attraction = getSetting(setting_attraction);
     var fisheyeEnabled = getSetting(setting_fisheye);
-
     
-    // Container       
+    // Zoom settings
+    var scale = getSetting(setting_scale);
+    var translateX = getSetting(setting_translatex);
+    var translateY = getSetting(setting_translatey);
+                                                    
+                                                    console.log("SCALE: " + scale);
+                                                    console.log("TRANSLATE X: " + translateX);
+                                                    console.log("TRANSLATE Y: " + translateY);
+    // Append zoomable container       
     var container = svg.append("g")
-                       .attr("id", "the-container");
-                       //.attr("transform", "scale(0.5)");
+                       .attr("id", "the-container");                   
 
     // Adding zoom
-    var zoom = d3.behavior.zoom()
-                 .scaleExtent([0.1, 5])
-                 .on("zoom", zoomed);
-                  
-    function zoomed() {
-        // Zoom container & update overlays
-        container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    var zoomBehaviour = d3.behavior.zoom()
+                          .scale(scale)
+                          /*.translate(function(d) {
+                              return [5,5];
+                          }) */
+                          .scaleExtent([0.1, 5])
+                          .on("zoom", zoomed);
+     
+    /** Updates the container after a zoom event */             
+    function zoomed() {      
+        // Translate
+        console.log(d3.event.translate);
+        if(d3.event.translate !== undefined) {
+            if(!isNaN(d3.event.translate[0])) {
+                putSetting(setting_translatex, d3.event.translate[0]);
+            }
+            if(!isNaN(d3.event.translate[1])) {
+                putSetting(setting_translatey, d3.event.translate[1]);
+            }
+        }
+        // Scale
+        console.log(d3.event.scale);
+        if(!isNaN(d3.event.scale)) {
+            putSetting(setting_scale, d3.event.scale);
+        }
+        // Transform         
+        var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
+        console.log("ZOOMED --> " + transform);
+        container.attr("transform", transform);
         updateOverlays();           
         
     }   
-    svg.call(zoom);  
-     
+    svg.call(zoomBehaviour); 
 
     // Creating D3 force
     var force = d3.layout.force()
@@ -1019,6 +1056,9 @@ function visualizeData() {
         });
     }
     
+    // Finally apply zoom.
+    container.attr("transform", "translate("+translateX+","+translateY+")scale("+scale+")");
+    //container.attr("transform", "scale("+scale+")");
 }
 
 /*************************************** OVERLAY ****************************************/  
@@ -1041,7 +1081,11 @@ function getRecordOverlayData(record) {
     var array = [];
     
     // Header
-    array.push({text: truncateText(record.name) + ", n=" + record.count, size: "12px", style: "bold", enter: true});        
+    var header = {text: truncateText(record.name), size: "12px", style: "bold", enter: true}; 
+    if(settings.showCounts) {
+        header.text += ", n=" + record.count;  
+    }
+    array.push(header);    
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1053,13 +1097,20 @@ function getRecordOverlayData(record) {
               
             // Does our record point to this link?
             if(link.source.id == record.id) {
+                // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
                     map[link.relation.name] = {};
                 }
                 
-                var obj = {text: "➜ " + truncateText(link.target.name) + ", n=" + link.targetcount, size: "9px", indent: true}; 
-                if(map[link.relation.name][obj.text] == undefined) {
-                    map[link.relation.name][obj.text] = obj;
+                // Record
+                var record = {text: "➜ " + truncateText(link.target.name), size: "9px", indent: true};
+                if(settings.showCounts) {
+                    record.text += ", n=" + link.targetcount;                      
+                }
+                
+                // Add record to map
+                if(map[link.relation.name][record.text] == undefined) {
+                    map[link.relation.name][record.text] = record;
                 }
             }
             
@@ -1077,13 +1128,20 @@ function getRecordOverlayData(record) {
             
             // Is our record a relation?
             if(link.relation.id == record.id && link.relation.name == record.name) {
+                // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
                     map[link.relation.name] = {};
                 }
-                
-                var obj = {text: truncateText(link.source.name) + " ↔ " + truncateText(link.target.name) + ", n=" + link.relation.count, size: "9px", indent: true};
-                if(map[link.relation.name][obj.text] == undefined) {
-                    map[link.relation.name][obj.text] = obj;
+               
+                // Relation
+                var relation = {text: truncateText(link.source.name) + " ↔ " + truncateText(link.target.name), size: "9px", indent: true};
+                if(settings.showCounts) {
+                    relation.text += ", n=" + link.relation.count
+                }
+                  
+                // Add relation to map
+                if(map[link.relation.name][relation.text] == undefined) {
+                    map[link.relation.name][relation.text] = relation;
                 }
             }
         }
@@ -1118,11 +1176,10 @@ function getRelationOverlayData(line) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
-            if(link.source.id == line.source.id && link.target.id == line.target.id) {
+            if(link.source.id == line.source.id && link.target.id == line.target.id ||
+               link.source.id == line.target.id && link.target.id == line.source.id) {
                 //console.log(link);
                 array.push({text: link.relation.name + ", n=" + link.relation.count, size: "9px"});  
-            }else if(link.source.id == line.target.id && link.target.id == line.source.id) {
-                array.push({text: link.relation.name + ", n=" + link.relation.count, size: "9px"}); 
             }
         }
     }

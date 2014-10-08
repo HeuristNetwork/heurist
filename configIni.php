@@ -131,15 +131,6 @@ $infoEmail = ""; // strongly recommended
 // Leaving this blank will send bug reports to Heurist development team
 $bugEmail = ""; // optional, set only if you are doing a lot of experimental development
 
-
-// system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
-// it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
-// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
-$parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
-if (is_file($parentIni)){
-	include_once($parentIni);
-}
-
 // URL of 3d party website thumbnail service. Heurist can call any thumbnailing service which returns an
 // appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a security block page
 // if the URL is passworded. The thumbnailing service is called automatically when web pages are bookmarked.
@@ -149,5 +140,15 @@ $websiteThumbnailUsername = "";
 $websiteThumbnailPassword = "";
 $websiteThumbnailXsize = 500;
 $websiteThumbnailYsize = 300;
+
+
+// system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
+// it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
+// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
+$parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
+if (is_file($parentIni)){
+	include_once($parentIni);
+}
+
 
 ?>
