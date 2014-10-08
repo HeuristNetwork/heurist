@@ -209,15 +209,22 @@ $.widget( "heurist.resultListMenu", {
                 if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
                     q ="&q=" + encodeURIComponent(this._query_request.q);
                 }
-                var url = top.HEURIST.basePath+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+                var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
                 
                 Hul.showDialog(url, { callback: 
-                    function(q){
-                        if(!Hul.isempty(q)) {
-                            that._query_request.q = q;
-                            //that._query_request.w = 'a';
-                            that._query_request.source = that.element.attr('id');
-                            top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                    function(res){
+                        if(!Hul.isempty(res)) {
+                            
+                            if(res.mode == 'apply'){
+                                
+                                that._query_request.q = q;
+                                //that._query_request.w = 'a';
+                                that._query_request.source = that.element.attr('id');
+                                
+                                top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                            
+                            }
+                            
                         }
                     }});
               
@@ -228,6 +235,22 @@ $.widget( "heurist.resultListMenu", {
                     $(app.widget).search_links('editSavedSearch', null, null, 'all'); //call method editSavedSearch - save current search
                 }
 
+          }else if(action == "menu-search-rulebuilder"){  
+                
+                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+                
+                Hul.showDialog(url, { width:900, callback: 
+                    function(q){
+                        if(!Hul.isempty(q)) {
+                            /*that._query_request.q = q;
+                            //that._query_request.w = 'a';
+                            that._query_request.source = that.element.attr('id');
+                            top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                            */
+                        }
+                    }});
+                
+                
           }else if(action == "menu-selected-select-all"){  
           
                 this.selectAll();                

@@ -1,7 +1,7 @@
 <?php
 
     /** 
-    * Standalone search for related recprds. It may be used separately or wihin widget in iframe (for example in recordListExt )
+    * Rule Builder Dialog
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -38,7 +38,7 @@
 ?>
 <html>
     <head>
-        <title><?=HEURIST_TITLE ?></title>
+        <title>Rule Builder</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
@@ -47,10 +47,7 @@
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
-        <!-- @todo load this 4 scripts dynamically -->
-        <!-- script type="text/javascript" src="../apps/search.js"></script>
-        <script type="text/javascript" src="relatedRecords.js"></script-->
-        
+       
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
@@ -61,14 +58,12 @@
         <script type="text/javascript">
             if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){
             <?php
-                //fill database definitions
-                print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
-                print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
+                //fill database definitions  - remove comments for standalone usage/testing
+                //print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
+                //print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
             }
 
-            var relatedRecords, ruleBuilder;
-            
             var ruleBuilders = [], counter = 0;
 
             function onInit(success) //callback function of hAPI initialization
@@ -85,23 +80,14 @@
                             $('#btn_add_level1').button().on('click', 1, addRuleBuilder);
                             $('#btn_add_level2').button().button("disable").on('click', 2, addRuleBuilder);
                             $('#btn_add_level3').button().button("disable").on('click', 3, addRuleBuilder);
-                            
-                            
-                            /*
-                            ruleBuilder = $("<div>").appendTo($("body"));
-                            var options = {};
-                            //add rule builder
-                            ruleBuilder.ruleBuilder( options );
-                            */
-                            
-                            //add record list widget
-                            /*options = { showmenu: false };
-                            var $container = $("<div>").appendTo($("body"));
-                            $container.resultList( options );*/
+                            $('#btn_apply').button().on('click', 3, applyRules);
 
                         }
             }
             
+            /**
+            * 
+            */
             function addRuleBuilder(event){
                 counter++;
                 var level = event.data;
@@ -111,6 +97,9 @@
                 updateButtons();
             }
             
+            /**
+            * 
+            */
             function removeRoleBuilder(event, data){
 
                 var level = $('#'+data.id).ruleBuilder('option' , 'level');
@@ -151,7 +140,9 @@
                 }
             }
             
-            // update add button disability
+            /**
+            *  update add button disability
+            */
             function updateButtons(){
                 var val = $('#level2').children().length>0?"enable":"disable";
                 $('#btn_add_level3').button(val);
@@ -159,6 +150,49 @@
                 $('#btn_add_level2').button(val);
             }
             
+            function getRulesArray(){
+                
+                    var res = {};
+                
+                    $.each(ruleBuilders, function( index, value ) {
+                        var $div = $(value);
+                        var qs = $div.ruleBuilder("queries"); //queries for this rule
+                        if(!top.HEURIST4.util.isempty(qs)){
+                            var level = $div.ruleBuilder('option' , 'level');
+                            
+                            if(top.HEURIST4.util.isnull(res[level])){
+                                res[level] = [];
+                            }
+                            res[level] = res[level].concat(qs);
+                        }
+                    });
+                    
+                    return res;
+                
+            }
+
+            /**
+            * Start search with current search
+            */
+            function applyRules(){
+                    var res = getRulesArray();
+                    if(Object.keys(records).length>0){
+                        res = {mode:'apply', rules:res};
+                        window.close(res);    
+                    }
+            }
+
+            /**
+            * Save rules with current search as a saved search
+            */
+            function saveRules(){
+                    var res = getRulesArray();
+                    if(Object.keys(records).length>0){
+                        res = {mode:'save', rules:res};
+                        window.close(res);    
+                    }
+            }
+                
             //
             //
             //
@@ -187,12 +221,25 @@
 
     </head>
     <body>
-        <div id="toolbar"><button id="btn_add_level1">Add Level 1</button><button id="btn_add_level2">Add Level 2</button><button id="btn_add_level3">Add Level 3</button></div>
+        <div style="overflow:hidden;width:100%;height:100%">
         
-        <div id="level1"></div>
-        
-        <div id="level2" style="padding-top:15px"></div>
-        
-        <div id="level3" style="padding-top:15px"></div>
+            <div id="toolbar" style="position:absolute;width:98%;height:2em">
+                <button id="btn_add_level1">Add Level 1</button>
+                <button id="btn_add_level2">Add Level 2</button>
+                <button id="btn_add_level3">Add Level 3</button>
+            </div>
+            
+            <div style="position:absolute;width:98%;top:4em;bottom:4em;overflow-y:auto">
+                <div id="level1" style="padding-top:15px"></div>
+            
+                <div id="level2" style="padding-top:15px"></div>
+            
+                <div id="level3" style="padding-top:15px"></div>
+            </div>
+            
+            <div style="position:absolute;width:98%;height:2em;bottom:10px">
+                <button id="btn_apply">Apply Rules</button>
+            </div>
+        </div>
     </body>
 </html>

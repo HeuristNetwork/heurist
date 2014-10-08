@@ -27,7 +27,7 @@ function hRecordSet(initdata) {
     var _className = "hRecordSet",
     _version   = "0.4";
 
-    var count_total = 0,   //number of records in query  - not match to  length()
+    var total_count = 0,   //number of records in query  - not match to  length()
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
@@ -40,7 +40,7 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
 
-        count_total = Number(response.count);
+        total_count = Number(response.count);
         offset = Number(response.offset);
         fields = response.fields;
         rectypes = response.rectypes;
@@ -403,7 +403,7 @@ function hRecordSet(initdata) {
                 _records = {};
             }
             return new hRecordSet({
-                count_total: Object.keys(records).length, //$(_records).length,
+                count: Object.keys(records).length, //$(_records).length,
                 offset: 0,
                 fields: fields,
                 rectypes: rectypes,
@@ -422,14 +422,15 @@ function hRecordSet(initdata) {
             
             //join records
             var records2 = recordset2.getRecords();
-            for (recid in records){
-                if(recid && !records2[recid]){
-                    records2[recid] = records[recid];
+            var records_new = records;
+            for (recid in records2){
+                if(recid && !records[recid]){
+                    records_new[recid] = records2[recid];
                 }
             }
             //join structures
-            var structures2 = recordset2.getRecords();
-            /* @todo
+            /* var structures2 = recordset2.getRecords();
+            @todo
             for (rt_id in structures){
                 if(rt_id && !structures2[rt_id]){
                     structures2[rt_id] = structures[rt_id];
@@ -439,21 +440,21 @@ function hRecordSet(initdata) {
             */
             
             
-            var fields2 = recordset2.getFields();
+            /*var fields2 = recordset2.getFields();
             jQuery.merge( fields2, fields );
-            fields2 = jQuery.unique( fields2 );
+            fields2 = jQuery.unique( fields2 );*/
 
-            var rectypes2 = recordset2.getFields();
+            var rectypes2 = recordset2.getRectypes();
             jQuery.merge( rectypes2, rectypes );
             rectypes2 = jQuery.unique( rectypes2 );
             
             return new hRecordSet({
-                count_total: Object.keys(records2).length, //$(_records).length,
+                count: total_count, //keep from original
                 offset: 0,
-                fields: fields2,
-                rectypes: rectypes,
-                structures: structures2,
-                records: records2
+                fields: fields,
+                rectypes: rectypes2,
+                structures: structures,
+                records: records_new
             });
         },
         
@@ -466,8 +467,11 @@ function hRecordSet(initdata) {
             return Object.keys(records).length; //$(records).length;
         },
 
+        /**
+        * get count of all records for current request
+        */
         count_total: function(){
-            return count_total;
+            return total_count;
         },
 
         offset: function(){

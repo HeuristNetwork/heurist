@@ -21,10 +21,14 @@ $.widget( "heurist.ruleBuilder", {
 
     // default options
     options: {
-        // callbacks
+        level: 0,
         queries:[],
-        recordtypes: [],  //array or record types from current main search result
-        query_request: {}   // keep current query request
+        recordtypes: [],  //array or record types from current main search result - otherwise show all rectypes
+        
+        is_search_allowed: false,
+        query_request: {},   // keep current query request
+        // callback
+        onremove: null
     },
     
     _selection: null,     // current set of selected records
@@ -37,7 +41,6 @@ $.widget( "heurist.ruleBuilder", {
     _create: function() {
 
         var that = this;
-        
         
         //create list/combobox of source record types
         this.label_1 = $("<label>").html('Source: ').appendTo(this.element);
@@ -60,14 +63,23 @@ $.widget( "heurist.ruleBuilder", {
                 .appendTo(this.element).hide();
         
         //create list/combobox of target record types
-        this.label_4 = $("<label>").html('Target: ').css('padding-left','5px').appendTo(this.element);
+        this.label_4 = $("<label>").html('Target: ').css({'padding-left':'5px'}).appendTo(this.element);
         this.select_target_rectype = $( "<select>" )
                 .addClass('menu-or-popup text ui-corner-all ui-widget-content')
                 .appendTo(this.element);
 
-        this.debug_label = $( "<label>" ).css('padding-left','10px').appendTo(this.element);
-        this.debug_filter = $( "<input>" ).appendTo(this.element);
-        this.debug_search = $( "<button>", {text:' Search'} ).appendTo(this.element);
+        this.label_5 = $("<label>").html('Filter: ').css({'padding-left':'5px'}).appendTo(this.element);
+        this.additional_filter = $( "<input>" ).appendTo(this.element);
+        
+        /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
+        this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
+        this.btn_delete = $( "<button>", {text:'Delete'} ).appendTo(this.element);
+        
+        if(this.options.is_search_allowed){
+            this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
+            this.debug_label = $( "<label>" ).css('padding-left','10px').appendTo(this.element);
+            this._on( this.debug_search, { click: this._debugSearch });
+        }
         
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
@@ -77,8 +89,7 @@ $.widget( "heurist.ruleBuilder", {
         this._on( this.select_target_rectype, { change: this._generateQuery });
         this._on( this.select_reltype, { change: this._generateQuery });
         
-        this._on( this.debug_search, { click: this._debugSearch });
-        
+        this._on( this.btn_delete, {click: function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
         
         //-----------------------     listener of global events
         /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT; 
@@ -160,7 +171,7 @@ $.widget( "heurist.ruleBuilder", {
         }else{
             $(this.element).find('.logged-in-only').css('visibility','hidden');
         }*/
-        
+        if(this.debug_label)
         this.debug_label.html(this.options.queries.join(' OR '));
     },
     // 
@@ -176,11 +187,13 @@ $.widget( "heurist.ruleBuilder", {
         this.select_target_rectype.remove();
         this.select_fields.remove();
         this.select_reltype.remove();
+        this.additional_filter.remove();
         
         this.label_1.remove();
         this.label_2.remove();
         this.label_3.remove();
         this.label_4.remove();
+        this.label_5.remove();
         
         if(this.debug_label) this.debug_label.remove();
     },
@@ -388,11 +401,14 @@ $.widget( "heurist.ruleBuilder", {
         this._refresh();
     },
     
+    /**
+    * debug search (not used) 
+    */
     _debugSearch: function(){
         
         var qsearch = '';
-        if(this.debug_filter.val()!=''){
-            qsearch = this.debug_filter.val();
+        if(this.additional_filter.val()!=''){
+            qsearch = this.additional_filter.val();
         } else {
             //return;
         }
@@ -416,5 +432,30 @@ $.widget( "heurist.ruleBuilder", {
         top.HAPI4.RecordMgr.search(request, $(this.document));
         
     },
+    
+    /**
+    * return array of queries
+    * 
+    * @returns {Array}
+    */
+    queries: function(){
+        
+        this._generateQuery();
+
+        if(top.HEURIST4.util.isempty(this.options.queries)){
+            return [];
+        }else{
+        
+            var qsearch = '';
+            if(this.additional_filter.val()!=''){
+                qsearch = this.additional_filter.val();
+                $.each(this.options.queries, function(index, value){
+                    this.options.queries[index] = this.options.queries[index] + ' ' + qsearch;
+                });
+            }
+            
+            return this.options.queries;
+        }
+    }
     
 });
