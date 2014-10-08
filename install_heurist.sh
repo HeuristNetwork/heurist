@@ -79,6 +79,7 @@ $2 rm $1.tar.bz2
 # this will fail if h3 already exists, use update script in this case
 $2 mkdir /var/www/html/HEURIST/h3
 $2 cp -R $1/* /var/www/html/HEURIST/h3/
+$2 rm -rf $1
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
