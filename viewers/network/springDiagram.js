@@ -56,7 +56,16 @@ function parseRecSet() {
                         //console.log("Relation #" + i + " ID: " + ids[i]);        
                         var relation = nodes[ids[i]];
                         if(relation === undefined) {
-                            relation = {id: ids[i], name: type, image: "unknown.png", count: 1, pointer: type.indexOf("ointer")>0};
+                            // Look up the typedef by ID
+                            var typedef = top.HEURIST.detailTypes.typedefs[ids[i]];
+                            console.log(typedef);
+                            if(typedef !== undefined) {
+                                // Construct relation details
+                                var name = typedef.commonFields[1];
+                                var group = "group";
+                                var image = top.HEURIST.iconBaseURL + group + ".png";
+                                relation = {id: ids[i], name: name, image: image, count: 1, pointer: type.indexOf("ointer")>0};
+                            }
                         }
                         
                         // Construct a link
