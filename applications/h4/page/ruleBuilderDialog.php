@@ -151,8 +151,15 @@
             }
             
             function getRulesArray(){
+  
+/*                
+         rules:[   {parent: index,  // index to top level
+                    level: level,   
+                    query: ],    
+*/                
                 
                     var res = {};
+                    var rules = [];
                 
                     $.each(ruleBuilders, function( index, value ) {
                         var $div = $(value);
@@ -164,6 +171,11 @@
                                 res[level] = [];
                             }
                             res[level] = res[level].concat(qs);
+                            
+                            rules.push({parent: level==1?'root':(level-1),   //@todo - make rules hierarchical
+                                        level: level,
+                                        query: qs[0]
+                            });
                         }
                     });
                     

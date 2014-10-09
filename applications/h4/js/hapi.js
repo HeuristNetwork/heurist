@@ -395,10 +395,14 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             ,search: function(request, callback){
 
+                if(!request.increment || top.HEURIST4.util.isnull(request.id)){
+                        request.id = (new Date().getTime());
+                }
+                
                 if(!$.isFunction(callback)){
                     var document = callback;
                     if(!top.HEURIST4.util.isnull(document)){
-                        document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //gloal app event  
+                        document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
                     } 
                     callback = function(response)
                     {
@@ -417,10 +421,49 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(top.HEURIST4.util.isnull(request.l)){
                     request.l = top.HAPI4.get_prefs('search_limit');
                 }
+                
+                //request.chunk = true;
 
-                _callserver('record_search', request, callback);
+                if(top.HEURIST4.util.isnull(request.chunk)){
+                    _callserver('record_search', request, callback);    //standard search 
+                }else{
+                    /*
+                    if(!request.db){
+                        request.db = _database;
+                    }
+
+                    var url = top.HAPI4.basePath+"php/api/record_search.php"; //+(new Date().getTime());
+                    
+                    //response is returned by chunks
+                    $.stream(url, {
+                        type: "http",
+                        dataType: "json",
+                        openData: request, 
+                        
+                        open:function(){
+                            //println("opened");
+                        },
+                        message:function(event){
+                            if(callback){
+                                callback(event.data);
+                            }
+                        },
+                        error:function(){
+                            if(callback){
+                                callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                                    message: jqXHR.responseText });
+                            }
+                        },
+                        close:function(){
+                            //println("closed");
+                        }
+                    });                    
+                    */
+                }
+                
             }
-
+            
+            
             // find min and max values for
             // rt - record type
             // dt - detailtyep
@@ -568,6 +611,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             LOGIN: "LOGIN",
             LOGOUT: "LOGOUT",
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
+            ON_REC_SEARCHSTART_RULES: "ON_REC_SEARCHSTART_RULES",
             ON_REC_SEARCHRESULT: "ON_REC_SEARCHRESULT",
             ON_REC_PAGESET: "ON_REC_PAGESET",
             ON_REC_SELECT: "ON_REC_SELECT"
