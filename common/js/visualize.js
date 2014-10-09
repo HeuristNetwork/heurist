@@ -649,6 +649,7 @@ function visualizeData() {
              .attr("fill", markercolor) // Using the markercolor setting
              .attr("opacity", "0.6")
              .append("path")
+             //.attr("d", "M10,-5L0,0L10,5"); // M0,-5L10,0L0,5     M-5,0L0,10L-5,0
              .attr("d", "M0,-5L10,0L0,5");
     
     /** Add lines */        
@@ -1145,20 +1146,21 @@ function getRecordOverlayData(record) {
               
             // Does our record point to this link?
             if(link.source.id == record.id) {
+                console.log(link.source.name + " -> " + link.target.name);
                 // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
                     map[link.relation.name] = {};
                 }
                 
-                // Record
-                var record = {text: "➜ " + truncateText(link.target.name), size: "9px", indent: true};
+                // Relation
+                var relation = {text: "➜ " + truncateText(link.target.name), size: "9px", indent: true};
                 if(settings.showCounts) {
-                    record.text += ", n=" + link.targetcount;                      
+                    relation.text += ", n=" + link.targetcount;                      
                 }
                 
-                // Add record to map
-                if(map[link.relation.name][record.text] == undefined) {
-                    map[link.relation.name][record.text] = record;
+                // Add record relation to map
+                if(map[link.relation.name][relation.text] == undefined) {
+                    map[link.relation.name][relation.text] = relation;
                 }
             }
             
@@ -1194,8 +1196,8 @@ function getRecordOverlayData(record) {
             }
         }
         
-        //console.log("MAP");
-        //console.log(map);
+        console.log("MAP");
+        console.log(map);
         
         // Convert map to array
         for(key in map) {                                   
@@ -1396,6 +1398,7 @@ function removeOverlay(selector) {
  
 /********************************* MENU ***********************************/
 $(document).ready(function() {
+    /* For future usage 
     // Menu popup link click
     $(".popup-link").click(function(e) {
         e.preventDefault();
@@ -1406,6 +1409,11 @@ $(document).ready(function() {
         
         var url = $(this).attr("href");
         top.HEURIST.util.popupURL(top, url, {height:height, width:width});
+    });
+    */
+    
+    $("#gephi-export").click(function(e) {
+       alert("Gephi export!"); 
     });
 });
 
