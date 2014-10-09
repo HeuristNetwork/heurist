@@ -510,9 +510,6 @@ function getEntityRadius(count) {
     var maxRadius = getSetting(setting_entityradius);
     return circleSize + executeFormula(count, maxRadius) - 1;
 }
-/********************************END OF VISUALISATION HELPER FUNCTIONS********************************/
-
-
 
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
 /** Visualizes the data */ 
@@ -566,9 +563,6 @@ function visualizeData() {
     var translateX = getSetting(setting_translatex);
     var translateY = getSetting(setting_translatey);
                                                     
-                                                    console.log("SCALE: " + scale);
-                                                    console.log("TRANSLATE X: " + translateX);
-                                                    console.log("TRANSLATE Y: " + translateY);
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "the-container");    
@@ -656,51 +650,67 @@ function visualizeData() {
              .attr("opacity", "0.6")
              .append("path")
              .attr("d", "M0,-5L10,0L0,5");
-
-    // Add the chosen lines [using the linetype setting]  
-    var lines;
-    if(linetype == "curved") {
-        // Add curved lines
-         lines = container.append("svg:g")
-                          .selectAll("path")
-                          .data(force.links())
-                          .enter()
-                          .append("svg:path");
-    }else{
-        // Add straight lines
-        lines = container.append("svg:g")
-                         .selectAll("polyline.link")
-                         .data(force.links())
-                         .enter()
-                         .append("svg:polyline");
-    }     
-    // Adding shared attributes
-    lines.attr("class", function(d) {
-            return "link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         }) 
-         .attr("stroke", linecolor)
-         .style("stroke-width", function(d) { 
-            return 0.5 + getLineWidth(d.relation.count);
-         }) 
-         .attr("marker-mid", function(d) {
-            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
-         })
-         .style("stroke-dasharray", (function(d) {
-             if(d.relation.count == 0) {
-                return "3, 3"; 
-             } 
-         })) 
-         .on("click", function(d) {
-             var id = d.relation.id;
-             // Construct line overlay data, then use it to generate the overlay itself  
-             if($(".overlay.id"+id).length > 0) { // Close overlay
-                removeOverlay(id);
-             }else{ // Display overlay
-                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
-             }
-         });
+    
+    /** Add lines */        
+    function addLines() {
+        // Add the chosen lines [using the linetype setting]  
+        var lines;
+        if(linetype == "curved") {
+            // Add curved lines
+             lines = container.append("svg:g")
+                              .selectAll("path")
+                              .data(force.links())
+                              .enter()
+                              .append("svg:path");
+        }else{
+            // Add straight lines
+            lines = container.append("svg:g")
+                             .selectAll("polyline.link")
+                             .data(force.links())
+                             .enter()
+                             .append("svg:polyline");
+        }    
          
+        // Adding shared attributes
+        lines.attr("class", function(d) {
+                return "link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+             }) 
+             .attr("marker-mid", function(d) {
+                return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
+             })
+             .style("stroke-dasharray", (function(d) {
+                 if(d.relation.count == 0) {
+                    return "3, 3"; 
+                 } 
+             })) 
+             .on("click", function(d) {
+                 var id = d.relation.id;
+                 // Construct line overlay data, then use it to generate the overlay itself  
+                 if($(".overlay.id"+id).length > 0) { // Close overlay
+                    removeOverlay(id);
+                 }else{ // Display overlay
+                    var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                    createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
+                 }
+             });
+             
+        return lines;
+    }
+    
+    // Bottom lines
+    var bottomLines = addLines();
+    bottomLines.attr("stroke", linecolor)
+               .style("stroke-width", function(d) { 
+                    return 0.5 + getLineWidth(d.relation.count);
+               });
+    
+    // Top lines
+    var topLines = addLines();
+    topLines.attr("stroke", "rgba(255, 255, 255, 0.0)")
+            .style("stroke-width", function(d) { 
+                   return 8.5 + getLineWidth(d.relation.count);
+            });
+    
     // Check what methods to call on drag
     var node_drag = d3.behavior.drag()
                                .on("dragstart", dragstart)
@@ -1003,37 +1013,55 @@ function visualizeData() {
             if(linetype == "curved") {
                 // Curved
                 force.stop();
-                lines.each(function(d) {
-                    d.fisheye = fisheye(d);
-                })
-                .attr("d", function(d) {
-                    var dx = d.target.fisheye.x - d.source.fisheye.x,
-                        dy = d.target.fisheye.y - d.source.fisheye.y,
-                        dr = Math.sqrt(dx * dx + dy * dy)/1.5,
-                        mx = d.source.fisheye.x + dx,
-                        my = d.source.fisheye.y + dy;
-                        
-                    return [
-                      "M",d.source.fisheye.x,d.source.fisheye.y,
-                      "A",dr,dr,0,0,1,mx,my,
-                      "A",dr,dr,0,0,1,d.target.fisheye.x,d.target.fisheye.y
-                    ].join(" ");
-                });
+                curvedFisheye(topLines);
+                curvedFisheye(bottomLines);
+                
+                /** Applies fish eye effect to curved lines */
+                function curvedFisheye(lines) {
+                    lines.each(function(d) {
+                        d.fisheye = fisheye(d);
+                    })
+                    .attr("d", function(d) {
+                        var dx = d.target.fisheye.x - d.source.fisheye.x,
+                            dy = d.target.fisheye.y - d.source.fisheye.y,
+                            dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+                            mx = d.source.fisheye.x + dx,
+                            my = d.source.fisheye.y + dy;
+                            
+                        return [
+                          "M",d.source.fisheye.x,d.source.fisheye.y,
+                          "A",dr,dr,0,0,1,mx,my,
+                          "A",dr,dr,0,0,1,d.target.fisheye.x,d.target.fisheye.y
+                        ].join(" ");
+                    });  
+                }
+                
             }else{
                 // Straight
-                lines.attr("points", function(d) {
-                   return d.source.fisheye.x + "," + d.source.fisheye.y + " " +
-                          (d.source.fisheye.x +(d.target.fisheye.x-d.source.fisheye.x)/2) + "," + 
-                          (d.source.fisheye.y +(d.target.fisheye.y-d.source.fisheye.y)/2) + " " +  
-                          d.target.fisheye.x + "," + d.target.fisheye.y;
-                });
+                straightFisheye(topLines);
+                straightFisheye(bottomLines);
+                
+                /** Applies fish eye effect to straight lines */
+                function straightFisheye(lines) {
+                    lines.attr("points", function(d) {
+                       return d.source.fisheye.x + "," + d.source.fisheye.y + " " +
+                              (d.source.fisheye.x +(d.target.fisheye.x-d.source.fisheye.x)/2) + "," + 
+                              (d.source.fisheye.y +(d.target.fisheye.y-d.source.fisheye.y)/2) + " " +  
+                              d.target.fisheye.x + "," + d.target.fisheye.y;
+                    });
+                }
             }
-            
         }); 
     }    
 
     /** Tick handler for curved lines */
     function curvedTick() {
+        updateCurvedLines(bottomLines);
+        updateCurvedLines(topLines);
+    }
+    
+    /** Updates curved lines */
+    function updateCurvedLines(lines) {
         // Calculate the curved segments
         lines.attr("d", function(d) {
             var dx = d.target.x - d.source.x,
@@ -1055,8 +1083,14 @@ function visualizeData() {
         });
     }
     
-    /** Tick handler for straight lines */                           
+    /** Tick handler for straight lines */  
     function straightTick() {
+        updateStraightLines(bottomLines);
+        updateStraightLines(topLines);
+    }
+    
+    /** Updates straight lines */                   
+    function updateStraightLines(lines) {
         // Calculate the straight points
         lines.attr("points", function(d) {
            return d.source.x + "," + d.source.y + " " +
@@ -1071,9 +1105,8 @@ function visualizeData() {
         });
     }
     
-    // Finally apply zoom.
+    // Finally apply translate & scale
     container.attr("transform", "translate("+translateX+","+translateY+")scale("+scale+")");
-    //container.attr("transform", "scale("+scale+")");
 }
 
 /*************************************** OVERLAY ****************************************/  
