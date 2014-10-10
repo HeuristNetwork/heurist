@@ -233,16 +233,12 @@ $.widget( "heurist.resultListMenu", {
                 
                 var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
                 
-                Hul.showDialog(url, { width:900, callback: 
-                    function(q){
-                        if(!Hul.isempty(q)) {
+                Hul.showDialog(url, { width:1200, callback: 
+                    function(res){
+                        if(!Hul.isempty(res)) {
                             if(res.mode == 'apply' && that._query_request){
-                                //apply new rules to existing search (do not remove current result set)
-                                //that._query_request.increment = true;
-                                that._query_request.rules = res; //search criteria for linked/related records
-                                that._query_request.source = that.element.attr('id');
                                 
-                                document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART_RULES, [ that._query_request ]); //global app event  
+                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
                                 
                                 //top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
                             }

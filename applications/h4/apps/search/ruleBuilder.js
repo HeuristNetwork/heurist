@@ -42,38 +42,44 @@ $.widget( "heurist.ruleBuilder", {
 
         var that = this;
         
+        this.element.addClass('rulebuilder');
+        
         //create list/combobox of source record types
-        this.label_1 = $("<label>").html('Source: ').appendTo(this.element);
+        var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'250px'}).appendTo(this.element);
         this.select_source_rectype = $( "<select>" )
-                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
-                .appendTo(this.element);
+                .addClass('text ui-corner-all')
+                .appendTo( cont );
+                
                 
         top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), null, false);
 
         //create list/combobox of pointer/relmarker fields
-        this.label_2 = $("<label>").html('Field: ').css('padding-left','5px').appendTo(this.element);
         this.select_fields = $( "<select>" )
-                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
-                .appendTo(this.element);
+                .addClass('text ui-corner-all')
+                .appendTo( $('<div>').appendTo(this.element) );
         
         //create list/combobox of relation types
-        this.label_3 = $("<label>").html('Reltype: ').css('padding-left','5px').appendTo(this.element);
         this.select_reltype = $( "<select>" )
-                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
-                .appendTo(this.element).hide();
+                .addClass('text ui-corner-all')
+                .appendTo( $('<div>').appendTo(this.element) ).hide();
         
         //create list/combobox of target record types
-        this.label_4 = $("<label>").html('Target: ').css({'padding-left':'5px'}).appendTo(this.element);
         this.select_target_rectype = $( "<select>" )
-                .addClass('menu-or-popup text ui-corner-all ui-widget-content')
-                .appendTo(this.element);
+                .addClass('text ui-corner-all')
+                .appendTo( $('<div>').appendTo(this.element) );
 
-        this.label_5 = $("<label>").html('Filter: ').css({'padding-left':'5px'}).appendTo(this.element);
-        this.additional_filter = $( "<input>" ).appendTo(this.element);
+        //        
+        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all')
+                .appendTo( $('<div>').appendTo(this.element) );
         
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
-        this.btn_delete = $( "<button>", {text:'Delete'} ).appendTo(this.element);
+        this.div_btn =  $('<div>').appendTo(this.element);
+        this.btn_delete = $( "<button>", {text:'Delete'} ).button().appendTo(this.div_btn);
+
+        if(this.options.level<3)
+        this.btn_add_next_level = $( "<button>", {text:'Add Level'} ).button().appendTo(this.div_btn);
+
         
         if(this.options.is_search_allowed){
             this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
@@ -90,6 +96,17 @@ $.widget( "heurist.ruleBuilder", {
         this._on( this.select_reltype, { change: this._generateQuery });
         
         this._on( this.btn_delete, {click: function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
+        
+        if(this.options.level<3)
+        this._on( this.btn_add_next_level, {click: function( event ){ 
+            
+             var new_level = this.options.level + 1;
+            
+             $("<div>").uniqueId().ruleBuilder({level:new_level,
+                                        onremove: function(event, data){
+                                              $('#'+data.id).remove();    //remove this rule builder
+                                        } }).appendTo(this.element);;
+        }});
         
         //-----------------------     listener of global events
         /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT; 
@@ -189,13 +206,14 @@ $.widget( "heurist.ruleBuilder", {
         this.select_reltype.remove();
         this.additional_filter.remove();
         
-        this.label_1.remove();
+        /*this.label_1.remove();
         this.label_2.remove();
         this.label_3.remove();
         this.label_4.remove();
-        this.label_5.remove();
+        this.label_5.remove();*/
         
         if(this.debug_label) this.debug_label.remove();
+        this.div_btn.remove();
     },
     
     
@@ -318,7 +336,7 @@ $.widget( "heurist.ruleBuilder", {
                     if(arr_field.key == dt_ID){
                         if(arr_field.terms){
                             is_not_relation = false;
-                            this.label_3.show();
+                            //this.label_3.show();
                             this.select_reltype.show();
                             top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'any', false);
                         }
@@ -330,7 +348,7 @@ $.widget( "heurist.ruleBuilder", {
                 }
             }
             if(is_not_relation){
-                this.label_3.hide();
+                //this.label_3.hide();
                 this.select_reltype.hide();    
             }
             if(is_not_selected){
@@ -361,7 +379,7 @@ $.widget( "heurist.ruleBuilder", {
             
             var rt_target = '';
             
-            if(this.select_target_rectype.val()!=''){
+            if(!top.HEURIST4.util.isempty(this.select_target_rectype.val())){
                 rt_target = this.select_target_rectype.val();
             }else{
                 var opts = this.select_target_rectype.find("option");
@@ -369,18 +387,18 @@ $.widget( "heurist.ruleBuilder", {
                     rt_target = $(opts[1]).attr('value');
                 }
             }
-            if(rt_target!='') rt_target = 't:'+rt_target+' ';
+            if(!top.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
 
             var rt_source = this.select_source_rectype.val();
             
             var dt_ID = this.select_fields.val();
             
-            if(dt_ID!=''){ //particular field is selected
+            if(!top.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
             
                 if(this.select_reltype.is(":visible")){
                     
                     var rel_type = this.select_reltype.val();
-                    if(rel_type!='') rel_type = '-'+rel_type;
+                    if(!top.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
                     
                     this.options.queries.push(rt_target + 'relatedfrom:'+rt_source+rel_type);    
                 }else{
@@ -456,6 +474,27 @@ $.widget( "heurist.ruleBuilder", {
             
             return this.options.queries;
         }
+    },
+    
+    getRules: function(){
+
+           // original rule array
+           // rules:[ {query:query, levels:[]}, ....  ]           
+          
+           //refresh query
+           this.queries(); 
+           
+           var rules = []; 
+           
+           //loop all dependent
+           $.each( this.element.children('.rulebuilder') , function( index, value ) {
+               
+                var subrule = $(value).ruleBuilder("getRules");
+                rules.push(subrule);  
+                
+           }); 
+        
+           return {query:this.options.queries[0], levels:rules};
     }
     
 });

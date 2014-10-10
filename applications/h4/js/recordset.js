@@ -31,7 +31,7 @@ function hRecordSet(initdata) {
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
-    records = null,      //list of records objects
+    records = null,      //list of records objects {recId:[], ....}
     rectypes = [],      // unique list of record types
     structures = null;  //record structure definitions for all rectypes in this record set
 
@@ -374,11 +374,30 @@ function hRecordSet(initdata) {
             var aitems = [];
             var recID;
             for(recID in records)
-            if(recID){
-                aitems.push(recID);
-            }
+                if(recID){
+                    aitems.push(recID);
+                }
             return aitems;
         },
+        
+        /*
+        getIdsChunked: function(chunk){
+            var res = [];
+            var aitems = [];
+            var recID;
+            for(recID in records)
+                if(recID){
+                    aitems.push(recID);
+                    if(aitems.length==chunk){
+                        res.push(aitems);
+                        aitems = [];
+                    }
+                }
+            if(aitems.length>0){
+                res.push(aitems);
+            }
+            return res;
+        },*/
 
         getBookmarkIds: function(){
             var aitems = [];

@@ -63,9 +63,7 @@
                 //print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
             }
-
-            var ruleBuilders = [], counter = 0;
-
+            
             function onInit(success) //callback function of hAPI initialization
             {
                         if(success)  //system is inited
@@ -76,88 +74,32 @@
                                 top.HR = window.HAPI4.setLocale(prefs['layout_language']); 
                             }
                             
-                            //init toolbar buttons
-                            $('#btn_add_level1').button().on('click', 1, addRuleBuilder);
-                            $('#btn_add_level2').button().button("disable").on('click', 2, addRuleBuilder);
-                            $('#btn_add_level3').button().button("disable").on('click', 3, addRuleBuilder);
+                            //init toolbar button
+                            $('#btn_add_level1').button().on('click', null, function(){
+                                $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule builder for level 1
+                                        onremove: function(event, data){
+                                              $('#'+data.id).remove();    //remove this rule builder
+                                        }
+                                }).appendTo($('#level1'));                
+                            });
                             $('#btn_apply').button().on('click', 3, applyRules);
 
                         }
             }
-            
-            /**
-            * 
-            */
-            function addRuleBuilder(event){
-                counter++;
-                var level = event.data;
-                var ruleBuilder = $("<div>",{id:'rb'+counter}).ruleBuilder({level:level, onremove:removeRoleBuilder}).appendTo($('#level'+level));
-                ruleBuilders.push(ruleBuilder);
-                
-                updateButtons();
-            }
-            
-            /**
-            * 
-            */
-            function removeRoleBuilder(event, data){
-
-                var level = $('#'+data.id).ruleBuilder('option' , 'level');
-                var remove_on_levels_above = (level<3 && $('#level'+(level+1)).children().length>0 && $(('#level'+level)).children().length==1);
-                
-                function _onDelete(){
-                    
-                    
-                    $.each(ruleBuilders, function( index, value ) {
-                        if(value.attr('id') == data.id){
-                            ruleBuilders.splice(index, 1);   
-                            return false;
-                        }
-                    });
-                
-                    $('#'+data.id).remove();
-                    
-                    if(remove_on_levels_above){ //remove ALL on dependent levels
-                        var index = 0;
-                        while (index < ruleBuilders.length){
-                            var $div = $(ruleBuilders[index]);
-                            if($div.ruleBuilder('option' , 'level')>level){
-                                ruleBuilders.splice(index, 1);                                                                   
-                                $div.remove();
-                            }else{
-                                index++;
-                            }
-                        }
-                    }
-                
-                    updateButtons();
-                }
-                
-                if(remove_on_levels_above){
-                    top.HEURIST4.util.showMsgDlg('You remove the last rule per level. All rules for dependent levels will be removed also. Please confirm',  _onDelete);
-                }else{
-                    _onDelete();
-                }
-            }
-            
-            /**
-            *  update add button disability
-            */
-            function updateButtons(){
-                var val = $('#level2').children().length>0?"enable":"disable";
-                $('#btn_add_level3').button(val);
-                val = $('#level1').children().length>0?"enable":"disable";
-                $('#btn_add_level2').button(val);
-            }
-            
+     
             function getRulesArray(){
   
-/*                
-         rules:[   {parent: index,  // index to top level
-                    level: level,   
-                    query: ],    
-*/                
-                
+                   // original rule array
+                   // rules:[ {query:query, levels:[]}, ....  ]           
+                    
+                   //get first level
+                   var rules = []; 
+                   $.each($('.level1'), function( index, value ) {
+                        var subrule = $(value).ruleBuilder("getRules");
+                        rules.push(subrule);  
+                   }); 
+                   return rules;
+/*
                     var res = {};
                     var rules = [];
                 
@@ -180,7 +122,7 @@
                     });
                     
                     return res;
-                
+*/                    
             }
 
             /**
@@ -188,7 +130,7 @@
             */
             function applyRules(){
                     var res = getRulesArray();
-                    if(Object.keys(records).length>0){
+                    if(res.length>0){
                         res = {mode:'apply', rules:res};
                         window.close(res);    
                     }
@@ -199,7 +141,7 @@
             */
             function saveRules(){
                     var res = getRulesArray();
-                    if(Object.keys(records).length>0){
+                    if(res.length>0){
                         res = {mode:'save', rules:res};
                         window.close(res);    
                     }
@@ -230,27 +172,36 @@
             });
             
         </script>
-
+        <style>
+            .rulebuilder{
+                display: block !important;
+                padding:4 4 4 0;
+                width:99% !important;
+                text-align:left !important;
+            }
+            .rulebuilder>div{
+                text-align:center;
+                display: inline-block;
+                width:160px;
+            }
+            .rulebuilder>div>select{
+                min-width:150px;
+                max-width:150px;
+            }
+        </style>
     </head>
     <body>
         <div style="overflow:hidden;width:100%;height:100%">
-        
-            <div id="toolbar" style="position:absolute;width:98%;height:2em">
-                <button id="btn_add_level1">Add Level 1</button>
-                <button id="btn_add_level2">Add Level 2</button>
-                <button id="btn_add_level3">Add Level 3</button>
+
+            <div style="position:absolute;width:98%;top:0" class="rulebuilder">
+                <div style="width:250px">Source</div><div>Field</div><div>Relation Type</div><div>Target</div><div>Filter</div>
             </div>
-            
-            <div style="position:absolute;width:98%;top:4em;bottom:4em;overflow-y:auto">
-                <div id="level1" style="padding-top:15px"></div>
-            
-                <div id="level2" style="padding-top:15px"></div>
-            
-                <div id="level3" style="padding-top:15px"></div>
+        
+            <div style="position:absolute;width:98%;top:2em;bottom:4em;overflow-y:auto" id="level1">
             </div>
             
             <div style="position:absolute;width:98%;height:2em;bottom:10px">
-                <button id="btn_apply">Apply Rules</button>
+                <button id="btn_add_level1">Add Level 1</button> <button id="btn_apply">Apply Rules</button>
             </div>
         </div>
     </body>

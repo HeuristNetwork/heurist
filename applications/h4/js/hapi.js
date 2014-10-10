@@ -611,7 +611,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             LOGIN: "LOGIN",
             LOGOUT: "LOGOUT",
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
-            ON_REC_SEARCHSTART_RULES: "ON_REC_SEARCHSTART_RULES",
+            ON_REC_SEARCH_APPLYRULES: "ON_REC_SEARCH_APPLYRULES",
             ON_REC_SEARCHRESULT: "ON_REC_SEARCHRESULT",
             ON_REC_PAGESET: "ON_REC_PAGESET",
             ON_REC_SELECT: "ON_REC_SELECT"
