@@ -70,7 +70,12 @@ function parseRecSet() {
                         
                         // Construct a link
                         if(relation !== undefined) {
-                            var link = {source: source, relation: relation, target: target, targetcount: target.count};
+                            var link;
+                            if(type.indexOf("ointer")>0) { // Swap source & target
+                                link = {source: target, relation: relation, target: source, targetcount: source.count};
+                            }else{ // Source --> Target
+                                link = {source: source, relation: relation, target: target, targetcount: target.count};
+                            }
                             //console.log("LINK");
                             //console.log(link);   
                             links.push(link);  

@@ -40,7 +40,7 @@
     $rtTerms = getTerms(true);
     $rtTerms = $rtTerms['termsByDomainLookup']['relation'];
 
-    $image_base_url = HEURIST_SERVER_URL . "/HEURIST_FILESTORE/" . HEURIST_DBNAME . "/rectype-icons/";
+    $image_base_url = HEURIST_SERVER_URL . "/html/HEURIST/HEURIST_FILESTORE/" . HEURIST_DBNAME . "/rectype-icons/";
     $idx_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_dt_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
     $idx_dt_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
@@ -167,7 +167,7 @@
         $record->name  = $rt['name'];
         $record->id    = $rt_id;
         $record->count = intval($rt['count']);
-        $record->image = $image_base_url.$rt_id;
+        $record->image = $image_base_url.$rt_id.".png";
         array_push($nodes, $record);
     }
     
@@ -181,7 +181,7 @@
         $record->name  = $row[1];
         $record->id    = $rt_id;
         $record->count = 0;
-        $record->image = $image_base_url.$rt_id; 
+        $record->image = $image_base_url.$rt_id.".png";
        
         // Duplicate check
         $found = false;
@@ -216,7 +216,7 @@
             $relationrecord->name  = $details['dt_name'];
             $relationrecord->id    = $details['dt_id'];
             $relationrecord->count = intval($details['count']);
-            $relationrecord->image = $image_base_url.$details['dt_id'];
+            $relationrecord->image = $image_base_url.$details['dt_id'].".png";
             $relationrecord->unconstrained = $details['isconstrained'] < 1;
 
             // Relation types

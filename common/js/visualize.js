@@ -647,7 +647,7 @@ function visualizeData() {
              })
              .attr("refX", function(d) {
                  if(d.relation.pointer) {
-                     return linelength*-0.3;
+                     return linelength*-0.2;
                  }
                  return -1;
              })
@@ -657,8 +657,7 @@ function visualizeData() {
              .attr("orient", "auto")
              .attr("fill", markercolor) // Using the markercolor setting
              .attr("opacity", "0.6")
-             .append("path")
-             //.attr("d", "M10,-5L0,0L10,5"); // M0,-5L10,0L0,5     M-5,0L0,10L-5,0
+             .append("path")                                                      
              .attr("d", "M0,-5L10,0L0,5");
     
     /** Add lines */        
@@ -694,14 +693,11 @@ function visualizeData() {
                  } 
              })) 
              .on("click", function(d) {
-                 var id = d.relation.id;
-                 // Construct line overlay data, then use it to generate the overlay itself  
-                 if($(".overlay.id"+id).length > 0) { // Close overlay
-                    removeOverlay(id);
-                 }else{ // Display overlay
-                    var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-                    createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
-                 }
+                 // Close all overlays and create a line overlay
+                 removeOverlays();
+                 var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                 createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
+                 
              });
              
         return lines;
@@ -863,12 +859,9 @@ function visualizeData() {
                   .on("click", function(d) {
                        // Check if it's not a click after dragging
                        if(!d3.event.defaultPrevented) {
-                           var id = d.id;
-                           if($(".overlay.id"+id).length > 0) { // Close overlay           
-                                removeOverlay(id);
-                           }else{ // Display overlay
-                                createOverlay(d3.event.offsetX, d3.event.offsetY, "record", "id"+id, getRecordOverlayData(d));  
-                           }
+                           // Remove all overlays and create a record overlay
+                           removeOverlays();
+                           createOverlay(d3.event.offsetX, d3.event.offsetY, "record", "id"+d.id, getRecordOverlayData(d));  
                        }
                   })
                   .call(node_drag);
@@ -1403,6 +1396,16 @@ function removeOverlay(selector) {
    }); 
 }
 
+/** Removes all overlays */
+function removeOverlays() {
+    $(".overlay").each(function() {
+        $(this).fadeOut(300, function() {
+            $(this).remove();
+        })
+    });
+}
+
+
 
  
 /********************************* MENU ***********************************/
@@ -1422,7 +1425,7 @@ $(document).ready(function() {
     */
     
     $("#gephi-export").click(function(e) {
-       alert("Gephi export!"); 
+        getGephiFormat();
     });
 });
 
@@ -1447,7 +1450,51 @@ function getCustomURL() {
     return url;
 }
 
+/** Function to download */
+function download(filename, text) {
+   
+}
+
 /** Transforms the visualisation into Gephi format */
 function getGephiFormat() {
-    return "GEPHI FORMAT TEST"; 
+    // Get data
+    var data = settings.getData.call(this, settings.data);
+    console.log("GEPHI DATA");
+    console.log(data);
+    
+    // META
+    var gexf = '<?xml version="1.0" encoding="UTF-8"?>';
+    gexf +=      '<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">';
+    gexf +=        '<meta lastmodifieddate="2014-10-10">';
+    gexf +=          '<creator>HeuristNetwork.org</creator>';
+    gexf +=          '<description>Visualisation export</description>';
+    gexf +=        '</meta>' ;
+    gexf +=        '<graph mode="static" defaultedgetype="directed">';
+    
+    // NODES
+    gexf += '<nodes>';
+    for(var key in data.nodes) {
+        var node = data.nodes[key];
+        gexf += '<node id="'+node.id+'" label="'+node.name+'" />';
+    }
+    gexf += '</nodes>';
+    
+    // EDGES
+    gexf += '<edges>';
+    for(var i = 0; i < data.links.length; i++) {
+        var edge = data.links[i]; 
+        gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'+edge.targetcount+'" />';
+    }
+    gexf += '</edges>';
+    
+    // COMPLETE
+    gexf +=         '</graph>';
+    gexf +=       '</gexf>';
+    
+    // DOWNLOAD
+    var pom = document.createElement('a');
+    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(gexf));
+    pom.setAttribute('download', getDatabaseName()+".gexf");
+    pom.click();
+    
 }
