@@ -101,7 +101,7 @@
             var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 
             top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php?db="+database);    // core HEURIST object definitions (dynamically generated)
-        
+
             var bugReportURL = '../export/email/formEmailRecordPopup.html?rectype=bugreport&db='+database;
             // was hBase, but ../ seems to work jsut as well
 
@@ -279,7 +279,7 @@
                                 New database</a>
                             </li>
 
-                            <li><div class="separator">STRUCTU</div></li>
+                            <li><div class="separator">STRUCTURE</div></li>
 
                             <!-- database name is appended automatically by auto-popup -->
                             <li style="padding-left:5px;">
@@ -539,7 +539,7 @@
                                     title="New Experimental UI">
                                     Experimental</a>
                             </li>
-                            
+
                             <!-- Calls search.js - setContactLink to set up email link
                             Leads to JS error if this is removed, comment out body of setContactLink if this is removed
                             <li style="display:none; padding-left:5px;">
@@ -1218,12 +1218,15 @@
                             </div>
                         </div>
                         <div id="results-level0" class="icons" level="0"></div>
+
                         <div>
                             <a href="#" onclick="alert('This is Rule Builder popup')">Rule builder</a>&nbsp;&nbsp;
-                            Apply filter rules: <select id="selSavedFiltersAndLayouts" onchange="{top.HEURIST.search.savedSearchExecute(this.value);}"></select>
-                        </div>
+                            Apply filter rules:
+                            <select id="selSavedFiltersAndLayouts" onchange="{top.HEURIST.search.savedSearchExecute(this.value);}"></select>
                         <div id="related-toggle" class="logged-in-only" style="display: none;">
-                            <div class="filter">
+
+                        </div>
+                            <div class="filter" style="margin-left: 10px;">
                                 Related Records
                                 <a onclick="top.HEURIST.util.setDisplayPreference('loadRelatedOnSearch','true');$('#related-toggle').hide();
                                     top.HEURIST.search.loadLevelFilter(1);" href="#"
@@ -1270,11 +1273,6 @@
                         <div id="p">
                             <iframe id="viewer-frame" class=viewers></iframe>
                         </div>
-                        
-
-                        <!-- art temp old mapping
-                        <div id="m"><iframe id="map-frame" class=viewers></iframe></div>
-                        -->
                     </div>
                 </div>
             </div>
@@ -1317,7 +1315,7 @@
             /*_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
             */
 //alert('icon path:'+top.HEURIST.iconBaseURL);
-            
+
             //removed by Ian's request 2012-11-21 top.HEURIST.loadScript("searchTypes.js");
             top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
             top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");		// edit-specific HEURIST functions

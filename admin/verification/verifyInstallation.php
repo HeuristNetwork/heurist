@@ -66,7 +66,7 @@
         <div class="banner">
             <h2>Verify Heurist installation</h2>
         </div>
-        
+
         <div id="page-inner">
             This function verifies the presence of required program components
             and the location and writability of folders required by the software.<br />
@@ -78,20 +78,18 @@
 
             <h3>Please run this using the latest instance on your server eg. h3-alpha</h3><br />
             If you use an older instance it may not pick up all requirements for the latest instance.<br/>&nbsp;<br/>
-            
+
             <hr><br />
 
-            Verification under development July 2014 <br /><br />
+            Verification under development Oct 2014 <br /><br />
             <?php
-                if (extension_loaded("dev")) {print "dev OK<br />";} else {print "dev MISSING<br />";}
-                if (extension_loaded("pear")) {print "pear OK<br />";} else {print "pear MISSING<br />";}
-
                 if (extension_loaded("curl")) {print "curl OK<br />";} else {print "curl MISSING<br />";}
                 if (extension_loaded("xsl")) {print "xsl OK<br />";} else {print "xsl MISSING<br />";}
                 if (extension_loaded("memcache")) {print "memcache OK<br />";} else {print "memcache MISSING<br />";}
                 if (extension_loaded("gd")) {print "gd OK<br />";} else {print "gd MISSING<br />";}
                 if (extension_loaded("zip")) {print "zip OK<br />";} else {print "zip MISSING<br />";}
-                if (extension_loaded("unzip")) {print "unzip OK<br />";} else {print "unzip MISSING<br />";}
+                // zip loads but unzip doesn't, but unzip is installed anyway (possibly with zip?)
+                // if (extension_loaded("unzip")) {print "unzip OK<br />";} else {print "unzip MISSING<br />";}
                 if (extension_loaded("mysql")) {print "mysql OK<br />";} else {print "mysql MISSING<br />";}
                 if (extension_loaded("pdo_mysql")) {print "pdo_mysql OK<br />";} else {print "pdo_mysql MISSING<br />";}
                 if (extension_loaded("pdo")) {print "pdo OK<br />";} else {print "pdo MISSING<br />";}
@@ -100,7 +98,7 @@
                 print "<h3>All loaded extensions:</h3><br />";
                 print_r(get_loaded_extensions());
             ?>
-            
+
             <br /><hr><br />
             Verification complete. Please note any errors listed above.
         </div>

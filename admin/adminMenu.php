@@ -369,12 +369,14 @@
                             menuEntry('---','Verify installation','verification/verifyInstallation.php?db='.HEURIST_DBNAME.'',
                                 'Verifies that all required JS libraries, other components and directories are in expected locations');
 
+                            /* Removd b/c Lucene installation generated high risk warnings on security check
                             menuEntry('','Rebuild Lucene<br />(work in progress)','verification/rebuildLuceneIndices.php?db='.HEURIST_DBNAME,
                                 'Rebuilds the Lucence indices used by Elastic Search, for all record types');
+                            */
 
                             menuEntry('','Clear database locks','verification/removeDatabaseLocks.php?db='.HEURIST_DBNAME,
                                 'Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions');
-                            menuEntry('','Database usage statistics','describe/dbStatistics.php?db='.HEURIST_DBNAME,
+                            menuEntry('','Database usage statistics (slow)','describe/dbStatistics.php?db='.HEURIST_DBNAME,
                                 'Size and usage statistics for all Heurist databases on this server');
 
                             menuEntry('','Inter-database transfer','../import/direct/getRecordsFromDB.php?db='.HEURIST_DBNAME,
