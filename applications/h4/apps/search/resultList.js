@@ -33,17 +33,47 @@ $.widget( "heurist.resultList", {
         isapplication: true,
         showcounter: true,
         showmenu: true,
-
         //searchsource: null,
         
-        recordset: null
+        recordset: null   //united recordset
         // callbacks
         //onselect: null
     },
+    
 
     _query_request: null, //keep current query request
     _events: null,
     _lastSelectedIndex: -1,
+
+    _rules:[],    // rules of current query request
+    _results:{},  // storage for record IDS - results of each rule request
+    _rule_index: -1,
+    _result_index: -1,
+    
+    /* format
+    
+         rules:{   {parent: index,  // index to top level
+                    level: level,   
+                    query: },    
+            
+         results: { root:[], ruleindex:[  ],  ruleindex:[  ] }    
+    
+    
+         requestXXX - index in rules array?  OR query string?
+    
+            ids:[[1...1000],[1001....2000],....],     - level0
+            request1:{ ids:[],                          level1
+                    request2:{},                        level2
+                    request2:{ids:[], 
+                            request3:{} } },            level3
+                            
+                            
+                            
+                            
+                            
+    
+    */
+    
 
     // the constructor
     _create: function() {
@@ -149,7 +179,9 @@ $.widget( "heurist.resultList", {
 
                 if(data){
                     
-                    if(data.source!=that.element.attr('id')) {  //new search from outside
+                    if(that._query_request==null || data.source!=that.element.attr('id') || data.id!=that._query_request.id) {  
+                        //new search from outside
+                        //reset recordset 
                     
                         var new_title = top.HR(data.qname || 'Search result');
                         var $header = $(".header"+that.element.attr('id'));
@@ -157,6 +189,7 @@ $.widget( "heurist.resultList", {
                         $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
 
                         that.option("recordset", null);
+                        
                         that.loadanimation(true);
                     }
                     that._query_request = data;  //keep current query request 
@@ -193,12 +226,19 @@ $.widget( "heurist.resultList", {
         this._superApply( arguments );
         this._refresh();
     },
-    /*
+    
     _setOption: function( key, value ) {
-    this._super( key, value );
-    this._refresh();
+        this._super( key, value );
+        
+        if(key=='recordset' && value==null){
+            //reset counters and storages
+            this._results = {};
+            this._rule_index = -1;
+            this._result_index = -1;
+        }
+        //this._refresh();
     },
-    */
+    
 
     /* private function */
     _refresh: function(){
@@ -405,6 +445,21 @@ $.widget( "heurist.resultList", {
                         });
                     }
                 }
+                
+                var records_ids = recordset.getIds()
+                if(records_ids.length>0){
+                
+                     var ruleindex = this._rule_index;
+                     if(this._rule_index<0){ //this is main/parent query
+                         ruleindex = 'root';
+                     }
+                     if(!this._results[ruleindex]){
+                         this._results[ruleindex] = [];
+                     }
+                     
+                     this._results[ruleindex].push(records_ids);
+                }
+                
 
             }else{
 
@@ -709,11 +764,50 @@ $.widget( "heurist.resultList", {
             this._query_request.source = this.element.attr('id'); //orig = 'rec_list';
             
             var total_count = this.options.recordset.count_total();
-            var new_offset = Number(this._query_request.o);
-            new_offset = (new_offset>0?new_offset:0) + Number(this._query_request.l);
-            if(new_offset<total_count){
-                this._query_request.o = new_offset;
-                top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+            
+            
+            if(total_count>0){
+            
+                var new_offset = Number(this._query_request.o);
+                new_offset = (new_offset>0?new_offset:0) + Number(this._query_request.l);
+                if(new_offset<total_count){
+                    this._query_request.increment = true;
+                    this._query_request.o = new_offset;
+                    top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+                }else{
+/*
+         rules:[   {parent: index,  // index to top level
+                    level: level,   
+                    query: ],    
+            
+         results: { root:[], ruleindex:[  ],  ruleindex:[  ] }    
+         
+         _result_index
+*/                    
+
+                     if(this._result_index<0){
+                         this._rule_index = 0;
+                     }else{
+                         this._result_index++;
+                         
+                         if(this._result_index == this._results[this._rules[this._rule_index].parent][this._rule_index].length){
+                            this._result_index = 0; 
+                            this._rule_index++;
+                         }
+                     }
+                     if(this._rule_index>=this._rules.length){
+                         return false; //this is the end
+                     }
+                    
+                     //two loops : by rules and by chunks of results
+                     var crule = this._rules[this._rule_index];
+                     this._query_request.q = crule.query;
+                     this._query_request.topids = this._results[crule.parent][this._result_index].join(',');
+                     this._query_request.increment = true;
+                     this._query_request.o = 0;
+                     top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+                     
+                }
             }
         }
 

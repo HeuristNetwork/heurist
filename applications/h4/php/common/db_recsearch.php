@@ -600,7 +600,7 @@
     {
         $mysqli = $system->get_mysqli();
         $currentUser = $system->getCurrentUser();
-
+        
         if ( $system->get_user_id()<1 ) {
             //$currentUser['ugr_Groups'] = user_getWorkgroups( $mysqli, $currentUser['ugr_ID'] );
             $params['w'] = 'all'; //does not allow to search bookmarks if not logged in
@@ -646,6 +646,8 @@
         
         }
         $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+        
+        $chunk_size = 1001;
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
         //DEGUG error_log("AAA ".$query);
@@ -660,11 +662,11 @@
                 $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
             }else{
 
-                $num_rows = $fres->fetch_row();
-                $num_rows = $num_rows[0];
+                $total_count_rows = $fres->fetch_row();
+                $total_count_rows = $total_count_rows[0];
                 $fres->close();
 
-
+                // read all field names
                 $_flds =  $res->fetch_fields();
                 $fields = array();
                 foreach($_flds as $fld){
@@ -672,76 +674,84 @@
                 }
                 array_push($fields, 'rec_ThumbnailURL'); //last one
 
-                $records = array();
                 $rectype_structures  = array();
                 $rectypes = array();
-
-                while ( ($row = $res->fetch_row()) && (count($records)<1001) ) {
-                    array_push( $row, fileGetThumbnailURL($system, $row[2]) );
-                    $records[$row[2]] = $row;
-                    if(!array_key_exists($row[4], $rectypes)){
-                        $rectypes[$row[4]] = 1;
-                    }
-                }
-                $res->close();
-
-                $rectypes = array_keys($rectypes);
-                //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
-
-                if($need_details){
-                    //search for specific details
-                    // @todo - we may use getAllRecordDetails
-                    $res = $mysqli->query(
-                        "select dtl_RecID,
-                        dtl_DetailTypeID,
-                        dtl_Value,
-                        astext(dtl_Geo),
-                        dtl_UploadedFileID,
-                        recUploadedFiles.ulf_ObfuscatedFileID,
-                        recUploadedFiles.ulf_Parameters
-                        from recDetails 
-                        left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
-                        where dtl_RecID in (" . join(",", array_keys($records)) . ")");
-                    if (!$res){
-                        $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
-                    }else{
-                        while ($row = $res->fetch_row()) {
-                            $recID = array_shift($row);
-                            if( !array_key_exists("d", $records[$recID]) ){
-                                $records[$recID]["d"] = array();
-                            }
-                            $dtyID = $row[0];
-                            if( !array_key_exists($dtyID, $records[$recID]["d"]) ){
-                                $records[$recID]["d"][$dtyID] = array();
-                            }
-
-                            if($row[2]){
-                                $val = $row[1]." ".$row[2]; //for geo
-                            }else if($row[3]){
-                                $val = array($row[4], $row[5]); //obfuscted value for fileid
-                            }else { 
-                                $val = $row[1];
-                            }
-                            array_push($records[$recID]["d"][$dtyID], $val);
-                        }
-
-                        if($need_structure){
-                            //description of recordtype and used detail types
-                            $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1); //no groups
+                $records = array();
+                    
+                    // load all records
+                    while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //1000 maxim allowed chunk
+                        array_push( $row, fileGetThumbnailURL($system, $row[2]) );
+                        $records[$row[2]] = $row;
+                        if(!array_key_exists($row[4], $rectypes)){
+                            $rectypes[$row[4]] = 1;
                         }
                     }
-                }
+                    $res->close();
+                    
+                    $rectypes = array_keys($rectypes);
+                    //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
 
-                //"query"=>$query,
-                $response = array("status"=>HEURIST_OK,
-                    "data"=> array(
-                        //"query"=>$query,
-                        "count"=>$num_rows,
-                        "offset"=> get_offset($params),
-                        "fields"=>$fields,
-                        "records"=>$records,
-                        "rectypes"=>$rectypes,
-                        "structures"=>$rectype_structures));
+                    if($need_details && count($records)>0){
+                        //search for specific details
+                        // @todo - we may use getAllRecordDetails
+                        $res_det = $mysqli->query(
+                            "select dtl_RecID,
+                            dtl_DetailTypeID,
+                            dtl_Value,
+                            astext(dtl_Geo),
+                            dtl_UploadedFileID,
+                            recUploadedFiles.ulf_ObfuscatedFileID,
+                            recUploadedFiles.ulf_Parameters
+                            from recDetails 
+                            left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
+                            where dtl_RecID in (" . join(",", array_keys($records)) . ")");
+                        if (!$res_det){
+                            $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+                            return $response;
+                        }else{
+                            while ($row = $res_det->fetch_row()) {
+                                $recID = array_shift($row);
+                                if( !array_key_exists("d", $records[$recID]) ){
+                                    $records[$recID]["d"] = array();
+                                }
+                                $dtyID = $row[0];
+                                if( !array_key_exists($dtyID, $records[$recID]["d"]) ){
+                                    $records[$recID]["d"][$dtyID] = array();
+                                }
+
+                                if($row[2]){
+                                    $val = $row[1]." ".$row[2]; //for geo
+                                }else if($row[3]){
+                                    $val = array($row[4], $row[5]); //obfuscted value for fileid
+                                }else { 
+                                    $val = $row[1];
+                                }
+                                array_push($records[$recID]["d"][$dtyID], $val);
+                            }
+                            $res_det->close();
+
+                        }
+                    }
+                    if($need_structure && count($rectypes)>0){ //rarely used
+                          //description of recordtype and used detail types
+                          $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1); //no groups
+                    }
+
+                    //"query"=>$query,
+                    $response = array("status"=>HEURIST_OK,
+                        "id"=>@$params['id'], 
+                        "data"=> array(
+                            //"query"=>$query,
+                            "count"=>$total_count_rows,
+                            "offset"=>get_offset($params),
+                            "fields"=>$fields,
+                            "records"=>$records,
+                            "rectypes"=>$rectypes,
+                            "structures"=>$rectype_structures));
+
+                            
+                
+            
             }
 
         }

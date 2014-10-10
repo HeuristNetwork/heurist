@@ -189,6 +189,17 @@
         $where_clause = $where_clause . ' and ' . $where2;
 
         // 6. DEFINE LIMIT AND OFFSET ---------------------------------------------------------------------------------------
+        
+        $limit = get_limit($params);
+
+        $offset = get_offset($params);
+
+        // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
+        return array("from"=>$query->from_clause, "where"=>$where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
+
+    }
+
+    function get_limit($params){
         if (@$params["l"]) {
             $limit = intval($params["l"]);
         }else if(@$params["limit"]) {
@@ -198,14 +209,9 @@
         if (!@$limit || $limit < 1){
             $limit = 1000;
         }
-
-        $offset = get_offset($params);
-
-        // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
-        return array("from"=>$query->from_clause, "where"=>$where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
-
+        return $limit;
     }
-
+    
     function get_offset($params){
         $offset = 0;
         if (@$params["o"]) {

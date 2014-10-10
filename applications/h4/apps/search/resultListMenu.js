@@ -164,7 +164,7 @@ $.widget( "heurist.resultListMenu", {
             
         
         this['menu_'+name] = $('<ul>')
-        .load('apps/search/resultListMenu'+name+'.html?t='+(new Date().getTime()), function(){
+        .load('apps/search/resultListMenu'+name+'.html', function(){  //'?t='+(new Date().getTime())
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
@@ -215,16 +215,10 @@ $.widget( "heurist.resultListMenu", {
                     function(res){
                         if(!Hul.isempty(res)) {
                             
-                            if(res.mode == 'apply'){
-                                
                                 that._query_request.q = q;
-                                //that._query_request.w = 'a';
                                 that._query_request.source = that.element.attr('id');
                                 
                                 top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                            
-                            }
-                            
                         }
                     }});
               
@@ -242,11 +236,16 @@ $.widget( "heurist.resultListMenu", {
                 Hul.showDialog(url, { width:900, callback: 
                     function(q){
                         if(!Hul.isempty(q)) {
-                            /*that._query_request.q = q;
-                            //that._query_request.w = 'a';
-                            that._query_request.source = that.element.attr('id');
-                            top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                            */
+                            if(res.mode == 'apply' && that._query_request){
+                                //apply new rules to existing search (do not remove current result set)
+                                //that._query_request.increment = true;
+                                that._query_request.rules = res; //search criteria for linked/related records
+                                that._query_request.source = that.element.attr('id');
+                                
+                                document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART_RULES, [ that._query_request ]); //global app event  
+                                
+                                //top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                            }
                         }
                     }});
                 
