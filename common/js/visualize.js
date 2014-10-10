@@ -142,19 +142,28 @@ function getParameterByName(name) {
 function getDatabaseName() {
     return getParameterByName("db");
 }
+
+/**
+* Returns the current displayed URL
+* 
+*/
+function getURL() {
+    return window.location.href; 
+}
+
 /**
  * Returns a setting from the localStorage
  * @param setting The setting to retrieve
  */
 function getSetting(setting) {
-    return localStorage.getItem(getDatabaseName()+setting);
+    return localStorage.getItem(getURL()+setting);
 }
 
 /**
 * Stores a value in the localStorage
 */
 function putSetting(key, value) {
-    localStorage.setItem(getDatabaseName()+key, value);
+    localStorage.setItem(getURL()+key, value);
 }
 
 /**

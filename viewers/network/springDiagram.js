@@ -58,7 +58,7 @@ function parseRecSet() {
                         if(relation === undefined) {
                             // Look up the typedef by ID
                             var typedef = top.HEURIST.detailTypes.typedefs[ids[i]];
-                            console.log(typedef);
+                            //console.log(typedef);
                             if(typedef !== undefined) {
                                 // Construct relation details
                                 var name = typedef.commonFields[1];
@@ -69,10 +69,12 @@ function parseRecSet() {
                         }
                         
                         // Construct a link
-                        var link = {source: source, relation: relation, target: target, targetcount: target.count};
-                        //console.log("LINK");
-                        //console.log(link);   
-                        links.push(link);  
+                        if(relation !== undefined) {
+                            var link = {source: source, relation: relation, target: target, targetcount: target.count};
+                            //console.log("LINK");
+                            //console.log(link);   
+                            links.push(link);  
+                        }
                     } 
                 }  
             }
