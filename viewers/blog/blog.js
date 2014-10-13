@@ -32,7 +32,7 @@
 var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath :
 				(opener && opener.HEURIST && opener.HEURIST.basePath? opener.HEURIST.basePath :
 				(window.location.pathname.match(/^\/[^\/]+\//) ? window.location.pathname.match(/^\/[^\/]+\//)[0] : "/")));
-var hBase = "http://" + window.location.host + basePath;
+var hBase = window.location.protocol + "//" + window.location.host + basePath;
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name :
 				(opener && opener.HEURIST && opener.HEURIST.database? opener.HEURIST.database.name :
 				(location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"")));

@@ -29,8 +29,18 @@
     if (!$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
     }
+    
+    $isSecure = false;
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+        $isSecure = true;
+    }
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+        $isSecure = true;
+    }
+    $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
+    
 
-    $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . $serverName;
+    $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
     // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
     $topdirs = "admin|applications|common|export|external|hapi|help|import|records|search|viewers";

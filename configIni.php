@@ -146,9 +146,8 @@ $websiteThumbnailYsize = 300;
 // it will override the ConfigIni.php in the installation. This allows unconfigured ConfigIni.php files to exist
 // in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
+
 if (is_file($parentIni)){
 	include_once($parentIni);
 }
-
-
 ?>

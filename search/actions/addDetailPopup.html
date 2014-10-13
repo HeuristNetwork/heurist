@@ -61,7 +61,7 @@
 var recIDs, rtyID, dtyID, value, fileID, wkt;
 var scopeSelect,fieldSelect,inputDiv,statusDiv;
 var resultSetIDs, selectedResultSetIDs, allSelectedIDs, rtyIDs = [];
-var hBase = "http://" + window.location.host +
+var hBase = window.location.protocol + "//" + window.location.host +
 			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 

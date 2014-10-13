@@ -1232,7 +1232,7 @@ top.HEURIST.search = {
 		var daysBad = "";
 		if (href) {
 			if (! href.match(/^[^\/\\]*:/))
-				href = "http://" + href;
+				href = window.location.protocol + "//" + href;
 			if (href.substring(0, 5).toLowerCase() != "file:") {
 				var err = top.HEURIST.search.format_web_error(res[9], verified_date, href);
 				if (err) daysBad = err;
@@ -1245,7 +1245,7 @@ top.HEURIST.search = {
 
 		if (href) {
 			if (! href.match(/^[^\/\\]*:/))
-				href = "http://" + href;
+				href = window.location.protocol + "//" + href;
 			href = href.htmlEscape();
 		}
 		else if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_NOTE'] && res[4] == top.HEURIST.magicNumbers['RT_NOTE']) {
