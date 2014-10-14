@@ -310,7 +310,12 @@ HEURIST_HTML_URL
 
         if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
         
-        $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
+        if(is_link($install_path)){
+            $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
+        }else{
+            $install_path = "";
+        }
+            
         if($install_path!=""){ //this is simlink
             //remove code folder - to get real HEURIST installation
             if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
@@ -323,7 +328,7 @@ HEURIST_HTML_URL
             }else{
                 $install_path = "";   
             }
-        }else {
+        }else {  //this is real path (NOT simlink)
         
             $install_dir = $installDir; //  /html/h3/
             if($install_dir){

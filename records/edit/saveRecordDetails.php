@@ -44,6 +44,7 @@
     require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
     require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
+    
     if (! is_logged_in()) return;
 
     mysql_connection_overwrite(DATABASE);
@@ -174,7 +175,7 @@
                                 $terms = array_diff($terms,$nonTerms);
                             }
                         }
-                        if (count($temp)<1) {
+                        if (count($terms)<1) {
                             $dtyIDDefs[$row[0]] = "all";
                         }else{
                             $dtyIDDefs[$row[0]] = $terms;
@@ -547,6 +548,7 @@ which is one step too many and has been removed from design by Ian in approx 201
             updateRecord($recID, $rtyID);
             return true;
         }else{
+            if (mysql_error()) error_log("error INSERT RECORD ".mysql_error());
             return false;
         }
     }

@@ -70,7 +70,7 @@ CREATE TABLE Records (
   rec_URL varchar(2000) default NULL COMMENT 'The primary URL pointed to by this record (particularly for Internet bookmarks)',
   rec_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'Date and time record added',
   rec_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time the record was modified',
-  rec_Title varchar(1023) NOT NULL COMMENT 'Composite (constructed) title of the record, used for display and search',
+  rec_Title varchar(1023) NOT NULL default '' COMMENT 'Composite (constructed) title of the record, used for display and search',
   rec_ScratchPad text COMMENT 'Scratchpad, mainly for text captured with bookmarklet',
   rec_RecTypeID smallint(5) unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
   rec_AddedByUGrpID smallint(5) unsigned default NULL COMMENT 'ID of the user who created the record',
@@ -102,7 +102,7 @@ CREATE TABLE Records (
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
   cfn_Domain enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring' COMMENT 'Domain of application of this function specification',
-  cfn_FunctionSpecification text NOT NULL COMMENT 'A function or chain of functions, or some PHP plugin code',
+  cfn_FunctionSpecification text NOT NULL default '' COMMENT 'A function or chain of functions, or some PHP plugin code',
   cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (cfn_ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Specifications for generating calculated fields, plugins and';
@@ -420,7 +420,7 @@ CREATE TABLE recDetails (
   dtl_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Set 1 if added by an import, set 0 if added by user during data entry',
   dtl_UploadedFileID mediumint(8) unsigned default NULL COMMENT 'The numeric code = filename of an uploaded file ',
   dtl_Geo geometry default NULL COMMENT 'A geometry (spatial) object',
-  dtl_ValShortened varchar(31) NOT NULL COMMENT 'Truncated version of the textual value without spaces',
+  dtl_ValShortened varchar(31) NOT NULL default '' COMMENT 'Truncated version of the textual value without spaces',
   dtl_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record detail, used to get last updated date for table',
   PRIMARY KEY  (dtl_ID),
   KEY dtl_DetailtypeIDkey (dtl_DetailTypeID),

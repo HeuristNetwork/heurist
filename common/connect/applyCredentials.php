@@ -29,12 +29,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-define('SKIP_VERSIONCHECK', 1);
+if(! defined('SKIP_VERSIONCHECK')) 
+    define('SKIP_VERSIONCHECK', 1);
 
 require_once(dirname(__FILE__)."/../config/initialise.php");
 
 if (! defined('COOKIE_VERSION'))
-	define('COOKIE_VERSION', 1);		// increment to force re-login when required
+    define('COOKIE_VERSION', 1);		// increment to force re-login when required
 
 
 startMySession();
