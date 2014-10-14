@@ -336,7 +336,7 @@
         $type = 'unknown';
 
         //1. detect source
-        if(strpos($url, 'http://'.HEURIST_SERVER_NAME)===0 && strpos($url, 'records/files/downloadFile.php') >=0){
+        if(strpos($url, $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME)===0 && strpos($url, 'records/files/downloadFile.php') >=0){
             $source = 'heurist';
         }else if(strpos($url,'http://www.flickr.com')===0){
             $source = 'flickr';

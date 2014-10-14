@@ -99,7 +99,7 @@ HEURIST_HTML_DIR
 HEURIST_HTML_URL
 
     */
-    
+
     require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 
@@ -111,12 +111,22 @@ HEURIST_HTML_URL
     if (!$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
     }
+    
+    $isSecure = false;
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+        $isSecure = true;
+    }
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+        $isSecure = true;
+    }
+    $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
+    
 
     define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
-    $serverBaseURL = ((array_key_exists("HTTPS", $_SERVER) && $_SERVER["HTTPS"] == "on") ? "https://" : "http://") . HEURIST_SERVER_NAME;
+    $serverBaseURL = $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME;
     define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
     define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
-    
+
     // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
     $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
     
@@ -152,7 +162,7 @@ HEURIST_HTML_URL
     // with addServer, connection is not established until actually used
     // the get/set functions return FALSE on fail so we get graceful degradation for free (if no memcached server is available)
     $memcache->addServer(MEMCACHED_HOST, MEMCACHED_PORT);
-
+    
     if (@$httpProxy != '') {
         define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
         if (@$httpProxyAuth != '') {
@@ -169,6 +179,7 @@ HEURIST_HTML_URL
         define('HEURIST_DBSERVER_NAME', "localhost"); //configure to access mysql on the same machine as the Heurist codebase
 
     }
+    
     if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonlyPassword)) { //if these are not specified then we can't do anything
         returnErrorMsgPage(1, "MySql user account/password not specified. Set in configIni.php");
     }
@@ -185,6 +196,7 @@ HEURIST_HTML_URL
     define('READONLY_DBUSERPSWD', $dbReadonlyPassword);
     define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix'] ? $_REQUEST['prefix'] : $dbPrefix));
     //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
+    
     
     //test db connect valid db
     $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword)
@@ -279,7 +291,7 @@ HEURIST_HTML_URL
         }
         testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
         
-        if(strpos($defaultRootFileUploadURL,"http://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
+        if(strpos($defaultRootFileUploadURL, $REQUEST_PROTOCOL . "://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
                 if( substr($defaultRootFileUploadURL, 0, 1) != '/' ) $defaultRootFileUploadURL = "/" . $defaultRootFileUploadURL;
                 $defaultRootFileUploadURL =  HEURIST_SERVER_URL . $defaultRootFileUploadURL; 
         }
@@ -295,6 +307,7 @@ HEURIST_HTML_URL
         // $documentRoot    /var/www/html/   or /var/www/
 
         $install_path = @$_SERVER['DOCUMENT_ROOT'].$installDir;
+
         if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
         
         $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/

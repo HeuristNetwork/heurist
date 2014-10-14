@@ -71,7 +71,7 @@
         <script>
             top.HEURIST.whenLoaded("obj-user", function() {
                 if (!top.HEURIST.baseURL) {
-                    top.HEURIST.baseURL = "http://"+ location.hostname + top.HEURIST.basePath;
+                    top.HEURIST.baseURL = location.protocol + "//" + location.hostname + top.HEURIST.basePath;
                 }
                 if (! top.HEURIST.is_logged_in()) {
 
@@ -508,7 +508,7 @@
                 switch (top.HEURIST.displayPreferences["action-on-save"]) {
                     case "close":
                     if (canCloseWindow) {
-                        document.getElementById("act-close").checked = true;
+                        //ART document.getElementById("act-close").checked = true;
                         break;
                     }
                     default:
@@ -519,7 +519,7 @@
                     document.getElementById("act-stay").checked = true;
                     }
                     */
-                    document.getElementById("act-stay").checked = true;
+                    //ART document.getElementById("act-stay").checked = true;
                 }
 
                 var helpLink = top.document.getElementById("help-link");
@@ -537,7 +537,7 @@
                     top.HEURIST.whenLoaded(recordEvent, function() {
                         document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
                         var citeAs = document.getElementById("cite-as-url");
-                        citeAs.href = "http://"+window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
+                        citeAs.href = window.location.protocol + "//" + window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
                         citeAs.appendChild(document.createTextNode(citeAs.href));
                     });
                 </script>

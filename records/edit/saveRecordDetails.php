@@ -446,7 +446,7 @@ which is one step too many and has been removed from design by Ian in approx 201
                 ++$insertedRowCount;
             }
         }
-        if (mysql_error()) error_log("error detail inserts".mysql_error());
+        if (mysql_error()) error_log("error detail inserts ".mysql_error());
 
         $deletedRowCount = 0;
         if ($bibDetailDeletes) {
