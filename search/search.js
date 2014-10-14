@@ -615,7 +615,7 @@ top.HEURIST.search = {
 		window.heuristListeners["heurist-related-recordset-loaded"] = [];
         console.log("HEURIST_RELATED_RECORDSET_LOADED");
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.applyFilterAndLayout);
-        top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.updateDiagramView(null));
+        top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.updateDiagramView);
 
 		top.HEURIST.util.getJsonData(URL,
 				function(related) {	// callback function to process related record results into HEURIST search results
@@ -1001,7 +1001,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.filterRelated(level);
 		}
 		top.HEURIST.search.updateMapRelated();
-        top.HEURIST.search.updateDiagramView(null);
+        top.HEURIST.search.updateDiagramView();
 	},
 
     getLink_toggleOff_loadRelatedRecords: function(level){
@@ -2673,7 +2673,7 @@ top.HEURIST.search = {
 		if(viewerFrame){
 			var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
 			var ssel = "selectedIds=" + selectedRecIDs.join(",");
-			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel);
+			top.HEURIST.fireEvent(viewerFrame.contentWindow,"heurist-selectionchange", ssel); 
 		}
 
 /*art temp old mapping
@@ -3452,26 +3452,38 @@ top.HEURIST.search = {
         console.log("updateDiagramView() called!");
         // Diagram check
         var diagramFrame = document.getElementById("diagram-frame");
-        console.log("Diagram frame: " + diagramFrame);
-        console.log("Tab view: " + _tabView);
+        //console.log("Diagram frame: " + diagramFrame);
+        //console.log("Tab view: " + _tabView);
+        
+        // Check if the diagram tab is open
         if (diagramFrame && !top.HEURIST.util.isnull(_tabView)) {
-            // Tab check
             var currentTab = _tabView.getTabIndex(_tabView.get('activeTab'));
-            console.log("Current tab inside updateDiagramView: " + currentTab);
-            //if(currentTab==_TAB_DIAGRAM){
             if(currentTab == _TAB_DIAGRAM) {
-                // Get database parameter
-                var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-                     
-                // Get record ID's
-                //var selectedRecIDs = top.HEURIST.search.getSelectedRecIDs().get();
-                     
-                //diagramFrame.src = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+top.HEURIST.currentRecordID+"&db="+db;
-                // Building URL
-               // var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?recIDs="+selectedRecIDs.join(",")+"&db="+db;
-                var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?db="+db;
-                setTimeout(function(){diagramFrame.src = url;}, 50);
+                /// Update selection, or update complete diagram?
+                if(recID == undefined) {
+                    /** Update complete diagram */
+                    // Get database parameter
+                    var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                             (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+                    // Building URL                                                                                 
+                    var url = top.HEURIST.basePath+"viewers/network/springDiagram.php?db="+db;
+                    setTimeout(function(){diagramFrame.src = url;}, 50);
+                }else{
+                    /** Update selection */
+                    // Unselected all previously selected                         
+                    $("#diagram-frame").contents().find(".foreground.selected").attr("class", "foreground around"); 
+                    
+                     // Select all newly selected
+                    var ids = top.HEURIST.search.getSelectedRecIDs().get();
+                    console.log(ids);
+                    if(ids !== undefined && ids.length > 0) {
+                        var contents = $("#diagram-frame").contents(); 
+                        for(var i = 0; i < ids.length; i++) {
+                            contents.find(".node.id"+ids[i] + " .foreground").attr("class", "foreground selected");
+                        }
+                    }
+                }
             }
         }
     },
@@ -3759,7 +3771,7 @@ top.HEURIST.search = {
 		if(fireEvent){
 			top.HEURIST.search.updateMapOrSmarty();
 		}
-        top.HEURIST.search.updateDiagramView(null);
+        top.HEURIST.search.updateDiagramView();
 
 		return;
 	},
@@ -5404,7 +5416,7 @@ function layoutAppPanel(isToggle,newWidth){
 			top.HEURIST.search.updateMapOrSmarty();
 		}else if(currentTab===_TAB_DIAGRAM) { // diagram
             console.log("ABOUT TO UPDATE DIAGRAM VIEW");
-            top.HEURIST.search.updateDiagramView(null);
+            top.HEURIST.search.updateDiagramView();
             
         }
 

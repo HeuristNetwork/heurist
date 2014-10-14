@@ -457,7 +457,6 @@ function handleSettingsInUI() {
 /*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
 var maxCount; 
 function determineMaxCount(data) {
-    console.log("DETERMINING NEW MAX COUNT");
     maxCount = 1;
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
@@ -467,7 +466,6 @@ function determineMaxCount(data) {
             } 
         }
     }
-    console.log("NEW MAX COUNT: " + maxCount);
 }
 
 /** Calculates log base 10 */
@@ -796,7 +794,9 @@ function visualizeData() {
     var node = container.selectAll(".node")
                   .data(force.nodes())
                   .enter().append("g")
-                  .attr("class", "node") 
+                  .attr("class", function(d) {
+                      return "node id" + d.id;
+                  }) 
                   .attr("transform", "translate(100, 100)")
                   .attr("x", function(d) {
                       // Setting 'x' based on localstorage
@@ -878,13 +878,13 @@ function visualizeData() {
     // Adding the foreground circles to the nodes
     var fgcircle = node.append("circle")
                        .attr("r", circleSize)
-                       .attr("class", "around foreground")
-                       .style("stroke", function(d) {
-                           if(d.selected == true) {
-                                return "#ee0";
-                           }
-                           return "#ddd";
+                       .attr("class", function(d) {
+                            if(d.selected == true) {
+                                return "foreground selected";
+                            }
+                            return "foreground around";
                        })
+                       .style("stroke", "#ddd")
                        .style("stroke-opacity", function(d) {
                            if(d.selected == true) {
                                return 1;
@@ -894,9 +894,7 @@ function visualizeData() {
    
     // Adding icons to the nodes 
     var icon = node.append("svg:image")
-                   .attr("class", function(d) {
-                       return "icon id"+d.id;
-                   }) 
+                   .attr("class", "icon")
                    .attr("xlink:href", function(d) {
                         return d.image;
                    })
@@ -1365,7 +1363,7 @@ function updateOverlays() {
         // Select element to align to
         var bbox;
         if(type == "record") {
-            bbox = $(".icon."+id)[0].getBoundingClientRect();
+            bbox = $(".node.id"+id + " .icon")[0].getBoundingClientRect();
         }else{
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }

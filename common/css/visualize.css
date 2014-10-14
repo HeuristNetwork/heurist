@@ -121,10 +121,17 @@ g:hover {
 
 /** Circle around icon */
 circle.around {
-    fill: #fff;
     stroke-width: 1px;
     stroke: #ddd;
     stroke-opacity: .25;
+}
+
+circle.foreground {
+    fill: #fff;
+}
+
+circle.selected {
+    fill: #1687E7 !important;
 }
 
 /** Text above circle */
