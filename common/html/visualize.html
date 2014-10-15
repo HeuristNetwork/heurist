@@ -19,13 +19,13 @@
                     <!-- Line length --> 
                     <div id="linelengthContainer">
                         <i>Length</i>
-                        <input id="linelength" class="small-input" type="number" min="1"/>
+                        <input id="linelength" class="number-input medium" type="number" min="1" step="10"/>
                     </div>
                     
                     <!-- Line width -->
                     <div id="linewidthContainer">
                         <i>Max width</i>
-                        <input id="linewidth" class="small-input" type="number" min="1"/>
+                        <input id="linewidth" class="number-input small" type="number" min="1" step="1"/>
                     </div>
                     
                     <!-- Line color -->
@@ -47,7 +47,7 @@
                     
                     <div id="entityradiusContainer">
                         <i>Max radius</i>
-                        <input id="entityradius" class="small-input" type="number" min="1"/>
+                        <input id="entityradius" class="number-input small" type="number" min="1" step="1"/>
                     </div>
                     
                     <!-- Entity circle color -->
@@ -59,12 +59,19 @@
                 
                 <!-- Text settings -->
                 <div class="settings space" id="textSettings">
-                    <b>Text:</b>
+                    <b>Labels:</b>
+                    <input id="labelCheckBox" type="checkbox" name="labelCheckBox" checked="checked">
                     
                     <!-- Text size -->
                     <div id="fontsizeContainer">
                         <i>Font-size</i>
-                        <input id="fontsize" class="small-input" type="number" min="1"/>
+                        <input id="fontsize" class="number-input small" type="number" min="1" step="1"/>
+                    </div>
+                    
+                    <!-- Text length -->
+                    <div id="textlengthContainer">
+                        <i>Text length</i>
+                        <input id="textlength" class="number-input small" type="number" min="1" step="1"/>
                     </div>
                     
                     <!-- Text color -->
@@ -109,7 +116,7 @@
                     <!-- Attraction strength -->
                     <div id="attractionContainer">
                         <i>Attraction</i>
-                        <input id="attraction" class="small-input" type="number"/>
+                        <input id="attraction" class="number-input medium" type="number" step="50"/>
                     </div>
                 </div>
 

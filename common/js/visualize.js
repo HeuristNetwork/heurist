@@ -55,7 +55,9 @@ var svg;        // The SVG where the visualisation will be executed on
             showEntityColor: true,
             
             showTextSettings: true,
+            showLabels: true,
             showFontSize: true,
+            showTextLength: true,
             showTextColor: true,
             
             showTransformSettings: true,
@@ -77,7 +79,9 @@ var svg;        // The SVG where the visualisation will be executed on
             entityradius: 30,
             entitycolor: "#262",
             
+            labels: true,
             fontsize: "8px",
+            textlength: 60,
             textcolor: "#000",
             
             formula: "linear",
@@ -115,7 +119,9 @@ var setting_linecolor     = "setting_linecolor";
 var setting_markercolor   = "setting_markercolor";
 var setting_entityradius  = "setting_entityradius";
 var setting_entitycolor   = "setting_entitycolor";
+var setting_labels        = "setting_labels";
 var setting_fontsize      = "setting_fontsize";
+var setting_textlength    = "setting_textlength";
 var setting_textcolor     = "setting_textcolor";
 var setting_formula       = "setting_formula";
 var setting_gravity       = "setting_gravity";
@@ -190,7 +196,9 @@ function checkStoredSettings() {
     checkSetting(   setting_markercolor,   settings.markercolor );
     checkSetting(   setting_entityradius,  settings.entityradius);
     checkSetting(   setting_entitycolor,   settings.entitycolor );
+    checkSetting(   setting_labels,        settings.labels      );
     checkSetting(   setting_fontsize,      settings.fontsize    );
+    checkSetting(   setting_textlength,    settings.textlength  );
     checkSetting(   setting_textcolor,     settings.textcolor   );
     checkSetting(   setting_formula,       settings.formula     );
     checkSetting(   setting_gravity,       settings.gravity     );
@@ -337,8 +345,24 @@ function handleSettingsInUI() {
         $("#entitySettings").remove();
     }
     
-    // TEXT SETTINGS
+    // LABEL SETTINGS
     if(settings.showTextSettings) {
+        /** Labels visible */
+        if(settings.showLabels) {
+            // Set checkbox value
+            if(getSetting(setting_labels) == "false") {
+                $("#labelCheckBox").prop("checked", false);
+            }
+            
+            // Listen to changes
+            $("#labelCheckBox").change(function(e) {
+                putSetting(setting_labels, $(this).is(':checked'));
+                visualizeData();
+            });
+        }else{
+            $("#labelCheckBox").remove();
+        }
+        
         /** TEXT FONT SIZE SETTING */
         if(settings.showFontSize) {
             // Set font size setting in UI
@@ -355,6 +379,20 @@ function handleSettingsInUI() {
             });
         }else{
             $("#fontsizeContainer").remove();
+        }
+        
+        /** TEXT LENGTH SETTING */
+        if(settings.showTextLength) {
+            // Set text length in UI
+            $("#textlength").val(getSetting(setting_textlength));
+            
+            // Listen to text length changes
+            $("#textlength").change(function() {
+                putSetting(setting_textlength, $(this).val());
+                visualizeData();
+            });
+        }else{
+            $("#textlengthContainer").remove();
         }
         
         /** TEXT COLOR SETTING */
@@ -460,7 +498,7 @@ function determineMaxCount(data) {
     maxCount = 1;
     if(data && data.nodes.length > 0) {
         for(var i = 0; i < data.nodes.length; i++) {
-            console.log(data.nodes[i]);
+            //console.log(data.nodes[i]);
             if(data.nodes[i].count > maxCount) {
                 maxCount = data.nodes[i].count;
             } 
@@ -586,12 +624,12 @@ function visualizeData() {
     /** Updates the container after a zoom event */             
     function zoomed() {      
         // Translate
-        //console.log(d3.event.translate);
+        //console.log(d3.event.translate);   
         if(d3.event.translate !== undefined) {
-            if(!isNaN(d3.event.translate[0])) {
+            if(!isNaN(d3.event.translate[0])) {           
                 putSetting(setting_translatex, d3.event.translate[0]);
             }
-            if(!isNaN(d3.event.translate[1])) {
+            if(!isNaN(d3.event.translate[1])) {    
                 putSetting(setting_translatey, d3.event.translate[1]);
             }
         }
@@ -599,7 +637,7 @@ function visualizeData() {
         //console.log(d3.event.scale);
         if(!isNaN(d3.event.scale)) {
             putSetting(setting_scale, d3.event.scale);
-        }
+        }   
         // Transform         
         var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
         //console.log("ZOOMED --> " + transform);
@@ -644,7 +682,8 @@ function visualizeData() {
                 return getMarkerWidth(d.relation.count);
              })
              .attr("refX", function(d) {
-                 if(d.relation.pointer) {
+                 // Move markers to display a pointer on a straight line
+                 if(linetype=="straight" && d.relation.pointer) {
                      return linelength*-0.2;
                  }
                  return -1;
@@ -807,7 +846,7 @@ function visualizeData() {
                               d.x = obj.x;
                               return obj.x;
                           }
-                      }
+                      }    
                   })
                   .attr("y", function(d) {
                       // Setting 'y' based on localstorage
@@ -818,7 +857,7 @@ function visualizeData() {
                               d.y = obj.y;
                               return obj.y;  
                           }
-                      }
+                      }      
                   })
                   .attr("px", function(d) {
                       // Setting 'px' based on localstorage
@@ -829,7 +868,7 @@ function visualizeData() {
                              d.px = obj.px;
                              return obj.px;
                          }
-                      }
+                      }         
                   })
                   .attr("py", function(d) {
                       // Setting 'py' based on localstorage
@@ -840,7 +879,7 @@ function visualizeData() {
                               d.py = obj.py; 
                               return obj.py;
                           }
-                      }
+                      }    
                   })
                   .attr("fixed", function(d) {
                       // Setting 'fixed' based on localstorage
@@ -902,33 +941,31 @@ function visualizeData() {
                    .attr("y", iconSize/-2)
                    .attr("height", iconSize)
                    .attr("width", iconSize);
-
-    // Adding shadow text to the nodes 
-    var shadowtext = node.append("text")
-                         .attr("x", 0)
-                         .attr("y", -iconSize)
-                         .attr("class", "center shadow")
-                         .style("font-size", fontsize, "important")
-                         .text(function(d) {
-                            if(d.name.length > 30) {
-                                return d.name.substring(0, 29) + "...";
-                            }  
-                            return d.name; 
-                         });
-        
-    // Adding normal text to the nodes 
-    var fronttext = node.append("text")
-                        .attr("x", 0)
-                        .attr("y", -iconSize)
-                        .attr("class", "center namelabel")
-                        .attr("fill", textcolor)
-                        .style("font-size", fontsize, "important")
-                        .text(function(d) {
-                            if(d.name.length > 30) {
-                                return d.name.substring(0, 29) + "...";
-                            } 
-                            return d.name; 
-                        });
+                   
+    // Add labels?
+    if(getSetting(setting_labels) == "true") {
+        // Adding shadow text to the nodes 
+        var maxLength = getSetting(setting_textlength);
+        var shadowtext = node.append("text")
+                             .attr("x", 0)
+                             .attr("y", -iconSize)
+                             .attr("class", "center shadow")
+                             .style("font-size", fontsize, "important")
+                             .text(function(d) {
+                                 return truncateText(d.name, maxLength);
+                             });
+            
+        // Adding normal text to the nodes 
+        var fronttext = node.append("text")
+                            .attr("x", 0)
+                            .attr("y", -iconSize)
+                            .attr("class", "center namelabel")
+                            .attr("fill", textcolor)
+                            .style("font-size", fontsize, "important")
+                            .text(function(d) {
+                                return truncateText(d.name, maxLength);
+                            });
+    }
     
     // Fish eye check
     if(fisheyeEnabled == "true") {
@@ -1116,8 +1153,7 @@ function visualizeData() {
 * Truncates text after 80 characaters
 * @param text The text to truncate
 */
-function truncateText(text) {
-    var maxLength = 40;
+function truncateText(text, maxLength) {
     if(text.length > maxLength) {
         return text.substring(0, maxLength-1) + "...";
     }
@@ -1127,6 +1163,7 @@ function truncateText(text) {
 /** Finds all outgoing links from a clicked record */
 function getRecordOverlayData(record) {
     console.log(record);
+    var maxLength = getSetting(setting_textlength);
     var array = [];
     
     // Header
@@ -1153,7 +1190,7 @@ function getRecordOverlayData(record) {
                 }
                 
                 // Relation
-                var relation = {text: "➜ " + truncateText(link.target.name), size: "9px", indent: true};
+                var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", indent: true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.targetcount;                      
                 }
@@ -1184,7 +1221,7 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(link.source.name) + " ↔ " + truncateText(link.target.name), size: "9px", indent: true};
+                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", indent: true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -1201,7 +1238,7 @@ function getRecordOverlayData(record) {
         
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: truncateText(key), size: "11px", enter: true}); // Heading
+            array.push({text: truncateText(key, maxLength), size: "11px", enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -1215,9 +1252,10 @@ function getRecordOverlayData(record) {
 function getRelationOverlayData(line) {
     console.log(line);
     var array = [];
+    var maxLength = getSetting(setting_textlength);
     
     // Header
-    var header = {text: truncateText(line.source.name) + " ↔ " + truncateText(line.target.name), size: "12px", style: "bold", enter: true};
+    var header = {text: truncateText(line.source.name, maxLength) + " ↔ " + truncateText(line.target.name, maxLength), size: "12px", style: "bold", enter: true};
     array.push(header);
 
     // Going through the current displayed data
@@ -1231,7 +1269,7 @@ function getRelationOverlayData(line) {
             if(link.source.id == line.source.id && link.target.id == line.target.id ||
                link.source.id == line.target.id && link.target.id == line.source.id) {
                 //console.log(link);
-                var relation = {text: truncateText(link.relation.name), size: "9px"}; 
+                var relation = {text: truncateText(link.relation.name, maxLength), size: "9px"}; 
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -1363,7 +1401,7 @@ function updateOverlays() {
         // Select element to align to
         var bbox;
         if(type == "record") {
-            bbox = $(".node.id"+id + " .icon")[0].getBoundingClientRect();
+            bbox = $(".node."+id + " .icon")[0].getBoundingClientRect();
         }else{
             bbox = $(".link."+id)[0].getBoundingClientRect();
         }
