@@ -40,10 +40,15 @@
     cursor: pointer;
 }
 
-.small-input {
+.number-input { 
     cursor: text;
-    max-width: 40px;
     text-align: center;
+}
+.number-input.small {
+     max-width: 30px;
+}
+.number-input.medium {
+    max-width: 45px;
 }
 
 .explanation {
