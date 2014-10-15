@@ -431,6 +431,33 @@ function hRecordSet(initdata) {
             });
         },
 
+        getSubSetByIds: function(rec_ids){
+            var _records = {};
+            //find all records
+            
+            var recID;
+            if(Object.keys(records).length<rec_ids.length){
+
+                for(recID in records)
+                    if(recID && rec_ids.indexOf(recID)>-1) {
+                        _records[recID] = records[recID];
+                    }
+
+            }else{
+                var idx;
+                for(idx=0; idx<rec_ids.length; idx++)
+                {
+                    recID = rec_ids[idx];
+                    if(records[recID]){
+                        _records[recID] = records[recID];    
+                    }
+                }
+
+            }
+            
+            return this.getSubSet(_records);
+        },
+        
         /**
         * Returns new recordSet that is the join from current and given recordset
         */

@@ -1,11 +1,8 @@
 /**
 * Query result listing. 
 * 
-* Requires apps/rec_actions.js (must be preloaded)
+* NO Requires apps/rec_actions.js (must be preloaded)
 * Requires apps/search/resultListMenu.js (must be preloaded)
-* 
-* @todo - remove action buttons and use rec_action widget
-* 
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -42,6 +39,7 @@ $.widget( "heurist.resultList", {
     
 
     _query_request: null, //keep current query request
+    _total_count_of_curr_request: 0, //total count for current request (main and rules)
     _events: null,
     _lastSelectedIndex: -1,
 
@@ -181,7 +179,26 @@ $.widget( "heurist.resultList", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
                 
                 if(data){
+                    //create flat rule array
                     that._doApplyRules(data);
+                    
+                    //if rules were applied before - need to remove all records except original and re-render
+                    if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
+                         //@todo - assign this.options.recordset and rerender record divs
+                         var rec_ids_level0 = [];
+                         
+                         var idx;
+                         for(idx=0; idx<that._rules[0].results.length; idx++){
+                            rec_ids_level0 = rec_ids_level0.concat(that._rules[0].results[idx]);
+                         }
+                         
+                         var data = that.options.recordset.getSubSetByIds(rec_ids_level0);
+                         that.options.recordset = null;
+                         that._clearAllRecordDivs();
+                         that._renderRecordsIncrementally(data); //hRecordSet
+                    
+                         that._doSearchIncrement(); //start search dependent records according to rules        
+                    }
                 }
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
@@ -247,9 +264,9 @@ $.widget( "heurist.resultList", {
         
         if(key=='recordset' && value==null){
             //reset counters and storages
-            _rule_index = -1; // current index 
-            _res_index =  -1; // current index in result array (chunked by 1000)
-            _rules = [];      // flat array of rules for current query request
+            this._rule_index = -1; // current index 
+            this._res_index =  -1; // current index in result array (chunked by 1000)
+            this._rules = [];      // flat array of rules for current query request
             
             this._clearAllRecordDivs();
         }
@@ -361,6 +378,7 @@ $.widget( "heurist.resultList", {
     },
 
     // @todo move record related stuff to HAPI
+    // NOT USED 
     _renderRecords: function(){
 
         if(this.div_content){
@@ -447,8 +465,10 @@ $.widget( "heurist.resultList", {
                 this.options.recordset = this.options.recordset.doUnite(recordset);
             }   
             
+            this._total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
+            
 
-            if( this.options.recordset.count_total() > 0 )
+            if( this._total_count_of_curr_request > 0 )
             {
 
                 var recs = recordset.getRecords();
@@ -464,24 +484,21 @@ $.widget( "heurist.resultList", {
                 }
                 
                 //save increment into current rules.results
-                /* @todo
                 var records_ids = recordset.getIds()
                 if(records_ids.length>0){
+                    // rules:[ {query:query, results:[], parent:index},  ]
                 
-                     var ruleindex = this._rule_index;
-                     if(this._rule_index<0){ //this is main/parent query
-                         ruleindex = 'root';
+                    var ruleindex = this._rule_index;
+                    if(ruleindex<0){
+                         ruleindex = 0; //root/main search
+                         if(top.HEURIST4.util.isempty(this._rules)){
+                            this._rules = [{results:[]}];
+                         }
                      }
-                     if(!this._results[ruleindex]){
-                         this._results[ruleindex] = [];
-                     }
-                     
-                     this._results[ruleindex].push(records_ids);
+                     this._rules[ruleindex].results.push(records_ids);
                 }
-                */
-                
 
-            }else{
+            }else if(this._rule_index<1) {
 
                 var $emptyres = $('<div>')
                 .html(top.HR('No records match the search')+
@@ -811,11 +828,6 @@ $.widget( "heurist.resultList", {
         //assign zero level - top most query
         if(this.options.recordset!=null){  //aplying rules to existing set 
             
-            //if rules were applied before - need to remove all records except original and re-render
-            if(this._rules[0].results.length>0){
-                //@todo - assign this.options.recordset and rerender record divs
-            }
-            
             //result for zero level retains
             flat_rules[0].results = this._rules[0].results;
         }
@@ -824,20 +836,20 @@ $.widget( "heurist.resultList", {
         
     },
 
+    //@todo - do not apply rules unless main search is finished
+    //@todo - if search in progress and new rules are applied - stop this search and remove all linked data (only main search remains)
     _doSearchIncrement: function(){
 
         if ( this._query_request ) {
 
             this._query_request.source = this.element.attr('id'); //orig = 'rec_list';
             
-            var total_count = this.options.recordset.count_total();
             
-            
-            if(total_count>0){
+            if(this._total_count_of_curr_request>0){
             
                 var new_offset = Number(this._query_request.o);
                 new_offset = (new_offset>0?new_offset:0) + Number(this._query_request.l);
-                if(new_offset<total_count){
+                if(new_offset< this._total_count_of_curr_request){
                     this._query_request.increment = true;
                     this._query_request.o = new_offset;
                     top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
@@ -850,39 +862,49 @@ $.widget( "heurist.resultList", {
          // rules:[ {query:query, results:[], parent:index},  ]
 
                       
-                     this._rule_level; //current level
-                     this._rule_index; //curent index within level
+                     // this._rule_index;  current rule
+                     // this._res_index;   curent index in result array (from previous level)
 
+                     var current_results;
+                     var current_rule;
                      
-                     
-                     
-
-                     
-                     /*
-
-                     if(this._result_index<0){
-                         this._rule_index = 0;
-                     }else{
-                         this._result_index++;
+                     while (true){ //while find rule with filled parent's resultset
                          
-                         if(this._result_index == this._results[this._rules[this._rule_index].parent][this._rule_index].length){
-                            this._result_index = 0; 
+                         if(this._res_index<0){  
+                             this._rule_index = 1; //start with index 1 - since zero is main resultset
+                             this._res_index = 0;
+                         }else{
+                             this._res_index++;  //goto next 1000 records
+                         }
+                     
+                         if(this._rule_index>=this._rules.length){
+                             this._rule_index = -1; //reset
+                             this._res_index = -1;
+                             return false; //this is the end
+                         }
+                             
+                         current_rule = this._rules[this._rule_index];
+                         //results from parent level
+                         current_results = this._rules[current_rule.parent].results
+                     
+                         //if we access the end of result set - got to next rule
+                         if(this._res_index >= current_results.length)
+                         {
+                            this._res_index = 0; 
                             this._rule_index++;
+                            
+                         }else{
+                            break; 
                          }
                      }
-                     if(this._rule_index>=this._rules.length){
-                         return false; //this is the end
-                     }
-                    
-                     //two loops : by rules and by chunks of results
-                     var crule = this._rules[this._rule_index];
-                     this._query_request.q = crule.query;
-                     this._query_request.topids = this._results[crule.parent][this._result_index].join(',');
+                     
+                     
+                     //create request 
+                     this._query_request.q = current_rule.query;
+                     this._query_request.topids = current_results[this._res_index].join(','); //list of record ids of parent resultset
                      this._query_request.increment = true;
                      this._query_request.o = 0;
                      top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
-                     
-                     */
                      
                 }
             }

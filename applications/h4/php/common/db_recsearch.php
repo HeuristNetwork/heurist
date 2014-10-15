@@ -644,8 +644,34 @@
 
 //error_log("parent query ".print_r($query_top, true));
         
+        }else if( @$params['topids'] ){
+         
+            $query_top = array();
+            
+            //@todo - move all this stuff into get_sql_query_clauses???
+            if($currentUser && @$currentUser['ugr_ID']>0){
+                $currUserID = $currentUser['ugr_ID'];
+            }else{
+                $currUserID = 0;
+                $params['w'] = 'all';
+            }
+            
+            if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'], 'bookmark') == 0) {
+                $query_top['from'] = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
+            }else{
+                $query_top['from'] = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$currUserID.' ';
+            }
+            $query_top['where'] = "(TOPBIBLIO.rec_ID in (".$params['topids']."))";
+            $query_top['sort'] =  '';
+            $query_top['limit'] =  '';
+            $query_top['offset'] =  '';
+            
+            $params['parentquery'] = $query_top;
         }
+        
         $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+        
+//error_log("query ".print_r($aquery, true));        
         
         $chunk_size = 1001;
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
