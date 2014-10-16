@@ -1144,7 +1144,8 @@ function visualizeData() {
     }
     
     // Finally apply translate & scale
-    container.attr("transform", "translate("+translateX+","+translateY+")scale("+scale+")");
+    //container.attr("transform", "translate("+translateX+","+translateY+")scale("+scale+")");
+    container.attr("transform", "translate(0,0)scale("+scale+")");
 }
 
 /*************************************** OVERLAY ****************************************/  
