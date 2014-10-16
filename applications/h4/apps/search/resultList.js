@@ -81,16 +81,10 @@ $.widget( "heurist.resultList", {
 
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
         
-        if(this.options.showmenu){
-            this.div_actions = $('<div>')
-                .css('width','100%')
-                .resultListMenu()
-                .appendTo(this.element);
-        }
 
-        this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.8em'}).appendTo( this.element );
+        this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'3.8em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
-        .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em','position':'absolute','top':'3em','bottom':'15px'})   //@todo - proper relative layout
+        .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em','position':'absolute','top':'4em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
@@ -103,7 +97,7 @@ $.widget( "heurist.resultList", {
 
         //-----------------------
         this.span_info = $("<label>").appendTo(
-            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'3px 2em 0 2em'}).appendTo( this.div_toolbar ));
+            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'3px 2em 0 300px'}).appendTo( this.div_toolbar ));
 
         //-----------------------
         this.btn_view = $( "<button>", {text: "view"} )
@@ -147,17 +141,31 @@ $.widget( "heurist.resultList", {
         });
         
         //-----------------------
-        
-        this.div_progress = $( "<div>" ).css({'width':'100%','height':'1em', 'font-size': '0.7em'}).appendTo( this.div_toolbar );
-        this.lbl_get_in_current_request   = $("<div>").css({'display':'inline-block'}).appendTo(this.div_progress);
-        this.span_progress = $("<div>").css({'display':'inline-block','width':'80%'}).appendTo(this.div_progress);
-        this.lbl_total_in_current_request = $("<div>").css({'display':'inline-block'}).appendTo(this.div_progress);
+                                                            //,'height':'1em'               
+        this.div_progress = $( "<div>" ).css({'position':'absolute','left':2,'right':2,'top':'2em'}).appendTo( this.div_toolbar );
+                                                                                               
+        this.lbl_current_request = $("<div>").css({'display':'inline-block','width':'100px','text-align':'center'}).appendTo(this.div_progress);
+        this.span_progress = $("<div>").css({'position':'absolute','right':'100px','left':'100px', 'margin-top':'5px', 'display':'inline-block', 'height':'10px'}).progressbar().appendTo(this.div_progress);
+
         this.btn_stop_search = $( "<button>", {text: "stop"} )
+              .css({'font-size': '0.8em','position':'absolute','right':'15px'})
               .appendTo( this.div_progress )
               .button({icons: {
                   secondary: "ui-icon-cancel"
                  },text:true});
+        
+        //.css({'display':'inline-block'}).appendTo(this.div_progress);
 
+        //----------------------
+        
+        if(this.options.showmenu){
+            this.div_actions = $('<div>')
+                .css({'position':'absolute','top':3,'left':2})
+                .resultListMenu()
+                .appendTo(this.div_toolbar);
+        }
+        
+        
         //-----------------------     listener of global events
         this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
@@ -233,6 +241,8 @@ $.widget( "heurist.resultList", {
                             //create flat rule array
                             that._doApplyRules(that._query_request.rules);
                         }
+                        
+                        that._renderProgress();
                         
                     }
                     that._query_request = data;  //keep current query request 
@@ -855,23 +865,27 @@ $.widget( "heurist.resultList", {
             this.span_info.show();
             
             var curr_offset = Number(this._query_request.o);
+            curr_offset = (curr_offset>0?curr_offset:0) + Number(this._query_request.l);
             
             if(this._rule_index<1){  //this is main request
                 
+                var tot = this._total_count_of_curr_request;
+                
+                if(curr_offset>tot) curr_offset = tot;
                 //search in progress
-                if(curr_offset<this._total_count_of_curr_request){
-                     this.lbl_get_in_current_request.html(curr_offset);
-                     this.lbl_total_in_current_request.html(this._total_count_of_curr_request);
+
+                     this.lbl_current_request.html(curr_offset+'~'+tot);
+                     
+                     this.span_progress.progressbar( "value", curr_offset/tot*100 );
+                     //this.span_progress.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
                      this.div_progress.show();
-                }else{
-                     this.div_progress.hide();
-                }
             
             }else{ //this is rule request
                 
-                     this.lbl_get_in_current_request.html(curr_offset);
-                     this.lbl_total_in_current_request.html(this._total_count_of_curr_request+'  '+
+                     this.lbl_current_request.html(curr_offset+'~'+this._total_count_of_curr_request+' of '+
                             this._res_index+'~'+this._rules[this._rules[this._rule_index].parent].results.length);
+                            
+                     this.div_progress.show();
                 
             }
             
@@ -886,7 +900,7 @@ $.widget( "heurist.resultList", {
             }*/
         }else{
             this.span_info.hide();
-            this.div_progress.hide();
+            //this.div_progress.hide();
         }
 
 
@@ -926,7 +940,7 @@ $.widget( "heurist.resultList", {
                      
                      while (true){ //while find rule with filled parent's resultset
                          
-                         if(this._res_index<0){  
+                         if(this._res_index<1){  
                              this._rule_index = 1; //start with index 1 - since zero is main resultset
                              this._res_index = 0;
                          }else{

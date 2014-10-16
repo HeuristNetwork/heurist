@@ -139,7 +139,7 @@ $.widget( "heurist.resultListMenu", {
 
         //show hide function
         var _hide = function(ele) {
-                $( ele ).delay(700).hide();
+                $( ele ).delay(800).hide();
             },
             _show = function(ele, parent) {
                 $('.menu-or-popup').hide(); //hide other
