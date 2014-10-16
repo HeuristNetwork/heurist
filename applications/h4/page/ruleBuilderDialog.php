@@ -21,7 +21,7 @@
 
 
     require_once(dirname(__FILE__)."/../php/System.php");
-    require_once(dirname(__FILE__).'/../php/common/db_structure.php');
+    //require_once(dirname(__FILE__).'/../php/common/db_structure.php'); //may be removed
 
     $system = new System();
 
@@ -63,6 +63,19 @@
                 //print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
             }
+
+            $(document).ready(function() {
+
+                if(!top.HAPI4){
+                    //this is case of standaloe page
+                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onInit);//, < ?=json_encode($system->getCurrentUser())? > );
+                }else{
+                    //otherwise we take everything from parent window
+                    onInit(true);
+                }
+
+            });
+
             
             function onInit(success) //callback function of hAPI initialization
             {
@@ -74,7 +87,7 @@
                                 top.HR = window.HAPI4.setLocale(prefs['layout_language']); 
                             }
                             
-                            //init toolbar button
+                            //init toolbar buttons
                             $('#btn_add_level1').button().on('click', null, function(){
                                 $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule builder for level 1
                                         onremove: function(event, data){
@@ -158,18 +171,6 @@
                 } 
                 */
             }
-            
-            $(document).ready(function() {
-
-                if(!top.HAPI4){
-                    //this is case of standaloe page
-                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onInit);//, < ?=json_encode($system->getCurrentUser())? > );
-                }else{
-                    //otherwise we take everything from parent window
-                    onInit(true);
-                }
-
-            });
             
         </script>
         <style>

@@ -20,7 +20,7 @@
     */
 
 
-    require_once(dirname(__FILE__)."/System.php");
+    require_once(dirname(__FILE__)."/../php/System.php");
        
     $system = new System();
 
@@ -31,7 +31,7 @@
             exit();
         }
     }else{
-        header('Location: php/databases.php');
+        header('Location: /../php/databases.php');
         exit();
     }
 ?>
@@ -41,7 +41,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="stylesheet" type="text/css" href="../style3.css">
 
 
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -51,8 +51,10 @@
         <script type="text/javascript" src="../ext/layout/jquery.layout-latest.js"></script>
 
 
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <!-- 
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-        <!-- script type="text/javascript">
+        <script type="text/javascript">
         Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";
         </script -->
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
@@ -74,6 +76,44 @@
 
             $(document).ready(function() {
 
+                if(!top.HAPI4){
+                    //this is case of standaloe page
+                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onHapiInit);//, < ?=json_encode($system->getCurrentUser())? > );
+                }else{
+                    //otherwise we take everything from parent window
+                    onHapiInit(true);
+                }
+
+            });
+            
+            function onHapiInit(success) //callback function of hAPI initialization
+            {
+                        if(success)  //system is inited
+                        {
+                            if(!top.HR){
+                                var prefs = top.HAPI4.get_prefs();
+                                //loads localization
+                                top.HR = top.HAPI4.setLocale(prefs['layout_language']); 
+                            }
+                            top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
+                                    top.HEURIST4.rectypes = response.data.rectypes;
+                                    top.HEURIST4.terms = response.data.terms;
+                                    top.HEURIST4.detailtypes = response.data.detailtypes;
+                                    
+                                    onMapInit();
+                                }else{
+                                    top.HEURIST4.util.showMsgErr('Can not obtain database definitions');
+                                }
+                            });
+                        }else{
+                            top.HEURIST4.util.showMsgErr('Can not init HAPI');    
+                        }
+            }
+            
+                
+            function onMapInit(){
+                
                 var layout_opts =  {
                     applyDefaultStyles: true,
                     togglerContent_open:    '<div class="ui-icon"></div>',
@@ -93,10 +133,6 @@
                 $('#mapping').layout(layout_opts);
 
                 var mapdata = [];
-
-                if(!top.HAPI4){
-                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');//, <?=json_encode($system->getCurrentUser())?> );
-                }
 
                 mapping = new hMapping("map", "timeline", top.HAPI4.basePath);
 
@@ -124,17 +160,16 @@
 
                 //height:100%;
 
-            });
+            }
+            
         </script>
 
     </head>
     <body>
-
-        <div id="mapping" style="{height:100%;width:100%;}">
+        <div id="mapping" style="height:100%;width:100%;">
             <div class="ui-layout-center"><div id="map" style="width:100%;height:100%">Mapping</div></div>
             <div class="ui-layout-north">Toolbar</div>
             <div class="ui-layout-south"><div id="timeline" style="width:100%;height:100%;overflow-y:auto;"></div></div>
         </div>
-
     </body>
 </html>

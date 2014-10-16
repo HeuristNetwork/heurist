@@ -168,7 +168,7 @@ function hMapping(_map, _timeline, _basePath) {
             dataLoadedFunction: _onDataLoaded
             }, tmap);
 
-        if(!gmap){
+        if(!gmap){ //if map is not inited yet (first call) - add contrlos
             tmap.map.addControls({ pan:true, zoom:'large', overview: false, scale:true, map_type:true});
         }
 
