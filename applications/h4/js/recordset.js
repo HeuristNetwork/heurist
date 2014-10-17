@@ -28,6 +28,7 @@ function hRecordSet(initdata) {
     _version   = "0.4";
 
     var total_count = 0,   //number of records in query  - not match to  length()
+    queryid = null, //unique query id
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
@@ -40,6 +41,7 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
 
+        queryid = response.queryid;
         total_count = Number(response.count);
         offset = Number(response.offset);
         fields = response.fields;
@@ -495,6 +497,7 @@ function hRecordSet(initdata) {
             rectypes2 = jQuery.unique( rectypes2 );
             
             return new hRecordSet({
+                queryid: queryid,
                 count: total_count, //keep from original
                 offset: 0,
                 fields: fields,
@@ -522,6 +525,10 @@ function hRecordSet(initdata) {
 
         offset: function(){
             return offset;
+        },
+        
+        queryid:function(){
+            return queryid;
         },
 
         /**

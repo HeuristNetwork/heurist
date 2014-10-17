@@ -145,7 +145,9 @@ $.widget( "heurist.resultList", {
         this.div_progress = $( "<div>" ).css({'position':'absolute','left':2,'right':2,'top':'2em'}).appendTo( this.div_toolbar );
                                                                                                
         this.lbl_current_request = $("<div>").css({'display':'inline-block','width':'100px','text-align':'center'}).appendTo(this.div_progress);
-        this.span_progress = $("<div>").css({'position':'absolute','right':'100px','left':'100px', 'margin-top':'5px', 'display':'inline-block', 'height':'10px'}).progressbar().appendTo(this.div_progress);
+        this.span_progress = $("<div>")
+            .css({'position':'absolute','right':'100px','left':'100px', 'margin-top':'5px', 'display':'inline-block', 'height':'9px', 'margin':'0px !important'})
+            .progressbar().appendTo(this.div_progress);
 
         this.btn_stop_search = $( "<button>", {text: "stop"} )
               .css({'font-size': '0.8em','position':'absolute','right':'15px'})
@@ -153,6 +155,16 @@ $.widget( "heurist.resultList", {
               .button({icons: {
                   secondary: "ui-icon-cancel"
                  },text:true});
+
+        this._on( this.btn_stop_search, {
+            click: function(e) {
+                if(this._query_request!=null){ //assign new id to search - it prevents further increment search
+                    this._query_request.id = Math.round(new Date().getTime() + (Math.random() * 100));                  
+                    this.div_progress.hide();
+                    //this._renderProgress();
+                }
+            }
+        });
         
         //.css({'display':'inline-block'}).appendTo(this.div_progress);
 
@@ -189,17 +201,19 @@ $.widget( "heurist.resultList", {
                 //that.option('recordset', data); //hRecordSet
                 that.loadanimation(false);
                 
-                that._renderRecordsIncrementally(data); //hRecordSet
+                if(that._query_request!=null &&  data.queryid()==that._query_request.id) {  
                 
-                that._doSearchIncrement(); //load next chunk
+                    that._renderRecordsIncrementally(data); //hRecordSet
+                    that._doSearchIncrement(); //load next chunk
+                }
 
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
                 
                 if(data){
                     //create flat rule array
-                    that._doApplyRules(data);
-                    
+                    that._doApplyRules(data); //indexes are rest inside this function
+                  
                     //if rules were applied before - need to remove all records except original and re-render
                     if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
                          
@@ -856,36 +870,54 @@ $.widget( "heurist.resultList", {
         if(this.options.showcounter && this.options.recordset && this.options.recordset.length()>0){
             
             var s = '';
+            
+            var isTerminated = false; //(this._query_request==null || this.options.recordset.queryid()!=this._query_request.id);
 
-            if(this._rule_index>0){ //this search by rules
+            if(this._rule_index>0 && !isTerminated){ //this search by rules
                 s = 'Rules: '+this._rule_index+' of '+(this._rules.length-1)+'  ';
             }                
             s = s + 'Total: '+this.options.recordset.length();
             this.span_info.html( s );
             this.span_info.show();
             
+            if(isTerminated){
+                this.div_progress.hide();
+                return;
+            }
+            
             var curr_offset = Number(this._query_request.o);
             curr_offset = (curr_offset>0?curr_offset:0) + Number(this._query_request.l);
+            var tot = this._total_count_of_curr_request;
+            if(curr_offset>tot) curr_offset = tot;
             
             if(this._rule_index<1){  //this is main request
-                
-                var tot = this._total_count_of_curr_request;
-                
-                if(curr_offset>tot) curr_offset = tot;
-                //search in progress
-
+                    
+                    //search in progress
                      this.lbl_current_request.html(curr_offset+'~'+tot);
                      
                      this.span_progress.progressbar( "value", curr_offset/tot*100 );
                      //this.span_progress.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
                      this.div_progress.show();
             
+                     if(curr_offset==tot) {
+                           this.div_progress.delay(500).hide();
+                     }
+                     
             }else{ //this is rule request
+            
+                     if( this._rule_index < this._rules.length){
+            
+                        var res_steps_count = this._rules[this._rules[this._rule_index].parent].results.length;
                 
-                     this.lbl_current_request.html(curr_offset+'~'+this._total_count_of_curr_request+' of '+
-                            this._res_index+'~'+this._rules[this._rules[this._rule_index].parent].results.length);
+                        this.lbl_current_request.html(curr_offset+'~'+tot+' of '+
+                            this._res_index+'~'+res_steps_count);
                             
-                     this.div_progress.show();
+                        var progress_value = this._res_index/res_steps_count*100 + curr_offset/tot*100/res_steps_count
+                            
+                        this.span_progress.progressbar( "value", progress_value );
+                            
+                        this.div_progress.show();
+                     }
                 
             }
             
@@ -900,7 +932,7 @@ $.widget( "heurist.resultList", {
             }*/
         }else{
             this.span_info.hide();
-            //this.div_progress.hide();
+            this.div_progress.hide();
         }
 
 
@@ -940,7 +972,7 @@ $.widget( "heurist.resultList", {
                      
                      while (true){ //while find rule with filled parent's resultset
                          
-                         if(this._res_index<1){  
+                         if(this._rule_index<1){  
                              this._rule_index = 1; //start with index 1 - since zero is main resultset
                              this._res_index = 0;
                          }else{

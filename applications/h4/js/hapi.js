@@ -396,7 +396,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,search: function(request, callback){
 
                 if(!request.increment || top.HEURIST4.util.isnull(request.id)){
-                        request.id = (new Date().getTime());
+                        request.id = Math.round(new Date().getTime() + (Math.random() * 100));
                 }
                 
                 if(!$.isFunction(callback)){

@@ -718,6 +718,7 @@
                     //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
 
                     if($need_details && count($records)>0){
+                        
                         //search for specific details
                         // @todo - we may use getAllRecordDetails
                         $res_det = $mysqli->query(
@@ -765,9 +766,9 @@
 
                     //"query"=>$query,
                     $response = array("status"=>HEURIST_OK,
-                        "id"=>@$params['id'], 
                         "data"=> array(
                             //"query"=>$query,
+                            "queryid"=>@$params['id'],  //query unqiue id
                             "count"=>$total_count_rows,
                             "offset"=>get_offset($params),
                             "fields"=>$fields,
