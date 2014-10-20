@@ -221,6 +221,7 @@ $.widget( "heurist.resultList", {
                          var rec_ids_level0 = [];
                          
                          var idx;
+                         var keep_it = that._rules[0].results;
                          for(idx=0; idx<that._rules[0].results.length; idx++){
                             rec_ids_level0 = rec_ids_level0.concat(that._rules[0].results[idx]);
                          }
@@ -228,7 +229,11 @@ $.widget( "heurist.resultList", {
                          var data = that.options.recordset.getSubSetByIds(rec_ids_level0);
                          that.options.recordset = null;
                          that._clearAllRecordDivs();
+                         //that.option('recordset', null);
+                         that._rules[0].results = [];
                          that._renderRecordsIncrementally(data); //hRecordSet
+                         //keep results separated by chunks
+                         that._rules[0].results = keep_it;
                     
                          that._doSearchIncrement(); //start search dependent records according to rules        
                     }
@@ -893,7 +898,7 @@ $.widget( "heurist.resultList", {
             if(this._rule_index<1){  //this is main request
                     
                     //search in progress
-                     this.lbl_current_request.html(curr_offset+'~'+tot);
+                     this.lbl_current_request.html(curr_offset==tot?tot:curr_offset+'~'+tot);
                      
                      this.span_progress.progressbar( "value", curr_offset/tot*100 );
                      //this.span_progress.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
@@ -909,8 +914,8 @@ $.widget( "heurist.resultList", {
             
                         var res_steps_count = this._rules[this._rules[this._rule_index].parent].results.length;
                 
-                        this.lbl_current_request.html(curr_offset+'~'+tot+' of '+
-                            this._res_index+'~'+res_steps_count);
+                        this.lbl_current_request.html( (curr_offset==tot?tot:curr_offset+'~'+tot)+' of '+
+                            (this._res_index+1)+'~'+res_steps_count);
                             
                         var progress_value = this._res_index/res_steps_count*100 + curr_offset/tot*100/res_steps_count
                             

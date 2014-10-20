@@ -22,7 +22,7 @@ $.widget( "heurist.ruleBuilder", {
     // default options
     options: {
         level: 0,
-        queries:[],
+        query: '',
         recordtypes: [],  //array or record types from current main search result - otherwise show all rectypes
         
         is_search_allowed: false,
@@ -34,8 +34,10 @@ $.widget( "heurist.ruleBuilder", {
     _selection: null,     // current set of selected records
     _arr_fields:[],
     _arr_rectypes:[],
-    _has_relation:false,
-    _has_pointers:false,
+    _has_relation:'0',
+    _has_pointers:'0',
+    _has_rev_relation:'0',
+    _has_rev_pointers:'0',
 
     // the widget's constructor
     _create: function() {
@@ -188,8 +190,8 @@ $.widget( "heurist.ruleBuilder", {
         }else{
             $(this.element).find('.logged-in-only').css('visibility','hidden');
         }*/
-        if(this.debug_label)
-        this.debug_label.html(this.options.queries.join(' OR '));
+        //if(this.debug_label)
+        //this.debug_label.html(this.options.queries.join(' OR '));
     },
     // 
     // custom, widget-specific, cleanup.
@@ -244,9 +246,12 @@ $.widget( "heurist.ruleBuilder", {
 
             var arr_fields = [], arr_rectypes = []; //arr_terms = [], arr_terms_dis = [], 
             
-            this._has_relation = false;
-            this._has_pointers = false;
-
+            this._has_relation = '0';
+            this._has_pointers = '0';
+            this._has_rev_relation = '0';
+            this._has_rev_pointers = '0';
+            
+            var rtyID, dtyID;
             for (dtyID in details){
                 if(dtyID){
                     
@@ -268,7 +273,7 @@ $.widget( "heurist.ruleBuilder", {
                             //
                             if(details[dtyID][fi_type]=='relmarker'){
                                 
-                                this._has_relation = true;
+                                this._has_relation = '1';
                             
                                 var temp = details[dtyID][fi_term_dis];
                                 temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) )
@@ -278,7 +283,7 @@ $.widget( "heurist.ruleBuilder", {
                                 arr_fields.push({key:dtyID, title:name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
                                 
                             }else{
-                                this._has_pointers = true;
+                                this._has_pointers = '1';
                                 
                                 arr_fields.push({key:dtyID, title:name, rectypes:constraints});
                             }
@@ -287,8 +292,73 @@ $.widget( "heurist.ruleBuilder", {
                     }
                     
                 }
-                
             }
+            //find all reverse links (pointers and relation that point to selected rt_ID)
+            var alldetails = rectypes.typedefs;
+            for (rtyID in alldetails)
+            if(rtyID){
+                details = alldetails[rtyID].dtFields;
+                for (dtyID in details){
+                    if(dtyID){
+                        
+                        if(details[dtyID][fi_type]=='resource' || details[dtyID][fi_type]=='relmarker'){
+                            
+                            var name = details[dtyID][fi_name];
+
+                            if(!top.HEURIST4.util.isempty(name)){
+                                
+                                //find constraints
+                                var constraints = details[dtyID][fi_rectypes];
+                                constraints = ( typeof(constraints) === "string" && !top.HEURIST4.util.isempty(constraints) )
+                                    ? constraints.split(","):[];  // $.parseJSON(temp) 
+                                if(!top.HEURIST4.util.isArray(constraints)){
+                                    constraints = [constraints];
+                                }
+                                //verify that selected record type is in this constaint
+                                if(constraints.length<1 || constraints.indexOf(rt_ID)<0) continue;
+                                
+                                arr_rectypes.push(rtyID);
+
+                                var isnotfound = true;
+                                var i, len = arr_fields.length;
+                                for (i=0;i<len;i++){
+                                    if(arr_fields[i].key == dtyID){
+                                        arr_fields[i].rectypes.push(rtyID);
+                                        isnotfound = false;
+                                        break;
+                                    }
+                                }
+                        
+                                //
+                                if(isnotfound){
+                                    if(details[dtyID][fi_type]=='relmarker'){
+                                        
+                                        this._has_rev_relation = '1';
+                                    
+                                        var temp = details[dtyID][fi_term_dis];
+                                        temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) )
+                                            ?  temp.split(",") :[];
+                                        if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
+                                    
+                                        arr_fields.push({key:dtyID, title:'is '+name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:[rtyID], isreverse:true });
+                                        
+                                    }else{
+                                        this._has_rev_pointers = '1';
+                                        
+                                        arr_fields.push({key:dtyID, title:'is '+name, rectypes:[rtyID], isreverse:true });
+                                    }
+                                }
+
+                            }
+                        }
+                        
+                    }
+                }
+            }
+
+            
+            
+            
             arr_rectypes = $.unique(arr_rectypes);
             //arr_terms_dis = $.unique(arr_terms_dis);
             
@@ -318,6 +388,19 @@ $.widget( "heurist.ruleBuilder", {
             // selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray
             //top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_terms, arr_terms_dis, null, arr_fields, false);
         
+    },
+    
+    
+    _findField: function(dt_ID){
+
+                var i, len = this._arr_fields.length;
+                for (i=0;i<len;i++){
+                    var arr_field = this._arr_fields[i];
+                    if(arr_field.key == dt_ID){
+                        return arr_field;
+                    }
+                }
+                return null;
     },
     
     //
@@ -372,7 +455,7 @@ $.widget( "heurist.ruleBuilder", {
     //
     _generateQuery: function(){
         
-        this.options.queries = [];
+        this.options.query = '';
             
         //query is possible if there is at least on resourse or relmarker field    
         if(this._arr_fields.length>0) {
@@ -395,23 +478,29 @@ $.widget( "heurist.ruleBuilder", {
             
             if(!top.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
             
+                var fld = this._findField(dt_ID);
+            
                 if(this.select_reltype.is(":visible")){
                     
                     var rel_type = this.select_reltype.val();
                     if(!top.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
                     
-                    this.options.queries.push(rt_target + 'relatedfrom:'+rt_source+rel_type);    
+                    this.options.query = rt_target + 'related'+(fld && fld.isreverse?'_to:':'from:')+rt_source+rel_type;    
                 }else{
-                    this.options.queries.push(rt_target + 'linkedfrom:'+rt_source+'-'+dt_ID);    
+                    this.options.query = rt_target + 'linked'+(fld && fld.isreverse?'_to:':'from:')+rt_source+'-'+dt_ID;    
                 }
                 
-            }else{
+            }else{ //field is not selected - search for all relations and links
+            
+                this.options.query = rt_target + 'links:'+rt_source+'-'+this._has_relation+this._has_pointers+this._has_relation+this._has_rev_pointers;
+            /* @todo
                 if(this._has_relation){
                      this.options.queries.push(rt_target + 'relatedfrom:'+rt_source);
                 }
                 if(this._has_pointers){
                      this.options.queries.push(rt_target + 'linkedfrom:'+rt_source);
                 }
+                */
             }
             
         }
@@ -431,8 +520,8 @@ $.widget( "heurist.ruleBuilder", {
             //return;
         }
         
-        if(!top.HEURIST4.util.isempty(this.options.queries)){
-            qsearch = this.options.queries[0] + ' ' + qsearch;
+        if(!top.HEURIST4.util.isempty(this.options.query)){
+            qsearch = this.options.query; //ies[0] + ' ' + qsearch;
         }
         //to do this.options.queries.join(' OR ')
 
@@ -456,10 +545,12 @@ $.widget( "heurist.ruleBuilder", {
     * 
     * @returns {Array}
     */
-    queries: function(){
+    getQuery: function(){
         
         this._generateQuery();
-
+        
+        return this.options.query;
+/*
         if(top.HEURIST4.util.isempty(this.options.queries)){
             return [];
         }else{
@@ -474,6 +565,7 @@ $.widget( "heurist.ruleBuilder", {
             
             return this.options.queries;
         }
+*/        
     },
     
     getRules: function(){
@@ -482,7 +574,7 @@ $.widget( "heurist.ruleBuilder", {
            // rules:[ {query:query, levels:[]}, ....  ]           
           
            //refresh query
-           this.queries(); 
+           this._generateQuery(); //this.queries(); 
            
            var rules = []; 
            
@@ -494,7 +586,7 @@ $.widget( "heurist.ruleBuilder", {
                 
            }); 
         
-           return {query:this.options.queries[0], levels:rules};
+           return {query:this.options.query, levels:rules};
     }
     
 });

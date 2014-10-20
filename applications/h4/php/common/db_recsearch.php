@@ -676,7 +676,8 @@
         $chunk_size = 1001;
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
-        //DEGUG error_log("AAA ".$query);
+        //DEGUG 
+//error_log("AAA ".$query);
 
         $res = $mysqli->query($query);
         if (!$res){

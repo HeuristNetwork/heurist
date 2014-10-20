@@ -30,6 +30,9 @@
     define('SORT_MODIFIED', 'm');
     define('SORT_ADDED', 'a');
     define('SORT_TITLE', 't');
+    
+    
+    define('DT_RELATION_TYPE', 6);
 
     $mysqli = null;
 
@@ -638,9 +641,16 @@
                                 $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1)));
 
                 case 'linkedfrom': 
-                                
                     return new LinkedFromParentPredicate($this, $pred_val);                                            
-                                
+                case 'relatedfrom': 
+                    return new RelatedFromParentPredicate($this, $pred_val);
+                case 'linked_to': 
+                    return new LinkedToParentPredicate($this, $pred_val);                                            
+                case 'related_to': 
+                    return new RelatedToParentPredicate($this, $pred_val);
+                //case 'links': 
+                //    return new RelatedOrLinkedFromParentPredicate($this, $pred_val);
+                    
                 case 'linkto':    // linkto:XXX matches records that have a recDetails reference to XXX
                     return new LinkToPredicate($this, $pred_val);
                 case 'linkedto':    // linkedto:XXX matches records that are referenced in one of XXX's bib_details
@@ -1541,7 +1551,7 @@
     
     //
     // this is special case 
-    // find records that are linked from parent/top query 
+    // find records that are linked from parent/top query         (resource field in parent record = record ID)
     // 
     // 1. take parent query from parent object
     //
@@ -1623,6 +1633,221 @@
             
             return $select; 
         }
+    }
+    
+    //
+    // find records that are linked (have pointers) to  parent/top query 
+    
+    //  resource detail value of parent query equals to record id
+    // 
+    class LinkedToParentPredicate extends Predicate {
+        function makeSQL() {
+            
+            $target_rty_ID = null;
+            //if value is specified we search linked from specific source type and field
+            if($this->value){
+                $vals = explode('-', $this->value);
+                if(count($vals)>1){
+                    $target_rty_ID = $vals[0];
+                    $target_dty_ID = $vals[1];
+                }else{
+                    $target_rty_ID = $vals[0];
+                    $target_dty_ID = '';
+                }
+            }
+
+            //additions for FROM and WHERE 
+            if($target_rty_ID){
+            
+                if($target_dty_ID){ 
+                    //linked from specific record and fields
+                    $add_from =  'recDetails bd ';
+                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$target_rty_ID.' and bd.dtl_DetailTypeID='.$target_dty_ID.' and bd.dtl_Value=rd.rec_ID ';
+                    
+                }else{ 
+                    //linked to specific record type (by any field)
+                    $add_from =  'defDetailTypes, recDetails bd ';
+                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$target_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value=rd.rec_ID ';
+                }
+            }else{ //any linked to
+                    $add_from =  'defDetailTypes, recDetails bd ';
+                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value=rd.rec_ID ';
+            }
+            
+            $select = 'exists (select bd.dtl_RecID  ';
+            
+            $pquery = &$this->getQuery();
+            if ($pquery->parentquery){
+                
+                $query = $pquery->parentquery;
+                //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
+                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+                $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
+                
+                $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+
+//error_log("select: ".$select);                
+                
+            }else{
+               $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
+
+            }
+            
+            return $select; 
+        }
+    }
+    
+    //
+    // find records that are related  (targets) from parent/top query 
+    // 
+    // 1. take parent query from parent object
+    //
+    // rule sample: t:10 relatedfrom:29-3318    
+    //                          [source rectype]-[relation type]
+    //
+    class RelatedFromParentPredicate extends Predicate {
+        function makeSQL() {
+            
+            $source_rty_ID = null;
+            //if value is specified we search linked from specific source type and field
+            if($this->value){
+                $vals = explode('-', $this->value);
+                if(count($vals)>1){
+                    $source_rty_ID = $vals[0];
+                    $relation_type_ID = $vals[1];
+                }else{
+                    $source_rty_ID = $vals[0];
+                    $relation_type_ID = '';
+                }
+            }
+
+            //additions for FROM and WHERE 
+            if($source_rty_ID){  //source record type is defined
+            
+            
+                if($relation_type_ID){
+                    $add_from =  'recRelationshipsCache rel, recDetails bd ';
+                    $add_where =  ' rel.rrc_SourceRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID
+                                  .'  and rel.rrc_RecID=bd.dtl_RecID and bd.dtl_DetailTypeID='.DT_RELATION_TYPE.' and  bd.dtl_Value='.$relation_type_ID;         //@todo  6 NEED TO CHANGE TO CONST
+                }else{
+                    $add_from =  'recRelationshipsCache rel ';
+                    $add_where =  ' rel.rrc_SourceRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID;
+                }
+            
+
+            }else{ //any related from
+                    $add_from =  'recRelationshipsCache rel ';
+                    $add_where = 'rel.rrc_TargetRecID=TOPBIBLIO.rec_ID ';
+            }
+            
+            $select = 'exists (select rel.rrc_TargetRecID  ';
+            
+            $pquery = &$this->getQuery();
+            if ($pquery->parentquery){
+                
+                $query = $pquery->parentquery;
+                //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
+                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+                $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
+                
+                $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+
+//error_log("select: ".$select);                
+                
+            }else{
+                
+               $select = $select.' FROM '.(($source_rty_ID)?'Records rd,':'').$add_from.' WHERE '.$add_where.')';
+            }
+            
+            return $select; 
+        }
+    }
+
+    //
+    // find records that are related  (targets) from parent/top query 
+    // 
+    // 1. take parent query from parent object
+    //
+    // rule sample: t:10 relatedfrom:29-3318    
+    //                          [source rectype]-[relation type]
+    //
+    class RelatedToParentPredicate extends Predicate {
+        function makeSQL() {
+            
+            $source_rty_ID = null;
+            //if value is specified we search linked from specific source type and field
+            if($this->value){
+                $vals = explode('-', $this->value);
+                if(count($vals)>1){
+                    $source_rty_ID = $vals[0];
+                    $relation_type_ID = $vals[1];
+                }else{
+                    $source_rty_ID = $vals[0];
+                    $relation_type_ID = '';
+                }
+            }
+
+            //additions for FROM and WHERE 
+            if($source_rty_ID){  //source record type is defined
+            
+            
+                if($relation_type_ID){
+                    $add_from =  'recRelationshipsCache rel, recDetails bd ';
+                    $add_where =  ' rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID
+                                  .'  and rel.rrc_RecID=bd.dtl_RecID and bd.dtl_DetailTypeID='.DT_RELATION_TYPE.' and  bd.dtl_Value='.$relation_type_ID;         //@todo  6 NEED TO CHANGE TO CONST
+                }else{
+                    $add_from =  'recRelationshipsCache rel ';
+                    $add_where =  ' rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID;
+                }
+            
+
+            }else{ //any related from
+                    $add_from =  'recRelationshipsCache rel ';
+                    $add_where = 'rel.rrc_SourceRecID=TOPBIBLIO.rec_ID ';
+            }
+            
+            $select = 'exists (select rel.rrc_SourceRecID  ';
+            
+            $pquery = &$this->getQuery();
+            if ($pquery->parentquery){
+                
+                $query = $pquery->parentquery;
+                //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
+                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+                $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
+                
+                $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+
+//error_log("select: ".$select);                
+                
+            }else{
+                
+               $select = $select.' FROM '.(($source_rty_ID)?'Records rd,':'').$add_from.' WHERE '.$add_where.')';
+            }
+            
+            return $select; 
+        }
+    }
+
+    
+    class RelatedOrLinkedFromParentPredicate extends Predicate {
+        function makeSQL() {
+        
+                    $predicate1 =  LinkedFromParentPredicate($parent, $value);                                            
+
+                    $predicate2 = RelatedFromParentPredicate($parent, $value);                                            
+                    
+                    return "(".$predicate1->makeSQL()."  or  ".$predicate2->makeSQL().")";
+        }        
     }
     
     
