@@ -1077,7 +1077,7 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
+	DROP TRIGGER IF EXISTS defDetailTypeGroups_delete$$
 
 		CREATE
 		DEFINER=`root`@`localhost`
