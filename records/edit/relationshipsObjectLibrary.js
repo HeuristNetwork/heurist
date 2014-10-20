@@ -407,7 +407,7 @@ if (!top.Relationship) {
 		//saveButton.style.fontSize = "2ex";
 		saveButton.style.marginRight = "10px";
 		saveButton.style.padding = "0px 3px";
-		saveButton.value = "Add";// relationship";
+		saveButton.value = "Add!!";// relationship";
 		saveButton.onclick = function() { thisRef.save(); };
 
 		td.appendChild(saveButton);

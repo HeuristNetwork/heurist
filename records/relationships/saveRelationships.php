@@ -175,8 +175,8 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 /*****DEBUG****///error_log("res = $res  error " .mysql_error());
 	}
 
-	if (mysql_error($res)) {
-		return array("error" => slash(mysql_error($res)));
+	if (mysql_error()) {
+		return array("error" => slash(mysql_error()));
 	} else {
 //		$related = getAllRelatedRecords($recID, $relnRecID);
 		$related = getAllRelatedRecords($recID);
