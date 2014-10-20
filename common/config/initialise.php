@@ -116,11 +116,14 @@ HEURIST_HTML_URL
     if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
         $isSecure = true;
     }
-    elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
+    elseif (//!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || 
+            !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
         $isSecure = true;
     }
     $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
-    
+
+//error_log("https=".@$_SERVER['HTTPS']."  HTTP_X_FORWARDED_PROTO=".@$_SERVER['HTTP_X_FORWARDED_PROTO']."  HTTP_X_FORWARDED_SSL=".@$_SERVER['HTTP_X_FORWARDED_SSL']);    
+//error_log("protocol ".$REQUEST_PROTOCOL);
 
     define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
     $serverBaseURL = $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME;
