@@ -9,7 +9,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0   
+    * @version     4.0
     */
 
     /*
@@ -90,10 +90,10 @@
         <div id="page-inner" style="overflow:auto">
 
             <p>This script simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
-                The new database is identical to the old in all respects including users, access and attaachments <br /> 
+                The new database is identical to the old in all respects including users, access and attaachments <br />
                 (beware of making many copies of databases containing many large files, as all uploaded files are copied).</p>
 
-            <p>For large databases (several tens of thousands of records and upwards), 
+            <p>For large databases (several tens of thousands of records and upwards),
             the script will take a long time to execute and could fail on reload of the dumped data.
             <br />In that case we recommend requesting the system adminstrtor to carry out the following steps from the command line interface:
             <ul>
@@ -121,7 +121,7 @@
                 <form name='selectdb' action='cloneDatabase.php' method='get'>
                     <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
                     <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
-                    <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b> 
+                    <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
                         (all databases created by this installation of the software will have the same prefix).</p>
                     <h3>Enter a name for the cloned database:</h3>
                     <div style="margin-left: 40px;">
@@ -176,11 +176,12 @@
         $newname = HEURIST_DB_PREFIX.$targetdbname;
 
         $dump_command = "mysqldump --routines --triggers -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".
-            HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_FILESTORE_DIR."temporary_db_dump.sql";
+            HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_FILESTORE_DIR.HEURIST_DBNAME.".sql";
         $create_command = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e 'create database $newname'";
         $upload_command = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-            " $newname < '".HEURIST_FILESTORE_DIR."/temporary_db_dump.sql'";
-        $cleanup_command = "rm ".HEURIST_FILESTORE_DIR."/temporary_db_dump.sql"; // cleanup
+            " $newname < '".HEURIST_FILESTORE_DIR."/".HEURIST_DBNAME.".sql'";
+        // It is good to leave this file for backup purposes, in any case it isn't used
+        // $cleanup_command = "rm ".HEURIST_FILESTORE_DIR."/temporary_db_dump.sql"; // cleanup
 
         echo ("<hr>Execution log:<p>");
 
@@ -226,10 +227,10 @@
         die ("Unable to process cleanup command ($cleanup_command)");
         }
         */
-        
+
         // Index new database for Elasticsearch
         buildAllIndices($targetdbname);
-        
+
         // Copy the images and the icons directories
         $copy_file_directory = "cp -R " . HEURIST_UPLOAD_ROOT.HEURIST_DBNAME . " " . HEURIST_UPLOAD_ROOT."$targetdbname"; // no prefix
         print "<br>Copying upload files: $copy_file_directory";
