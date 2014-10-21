@@ -96,9 +96,10 @@
             <div id="logo" title="Click the logo at top left of any Heurist page to return to your default search">
             </div>
 
-            <div>
+            <div align="left" style="margin-left: 20px;">
                 <h2><?=$msg?></h2>
-                <br>Please select a database from the list
+                <br>Please select a database from the list. For further information on Heurist please visit
+                <b> <a href="http://HeuristNetwork.org" target="_blank">http://HeuristNetwork.org</a></b>
             </div>
 
             <div id="loginDiv" style="height:auto; margin-top:44px; overflow-y:auto;text-align:left;">
