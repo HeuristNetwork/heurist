@@ -1701,8 +1701,9 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     if (!mysql_num_rows(@$res)) {
         return array();
     }
-    if (@$res && mysql_error(@$res)) {
-        return array("error" => mysql_error($res));
+    //if (@$res && mysql_error(@$res)) {
+    if (mysql_error()) {
+        return array("error" => mysql_error());
     }
     $relations = array('relationshipRecs' => array());
     while ($row = mysql_fetch_assoc($res)) {

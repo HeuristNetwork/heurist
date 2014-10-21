@@ -28,6 +28,7 @@
 
     define('NO_DB_ALLOWED',1);
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+    require_once('bigdump.php');
 
     // must be logged in if a dbname is passed to it
     if (!is_logged_in() && HEURIST_DBNAME!="") {
@@ -317,10 +318,25 @@
 
             function cleanupNewDB ($newname) { // called in case of failure to remove the partially created database
                 global $newDBName, $isNewDB, $done;
+                
+                
+                    $mysqli = new mysqli(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+                    // Check connection
+                    if (mysqli_connect_errno()) {
+                        echo ("<p class='error'>Failed to connect to MySQL: ".mysqli_connect_error().". Unable to cleanup database $newname<br/></p>");
+                        return false;
+                    }else  if (!$mysqli->query("DROP DATABASE ".$newname)) {
+                        echo ("<p class='error'>Error ".$mysqli->error.". Unable to cleanup database $newname<br/></p>");
+                        return false;
+                    }                    
+                    echo "<br>Database cleanup for $newname, completed<br>&nbsp;<br>";
+                
+                /* OLD APPROACH
                 $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
                 $output2=exec($cmdline . ' 2>&1', $output, $res2);
                 echo "<br>Database cleanup for $newname, completed<br>&nbsp;<br>";
                 echo($output2);
+                */
                 $done = true;
             } // cleanupNewDB
 
@@ -365,11 +381,61 @@
                     } // rejecting illegal characters in db name
 
 
+                    
+                    $mysqli = new mysqli(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+                    // Check connection
+                    if (mysqli_connect_errno()) {
+                        echo ("<p class='error'>Failed to connect to MySQL: ".mysqli_connect_error().". Unable to create database $newname<br/></p>");
+                        $isCreateNew = true;
+                        return false;
+                    }
+
+                    // Create database
+                    $sql = "CREATE DATABASE ".$newname;
+                    if (!$mysqli->query($sql)) {
+                        echo ("<p class='error'>Error ".$mysqli->error.". Unable to create database $newname<br/></p>");
+                        $isCreateNew = true;
+                        return false;
+                    }                    
+                                     
+                    /*$success = $mysqli->select_db($newname);
+                    if(!$success){
+                        echo ("<p class='error'>Can not open database $newname<br/></p>");
+                        cleanupNewDB($newname);
+                        return false;
+                    }*/
+
+                    if(doDump(HEURIST_DBSERVER_NAME, $newname, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, "blankDBStructure.sql")){
+                        echo ("<p>SUCCESS blankDBStructure</p>");
+                    }else{
+                        cleanupNewDB($newname);
+                        return false;
+                    }
+                    
+                    if(doDump(HEURIST_DBSERVER_NAME, $newname, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, "addReferentialConstraints.sql")){
+                        echo ("<p>SUCCESS addReferentialConstraints</p>");
+                    }else{
+                        cleanupNewDB($newname);
+                        return false;
+                    }
+                    
+                    if(doDump(HEURIST_DBSERVER_NAME, $newname, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, "addProceduresTriggers.sql")){
+                        echo ("<p>SUCCESS addProceduresTriggers</p>");
+                    }else{
+                        cleanupNewDB($newname);
+                        return false;
+                    }
+                    
+
+                   //$cmdline = "ssh -t aosmakov@heur-db-pro-3.ucc.usyd.edu.au mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
+/*                   
+                    //OLD COMMAND LINE APPROACH
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                         $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
                     } else {
                         $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
                     }
+                    
                     $output1 = exec($cmdline . ' 2>&1', $output, $res1);
                     if ($res1 != 0 ) {
                         echo ("<p class='error'>Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
@@ -428,6 +494,7 @@
                         cleanupNewDB($newname);
                         return false;
                     }
+*/                    
 
                     // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
                     // yes, this is badly structured, but it works - if it ain't broke ...

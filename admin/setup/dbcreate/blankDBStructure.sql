@@ -1,25 +1,3 @@
-/**
-* BlankDBStructure.sql: SQL file to create Heurist structures in a blank MySQL database
-*
-* @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-\W -- warnings to standard out, OK for cammand line but not for phpMyAdmin
-
 -- --------------------------------------------------------
 
 -- TO DO: After creating the structure from this file we need to:
@@ -102,7 +80,7 @@ CREATE TABLE Records (
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint(3) unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
   cfn_Domain enum('calcfieldstring','pluginphp') NOT NULL default 'calcfieldstring' COMMENT 'Domain of application of this function specification',
-  cfn_FunctionSpecification text NOT NULL default '' COMMENT 'A function or chain of functions, or some PHP plugin code',
+  cfn_FunctionSpecification text COMMENT 'A function or chain of functions, or some PHP plugin code',
   cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (cfn_ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Specifications for generating calculated fields, plugins and';
@@ -976,29 +954,31 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
  'Group 1 owns databases by default. DO NOT DELETE.',
  'This workgroup contains the administrators of the database. The first user (user #2) has special status as the master user. They cannot be deleted',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','y','db','owners');
- -- Note: ugr_id=1 is set as the database owner group in the sysidentification table
+-- Note: ugr_id=1 is set as the database owner group in the sysidentification table
 
- -- This user (#2) is replaced with the user who created the database
+-- This user (#2) is replaced with the user who created the database
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (2,'dbAdmin','User 2 is default administrator for databases. DO NOT DELETE',
- 'User','TO BE RESET','EMAIL NOT SET FOR ID=2','y','sys','admin');  -- password is 'none'
-  -- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
-  -- there can be multipl admins for a database
+ 'User','TO BE RESET','EMAIL NOT SET FOR ID=2','y','sys','admin');  
+-- password is 'none'
+-- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
+-- there can be multipl admins for a database
 
-  -- An extra group of users to give people the idea
+-- An extra group of users to give people the idea
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (3,'Other users',
  'Another group, can be used eg. for guests',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=3','y','other','users');
- -- Note: ugr_id=1 is set as the database owner group in the sysidentification table
+-- Note: ugr_id=1 is set as the database owner group in the sysidentification table
 
 -- insert as 4 then change - cannot insert 0 straight up, as it gets reset to 4 in any case
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (4,'Everyone',  -- see note above
  'Group 0 represents all logged in users. DO NOT DELETE.',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','y','every','user');
- -- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint
- UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 4; -- cannot insert 0 straight up, it gets appended
+-- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint
+ UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 4; 
+-- cannot insert 0 straight up, it gets appended
 
 -- Insert a row to define the link between group 1 (dbowners) and group 3 (other users) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');

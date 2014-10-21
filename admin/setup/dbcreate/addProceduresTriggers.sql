@@ -1,32 +1,3 @@
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
-/**
-* brief description of file
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
 -- Created by Steve White 2010-10-23
 -- Last updated 2 April 2011 Ian Johnson - removed deprecated archive triggers
 -- 2013-05-13 Arjen Lentz - added replacement functions for levenshtein.c and liposuction.c UDFs
@@ -207,7 +178,7 @@ CREATE FUNCTION NEW_LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(2
 	BEGIN
 		DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
 		DECLARE s1_char CHAR CHARACTER SET utf8;
-		-- max strlen=255 for this function
+-- max strlen=255 for this function
 		DECLARE cv0, cv1 VARBINARY(256);
 
 		SET s1_len = CHAR_LENGTH(s1),
@@ -316,7 +287,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `getTemporalDateString`(strDate varch
 			declare iBegin integer;
 			declare iEnd integer;
 			declare dateString varchar(4095);
-		-- find the temporal type might not be a temporal format, see else below
+-- find the temporal type might not be a temporal format, see else below
 		set @iBegin := LOCATE('TYP=',strDate);
 		if iBegin = 0 THEN
 			RETURN strDate;
@@ -325,89 +296,109 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `getTemporalDateString`(strDate varch
 		end if;
 		set @temporalType = SUBSTRING(strDate,@iBegin,1);
 		CASE @temporalType
-			WHEN 's' THEN -- Simple Date
+			WHEN 's' THEN 
+-- Simple Date
 				begin
 					set @iBegin := INSTR(strDate,'DAT=');
-					if @iBegin = 0 THEN -- no Date field send empty string
+					if @iBegin = 0 THEN 
+-- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN -- no other properties so goto end of string
+					if @iEnd = 0 THEN 
+-- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	-- use iEnd to calc substring length
+					else	
+-- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'f' THEN -- Fuzzy Date
+			WHEN 'f' THEN 
+-- Fuzzy Date
 				begin
 					set @iBegin := INSTR(strDate,'DAT=');
-					if @iBegin = 0 THEN -- no Date field send empty string
+					if @iBegin = 0 THEN 
+-- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN -- no other properties so goto end of string
+					if @iEnd = 0 THEN 
+-- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	-- use iEnd to calc substring length
+					else	
+-- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'c' THEN -- Carbon14 Date
+			WHEN 'c' THEN 
+-- Carbon14 Date
 				begin
 					set @iBegin := INSTR(strDate,'BPD=');
-					if @iBegin = 0 THEN -- no Date field send empty string
+					if @iBegin = 0 THEN 
+-- no Date field send empty string
 						set @iBegin := INSTR(strDate,'BCE=');
 					end if;
-					if @iBegin = 0 THEN -- no Date field send empty string
+					if @iBegin = 0 THEN 
+-- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN -- no other properties so goto end of string
+					if @iEnd = 0 THEN 
+-- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	-- use iEnd to calc substring length
+					else	
+-- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'p' THEN -- Probable Date
+			WHEN 'p' THEN 
+-- Probable Date
 				begin
 					set @iBegin := INSTR(strDate,'TPQ=');
-					if @iBegin = 0 THEN -- no TPQ field try PDB
+					if @iBegin = 0 THEN 
+-- no TPQ field try PDB
 						set @iBegin := INSTR(strDate,'PDB=');
 					end if;
-					if @iBegin = 0 THEN -- no PDB field try PDE
+					if @iBegin = 0 THEN 
+-- no PDB field try PDE
 						set @iBegin := INSTR(strDate,'PDE=');
 					end if;
-					if @iBegin = 0 THEN -- no PDE field try TAQ
+					if @iBegin = 0 THEN 
+-- no PDE field try TAQ
 						set @iBegin := INSTR(strDate,'TAQ=');
 					end if;
-					if @iBegin = 0 THEN -- no Date field send empty string
+					if @iBegin = 0 THEN 
+-- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN -- no other properties so goto end of string
+					if @iEnd = 0 THEN 
+-- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	-- use iEnd to calc substring length
+					else	
+-- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
@@ -464,13 +455,13 @@ DELIMITER $$
 --		if NEW.dtl_DetailTypeID=relTrgDT then
 		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
 			update recRelationshipsCache
-			-- need to also save the RecTypeID for the record to help with constraint checking
+-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 --		elseif NEW.dtl_DetailTypeID=relSrcDT then
 		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
 			update recRelationshipsCache
-			-- need to also save the RecTypeID for the record to help with constraint checking
+-- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_SourceRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
@@ -526,10 +517,10 @@ DELIMITER $$
 		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
 		update recRelationshipsCache
 				set rrc_SourceRecID = NEW.dtl_Value
-			-- need to also save teh RecTypeID for the record
+-- need to also save teh RecTypeID for the record
 				where rrc_RecID=NEW.dtl_RecID;
 		end if;
-		-- need to add update for detail 200, now 5, to save the termID
+-- need to add update for detail 200, now 5, to save the termID
 	end$$
 
 DELIMITER ;
@@ -551,14 +542,14 @@ DELIMITER $$
 --		select rty_ID into relRT
 --			from defRecTypes
 --			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
-	-- need to change this to check the rectype's type = relationship
-	-- 1 = record relationship
+-- need to change this to check the rectype's type = relationship
+-- 1 = record relationship
 	insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
 								values (@logged_in_user_id, NEW.rec_ID, now());
 	set @rec_id := last_insert_id(NEW.rec_ID);
 --		if NEW.rec_RecTypeID = relRT then
 		if NEW.rec_RecTypeID = 1 then
-			--  need to also save relationship records RecTypeID
+--  need to also save relationship records RecTypeID
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
 		end if;
 	end$$
@@ -623,16 +614,16 @@ DELIMITER $$
 --		select rty_ID into relRT
 --			from defRecTypes
 --			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
-		-- if change the records type from something else to relation insert cache value
+-- if change the records type from something else to relation insert cache value
 --		if NEW.rec_RecTypeID = relRT AND NOT OLD.rec_RecTypeID = relRT then
 --			select dtl_Value into srcRecID
 --				from recDetails
 --				where dtl_DetailTypeID = relSrcDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
-		-- record type 1 = relationship record
+-- record type 1 = relationship record
 		if NEW.rec_RecTypeID = 1 AND NOT OLD.rec_RecTypeID = 1 then
 			select dtl_Value into srcRecID
 				from recDetails
-				-- primary resource pointer
+-- primary resource pointer
 				where dtl_DetailTypeID=7 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if srcRecID is null then
 				set srcRecID = NEW.rec_ID;
@@ -640,14 +631,14 @@ DELIMITER $$
 			select dtl_Value into trgRecID
 				from recDetails
 --				where dtl_DetailTypeID = relTrgDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
-				-- linked resource pointer
+-- linked resource pointer
 				where dtl_DetailTypeID=5 and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
 			if trgRecID is null then
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
 		end if;
-		-- if change the records type from relation to something else remove cache value
+-- if change the records type from relation to something else remove cache value
 --		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 	if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
@@ -677,7 +668,7 @@ DELIMITER $$
 
     delete from usrRecentRecords where rre_RecID = OLD.rec_ID;
 
-	-- need to change this to check the rectype's type = relationship
+-- need to change this to check the rectype's type = relationship
 --		if OLD.rec_RecTypeID = relRT then
 		if OLD.rec_RecTypeID = 1 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
@@ -822,7 +813,7 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS defDetailTypes_delete;
+	DROP TRIGGER IF EXISTS defDetailTypes_delete$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
@@ -865,7 +856,7 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS defRecTypes_delete;
+	DROP TRIGGER IF EXISTS defRecTypes_delete$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
@@ -964,7 +955,7 @@ DELIMITER ;
 DELIMITER $$
 
 --  			insert
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert;
+	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
@@ -977,7 +968,7 @@ DELIMITER ;
 DELIMITER $$
 
 --  			update
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update;
+	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update$$
 
 	CREATE
 	DEFINER=`root`@`localhost`
@@ -990,7 +981,7 @@ DELIMITER ;
 DELIMITER $$
 
 --  			delete
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete;
+	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete$$
 
 	CREATE
 	DEFINER=`root`@`localhost`

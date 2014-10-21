@@ -373,6 +373,11 @@ HEURIST_HTML_URL
     */
     
     testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder");
+    
+    if (!defined('HEURIST_FILESTORE_DIR')){ //fatal error - storage folder is not defined
+        returnErrorMsgPage(1, "Can not access Heurist File Storage folder ". HEURIST_UPLOAD_ROOT . $dbName . '/' .". It is either not found or not writable.");
+    }
+    
     define('HEURIST_FILESTORE_URL', HEURIST_UPLOAD_ROOT_URL . $dbName . '/');    //full url to file store folder
 
     // Define the site relative path for rectype icons
