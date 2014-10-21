@@ -217,6 +217,9 @@ $.widget( "heurist.resultList", {
                     //if rules were applied before - need to remove all records except original and re-render
                     if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
                          
+                         //keep json (to possitble save as saved searches)
+                         that._query_request.rules = data;
+                        
                          // re-render the original set of records only                        
                          var rec_ids_level0 = [];
                          
@@ -256,9 +259,9 @@ $.widget( "heurist.resultList", {
                         
                         that.loadanimation(true);
                         
-                        if( that._query_request!=null && that._query_request.rules!=null ){
+                        if( data.rules!=null ){
                             //create flat rule array
-                            that._doApplyRules(that._query_request.rules);
+                            that._doApplyRules(data.rules);
                         }
                         
                         that._renderProgress();
@@ -998,7 +1001,7 @@ $.widget( "heurist.resultList", {
                          //if we access the end of result set - got to next rule
                          if(this._res_index >= current_parent_ids.length)
                          {
-                            this._res_index = 0; 
+                            this._res_index = -1; 
                             this._rule_index++;
                             
                          }else{

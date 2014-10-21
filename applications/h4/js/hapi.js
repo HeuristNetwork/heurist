@@ -179,7 +179,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   sys_info     - get current user info and database settings
     *   save_prefs   - save user preferences  in session
     *   mygroups     - description of current user groups
-    *   ssearch_get  - get saved searched for current user and all usergroups where user is memeber
+    *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber
     *   ssearch_save - save saved search in database
     *   ssearch_delete - delete saved searches by IDs
     *   get_defs     - get the desired database structure definition

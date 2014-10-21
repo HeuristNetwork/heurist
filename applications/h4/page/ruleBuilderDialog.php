@@ -96,10 +96,34 @@
                                 }).appendTo($('#level1'));                
                             });
                             $('#btn_apply').button().on('click', 3, applyRules);
+                            
+                            //create rule builders in case there is parameter 'rules'
+                            var rules = "<?=$_REQUEST['rules']?>";                            
+                            if(!top.HEURIST4.util.isempty(rules)){
+                                
+                                rules = $.parseJSON(rules);
+                                var i;
+                                for(i=0; i<rules.length; i++){
+                                    
+                                    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule builder for level 1
+                                            content: rules[0],
+                                            onremove: function(event, data){
+                                                  $('#'+data.id).remove();    //remove this rule builder
+                                            }
+                                    }).appendTo($('#level1'));                
+                                    
+                                }
+                                
+                            }
+                            
+                            
 
                         }
             }
      
+            //
+            // create rules array as a result of this builder
+            //
             function getRulesArray(){
   
                    // original rule array

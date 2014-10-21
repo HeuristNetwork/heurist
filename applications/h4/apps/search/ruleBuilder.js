@@ -22,6 +22,7 @@ $.widget( "heurist.ruleBuilder", {
     // default options
     options: {
         level: 0,
+        content: {}, 
         query: '',
         recordtypes: [],  //array or record types from current main search result - otherwise show all rectypes
         
@@ -83,11 +84,11 @@ $.widget( "heurist.ruleBuilder", {
         this.btn_add_next_level = $( "<button>", {text:'Add Level'} ).button().appendTo(this.div_btn);
 
         
-        if(this.options.is_search_allowed){
+        /*if(this.options.is_search_allowed){
             this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
             this.debug_label = $( "<label>" ).css('padding-left','10px').appendTo(this.element);
             this._on( this.debug_search, { click: this._debugSearch });
-        }
+        }*/
         
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
@@ -507,10 +508,36 @@ $.widget( "heurist.ruleBuilder", {
         
         this._refresh();
     },
+
+    //select recordtype, field, reltype and ta    
+    initContent: function(){
+        
+        if(this.options.content){
+            
+            //parse rule query string
+            
+            var query = this.options.content.query;
+            var levels = this.options.content.levels;
+            
+            var rt_target, rt_source, field_id, relation_id;
+             
+            var parts = query.split(' ');
+            if(trim(parts[0]).indexOf('t:')==0){
+                rt_target = substr(trim(parts[0]),2);
+                parts[0] = parts[1];
+            }
+            //get source and field
+            //var 
+            
+            
+        }
+        
+        
+    },
     
-    /**
+    
+    /*
     * debug search (not used) 
-    */
     _debugSearch: function(){
         
         var qsearch = '';
@@ -539,6 +566,7 @@ $.widget( "heurist.ruleBuilder", {
         top.HAPI4.RecordMgr.search(request, $(this.document));
         
     },
+    */
     
     /**
     * return array of queries
@@ -588,5 +616,5 @@ $.widget( "heurist.ruleBuilder", {
         
            return {query:this.options.query, levels:rules};
     }
-    
+
 });

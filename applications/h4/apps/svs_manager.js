@@ -206,9 +206,9 @@ $.widget( "heurist.svs_manager", {
             if(svsID && (ssearches[svsID][2]== this.options.current_GrpID || "bookmark"+ssearches[svsID][2]== this.options.current_GrpID)){
 
                 var name = ssearches[svsID][0];
-                var prms = top.HEURIST4.util.getUrlQueryAndDomain(ssearches[svsID][1]);
-                var qsearch = prms[0];
-                var domain2  = prms[1];
+                var request = top.HEURIST4.util.parseHeuristQuery(ssearches[svsID][1]);
+                var qsearch = request.q;
+                var domain2 = request.w;
 
                 if(this.options.current_GrpID==top.HAPI4.currentUser.ugr_ID){
                     if(domain2=="bookmark"){
@@ -299,20 +299,24 @@ $.widget( "heurist.svs_manager", {
             var svs_name = $dlg.find('#svs_Name');
             var svs_query = $dlg.find('#svs_Query');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
+            var svs_rules = $dlg.find('#svs_Rules');
+            var svs_notes = $dlg.find('#svs_Notes');
 
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+
+                var request = top.HEURIST4.util.parseHeuristQuery(svs[1]);
+                var domain  = request.w;
+
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
-
-                var prms = top.HEURIST4.util.getUrlQueryAndDomain(svs[1]);
-                var qsearch = prms[0];
-                var domain  = prms[1];
-
-                svs_query.val( qsearch );
-                svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?domain:svs[2]);
+                svs_query.val( request.q );
+                svs_rules.val( request.rules );
+                svs_notes.val( request.notes );
+                
+                svs_ugrid.val( svs[2]==top.HAPI4.currentUser.ugr_ID ?domain:svs[2] );
                 svs_ugrid.parent().hide();
 
             }else{ //add new saved search
@@ -320,6 +324,8 @@ $.widget( "heurist.svs_manager", {
                 svs_id.val('');
                 svs_name.val('');
                 svs_query.val('');
+                svs_rules.val('');
+                svs_notes.val('');
 
                 var domain = this.currentSearch.w;
                 domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';

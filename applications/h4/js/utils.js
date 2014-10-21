@@ -47,15 +47,21 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
 
-    getUrlQueryAndDomain: function(qsearch)            
+    //
+    // converts query string to object
+    //
+    parseHeuristQuery: function(qsearch)            
     {
-        var domain = null;
+        var domain = null, rules = '', notes = '';
         if(qsearch && qsearch.indexOf('?')==0){
-            domain = top.HEURIST4.util.getUrlParameter('w', qsearch);
+            domain  = top.HEURIST4.util.getUrlParameter('w', qsearch);
+            rules   = top.HEURIST4.util.getUrlParameter('rules', qsearch);
+            notes   = top.HEURIST4.util.getUrlParameter('notes', qsearch);
             qsearch = top.HEURIST4.util.getUrlParameter('q', qsearch);
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
-        return [qsearch, domain];
+        
+        return {q:qsearch, w:domain, rules:rules, notes:notes};
     },
 
     getUrlParameter: function getUrlParameter(name, query){

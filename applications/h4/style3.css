@@ -155,13 +155,18 @@ fieldset > div, .input-row{
     padding-bottom:0.4em;
 }
 
-fieldset > div > .header{
+fieldset > div > .header, 
+fieldset > div > .header_narrow{
     display:table-cell;
     width:150px;
     min-width:150px;
     text-align:right;
     padding-top:0.4em;
     padding-right:0.4em;
+}
+fieldset > div > .header_narrow{
+    width:50px;
+    min-width:50px;
 }
 div.prompt{
     font-size:0.8em;

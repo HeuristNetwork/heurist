@@ -186,13 +186,15 @@ $.widget( "heurist.search", {
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
 
-            that.query_request = data; //keep for search in current result
-            top.HEURIST4.current_query_request = data;
+            if(data!=null && top.HEURIST4.util.isempty(data.topids)){
+                 top.HEURIST4.current_query_request = data;  //the only place where this values is assigned  
 
-            if(data && data.source!=that.element.attr('id')){
-                that.input_search.val(data.q);
-                that.options.search_domain = data.w;
-                that._refresh();
+                 if(data.source!=that.element.attr('id') ){
+                    that.query_request = data; //keep for search in current result
+                    that.input_search.val(data.q);
+                    that.options.search_domain = data.w;
+                    that._refresh();
+                 }
             }
         });
 

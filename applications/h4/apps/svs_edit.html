@@ -24,16 +24,25 @@
     <fieldset>
         <input type="hidden" name="svs_ID" id="svs_ID" />
         <div>
-            <div class="header"><label for="svs_Name">Name</label></div>
+            <div class="header_narrow"><label for="svs_Name">Name</label></div>
             <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" />
         </div>
         <div>
-            <div class="header"><label for="svs_Query">Query</label></div>
+            <div class="header_narrow"><label for="svs_Query">Query</label></div>
             <input type="text" name="svs_Query" id="svs_Query" value="" class="text ui-widget-content ui-corner-all" />
         </div>
         <div>
-            <div class="header"><label for="svs_UGrpID">Group</label></div>
+            <div class="header_narrow"><label for="svs_Rules">Rules</label></div>
+            <input type="text" name="svs_Rules" id="svs_Rules" value="" class="text ui-widget-content ui-corner-all" />
+            <div id="svs_Rules_edit"></div>
+        </div>
+        <div>
+            <div class="header_narrow"><label for="svs_UGrpID">Group</label></div>
             <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+        <div>
+            <div class="header_narrow" style="vertical-align:top"><label for="svs_Notes">Notes</label></div>
+            <textarea name="svs_Notes" id="svs_Notes" rows="2" class="text ui-widget-content ui-corner-all"  style="margin-top:0.4em"></textarea>
         </div>
     </fieldset>
   </form>
