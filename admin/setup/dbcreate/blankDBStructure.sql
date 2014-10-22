@@ -573,7 +573,7 @@ CREATE TABLE sysIdentification (
   sys_AutoIncludeFieldSetIDs varchar(63) default '0' COMMENT 'CSV list of fieldsets which are included in all rectypes',
   sys_RestrictAccessToOwnerGroup tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, database may only be accessed by members of owners group',
   sys_URLCheckFlag tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags whether system should send out requests to URLs to test for validity',
-  sys_UploadDirectory varchar(128) default NULL COMMENT 'Absolute directory path for uploaded files (blank = use default from installation)',
+  sys_UploadDirectory varchar(128) default NULL COMMENT 'NOT USED: Absolute directory path for uploaded files (blank = use default from installation)',
   sys_hmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write hml representation of published records, default to hml within upload directory',
   sys_htmlOutputDirectory varchar(255) default NULL COMMENT 'Directory in which to write html representation of published records, default to html within upload directory',
   sys_NewRecOwnerGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Group which by default owns new records, 0=everyone. Allow override per user',
@@ -959,7 +959,7 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
 -- This user (#2) is replaced with the user who created the database
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
  VALUES (2,'dbAdmin','User 2 is default administrator for databases. DO NOT DELETE',
- 'User','TO BE RESET','EMAIL NOT SET FOR ID=2','y','sys','admin');  
+ 'User','TO BE RESET','EMAIL NOT SET FOR ID=2','y','sys','admin');
 -- password is 'none'
 -- Note: ugr_id=2 is set as the database admin in the sysUsrGrpLinks table
 -- there can be multipl admins for a database
@@ -973,11 +973,11 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
 
 -- insert as 4 then change - cannot insert 0 straight up, as it gets reset to 4 in any case
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
- VALUES (4,'Everyone',  -- see note above
+ VALUES (4,'Everyone',
  'Group 0 represents all logged in users. DO NOT DELETE.',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=0','y','every','user');
 -- Note: ugr_id=0 is set as the default new rec owner in the sysidentification table, this entry is require to constraint
- UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 4; 
+ UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 4;
 -- cannot insert 0 straight up, it gets appended
 
 -- Insert a row to define the link between group 1 (dbowners) and group 3 (other users) and user 2 (the first admin)
