@@ -25,6 +25,8 @@
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
     require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+    
+    require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
 
     if (! is_logged_in()) {
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -171,6 +173,14 @@
                     print "Export SQL dump of the whole database<br>";
                     ob_flush();flush();
 
+                    try{
+                        $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+                        $dump->start($folder."/MySQL_Database_Dump2.sql");
+                    } catch (Exception $e) {
+                        die ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
+                    }
+
+                    /* OLD WAY   
                     $dump_command = "mysqldump --routines -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
                     " ".DATABASE." > ".$folder."/MySQL_Database_Dump.sql";
 
@@ -180,7 +190,7 @@
                         die ("<h2>Error</h2>Unable to process database dump: <i>mysqldump -u... -p... $msg[1]</i>".
                             "<p>The most likely reason is that the target directory is not writable by PHP, or the SQL output file already exists".
                             "Please check the target directory listed above, or ask your sysadmin to make it writable/remove existing SQL file");
-                    }
+                    }*/
                 }
 
                 if($_REQUEST['includeresources']){

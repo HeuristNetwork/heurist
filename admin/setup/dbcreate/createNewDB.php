@@ -28,7 +28,8 @@
 
     define('NO_DB_ALLOWED',1);
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once('bigdump.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
     // must be logged in if a dbname is passed to it
     if (!is_logged_in() && HEURIST_DBNAME!="") {
@@ -73,8 +74,9 @@
             }
 
 
-            function showProgress(){
+            function showProgress(force){
                 var ele = document.getElementById("loading");
+                if(force) ele.style.display = "block";
                 if(ele.style.display != "none"){
                     ele = document.getElementById("divProgress");
                     if(ele){
@@ -157,17 +159,26 @@
                         return false;
                     }
                     <?php } ?>
+                    
+                var ele = document.getElementById("createDBForm");
+                if(ele) ele.style.display = "none";                                            
+                    
+                showProgress(true);    
                 return true;
             }
 
         </script>
     </head>
 
-    <body class="popup" onload="hideProgress()">
+    <body class="popup">
 
         <?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
 
         <div id="page-inner" style="overflow:auto">
+            <div id="loading" style="display:none">
+                <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
+                <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
+            </div>
 
         <?php
             $newDBName = "";
@@ -192,24 +203,19 @@
                 echo "<h3>Database '".$dbname."' already exists. Choose different name</h3>";
                 }else{
                 */
-            ?>
 
-            <div id="loading">
-                <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
-                <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
-            </div>
+                ob_flush();
+                flush();
 
-            <script type="text/javascript">showProgress();</script>
-            <?php
-                ob_flush();flush();
+                echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 makeDatabase(); // this does all the work <<<*************************************************
-
-            }
-
+                
+                echo_flush( '<script type="text/javascript">hideProgress();</script>' );
+           }
+            
             if($isCreateNew){
-            ?>
-
+        ?>
 
             <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
                 <h3>Enter the password set by your system administrator for new database creation:</h3>
@@ -310,36 +316,12 @@
             <?php
             }
 
-
-            function isInValid($str) {
-                return preg_match('[\W]', $str);
+            
+            function echo_flush($msg){
+                 print $msg;
+                 ob_flush();
+                 flush();
             }
-
-
-            function cleanupNewDB ($newname) { // called in case of failure to remove the partially created database
-                global $newDBName, $isNewDB, $done;
-                
-                
-                    $mysqli = new mysqli(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
-                    // Check connection
-                    if (mysqli_connect_errno()) {
-                        echo ("<p class='error'>Failed to connect to MySQL: ".mysqli_connect_error().". Unable to cleanup database $newname<br/></p>");
-                        return false;
-                    }else  if (!$mysqli->query("DROP DATABASE ".$newname)) {
-                        echo ("<p class='error'>Error ".$mysqli->error.". Unable to cleanup database $newname<br/></p>");
-                        return false;
-                    }                    
-                    echo "<br>Database cleanup for $newname, completed<br>&nbsp;<br>";
-                
-                /* OLD APPROACH
-                $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database `$newname`'";
-                $output2=exec($cmdline . ' 2>&1', $output, $res2);
-                echo "<br>Database cleanup for $newname, completed<br>&nbsp;<br>";
-                echo($output2);
-                */
-                $done = true;
-            } // cleanupNewDB
-
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
 
@@ -373,61 +355,36 @@
                     $newDBName = $newDBName . trim($_POST['dbname']);
                     $newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
 
-                    // Avoid illegal chars in db name
-                    $hasInvalid = isInValid($newname);
-                    if ($hasInvalid) {
-                        echo ("Only letters, numbers and underscores (_) are allowed in the database name");
-                        return false;
-                    } // rejecting illegal characters in db name
-
-
                     
-                    $mysqli = new mysqli(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
-                    // Check connection
-                    if (mysqli_connect_errno()) {
-                        echo ("<p class='error'>Failed to connect to MySQL: ".mysqli_connect_error().". Unable to create database $newname<br/></p>");
+                    if(!db_create($newname)){
                         $isCreateNew = true;
                         return false;
                     }
 
-                    // Create database
-                    $sql = "CREATE DATABASE ".$newname;
-                    if (!$mysqli->query($sql)) {
-                        echo ("<p class='error'>Error ".$mysqli->error.". Unable to create database $newname<br/></p>");
-                        $isCreateNew = true;
+                    echo_flush ("<p>Create Database Structure (tables)</p>");
+                    if(db_script($newname, dirname(__FILE__)."/blankDBStructure.sql")){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    }else{
+                        db_drop($newname);
                         return false;
-                    }                    
-                                     
-                    /*$success = $mysqli->select_db($newname);
-                    if(!$success){
-                        echo ("<p class='error'>Can not open database $newname<br/></p>");
-                        cleanupNewDB($newname);
-                        return false;
-                    }*/
+                    }
 
-                    if(doDump(HEURIST_DBSERVER_NAME, $newname, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, "blankDBStructure.sql")){
-                        echo ("<p>SUCCESS blankDBStructure</p>");
+                    echo_flush ("<p>Addition Referential Constraints</p>");
+                    if(db_script($newname, dirname(__FILE__)."/addReferentialConstraints.sql")){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
                     }else{
-                        cleanupNewDB($newname);
+                        db_drop($newname);
                         return false;
                     }
-                    
-                    if(doDump(HEURIST_DBSERVER_NAME, $newname, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, "addReferentialConstraints.sql")){
-                        echo ("<p>SUCCESS addReferentialConstraints</p>");
-                    }else{
-                        cleanupNewDB($newname);
-                        return false;
-                    }
-                    
-                    if(doDump(HEURIST_DBSERVER_NAME, $newname, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, "addProceduresTriggers.sql")){
-                        echo ("<p>SUCCESS addProceduresTriggers</p>");
-                    }else{
-                        cleanupNewDB($newname);
-                        return false;
-                    }
-                    
 
-                   //$cmdline = "ssh -t aosmakov@heur-db-pro-3.ucc.usyd.edu.au mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
+                    echo_flush ("<p>Addition Procedures and Triggers</p>");
+                    if(db_script($newname, dirname(__FILE__)."/addProceduresTriggers.sql")){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    }else{
+                        db_drop($newname);
+                        return false;
+                    }
+                    
 /*                   
                     //OLD COMMAND LINE APPROACH
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -536,18 +493,18 @@
                         $query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, " .
                             "ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".get_user_id());
                         $details = mysql_fetch_row($query);
-                        $longName = mysql_escape_string($details[0]);
-                        $firstName = mysql_escape_string($details[1]);
-                        $lastName = mysql_escape_string($details[2]);
-                        $eMail = mysql_escape_string($details[3]);
-                        $name = mysql_escape_string($details[4]);
-                        $password = mysql_escape_string($details[5]);
-                        $department = mysql_escape_string($details[6]);
-                        $organisation = mysql_escape_string($details[7]);
-                        $city = mysql_escape_string($details[8]);
-                        $state = mysql_escape_string($details[9]);
-                        $postcode = mysql_escape_string($details[10]);
-                        $interests = mysql_escape_string($details[11]);
+                        $longName = mysql_real_escape_string($details[0]);
+                        $firstName = mysql_real_escape_string($details[1]);
+                        $lastName = mysql_real_escape_string($details[2]);
+                        $eMail = mysql_real_escape_string($details[3]);
+                        $name = mysql_real_escape_string($details[4]);
+                        $password = mysql_real_escape_string($details[5]);
+                        $department = mysql_real_escape_string($details[6]);
+                        $organisation = mysql_real_escape_string($details[7]);
+                        $city = mysql_real_escape_string($details[8]);
+                        $state = mysql_real_escape_string($details[9]);
+                        $postcode = mysql_real_escape_string($details[10]);
+                        $interests = mysql_real_escape_string($details[11]);
                     }
 
                     //	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)

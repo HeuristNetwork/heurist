@@ -637,7 +637,7 @@ DELIMITER $$
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
-		end if;
+		end if;     
 -- if change the records type from relation to something else remove cache value
 --		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 	if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then

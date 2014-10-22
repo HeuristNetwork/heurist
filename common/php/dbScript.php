@@ -40,22 +40,20 @@
 // *** New way to determine the upload directory
 // *** Set UTF8 as default connection charset
 
-define ('VERSION','0.35b');
 define ('DATA_CHUNK_LENGTH',16384);  // How many chars are read per time
-define ('TESTMODE',false);           // Set to true to process the file without actually accessing the database
+define ('TESTMODE', false);           // Set to true to process the file without actually accessing the database
+//define ('VERSION','0.35b');
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
 
 
 // Database configuration
-function doDump($db_server, $db_name, $db_username, $db_password, $filename){
+function db_script($db_name, $filename, $verbose = true){
 
-/*    
-$db_server   = 'localhost';
-$db_name     = '';
-$db_username = '';
-$db_password = ''; 
-*/
+$db_server   = HEURIST_DBSERVER_NAME;
+$db_username = ADMIN_DBUSERNAME;
+$db_password = ADMIN_DBUSERPSWD; 
+
 // Connection charset should be the same as the dump file charset (utf8, latin1, cp1251, koi8r etc.)
 // See http://dev.mysql.com/doc/refman/5.0/en/charset-charsets.html for the full list
 // Change this if you have problems with non-latin letters
@@ -131,7 +129,7 @@ $file  = false;
 // Check PHP version
 
 if (!$error && !function_exists('version_compare'))
-{ echo ("<p class=\"error\">PHP version 4.1.0 is required for BigDump to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
+{ echo ("<p class=\"error\">PHP version 4.1.0 is required for db script read to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
   $error=true;
 }
 
@@ -153,7 +151,7 @@ if (!$error && !TESTMODE)
     $db = mysql_select_db($db_name);
   if (!$dbconnection || !$db) 
   { echo ("<p class=\"error\">Database connection failed due to ".mysql_error()."</p>\n");
-    echo ("<p>Edit the database settings in BigDump configuration, or contact your database provider.</p>\n");
+    echo ("<p>Edit the database settings in your configuration file, or contact your database administrator.</p>\n");
     $error=true;
   }
   if (!$error && $db_connection_charset!=='')
@@ -191,7 +189,6 @@ $_REQUEST["totalqueries"]=0;
 //$filename = "";
 }
 
-
 // Open the file
 
 if (!$error && isset($_REQUEST["start"]))
@@ -209,9 +206,9 @@ if (!$error && isset($_REQUEST["start"]))
 // Recognize GZip filename
   $gzipmode=false;
 
-  if ((!$gzipmode && !$file=@fopen($upload_dir.'/'.$curfilename,"r")) || ($gzipmode && !$file=@gzopen($upload_dir.'/'.$curfilename,"r")))
+  if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
   { echo ("<p class=\"error\">Can't open ".$curfilename." for import</p>\n");
-    echo ("<p>Please, check that your dump file name contains only alphanumerical characters, and rename it accordingly, for example: $curfilename.".
+    echo ("<p>Please, check that your script file name contains only alphanumerical characters, and rename it accordingly, for example: $curfilename.".
            "<br>Or, specify \$filename in bigdump.php with the full filename. ".
            "<br>Or, you have to upload the $curfilename to the server first.</p>\n");
     $error=true;
@@ -409,9 +406,7 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
         echo ("<p class=\"error\">Stopped at the line $linenumber. </p>");
         echo ("<p>At this place the current query includes more than ".$max_query_lines." dump lines. That can happen if your dump file was ");
         echo ("created by some tool which doesn't place a semicolon followed by a linebreak at the end of each query, or if your dump contains ");
-        echo ("extended inserts or very long procedure definitions. Please read the <a href=\"http://www.ozerov.de/bigdump/usage/\">BigDump usage notes</a> ");
-        echo ("for more infos. Ask for our support services ");
-        echo ("in order to handle dump files containing extended inserts.</p>\n");
+        echo ("extended inserts or very long procedure definitions.</p>\n");
         $error=true;
         break;
       }
@@ -588,7 +583,7 @@ skin_open();
 
 skin_close();
 
-}
+}  //end TESTMODE statistics
 
 }
 
