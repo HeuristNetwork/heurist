@@ -141,7 +141,10 @@
                     top.HAPI4.RecordMgr.search({q: q, w: "all", f:"map", l:200},
                         function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
-
+                                console.log("onMapInit response");
+                                console.log(response);
+                                
+                                // Show info on map
                                 var recset = new hRecordSet(response.data);
                                 mapping.load(recset.toTimemap());
 

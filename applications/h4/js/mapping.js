@@ -118,9 +118,11 @@ function hMapping(_map, _timeline, _basePath) {
             mapId: mapdiv_id, // Id of gmap div element (required)
             timelineId: timelinediv_id, // Id of timeline div element (required)
             datasets: mapdata, //.timemap || mapdata,
+            
             options: {
                 mapZoom: defaultZoom,
                 theme: customTheme,
+                showMapCtrl: true,
                 //ART 201302 useMarkerCluster: (mapdata.count_mapobjects<300),
                 // TODO onlyTimeline: false, //TODO (mapdata.count_mapobjects<1),
                 /*
@@ -169,10 +171,20 @@ function hMapping(_map, _timeline, _basePath) {
             }, tmap);
 
         if(!gmap){ //if map is not inited yet (first call) - add contrlos
-            tmap.map.addControls({ pan:true, zoom:'large', overview: false, scale:true, map_type:true});
+            var mapOptions = {
+                panControl:true,
+                zoomControl:true,
+                mapTypeControl:true,
+                scaleControl:true,     
+                overviewMapControl:true,
+                rotateControl:true,
+                scrollwheel: true
+            };
+            tmap.map.addControls(mapOptions);
+            tmap.getNativeMap().setOptions(mapOptions);
         }
 
-        gmap = tmap.map; //background gmap - gmap or other - needed for direct access
+        gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
     }
 
     function _onDataLoaded(_tmap){
