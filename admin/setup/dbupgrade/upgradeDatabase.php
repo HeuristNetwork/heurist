@@ -23,7 +23,8 @@
     define('SKIP_VERSIONCHECK2', 1);
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once (dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
     /*if(isForAdminOnly("to upgrade database structure")){
     return;
@@ -214,6 +215,15 @@
 <?php
     function executeScript($filename){
 
+                    if(db_script(DATABASE, $filename)){
+                       return true;
+                    }else{
+                        echo ("<p class='error'>Error: Unable to execute $filename for database ".HEURIST_DBNAME."<br>");
+                        echo ("Please check whether this file is valid; consult Heurist helpdesk if needed <br />&nbsp;<br></p>");
+                        return false;
+                    }
+        
+/* OLD APPROACH        
         $cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D".DATABASE." < ".$filename;
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);
 
@@ -225,6 +235,6 @@
         }else{
             return true;
         }
-
+*/
     }
 ?>

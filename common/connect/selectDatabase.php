@@ -28,9 +28,9 @@
     define('SKIP_VERSIONCHECK', 1);
     define('NO_DB_ALLOWED',1);
 
-    require_once(dirname(__FILE__).'/../../common/config/initialise.php');
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+    require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
+    require_once(dirname(__FILE__).'/../../common/php/dbScript.php');
 
     $msg = "Ambiguous database name, or no database name supplied";
     if(@$_REQUEST['msg']){
@@ -45,6 +45,26 @@
 
     function buildSandpitDB($dbName){  // creates the sandpit database as a starting point for users to register and create databases
         global $query_create, $dbPrefix;
+        
+        $full_dbname = $dbPrefix.$dbName;
+        
+                    if(!db_create($full_dbname)){
+                        return false;
+                    }
+
+                    if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/blankDBStructure.sql")){
+                        return false;
+                    }
+
+                    if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/addReferentialConstraints.sql")){
+                        return false;
+                    }
+
+                    if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/addProceduresTriggers.sql")){
+                        return false;
+                    }
+
+/* OLD APPROACH        
         // create database
         $cmdline="mysql -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e 'create database ".$dbPrefix.$dbName."';";
         $output2 = exec($cmdline . ' 2>&1', $output, $res);
@@ -57,10 +77,28 @@
         $query_create = str_replace(ADMIN_DBUSERPSWD, "xxxxxxxxxxx", $cmdline); //in case we need error message, don't display pwd
         $output2 = exec($cmdline . ' 2>&1', $output, $res);
         return $res;
+*/        
     } //buildSandpitDB
 
-    function insertOwner($dbName,$LoginName,$Password,$eMail){ // inserts new credentials for the database owner
+    function insertOwner($dbName, $LoginName, $Password, $eMail){ // inserts new credentials for the database owner
         global $query_owner, $dbPrefix;
+        
+        
+                    mysql_connection_insert($dbPrefix.$dbName);
+
+                    // Make the current user the owner and admin of the new database
+                    mysql_query('UPDATE sysUGrps SET ".
+                        ugr_eMail="'.mysql_real_escape_string($eMail).'", ugr_Name="'.mysql_real_escape_string($name).'",
+                        ugr_Password="'.mysql_real_escape_string($password).'" WHERE ugr_ID=2');
+
+                    if (mysql_error()) {
+                        $query_owner = mysql_error();
+                        return false;
+                    }
+                    
+                    return true;
+        
+/* OLD APPROACH        
         $cmdline='mysql -u'.ADMIN_DBUSERNAME.' -p'.ADMIN_DBUSERPSWD.' '.$dbPrefix.$dbName.' -e "'.
         "update sysUGrps set ugr_Name='$LoginName' where ugr_ID=2;".
         "update sysUGrps set ugr_Password='$Password' where ugr_ID=2;".
@@ -68,6 +106,7 @@
         $query_owner = str_replace(ADMIN_DBUSERPSWD, "xxxxxxxxxxx", $cmdline); //in case we need error message, don't display pwd
         $output2 = exec($cmdline . ' 2>&1', $output, $res);
         return $res;
+*/        
     } // insertOwner
 
     // TODO: Copied from resetUserPassword.php. This bit of code occurs in half a dozen places. It needs to be centralised in a library.
@@ -117,10 +156,12 @@
                         // but check to see if any databases have ben listed. if not it's an initialised instance, need to create sandpit db
                         if ( $i == 0 ) { // no database can be created until sandpit db exists, so this is an adequate test
                             $res = buildSandpitDB($sandpitDB); // TODO: supply prefix from code rather than hardcoded
-                            if ($res != 0 ) { //error
-                                print "<h2>Unable to create $sandpitDB example database<h2> SQL error:".$res.
-                                "Query: ".$query_create." <p>Please contact Heurist developers for help";
-                            }else{
+                            
+                            
+                            //if ($res != 0 ) { //error
+                            //    print "<h2>Unable to create $sandpitDB example database<h2> SQL error:".$res.
+                            //   "Query: ".$query_create." <p>Please contact Heurist developers for help";
+                            if($res){
                                 // successful: sandpit database requires configuration of owner user name, email and password
                                 if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('db', $_REQUEST)){
                                     print "<h2>Initialisation: $sandpitDB database created</h2>";
@@ -157,9 +198,9 @@
 
                             // update the owner email, username and password in the sandpit database
                             $res=insertOwner($sandpitDB,$Username,$Password,$eMail); // TODO: supply prefix from code rather than hardcoded
-                            if ($res != 0 ) { //error
-                                print "<h2>Unable to update owner email and password for $sandpitDB database<h2> SQL error:".$res.
-                                "Query: ".$query_owner." <p>Please contact Heurist developers for help";
+                            if (!$res) { //error
+                                print "<h2>Unable to update owner email and password for $sandpitDB database<h2> SQL error:".$res;
+                                "<p>Please contact Heurist developers for help</p>";
                             }
 
                         } // mode = 2
