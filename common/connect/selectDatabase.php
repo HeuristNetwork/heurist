@@ -52,10 +52,10 @@
                         return false;
                     }
 
-                    if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/blankDBStructure.sql")){
+                    if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/buildExampleDB.sql")){
                         return false;
                     }
-
+/*
                     if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/addReferentialConstraints.sql")){
                         return false;
                     }
@@ -63,6 +63,7 @@
                     if(!db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/addProceduresTriggers.sql")){
                         return false;
                     }
+*/                    
 
 /* OLD APPROACH        
         // create database
