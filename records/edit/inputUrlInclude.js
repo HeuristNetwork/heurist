@@ -29,7 +29,7 @@
 */
 
 
-if(top.HEURIST.edit){
+if(top && top.HEURIST.edit){
 
 top.HEURIST.edit.inputs.BibDetailURLincludeInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
 top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
