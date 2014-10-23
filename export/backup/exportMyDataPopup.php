@@ -175,7 +175,7 @@
 
                     try{
                         $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
-                        $dump->start($folder."/MySQL_Database_Dump2.sql");
+                        $dump->start($folder."/MySQL_Database_Dump.sql");
                     } catch (Exception $e) {
                         die ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
                     }

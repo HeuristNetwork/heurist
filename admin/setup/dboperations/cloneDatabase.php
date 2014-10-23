@@ -22,8 +22,10 @@
 
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
+    require_once(dirname(__FILE__).'/../../../external/php/Mysqldump.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
     if(isForAdminOnly("to clone a database")){
         return;
@@ -110,13 +112,13 @@
             </ul>
 
 
-            <?php
+    <?php
 
 
                 // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
 
                 if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
-                ?>
+    ?>
                 <div class="separator_row" style="margin:20px 0;"></div>
                 <form name='selectdb' action='cloneDatabase.php' method='get'>
                     <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
@@ -134,8 +136,8 @@
         </body>
     </html>
     <?php
-        exit;
-    }
+                    exit;
+              }
 
     // ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
 
@@ -163,17 +165,79 @@
         }
 
         cloneDatabase($targetdbname);
+        
+        print "</div></body></html>";
     }
-
 
     // ---- COPY FUNCTION -----------------------------------------------------------------
 
+    function echo_flush($msg){
+         print $msg;
+         ob_flush();
+         flush();
+    }
 
     function cloneDatabase($targetdbname) {
 
         // Use the file upload directory for this database because we know it should exist and be writable
+        
+        //create dump in temp file
+        //$tmpfname = tmpfile();
+        if(false){
+        $tmpfname = tempnam ('/tmp', 'dump-');
+        
+        echo_flush ("Temp file name ".$tmpfname."<br/>");
+        
+        try{
+            $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+            $dump->start($tmpfname);
+        } catch (Exception $e) {
+            print ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
+            return false;
+        }
+        
+        }
 
         $newname = HEURIST_DB_PREFIX.$targetdbname;
+        
+        //$tmpfname = 
+        
+                    //create new database
+                    if(!db_create($newname)){
+                        return false;
+                    }
+                    
+                    $tmpfname = 'c:/xampp/htdocs/HEURIST_FILESTORE/artem_delete1/backup/johnson/MySQL_Database_Dump.sql';
+                    
+
+                    echo_flush ("<p>Create Database Structure and import data</p>");
+                    if(db_script($newname, $tmpfname)){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    }else{
+                        db_drop($newname);
+                        return false;
+                    }
+                    
+                    return false;
+                    //unlink($tmpfname);
+
+                    echo_flush ("<p>Addition Referential Constraints</p>");
+                    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    }else{
+                        db_drop($newname);
+                        return false;
+                    }
+
+                    echo_flush ("<p>Addition Procedures and Triggers</p>");
+                    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addProceduresTriggers.sql")){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    }else{
+                        //db_drop($newname);
+                        return false;
+                    }
+        
+/* OLD APPROACH        
 
         $dump_command = "mysqldump --routines --triggers -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".
             HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_FILESTORE_DIR.HEURIST_DBNAME.".sql";
@@ -211,9 +275,12 @@
                 "<p>The SQL file might not have been written correctly. ".
                 "Please ask your sysadmin for help and report the problem to the Heurist development team");
         }
+        
+*/        
 
+        mysql_connection_insert($newname);
         // RESET register db ID
-        $query1 = "update $newname.sysIdentification set sys_dbRegisteredID=0 where 1";
+        $query1 = "update sysIdentification set sys_dbRegisteredID=0 where 1";
         $res1 = mysql_query($query1);
         if (mysql_error())  { //(mysql_num_rows($res1) == 0)
             print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
@@ -236,13 +303,14 @@
         print "<br>Copying upload files: $copy_file_directory";
         exec("$copy_file_directory" . ' 2>&1', $output, $res1);
         if ($res1 != 0 ) {
-            die ("<h3>Error</h3>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
+            print ("<h3>Error</h3>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
                 "<p>Please copy the directory manually or ask you sysadmin to help you</p>");
+            return false;    
         }
 
 
         // Update file path in target database
-        $query1 = "update $newname.recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
+        $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
             "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
         $res1 = mysql_query($query1);
         if (mysql_error())  { //(mysql_num_rows($res1) == 0)
@@ -254,10 +322,6 @@
         echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
         print "<p>Please go to the <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$targetdbname.
             "' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
-
-        print "</body></html>";
-        exit;
-
 
     } // straightCopyNewDatabase
 

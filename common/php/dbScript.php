@@ -83,7 +83,7 @@ $comment[]='-- ';
 $comment[]='DELIMITER';               // Ignore DELIMITER switch as it's not a valid SQL statement
 // $comment[]='---';                  // Uncomment this line if using proprietary dump created by outdated mysqldump
 // $comment[]='CREATE DATABASE';      // Uncomment this line if your dump contains create database queries in order to ignore them
-$comment[]='/*!';                     // Or add your own string to leave out other proprietary things
+// $comment[]='/*!';                     // Or add your own string to leave out other proprietary things
 
 // Pre-queries: SQL queries to be executed at the beginning of each import session
 
