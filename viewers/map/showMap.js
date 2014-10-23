@@ -183,6 +183,7 @@ function ShowMap() {
 			if(!Hul.isnull(ind))
 			{
 				geoobj = HEURIST.tmap.geoObjects[ind];
+                //console.log("geoobj type: " + geoobj.type);
 
 				var shape = null,
 				isempty = false;

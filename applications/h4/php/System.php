@@ -19,7 +19,6 @@
 
 
     require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
-
     require_once (dirname(__FILE__).'/consts.php');
     require_once (dirname(__FILE__).'/common/utils_db.php');
     require_once (dirname(__FILE__).'/common/db_users.php');
@@ -85,7 +84,7 @@
                 $this->mysqli = null;
                 return false;
             }
-
+ 
             //dbutils
             $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $this->dbname_full);
             if ( is_array($res) ){
@@ -93,7 +92,7 @@
                 $this->mysqli = null;
                 return false;
             }else{
-                $this->mysqli = $res;
+                $this->mysqli = $res;   
 
                 if($this->dbname_full)  //database is defined
                 {
@@ -112,10 +111,119 @@
                     $this->initPathConstants();
                     
                 }
+                
+                //consts
+                $this->defineConstants();
+            
                 return true;
             }
-
+   
         }
+        
+        /**
+        * Defines all constants
+        */
+        function defineConstants() {
+            // Record type constants
+            global $rtDefines;
+            foreach ($rtDefines as $str => $id) {
+                $this->defineRTLocalMagic($str, $id[1], $id[0]);
+            }
+
+            // Data type constants
+            global $dtDefines;
+            foreach ($dtDefines as $str => $id) {
+                $this->defineDTLocalMagic($str, $id[1], $id[0]);
+            }    
+        }
+        
+        /**
+        * bind Magic Number Constants to their local id
+        * @param    string [$defString] define string
+        * @param    int [$rtID] origin rectype id
+        * @param    int [$dbID] origin database id
+        */
+        function defineRTLocalMagic($defString, $rtID, $dbID) { 
+            $id = $this->rectypeLocalIDLookup($rtID, $dbID);
+            //echo "\nRT DEFINING \"" . $defString . "\" AS " . $id;
+            if ($id) {
+                define($defString, $id);
+            }
+        }
+
+        /**
+        * lookup local id for a given rectype concept id pair
+        * @global    type description of global variable usage in a function
+        * @staticvar array [$RTIDs] lookup array of local ids
+        * @param     int [$rtID] origin rectype id
+        * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
+        * @return    int local rectype ID or null if not found
+        */
+        function rectypeLocalIDLookup($rtID, $dbID = 2) {
+            global $talkToSysAdmin;                     
+            static $RTIDs;
+            if (!$RTIDs) {
+                $res = $this->mysqli->query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
+                if (!$res) {
+                    echo "Unable to build internal record-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
+                    exit();
+                }
+                
+                $RTIDs = array();
+                while ($row = $res->fetch_assoc()) {
+                    if (!@$RTIDs[$row['dbID']]) {
+                        $RTIDs[$row['dbID']] = array();
+                    }
+                    $RTIDs[$row['dbID']][$row['id']] = $row['localID'];
+                }
+                //print_r(@$RTIDs);
+            }   
+            return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID] : null);
+        }
+
+        /**
+        * bind Magic Number Constants to their local id
+        * @param    string [$defString] define string
+        * @param    int [$dtID] origin detailtype id
+        * @param    int [$dbID] origin database id
+        */
+        function defineDTLocalMagic($defString, $dtID, $dbID) {
+            $id = $this->detailtypeLocalIDLookup($dtID, $dbID);
+            //echo "\nDT DEFINING \"" . $defString . "\" AS " . $id;
+            if ($id) {
+                define($defString, $id);
+            }
+        }
+
+        /**
+        * lookup local id for a given detailtype concept id pair
+        * @global    type description of global variable usage in a function
+        * @staticvar array [$RTIDs] lookup array of local ids
+        * @param     int [$dtID] origin detailtype id
+        * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
+        * @return    int local detailtype ID or null if not found
+        */
+        function detailtypeLocalIDLookup($dtID, $dbID = 2) {
+            global $talkToSysAdmin;
+            static $DTIDs;
+            if (!$DTIDs) {
+                $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
+                if (!$res) {
+                    echo "Unable to build internal field-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
+                    exit();
+                }
+                
+                $DTIDs = array();
+                while ($row = $res->fetch_assoc()) {
+                    if (!@$DTIDs[$row['dbID']]) {
+                        $DTIDs[$row['dbID']] = array();
+                    }
+                    $DTIDs[$row['dbID']][$row['id']] = $row['localID'];
+                }
+            }
+            return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null);
+        }
+
         
         public function initPathConstants($dbname=null){
             
@@ -378,9 +486,6 @@
         * Load user info from session
         */
         public function login_verify(){
-
-            
-            
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
             
             if(!$userID){
@@ -417,9 +522,7 @@
                     //update cookie - to keep it alive
                     setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', HEURIST_SERVER_NAME);
                 }
-                
-                
-                
+       
             }
             return $islogged;
         }

@@ -92,11 +92,10 @@ function hMapping(_map, _timeline, _basePath) {
     * @param _mapdata
     */
     function _load(_mapdata){
-
         mapdata = _mapdata || [];
-
+        
+        // TimeMap theme
         var customIcon = basePath + "assets/star-red.png"
-
         var customTheme = new TimeMapTheme({
             "color": "#0000FF",
             "icon": customIcon,
@@ -104,7 +103,6 @@ function hMapping(_map, _timeline, _basePath) {
             "iconShadow": null,
             "iconAnchor":[9,17]
         });
-
         var tl_theme = Timeline.ClassicTheme.create();
         tl_theme.autoWidth = true;
         tl_theme.mouseWheel = "default";//"zoom";
@@ -113,7 +111,7 @@ function hMapping(_map, _timeline, _basePath) {
         };*/
         tl_theme.event.track.offset = 1.4;
 
-
+        // Initialize TimeMap
         tmap = TimeMap.init({
             mapId: mapdiv_id, // Id of gmap div element (required)
             timelineId: timelinediv_id, // Id of timeline div element (required)
@@ -162,8 +160,8 @@ function hMapping(_map, _timeline, _basePath) {
                     intervalPixels: timeZoomSteps[timeZoomSteps.length - 1].pixelsPerInterval,
                     zoomIndex: timeZoomSteps.length - 1,
                     zoomSteps: timeZoomSteps,
-                    trackHeight:    1.3,
-                    trackGap:       0.2,
+                    trackHeight: 1.3,
+                    trackGap:    0.2,
                     width: "100%"
                 }
             ],
@@ -172,12 +170,12 @@ function hMapping(_map, _timeline, _basePath) {
 
         if(!gmap){ //if map is not inited yet (first call) - add contrlos
             var mapOptions = {
-                panControl:true,
-                zoomControl:true,
-                mapTypeControl:true,
-                scaleControl:true,     
-                overviewMapControl:true,
-                rotateControl:true,
+                panControl: true,
+                zoomControl: true,
+                mapTypeControl: true,
+                scaleControl: true,     
+                overviewMapControl: true,
+                rotateControl: true,
                 scrollwheel: true
             };
             tmap.map.addControls(mapOptions);
@@ -199,7 +197,7 @@ function hMapping(_map, _timeline, _basePath) {
     }
 
     function _renderTimelineZoom(){
-
+        // Zoomline div styling
         var $div = $("#timeline-zoom");
         if ($div.length > 0) { return; } //already defined
 
@@ -269,6 +267,7 @@ function hMapping(_map, _timeline, _basePath) {
             tmap.timeline.paint();
         }; //end internal zoom function
 
+        // Controls
         $( "<div>", {title:'Zoom In'} )
         .button({icons: {
             primary: "ui-icon-zoomin"
@@ -312,9 +311,9 @@ function hMapping(_map, _timeline, _basePath) {
     *
     */
     function _zoomTimeLineToAll(){
-
         //$("#timeline").css("height", "99%");
-
+        
+        // Time mid point
         function __timeMidPoint(start, end) {
             var d, diff;
             d = new Date();
@@ -322,6 +321,8 @@ function hMapping(_map, _timeline, _basePath) {
             d.setTime(start.getTime() + diff/2);
             return d;
         }
+        
+        // Find time scale
         function __findTimeScale(start, end, scales, timelineWidth) {
             var diff, span, unitLength, intervals, i;
             s = new Date();
@@ -337,6 +338,8 @@ function hMapping(_map, _timeline, _basePath) {
             }
             return i;
         }
+        
+        // Change scale
         function __changeScale(bandIndex, zoomIndex) {
 
             if(zoomIndex<0) {

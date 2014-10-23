@@ -87,6 +87,7 @@
     //---------------------------------
 
     define('HEURIST_TITLE', 'Heurist new UI');
+    $talkToSysAdmin="Please advise your system administrator or email info - a t - heuristscholar.org for assistance.";
 
     /**
     * Response status for ajax requests. See ResponseStatus in hapi.js
@@ -125,4 +126,126 @@
     "rty_LocallyModified"=>"i"
     );
     */
+    
+    //---------------------------------
+    
+    /** RECORD TYPE DEFINITIONS */
+    $rtDefines = array(
+        // Standard core record types (H3CoreDefinitions: DB = 2)
+        'RT_RELATION' => array(2, 1),
+        'RT_INTERNET_BOOKMARK' => array(2, 2),
+        'RT_NOTE' => array(2, 3),
+        'RT_MEDIA_RECORD' => array(2, 5),
+        'RT_AGGREGATION' => array(2, 6),
+        'RT_COLLECTION' => array(2, 6), // duplicate naming
+        'RT_BLOG_ENTRY' => array(2, 7),
+        'RT_INTERPRETATION' => array(2, 8),
+        'RT_PERSON' => array(2, 10),
+
+        'RT_IMAGE_LAYER' => array(2, 11), //TODO : change RT_TILED_IMAGE
+        'RT_TILED_IMAGE_LAYER' => array(2, 11), // added Ian 23/10/14 for consistency
+
+        // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 H3ToolExtensions
+        'RT_FILTER' => array(2, 12),
+        'RT_XML_DOCUMENT' => array(2, 13),
+        'RT_TRANSFORM' => array(2, 14),
+        'RT_ANNOTATION' => array(2, 15),
+        'RT_LAYOUT' => array(2, 16),
+        'RT_PIPELINE' => array(2, 17),
+        'RT_TOOL' => array(2, 19),
+
+        // Cleaned up bibliographic record types
+        'RT_JOURNAL_ARTICLE' => array(3, 1012),
+        'RT_BOOK' => array(3, 1002),
+        'RT_JOURNAL_VOLUME' => array(3, 1013),
+
+        'RT_AUTHOR_EDITOR' => array(3, 23), //Deprecated
+        'RT_FACTOID' => array(3, 22), // Deprecated
+
+        // Spatial data
+        'RT_KML_LAYER' => array(3, 1014),
+        'RT_SHP_LAYER' => array(3, 1017),
+        'RT_GEOTIFF_LAYER' => array(3, 1018),
+        'RT_MAP_DOCUMENT' => array(3,1019), // H3ReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
+        'RT_MAP_LAYER' => array(3,1020),
+        'RT_QUERY_LAYER' => array(3,1021)
+
+        );
+ 
+    /** DETAIL TYPE DEFINITIONS */
+    $dtDefines = array('DT_NAME' => array(2, 1),
+        'DT_SHORT_NAME' => array(2, 2),
+        'DT_SHORT_SUMMARY' => array(2, 3),
+        'DT_EXTENDED_DESCRIPTION' => array(2, 4),
+        'DT_TARGET_RESOURCE' => array(2, 5),
+        'DT_RELATION_TYPE' => array(2, 6),
+        'DT_PRIMARY_RESOURCE' => array(2, 7),
+        'DT_INTERPRETATION_REFERENCE' => array(2, 8),
+        'DT_DATE' => array(2, 9),
+        'DT_START_DATE' => array(2, 10),
+        'DT_END_DATE' => array(2, 11),
+        'DT_QUERY_STRING' => array(2, 12),
+        'DT_RESOURCE' => array(2, 13),
+        'DT_CREATOR' => array(2, 15),
+        'DT_CONTACT_INFO' => array(2, 17),
+        'DT_GIVEN_NAMES' => array(2, 18),
+        'DT_LOCATION' => array(2, 27), // TODO : change DT_PLACE_NAME with new update.
+        'DT_GEO_OBJECT' => array(2, 28),
+        'DT_MIME_TYPE' => array(2, 29),
+        'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
+        'DT_MINMUM_ZOOM_LEVEL' => array(2, 32),
+        'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
+        'DT_SERVICE_URL' => array(2, 34),
+        'DT_ORIGINAL_RECORD_ID' => array(2, 36),
+        'DT_FILE_RESOURCE' => array(2, 38),
+        'DT_THUMBNAIL' => array(2, 39),
+        'DT_FILTER_STRING' => array(2, 40),
+        'DT_FILE_TYPE' => array(2, 41),
+        'DT_ANNOTATION_RESOURCE' => array(2, 42),
+        'DT_ANNOTATION_RANGE' => array(2, 43),
+        'DT_START_WORD' => array(2, 44),
+        'DT_END_WORD' => array(2, 45),
+        'DT_START_ELEMENT' => array(2, 46),
+        'DT_END_ELEMENT' => array(2, 47),
+        'DT_LAYOUT_STRING' => array(2, 48),
+        'DT_TRANSFORM_RESOURCE' => array(2, 50),
+        'DT_PROPERTY_VALUE' => array(2, 51),
+        'DT_TOOL_TYPE' => array(2, 52),
+        'DT_RECORD_TYPE' => array(2, 53),
+        'DT_DETAIL_TYPE' => array(2, 54),
+        'DT_COMMAND' => array(2, 55),
+        'DT_COLOUR' => array(2, 56),
+        'DT_DRAWING' => array(2, 59),
+        'DT_COUNTER' => array(2, 60),
+        'DT_FILE_NAME' => array(2, 62),
+        'DT_FILE_FOLDER' => array(2, 63),
+        'DT_FILE_EXT' => array(2, 64),
+        'DT_FILE_DEVICE' => array(2, 65),
+        'DT_FILE_DURATION' => array(2, 66),
+        'DT_FILE_SIZE' => array(2, 67),
+        'DT_FILE_MD5' => array(2, 68),
+        'DT_EDITOR' => array(3, 1013),
+        'DT_OTHER_FILE' => array(3, 62), //TODO: remove from code
+        'DT_LOGO_IMAGE' => array(3, 222), //TODO: remove from code
+        'DT_IMAGES' => array(3, 224), //TODO: remove from code
+        'DT_DOI' => array(3, 1003),
+        'DT_WEBSITE_ICON' => array(3, 347), //TODO: remove from code
+        'DT_ISBN' => array(3, 1011),
+        'DT_ISSN' => array(3, 1032),
+        'DT_JOURNAL_REFERENCE' => array(3, 1034),
+        'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
+        'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
+        'DT_KML_FILE' => array(3, 1044),
+        'DT_KML' => array(3, 1036),
+        'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
+        'DT_SHOW_IN_MAP_BG_LIST' => array(3, 679), // DEPRECATED  show image layer or kml in map background list
+        'DT_ALTERNATE_NAME' => array(3, 1009),
+        'DT_FULL_IMAG_URL' => array(70, 603), //TODO: remove from code
+        'DT_THUMB_IMAGE_URL' => array(70, 606) // deprecated
+    ); //TODO: add email magic numbers
+
+    //---------------------------------
+
+   
+
 ?>
