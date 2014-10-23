@@ -507,9 +507,6 @@ HEURIST_HTML_URL
         'RT_INTERPRETATION' => array(2, 8),
         'RT_PERSON' => array(2, 10),
 
-        'RT_IMAGE_LAYER' => array(2, 11), //TODO : change RT_TILED_IMAGE
-        'RT_TILED_IMAGE_LAYER' => array(2, 11), // added Ian 23/10/14 for consistency
-
         // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 H3ToolExtensions
         'RT_FILTER' => array(2, 12),
         'RT_XML_DOCUMENT' => array(2, 13),
@@ -519,15 +516,17 @@ HEURIST_HTML_URL
         'RT_PIPELINE' => array(2, 17),
         'RT_TOOL' => array(2, 19),
 
-        // Cleaned up bibliographic record types
+        // SW & SH bibliographic record types (deprecated)
         'RT_JOURNAL_ARTICLE' => array(3, 1012),
         'RT_BOOK' => array(3, 1002),
         'RT_JOURNAL_VOLUME' => array(3, 1013),
-
         'RT_AUTHOR_EDITOR' => array(3, 23), //Deprecated
         'RT_FACTOID' => array(3, 22), // Deprecated
 
         // Spatial data
+        'RT_IMAGE_LAYER' => array(2, 11), //TODO : change RT_TILED_IMAGE
+        'RT_TILED_IMAGE_LAYER' => array(2, 11), // added Ian 23/10/14 for consistency
+        'RT_PLACE' => array(3, 1009),
         'RT_KML_LAYER' => array(3, 1014),
         'RT_SHP_LAYER' => array(3, 1017),
         'RT_GEOTIFF_LAYER' => array(3, 1018),
