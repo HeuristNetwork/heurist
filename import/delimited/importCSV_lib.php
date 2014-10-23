@@ -2310,14 +2310,14 @@ error_log(">>4");
     */
     function saveSession($mysqli, $imp_session){
 
-        $imp_id = mysql__insertupdate($mysqli, "import_sessions", "imp",
+        $imp_id = mysql__insertupdate($mysqli, "sysImportSessions", "imp",
             array("imp_ID"=>@$imp_session["import_id"],
                 "ugr_id"=>get_user_id(),
                 "imp_table"=>$imp_session["import_name"],
                 "imp_session"=>json_encode($imp_session) ));
 
         if(intval($imp_id)<1){
-            return "can not save session";
+            return "Can not save session. SQL error:".$imp_id;
         }else{
             $imp_session["import_id"] = $imp_id;
             return $imp_session;
@@ -2361,7 +2361,7 @@ error_log(">>4");
         }
 
         $res = mysql__select_array2($mysqli,
-            "select imp_session from import_sessions".$where);
+            "select imp_session from sysImportSessions".$where);
 
         //get field names and original filename
         $session = json_decode($res[0], true);
@@ -2414,7 +2414,7 @@ error_log(">>4");
         }
 
         $res = mysql__select_array3($mysqli,
-            "select imp_id, imp_session from import_sessions".$where);
+            "select imp_id, imp_session from sysImportSessions".$where);
 
         if(!$res){
             $ret = "can not get list of sessions";
@@ -2436,7 +2436,7 @@ error_log(">>4");
                     $where = " where imp_id>0";
                 }
 
-                if (!$mysqli->query("delete from import_sessions ".$where)) {
+                if (!$mysqli->query("delete from sysImportSessions ".$where)) { //  drop table IF EXISTS sysImportSessions 
                     $ret = "can not delete data from import session table: " . $mysqli->error;
                 }else{
                     $ret = "ok";
@@ -2459,7 +2459,7 @@ error_log(">>4");
         if($import_id && is_numeric($import_id)){
 
             $res = mysql__select_array2($mysqli,
-                "select imp_session, imp_table from import_sessions where imp_id=".$import_id);
+                "select imp_session, imp_table from sysImportSessions where imp_id=".$import_id);
 
             $session = json_decode($res[0], true);
             $session["import_id"] = $import_id;
@@ -2480,9 +2480,9 @@ error_log(">>4");
 
         global $mysqli;
 
-        $query = "CREATE TABLE IF NOT EXISTS `import_sessions` (
+        $query = "CREATE TABLE IF NOT EXISTS `sysImportSessions` (
         `imp_ID` int(11) unsigned NOT NULL auto_increment,
-        `ugr_ID` int(11) unsigned NOT NULL,
+        `ugr_ID` int(11) unsigned NOT NULL default 0,
         `imp_table` varchar(255) NOT NULL default '',
         `imp_session` text,
         PRIMARY KEY  (`imp_ID`))";
@@ -2491,7 +2491,7 @@ error_log(">>4");
         }
 
         $ret = '<option value="0">select uploaded file ...</option>';
-        $query = "select imp_ID, imp_table from import_sessions"; //" where ugr_ID=".get_user_id();
+        $query = "select imp_ID, imp_table from sysImportSessions"; //" where ugr_ID=".get_user_id();
         $res = $mysqli->query($query);
         if ($res){
             while ($row = $res->fetch_row()){

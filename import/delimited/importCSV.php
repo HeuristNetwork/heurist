@@ -66,7 +66,6 @@
 
         <link rel=stylesheet href="../../common/css/global.css" media="all">
 
-        <script src="../../applications/h4/js/utils.js"></script>
         <style type="text/css">
             .tbmain th
             {
@@ -1182,6 +1181,10 @@
 
         if($csv_enclosure=="'") $csv_enclosure = "\\".$csv_enclosure;
 
+        if(strpos($filename,"\\")>0){
+            $filename = str_replace("\\","\\\\",$filename);
+        }
+        
         //load file into table
         $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
         ." CHARACTER SET UTF8"
