@@ -493,7 +493,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         if(!rectypes) return selObj;
 
 
-        if(rectypeList){
+        if(!top.HEURIST4.util.isempty(rectypeList)){
 
             if(!top.HEURIST4.util.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');

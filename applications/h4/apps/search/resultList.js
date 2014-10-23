@@ -849,7 +849,7 @@ $.widget( "heurist.resultList", {
         }
         
         //it may be json
-        if(rules_tree!=null && !$.isArray(rules_tree)){
+        if(!top.HEURIST.util.isempty(rules_tree) && !$.isArray(rules_tree)){
              rules_tree = $.parseJSON(rules_tree);
         }
         

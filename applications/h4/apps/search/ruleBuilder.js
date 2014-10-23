@@ -22,19 +22,23 @@ $.widget( "heurist.ruleBuilder", {
     // default options
     options: {
         level: 0,
-        content: {}, 
-        query: '',
-        recordtypes: [],  //array or record types from current main search result - otherwise show all rectypes
+        rules: {}, // JSON: {query:String , codes:[], levels:[]} 
+        // codes: list of codes: source rt,dt_id,term_id,target rt,filter - it is more convenient to restore/save
+        recordtypes: null,  //array or record types - list of source rt (from current main search result or from parent) - otherwise show all rectypes
+        init_source_rt:null,
         
-        is_search_allowed: false,
-        query_request: {},   // keep current query request
+        //debug is_search_allowed: false,
+        //debug query_request: {},   // keep current query request
+        
         // callback
         onremove: null
     },
     
     _selection: null,     // current set of selected records
     _arr_fields:[],
-    _arr_rectypes:[],
+    _arr_rectypes:[],          //list of all target rectypes for current selected source rt 
+    //_arr_rectypes_subset:[],   //list of all target rectypes for current selected source rt and selected field type
+    
     _has_relation:'0',
     _has_pointers:'0',
     _has_rev_relation:'0',
@@ -54,8 +58,8 @@ $.widget( "heurist.ruleBuilder", {
                 .appendTo( cont );
                 
                 
-        top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), null, false);
-
+        top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, false);
+        
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
                 .addClass('text ui-corner-all')
@@ -95,21 +99,13 @@ $.widget( "heurist.ruleBuilder", {
         
         this._on( this.select_fields, { change: this._onSelectFieldtype });
 
-        this._on( this.select_target_rectype, { change: this._generateQuery });
-        this._on( this.select_reltype, { change: this._generateQuery });
+        //this._on( this.select_target_rectype, { change: this._generateQuery });
+        //this._on( this.select_reltype, { change: this._generateQuery });
         
         this._on( this.btn_delete, {click: function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
         
         if(this.options.level<3)
-        this._on( this.btn_add_next_level, {click: function( event ){ 
-            
-             var new_level = this.options.level + 1;
-            
-             $("<div>").uniqueId().ruleBuilder({level:new_level,
-                                        onremove: function(event, data){
-                                              $('#'+data.id).remove();    //remove this rule builder
-                                        } }).appendTo(this.element);;
-        }});
+        this._on( this.btn_add_next_level, {click: function( event ){ this._addChildRule(null); }});
         
         //-----------------------     listener of global events
         /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT; 
@@ -153,11 +149,29 @@ $.widget( "heurist.ruleBuilder", {
         });
         */
         
-        this._onSelectRectype();
-        this._refresh();
+        this._initRules();
+        
+        //this._onSelectRectype();
+        //this._refresh();
         
 
     }, //end _create
+    
+    //
+    //
+    //
+    _addChildRule: function(rules){
+        
+        var new_level = this.options.level + 1;
+
+        $("<div>").uniqueId().ruleBuilder({level:new_level,
+            rules: rules,
+            init_source_rt: this._getTargetRt(),
+            onremove: function(event, data){
+                $('#'+data.id).remove();    //remove this rule builder
+        } }).appendTo(this.element);;
+
+    },
 
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
@@ -170,6 +184,7 @@ $.widget( "heurist.ruleBuilder", {
         this._superApply( arguments );
     },*/
     
+    /*
     _setOption: function( key, value ) {
         this._super( key, value );
         if ( key === "recordtypes" ) {
@@ -178,7 +193,7 @@ $.widget( "heurist.ruleBuilder", {
             this._onSelectRectype();
             this._refresh();
         }
-    },    
+    },*/    
 
     /* 
     * private function 
@@ -270,7 +285,7 @@ $.widget( "heurist.ruleBuilder", {
                                 constraints = [constraints];
                             }
                             if(constraints.length>0) arr_rectypes = arr_rectypes.concat(constraints);
-                    
+
                             //
                             if(details[dtyID][fi_type]=='relmarker'){
                                 
@@ -280,12 +295,10 @@ $.widget( "heurist.ruleBuilder", {
                                 temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) )
                                     ?  temp.split(",") :[];
                                 if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
-                            
                                 arr_fields.push({key:dtyID, title:name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
                                 
                             }else{
                                 this._has_pointers = '1';
-                                
                                 arr_fields.push({key:dtyID, title:name, rectypes:constraints});
                             }
 
@@ -331,7 +344,10 @@ $.widget( "heurist.ruleBuilder", {
                                 }
                         
                                 //
-                                if(isnotfound){
+                                if(isnotfound){ //it means this is reverse
+                                
+                                    name = top.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
+                                
                                     if(details[dtyID][fi_type]=='relmarker'){
                                         
                                         this._has_rev_relation = '1';
@@ -345,7 +361,6 @@ $.widget( "heurist.ruleBuilder", {
                                         
                                     }else{
                                         this._has_rev_pointers = '1';
-                                        
                                         arr_fields.push({key:dtyID, title:'is '+name, rectypes:[rtyID], isreverse:true });
                                     }
                                 }
@@ -365,6 +380,7 @@ $.widget( "heurist.ruleBuilder", {
             
             this._arr_fields = arr_fields;
             this._arr_rectypes = arr_rectypes;
+            //this._arr_rectypes_subset = arr_rectypes;
         
             //fill selectors        
             /*top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
@@ -383,8 +399,8 @@ $.widget( "heurist.ruleBuilder", {
             }
             
             top.HEURIST4.util.createSelector(this.select_fields.get(0), arr_fields);
-            
-            this._onSelectFieldtype(null);
+            this.select_fields.val('')
+            this._onSelectFieldtype();
             
             // selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray
             //top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_terms, arr_terms_dis, null, arr_fields, false);
@@ -408,8 +424,8 @@ $.widget( "heurist.ruleBuilder", {
     // load relation types
     //
     _onSelectFieldtype: function(event){
-
-            var dt_ID = event?event.target.value:'',
+                                                  
+            var dt_ID = this.select_fields.val(); //event?event.target.value:'',
                 is_not_relation = true,
                 is_not_selected = true; //field is not defined/selected
             if(dt_ID!='') {
@@ -426,6 +442,7 @@ $.widget( "heurist.ruleBuilder", {
                         }
                         //reduced list of constraints
                         top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, arr_field.rectypes.length>1?'any':null);
+                        //this._arr_rectypes_subset = arr_field.rectypes;
                         is_not_selected = false;
                         break;
                     }
@@ -438,6 +455,7 @@ $.widget( "heurist.ruleBuilder", {
             if(is_not_selected){
                 //show all constraints
                 top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes, this._arr_rectypes.length>1?'any':null);
+                //this._arr_rectypes_subset = this._arr_rectypes;
             }
             
             /*if(this.select_target_rectype.find("option").length>2){
@@ -448,16 +466,16 @@ $.widget( "heurist.ruleBuilder", {
                 this.select_target_rectype.hide();
             }*/
             
-            this._generateQuery();
+            //this._generateQuery();
     },
     
     //
     // compose search query
     //
+    /*
     _generateQuery: function(){
         
         this.options.query = '';
-            
         //query is possible if there is at least on resourse or relmarker field    
         if(this._arr_fields.length>0) {
             
@@ -492,129 +510,153 @@ $.widget( "heurist.ruleBuilder", {
                 }
                 
             }else{ //field is not selected - search for all relations and links
-            
                 this.options.query = rt_target + 'links:'+rt_source+'-'+this._has_relation+this._has_pointers+this._has_relation+this._has_rev_pointers;
-            /* @todo
-                if(this._has_relation){
-                     this.options.queries.push(rt_target + 'relatedfrom:'+rt_source);
-                }
-                if(this._has_pointers){
-                     this.options.queries.push(rt_target + 'linkedfrom:'+rt_source);
-                }
-                */
             }
             
         }
         
         this._refresh();
     },
+    */
+    
+    _getTargetRt: function(){
+        var rt_target = '';
+        if(!top.HEURIST4.util.isempty(this.select_target_rectype.val())){
+            rt_target = this.select_target_rectype.val();
+        }else{
+            var opts = this.select_target_rectype.find("option");
+            if(opts.length==2){
+                rt_target = $(opts[1]).attr('value');
+            }
+        }
+        return rt_target;
+    },
+    
+    _getCodes: function(){
+
+        var rt_source   = this.select_source_rectype.val();
+        var dt_ID = this.select_fields.val();
+        var rel_term_id = this.select_reltype.val();
+        var filter = this.additional_filter.val();
+        
+        var rt_target = this._getTargetRt();        
+        
+        var linktype = 0;
+        
+        if(!top.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
+                var fld = this._findField(dt_ID);
+                if(this.select_reltype.is(":visible")){
+                    linktype = (fld && fld.isreverse)?3:4; //relatiom to/from 
+                }else{
+                    linktype = (fld && fld.isreverse)?1:2; //kink to/from
+                }
+        }
+        
+        return [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype];
+    },
+    
+    _getQuery: function(codes){
+       
+        var query = '';
+
+        if(top.HEURIST4.util.isArray(codes) && codes.length==6){
+            
+            var rt_source = codes[0];
+            var dt_ID     = codes[1];
+            var rel_type  = codes[2];
+            var rt_target = codes[3];
+            var filter    = codes[4];
+            var linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
+
+            if(!top.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
+
+            if(linktype>0){
+
+                if(linktype>2){
+                    if(!top.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
+                    query = rt_target + 'related'+(linktype==3?'_to:':'from:')+rt_source+rel_type;    
+                }else{
+                    query = rt_target + 'linked'+(linktype==1?'_to:':'from:')+rt_source+'-'+dt_ID;    
+                }
+                
+            }else{
+                query = rt_target + 'links:'+rt_source;
+            }
+        }
+        return query;  
+    },
 
     //select recordtype, field, reltype and ta    
-    initContent: function(){
+    _initRules: function(){
         
-        if(this.options.content){
+        if(this.options.rules){
             
-            //parse rule query string
+            var codes = this.options.rules.codes; 
+            if(top.HEURIST4.util.isArray(codes) && codes.length==6){
             
-            var query = this.options.content.query;
-            var levels = this.options.content.levels;
-            
-            var rt_target, rt_source, field_id, relation_id;
-             
-            var parts = query.split(' ');
-            if(trim(parts[0]).indexOf('t:')==0){
-                rt_target = substr(trim(parts[0]),2);
-                parts[0] = parts[1];
-            }
-            //get source and field
-            //var 
-            
-            
-        }
-        
-        
-    },
-    
-    
-    /*
-    * debug search (not used) 
-    _debugSearch: function(){
-        
-        var qsearch = '';
-        if(this.additional_filter.val()!=''){
-            qsearch = this.additional_filter.val();
-        } else {
-            //return;
-        }
-        
-        if(!top.HEURIST4.util.isempty(this.options.query)){
-            qsearch = this.options.query; //ies[0] + ' ' + qsearch;
-        }
-        //to do this.options.queries.join(' OR ')
+                var rt_source = codes[0];
+                var dt_ID     = codes[1];
+                var rel_type  = codes[2];
+                var rt_target = codes[3];
+                var filter    = codes[4];
+                var linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
 
-        var request = {q: qsearch, w: 'a', source:this.element.attr('id') };  //f: this.options.searchdetails, 
-        
-        
-        if(this.options.query_request && this.options.query_request.q){
-            request.tq = this.options.query_request.q;
-            if(this.options.query_request.s) request.ts = this.options.query_request.s;
-            if(this.options.query_request.l) request.tl = this.options.query_request.l;
-            if(this.options.query_request.o) request.to = this.options.query_request.o;
-        }
 
-        // perform search
-        top.HAPI4.RecordMgr.search(request, $(this.document));
-        
-    },
-    */
-    
-    /**
-    * return array of queries
-    * 
-    * @returns {Array}
-    */
-    getQuery: function(){
-        
-        this._generateQuery();
-        
-        return this.options.query;
-/*
-        if(top.HEURIST4.util.isempty(this.options.queries)){
-            return [];
-        }else{
-        
-            var qsearch = '';
-            if(this.additional_filter.val()!=''){
-                qsearch = this.additional_filter.val();
-                $.each(this.options.queries, function(index, value){
-                    this.options.queries[index] = this.options.queries[index] + ' ' + qsearch;
-                });
+                //assign values from codes to html elements
+                this.select_source_rectype.val(rt_source);
+                this._onSelectRectype();
+
+                this.select_fields.val(dt_ID);
+                this._onSelectFieldtype();
+
+                this.select_reltype.val(rel_type);
+                this.select_target_rectype.val(rt_target);
+                this.additional_filter.val(filter);
+                
+                //add and init subrules
+                var that = this;
+                if(top.HEURIST4.util.isArray(this.options.rules.levels))
+                        $.each( this.options.rules.levels , function( index, value ) {
+                                that._addChildRule(value);
+                        }); 
+                        
+               return;         
             }
-            
-            return this.options.queries;
         }
-*/        
+        
+        if(!top.HEURIST4.util.isempty(this.options.init_source_rt)){
+                    this.select_source_rectype.val(this.options.init_source_rt);  
+        }
+        this._onSelectRectype(); 
+            
     },
-    
+
+    //
+    // fill options.rules
+    // 1. generate current query string and codes array
+    // 2. recursion for all dependent rules
+    //
     getRules: function(){
 
            // original rule array
-           // rules:[ {query:query, levels:[]}, ....  ]           
+           // rules:[ {query:query, codes:[], levels:[]}, ....  ]           
           
            //refresh query
-           this._generateQuery(); //this.queries(); 
+           var codes = this._getCodes();
+           var query = this._getQuery(codes);
            
-           var rules = []; 
+           var sub_rules = []; 
            
            //loop all dependent
            $.each( this.element.children('.rulebuilder') , function( index, value ) {
                
                 var subrule = $(value).ruleBuilder("getRules");
-                rules.push(subrule);  
+                sub_rules.push(subrule);  
                 
            }); 
         
-           return {query:this.options.query, levels:rules};
+           this.options.rules = {query:query, codes:codes, levels:sub_rules};
+           return this.options.rules;
     }
 
 });

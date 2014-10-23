@@ -637,7 +637,7 @@ $.widget( "heurist.search_links", {
     
     , _editRules:function(ele_rules){
         
-                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database+'&rules' + ele_rules.val();
+                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database+'&rules=' + ele_rules.val(); //encodeURIComponent();
                 
                 Hul.showDialog(url, { width:1200, callback: 
                     function(res){
