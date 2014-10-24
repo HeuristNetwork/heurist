@@ -168,7 +168,8 @@ function hMapping(_map, _timeline, _basePath) {
             dataLoadedFunction: _onDataLoaded
             }, tmap);
 
-        if(!gmap){ //if map is not inited yet (first call) - add contrlos
+        // Add controls if the map is not initialized yet
+        if(!gmap){ 
             var mapOptions = {
                 panControl: true,
                 zoomControl: true,
@@ -183,6 +184,7 @@ function hMapping(_map, _timeline, _basePath) {
         }
 
         gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
+        addMapOverlay(tmap.getNativeMap());
     }
 
     function _onDataLoaded(_tmap){

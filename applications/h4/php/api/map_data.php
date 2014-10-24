@@ -217,7 +217,7 @@
                     }                   
                 }
                 
-                print_r($document);
+                //print_r($document);
                 array_push($documents, $document);
             }
         }

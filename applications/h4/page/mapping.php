@@ -64,6 +64,7 @@
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
         <script type="text/javascript" src="../js/mapping.js"></script>
+        <script type="text/javascript" src="../js/map_overlay.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
@@ -163,9 +164,30 @@
     <!-- HTML -->
     <body>
         <div id="mapping" style="height:100%;width:100%;">
-            <div class="ui-layout-center"><div id="map" style="width:100%;height:100%">Mapping</div></div>
-            <div class="ui-layout-north">Toolbar</div>
-            <div class="ui-layout-south"><div id="timeline" style="width:100%;height:100%;overflow-y:auto;"></div></div>
+            <!-- Map -->
+            <div class="ui-layout-center">
+                <div id="map" style="width:100%;height:100%">Mapping</div>
+            </div>
+            
+            <!-- Toolbar -->
+            <div class="ui-layout-north" id="toolbar">
+                <!-- Map document selector -->
+                <i>Map document:</i>
+                <select id="map-doc-select">
+                    <option value="-1">None</option>
+                </select>
+                
+                <!-- Legend -->
+                <div id="legend" style="background-color: rgba(0, 0, 0, 0.8); color:#eee; padding:10px">
+                    <h3>Legend</h3>
+                    <div class="content"></div>
+                </div>
+            </div>
+            
+            <!-- Timeline -->
+            <div class="ui-layout-south">
+                <div id="timeline" style="width:100%;height:100%;overflow-y:auto;"></div>
+            </div> 
         </div>
     </body>
 </html>
