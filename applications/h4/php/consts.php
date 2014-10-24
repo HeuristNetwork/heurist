@@ -241,7 +241,18 @@
         'DT_SHOW_IN_MAP_BG_LIST' => array(3, 679), // DEPRECATED  show image layer or kml in map background list
         'DT_ALTERNATE_NAME' => array(3, 1009),
         'DT_FULL_IMAG_URL' => array(70, 603), //TODO: remove from code
-        'DT_THUMB_IMAGE_URL' => array(70, 606) // deprecated
+        'DT_THUMB_IMAGE_URL' => array(70, 606), // deprecated
+        // Map document
+        'DT_MAP_LAYER' => array(3, 1081),
+        'DT_TOP_MAP_LAYER' => array(3, 1096),
+        'DT_LONGITUDE_CENTREPOINT' => array(3, 1074),
+        'DT_LATITUDE_CENTREPOINT' => array(3, 1075),
+        // Map layer
+        'MINIMUM_ZOOM' => array(3, 1085),
+        'MAXIMUM_ZOOM' => array(3, 1086),
+        'DT_OPACITY' => array(3, 1090)
+        
+        
     ); //TODO: add email magic numbers
 
     //---------------------------------

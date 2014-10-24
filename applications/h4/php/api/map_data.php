@@ -20,6 +20,7 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
+    require_once (dirname(__FILE__).'/../common/db_files.php');
     
     $recordQuery = "SELECT r.rec_ID, r.rec_Title, r.rec_RecTypeID FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
     $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
@@ -45,14 +46,32 @@
     }
     
     /**
+    * Finds the url that belongs to the file with the given fileID in the given system
+    * 
+    * @param mixed $system System reference
+    * @param mixed $fileID FileID
+    * @return mixed Image URL
+    */
+    function getImageURL($system, $fileID) {
+        $paths = fileGetPath_URL_Type($system, $fileID);
+        if(isset($paths[0][0])) {
+            return HEURIST_FILESTORE_URL . $paths[0][0];
+        }
+        return HEURIST_FILESTORE_URL . "unknown.jpg";
+    }
+    
+    /**
     * Retrieves a Map Layer object from the database
     * 
     * Layer object:
-    * -------------------------------
-    * - ID: the id
-    * - Title: record title
-    * - RectypeID: record type id
-    * -------------------------------
+    * -----------------------------------------
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
+    * -----------------------------------------
+    * - minZoom: Minimum zoom
+    * - maxZoom: Maximum zoom    
+    * - thumbnail: Thumbnail file
     * 
     * @param mixed $system System reference
     * @param mixed $id     Map Layer record ID
@@ -84,26 +103,26 @@
                         //print_r($detail);
                         $type = $detail["dtl_DetailTypeID"]; 
                         $value = $detail["dtl_Value"];
-                        
+                        //echo "\nLAYER | Type: #" . $type . " --> " . $value;
+                                
                         // Type check
-                        if($type == 120) {
+                        if($type == 1086) {
                             // Maximum zoom
                             $layer->maxZoom = $value;
                              
-                        }else if($type == 119) {
+                        }else if($type == 1085) {
                             // Minimum zoom
-                            $layer->minZoom = $value;  
-                        }else if($type == 127) {
+                            $layer->minZoom = $value; 
+                             
+                        }else if($type == 1090) {
                             // Opacity
                             $layer->opacity = $value;
-                        }else if($type == 39) {
-                            // Uploaded file ID
-                            // Get file somehow
-                            
-                        }
+                        }else if($type == DT_THUMBNAIL) { // DT_THUMBNAIL
+                            // Uploaded file URL
+                            $layer->thumbnail = getImageURL($system, $detail["dtl_UploadedFileID"]);
+                        } 
                     }
-                    
-                    
+
                 }
             }
         } 
@@ -117,15 +136,17 @@
     * 
     * Document object:
     * -----------------------------------------
-    * - ID: Record ID
-    * - Title: Record title
-    * - RectypeID: Record type ID
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
     * -----------------------------------------
-    * - Long: Longitude
-    * - Lat: Latitude
-    * - Top layer: Layer object
-    * - Layers: Array of Layer objects
-    * - Details: Array containing all details
+    * - topLayer: Layer object
+    * - layers: Array of Layer objects
+    * - long: Longitude
+    * - lat: Latitude
+    * - minZoom: Minimum zoom
+    * - maxZoom: Maximum zoom 
+    * - thumbnail: Thumbnail file   
     * ------------------------------------------
     * 
     * @param mixed $system System reference
@@ -151,7 +172,6 @@
                 $details = $mysqli->query($query);
                 if($details) {
                     // New attributes
-                    $document->details = array();
                     $document->layers = array();
                     
                     // Parse all details 
@@ -160,26 +180,40 @@
                         //print_r($detail);
                         $type = $detail["dtl_DetailTypeID"]; 
                         $value = $detail["dtl_Value"];
-                        
+                        //echo "\nMAP DOCUMENT | Type: #" . $type . " --> " . $value;
+
                         // Type check
-                        if($type == 131) {
+                        if($type == 1096) {
                             // Top map layer  
                             // Pointer to recID value
                             $document->toplayer = getMapLayer($system, $value);
     
-                        }else if($type == 1096) {
+                        }else if($type == 1081) {
                             // Map layer
                             // Pointer to recID value 
                             array_push($document->layers, getMapLayer($system, $value));
                             
-                        }else if($type == 114) {
+                        }else if($type == 1074) {
                             // Longitude centrepoint
                             $document->long = $value;
                             
-                        }else if($type == 115) {
+                        }else if($type == 1075) {
                             // Latitude centrepoint
                             $document->lat = $value;
-                        }
+                        }else if($type == 1086) {
+                            // Maximum zoom
+                            $document->maxZoom = $value;
+                             
+                        }else if($type == 1085) {
+                            // Minimum zoom
+                            $document->minZoom = $value; 
+                             
+                        }else if($type == DT_THUMBNAIL) {
+                            // Uploaded file ID
+                            // Get file somehow   
+                            $document->thumbnail = getImageURL($system, $detail["dtl_UploadedFileID"]);
+                            
+                        } 
                     }                   
                 }
                 
@@ -196,11 +230,7 @@
 
     // Initialize a System object that uses the requested database
     $system = new System();
-    if( $system->init(@$_REQUEST['db']) ){
-        // Globals
-        echo "\n\nRT INTERPRETATION: " . RT_INTERPRETATION;  
-        echo "\nRT MAP DOCUMENT: " . RT_MAP_DOCUMENT . "\n\n";  
-                                              
+    if( $system->init(@$_REQUEST['db']) ){                               
         // Get all Map Documents
         $documents = getMapDocuments($system);
 

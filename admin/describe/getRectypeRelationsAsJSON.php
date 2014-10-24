@@ -40,7 +40,7 @@
     $rtTerms = getTerms(true);
     $rtTerms = $rtTerms['termsByDomainLookup']['relation'];
 
-    $image_base_url = HEURIST_SERVER_URL . "/html/HEURIST/HEURIST_FILESTORE/" . HEURIST_DBNAME . "/rectype-icons/";
+    $image_base_url = HEURIST_SERVER_URL . "/HEURIST/HEURIST_FILESTORE/" . HEURIST_DBNAME . "/rectype-icons/";
     $idx_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_dt_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
     $idx_dt_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
