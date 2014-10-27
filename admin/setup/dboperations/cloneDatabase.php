@@ -207,7 +207,7 @@
                         return false;
                     }
                     
-                    $tmpfname = 'c:/xampp/htdocs/HEURIST_FILESTORE/artem_delete1/backup/johnson/MySQL_Database_Dump.sql';
+                    $tmpfname = 'c:/xampp/htdocs/HEURIST_FILESTORE/artem_delete10/backup/johnson/MySQL_Database_Dump.sql';
                     
 
                     echo_flush ("<p>Create Database Structure and import data</p>");
