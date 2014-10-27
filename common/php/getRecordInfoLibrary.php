@@ -1046,6 +1046,7 @@ function getRectypeStructures($rtIDs) {
  */
 function getAllRectypeStructures($useCachedData = false) {
     global $dbID;
+    
     $cacheKey = DATABASE . ":AllRecTypeInfo";
     if ($useCachedData) {
         $rtStructs = getCachedData($cacheKey);
@@ -1135,6 +1136,9 @@ function getAllRectypeStructures($useCachedData = false) {
         $rtStructs['names'][$row[0]] = $row[3];
         $rtStructs['pluralNames'][$row[0]] = $row[8];
     }
+    
+//DEBUG error_log( print_r($rtStructs['typedefs'][3]['dtFields'], true) );
+    
     $rtStructs['constraints'] = getAllRectypeConstraint();
     setCachedData($cacheKey, $rtStructs);
     return $rtStructs;

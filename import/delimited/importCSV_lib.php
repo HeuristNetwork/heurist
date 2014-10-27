@@ -1252,7 +1252,12 @@
                 }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
                     array_push($query_num, $field_name);
-                    array_push($query_num_where, "(concat('',$field_name * 1) != $field_name  and not ($field_name is null or $field_name=''))");
+                    //array_push($query_num_where, "(concat('',$field_name * 1) != $field_name  and not ($field_name is null or $field_name=''))");
+                    
+                    $sregex = "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
+                    array_push($query_num_where, "(NOT($field_name is null or $field_name='') and NOT($field_name REGEXP ".$sregex."))");
+                    
+                    
 
                 }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
@@ -1396,12 +1401,17 @@
 
                 $idx = array_search($field, $sel_query)+1;
 
+//error_log("1.validate numeric ".$query);
+                
                 $wrong_records = validateNumericField($mysqli, $query, $imp_session, $field, $idx);
             
             }else{
                 $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
                 ." where ".$only_for_specified_id."(".$query_num_where[$k].")"; //implode(" or ",$query_num_where);
+                
+//error_log("2.validate numeric ".$query);
+                
                 $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                     "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
                     "Wrong Numerics", $field);
@@ -1728,15 +1738,27 @@
                 foreach($values as $idx=>$r_value){
                     if($r_value!=null && trim($r_value)!=""){
                         
-                        $date = date_parse($r_value);
-                        if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
-                        {
-                            $value = strtotime($r_value);
-                            $value = date('Y-m-d H:i:s', $value);
-                            array_push($newvalue, $value);
+                        
+                        if( is_numeric($r_value) && intval($r_value) ){
+                            //$value = strtotime($r_value);
+                            //$value = date('Y-m-d', $r_value.'-1-1');
+                            array_push($newvalue, $r_value);
                         }else{
-                            $is_error = true;
-                            array_push($newvalue, "<font color='red'>".$r_value."</font>");
+
+                            $date = date_parse($r_value);
+
+//DEBUG error_log($r_value."  ".$date["month"]."/".$date["day"]."/".$date["year"]);                        
+
+                            if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
+                            {
+                                $value = strtotime($r_value);
+                                $value = date('Y-m-d H:i:s', $value);
+                                array_push($newvalue, $value);
+                            }else{
+                                $is_error = true;
+                                array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                            }
+
                         }
                     }
                 }
