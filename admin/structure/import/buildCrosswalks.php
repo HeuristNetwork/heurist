@@ -121,11 +121,16 @@
 	// connection is lost, eg. heartbeat on subsequent pages or a specific 'remove admin lock' link (easier)
 
 	// Check if someone else is already modifying database definitions, if so: stop.
+    
+    if($isNewDB){    
+        $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFaims)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
+    }
 
-	if($isNewDB && !file_exists("../../setup/dbcreate/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
+	if($isNewDB && !file_exists("../../setup/dbcreate/".$definitions_filename)){
+                //($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
 		$errorCreatingTables = true;
 		$isCreateNew = true;
-		echo (($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt")." not found</br>");
+		echo ($definitions_filename." not found</br>");
 		return false;
 	}
 
@@ -175,7 +180,7 @@
 
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
-		$file = fopen("../../setup/dbcreate/".($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"), "r");
+		$file = fopen("../../setup/dbcreate/".$definitions_filename, "r");
 		while(!feof($file)) {
 			$output = $output . fgets($file, 4096);
 		}
