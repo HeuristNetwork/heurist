@@ -247,9 +247,11 @@
         'DT_TOP_MAP_LAYER' => array(3, 1096),
         'DT_LONGITUDE_CENTREPOINT' => array(3, 1074),
         'DT_LATITUDE_CENTREPOINT' => array(3, 1075),
+        'DT_MINOR_SPAN' => array(3, 1076),
         // Map layer
-        'MINIMUM_ZOOM' => array(3, 1085),
-        'MAXIMUM_ZOOM' => array(3, 1086),
+        'DT_DATA_SOURCE' => array(3, 1083),
+        'DT_MINIMUM_ZOOM' => array(3, 1085),
+        'DT_MAXIMUM_ZOOM' => array(3, 1086),
         'DT_OPACITY' => array(3, 1090)
         
         

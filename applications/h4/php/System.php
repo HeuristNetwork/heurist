@@ -110,10 +110,11 @@
                     
                     $this->initPathConstants();
                     
+                     //consts
+                     $this->defineConstants();
                 }
                 
-                //consts
-                $this->defineConstants();
+               
             
                 return true;
             }
@@ -145,9 +146,12 @@
         */
         function defineRTLocalMagic($defString, $rtID, $dbID) { 
             $id = $this->rectypeLocalIDLookup($rtID, $dbID);
-            //echo "\nRT DEFINING \"" . $defString . "\" AS " . $id;
             if ($id) {
+                //echo "\nRT DEFINING \"" . $defString . "\" AS " . $id;
                 define($defString, $id);
+            } else {
+                //echo "\nRT DEFINING \"" . $defString . "\" AS " . $rtID;
+                define($defString, $rtID);
             }
         }
 
@@ -189,9 +193,12 @@
         */
         function defineDTLocalMagic($defString, $dtID, $dbID) {
             $id = $this->detailtypeLocalIDLookup($dtID, $dbID);
-            //echo "\nDT DEFINING \"" . $defString . "\" AS " . $id;
             if ($id) {
+                //echo "\nDT DEFINING \"" . $defString . "\" AS " . $id;
                 define($defString, $id);
+            } else {
+                //echo "\nDT DEFINING \"" . $defString . "\" AS " . $dtID;
+                define($defString, $dtID);
             }
         }
 

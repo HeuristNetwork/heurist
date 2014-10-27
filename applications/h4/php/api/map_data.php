@@ -39,9 +39,9 @@
     */
     function getRecord($row) {
         $obj = new stdClass();
-        $obj->id = $row["rec_ID"];
+        $obj->id = intval($row["rec_ID"]);
         $obj->title = $row["rec_Title"];
-        $obj->rectypeID = $row["rec_RecTypeID"];
+        $obj->rectypeID = intval($row["rec_RecTypeID"]);
         return $obj;
     }
     
@@ -61,6 +61,106 @@
     }
     
     /**
+    * Retrieves a data source record out of the database
+    * 
+    * Allowed types according to field type 'Data source' (3-1083):
+    * - Map image file (tiled)        RT_TILED_IMAGE_LAYER
+    * - KML                           RT_KML_LAYER
+    * - Shapefile                     RT_SHP_LAYER
+    * - Map image file (untiled)      RT_IMAGE_LAYER
+    * - Mappable query                RT_QUERY_LAYER
+    * 
+    * @param mixed $system System reference
+    * @param mixed $id Record ID
+    */
+    function getDataSource($system, $id) {
+        global $recordQuery;
+        global $detailQuery;
+        $record = new stdClass();
+        
+        // Select the record
+        $query = $recordQuery." WHERE r.rec_ID=".$id;
+        $mysqli = $system->get_mysqli();
+        $res = $mysqli->query($query);
+
+        if ($res) {
+            $row = $res->fetch_assoc();
+            if($row) {
+                // Data object containing the row values
+                $record = getRecord($row);
+                
+                // Retrieve extended details
+                $query = $detailQuery . $record->id;
+                $details = $mysqli->query($query);
+                if($details) {
+                    // Source record type check
+                    if($record->rectypeID == RT_TILED_IMAGE_LAYER) {
+                        // Map image file (tiled)    
+                        while($detail = $details->fetch_assoc()) {  
+                            // Values
+                            //print_r($detail);      
+                            $record->type = "RT_TILED_IMAGE_LAYER";
+                            $type = $detail["dtl_DetailTypeID"]; 
+                            $value = $detail["dtl_Value"];
+
+                        }
+                        
+                    }else if($record->rectypeID == RT_KML_LAYER){
+                        // KML    
+                        while($detail = $details->fetch_assoc()) {  
+                            // Values
+                            //print_r($detail);
+                            $record->type = "RT_KML_LAYER";
+                            $type = $detail["dtl_DetailTypeID"]; 
+                            $value = $detail["dtl_Value"];
+
+                        }
+                        
+                    }else if($record->rectypeID == RT_SHP_LAYER){
+                        // Shapefile   
+                        while($detail = $details->fetch_assoc()) {  
+                            // Values
+                            //print_r($detail);
+                            $record->type = "RT_SHAPE_LAYER";
+                            $type = $detail["dtl_DetailTypeID"]; 
+                            $value = $detail["dtl_Value"];
+
+                        }
+                        
+                        
+                         
+                    }else if($record->rectypeID == RT_IMAGE_LAYER){
+                        // Map image file (untiled)
+                        while($detail = $details->fetch_assoc()) {  
+                            // Values
+                            //print_r($detail);
+                            $record->type = "RT_SHAPE_LAYER";
+                            $type = $detail["dtl_DetailTypeID"]; 
+                            $value = $detail["dtl_Value"];
+
+                        } 
+                        
+                    }else if($record->rectypeID == RT_QUERY_LAYER){
+                        // Mappable query  
+                        while($detail = $details->fetch_assoc()) {  
+                            // Values
+                            //print_r($detail);
+                            $record->type = "RT_QUERY_LAYER";
+                            $type = $detail["dtl_DetailTypeID"]; 
+                            $value = $detail["dtl_Value"];
+
+                        }
+                    }else{
+                        // UNKNOWN TYPE
+                        $record->type = "UNKNOWN";
+                    }
+                }
+            }
+        }
+        return $record;
+    }
+    
+    /**
     * Retrieves a Map Layer object from the database
     * 
     * Layer object:
@@ -70,7 +170,8 @@
     * - rectypeID: Record type ID
     * -----------------------------------------
     * - minZoom: Minimum zoom
-    * - maxZoom: Maximum zoom    
+    * - maxZoom: Maximum zoom  
+    * - opacity: Opacity level  
     * - thumbnail: Thumbnail file
     * 
     * @param mixed $system System reference
@@ -106,23 +207,27 @@
                         //echo "\nLAYER | Type: #" . $type . " --> " . $value;
                                 
                         // Type check
-                        if($type == 1086) {
+                        if($type == DT_MAXIMUM_ZOOM) {
                             // Maximum zoom
-                            $layer->maxZoom = $value;
+                            $layer->maxZoom = floatval($value);
                              
-                        }else if($type == 1085) {
+                        }else if($type == DT_MINIMUM_ZOOM) {
                             // Minimum zoom
-                            $layer->minZoom = $value; 
+                            $layer->minZoom = floatval($value); 
                              
-                        }else if($type == 1090) {
+                        }else if($type == DT_OPACITY) {
                             // Opacity
-                            $layer->opacity = $value;
-                        }else if($type == DT_THUMBNAIL) { // DT_THUMBNAIL
-                            // Uploaded file URL
+                            $layer->opacity = floatval($value);
+                            
+                        }else if($type == DT_THUMBNAIL) {
+                            // Uploaded thumbnail
                             $layer->thumbnail = getImageURL($system, $detail["dtl_UploadedFileID"]);
-                        } 
+                            
+                        }else if($type == DT_DATA_SOURCE) {
+                            // Data source
+                            $layer->dataSource = getDataSource($system, $value);
+                        }
                     }
-
                 }
             }
         } 
@@ -146,6 +251,7 @@
     * - lat: Latitude
     * - minZoom: Minimum zoom
     * - maxZoom: Maximum zoom 
+    * - minorSpan: Initial minor span in degrees
     * - thumbnail: Thumbnail file   
     * ------------------------------------------
     * 
@@ -183,34 +289,37 @@
                         //echo "\nMAP DOCUMENT | Type: #" . $type . " --> " . $value;
 
                         // Type check
-                        if($type == 1096) {
+                        if($type == DT_TOP_MAP_LAYER) {
                             // Top map layer  
                             // Pointer to recID value
                             $document->toplayer = getMapLayer($system, $value);
     
-                        }else if($type == 1081) {
+                        }else if($type == DT_MAP_LAYER) {
                             // Map layer
                             // Pointer to recID value 
                             array_push($document->layers, getMapLayer($system, $value));
                             
-                        }else if($type == 1074) {
+                        }else if($type == DT_LONGITUDE_CENTREPOINT) {
                             // Longitude centrepoint
-                            $document->long = $value;
+                            $document->long = floatval($value);
                             
-                        }else if($type == 1075) {
+                        }else if($type == DT_LATITUDE_CENTREPOINT) {
                             // Latitude centrepoint
-                            $document->lat = $value;
-                        }else if($type == 1086) {
+                            $document->lat = floatval($value);
+                        }else if($type == DT_MAXIMUM_ZOOM) {
                             // Maximum zoom
-                            $document->maxZoom = $value;
+                            $document->maxZoom = floatval($value);
                              
-                        }else if($type == 1085) {
+                        }else if($type == DT_MINIMUM_ZOOM) {
                             // Minimum zoom
-                            $document->minZoom = $value; 
+                            $document->minZoom = floatval($value); 
                              
+                        }else if($type == DT_MINOR_SPAN) {
+                            // Initial minor span
+                            $document->minorSpan = floatval($value);
+                            
                         }else if($type == DT_THUMBNAIL) {
-                            // Uploaded file ID
-                            // Get file somehow   
+                            // Uploaded thumbnail 
                             $document->thumbnail = getImageURL($system, $detail["dtl_UploadedFileID"]);
                             
                         } 

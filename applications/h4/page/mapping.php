@@ -178,8 +178,9 @@
                 </select>
                 
                 <!-- Legend -->
-                <div id="legend" style="background-color: rgba(0, 0, 0, 0.8); color:#eee; padding:10px">
-                    <h3>Legend</h3>
+                <div id="legend" style="background-color: rgba(0, 0, 0, 0.7); color:#eee; padding:8px">
+                    <span style="font-size: 1.25em">Legend</span>
+                    <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
                     <div class="content"></div>
                 </div>
             </div>
