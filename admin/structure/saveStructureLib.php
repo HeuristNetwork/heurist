@@ -1238,6 +1238,8 @@ error_log("AAAA:".$query);
                     }else if($colName=="trm_InverseTermId"){
                         if($val=="") $val=null;
                         $inverse_termid = $val;   //new value
+                    }else if($colName=="trm_Status"){
+                        if($val=="") $val="open";
                     }
 
                     $parameters = addParam($parameters, $trmColumnNames[$colName], $val);
@@ -1294,7 +1296,7 @@ error_log("AAAA:".$query);
 
 				if ($rows==0 || is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "Inverse term id: $inverse_termid. SQL error $oper term $trmID in updateTerms: ".$rows; //htmlspecialchars($query);
+					$ret = "Inverse term id: $inverse_termid. SQL error $oper term $trmID in updateTerms: ".$rows; //."  ".htmlspecialchars($query);
 				} else {
 					if($isInsert){
 						$trmID = $ext_db->insert_id;  // new id
