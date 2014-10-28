@@ -52,12 +52,12 @@
     * @param mixed $fileID FileID
     * @return mixed Image URL
     */
-    function getImageURL($system, $fileID) {
+    function getFileURL($system, $fileID) {
         $paths = fileGetPath_URL_Type($system, $fileID);
         if(isset($paths[0][0])) {
             return HEURIST_FILESTORE_URL . $paths[0][0];
         }
-        return HEURIST_FILESTORE_URL . "unknown.jpg";
+        return HEURIST_FILESTORE_URL;
     }
     
     /**
@@ -93,20 +93,32 @@
                 $query = $detailQuery . $record->id;
                 $details = $mysqli->query($query);
                 if($details) {
-                    // Source record type check
-                    if($record->rectypeID == RT_TILED_IMAGE_LAYER) {
-                        // Map image file (tiled)    
+                    // Performing record type checks:
+                    
+                    // MAP IMAGE FILE (TILED)
+                    if($record->rectypeID == RT_TILED_IMAGE_LAYER) {   
                         while($detail = $details->fetch_assoc()) {  
                             // Values
                             //print_r($detail);      
                             $record->type = "RT_TILED_IMAGE_LAYER";
                             $type = $detail["dtl_DetailTypeID"]; 
                             $value = $detail["dtl_Value"];
-
+                            
+                            if($type == DT_SERVICE_URL) {
+                                // Source URL
+                                $record->sourceURL = $value;
+                            }else if($type == 0) {
+                                // Tiled image type
+                                
+                            }else if($type == DT_MAP_IMAGE_LAYER_SCHEMA) {
+                                // Image tiling schema
+                                
+                            }
                         }
-                        
+                    
+                    // KML LAYER    
                     }else if($record->rectypeID == RT_KML_LAYER){
-                        // KML    
+                          
                         while($detail = $details->fetch_assoc()) {  
                             // Values
                             //print_r($detail);
@@ -114,44 +126,82 @@
                             $type = $detail["dtl_DetailTypeID"]; 
                             $value = $detail["dtl_Value"];
 
+                            if($type == DT_KML) {
+                                // KML snippet
+                                $record->kmlSnippet = $value;
+                                
+                            }else if($type == DT_FILE_RESOURCE) {
+                                // KML file
+                                $record->kmlFile = getFileURL($system, $value);
+                            }
                         }
-                        
-                    }else if($record->rectypeID == RT_SHP_LAYER){
-                        // Shapefile   
+                    
+                    // SHAPE LAYER    
+                    }else if($record->rectypeID == RT_SHP_LAYER){ 
                         while($detail = $details->fetch_assoc()) {  
                             // Values
                             //print_r($detail);
                             $record->type = "RT_SHAPE_LAYER";
                             $type = $detail["dtl_DetailTypeID"]; 
                             $value = $detail["dtl_Value"];
+                            $record->files = array();
 
+                            if($type == DT_SHAPE_FILE) {
+                                // Shape file (SHP component)
+                                $record->shapeFile = getFileURL($system, $value);
+                                
+                            }else if($type == DT_DBF_FILE) {
+                                // DBF file (DBF component)
+                                $record->dbfFile = getFileUrl($system, $value);
+                                
+                            }else if($type == DT_SHX_FILE) {
+                                // SHX file (SHX component)
+                                $record->shxFile = getFileURL($system, $value);
+                                
+                            }else if($type == DT_FILE_RESOURCE) {
+                                // File(s)
+                                array_push($record->files, getFileURL($system, $value));
+                                
+                            }else if($type == DT_ZIP_FILE) {
+                                // Zip file
+                                $record->zipFile = getFileURL($system, $value);
+                   
+                            }
                         }
-                        
-                        
-                         
+     
+                    // MAP IMAGE FILE (UNTILED)
                     }else if($record->rectypeID == RT_IMAGE_LAYER){
-                        // Map image file (untiled)
                         while($detail = $details->fetch_assoc()) {  
                             // Values
                             //print_r($detail);
                             $record->type = "RT_SHAPE_LAYER";
                             $type = $detail["dtl_DetailTypeID"]; 
                             $value = $detail["dtl_Value"];
-
+      
+                            if($type == DT_FILE_RESOURCE) {
+                                // Map image file or URL
+                                $record->mapImage = getFileURL($system, $value);
+                                
+                            }
                         } 
-                        
+                    
+                    // MAPPABLE QUERY    
                     }else if($record->rectypeID == RT_QUERY_LAYER){
-                        // Mappable query  
                         while($detail = $details->fetch_assoc()) {  
                             // Values
                             //print_r($detail);
                             $record->type = "RT_QUERY_LAYER";
                             $type = $detail["dtl_DetailTypeID"]; 
                             $value = $detail["dtl_Value"];
-
+                            
+                            if($type == DT_QUERY_STRING) {
+                                // Heurist query string
+                                $record->query = $value;
+                            }
                         }
+                        
+                    // UNKNOWN TYPE    
                     }else{
-                        // UNKNOWN TYPE
                         $record->type = "UNKNOWN";
                     }
                 }
@@ -221,7 +271,7 @@
                             
                         }else if($type == DT_THUMBNAIL) {
                             // Uploaded thumbnail
-                            $layer->thumbnail = getImageURL($system, $detail["dtl_UploadedFileID"]);
+                            $layer->thumbnail = getFileURL($system, $detail["dtl_UploadedFileID"]);
                             
                         }else if($type == DT_DATA_SOURCE) {
                             // Data source
@@ -320,7 +370,7 @@
                             
                         }else if($type == DT_THUMBNAIL) {
                             // Uploaded thumbnail 
-                            $document->thumbnail = getImageURL($system, $detail["dtl_UploadedFileID"]);
+                            $document->thumbnail = getFileURL($system, $detail["dtl_UploadedFileID"]);
                             
                         } 
                     }                   
