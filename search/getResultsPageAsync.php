@@ -185,7 +185,10 @@ if (false && HEURIST_INDEX_BASE_URL!=HEURIST_BASE_URL){
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <script type="text/javascript">
 
-<?php if($isNeedUpdateWorkgroups){ ?>
+<?php 
+    ob_start();
+    if($isNeedUpdateWorkgroups){ 
+?>
 top.HEURIST.user.workgroups = [<?php
 		if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
 			$query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";

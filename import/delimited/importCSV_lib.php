@@ -1843,9 +1843,7 @@
         }
 
         //indexes
-error_log(">>3");
         $recStruc = getRectypeStructures(array($recordType));
-error_log(">>4");
         $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
         $idx_name = $recStruc['dtFieldNamesToIndex']['rst_DisplayName'];
 
@@ -1900,8 +1898,8 @@ error_log(">>4");
             $rep_updated = 0;
             $tot_count = $imp_session['reccount'];
             $first_time = true;
-            $step = ceil($tot_count/100);
-            if($step>100) $step = 100;
+            $step = ceil($tot_count/10);
+            if($step>10) $step = 10;
             else if($step<1) $step=1;
 
 
@@ -2105,6 +2103,7 @@ error_log(">>4");
                     $rep_processed++;
 
                     if ($rep_processed % $step == 0) {
+                        ob_start();
                         if($first_time){
                             print '<script type="text/javascript">$("#div-progress").hide();</script>';
                             $first_time = false;

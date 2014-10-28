@@ -199,11 +199,13 @@
             $step = intval(@$_REQUEST["step"]);
             if(!$step) $step=0;
 
+            ob_start();
             echo '<div id="div-progress" style="display:none" class="loading">&nbsp;</div>';
             ob_flush();flush();
 
             //load session
             if(intval(@$_REQUEST["import_id"])>0){
+                ob_start();
                 echo '<script>showProgressMsg("Please wait, processing ... ")</script>';
                 ob_flush();flush();
                 $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
@@ -211,6 +213,7 @@
 
             //first step - load file into import table
             if($step==1 && $imp_session==null){
+                ob_start();
                 echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
                 ob_flush();flush();
 
@@ -372,6 +375,7 @@
                 if($step==2){  //find  - NOT USED ANYMORE  - we trying to assign IDs at once
                                // ARTEM TODO: REMOVE REDUNDANT CODE
 
+                    ob_start();
                     echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
                     ob_flush();flush();
 
@@ -381,6 +385,7 @@
 
                 }else if($step==3){  //assign ids
 
+                    ob_start();
                     echo '<script>showProgressMsg("Please wait, assign of records ids")</script>';
                     ob_flush();flush();
 
@@ -408,6 +413,7 @@
 
                 if($step==2){  //verification
 
+                    ob_start();
                     echo '<script>showProgressMsg("Please wait, mapping validation in progress")</script>';
                     ob_flush();flush();
 

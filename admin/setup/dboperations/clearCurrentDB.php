@@ -75,7 +75,7 @@
 
                 $fulldbname = HEURIST_DB_PREFIX.$dbname;
                 
-                db_clean($fulldbname);
+                $res = db_clean($fulldbname);
 /*                
                 // This is a bit inelegant but it does the job effectively. Delete all the related records first because
                 // otherwise referential integrity will stop you deleting the records and/or bookmarks
@@ -237,15 +237,16 @@
                     }
                 }
  */               
-                // Remove from Elasticsearch
-                print "Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br />";
-                deleteIndexForDatabase($dbname);
                 
-                if ($res2 != 0 ) {
+                if (!$res) {
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                     print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
                 } else {
-                    print "Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
+                    // Remove from Elasticsearch
+                    print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
+                    deleteIndexForDatabase($dbname);
+                    
+                    print "<br/><br/>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a></p>";
                 }

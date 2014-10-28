@@ -113,13 +113,14 @@ function empty_table($mysqli, $name, $remark, $verbose){
    if($verbose) echo ("Deleting ".$remark."</br>");
     
     
-   if(!$mysqli->query("delete from recThreadedComments")){
+   if(!$mysqli->query("delete from $name where 1")){
        if($verbose) {
             echo ("<br/><p>Warning: Unable to clean ".$remark
             ." - SQL error: ".$mysqli->error."</p>");
        }
        return false;
    }else{
+       //if($verbose) { echo ("<p>OK</p>"); }
        return true;
    }
 }
@@ -139,6 +140,8 @@ function db_clean($db_name, $verbose=true){
                 }
 
                 if($res){
+                    
+                    $mysqli->autocommit(FALSE);
 
                     if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
                         $res = false;
@@ -169,8 +172,15 @@ function db_clean($db_name, $verbose=true){
                             }
                         }
 
-                        $mysqli->query("ALTER TABLE Records AUTO_INCREMENT = 0");
+                        if($res){
+                            $res = $mysqli->query("ALTER TABLE Records AUTO_INCREMENT = 0");
+                            if($res) $mysqli->commit();
+                        }
                     }
+                }
+                
+                if(!$res){
+                    $mysqli->rollback();
                 }
 
                 $mysqli->close();

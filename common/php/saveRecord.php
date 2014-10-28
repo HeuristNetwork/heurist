@@ -36,7 +36,7 @@
     require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
     require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
-    set_time_limit(120);
+    set_time_limit(600);
     
     $msgInfoSaveRec = array(); //array for containing the warning and error information for the calling code.
 

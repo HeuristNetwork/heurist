@@ -70,6 +70,8 @@
 	header('Cache-Control: no-cache');
 	header('Pragma: no-cache');
 
+    ob_start();
+    
     // This is the best place I can think of to stick this stuff --kj, 2008-07-21
 	print "if (!top.HEURIST) top.HEURIST = {};\n";
 	print "top.HEURIST.VERSION = " . json_format(HEURIST_VERSION) . ";\n";
