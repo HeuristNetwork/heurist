@@ -48,6 +48,8 @@ require_once("getRecordInfoLibrary.php");
 
 mysql_connection_select(DATABASE);
 
+ob_start();
+
 header("Content-type: text/javascript");
 
 $rv = array();

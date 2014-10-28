@@ -384,7 +384,7 @@
 				/*****DEBUG****///error_log(">>>>>>>>>>>>>>>".$query."   params=".join(",",$parameters)."<<<<<<<<<<<<<<<");
 
 				$res = execSQL($mysqli, $query, $parameters, true);
-				if($rows == "1062"){
+				if($res == "1062"){
 					$ret =  "Record type with specified name already exists in the database, please use the existing record type";
 				}else if(!is_numeric($res)){
 					$ret = "SQL error updating record type $rtyID in updateRectype: ".$res;

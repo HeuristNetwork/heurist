@@ -229,8 +229,8 @@
             }
             
             // Req check
-            if(@$details[req]){
-                array_push($relationtypes, substr($details[req],0,3));            
+            if(@$details['req']){
+                array_push($relationtypes, substr($details['req'],0,3));            
             }
 
             // Max check

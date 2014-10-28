@@ -49,6 +49,8 @@
 
     $image_icon      = getRectypeIconURL($rt_id);
     $image_thumbnail = getRectypeThumbURL($rt_id);
+    $success_msg = null;
+    $failure_msg = null;
 
     /*****DEBUG****///error_log("image directory / image url: ".$image_dir."  /  ".$image_url);
 

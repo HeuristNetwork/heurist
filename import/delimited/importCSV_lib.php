@@ -1209,19 +1209,49 @@
         $query_date_nam = array();
         $query_date_where = array();
 
+        $numeric_regex = "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
+        
         
         //loop for all fields in record type structure
         foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
 
+           
             //find among mappings
             $field_name = @$mapping[$ft_id];
             if(!$field_name){
                 $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previos session
             }
 
-            //DEBUG  if($field_name) error_log($field_name."=>".$recordType.".".$ft_id);
-
-            if($ft_vals[$idx_reqtype] == "required"){
+            if(!$field_name && $ft_vals[$idx_fieldtype] == "geo"){ 
+                //specific mapping for geo fields
+                //it may be mapped to itself of mapped to two fields - lat and long
+                
+                $field_name1 = @$mapping[$ft_id."_lat"];
+                $field_name2 = @$mapping[$ft_id."_long"];
+                if(!$field_name1 && !$field_name2){
+                    $field_name1 = array_search($recordType.".".$ft_id."_lat", $imp_session["mapping"], true);
+                    $field_name2 = array_search($recordType.".".$ft_id."_long", $imp_session["mapping"], true);
+                }
+                
+                if($ft_vals[$idx_reqtype] == "required"){
+                    if(!$field_name1 || !$field_name2){
+                        array_push($missed, $ft_vals[0]);
+                    }else{
+                        array_push($query_reqs, $field_name1);
+                        array_push($query_reqs, $field_name2);
+                        array_push($query_reqs_where, $field_name1." is null or ".$field_name1."=''");
+                        array_push($query_reqs_where, $field_name2." is null or ".$field_name2."=''");
+                    }                
+                }
+                if($field_name1 && $field_name2){
+                    array_push($query_num, $field_name1);
+                    array_push($query_num_where, "(NOT($field_name1 is null or $field_name1='') and NOT($field_name1 REGEXP ".$numeric_regex."))");
+                    array_push($query_num, $field_name2);
+                    array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='') and NOT($field_name2 REGEXP ".$numeric_regex."))");
+                }
+                
+                
+            }else if($ft_vals[$idx_reqtype] == "required"){
                 if(!$field_name){
                     array_push($missed, $ft_vals[0]);
                 }else{
@@ -1230,7 +1260,7 @@
                 }
             }
 
-            if($field_name){
+            if($field_name){  //mapping exsits
 
                 $dt_mapping[$field_name] = $ft_id; //$ft_vals[$idx_fieldtype];
 
@@ -1253,9 +1283,7 @@
 
                     array_push($query_num, $field_name);
                     //array_push($query_num_where, "(concat('',$field_name * 1) != $field_name  and not ($field_name is null or $field_name=''))");
-                    
-                    $sregex = "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
-                    array_push($query_num_where, "(NOT($field_name is null or $field_name='') and NOT($field_name REGEXP ".$sregex."))");
+                    array_push($query_num_where, "(NOT($field_name is null or $field_name='') and NOT($field_name REGEXP ".$numeric_regex."))");
                     
                     
 
@@ -1827,7 +1855,7 @@
         $field_types = array();  // idx => fieldtype ID
         $sel_query = array();
         foreach ($params as $key => $field_type) {
-            if(strpos($key, "sa_dt_")===0 && $field_type){
+            if(strpos($key, "sa_dt_")===0 && $field_type){  //search for values of field selector
                 //get index
                 $index = substr($key,6);
                 $field_name = "field_".$index;
@@ -1841,7 +1869,7 @@
         if(count($sel_query)<1){
             return "mapping not defined";
         }
-
+        
         //indexes
         $recStruc = getRectypeStructures(array($recordType));
         $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
@@ -1983,6 +2011,9 @@
                     }
                     array_push( $details['imp_id'], end($row));
 
+                    $lat = null;
+                    $long = null;
+                    
                     foreach ($field_types as $index => $field_type) {
 
                         if($field_type=="url"){
@@ -1993,8 +2024,17 @@
                                 $details['recordNotes'] = trim($row[$index]);
                         }else{
 
-                            $ft_vals = $recStruc[$recordType]['dtFields'][$field_type];
-
+                            if(substr($field_type, -strlen("_lat")) === "_lat"){
+                                 $field_type = substr($field_type, 0, strlen($field_type)-4);
+                                 $fieldtype_type = "lat";
+                            }else if (substr($field_type, -strlen("_long")) === "_long"){
+                                 $field_type = substr($field_type, 0, strlen($field_type)-5);
+                                 $fieldtype_type = "long";
+                            }else{
+                                $ft_vals = $recStruc[$recordType]['dtFields'][$field_type]; //field type description
+                                $fieldtype_type = $ft_vals[$idx_fieldtype];
+                            }
+                            
                             if(strpos($row[$index],$params['csv_mvsep'])!==false){
                                 $values = getMultiValues($row[$index], $params['csv_enclosure'], $params['csv_mvsep']);
 
@@ -2007,18 +2047,17 @@
                                 $values = array($row[$index]);
                             }
 
-
                             foreach ($values as $idx=>$r_value)
                             {
                                 $value = null;
                                 $r_value = trim($r_value);
 
-                                if(($ft_vals[$idx_fieldtype] == "enum" || $ft_vals[$idx_fieldtype] == "relationtype")
+                                if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")
                                     && !ctype_digit($r_value)) {
 
                                     $r_value = trim_lower_accent($r_value);
                                     //print "<br>>>>".$r_value;
-                                    if($ft_vals[$idx_fieldtype] == "enum"){
+                                    if($fieldtype_type == "enum"){
                                         if(!$terms_enum) { //find ALL term IDs
                                             $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
                                             //print print_r($terms_enum, true);
@@ -2029,20 +2068,44 @@
                                         $value = array_search($r_value, $terms_enum, true);
                                         if($value===false) $value = null;
                                         */
-                                    }else if($ft_vals[$idx_fieldtype] == "relationtype"){
+                                    }else if($fieldtype_type == "relationtype"){
                                         if(!$terms_relation){ //find ALL relation IDs
                                             $terms_relation = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
                                         }
                                         $value = @$terms_relation[$r_value];
                                     }
+                                    
+                                }else if($fieldtype_type == "geo"){
+                                    
+                                    //verify WKT
+                                    $geoType = null;
+                                    //get WKT type
+                                    if(strpos($r_value,'POINT(')!==false){
+                                        $geoType = "p";
+                                    }else if(strpos($r_value,'LINESTRING(')!==false){
+                                        $geoType = "l";
+                                    }else if(strpos($r_value,'POLYGON(')!==false){
+                                        $geoType = "pl";
+                                    }
+                                    
+                                    if($geoType){
+                                        $value = $geoType." ".$r_value;    
+                                    }else{
+                                        $value = null;
+                                    }
 
+                                }else if($fieldtype_type == "lat") {
+                                        $lat = $r_value;    
+                                }else if($fieldtype_type == "long"){
+                                    //WARNING MILTIVALUE IS NOT SUPPORTED
+                                        $long = $r_value;    
                                 }else{
                                     //double spaces are removed on preprocess stage $value = trim(preg_replace('/([\s])\1+/', ' ', $r_value));
 
                                     $value = trim($r_value);
 
                                     if($value!="") {
-                                        if($ft_vals[$idx_fieldtype] == "date") {
+                                        if($fieldtype_type == "date") {
                                             //$value = strtotime($value);
                                             //$value = date('Y-m-d H:i:s', $value);
                                         }else{
@@ -2051,7 +2114,13 @@
                                             $value = str_replace("\\n", "\n", $value);
                                         }
                                     }
-
+                                }
+                                
+                                if($lat && $long){
+                                    $value = "p POINT(".$long."  ".$lat.")";      
+                                    //reset
+                                    $lat = null;
+                                    $long = null;
                                 }
 
                                 if($value  &&
@@ -2247,7 +2316,7 @@
         $import_table = $imp_session['import_table'];
         $recordType = @$params['sa_rectype'];
         //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
-
+        
         //add-update Heurist record
         $out = saveRecord($recordId, $recordType,
             @$details["recordURL"],

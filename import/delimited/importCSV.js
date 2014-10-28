@@ -55,7 +55,8 @@ function init() {
         var select_fieldtype = $('select[id^="sa_dt_"]');
         select_fieldtype.each(function() {
 
-            var allowed_ft = allowed;
+            var allowed_ft = allowed.slice(0);
+            allowed_ft.push("geo");
             var topitems = [{key:'',title:'...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
             if($(this).hasClass('indexes')){
                 allowed_ft = ["resource"];
@@ -823,8 +824,16 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
                     var name = details[dtyID][fi];
 
                     if(!top.HEURIST.util.isnull(name)){
-                        arrterm.push([dtyID, name+' ['+
-                            top.HEURIST.detailTypes.lookups[details[dtyID][fit]]+']', (details[dtyID][fir]=="required")]);
+                        
+                        var label = name+' ['+ top.HEURIST.detailTypes.lookups[details[dtyID][fit]]+']';
+                        
+                        arrterm.push([dtyID, label, (details[dtyID][fir]=="required") ]);
+                            
+                        if(details[dtyID][fit]=="geo"){
+                            arrterm.push([ dtyID+'_long', label+' Longitude', false ]);
+                            arrterm.push([ dtyID+'_lat', label+' Latitude', false ]);
+                        }    
+                            
                     }
                 }
             }

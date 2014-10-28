@@ -827,7 +827,7 @@ which is one step too many and has been removed from design by Ian in approx 201
     }
     class BibDetailGeographicInput extends BibDetailInput {
         function convertPostToMysql($postVal) {
-            if (preg_match("/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
+            if (preg_match("/^(p(?= point)|r(?= polygon)|[c](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
                 return array("dtl_Value" => $matches[1], "dtl_Geo" => array("geomfromtext(\"" . $matches[2] . "\")"));
             } else
                 return array();

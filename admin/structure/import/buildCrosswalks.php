@@ -123,7 +123,7 @@
 	// Check if someone else is already modifying database definitions, if so: stop.
     
     if($isNewDB){    
-        $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFaims)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
+        $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFAIMS)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
     }
 
 	if($isNewDB && !file_exists("../../setup/dbcreate/".$definitions_filename)){
@@ -181,6 +181,7 @@
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
 		$file = fopen("../../setup/dbcreate/".$definitions_filename, "r");
+        $output = "";
 		while(!feof($file)) {
 			$output = $output . fgets($file, 4096);
 		}

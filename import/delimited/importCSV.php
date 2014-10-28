@@ -490,13 +490,15 @@
                 value="New upload" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
                 style="margin-right: 10px; margin-left:20px;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
+            <?php if(@$_REQUEST["import_id"]){ ?>
             <input type="button"
-                value="Clear data" onclick="doClearSession(<?=$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
+                value="Clear data" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
                 title="Clear the data for this uploaded file from the server">
             <input type="button"
                 value="Download data to file"
-                onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=$_REQUEST["import_id"]?>','_blank')"
+                onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
                 title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
+            <?php } ?>
         </div>
 
         <?php
