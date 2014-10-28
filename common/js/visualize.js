@@ -1155,7 +1155,7 @@ function visualizeData() {
 * @param text The text to truncate
 */
 function truncateText(text, maxLength) {
-    if(text.length > maxLength) {
+    if(text !== null && text.length > maxLength) {
         return text.substring(0, maxLength-1) + "...";
     }
     return text; 

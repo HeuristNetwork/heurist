@@ -86,6 +86,7 @@
         <!-- jQuery -->
         <script type="text/javascript" src="../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         
+        
         <!-- D3 -->
         <script type="text/javascript" src="../external/d3/d3.js"></script>
         <script type="text/javascript" src="../external/d3/fisheye.js"></script>
@@ -97,6 +98,20 @@
         <!-- Visualize plugin --> 
         <script type="text/javascript" src="../common/js/visualize.js"></script>
         <link rel="stylesheet" type="text/css" href="../common/css/visualize.css">
+        
+        <!-- On Row Click -->
+        <script>
+            function onrowclick(rt_ID, innewtab){
+                var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
+                if(innewtab){
+                    window.open("search.html?"+query, "_blank");
+                    return false;
+                }else{
+                    top.HEURIST.search.executeQuery(query);
+                    window.close();
+                }
+            }
+        </script>
     </head>
 
     <body class="popup">
