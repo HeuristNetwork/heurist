@@ -235,6 +235,7 @@
         'DT_JOURNAL_REFERENCE' => array(3, 1034),
         'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
         'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
+        // Spatial & mapping
         'DT_KML_FILE' => array(3, 1044),
         'DT_KML' => array(3, 1036),
         'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
@@ -252,9 +253,14 @@
         'DT_DATA_SOURCE' => array(3, 1083),
         'DT_MINIMUM_ZOOM' => array(3, 1085),
         'DT_MAXIMUM_ZOOM' => array(3, 1086),
-        'DT_OPACITY' => array(3, 1090)
+        'DT_OPACITY' => array(3, 1090),
+        // Shape
+        'DT_ZIP_FILE' => array(3, 1072),
+        'DT_SHAPE_FILE' => array(3, 1069),
+        'DT_DBF_FILE' => array(3, 1070),
+        'DT_SHX_FILE' => array(3, 1071)
         
-        
+
     ); //TODO: add email magic numbers
 
     //---------------------------------
