@@ -26,13 +26,10 @@
     $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
     
     /**
-    * Constructs a record object from a SQL result row
-    * Record object: 
-    * -------------------------------
+    * Constructs a record object from a SQL result row:
     * - ID: the id
     * - Title: record title
-    * - RectypeID: record type id
-    * -------------------------------
+    * - RectypeID: record type id      
     * 
     * @param mixed $row SQL row
     * @return stdClass Record object
@@ -57,13 +54,192 @@
         if(isset($paths[0][0])) {
             return HEURIST_FILESTORE_URL . $paths[0][0];
         }
-        return HEURIST_FILESTORE_URL;
+        return "null";
+    }
+    
+    /**
+    * Parses query result details into a Tiled Image Layer object:
+    * -----------------------------------------
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
+    * -----------------------------------------
+    * - sourceURL: Source URL link
+    * -----------------------------------------
+    * 
+    * @param mixed $record   Base record
+    * @param mixed $details  SQL rows            
+    */
+    function getTiledImageLayer($record, $details) {
+        while($detail = $details->fetch_assoc()) {  
+            // Values
+            //print_r($detail);      
+            $record->type = "RT_TILED_IMAGE_LAYER";
+            $type = $detail["dtl_DetailTypeID"]; 
+            $value = $detail["dtl_Value"];
+            
+            if($type == DT_SERVICE_URL) {
+                // Source URL
+                $record->sourceURL = $value;
+            }else if($type == 0) {
+                // Tiled image type
+                
+            }else if($type == DT_MAP_IMAGE_LAYER_SCHEMA) {
+                // Image tiling schema
+                
+            }
+        }
+        return $record;
+    }
+    
+    /**
+    * Parses query result details into a KML Layer object:
+    * -----------------------------------------
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
+    * -----------------------------------------
+    * - kmlSnippet: Snippet text
+    * - kmlFile: KML file URL
+    * -----------------------------------------
+    * 
+    * @param mixed $record   Base record
+    * @param mixed $details  SQL rows            
+    */
+    function getKMLLayer($record, $details) {
+        while($detail = $details->fetch_assoc()) {  
+            // Values
+            //print_r($detail);
+            $record->type = "RT_KML_LAYER";
+            $type = $detail["dtl_DetailTypeID"]; 
+            $value = $detail["dtl_Value"];
+
+            if($type == DT_KML) {
+                // KML snippet
+                $record->kmlSnippet = $value;
+                
+            }else if($type == DT_FILE_RESOURCE) {
+                // KML file
+                $record->kmlFile = getFileURL($system, $value);
+            }
+        }
+        return $record;
+    }
+    
+    /**
+    * Parses query result details into a Shape Layer object:
+    * -----------------------------------------
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
+    * -----------------------------------------
+    * - shapeFile: SHP component url
+    * - dbfFile: DBF component url
+    * - shxFile: SHX component url
+    * - files: Array of other file url's
+    * - zipFile: Zip file url, the zip file contains all of the above files (optional)
+    * -----------------------------------------
+    * 
+    * @param mixed $record   Base record
+    * @param mixed $details  SQL rows            
+    */
+    function getShapeLayer($record, $details) {
+        while($detail = $details->fetch_assoc()) {  
+            // Values
+            //print_r($detail);
+            $record->type = "RT_SHAPE_LAYER";
+            $type = $detail["dtl_DetailTypeID"]; 
+            $value = $detail["dtl_Value"];
+            $record->files = array();
+
+            if($type == DT_SHAPE_FILE) {
+                // Shape file (SHP component)
+                $record->shapeFile = getFileURL($system, $value);
+                
+            }else if($type == DT_DBF_FILE) {
+                // DBF file (DBF component)
+                $record->dbfFile = getFileUrl($system, $value);
+                
+            }else if($type == DT_SHX_FILE) {
+                // SHX file (SHX component)
+                $record->shxFile = getFileURL($system, $value);
+                
+            }else if($type == DT_FILE_RESOURCE) {
+                // File(s)
+                array_push($record->files, getFileURL($system, $value));
+                
+            }else if($type == DT_ZIP_FILE) {
+                // Zip file
+                $record->zipFile = getFileURL($system, $value);
+   
+            }
+        }
+        return $record;
+    }
+    
+    /**
+    * Parses query result details into an Untiled Image Layer object:
+   * -----------------------------------------
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
+    * -----------------------------------------
+    * - mapImage: Map image url
+    * -----------------------------------------
+    * 
+    * @param mixed $record   Base record
+    * @param mixed $details  SQL rows            
+    */
+    function getUntiledImageLayer($record, $details) {
+        while($detail = $details->fetch_assoc()) {  
+            // Values
+            //print_r($detail);
+            $record->type = "RT_SHAPE_LAYER";
+            $type = $detail["dtl_DetailTypeID"]; 
+            $value = $detail["dtl_Value"];
+
+            if($type == DT_FILE_RESOURCE) {
+                // Map image file or URL
+                $record->mapImage = getFileURL($system, $value);
+                
+            }
+        } 
+        return $record;
+    }
+
+    /**
+    * Parses query result details into a Mapable Query Layer object:
+    * -----------------------------------------
+    * - id: Record ID
+    * - title: Record title
+    * - rectypeID: Record type ID
+    * -----------------------------------------
+    * - query: Heurist query string
+    * -----------------------------------------
+    * 
+    * @param mixed $record   Base record
+    * @param mixed $details  SQL rows            
+    */
+    function getMapableQueryLayer($record, $details) {
+        while($detail = $details->fetch_assoc()) {  
+            // Values
+            //print_r($detail);
+            $record->type = "RT_QUERY_LAYER";
+            $type = $detail["dtl_DetailTypeID"]; 
+            $value = $detail["dtl_Value"];
+            
+            if($type == DT_QUERY_STRING) {
+                // Heurist query string
+                $record->query = $value;
+            }
+        }
+        return $record;
     }
     
     /**
     * Retrieves a data source record out of the database
     * 
-    * Allowed types according to field type 'Data source' (3-1083):
+    * Allowed types according to field type 'Data source' (3-1083): 
     * - Map image file (tiled)        RT_TILED_IMAGE_LAYER
     * - KML                           RT_KML_LAYER
     * - Shapefile                     RT_SHP_LAYER
@@ -95,111 +271,21 @@
                 if($details) {
                     // Performing record type checks:
                     
-                    // MAP IMAGE FILE (TILED)
+                    // TILED MAP IMAGE LAYER
                     if($record->rectypeID == RT_TILED_IMAGE_LAYER) {   
-                        while($detail = $details->fetch_assoc()) {  
-                            // Values
-                            //print_r($detail);      
-                            $record->type = "RT_TILED_IMAGE_LAYER";
-                            $type = $detail["dtl_DetailTypeID"]; 
-                            $value = $detail["dtl_Value"];
-                            
-                            if($type == DT_SERVICE_URL) {
-                                // Source URL
-                                $record->sourceURL = $value;
-                            }else if($type == 0) {
-                                // Tiled image type
-                                
-                            }else if($type == DT_MAP_IMAGE_LAYER_SCHEMA) {
-                                // Image tiling schema
-                                
-                            }
-                        }
-                    
+                        $record = getTiledImageLayer($record, $details);    
                     // KML LAYER    
                     }else if($record->rectypeID == RT_KML_LAYER){
-                          
-                        while($detail = $details->fetch_assoc()) {  
-                            // Values
-                            //print_r($detail);
-                            $record->type = "RT_KML_LAYER";
-                            $type = $detail["dtl_DetailTypeID"]; 
-                            $value = $detail["dtl_Value"];
-
-                            if($type == DT_KML) {
-                                // KML snippet
-                                $record->kmlSnippet = $value;
-                                
-                            }else if($type == DT_FILE_RESOURCE) {
-                                // KML file
-                                $record->kmlFile = getFileURL($system, $value);
-                            }
-                        }
-                    
+                        $record = getKMLLayer($record, $details);   
                     // SHAPE LAYER    
                     }else if($record->rectypeID == RT_SHP_LAYER){ 
-                        while($detail = $details->fetch_assoc()) {  
-                            // Values
-                            //print_r($detail);
-                            $record->type = "RT_SHAPE_LAYER";
-                            $type = $detail["dtl_DetailTypeID"]; 
-                            $value = $detail["dtl_Value"];
-                            $record->files = array();
-
-                            if($type == DT_SHAPE_FILE) {
-                                // Shape file (SHP component)
-                                $record->shapeFile = getFileURL($system, $value);
-                                
-                            }else if($type == DT_DBF_FILE) {
-                                // DBF file (DBF component)
-                                $record->dbfFile = getFileUrl($system, $value);
-                                
-                            }else if($type == DT_SHX_FILE) {
-                                // SHX file (SHX component)
-                                $record->shxFile = getFileURL($system, $value);
-                                
-                            }else if($type == DT_FILE_RESOURCE) {
-                                // File(s)
-                                array_push($record->files, getFileURL($system, $value));
-                                
-                            }else if($type == DT_ZIP_FILE) {
-                                // Zip file
-                                $record->zipFile = getFileURL($system, $value);
-                   
-                            }
-                        }
-     
-                    // MAP IMAGE FILE (UNTILED)
+                        $record = getShapeLayer($record, $details);  
+                    // UNTILED MAP IMAGE LAYER
                     }else if($record->rectypeID == RT_IMAGE_LAYER){
-                        while($detail = $details->fetch_assoc()) {  
-                            // Values
-                            //print_r($detail);
-                            $record->type = "RT_SHAPE_LAYER";
-                            $type = $detail["dtl_DetailTypeID"]; 
-                            $value = $detail["dtl_Value"];
-      
-                            if($type == DT_FILE_RESOURCE) {
-                                // Map image file or URL
-                                $record->mapImage = getFileURL($system, $value);
-                                
-                            }
-                        } 
-                    
-                    // MAPPABLE QUERY    
+                        $record = getUntiledImageLayer($record, $details);
+                    // MAPABLE QUERY LAYER   
                     }else if($record->rectypeID == RT_QUERY_LAYER){
-                        while($detail = $details->fetch_assoc()) {  
-                            // Values
-                            //print_r($detail);
-                            $record->type = "RT_QUERY_LAYER";
-                            $type = $detail["dtl_DetailTypeID"]; 
-                            $value = $detail["dtl_Value"];
-                            
-                            if($type == DT_QUERY_STRING) {
-                                // Heurist query string
-                                $record->query = $value;
-                            }
-                        }
-                        
+                        $record = getMapableQueryLayer($record, $details);    
                     // UNKNOWN TYPE    
                     }else{
                         $record->type = "UNKNOWN";
@@ -211,9 +297,7 @@
     }
     
     /**
-    * Retrieves a Map Layer object from the database
-    * 
-    * Layer object:
+    * Retrieves a Map Layer object from the database:
     * -----------------------------------------
     * - id: Record ID
     * - title: Record title
@@ -223,6 +307,7 @@
     * - maxZoom: Maximum zoom  
     * - opacity: Opacity level  
     * - thumbnail: Thumbnail file
+    * -----------------------------------------
     * 
     * @param mixed $system System reference
     * @param mixed $id     Map Layer record ID
@@ -400,6 +485,7 @@
         // Show construction error
         echo $system->getError();   
     }
+    
     exit();
 
 ?>
