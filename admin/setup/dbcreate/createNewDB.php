@@ -23,8 +23,9 @@
 
     /**
     * Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
-    * a series of files with checks on each stage and cleanup code
-    * **/
+    * a series of files with checks on each stage and cleanup code. New database creation functions
+    * Oct 2014 by Artem Osmakov to replace command line execution to allow operation on dual tier systems
+    */
 
     define('NO_DB_ALLOWED',1);
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
@@ -159,11 +160,11 @@
                         return false;
                     }
                     <?php } ?>
-                    
+
                 var ele = document.getElementById("createDBForm");
-                if(ele) ele.style.display = "none";                                            
-                    
-                showProgress(true);    
+                if(ele) ele.style.display = "none";
+
+                showProgress(true);
                 return true;
             }
 
@@ -210,10 +211,10 @@
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 makeDatabase(); // this does all the work <<<*************************************************
-                
+
                 echo_flush( '<script type="text/javascript">hideProgress();</script>' );
            }
-            
+
             if($isCreateNew){
         ?>
 
@@ -316,7 +317,7 @@
             <?php
             }
 
-            
+
             function echo_flush($msg){
                  ob_start();
                  print $msg;
@@ -334,17 +335,18 @@
                 if (isset($_POST['dbname'])) {
 
                     // Check that there is a current administrative user who can be made the owner of the new database
+                    $message = "DB Admin username and password have not been set in configIni.php<br/> ".
+                                "Please do so before trying to create a new database.<br>";
                     if(ADMIN_DBUSERNAME == "") {
                         if(ADMIN_DBUSERPSWD == "") {
-                            echo "DB Admin username and password have not been set in config.ini. '+
-                                'Please do so before trying to create a new database.<br>";
+                            echo $message;
                             return;
                         }
-                        echo "DB Admin username has not been set in config.ini. Please do so before trying to create a new database.<br>";
+                        echo $message;
                         return;
                     }
                     if(ADMIN_DBUSERPSWD == "") {
-                        echo "DB Admin password has not been set in config.ini. Please do so before trying to create a new database.<br>";
+                        echo $message;
                         return;
                     } // checking for current administrative user
 
@@ -356,7 +358,7 @@
                     $newDBName = $newDBName . trim($_POST['dbname']);
                     $newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
 
-                    
+
                     if(!db_create($newname)){
                         $isCreateNew = true;
                         return false;
@@ -385,15 +387,15 @@
                         db_drop($newname);
                         return false;
                     }
-                    
-/*                   
+
+/*
                     //OLD COMMAND LINE APPROACH
                     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
                         $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
                     } else {
                         $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
                     }
-                    
+
                     $output1 = exec($cmdline . ' 2>&1', $output, $res1);
                     if ($res1 != 0 ) {
                         echo ("<p class='error'>Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
@@ -452,7 +454,8 @@
                         cleanupNewDB($newname);
                         return false;
                     }
-*/                    
+*/
+
 
                     // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
                     // yes, this is badly structured, but it works - if it ain't broke ...
@@ -492,7 +495,7 @@
                     }else{
                         mysql_connection_insert(DATABASE);
                         $query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, " .
-                            "ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".get_user_id());
+                            "ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".                                    get_user_id());
                         $details = mysql_fetch_row($query);
                         $longName = mysql_real_escape_string($details[0]);
                         $firstName = mysql_real_escape_string($details[1]);
@@ -514,7 +517,7 @@
                     $warnings = 0;
 
                     // Create a default upload directory for uploaded files eg multimedia, images etc.
-                    $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;//TODO: This locks us into upload path. This is teh place for DB override.
+                    $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
                     $cmdline = "mkdir -p -m a=rwx ".$uploadPath;
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
                     if ($res2 != 0 ) { // TODO: need to properly trap the error and distiguish different versions.
@@ -525,6 +528,8 @@
                         echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
                         echo($output2);
                         $warnings = 1;
+                    } else {
+                        add_index_html($uploadpath); // index file to block directory browsing
                     }
 
                     // copy icon and thumbnail directories from default set in the program code (sync. with H3CoreDefinitions)
@@ -535,7 +540,11 @@
                         echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
                         echo($output2);
                         $warnings = 1;
+                    } else {
+                        add_index_html($uploadpath."rectype-icons"); // index file to block directory browsing
+                        add_index_html($uploadpath."rectype_icons/thumb");
                     }
+
                     // copy smarty template directory from default set in the program code
                     $cmdline = "cp -R ../smarty-templates $uploadPath";
                     $output2 = exec($cmdline . ' 2>&1', $output, $res2);
@@ -543,6 +552,8 @@
                         echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
                         echo($output2);
                         $warnings = 1;
+                    } else {
+                        add_index_html($uploadpath."smarty-templates"); // index file to block directory browsing
                     }
 
                     // copy xsl template directories from default set in the program code
@@ -552,8 +563,12 @@
                         echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
                         echo($output2);
                         $warnings = 1;
+                    } else {
+                        add_index_html($uploadpath."xsl-templates"); // index file to block directory browsing
                     }
 
+                    // Create all the other standard folders required for the database
+                    // index.html files are added by createFolder to block index browsing
                     $warnings =+ createFolder("settings","used to store import mappings and the like");
                     $warnings =+ createFolder("scratch","used to store temporary files");
                     $warnings =+ createFolder("hml-output","used to write published records as hml files");
@@ -586,11 +601,11 @@
                     echo "<p><strong>Admin username:</strong> ".$name."<br />";
                     echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-                    echo "<p>Bookmark the database search page: <a href=\"".
-                        HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_BASE_URL."?db=".$newDBName."</a></p>";
-                    echo "<p>Go to the <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$newDBName.
-                        "' title='' target=\"_new\" style='font-size:1.2em;font-weight:bold'>Administration page</a>, ".
-                        "to set up record types, fields and other settings for your new database</p>";
+                    echo "<p>Click here to log in to your new database: <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href=\"".
+                        HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_BASE_URL."?db=".$newDBName.
+                        "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
+                    echo "<p>Use Database > Structure > Record types/fields in the menu at top right of the main database page<br/>".
+                         "to set up record types, fields, terms and other settings for your new database</p>";
 
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
@@ -610,7 +625,7 @@
 
                 if(file_exists($folder) && !is_dir($folder)){
                     if(!unlink($folder)){
-                        echo ("<h3>Warning:</h3> Unable to remove file $folder. We have to create folder with such name ($msg)<br>");
+                        echo ("<h3>Warning:</h3> Unable to remove folder $folder. We need to create a folder with this name ($msg)<br>");
                         return 1;
                     }
                 }
@@ -620,10 +635,12 @@
                         echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
                         return 1;
                     }
-                }else if (!is_writable($folder)) {
+                } else if (!is_writable($folder)) {
                     echo ("<h3>Warning:</h3> Folder $folder already exists and it is not writeable. Check permissions! ($msg)<br>");
                     return 1;
                 }
+
+                add_index_html($folder); // index file to block directory browsing
 
                 return 0;
             }
