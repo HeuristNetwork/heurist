@@ -778,6 +778,7 @@ function importTermID($importTermID) {
 			unset($term["trm_ChildCount"]);
 			unset($term["trm_InverseTermId"]);
 			$term["trm_AddedByImport"] = 1;
+            if(@$term["trm_Status"]==null) $term["trm_Status"] = "open";
 			$term["trm_Label"] = mysql_escape_string($term["trm_Label"]);
 			$term["trm_Description"] = mysql_escape_string($term["trm_Description"]);
 			$term["trm_NameInOriginatingDB"] = mysql_escape_string($term["trm_NameInOriginatingDB"]);

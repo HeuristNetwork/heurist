@@ -204,8 +204,8 @@
                 }else{
                 */
 
-                ob_flush();
-                flush();
+                //ob_flush();
+                //flush();
 
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
@@ -318,6 +318,7 @@
 
             
             function echo_flush($msg){
+                 ob_start();
                  print $msg;
                  ob_flush();
                  flush();
@@ -462,7 +463,7 @@
                     // errorCreatingTables is set to true by buildCrosswalks if an error occurred
                     if($errorCreatingTables) {
                         echo ("<p class='error'>Error importing core definitions from ".
-                            ($isHuNI?"coreDefinitionsHuNI.txt":(($isFaims)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt")).
+                            ($isHuNI?"coreDefinitionsHuNI.txt":(($isFAIMS)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt")).
                             " for database $newname<br>");
                         echo ("Please check whether this file is valid; consult Heurist support if needed</p>");
                         cleanupNewDB($newname);

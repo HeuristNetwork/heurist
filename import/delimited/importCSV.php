@@ -238,7 +238,7 @@
             </script>
 
             <?php
-                if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
+        if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
 
                     if(count(@$imp_session['errors'])>0){
                 
@@ -287,6 +287,21 @@
         <?php
             exit();
 
+        }else if(is_array($imp_session) && @$imp_session['fatal_error']){ //preprocessing
+        ?>
+                <p style='color:red'>ERROR: <?=$imp_session['fatal_error']?></p>
+                <hr width="100%" />
+                <div class="actionButtons" >
+                    <input type="button" value="Cancel"
+                        onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
+                        style="margin-right: 10px;">
+                </div>
+            </body>
+            </html>
+
+        <?php     
+            exit();
+        
         }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
         ?>
 
@@ -490,13 +505,15 @@
                 value="New upload" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
                 style="margin-right: 10px; margin-left:20px;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
+            <?php if(@$_REQUEST["import_id"]){ ?>
             <input type="button"
-                value="Clear data" onclick="doClearSession(<?=$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
+                value="Clear data" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
                 title="Clear the data for this uploaded file from the server">
             <input type="button"
                 value="Download data to file"
-                onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=$_REQUEST["import_id"]?>','_blank')"
+                onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
                 title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
+            <?php } ?>
         </div>
 
         <?php
@@ -1120,7 +1137,7 @@
         }
         fclose($handle);
         if(!$line){
-            return "empty header line";
+            return "Empty header line";
         }
 
         //get fields
@@ -1128,7 +1145,7 @@
         $len = count($fields);
 
         if($len>200){
-            return "too many columns ".$len;
+            return "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.";
         }
 
         if($is_preprocess){
@@ -1136,14 +1153,14 @@
             if (move_uploaded_file($filename, $temp_file)) {
                 if($len==1){
                     return array("warning"=>"You appear to have only one value per line. This probably indicates that "
-                        ."you have selected the wrong separator type. Continue?",
-                        "filename"=>$temp_file, "original"=>$original );
+                        ."you have selected the wrong separator type.",
+                        "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
                 }else{
                     return array("warning"=>"Please verify the list of columns",
                         "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
                 }
             }else {
-                return "Failed to keep the uploaded file '$temp_file'.";
+                return "Failed to keep the uploaded file '$temp_file'."; //array("fatal_error"=>"Failed to keep the uploaded file '$temp_file'.");
             }
         }
 

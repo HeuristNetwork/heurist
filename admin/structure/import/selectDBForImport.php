@@ -90,7 +90,7 @@
 
 
             <!-- Beware: buildCrosswalks.php does includes of record structure in  admin/structure/crosswalk, and these includes
-            appear to use paths relative to th calling script not relative to buildCrosswalks; so this will break if moved to
+            appear to use paths relative to the calling script not relative to buildCrosswalks; so this will break if moved to
             a different level in the tree than other calling scripts -currently admin/setup/dbcreate createNewDB.php -->
             <form id="crosswalkInfo" action="buildCrosswalks.php?db=<?= HEURIST_DBNAME?>" method="POST">
                 <input id="dbID" name="dbID" type="hidden">

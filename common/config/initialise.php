@@ -153,7 +153,7 @@ HEURIST_HTML_URL
     define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h3/
 
     //@todo: CHANGE TO h3 back!!!! Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
-    define('HEURIST_INDEX_BASE_URL', "http://heuristscholar.org/h3/");
+    define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h3/"); //"http://heuristscholar.org/h3/");
 
     //-------------------------------------------------------------------------- MEMCACHE AND PROXY
 

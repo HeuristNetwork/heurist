@@ -65,6 +65,10 @@
         global $msgInfoSaveRec;
         $msgInfoSaveRec = array(); // reset the message array
      
+     
+//error_log(print_r($details, true));     
+     
+     
         mysql_query("start transaction");
         //	$log = " saving record ($recordID) ";
         $recordID = intval($recordID);

@@ -60,6 +60,8 @@
 
 	require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
 	/* ARTEM
 	if (!is_logged_in()) {
@@ -123,7 +125,7 @@
 	// Check if someone else is already modifying database definitions, if so: stop.
     
     if($isNewDB){    
-        $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFaims)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
+        $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFAIMS)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
     }
 
 	if($isNewDB && !file_exists("../../setup/dbcreate/".$definitions_filename)){
@@ -156,18 +158,27 @@
 		$query = "insert into sysLocks (lck_UGrpID, lck_Action) VALUES (".(function_exists('get_user_id') ? get_user_id(): 0).", 'buildcrosswalks')";
 		$res = mysql_query($query); // create sysLock
 		// Create the Heurist structure for the temp database, using a tripped version of the new database template
-		mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");	// database might exist from previous use
+        
+        db_drop($tempDBName, false);
+        
+        if(!db_create($tempDBName) ||
+           !db_script($tempDBName, dirname(__FILE__)."/../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql") ){
+            unlockDatabase();
+            exit();
+        }
+        
+        /*  OLD WAY
+        mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");    // database might exist from previous use
 		mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
 		$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
 		" -D$tempDBName < ../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
-        
-/*DEBUG*///error_log("TEMP DB:".$tempDBName);
         
 		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
 		if($res2 != 0) {
 			unlockDatabase();
 			die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing blankDBStructureDefinitionsOnly.sql)");
 		}
+        */
 	}
 
 	mysql_connection_insert($tempDBName); // Use temp database
@@ -181,6 +192,7 @@
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
 		$file = fopen("../../setup/dbcreate/".$definitions_filename, "r");
+        $output = "";
 		while(!feof($file)) {
 			$output = $output . fgets($file, 4096);
 		}
@@ -217,8 +229,8 @@
 
         }
 
-        error_log("source url ".print_r($source_url,true));
-        error_log("source url NEW ".print_r($source_url_new,true));
+//DEBUG        error_log("source url ".print_r($source_url,true));
+//DEBUG        error_log("source url NEW ".print_r($source_url_new,true));
 
 		$data = loadRemoteURLContent($source_url_new); // try new  path
 		if (!$data || substr($data, 0, 6) == "unable") { // new path didn't work
@@ -500,7 +512,7 @@
 	function unlockDatabase($isdroptemp=true) {
         global $tempDBName;
 		if($isdroptemp && $tempDBName){
-			mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");
+            db_drop($tempDBName);
 		}
 		mysql_connection_insert(DATABASE); // Use logged into DB
 		$res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock

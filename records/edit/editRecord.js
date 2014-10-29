@@ -3083,7 +3083,7 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(element, value) {
         if (! value) return; // "cancel"
 
-        var description = this.wktValueToDescription(value);
+        var description = this.wktValueToDescription(value); //get human readable string 
 
         element.input.name = element.input.name.replace(/^_/, "");
         element.input.value = value;
