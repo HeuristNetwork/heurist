@@ -77,7 +77,7 @@ var svg;        // The SVG where the visualisation will be executed on
             markercolor: "#000",
             
             entityradius: 30,
-            entitycolor: "#262",
+            entitycolor: "#b5b5b5",
             
             labels: true,
             fontsize: "8px",
@@ -1155,10 +1155,13 @@ function visualizeData() {
 * @param text The text to truncate
 */
 function truncateText(text, maxLength) {
-    if(text !== null && text.length > maxLength) {
-        return text.substring(0, maxLength-1) + "...";
+    if(text !== null) {
+        if(text.length > maxLength) {
+            return text.substring(0, maxLength-1) + "...";
+        }
+        return text;
     }
-    return text; 
+    return "[no name]"; 
 }
 
 /** Finds all outgoing links from a clicked record */
@@ -1168,7 +1171,7 @@ function getRecordOverlayData(record) {
     var array = [];
     
     // Header
-    var header = {text: truncateText(record.name), size: "12px", style: "bold", enter: true}; 
+    var header = {text: truncateText(record.name), size: "11px", style: "bold", height: 15, enter: true}; 
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
     }
@@ -1191,7 +1194,7 @@ function getRecordOverlayData(record) {
                 }
                 
                 // Relation
-                var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", indent: true};
+                var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.targetcount;                      
                 }
@@ -1222,7 +1225,7 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", indent: true};
+                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", height: 12, indent: true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -1239,7 +1242,7 @@ function getRecordOverlayData(record) {
         
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "11px", enter: true}); // Heading
+            array.push({text: truncateText(key, maxLength), size: "11px", height: 14, enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -1256,8 +1259,14 @@ function getRelationOverlayData(line) {
     var maxLength = getSetting(setting_textlength);
     
     // Header
-    var header = {text: truncateText(line.source.name, maxLength) + " ↔ " + truncateText(line.target.name, maxLength), size: "12px", style: "bold", enter: true};
-    array.push(header);
+    var header1 = truncateText(line.source.name, maxLength);
+    var header2 = truncateText(line.target.name, maxLength);
+    if(header1.length+header2.length > maxLength) {
+        array.push({text: header1 + " ↔", size: "11px", style: "bold", height: 15});
+        array.push({text: header2, size: "11px", style: "bold", height: 10, enter: true});
+    }else{
+        array.push({text: header1+" ↔ "+header2, size: "11px", style: "bold", height: 15, enter: true}); 
+    }
 
     // Going through the current displayed data
     var data = settings.getData.call(this, settings.data); 
@@ -1265,12 +1274,20 @@ function getRelationOverlayData(line) {
         var map = {};
         for(var i = 0; i < data.links.length; i++) {
             var link = data.links[i];
+            //console.log(link);
             
-            // Check if this line is between the source & target.
-            if(link.source.id == line.source.id && link.target.id == line.target.id ||
-               link.source.id == line.target.id && link.target.id == line.source.id) {
-                //console.log(link);
-                var relation = {text: truncateText(link.relation.name, maxLength), size: "9px"}; 
+            // Pointing to target
+            if(link.source.id == line.source.id && link.target.id == line.target.id) {
+                var relation = {text: "➜ " + truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
+                if(settings.showCounts) {
+                    relation.text += ", n=" + link.relation.count
+                }
+                array.push(relation);  
+            }
+   
+           // Pointing to source 
+           if(link.source.id == line.target.id && link.target.id == line.source.id) {
+                var relation = {text: "← "+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -1303,8 +1320,8 @@ function createOverlay(x, y, type, selector, info) {
                       .attr("y", 0)
                       .on("drag", overlayDrag);
             
-    // Adding text  
-    var offset = 11; 
+    // Adding text 
+    var offset = 10;  
     var indent = 5;
     var position = 0;
     var text = overlay.selectAll("text")
@@ -1324,9 +1341,9 @@ function createOverlay(x, y, type, selector, info) {
                       .attr("y", function(d, i) {
                           // Multiline check
                           if(!d.multiline) { 
-                              position += offset;
+                              position += d.height;
                           }
-                          return position;      // Position calculation
+                          return position; // Position calculation
                       })
                       .attr("font-weight", function(d) {  // Font weight based on style property
                           return d.style;
@@ -1354,8 +1371,8 @@ function createOverlay(x, y, type, selector, info) {
             maxHeight = y;
         }
     }
-    maxWidth  += 3.5*offset;
-    maxHeight += 1.5*offset; 
+    maxWidth  += offset*3.5;
+    maxHeight += offset*2; 
     
     // Set optimal width & height
     rect.attr("width", maxWidth)

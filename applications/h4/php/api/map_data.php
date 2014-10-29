@@ -51,6 +51,7 @@
     */
     function getFileURL($system, $fileID) {
         $paths = fileGetPath_URL_Type($system, $fileID);
+        //print_r($paths);
         if(isset($paths[0][0])) {
             return HEURIST_FILESTORE_URL . $paths[0][0];
         }

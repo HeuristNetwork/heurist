@@ -171,7 +171,7 @@
 
                                 // Show
                                 if($count < 10) {
-                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "' checked></td>";
+                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
                                 }else{
                                     echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
                                 }
@@ -274,7 +274,7 @@
                     }
                     
                     // Set 'checked' attribute and store it
-                    obj.checked = $(this).is(':checked');
+                    obj.checked = $(this).prop('checked');
                     localStorage.setItem(name, JSON.stringify(obj));
                     
                     // Update visualisation
@@ -284,8 +284,8 @@
                 // Listen to the 'show-all' checkbox 
                 $("#show-all").change(function() {
                     // Change all check boxes
-                    var checked = $(this).is(':checked');  
-                    $(".show-record").prop("checked", checked);
+                    var checked = $(this).prop('checked');
+                    $(".show-record").prop("checked", checked);   
                     
                     // Update localstorage
                     $(".show-record").each(function(e) {
@@ -313,13 +313,13 @@
                     // Build name filter
                     var names = [];   
                     $(".show-record").each(function() {
-                        var checked = $(this).is(':checked'); 
-                        if(!checked) {
+                        var checked = $(this).prop('checked'); 
+                        if(checked == false) {
                             var name = $(this).attr("name");
                             names.push(name);
                         }
-                    });    
-                    
+                    }); 
+
                     // Filter nodes
                     var map = {};
                     var size = 0;
@@ -350,10 +350,11 @@
                     console.log("Calling plugin!");
                     $("#visualisation").visualize({
                         data: json,
-                        getData: function(data) { return getData(data); }
+                        getData: function(data) { return getData(data); },
+                        linelength: 200
                     });   
                 }
-                
+
                 visualizeData();
   
             });

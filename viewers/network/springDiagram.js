@@ -134,12 +134,13 @@ function visualize(data) {
     
     // Call plugin
     console.log("Calling plugin!");
-    putSetting(setting_entityradius, 1);
-    putSetting(setting_linewidth, 1);
     $("#visualisation").visualize({
         data: data,
         getData: function(data) { return getData(data); },
         getLineLength: function(record) { return getLineLength(record); },
+        
+        entityradius: 1,
+        linewidth: 1,
         
         showCounts: false,
         showEntitySettings: false,
