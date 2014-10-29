@@ -12,7 +12,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.0   
+    * @version     3.0
     */
 
     /*
@@ -22,6 +22,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
@@ -33,7 +34,7 @@
 
     $sError = null;
 
-    /*
+    /*  WHY HAS THIS BEEN COMMENTED OUT ??????
     $user_id = get_user_id();
     // User must be system administrator or admin of the owners group for this database
     if (!is_admin()) {
@@ -113,7 +114,7 @@
                         <input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" >
                         <div>Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)</div>
                         <div  style="margin-top: 15px; margin-bottom: 20px;">
-                            <br/>Note: After registering the database, you will be asked to log in to a Heurist database (H3MasterIndex). 
+                            <br/>Note: After registering the database, you will be asked to log in to a Heurist database (H3MasterIndex).
                             <br/>You should log into this database using your email address and the same login as your current database
                             <br/>(or the first database you registered, if different). This will allow you to edit the collection metadata
                             <br/>describing your database.
@@ -150,7 +151,7 @@
 
                 // Check if database has already been registered
 
-                if (isset($dbID) && ($dbID != 0)) 
+                if (isset($dbID) && ($dbID != 0))
                 { // already registered, display info and link to H3MasterIndex edit
                     echo '<script type="text/javascript">';
                     echo 'document.getElementById("registerDBForm").style.display = "none";';
@@ -166,7 +167,7 @@
                     "<a href=$url target=_blank style='color:red;'>Click here to edit</a> (login as person who registered this database - ".
                     " note: use EMAIL ADDRESS as username)</div></div>";
                 } // existing registration
-                else 
+                else
                 { // New registration, display registration form
                     echo '<script type="text/javascript">';
                     echo 'document.getElementById("registerDBForm").style.display = "block";';
@@ -179,9 +180,9 @@
                 //error_log("About to test length");
 
                 if(isset($_POST['dbDescription'])) {
-                    
-//error_log("About to test length ".strlen($_POST['dbDescription']));
-                    
+
+                    //error_log("About to test length ".strlen($_POST['dbDescription']));
+
                     if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1000) {
                         $dbDescription = $_POST['dbDescription'];
                         echo '<script type="text/javascript">';
@@ -208,7 +209,7 @@
 
                 function registerDatabase() {
                     $heuristDBname = rawurlencode(HEURIST_DBNAME);
-                    global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword, 
+                    global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword,
                     $usrName, $usrFirstName, $usrLastName, $dbDescription;
 
                     $serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
@@ -221,7 +222,7 @@
                     $dbDescriptionEncoded = rawurlencode($dbDescription);
 
                     // TODO: New URL should be active July 2014 when H3 on HeuristScholar.org updated to 3.1.8
-                    $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" . 
+                    $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" .
                     "?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                     "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                     "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
@@ -230,13 +231,13 @@
                     error_log("DB Registration attempt with URL: ".$reg_url);
 
                     $data = loadRemoteURLContent($reg_url);
-                    if (!$data) {                            
+                    if (!$data) {
                         die("Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />".
                             "URL requested: <a href='$reg_url'>$reg_url</a>");
                     }
 
                     if ($data) {
-                        $dbID = intval($data); // correct return of data is just the registration number. we probably need a 
+                        $dbID = intval($data); // correct return of data is just the registration number. we probably need a
                         // better formatted return with some tags to ensure we are getting the right thing
                     }
 
@@ -249,13 +250,13 @@
                         " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
                         echo $msg . "<br />";
                         return;
-                    } 
-                    else if($dbID == -1) 
+                    }
+                    else if($dbID == -1)
                     { // old title update function, should no longer be called
                         $res = mysql_query("update sysIdentification set `sys_dbDescription`='".mysql_real_escape_string($dbDescription)."' where 1");
                         echo "<div class='input-row'><div class='input-header-cell'>".
                         "Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
-                    } else 
+                    } else
                     { // We have got a new dbID, set the assigned dbID in sysIdentification
                         $res = mysql_query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
                             "`sys_dbDescription`='".mysql_real_escape_string($dbDescription)."' where 1");
@@ -269,8 +270,47 @@
                             "<div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
                             $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
                             echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div>".
-                            "<div class='input-cell'><a href=$url target=_blank>Click here to edit</a> " . 
+                            "<div class='input-cell'><a href=$url target=_blank>Click here to edit</a> " .
                             "(login - if asked - as yourself) </div></div>";
+                            // Update original DB ID and original db code for all existing record types, fields and terms
+                            // which don't have them (meaning that they were defined within this database)
+                            // Record types
+                            $result = 0;
+                            $res = mysql_query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
+                                "where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
+                            if (!$res) {$result = 1; }
+                            $res = mysql_query("update defRecTypes set rty_NameInOriginatingDB=rty_Name ".
+                                "where (rty_NameInOriginatingDB = '') OR (rty_NameInOriginatingDB IS NULL)");
+                            if (!$res) {$result = 1; }
+                            $res = mysql_query("update defRecTypes set rty_IDInOriginatingDB=rty_ID ".
+                                "where (rty_IDInOriginatingDB = '0') OR (rty_IDInOriginatingDB IS NULL) ");
+                            if (!$res) {$result = 1; }
+                            // Fields
+                            $res = mysql_query("update defDetailTypes set dty_OriginatingDBID='$dbID' ".
+                                "where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
+                            if (!$res) {$result = 1; }
+                            $res = mysql_query("update defDetailTypes set dty_NameInOriginatingDB=dty_Name ".
+                                "where (dty_NameInOriginatingDB = '') OR (dty_NameInOriginatingDB IS NULL)");
+                            if (!$res) {$result = 1; }
+                            $res = mysql_query("update defDetailTypes set dty_IDInOriginatingDB=dty_ID ".
+                                "where (dty_IDInOriginatingDB = '0') OR (dty_IDInOriginatingDB IS NULL) ");
+                            if (!$res) {$result = 1; }
+                            // Terms
+                            $res = mysql_query("update defTerms set trm_OriginatingDBID='$dbID' ".
+                                "where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
+                            if (!$res) {$result = 1; }
+                            $res = mysql_query("update defTerms set trm_NameInOriginatingDB=trm_Label ".
+                                "where (trm_NameInOriginatingDB = '') OR (trm_NameInOriginatingDB IS NULL)");
+                            if (!$res) {$result = 1; }
+                            $res = mysql_query("update defTerms set trm_IDInOriginatingDB=trm_ID ".
+                                "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
+                            if (!$res) {$result = 1; }
+                            if ($result == 1) {
+                                echo "<div class=wrap><div id=errorMsg>Unable to set all values for originating DB information for ".DATABASE.
+                                " - one of the update queries failed</div></div>";
+                                error_log ('Unable to set all values for originating DB information for ".DATABASE.
+                                " - one of the update queries failed');
+                            }
                         ?>
                         <script> // automatically call H3MasterIndix metadata edit form for this database
                             window.open("<?=$url?>",'_blank');
