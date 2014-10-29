@@ -63,7 +63,7 @@ function db_create($db_name, $verbose = true){
         $mysqli = server_connect();
         if($mysqli){
             // Create database
-            $sql = "CREATE DATABASE ".$db_name;
+            $sql = "CREATE DATABASE `".$db_name."`";
             if ($mysqli->query($sql)) {
                 $res = true;
             }else if($verbose) {
@@ -83,7 +83,7 @@ function db_drop($db_name, $verbose = true) { // called in case of failure to re
       $mysqli = server_connect();
       if($mysqli){
 
-            $sql = "DROP DATABASE ".$db_name;
+            $sql = "DROP DATABASE IF EXISTS `".$db_name."`";
             if ($mysqli->query($sql)) {
                 $res = true;
             }

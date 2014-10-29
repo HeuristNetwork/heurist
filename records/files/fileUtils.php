@@ -42,6 +42,10 @@
 //DEBUG error_log(" CURL is not installed!!!");
         return false;
     }
+    
+    if(strpos($url, HEURIST_SERVER_URL)===0){
+        $url= str_replace(HEURIST_SERVER_URL,'http://localhost',$url);
+    }
       
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
@@ -74,7 +78,7 @@
     if ($error) {
       $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
       //echo "$error ($code)" . " url = ". $url;
-      error_log("$error ($code)" . " url = ". $url);
+      error_log("CURL ERROR: $error ($code)" . " url = ". $url);
       curl_close($ch);
       return false;
     } else {
