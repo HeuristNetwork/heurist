@@ -25,7 +25,7 @@
     * Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
     * a series of files with checks on each stage and cleanup code. New database creation functions
     * Oct 2014 by Artem Osmakov to replace command line execution to allow operation on dual tier systems
-    * **/
+    */
 
     define('NO_DB_ALLOWED',1);
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
@@ -335,8 +335,8 @@
                 if (isset($_POST['dbname'])) {
 
                     // Check that there is a current administrative user who can be made the owner of the new database
-                    $message = "DB Admin username and password have not been set in configIni.php<br/> '+
-                                'Please do so before trying to create a new database.<br>";
+                    $message = "DB Admin username and password have not been set in configIni.php<br/> ".
+                                "Please do so before trying to create a new database.<br>";
                     if(ADMIN_DBUSERNAME == "") {
                         if(ADMIN_DBUSERPSWD == "") {
                             echo $message;
@@ -601,11 +601,11 @@
                     echo "<p><strong>Admin username:</strong> ".$name."<br />";
                     echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-                    echo "<p>Click here to log in to your new database: <a href=\"".
+                    echo "<p>Click here to log in to your new database: <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href=\"".
                         HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_BASE_URL."?db=".$newDBName.
-                        "</a> <i>(we suggest bookmarking this link)</i></p>";
-                    echo "<p>Use Database > Structure > Record types/fields in the menu at top right of the main database page to".
-                         "set up record types, fields, terms and other settings for your new database</p>";
+                        "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
+                    echo "<p>Use Database > Structure > Record types/fields in the menu at top right of the main database page<br/>".
+                         "to set up record types, fields, terms and other settings for your new database</p>";
 
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
