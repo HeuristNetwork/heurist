@@ -947,9 +947,9 @@ function visualizeData() {
         // Adding shadow text to the nodes 
         var maxLength = getSetting(setting_textlength);
         var shadowtext = node.append("text")
-                             .attr("x", 0)
-                             .attr("y", -iconSize)
-                             .attr("class", "center shadow")
+                             .attr("x", iconSize)
+                             .attr("y", iconSize/4)
+                             .attr("class", "shadow bold")
                              .style("font-size", fontsize, "important")
                              .text(function(d) {
                                  return truncateText(d.name, maxLength);
@@ -957,9 +957,9 @@ function visualizeData() {
             
         // Adding normal text to the nodes 
         var fronttext = node.append("text")
-                            .attr("x", 0)
-                            .attr("y", -iconSize)
-                            .attr("class", "center namelabel")
+                            .attr("x", iconSize)
+                            .attr("y", iconSize/4)
+                            .attr("class", "namelabel bold")
                             .attr("fill", textcolor)
                             .style("font-size", fontsize, "important")
                             .text(function(d) {

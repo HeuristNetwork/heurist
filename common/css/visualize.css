@@ -145,6 +145,10 @@ text.center {
     text-anchor: middle;   
 }
 
+text.bold {
+    font-weight: bold;
+}
+
 text.shadow {
     stroke: #fff;
     stroke-width: 2px;

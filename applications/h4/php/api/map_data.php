@@ -26,6 +26,31 @@
     $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
     
     /**
+    * Finds a record in the database by ID
+    * 
+    * @param mixed $system System reference
+    * @param mixed $id  Record ID
+    */
+    function getRecordByID($system, $id) {
+        global $recordQuery;
+        $record = new stdClass();
+        
+        // Select the record
+        $query = $recordQuery." WHERE r.rec_ID=".$id;
+        $res = $system->get_mysqli()->query($query);
+
+        if ($res) {
+            $row = $res->fetch_assoc();
+            if($row) {
+                // Data object containing the row values
+                $record = getRecord($row);
+            }
+        }
+        
+        return $record;
+    }
+    
+    /**
     * Constructs a record object from a SQL result row:
     * - ID: the id
     * - Title: record title
@@ -72,10 +97,10 @@
     * @param mixed $details  SQL rows            
     */
     function getTiledImageLayer($record, $details) {
+        $record->type = "RT_TILED_IMAGE_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
             //print_r($detail);      
-            $record->type = "RT_TILED_IMAGE_LAYER";
             $type = $detail["dtl_DetailTypeID"]; 
             $value = $detail["dtl_Value"];
             
@@ -108,20 +133,24 @@
     * @param mixed $details  SQL rows            
     */
     function getKMLLayer($record, $details) {
+        $record->type = "RT_KML_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
-            //print_r($detail);
-            $record->type = "RT_KML_LAYER";
+            ///print_r($detail);
             $type = $detail["dtl_DetailTypeID"]; 
             $value = $detail["dtl_Value"];
 
-            if($type == DT_KML) {
+            if($type == DT_DATA_SOURCE) {
+                // KML record
+                
+            }else if($type == DT_KML) {
                 // KML snippet
                 $record->kmlSnippet = $value;
                 
             }else if($type == DT_FILE_RESOURCE) {
                 // KML file
-                $record->kmlFile = getFileURL($system, $value);
+                //$record->kmlFile = getFileURL($system, $detail["dtl_UploadedFileID"]);
+                $record->kmlFile = "TODO";
             }
         }
         return $record;
@@ -145,10 +174,10 @@
     * @param mixed $details  SQL rows            
     */
     function getShapeLayer($record, $details) {
+        $record->type = "RT_SHAPE_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
             //print_r($detail);
-            $record->type = "RT_SHAPE_LAYER";
             $type = $detail["dtl_DetailTypeID"]; 
             $value = $detail["dtl_Value"];
             $record->files = array();
@@ -192,10 +221,10 @@
     * @param mixed $details  SQL rows            
     */
     function getUntiledImageLayer($record, $details) {
+        $record->type = "RT_SHAPE_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
             //print_r($detail);
-            $record->type = "RT_SHAPE_LAYER";
             $type = $detail["dtl_DetailTypeID"]; 
             $value = $detail["dtl_Value"];
 
@@ -222,10 +251,10 @@
     * @param mixed $details  SQL rows            
     */
     function getMapableQueryLayer($record, $details) {
+        $record->type = "RT_QUERY_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
             //print_r($detail);
-            $record->type = "RT_QUERY_LAYER";
             $type = $detail["dtl_DetailTypeID"]; 
             $value = $detail["dtl_Value"];
             
@@ -236,6 +265,9 @@
         }
         return $record;
     }
+
+    
+    
     
     /**
     * Retrieves a data source record out of the database
@@ -251,49 +283,34 @@
     * @param mixed $id Record ID
     */
     function getDataSource($system, $id) {
-        global $recordQuery;
         global $detailQuery;
-        $record = new stdClass();
-        
-        // Select the record
-        $query = $recordQuery." WHERE r.rec_ID=".$id;
-        $mysqli = $system->get_mysqli();
-        $res = $mysqli->query($query);
+        $record = getRecordByID($system, $id);
 
-        if ($res) {
-            $row = $res->fetch_assoc();
-            if($row) {
-                // Data object containing the row values
-                $record = getRecord($row);
-                
-                // Retrieve extended details
-                $query = $detailQuery . $record->id;
-                $details = $mysqli->query($query);
-                if($details) {
-                    // Performing record type checks:
-                    
-                    // TILED MAP IMAGE LAYER
-                    if($record->rectypeID == RT_TILED_IMAGE_LAYER) {   
-                        $record = getTiledImageLayer($record, $details);    
-                    // KML LAYER    
-                    }else if($record->rectypeID == RT_KML_LAYER){
-                        $record = getKMLLayer($record, $details);   
-                    // SHAPE LAYER    
-                    }else if($record->rectypeID == RT_SHP_LAYER){ 
-                        $record = getShapeLayer($record, $details);  
-                    // UNTILED MAP IMAGE LAYER
-                    }else if($record->rectypeID == RT_IMAGE_LAYER){
-                        $record = getUntiledImageLayer($record, $details);
-                    // MAPABLE QUERY LAYER   
-                    }else if($record->rectypeID == RT_QUERY_LAYER){
-                        $record = getMapableQueryLayer($record, $details);    
-                    // UNKNOWN TYPE    
-                    }else{
-                        $record->type = "UNKNOWN";
-                    }
-                }
+        // Retrieve extended details
+        $query = $detailQuery . $record->id;
+        $details = $system->get_mysqli()->query($query);
+        if($details) {
+            // TILED MAP IMAGE LAYER
+            if($record->rectypeID == RT_TILED_IMAGE_LAYER) {   
+                $record = getTiledImageLayer($record, $details);    
+            // KML LAYER    
+            }else if($record->rectypeID == RT_KML_LAYER){
+                $record = getKMLLayer($record, $details);   
+            // SHAPE LAYER    
+            }else if($record->rectypeID == RT_SHP_LAYER){ 
+                $record = getShapeLayer($record, $details);  
+            // UNTILED MAP IMAGE LAYER
+            }else if($record->rectypeID == RT_IMAGE_LAYER){
+                $record = getUntiledImageLayer($record, $details);
+            // MAPABLE QUERY LAYER   
+            }else if($record->rectypeID == RT_QUERY_LAYER){
+                $record = getMapableQueryLayer($record, $details);    
+            // UNKNOWN TYPE    
+            }else{
+                $record->type = $record->rectypeID;
             }
-        }
+        }   
+        
         return $record;
     }
     
@@ -315,57 +332,43 @@
     */
     function getMapLayer($system, $id) {
         //echo "getMapLayer for id".$id;
-        global $recordQuery;
         global $detailQuery;
-        $layer = new stdClass();
-        
-        // Retrieve record information
-        $query =  $recordQuery." WHERE r.rec_ID=$id";
-        $mysqli = $system->get_mysqli();
-        $res = $mysqli->query($query);
-        if ($res) {
-            // Get details
-            $row = $res->fetch_assoc();
-            if($row) {
-                // Layer object containing the row values
-                $layer = getRecord($row);
+        $layer = getRecordByID($system, $id);
                 
-                // Retrieve extended details
-                $query = $detailQuery . $layer->id;
-                $details = $mysqli->query($query);
-                if($details) {
-                    // Parse all details 
-                    while($detail = $details->fetch_assoc()) {  
-                        // Values
-                        //print_r($detail);
-                        $type = $detail["dtl_DetailTypeID"]; 
-                        $value = $detail["dtl_Value"];
-                        //echo "\nLAYER | Type: #" . $type . " --> " . $value;
-                                
-                        // Type check
-                        if($type == DT_MAXIMUM_ZOOM) {
-                            // Maximum zoom
-                            $layer->maxZoom = floatval($value);
-                             
-                        }else if($type == DT_MINIMUM_ZOOM) {
-                            // Minimum zoom
-                            $layer->minZoom = floatval($value); 
-                             
-                        }else if($type == DT_OPACITY) {
-                            // Opacity
-                            $layer->opacity = floatval($value);
-                            
-                        }else if($type == DT_THUMBNAIL) {
-                            // Uploaded thumbnail
-                            $layer->thumbnail = getFileURL($system, $detail["dtl_UploadedFileID"]);
-                            
-                        }else if($type == DT_DATA_SOURCE) {
-                            // Data source
-                            $layer->dataSource = getDataSource($system, $value);
-                        }
-                    }
+        // Retrieve extended details
+        $query = $detailQuery . $layer->id;
+        $details = $system->get_mysqli()->query($query);
+        if($details) {
+            // Parse all details 
+            while($detail = $details->fetch_assoc()) {  
+                // Values
+                //print_r($detail);
+                $type = $detail["dtl_DetailTypeID"]; 
+                $value = $detail["dtl_Value"];
+                //echo "\nLAYER | Type: #" . $type . " --> " . $value;
+                        
+                // Type check
+                if($type == DT_MAXIMUM_ZOOM) {
+                    // Maximum zoom
+                    $layer->maxZoom = floatval($value);
+                     
+                }else if($type == DT_MINIMUM_ZOOM) {
+                    // Minimum zoom
+                    $layer->minZoom = floatval($value); 
+                     
+                }else if($type == DT_OPACITY) {
+                    // Opacity
+                    $layer->opacity = floatval($value);
+                    
+                }else if($type == DT_THUMBNAIL) {
+                    // Uploaded thumbnail
+                    $layer->thumbnail = getFileURL($system, $detail["dtl_UploadedFileID"]);
+                    
+                }else if($type == DT_DATA_SOURCE) {
+                    // Data source
+                    $layer->dataSource = getDataSource($system, $value);
                 }
-            }
+            } 
         } 
         
         //print_r($layer);
