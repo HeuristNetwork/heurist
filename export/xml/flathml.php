@@ -112,6 +112,8 @@
     require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
     require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
 
+    set_time_limit(0); //no limit    
+    
     mysql_connection_select(DATABASE);
 
     $relRT = (defined('RT_RELATION') ? RT_RELATION : 0);
