@@ -580,7 +580,7 @@ $.widget( "heurist.ruleBuilder", {
                 }
                 
             }else{
-                query = rt_target + 'links:'+rt_source;
+                query = rt_target + 'links:'+rt_source;     //all links
             }
         }
         return query;  

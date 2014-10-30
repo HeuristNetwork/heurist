@@ -648,8 +648,8 @@
                     return new LinkedToParentPredicate($this, $pred_val);                                            
                 case 'related_to': 
                     return new RelatedToParentPredicate($this, $pred_val);
-                //case 'links': 
-                //    return new RelatedOrLinkedFromParentPredicate($this, $pred_val);
+                case 'links': 
+                    return new AllLinksPredicate($this, $pred_val);
                     
                 case 'linkto':    // linkto:XXX matches records that have a recDetails reference to XXX
                     return new LinkToPredicate($this, $pred_val);
@@ -1682,10 +1682,10 @@
                 $query = $pquery->parentquery;
                 //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
 
-                $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["from"]  = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["from"]  = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
                 $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
                 $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
-                $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
                 
                 $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
@@ -1839,7 +1839,7 @@
     }
 
     
-    class RelatedOrLinkedFromParentPredicate extends Predicate {
+    class AllLinksPredicate  extends Predicate {
         function makeSQL() {
         
                     $predicate1 =  LinkedFromParentPredicate($parent, $value);                                            
