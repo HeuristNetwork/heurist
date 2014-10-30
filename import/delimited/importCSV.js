@@ -33,6 +33,8 @@ function init() {
 
     $("#div-progress").hide();
 
+    var _dialogbox;
+    
     var select_rectype = $("#sa_rectype");
     createRectypeSelect( select_rectype.get(0), null, 'select...' );
 
@@ -283,7 +285,17 @@ function init() {
     $(".analized2").show();
 
     if(form_vals['error_message']){
-        alert(form_vals['error_message']);
+        if(form_vals['error_message'].indexOf('Mapping')===0){
+            
+            $("#btnMatchCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
+            $("#btnMatchProceed").click(function(){ alert('process'); });
+            
+            
+            _dialogbox = top.HEURIST.util.popupElement(top.window, document.getElementById('divMatchingPopup'), 
+                {title:'Missed required fields',height:400,width:800});
+        }else{                                                                                      
+            alert(form_vals['error_message']);
+        }
     }
     
     //form_vals = null;

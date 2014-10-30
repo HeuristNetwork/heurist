@@ -32,7 +32,7 @@
 
 	// TO DO: Needs to use global concept nubmers in place of local codes for rectype/fields
 
-	set_time_limit(0);
+	set_time_limit(0); //no limit
 
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');

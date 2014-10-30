@@ -558,10 +558,12 @@
         $disamb_ids = @$params['disamb_id'];   //record ids
         $disamb_keys = @$params['disamb_key'];  //key values
         $disamb_resolv = array();
+//DEBUG print "disamb_keys :".print_r($disamb_keys, true)."<br>";            
         if($disamb_keys){
             foreach($disamb_keys as $idx => $keyvalue){
-                $disamb_resolv[$keyvalue] = $disamb_ids[$idx];
+                $disamb_resolv[$disamb_ids[$idx]] = $keyvalue;  //rec_id => keyvalue
             }
+//DEBUG print "disamb resolution :".print_r($disamb_resolv, true)."<br>";            
         }
 
         //get rectype to import
@@ -677,12 +679,14 @@
             while ($row = $res->fetch_row()){
                 $imp_id = $row[0];
                 $row[0] = $params_dt;
+                
 
                 $multivalue = $row[$multivalue_field_name_idx];
 
                 $ids = array();
                 //split multivalue field
                 $values = getMultiValues($multivalue, $params['csv_enclosure'], $params['csv_mvsep']);
+                
                 foreach($values as $idx=>$value){
                     $row[$multivalue_field_name_idx] = $value;
                     //verify that not empty
@@ -695,8 +699,16 @@
                     $fc = $row;
                     array_walk($fc, 'trim_lower_accent2');
 
-                    $keyvalue = implode($params['csv_mvsep'], $fc);
+                    $keyvalue = implode($params['csv_mvsep'], $fc);  //csv_mvsep - separator
 
+                    
+/*                if($imp_id==240){
+print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
+//print "DEBUG ".$multivalue."  ".$multivalue_field_name_idx."<br>";
+//print "DEBUG ".$multivalue."  ".implode(",", $sel_fields)."  ".print_r($values, true)."<br>";
+                }*/
+                    
+                    
                     if(!@$pairs[$keyvalue]){  //was $value && $value!="" &&
                         //search for ID
 
@@ -724,11 +736,14 @@
                             array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
                             //DEBUG print "<br>push :".print_r($imp_session['validation']['recs_insert'], true);
                             
-                        }else if(count($disamb)==1 || @$disamb_resolv[addslashes($keyvalue)]){  //eirther found exact or disamiguation is resolved 
-
+                        }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){  
+                            //either found exact or disamiguation is resolved 
+                        
                             if(count($disamb)>1){
+                                $rec_ID = array_search($keyvalue, $disamb_resolv, true);
+                                print "<br>resolved: ".$keyvalue."   ".$rec_ID.", ";
                                 //DEBUG print "<br> ".$keyvalue."   ".@$disamb_resolv[addslashes($keyvalue)].".";
-                                $rec_ID = $disamb_resolv[addslashes($keyvalue)];
+                                //$rec_ID = $disamb_resolv[addslashes($keyvalue)];
                             }
 
                             $new_id = $rec_ID;
@@ -739,6 +754,14 @@
                             array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
                             
                         }else{
+                            
+                            /*if($disamb_resolv)
+                            foreach ($disamb_resolv as $rec_ID=>$kv){
+                                if($kv==$keyvalue){
+                                    break;
+                                }
+                            }*/
+                            
                             $new_id= 'Found:'.count($disamb); //Disambiguation!
                             $disambiguation[$keyvalue] = $disamb;
                         }
@@ -890,7 +913,7 @@
 
 
         //get field type
-        $field_type = $params['sa_keyfield_type'];
+        $field_type = @$params['sa_keyfield_type'];
 
         if(!@$imp_session['indexes_keyfields']){
             $imp_session['indexes_keyfields'] = array();
@@ -1310,7 +1333,8 @@
             ($imp_session['validation']['count_insert']>0 ||  // there are records to be inserted
                 ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
-            return "The following Required fields have not been mapped to input columns: ".implode(",", $missed);
+            return "Mapping: ".implode(",", $missed);
+            //"The following Required fields have not been mapped to input columns: ".implode(",", $missed);
         }
 
         if($id_field){ //validate only for defined records IDs
@@ -2646,11 +2670,11 @@
             print '<input type="hidden" name="disamb_key[]" value="'.addslashes($keyvalue).'"/><select name="disamb_id[]">';
 
             foreach($disamb as $rec_ID =>$rec_Title){
-                print '<option value="'.$rec_ID.'">'.$rec_Title.'</option>';
+                print '<option value="'.$rec_ID.'">[rec# '.$rec_ID.'] '.$rec_Title.'</option>';
             }
 
             print '</select>&nbsp;';
-            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&q=ids:'.implode(",", array_keys($disamb)).'\', \'_blank\');}">edit ambiguities</a>';
+            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&q=ids:'.implode(",", array_keys($disamb)).'\', \'_blank\');}">view records</a>';
             print '</td></tr>';
         }
 
@@ -3076,12 +3100,33 @@
     }
     
     
+    function my_strtr($inputStr, $from, $to, $encoding = 'UTF-8') {
+            $inputStrLength = mb_strlen($inputStr, $encoding);
+
+            $translated = '';
+
+            for($i = 0; $i < $inputStrLength; $i++) {
+                    $currentChar = mb_substr($inputStr, $i, 1, $encoding);
+
+                    $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
+
+                    if($translatedCharPos === false) {
+                            $translated .= $currentChar;
+                    }
+                    else {
+                            $translated .= mb_substr($to, $translatedCharPos, 1, $encoding);
+                    }
+            }
+
+            return $translated;
+    }    
+    
     function stripAccents($stripAccents){
-        return strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+        return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
     }
     //
     function  trim_lower_accent($item){
-        return stripAccents(mb_strtolower(trim($item)));
+        return mb_strtolower(stripAccents($item)); //stripAccents(mb_strtolower(trim($item)));
     }
     //
     function  trim_lower_accent2(&$item, $key){

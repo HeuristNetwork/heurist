@@ -1037,6 +1037,21 @@
     <?php
     }
 ?>
+
+<div id="divMatchingPopup" style="display:none">
+<p>One or more of the records you are trying to update does not yet exist in the database, so it/they need to be created from scratch. However, you have not assigned data for all the required fields, so these records cannot be created.</p> 
+<br/>
+<br/>
+<p>Option 1: Hit Cancel, then assign the required data fields so that the missing records can be created. It is essential to check the appropriate radio button to make sure that the values in your input file do not overwrite data for existing (matched) records in the database which may have been edited or imported from another source. </p>
+<br/>
+<p>Option 2: Download the non-matching rows as a tab-delimited text file and delete them from the current data before proceeding:  download unmatched rows    [[ Delete unmatched rows ]]</p>
+<br/>
+<p>If you proceed, Heurist will update only the records which have been matched to input rows</p>
+<br/>
+<p><input type="button" id="btnMatchProceed" value="Proceed"/>  <input id="btnMatchCancel" type="button" value="Cancel"/></p>
+
+</div>
+
 </body>
 </html>
 
