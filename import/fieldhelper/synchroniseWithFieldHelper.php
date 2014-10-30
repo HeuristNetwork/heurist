@@ -98,13 +98,13 @@
             $progress_divid = 0;
             $system_folders = array(HEURIST_THUMB_DIR,
                         HEURIST_FILESTORE_DIR."/generated-reports/",
-                        HEURIST_HML_DIR,
-                        HEURIST_HTML_DIR,
                         HEURIST_ICON_DIR,
                         HEURIST_FILESTORE_DIR."/scratch/",
                         HEURIST_FILESTORE_DIR."/settings/",
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
+                if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
+                if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
                         
             mysql_connection_overwrite(DATABASE);
             if(mysql_error()) {
@@ -223,7 +223,7 @@
                 $rep_issues = "";
                 $progress_divid = 0;
 
-                set_time_limit(300);
+                set_time_limit(0); //no limit
 
                 doHarvest($dirs);
 

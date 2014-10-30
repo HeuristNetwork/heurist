@@ -116,12 +116,12 @@
                 
                 $system_folders = array(HEURIST_THUMB_DIR,
                         HEURIST_FILESTORE_DIR."/generated-reports/",
-                        HEURIST_HML_DIR,
-                        HEURIST_HTML_DIR,
                         HEURIST_ICON_DIR,
                         HEURIST_FILESTORE_DIR."/settings/",
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
+                if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
+                if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
                 
 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
