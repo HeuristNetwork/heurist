@@ -1,6 +1,7 @@
 HeuristOverlay.prototype = new google.maps.OverlayView();
 var map;
 var data;
+var overlays = [];
 
 /**
 * Adds a map overlay to the given map.
@@ -32,7 +33,6 @@ function addMapOverlay(_map) {
         // Have any map documents been defined?
         if(data.length > 0) {
             addOptions();
-            
         }
     }).fail(function( jqxhr, textStatus, error ) {
         var msg = "Map Document API call failed: " + textStatus + ", " + error;
@@ -60,10 +60,23 @@ function addOptions() {
         
         // Show overlays for the selected option 
         var index = $(this).prop("value");
-        console.log("Index: " + index);
         if(index >= 0 && index < data.length) {
-            console.log("ADDING OVERLAYS");
-            addOverlays(data[index]);  
+            // Selected document
+            var doc = data[index];
+            addOverlays(doc);  
+            
+            // Listen to checkbox changes
+            $("#legend input").change(function(e) {
+                // Hide or display the layer
+                var index = $(this).prop("value");
+                var checked = $(this).prop("checked");
+                console.log("Checked: " + checked);
+                if(checked) {
+                    overlays[index].setMap(map); 
+                }else{
+                    overlays[index].setMap(null);
+                }
+            });
         }
     });   
 }
@@ -72,7 +85,13 @@ function addOptions() {
 * Removes all overlays 
 */
 function removeOverlays() {
-    
+    if(overlays.length > 0) {
+        for(var i = 0; i < overlays.length; i++) {
+            overlays[i].setMap(null);
+            overlays[i] = null;
+        }
+    }
+    overlays = [];
 }
 
 /**
@@ -87,21 +106,26 @@ function emptyLegend() {
 * @param doc A map document
 */
 function addOverlays(doc) {
-    // Map document overlay
+    // Bounds
     var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
     var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
     var bounds = new google.maps.LatLngBounds(swBound, neBound); 
+
+    // Map document overlay
     addMapDocumentOverlay(bounds, doc);
+    map.fitBounds(bounds);
     
     // Map document layers
+    var index = 0;
     if(doc.layers.length > 0) {
         for(var i = 0; i < doc.layers.length; i++) {
-            addLayerOverlay(bounds, doc.layers[i]);
+            addLayerOverlay(bounds, doc.layers[i], index);
+            index++;
         }
     }
     
     // Top layer
-    addLayerOverlay(doc.topLayer);
+    addLayerOverlay(bounds, doc.toplayer, index);
 }
 
 /**
@@ -110,31 +134,35 @@ function addOverlays(doc) {
 */
 function addMapDocumentOverlay(bounds, doc) {
     var overlay = new HeuristOverlay(bounds, doc.thumbnail, map);
+    overlays.push(overlay);
 }
 
 /**
 * Adds an overlay for the Layer object
 * @param layer Layer object
 */
-function addLayerOverlay(bounds, layer) {
-    if(layer !== undefined) {
-        console.log("addLayerOverlay");
-        console.log(layer);
+function addLayerOverlay(bounds, layer, index) {
+    console.log("addLayerOverlay");
+    console.log(layer);
         
+    if(layer !== undefined) {
         // Legend
-        $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+layer.id+"' checked>["+layer.id+"] "+layer.title+"</label>");
+        $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>["+layer.id+"] "+layer.title+"</label>");
     
         // Map
         var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
+        overlays.push(overlay);
         
         /*
         layer.opacity;
         layer.minZoom;
         layer.maxZoom;
         */   
-        
     }
 }
+
+
+
 
 /**
 * HeuristOverlay constructor
