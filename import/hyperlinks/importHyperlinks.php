@@ -39,6 +39,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 //require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 require_once(dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 
 //require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
@@ -72,6 +73,12 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	} else if (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
+        
+error_log("LOAD FROM ".$_REQUEST['url']);        
+
+        $src = loadRemoteURLContentWithRange($_REQUEST['url'], null, false, 120);
+
+/*        
 		$ch = curl_init();
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0 );
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -91,9 +98,15 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$error = curl_error($ch);
 		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+error_log("CODE=".$error);        
         
 		if (intval($code) >= 400)
 			$error = 'URL could not be retrieved. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
+*/      
+        if(!$src){
+            $error = 'URL could not be retrieved. Verify your proxy setting in configuration file. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
+        }
+            
 		$srcname = @$_REQUEST['url'];
 	}
 

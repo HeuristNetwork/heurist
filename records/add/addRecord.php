@@ -309,7 +309,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 										'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
-										'rec_FlagTemporary' => ! ($url  ||  $_REQUEST['bkmrk_bkmk_title'])));
+										'rec_FlagTemporary' => ($url  ||  @$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
 
         if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
 
@@ -361,7 +361,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 									'rec_NonOwnerVisibility' => (@$_REQUEST['rec_visibility']?(strtolower($_REQUEST['rec_visibility'])):
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
-									'rec_FlagTemporary' => ! ($_REQUEST['bkmrk_bkmk_title']))); // saw BUG???
+                                    'rec_FlagTemporary' => (@$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
                                     
 
         if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
