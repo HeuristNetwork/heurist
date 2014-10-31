@@ -170,6 +170,7 @@ function init() {
             $("#div_idfield").hide();
         }
         $(".analized2").hide();  //hide after rectype change
+        if ($("#divPreviousBtn").is(":visible")) $(".analized3").show();
 
 
     }); //end record type change
@@ -283,12 +284,41 @@ function init() {
     }
 
     $(".analized2").show();
+    $(".analized3").hide();
 
     if(form_vals['error_message']){
         if(form_vals['error_message'].indexOf('Mapping')===0){
             
             $("#btnMatchCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
-            $("#btnMatchProceed").click(function(){ alert('process'); });
+            $("#btnMatchProceed").click(function(){  });
+            
+            $("#btnUnMatchDownload").click(function(){ 
+                var url = 'importCSV.php/import.csv?db='+currentDb+'&getsession='+$('#import_id').val()+'&mode=1&idfield='+$("#recid_field").val();
+                window.open(url,'_blank')            
+            });
+            $("#btnUnMatchDelete").click(function(){ 
+                $.ajax({
+                    url: top.HEURIST.basePath+'import/delimited/importCSV.php',
+                    type: "POST",
+                    data: {deleteunmatched: $('#import_id').val(), idfield:$("#recid_field").val(), db:currentDb},
+                    dataType: "json",
+                    cache: false,
+                    error: function(jqXHR, textStatus, errorThrown ) {
+                        //alert('Error connecting server. '+textStatus);
+                    },
+                    success: function( response, textStatus, jqXHR ){
+                        if(response){
+                            if(response>0){
+                                $("#divUnmatchedRes").html('Removed '+response+' recrods');
+                                $("#divUnmatchedBtns").hide();
+                            }else{
+                                $("#divUnmatchedRes").html(response);
+                            }
+                        }
+                    }
+                });                
+                        
+            });
             
             
             _dialogbox = top.HEURIST.util.popupElement(top.window, document.getElementById('divMatchingPopup'), 
@@ -458,6 +488,7 @@ function onFtSelect(ind){
 
     if(ind>=0){
         $(".analized2").hide();
+        if ($("#divPreviousBtn").is(":visible")) $(".analized3").show();
     }
 
     return;
@@ -498,6 +529,7 @@ function onFtSelect2(ind){
 
     if(ind>=0){
         $(".analized2").hide();
+        if ($("#divPreviousBtn").is(":visible")) $(".analized3").show();
     }
 
     return;

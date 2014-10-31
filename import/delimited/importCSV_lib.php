@@ -2455,13 +2455,52 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     }
 
     /**
+    * remove unmatched records from import data
+    * 
+    * @param mixed $session_id
+    * @param mixed $idfield
+    */
+    function delete_unmatched_records($session_id, $idfield){
+        
+        global $mysqli;
+        
+        header('Content-type: text/javascript');
+
+        $session = get_import_session($mysqli, $session_id);
+        
+        if(!is_array($session)){
+            print $session;
+            return;
+        }
+        
+        $import_table = $session['import_table'];
+      
+        $query = " DELETE FROM ".$import_table
+        ." WHERE ".$idfield."<0";
+
+        $res = $mysqli->query($query);
+        
+//error_log($query."  ".$res."  ".$mysqli->affected_rows);
+        
+        if($res){
+            //read content of tempfile and send it to client
+            print $mysqli->affected_rows;
+        }else{
+            print "SQL error: ".$mysqli->error;
+        }
+        
+        
+    }
+    
+    /**
     * download seesion data into file
     *
     * @param mixed $mysqli
     * @param mixed $import_id
+    * @param mixed $mode - 0 matched, 1 unmatched
     * @return mixed
     */
-    function download_import_session($session_id){
+    function download_import_session($session_id, $idfield=null, $mode=1){
 
         global $mysqli;
 
@@ -2494,15 +2533,22 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         //export content of import table into tempfile
         $tmpFile = tempnam(sys_get_temp_dir(), 'export');
         $tmpFile = $tmpFile."1";
+        if(strpos($tmpFile,"\\")>0){
+            $tmpFile = str_replace("\\","/",$tmpFile);
+        }
 
         $query = "SELECT ".implode(',',$headers)
         ." UNION ALL "
         ." SELECT ".implode(",",$list)." FROM ".$import_table
+        .($idfield!=null?" WHERE ".$idfield.($mode==0?">0":"<0"):"")
         ." INTO OUTFILE '".$tmpFile."'"
         ." FIELDS TERMINATED BY ','"
         ." ENCLOSED BY '\"'"
         ." LINES TERMINATED BY '\n' ";
 
+//error_log($query."  ".$mode);
+        
+        
         $res = $mysqli->query($query);
         if($res){
             //read content of tempfile and send it to client

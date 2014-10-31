@@ -1,5 +1,4 @@
 <?php
-
     /**
     * importCSV.php: UI for delimited text file normalising data import
     * filename: explanation
@@ -49,9 +48,15 @@
             exit();
         } else
             if( @$_REQUEST["getsession"] ){ //download session
-                download_import_session($_REQUEST["getsession"]);
+                download_import_session($_REQUEST["getsession"], @$_REQUEST["idfield"], @$_REQUEST["mode"]);
+                exit();
+        } else
+            if( @$_REQUEST["deleteunmatched"] ){ //download session
+                delete_unmatched_records($_REQUEST["deleteunmatched"], @$_REQUEST["idfield"]);
                 exit();
             }
+            
+            
 ?>
 
 <html>
@@ -543,7 +548,7 @@
 
                         </span>
                     </span>
-                    <span class="importing">
+                    <span class="importing" id="divPreviousBtn">
                         <input type="button" value="<< Previous" style="font-weight: bold;"
                             title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
                     </span>
@@ -562,32 +567,38 @@
                         $cnt_disamb   = count(@$validationRes['disambiguation']);
                         $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
 
+                        
+                        $url = 'importCSV.php/import.csv?db='.HEURIST_DBNAME.'&getsession='.@$_REQUEST["import_id"].'&idfield='.@$_REQUEST["recid_field"].'&mode=';
+                        
                         $cnt_update  = intval(@$validationRes['count_update']);
                         $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
+                        $download_update= ($cnt_update>0)?"<a href='#' onclick='window.open(\"".$url."0\" ,\"_blank\")'>download</a>" :"&nbsp;";
 
                         $cnt_insert  = intval(@$validationRes['count_insert']);
                         $show_insert = ($cnt_insert>0)?"<a href='#' onclick='showRecords(\"insert\")'>show</a>" :"&nbsp;";
+                        $download_insert= ($cnt_insert>0)?"<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>" :"&nbsp;";
 
                         $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
 
                     ?>
                     <td><div class="analized2">
                             <table style="display: inline-block; border:none" border="0">
-                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td></tr>
-                                <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td></tr>
+                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td><td><?=$download_update?></td></tr>
+                                <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td><td><?=$download_insert?></td></tr>
                                 <?php        if($sa_mode==0){ ?>
                                     <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
-                                        <td><?=$cnt_disamb?></td><td><?=$show_disamb?></td></tr>
+                                        <td><?=$cnt_disamb?></td><td><?=$show_disamb?></td><td></td></tr>
                                     <?php        } else { ?>
-                                    <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td></tr>
+                                    <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td><td></td></tr>
                                     <?php        }        ?>
                             </table>
 
                             <div style="float:right;vertical-align:middle;padding-top:10px">
                                 <?php if($sa_mode==1){  ?>
-                                    <span class="importing">
+                                    <!-- <span class="importing">
                                         <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
                                             onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
+                                     -->       
                                     <?php }
                                     if($cnt_disamb>0){
                                     ?>
@@ -612,11 +623,16 @@
                 ?>
 
                 <td>
-                    <span class="importing">
-                        <input  id="btnStartImport" type="submit"
-                            value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
-                    </span>
-
+                    <?php 
+                          if($sa_mode==1 && $validationRes){  ?>
+                            <span class="importing analized2">
+                                        <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
+                                            onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
+                    <?php } ?>
+                            <span class="importing analized3">
+                                <input  id="btnStartImport" type="submit"
+                                    value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
+                            </span>
                 </td>
             </tr>
         </table>
@@ -1040,14 +1056,15 @@
 
 <div id="divMatchingPopup" style="display:none">
 <p>One or more of the records you are trying to update does not yet exist in the database, so it/they need to be created from scratch. However, you have not assigned data for all the required fields, so these records cannot be created.</p> 
-<br/>
-<br/>
+
 <p>Option 1: Hit Cancel, then assign the required data fields so that the missing records can be created. It is essential to check the appropriate radio button to make sure that the values in your input file do not overwrite data for existing (matched) records in the database which may have been edited or imported from another source. </p>
-<br/>
-<p>Option 2: Download the non-matching rows as a tab-delimited text file and delete them from the current data before proceeding:  download unmatched rows    [[ Delete unmatched rows ]]</p>
-<br/>
+
+<p>Option 2: Download the non-matching rows as a tab-delimited text file and delete them from the current data before proceeding:  
+<div id="divUnmatchedBtns"><input type="button" id="btnUnMatchDownload" value="Download unmatched rows"/>  <input id="btnUnMatchDelete" type="button" value="Delete unmatched rows"/></div>
+<div id="divUnmatchedRes" class="error"></div>
+</p>
+
 <p>If you proceed, Heurist will update only the records which have been matched to input rows</p>
-<br/>
 <p><input type="button" id="btnMatchProceed" value="Proceed"/>  <input id="btnMatchCancel" type="button" value="Cancel"/></p>
 
 </div>
