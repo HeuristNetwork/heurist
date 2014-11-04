@@ -57,7 +57,7 @@
         
         <script type="text/javascript">
             var db =  '<?=$_REQUEST['db']?>';
-            var rules = '<?=$_REQUEST['rules']?>';                             
+            var rules = '<?=@$_REQUEST['rules']?$_REQUEST['rules']:''?>';                             
         </script>
         <script type="text/javascript" src="ruleBuilderDialog.js"></script>
         

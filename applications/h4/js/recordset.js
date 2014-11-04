@@ -472,7 +472,7 @@ function hRecordSet(initdata) {
             var records2 = recordset2.getRecords();
             var records_new = records;
             for (recid in records2){
-                if(recid && !records[recid]){
+                if(recid){ //&& !records[recid]){
                     records_new[recid] = records2[recid];
                 }
             }

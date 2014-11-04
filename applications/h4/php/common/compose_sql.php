@@ -32,7 +32,7 @@
     define('SORT_TITLE', 't');
     
     
-    define('DT_RELATION_TYPE', 6);
+    //defined in const.php define('DT_RELATION_TYPE', 6);
 
     $mysqli = null;
 
@@ -1558,37 +1558,47 @@
     class LinkedFromParentPredicate extends Predicate {
         function makeSQL() {
             
-            $source_rty_ID = null;
+            $rty_ID = null;
+            $dty_ID = null;
             //if value is specified we search linked from specific source type and field
             if($this->value){
                 $vals = explode('-', $this->value);
                 if(count($vals)>1){
-                    $source_rty_ID = $vals[0];
-                    $source_dty_ID = $vals[1];
+                    $rty_ID = $vals[0];
+                    $dty_ID = $vals[1];
                 }else{
-                    $source_rty_ID = $vals[0];
-                    $source_dty_ID = '';
+                    $rty_ID = $vals[0];
+                    $dty_ID = '';
                 }
             }
-
+/*
             //additions for FROM and WHERE 
-            if($source_rty_ID){
+            if($rty_ID){
             
-                if($source_dty_ID){ 
+                if($dty_ID){ 
                     //linked from specific record and fields
                     $add_from =  'recDetails bd ';
-                    $add_where =  'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and bd.dtl_DetailTypeID='.$source_dty_ID;
+                    $add_where =  'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$rty_ID.' and bd.dtl_DetailTypeID='.$dty_ID;
                 }else{ 
                     //linked from specific record type (by any field)
                     $add_from =  'defDetailTypes, recDetails bd ';
-                    $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" '; 
+                    $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and rd.rec_RecTypeID='.$rty_ID.' '; 
                 }
             }else{ //any linked from
                     $add_from =  'defDetailTypes, recDetails bd ';
-                    $add_where = 'bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" ';
+                    $add_where = 'bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" ';
             }
-            
+
            $select = 'exists (select bd.dtl_RecID  ';
+*/
+            //NEW  ---------------------------
+            $add_from  = 'recLinks rl ';
+            $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'') 
+                         . ' rl.rl_SourceID=rd.rec_ID and '
+                         . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+
+            $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
+           
             
             $pquery = &$this->getQuery();
             if ($pquery->parentquery){
@@ -1606,34 +1616,13 @@
 //error_log("select: ".$select);                
                 
             }else{
-                
-               $select = $select.' FROM '.(($source_rty_ID)?'Records rd,':'').$add_from.' WHERE '.$add_where.')';
-                /*
-                if($source_rty_ID){
-                
-                    if($source_dty_ID){ //linked from specific record and fields
-                        
-                        return ' exists (select bd.rec_ID from Records rd, recDetails bd '
-                            . 'where bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and bd.dtl_DetailTypeID='.$source_dty_ID.')';
-                        
-                    }else{ //linked from specific record type (by any field)
-                        
-                        return ' exists (select bd.rec_ID from Records rd, defDetailTypes, recDetails bd '
-                            . 'where bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource")';
-                        
-                    }
-                }else{ //any linked from
-                    
-                    return ' exists (select bd.rec_ID from defDetailTypes, recDetails bd '
-                        . 'where bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource")';
-                    
-                }
-               */
+               $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
             }
             
             return $select; 
         }
     }
+    
     
     //
     // find records that are linked (have pointers) to  parent/top query 
@@ -1643,31 +1632,33 @@
     class LinkedToParentPredicate extends Predicate {
         function makeSQL() {
             
-            $target_rty_ID = null;
+            $rty_ID = null;
+            $dty_ID = null;
             //if value is specified we search linked from specific source type and field
             if($this->value){
                 $vals = explode('-', $this->value);
                 if(count($vals)>1){
-                    $target_rty_ID = $vals[0];
-                    $target_dty_ID = $vals[1];
+                    $rty_ID = $vals[0];
+                    $dty_ID = $vals[1];
                 }else{
-                    $target_rty_ID = $vals[0];
-                    $target_dty_ID = '';
+                    $rty_ID = $vals[0];
+                    $dty_ID = '';
                 }
             }
 
+/*            
             //additions for FROM and WHERE 
-            if($target_rty_ID){
+            if($rty_ID){
             
-                if($target_dty_ID){ 
+                if($dty_ID){ 
                     //linked from specific record and fields
                     $add_from =  'recDetails bd ';
-                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$target_rty_ID.' and bd.dtl_DetailTypeID='.$target_dty_ID.' and bd.dtl_Value=rd.rec_ID ';
+                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$rty_ID.' and bd.dtl_DetailTypeID='.$dty_ID.' and bd.dtl_Value=rd.rec_ID ';
                     
                 }else{ 
                     //linked to specific record type (by any field)
                     $add_from =  'defDetailTypes, recDetails bd ';
-                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$target_rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value=rd.rec_ID ';
+                    $add_where = 'TOPBIBLIO.rec_ID = bd.dtl_RecID and rd.rec_RecTypeID='.$rty_ID.' and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value=rd.rec_ID ';
                 }
             }else{ //any linked to
                     $add_from =  'defDetailTypes, recDetails bd ';
@@ -1675,6 +1666,16 @@
             }
             
             $select = 'exists (select bd.dtl_RecID  ';
+*/            
+            
+            //NEW  ---------------------------
+            $add_from  = 'recLinks rl ';
+            $add_where = (($rty_ID) ?'rd.rec_RecTypeID='.$rty_ID.' and ':'') 
+                         . ' rl.rl_TargetID=rd.rec_ID and '
+                         . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
+
+            $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
+            
             
             $pquery = &$this->getQuery();
             if ($pquery->parentquery){
@@ -1700,8 +1701,9 @@
         }
     }
     
+    
     //
-    // find records that are related  (targets) from parent/top query 
+    // find records that are related  from (targets) parent/top query 
     // 
     // 1. take parent query from parent object
     //
@@ -1723,7 +1725,7 @@
                     $relation_type_ID = '';
                 }
             }
-
+ /*
             //additions for FROM and WHERE 
             if($source_rty_ID){  //source record type is defined
             
@@ -1740,10 +1742,20 @@
 
             }else{ //any related from
                     $add_from =  'recRelationshipsCache rel ';
-                    $add_where = 'rel.rrc_TargetRecID=TOPBIBLIO.rec_ID ';
+                    $add_where = 'rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID ';
             }
             
             $select = 'exists (select rel.rrc_TargetRecID  ';
+*/            
+            
+            //NEW  ---------------------------
+            $add_from  = 'recLinks rl ';
+            $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'') 
+                         . ' rl.rl_SourceID=rd.rec_ID and '
+                         . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
+
+            $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
+           
             
             $pquery = &$this->getQuery();
             if ($pquery->parentquery){
@@ -1762,7 +1774,7 @@
                 
             }else{
                 
-               $select = $select.' FROM '.(($source_rty_ID)?'Records rd,':'').$add_from.' WHERE '.$add_where.')';
+               $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
             }
             
             return $select; 
@@ -1770,7 +1782,7 @@
     }
 
     //
-    // find records that are related  (targets) from parent/top query 
+    // find records that are related to (sources) parent/top query 
     // 
     // 1. take parent query from parent object
     //
@@ -1792,7 +1804,7 @@
                     $relation_type_ID = '';
                 }
             }
-
+/*
             //additions for FROM and WHERE 
             if($source_rty_ID){  //source record type is defined
             
@@ -1807,12 +1819,22 @@
                 }
             
 
-            }else{ //any related from
+            }else{ //any related TO
                     $add_from =  'recRelationshipsCache rel ';
-                    $add_where = 'rel.rrc_SourceRecID=TOPBIBLIO.rec_ID ';
+                    $add_where = 'rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID ';
             }
-            
+
             $select = 'exists (select rel.rrc_SourceRecID  ';
+*/
+
+            //NEW  ---------------------------
+            $add_from  = 'recLinks rl ';
+            $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'') 
+                         . ' rl.rl_TargetID=rd.rec_ID and '
+                         . (($relation_type_ID) ?'rl.rl_RelationTypeID='.$relation_type_ID :'rl.rl_RelationID is not null' );
+
+            $select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
+
             
             $pquery = &$this->getQuery();
             if ($pquery->parentquery){
@@ -1831,25 +1853,131 @@
                 
             }else{
                 
-               $select = $select.' FROM '.(($source_rty_ID)?'Records rd,':'').$add_from.' WHERE '.$add_where.')';
+               $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
             }
             
             return $select; 
         }
     }
 
+
     
     class AllLinksPredicate  extends Predicate {
         function makeSQL() {
-        
-                    $predicate1 =  LinkedFromParentPredicate($parent, $value);                                            
+                        
+            $rty_ID = null;
+            //if value is specified we search linked from specific source type and field
+            if($this->value){
+                $vals = explode('-', $this->value);
+                if(count($vals)>1){
+                    $rty_ID = $vals[0];
+                    $rty_ID = $vals[1];
+                }
+            }
 
-                    $predicate2 = RelatedFromParentPredicate($parent, $value);                                            
-                    
-                    return "(".$predicate1->makeSQL()."  or  ".$predicate2->makeSQL().")";
+/*                        
+            $add_select = 'exists (select rd.rec_ID  ';
+                            
+            //parent query - rd (Records) and bd (Details)
+            //linked from  - bd.dtl_Value=TOPBIBLIO.rec_ID and bd.dtl_RecID=rd.rec_ID
+            //linked to      TOPBIBLIO.rec_ID=bd.dtl_RecID and bd.dtl_Value=rd.rec_ID
+    
+            $add_from =  'defDetailTypes, recDetails bd ';
+            $add_where = '((bd.dtl_RecID=rd.rec_ID and bd.dtl_Value=TOPBIBLIO.rec_ID) or '
+                         .'(TOPBIBLIO.rec_ID=bd.dtl_RecID and bd.dtl_Value=rd.rec_ID and TOPBIBLIO.rec_RecTypeID!=1)) '
+                                .'and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" ';
+            
+            if($rty_ID){
+                $add_where = $add_where . ' and rd.rec_RecTypeID='.$rty_ID;
+            }
+
+            //------------------
+            $add_from_rel =  'recRelationshipsCache rel ';
+            $add_where_rel = '((rel.rrc_SourceRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID) or '
+                             .'(rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID))';
+            if($rty_ID){  //source record type is defined
+                    $add_where_rel = $add_where_rel.' and rd.rec_RecTypeID='.$rty_ID;
+            }
+*/
+            
+            //NEW  -------------------
+            $add_from  = 'recLinks rl ';
+            $add_where = ($rty_ID)?'rd.rec_RecTypeID='.$rty_ID.' and ':'';
+
+            $add_where = $add_where.'rl.rl_TargetID=rd.rec_ID';
+            $add_select = 'TOPBIBLIO.rec_ID in (select rl.rl_SourceID ';
+
+            $add_from2  = 'recLinks rl ';
+            $add_where2 = ($rty_ID)?'rd.rec_RecTypeID='.$rty_ID.' and ':'';
+            
+            $add_where2 = $add_where2.'rl.rl_SourceID=rd.rec_ID';
+            $add_select2 = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
+            
+            $pquery = &$this->getQuery();
+            if ($pquery->parentquery){
+                
+                $query = $pquery->parentquery;
+                //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
+                $query["from"]  = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+                $query["from"]  = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
+                $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+                $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+                
+                $select1 = $add_select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
+
+                //create  
+
+                $select2 = $add_select2.$query["from"].', '.$add_from2.' WHERE '.$query["where"].' and '.$add_where2.' '.$query["sort"].$query["limit"].$query["offset"].')';
+
+                
+            }else{
+                $select1 = $add_select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
+                $select2 = $add_select2.' FROM Records rd,'.$add_from2.' WHERE '.$add_where2.')';
+            }
+
+            
+            $select = '(' . $select1 . ' OR ' .$select2. ')';
+            //$select = $select1;
+
+//error_log("select: ".$select);                
+            
+            return $select; 
         }        
     }
-    
+/*
+
+DROP TABLE IF EXISTS recLinks;
+
+CREATE TABLE recLinks (
+  rl_ID   int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key',
+  rl_SourceID int(10) unsigned NOT NULL COMMENT 'Source record ID',
+  rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
+  rl_RelationID int(10) unsigned        COMMENT 'Realtionship record ID',
+  rl_RelationTypeID int(10) unsigned    COMMENT 'Realtionship type - defTerms.trm_ID',
+  rl_DetailTypeID int(10) unsigned      COMMENT 'Pointer (Resource) detail type ID',
+  rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
+  PRIMARY KEY  (rl_ID),
+  KEY rl_SourcePtrKey (rl_SourceID),
+  KEY rl_TargetPtrKey (rl_TargetID),
+  KEY rl_RelationKey (rl_RelationID),
+  KEY rl_DetailKey (rl_DetailID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for records links (pointers and relationships) to speed access';
+
+-- add relationships
+insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID)
+select d1.dtl_Value, d2.dtl_Value, rd.rec_ID, d3.dtl_Value from Records rd 
+left join recDetails d1 on d1.dtl_RecID = rd.rec_ID and d1.dtl_DetailTypeID = 7
+left join recDetails d2 on d2.dtl_RecID = rd.rec_ID and d2.dtl_DetailTypeID = 5
+left join recDetails d3 on d3.dtl_RecID = rd.rec_ID and d3.dtl_DetailTypeID = 6
+where rd.rec_RecTypeID=1 and d1.dtl_Value is not null and d2.dtl_Value is not null;
+
+-- add pointers
+insert into recLinks (rl_SourceID, rl_TargetID, rl_DetailTypeID, rl_DetailID)
+select rd.rec_ID, bd.dtl_Value, dty_ID, bd.dtl_ID from Records rd, defDetailTypes, recDetails bd 
+where rd.rec_RecTypeID!=1 and bd.dtl_RecID=rd.rec_ID and dty_ID=bd.dtl_DetailTypeID and dty_Type="resource" and bd.dtl_Value is not null; 
+
+*/    
     
     //
     // find records that have pointed records

@@ -33,7 +33,8 @@
 
 //print $filename;    
     
-    if(file_exists($filename)){    
+    if(file_exists($filename)){
+        ob_start();    
         header('Content-type: image/png');
         header('Pragma: public');
         header('Content-Length: ' . filesize($filename));

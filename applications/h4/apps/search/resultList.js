@@ -412,7 +412,7 @@ $.widget( "heurist.resultList", {
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
-            this.div_content.empty();  //clear
+            this.div_content[0].innerHTML = '';//.empty();  //clear
         }
 
         if(this.options.recordset){
@@ -470,7 +470,7 @@ $.widget( "heurist.resultList", {
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
-            this.div_content.empty();  //clear
+            this.div_content[0].innerHTML = '';//.empty();  //clear
         }
         
     },
@@ -500,17 +500,32 @@ $.widget( "heurist.resultList", {
             if( this._total_count_of_curr_request > 0 )
             {
 
-                var recs = recordset.getRecords();
+                if(this.options.recordset.length()<10001){
+                
+                    var recs = recordset.getRecords();
 
-                var recID;
-                for(recID in recs) {
-                    if(recID){
-                        var recdiv = this._renderRecord(recs[recID]);
-                        this._on( recdiv, {
-                            click: this._recordDivOnClick
-                        });
+                    var html = '';
+                    var recID;
+                    for(recID in recs) {
+                        if(recID){
+                            //var recdiv = this._renderRecord(recs[recID]);
+                            html  += this._renderRecord_html(recs[recID]);
+                            /*this._on( recdiv, {
+                                click: this._recordDivOnClick
+                            });*/
+                        }
                     }
+                    this.div_content[0].innerHTML += html;   
+
+                    /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
+                    this._on( lastdiv.nextAll(), {
+                                click: this._recordDivOnClick
+                            });*/
                 }
+                $allrecs = this.div_content.find('.recordDiv');
+                this._on( $allrecs, {
+                    click: this._recordDivOnClick
+                });
                 
                 //save increment into current rules.results
                 var records_ids = recordset.getIds()
@@ -673,6 +688,75 @@ $.widget( "heurist.resultList", {
 
         
         return $recdiv;
+    },
+    
+    _renderRecord_html: function(record){
+
+        var recset = this.options.recordset;
+        function fld(fldname){
+            return recset.fld(record, fldname);
+        }
+
+        /*
+        0 .'bkm_ID,'
+        1 .'bkm_UGrpID,'
+        2 .'rec_ID,'
+        3 .'rec_URL,'
+        4 .'rec_RecTypeID,'
+        5 .'rec_Title,'
+        6 .'rec_OwnerUGrpID,'
+        7 .'rec_NonOwnerVisibility,'
+        8. rec_ThumbnailURL
+
+        9 .'rec_URLLastVerified,'
+        10 .'rec_URLErrorMessage,'
+        11 .'bkm_PwdReminder ';
+        11  thumbnailURL - may not exist
+        */
+
+        var recID = fld('rec_ID');
+        var rectypeID = fld('rec_RecTypeID');
+        var bkm_ID = fld('bkm_ID');
+        var recTitle = fld('rec_Title');//.htmlescape();
+        
+        var html_thumb = '';
+        if(fld('rec_ThumbnailURL')){
+            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
+        }
+    
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
+            + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
+            + html_thumb 
+            + '<div class="recordIcons" recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="@todo rectypeTitle" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+            + '</div>'
+            + '<div title="'+recTitle+'" class="recordTitle">'
+            +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)  
+            + '</div>'
+            + '<div id="rec_edit_link" title="Click to edit record" class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+            + '</div></div>';
+
+            
+        return html;
+
+        /*$('<div>',{
+            id: 'rec_edit_link',
+            title: 'Click to edit record'
+        })
+        .addClass('logged-in-only')
+        .button({icons: {
+            primary: "ui-icon-pencil"
+            },
+            text:false})
+        .click(function( event ) {
+            event.preventDefault();
+            window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+        })
+        .appendTo($recdiv);*/
+        
+        
     },
    
     _recordDivOnClick: function(event){
