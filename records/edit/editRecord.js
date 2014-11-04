@@ -2660,7 +2660,7 @@ if (! top.HEURIST.edit) {
             //this.inputCell.insertBefore(br, newInput);
         }
 
-        if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return}  //only one edit link and if admin
+        if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
         this.createSpanLinkTerms(bdValue);
         return newInput;
