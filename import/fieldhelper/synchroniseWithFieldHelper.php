@@ -357,7 +357,8 @@
 
                 $manifest_file = $dir."fieldhelper.xml";
 
-                $all_files = scandir($dir);
+                //list of all files in given folder - need to treat new files that are not mentioned in manifest file
+                $all_files = scandir($dir); 
 
                 /*****DEBUG****///
 
@@ -387,7 +388,7 @@
                     }
 
                     //MAIN 	LOOP in manifest
-                    $not_found = true;
+                    $not_found = true;  //true if manifest is empty
 
                     foreach ($fh_data->children() as $f_gen){
                         if($f_gen->getName()=="items"){
@@ -408,7 +409,7 @@
                                 $lat = null;
                                 $lon = null;
                                 $filename = null;
-                                $filename_base = null;
+                                $filename_base = null;   //filename only
                                 $details = array();
                                 $file_id = null;
                                 $old_md5 = null;
@@ -429,12 +430,11 @@
 
                                         $old_md5 = $value;
 
-                                    }else if(array_key_exists($key,
-                                        $fieldhelper_to_heurist_map) && $fieldhelper_to_heurist_map[$key]){
+                                    }else if(@$fieldhelper_to_heurist_map[$key]){
 
-                                            $key2 = $fieldhelper_to_heurist_map[$key];
+                                         $key2 = $fieldhelper_to_heurist_map[$key];
 
-                                            if($key2=="file"){
+                                         if($key2=="file"){
 
                                                 $filename = $dir.$value;
                                                 $filename_base = $value;
@@ -474,6 +474,14 @@
                                         $ind = array_search($filename_base,$all_files,true);
                                         unset($all_files[$ind]);
                                     }
+                                }
+                                
+                                if($recordId!=null){ //veify that this record exists
+                                    $res = mysql__select_array("Records", "rec_ID", "rec_ID=".$recordId);
+                                    if (!(is_array($res) && count($res)>0)){
+                                        print  "<div>File: <i>$filename_base</i> was indexed as rec# $recordId. But this record was not found. File will be reindexed</div>";
+                                        $recordId = null;
+                                    }  
                                 }
 
                                 if($recordId==null){ //import only new
