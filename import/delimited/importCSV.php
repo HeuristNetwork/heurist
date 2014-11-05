@@ -474,6 +474,7 @@
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
     <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
     <input type="hidden" name="step" id="input_step" value="2">
+    <input type="hidden" id="ignore_insert" name="ignore_insert" value="<?=@$_REQUEST["ignore_insert"]?>">
     <input type="hidden" id="mvm" name="mvm" value="0">
     <input type="hidden" id="multifield" name="multifield" value="">
     <input type="hidden" id="import_id" name="import_id" value="<?=$imp_session["import_id"]?>">
@@ -536,7 +537,7 @@
                 Unprocessed data is retained in buffer on exit
         </div>
         
-        <br />
+        <br /><br /><br />
 
         <table style="vertical-align:middle;">
             <tr>
@@ -583,7 +584,7 @@
                     ?>
                     <td><div class="analized2">
                             <table style="display: inline-block; border:none" border="0">
-                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td><?=$show_update?></td><td><?=$download_update?></td></tr>
+                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td width="80"><?=$show_update?></td><td width="80"><?=$download_update?></td></tr>
                                 <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td><td><?=$download_insert?></td></tr>
                                 <?php        if($sa_mode==0){ ?>
                                     <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
@@ -999,7 +1000,7 @@
 
         <table width="100%">
             <tr>
-                <td align="right"><label>Upload new CSV file:</label></td><td><input type="file" size="50" name="import_file"></td>
+                <td align="right"><label>Upload new CSV file:</label></td><td><input type="file" name="import_file"></td>
             </tr>
             <tr><td align="center">OR</td>
 
@@ -1054,7 +1055,7 @@
     }
 ?>
 
-<div id="divMatchingPopup" style="display:none">
+<div id="divMatchingPopup" style="display:none;padding:10px;">
 <p>One or more of the records you are trying to update does not yet exist in the database, so it/they need to be created from scratch. However, you have not assigned data for all the required fields, so these records cannot be created.</p> 
 
 <p>Option 1: Hit Cancel, then assign the required data fields so that the missing records can be created. It is essential to check the appropriate radio button to make sure that the values in your input file do not overwrite data for existing (matched) records in the database which may have been edited or imported from another source. </p>

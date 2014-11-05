@@ -289,19 +289,31 @@ function init() {
     if(form_vals['error_message']){
         if(form_vals['error_message'].indexOf('Mapping')===0){
             
-            $("#btnMatchCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
-            $("#btnMatchProceed").click(function(){  });
+            $("#btnMatchCancel").click(function(){
+                    if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
+                    _dialogbox = null;
+            });
+            $("#btnMatchProceed").click(function(){ 
+                $("#ignore_insert").val(1);
+                $("#input_step").val(2);
+                document.forms[0].submit();
+                if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
+                _dialogbox = null;
+            });
             
             $("#btnUnMatchDownload").click(function(){ 
                 var url = 'importCSV.php/import.csv?db='+currentDb+'&getsession='+$('#import_id').val()+'&mode=1&idfield='+$("#recid_field").val();
                 window.open(url,'_blank')            
             });
+            
+            var divUnmatchedRes = $("#divUnmatchedRes");
+            var divUnmatchedBtns = $("#divUnmatchedBtns");
             $("#btnUnMatchDelete").click(function(){ 
                 $.ajax({
                     url: top.HEURIST.basePath+'import/delimited/importCSV.php',
                     type: "POST",
                     data: {deleteunmatched: $('#import_id').val(), idfield:$("#recid_field").val(), db:currentDb},
-                    dataType: "json",
+                    dataType: "text",
                     cache: false,
                     error: function(jqXHR, textStatus, errorThrown ) {
                         //alert('Error connecting server. '+textStatus);
@@ -309,10 +321,10 @@ function init() {
                     success: function( response, textStatus, jqXHR ){
                         if(response){
                             if(response>0){
-                                $("#divUnmatchedRes").html('Removed '+response+' recrods');
-                                $("#divUnmatchedBtns").hide();
+                                divUnmatchedRes.html('Removed '+response+' recrods');
+                                divUnmatchedBtns.hide();
                             }else{
-                                $("#divUnmatchedRes").html(response);
+                                divUnmatchedRes.html(response);
                             }
                         }
                     }
@@ -412,7 +424,7 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
             //"BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
     }
     if(r){
-        $("#input_step").val(3);
+        $("#input_step").val(3); //start real import
         document.forms[0].submit();
     }
 }

@@ -1077,6 +1077,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
         $import_table = $imp_session['import_table'];
         $id_field = @$params['recid_field']; //record ID field is always defined explicitly
+        $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
 
         //error_log(">>>>".$id_field)   ;
 
@@ -1106,9 +1107,11 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         // calculate the number of records to insert, update and insert with existing ids
         // @todo - it has implemented for non-multivalue indexes only
         if(!$id_field){ //ID field not defined - all records will be inserted
-            $imp_session['validation']["count_insert"] = $imp_session['reccount'];
-            $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
-            $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
+            if(!$ignore_insert){
+                $imp_session['validation']["count_insert"] = $imp_session['reccount'];
+                $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
+                $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
+            }
         }else{
 
             $cnt_recs_insert_nonexist_id = 0;
@@ -1135,14 +1138,16 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     return $wrong_records;
                 }
 
-                //find record ID that are not exists in HDB - to insert
-                $query = "select count(imp_id) "
-                ." from ".$import_table
-                ." left join Records on rec_ID=".$id_field
-                ." where ".$id_field.">0 and rec_ID is null";
-                $row = mysql__select_array2($mysqli, $query);
-                if($row && $row[0]>0){
-                    $cnt_recs_insert_nonexist_id = $row[0];
+                if(!$ignore_insert){
+                    //find record ID that are not exists in HDB - to insert
+                    $query = "select count(imp_id) "
+                    ." from ".$import_table
+                    ." left join Records on rec_ID=".$id_field
+                    ." where ".$id_field.">0 and rec_ID is null";
+                    $row = mysql__select_array2($mysqli, $query);
+                    if($row && $row[0]>0){
+                        $cnt_recs_insert_nonexist_id = $row[0];
+                    }
                 }
             }
 
@@ -1169,20 +1174,24 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }else{
                 return "SQL error: Can not execute query to calculate number of records to be updated!";
             }
-            // find records to insert
-            $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
-            //DEBUG error_log("1.ins >>>>".$select_query);
-            $row = mysql__select_array2($mysqli, $select_query);
-            if($row){
-                if( $row[0]>0 ){
-                    $imp_session['validation']['count_insert'] = $row[0];
-                    //find first 100 records to display
-                    $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000"; //.$id_field." is null OR "
-                    //DEBUG error_log("2.ins >>>>".$select_query);
-                    $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
+            
+            if(!$ignore_insert){
+            
+                // find records to insert
+                $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
+                //DEBUG error_log("1.ins >>>>".$select_query);
+                $row = mysql__select_array2($mysqli, $select_query);
+                if($row){
+                    if( $row[0]>0 ){
+                        $imp_session['validation']['count_insert'] = $row[0];
+                        //find first 100 records to display
+                        $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000"; //.$id_field." is null OR "
+                        //DEBUG error_log("2.ins >>>>".$select_query);
+                        $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
+                    }
+                }else{
+                    return "SQL error: Can not execute query to calculate number of records to be inserted";
                 }
-            }else{
-                return "SQL error: Can not execute query to calculate number of records to be inserted";
             }
             //additional query for non-existing IDs
             if($cnt_recs_insert_nonexist_id>0){
@@ -1331,6 +1340,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
         }
 
+        //ignore_required
+        
         //1. Verify that all required field are mapped  =====================================================
         if(count($missed)>0  &&
             ($imp_session['validation']['count_insert']>0 ||  // there are records to be inserted
@@ -1341,7 +1352,11 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
         if($id_field){ //validate only for defined records IDs
-            $only_for_specified_id = " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            if($ignore_insert){
+                $only_for_specified_id = " (".$id_field." > 0) AND ";
+            }else{
+                $only_for_specified_id = " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            }
         }else{
             $only_for_specified_id = "";
         }
@@ -1916,13 +1931,18 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         . ", imp_id "  //last field is row# - imp_id
         . " FROM ".$import_table;
 
-
-
+        $ignore_insert = ($params['ignore_insert']==1);
 
         if($id_field){  //index field defined - add to list of columns
             $id_field_idx = count($field_types); //last one
-            $select_query = $select_query." WHERE (NOT(".$id_field." is null OR ".$id_field."='')) ORDER BY ".$id_field;
+            
+            $select_query = $select_query." WHERE (".
+                ($ignore_insert? $id_field.">0":"NOT(".$id_field." is null OR ".$id_field."='')").") ORDER BY ".$id_field;
         }else{
+            if($ignore_insert){
+                return "id field not defined";
+            }
+            
             //create id field by default - add to import table
 
             $id_fieldname = "ID field for Record type #".$recordType;
@@ -2477,7 +2497,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         
         global $mysqli;
         
-        header('Content-type: text/javascript');
+        //header('Content-type: text/javascript');
 
         $session = get_import_session($mysqli, $session_id);
         
@@ -2491,10 +2511,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $query = " DELETE FROM ".$import_table
         ." WHERE ".$idfield."<0";
 
+        //print 33;  return;
         $res = $mysqli->query($query);
-        
 //error_log($query."  ".$res."  ".$mysqli->affected_rows);
-        
         if($res){
             //read content of tempfile and send it to client
             print $mysqli->affected_rows;
