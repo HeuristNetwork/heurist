@@ -104,7 +104,7 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
             $allowed_terms = getTermLabels($allowed_terms);
         }
 
-        //keep for fitire use
+        //keep for fiture use
         if($dtyID!=null){
             $dtyID_term_label[$dtyID] = $allowed_terms;
         }

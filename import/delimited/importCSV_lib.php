@@ -232,7 +232,8 @@
 
                         //if fieldname is numeric - compare it with dtl_Value directly
                         $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
-                        ." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
+                        ." t".$index.".trm_Label=$field_name ";
+                        //." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
 
                         array_push($select_query_update_from, "defTerms t".$index);
 
@@ -417,7 +418,8 @@
 
                         //if fieldname is numeric - compare it with dtl_Value directly
                         $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
-                        ." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
+                                       ." t".$index.".trm_Label=$field_name ";
+                        //." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
 
                         array_push($select_query_update_from, "defTerms t".$index);
 
@@ -1293,7 +1295,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     array_push($query_enum, $field_name);
                     $trm1 = "trm".count($query_enum);
                     array_push($query_enum_join,
-                        " defTerms $trm1 on if(concat('',$field_name * 1) = $field_name,$trm1.trm_ID=$field_name,$trm1.trm_Label=$field_name) ");
+                        " defTerms $trm1 on $trm1.trm_Label=$field_name ");
+                        //" defTerms $trm1 on if(concat('',$field_name * 1) = $field_name,$trm1.trm_ID=$field_name,$trm1.trm_Label=$field_name) ");
                     array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
 
                 }else if($ft_vals[$idx_fieldtype] == "resource"){
@@ -1894,12 +1897,16 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             return "mapping not defined";
         }
         
+        
         //indexes
         $recStruc = getRectypeStructures(array($recordType));
         $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
         $idx_name = $recStruc['dtFieldNamesToIndex']['rst_DisplayName'];
 
         $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+        $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+        $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+        
         //get terms name=>id
         $terms_enum = null;
         $terms_relation = null;
@@ -2076,27 +2083,33 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                 $value = null;
                                 $r_value = trim($r_value);
 
-                                if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")
-                                    && !ctype_digit($r_value)) {
-
+                                if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
+                                    //&& !ctype_digit($r_value)) {
+                                    
                                     $r_value = trim_lower_accent($r_value);
-                                    //print "<br>>>>".$r_value;
-                                    if($fieldtype_type == "enum"){
-                                        if(!$terms_enum) { //find ALL term IDs
-                                            $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
-                                            //print print_r($terms_enum, true);
-                                            //print " <br>try to find=".@$terms_enum["Medaille d'Honneur des Epidemies"];
+                                    
+                                    if ($r_value!="" && isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type )){ 
+
+                                        //print "<br> in csv>>>".$r_value;
+                                        if($fieldtype_type == "enum"){
+                                            if(!$terms_enum) { //find ALL term IDs
+                                                $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
+                                                //print print_r($terms_enum, true);
+                                                //print " <br>try to find=".@$terms_enum["Medaille d'Honneur des Epidemies"];
+                                            }
+                                            $value = @$terms_enum[$r_value];
+                                            //print "<br> found>>>".$value;                                        
+                                            /*
+                                            $value = array_search($r_value, $terms_enum, true);
+                                            if($value===false) $value = null;
+                                            */
+                                        }else if($fieldtype_type == "relationtype"){
+                                            if(!$terms_relation){ //find ALL relation IDs
+                                                $terms_relation = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
+                                            }
+                                            $value = @$terms_relation[$r_value];
                                         }
-                                        $value = @$terms_enum[$r_value];
-                                        /*
-                                        $value = array_search($r_value, $terms_enum, true);
-                                        if($value===false) $value = null;
-                                        */
-                                    }else if($fieldtype_type == "relationtype"){
-                                        if(!$terms_relation){ //find ALL relation IDs
-                                            $terms_relation = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
-                                        }
-                                        $value = @$terms_relation[$r_value];
+                                        
                                     }
                                     
                                 }else if($fieldtype_type == "geo"){
