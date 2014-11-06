@@ -202,5 +202,77 @@
 
         return $res;
     }
+    
+    /**
+    * Copy all tables (except csv import cache) from one db to another
+    * It is assumed that all tables exist and empty in target db
+    * 
+    * @param mixed $db_source
+    * @param mixed $db_target
+    * @param mixed $verbose
+    */
+    function db_clone($db_source, $db_target, $verbose=true){
+
+        $res = true;
+
+        $mysqli = server_connect();
+        if($mysqli){
+
+            if(!$mysqli->select_db($db_target)){
+                $res = false;
+                if($verbose) {
+                    echo ("<br/><p>Warning: Could not open database ".$db_target);
+                }
+            }
+
+            if($res){
+                
+                $tables = $mysqli->query("SHOW TABLES");
+                if($tables){
+                
+                    $mysqli->query("SET foreign_key_checks = 0"); 
+                    $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+                    
+                    while ($table = $tables->fetch_row()) {
+                         $table = $table[0];
+                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS"); 
+                         $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  ); 
+                         
+                         if($res){
+                            echo ("<br/><p> $table . Added ".$mysqli->affected_rows);
+                         }else{
+                             echo ("<br/><p>Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                             $res = false;
+                             break;
+                         }
+                         
+                         $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS"); 
+                    }
+                    
+                    $mysqli->query("SET foreign_key_checks = 1"); 
+                    
+                }else{
+                    $res = false;
+                    if($verbose) {
+                        echo ("<br/><p>Error: Can not get list of table in database ".$db_target);
+                    }
+                }
+                
+
+                //$mysqli->autocommit(FALSE);
+                //if($res) $mysqli->commit();
+            }
+
+            if(!$res){
+                //$mysqli->rollback();
+            }
+
+            $mysqli->close();
+        }else{
+            $res = false;
+        }
+
+        return $res;
+    }    
 
 ?>

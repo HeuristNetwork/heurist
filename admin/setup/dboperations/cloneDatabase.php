@@ -23,7 +23,7 @@
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
-    require_once(dirname(__FILE__).'/../../../external/php/Mysqldump.php');
+    //require_once(dirname(__FILE__).'/../../../external/php/Mysqldump.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
@@ -178,25 +178,25 @@
     }
 
     function cloneDatabase($targetdbname) {
-
+        set_time_limit(0);
+        
         // Use the file upload directory for this database because we know it should exist and be writable
         
+        /*
         //create dump in temp file
-        //$tmpfname = tmpfile();
         if(false){
-        $tmpfname = tempnam ('/tmp', 'dump-');
-        
-        echo_flush ("Temp file name ".$tmpfname."<br/>");
-        
-        try{
-            $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
-            $dump->start($tmpfname);
-        } catch (Exception $e) {
-            print ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
-            return false;
-        }
-        
-        }
+            $tmpfname = tempnam ('/tmp', 'dump-');
+            
+            echo_flush ("Temp file name ".$tmpfname."<br/>");
+            
+            try{
+                $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+                $dump->start($tmpfname);
+            } catch (Exception $e) {
+                print ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
+                return false;
+            }
+        }*/
 
         $newname = HEURIST_DB_PREFIX.$targetdbname;
         
@@ -207,25 +207,55 @@
                         return false;
                     }
                     
-                    $tmpfname = 'c:/xampp/htdocs/HEURIST_FILESTORE/artem_delete10/backup/johnson/MySQL_Database_Dump.sql';
-                    
-
-                    echo_flush ("<p>Create Database Structure and import data</p>");
-                    if(db_script($newname, $tmpfname)){
+                    echo_flush ("<p>Create Database Structure (tables)</p>");
+                    if(db_script($newname, dirname(__FILE__)."/../dbcreate/blankDBStructure.sql")){
                         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
                     }else{
                         db_drop($newname);
                         return false;
                     }
                     
-                    return false;
+                    mysql_connection_insert($newname);
+                    mysql_query('delete from sysIdentification where 1');
+                    mysql_query('delete from sysTableLastUpdated where 1');
+                    mysql_query('delete from sysUsrGrpLinks where 1');
+                    mysql_query('delete from sysUGrps where ugr_ID>=0');
+                    mysql_query('delete from defLanguages where 1');
+                    
+                    
+                    echo_flush ("<p>Copy data</p>");
+                    if( db_clone(DATABASE, $newname) ){
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    }else{
+                        //db_drop($newname);
+                        return false;
+                    }
+                    
+                    //need to successful addition of constraints
+                    mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID set t1.trm_InverseTermId=null where t1.trm_ID>0 and t2.trm_ID is NULL');
+                    mysql_query('delete FROM usrRecentRecords where rre_RecID>0 and rre_RecID not in (select rec_ID from Records)');
+                    
+                    
+                    /*
+                    if(false){
+                        $tmpfname = 'c:/xampp/htdocs/HEURIST_FILESTORE/artem_delete10/backup/johnson/MySQL_Database_Dump.sql';
+                        //restore from dump
+                        echo_flush ("<p>Create Database Structure and import data</p>");
+                        if(db_script($newname, $tmpfname)){
+                            echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                        }else{
+                            db_drop($newname);
+                            return false;
+                        }
+                    }
                     //unlink($tmpfname);
+                    */
 
                     echo_flush ("<p>Addition Referential Constraints</p>");
                     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
                         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
                     }else{
-                        db_drop($newname);
+                        //db_drop($newname);
                         return false;
                     }
 
@@ -299,6 +329,9 @@
         buildAllIndices($targetdbname);
 
         // Copy the images and the icons directories
+        recurse_copy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
+        
+        /* OLD WAY
         $copy_file_directory = "cp -R " . HEURIST_UPLOAD_ROOT.HEURIST_DBNAME . " " . HEURIST_UPLOAD_ROOT."$targetdbname"; // no prefix
         print "<br>Copying upload files: $copy_file_directory";
         exec("$copy_file_directory" . ' 2>&1', $output, $res1);
@@ -306,7 +339,7 @@
             print ("<h3>Error</h3>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
                 "<p>Please copy the directory manually or ask you sysadmin to help you</p>");
             return false;    
-        }
+        }*/
 
 
         // Update file path in target database
@@ -325,5 +358,20 @@
 
     } // straightCopyNewDatabase
 
-
+    
+function recurse_copy($src, $dst) { 
+    $dir = opendir($src); 
+    @mkdir($dst); 
+    while(false !== ( $file = readdir($dir)) ) { 
+        if (( $file != '.' ) && ( $file != '..' )) { 
+            if ( is_dir($src . '/' . $file) ) { 
+                recurse_copy($src . '/' . $file,$dst . '/' . $file); 
+            } 
+            else { 
+                copy($src . '/' . $file,$dst . '/' . $file); 
+            } 
+        } 
+    } 
+    closedir($dir); 
+}    
 ?>
