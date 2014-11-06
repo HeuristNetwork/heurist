@@ -309,6 +309,10 @@ function init() {
             var divUnmatchedRes = $("#divUnmatchedRes");
             var divUnmatchedBtns = $("#divUnmatchedBtns");
             $("#btnUnMatchDelete").click(function(){ 
+                
+                divUnmatchedRes.html('Deleting unmatched records...');
+                divUnmatchedBtns.hide();
+                
                 $.ajax({
                     url: top.HEURIST.basePath+'import/delimited/importCSV.php',
                     type: "POST",
@@ -325,6 +329,7 @@ function init() {
                                 divUnmatchedBtns.hide();
                             }else{
                                 divUnmatchedRes.html(response);
+                                divUnmatchedBtns.show();
                             }
                         }
                     }

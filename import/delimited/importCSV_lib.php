@@ -2517,6 +2517,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         if($res){
             //read content of tempfile and send it to client
             print $mysqli->affected_rows;
+
+            $query = " SELECT count(*) FROM ".$import_table;
+            $row = mysql__select_array2($mysqli, $query);
+            if($row && $row[0]>0){
+                $session['reccount'] = $row[0];
+            }
+
         }else{
             print "SQL error: ".$mysqli->error;
         }

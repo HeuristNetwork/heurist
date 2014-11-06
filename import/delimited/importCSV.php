@@ -576,15 +576,22 @@
                         $download_update= ($cnt_update>0)?"<a href='#' onclick='window.open(\"".$url."0\" ,\"_blank\")'>download</a>" :"&nbsp;";
 
                         $cnt_insert  = intval(@$validationRes['count_insert']);
-                        $show_insert = ($cnt_insert>0)?"<a href='#' onclick='showRecords(\"insert\")'>show</a>" :"&nbsp;";
-                        $download_insert= ($cnt_insert>0)?"<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>" :"&nbsp;";
+                        if($cnt_insert>0){
+                            $show_insert = "<a href='#' onclick='showRecords(\"insert\")'>show</a>";
+                            $download_insert= "<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>"
+                            ." &nbsp;&nbsp; <input type=\"checkbox\" title=\"Do not insert new records. Do update only\" "
+                            ." onclick=\"{document.getElementById('ignore_insert').value=this.checked?1:0; }\"> ignore ";
+                        }else{
+                            $show_insert = "&nbsp;";
+                            $download_insert= "&nbsp;";
+                        }
 
                         $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
 
                     ?>
                     <td><div class="analized2">
                             <table style="display: inline-block; border:none" border="0">
-                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td width="80"><?=$show_update?></td><td width="80"><?=$download_update?></td></tr>
+                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td width="80"><?=$show_update?></td><td width="120"><?=$download_update?></td></tr>
                                 <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td><td><?=$download_insert?></td></tr>
                                 <?php        if($sa_mode==0){ ?>
                                     <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
@@ -624,16 +631,17 @@
                 ?>
 
                 <td>
+                            <span class="importing">
                     <?php 
                           if($sa_mode==1 && $validationRes){  ?>
-                            <span class="importing analized2">
+                            <span class="analized2">
                                         <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
                                             onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
                     <?php } ?>
                             <span class="importing analized3">
                                 <input  id="btnStartImport" type="submit"
                                     value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
-                            </span>
+                            </span></span>
                 </td>
             </tr>
         </table>
