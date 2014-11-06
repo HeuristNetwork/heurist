@@ -2522,6 +2522,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             $row = mysql__select_array2($mysqli, $query);
             if($row && $row[0]>0){
                 $session['reccount'] = $row[0];
+                saveSession($mysqli, $session);
             }
 
         }else{

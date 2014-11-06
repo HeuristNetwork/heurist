@@ -32,10 +32,10 @@
     require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
     require_once('importCSV_lib.php');
+    set_time_limit(0);
 
     $mysqli = mysqli_connection_overwrite(DATABASE);
     mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
-
     
     if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);

@@ -318,6 +318,11 @@ function isForAdminOnly($message="", $redirect=true)
     }
 }
 
-
+function flush_buffers($start=true){ 
+    //ob_end_flush(); 
+    ob_flush(); 
+    flush();
+    if($start) ob_start(); 
+}
 
 ?>
