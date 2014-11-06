@@ -37,6 +37,8 @@
         return;
     }
 
+    set_time_limit(0);
+    
     mysql_connection_overwrite(DATABASE);
 
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php'); //?db='.HEURIST_DBNAME);
@@ -54,6 +56,7 @@
     $repair_count = 0;
     $processed_count = 0;
 
+    ob_start();
 ?>
 
 <html>
@@ -108,6 +111,7 @@
             <div><span id=blank_count>0</span> will be left as-is (missing fields etc)</div>
 
             <?php
+                flush_buffers();
 
                 $blanks = array();
                 $reparables = array();
@@ -117,13 +121,13 @@
                     $step_uiupdate = ceil( count($recs) / 100 );
                 }
 
+                
                 foreach ($recs as $rec_id => $rec) {
                     if ($rec_id % $step_uiupdate == 0) {
-
+                        
                         print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.
                         ','.count($updates).')</script>'."\n";
-                        ob_flush();
-                        flush();
+                        flush_buffers();
                     }
 
                     $mask = $masks[$rec['rec_RecTypeID']];
@@ -154,8 +158,7 @@
                         '&recID='.$rec_id.'">*</a> <br> <br>';
 
                     if ($rec_id % $step_uiupdate == 0) {
-                        ob_flush();
-                        flush();
+                        flush_buffers();
                     }
                 }//for
 
@@ -174,14 +177,14 @@
                         $step_uiupdate = ceil( count($updates) / 100 );
                     }
 
+                    
                     $i = 0;
                     foreach ($updates as $rec_id => $new_title) {
                         mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
                         ++$i;
                         if ($rec_id % $step_uiupdate == 0) {
                             print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
-                            ob_flush();
-                            flush();
+                            flush_buffers();
                         }
                     }
                     foreach ($reparables as $rec_id) {
@@ -214,9 +217,7 @@
                     'or faulty data in individual records. These titles have not been changed.';
                 }
 
-                ob_flush();
-                flush();
-
+                flush_buffers(false);
             ?>
         </div>
     </body>
