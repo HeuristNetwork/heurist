@@ -345,6 +345,7 @@
 
                 $progress_divid++;
 
+                ob_start();
                 print "<div><b>$dir</b><span id='progress$progress_divid'></span></div>";
                 ob_flush();
                 flush();
@@ -445,7 +446,9 @@
                                                 }
                                                 $key3 = $fieldhelper_to_heurist_map['file_path'];
                                             if($key3>0){
-                                                $details["t:".$key3] = array("1"=>$dir);
+                                                if( substr($dir, -1, 1) != '/' )  $dir = $dir.'/';
+                                                $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
+                                                $details["t:".$key3] = array("1"=>$relative_path); //change to relative path
                                             }
 
                                         }else if($key2=="lat"){
@@ -586,6 +589,7 @@
 
                                 $cnt_files++;
                                 if ($cnt_files % 5 == 0) {
+                                    ob_start();
                                     print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$rep_processed.','.$tot_files.')</script>'."\n";
                                     ob_flush();
                                     flush();
@@ -768,6 +772,7 @@ XML;
                         $cnt_files++;
 
                         if ($cnt_files % 5 == 0) {
+                            ob_start();
                             print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.','.$tot_files.')</script>'."\n";
                             ob_flush();
                             flush();
@@ -777,6 +782,7 @@ XML;
                 }//for files in folder that are not specified in the directory
 
 
+                ob_start();
                 if($rep_processed_dir>0){
                     print "<div style=\"color:green\">$rep_processed_dir processed. $cnt_added records created (new entries added to manifest)</div>";
                 }
