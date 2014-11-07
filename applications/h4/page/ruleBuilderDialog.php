@@ -90,7 +90,9 @@
             </div>
             
             <div style="position:absolute;width:98%;height:2em;bottom:10px">
-                <button id="btn_add_level1">Add Level 1</button> <button id="btn_apply">Apply Rules</button>
+                <button id="btn_add_level1">Add Level 1</button> 
+                <button id="btn_save">Save Rules</button>
+                <button id="btn_apply">Apply Rules</button>
             </div>
         </div>
     </body>

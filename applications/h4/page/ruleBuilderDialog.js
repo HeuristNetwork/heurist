@@ -18,6 +18,14 @@ $(document).ready(function() {
 
 });
 
+function addLevel(){
+            $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule builder for level 1
+                onremove: function(event, data){
+                    $('#'+data.id).remove();    //remove this rule builder
+                }
+            }).appendTo($('#level1'));                
+}
+
 
 function onInit(success) //callback function of hAPI initialization
 {
@@ -30,13 +38,8 @@ function onInit(success) //callback function of hAPI initialization
         }
 
         //init toolbar buttons
-        $('#btn_add_level1').button().on('click', null, function(){
-            $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule builder for level 1
-                onremove: function(event, data){
-                    $('#'+data.id).remove();    //remove this rule builder
-                }
-            }).appendTo($('#level1'));                
-        });
+        $('#btn_add_level1').button().on('click', null, addLevel );
+
         $('#btn_apply').button().on('click', 3, applyRules);
 
         //create rule builders in case there is parameter 'rules'
@@ -51,11 +54,14 @@ function onInit(success) //callback function of hAPI initialization
                     rules: rules[i],
                     onremove: function(event, data){
                         $('#'+data.id).remove();    //remove this rule builder
+                        
                     }
                 }).appendTo($('#level1'));                
 
             }
 
+        }else{
+            addLevel(); //add first level by default
         }
 
 

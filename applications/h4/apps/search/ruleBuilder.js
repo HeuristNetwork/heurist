@@ -50,15 +50,14 @@ $.widget( "heurist.ruleBuilder", {
         var that = this;
         
         this.element.addClass('rulebuilder');
-        
+
         //create list/combobox of source record types
         var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'250px'}).appendTo(this.element);
         this.select_source_rectype = $( "<select>" )
                 .addClass('text ui-corner-all')
                 .appendTo( cont );
                 
-                
-        top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, false);
+        top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false) );
         
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
@@ -102,7 +101,7 @@ $.widget( "heurist.ruleBuilder", {
         //this._on( this.select_target_rectype, { change: this._generateQuery });
         //this._on( this.select_reltype, { change: this._generateQuery });
         
-        this._on( this.btn_delete, {click: function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
+        this._on( this.btn_delete, {click: this._removeRule }); // function( event ){ this._trigger( "onremove", event, { id:this.element.attr('id') } ) } } );
         
         if(this.options.level<3)
         this._on( this.btn_add_next_level, {click: function( event ){ this._addChildRule(null); }});
@@ -160,16 +159,40 @@ $.widget( "heurist.ruleBuilder", {
     //
     //
     //
+    _removeRule: function(){    
+        //$('#'+this.element.attr('id')).remove();    //remove itself
+        
+        //check if parent rulebuilder has no more children
+        if(this.element.parent().children('.rulebuilder').length==1){
+           this.element.parent().find("select").prop('disabled', false);
+        }
+        
+        this.element.remove();
+        
+    },
+    
+    //
+    //
+    //
     _addChildRule: function(rules){
         
         var new_level = this.options.level + 1;
+        var that = this;
 
         $("<div>").uniqueId().ruleBuilder({level:new_level,
             rules: rules,
             init_source_rt: this._getTargetRt(),
-            onremove: function(event, data){
+            onremove: function(event, data){      //not used
                 $('#'+data.id).remove();    //remove this rule builder
-        } }).appendTo(this.element);;
+        } }).appendTo(this.element);
+        
+        //disable itself
+        $.each(this.element.find("select"), function(index, value){
+              var ele = $(value);
+              if(ele.parent().parent()[0] == that.element[0]){
+                    $(value).prop('disabled', true);
+              }
+        }); 
 
     },
 
@@ -535,6 +558,12 @@ $.widget( "heurist.ruleBuilder", {
     _getCodes: function(){
 
         var rt_source   = this.select_source_rectype.val();
+        
+        if(!rt_source){
+            return null;
+        }
+        
+        
         var dt_ID = this.select_fields.val();
         var rel_term_id = this.select_reltype.val();
         var filter = this.additional_filter.val();
@@ -643,20 +672,24 @@ $.widget( "heurist.ruleBuilder", {
           
            //refresh query
            var codes = this._getCodes();
-           var query = this._getQuery(codes);
-           
-           var sub_rules = []; 
-           
-           //loop all dependent
-           $.each( this.element.children('.rulebuilder') , function( index, value ) {
+           if(codes==null){
+               return null;
+           }else{
+               var query = this._getQuery(codes);
                
-                var subrule = $(value).ruleBuilder("getRules");
-                sub_rules.push(subrule);  
-                
-           }); 
-        
-           this.options.rules = {query:query, codes:codes, levels:sub_rules};
-           return this.options.rules;
+               var sub_rules = []; 
+               
+               //loop all dependent
+               $.each( this.element.children('.rulebuilder') , function( index, value ) {
+                   
+                    var subrule = $(value).ruleBuilder("getRules");
+                    if(subrule!=null)  sub_rules.push(subrule);  
+                    
+               }); 
+            
+               this.options.rules = {query:query, codes:codes, levels:sub_rules};
+               return this.options.rules;
+           }
     }
 
 });
