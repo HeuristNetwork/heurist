@@ -338,6 +338,12 @@
                                 </td>
                             </tr>
                             
+                            <tr style='display:none'>
+                                <td colspan="2">
+                                <label id="lblRetainId"></label>
+                                <label id="lblMergeId"></label>
+                                </td>
+                            </tr>
                         </table>
                         
                         

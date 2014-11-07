@@ -559,6 +559,10 @@ function EditTerms() {
             
                         var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
                         
+                        var retain_nodeid = $(top.document).find('#lblRetainId').html();
+                        var nodeid = $(top.document).find('#lblMergeId').html();
+
+                        
                         if(Hul.isempty(trmLabel)){
                             alert('Term label can not be empty');
                             return;
@@ -575,12 +579,16 @@ function EditTerms() {
 
                         var str = YAHOO.lang.JSON.stringify(oTerms);
                         
+                        //alert(str);
+                        
                         var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                         var callback = _updateResult;
                         var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
                         Hul.getJsonData(baseurl, callback, params);
+                        
             
             if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
+            _dialogbox = null;
         };
 
         
@@ -641,11 +649,14 @@ function EditTerms() {
             $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
         }
         
+        $('#lblRetainId').html(retain_nodeid);
+        $('#lblMergeId').html(nodeid);
+        
         //fill elements of con
         var ele = document.getElementById('divTermMergeConfirm');
         
         $("#btnMergeCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
-        $("#btnMergeOK").click(_updateOnServer);
+        $("#btnMergeOK").click( _updateOnServer );
 
         
         //show confirmation dialog
