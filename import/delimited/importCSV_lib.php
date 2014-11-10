@@ -2892,12 +2892,12 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 
                     if(count($distinct_value)>0){
                         //print distinct term values
-                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms"><br>';
+                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
                         foreach ($distinct_value as $value) {
                             print '<div style="margin-left:30px;">'.$value.' </div>';
                         }
                         print '</div>';
-                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
+                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.$k.'\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
                         //  $(\'#distinct_terms\').show()
                     }
                 }
@@ -3090,12 +3090,12 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 
                     if(count($distinct_value)>0){
                         //print distinct term values
-                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms"><br>';
+                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
                         foreach ($distinct_value as $value) {
                             print '<div style="margin-left:30px;">'.$value.' </div>';
                         }
                         print '</div>';
-                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
+                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.$k.'\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
                         //  $(\'#distinct_terms\').show()
                     }
                 }
