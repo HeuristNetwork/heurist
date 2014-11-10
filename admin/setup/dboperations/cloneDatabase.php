@@ -145,6 +145,10 @@
     function isInValid($str) {
         return preg_match('[\W]', $str);
     }
+    function arraytolower($item)
+    {
+         return strtolower($item);
+    }            
 
     if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
         $targetdbname = $_REQUEST['targetdbname'];
@@ -158,9 +162,11 @@
             return false;
         } // rejecting illegal characters in db name
 
+
         $list = mysql__getdatabases();
-        if(in_array($targetdbname, $list)){
-            echo "<h3>Error: database '".$targetdbname."' already exists. Choose different name</h3>";
+        $list = array_map("arraytolower", $list);
+        if(in_array(strtolower($targetdbname), $list)){
+            echo ("<p class='error'>Error: database '".$targetdbname."' already exists. Choose different name<br/></p>");
             return false;
         }
 

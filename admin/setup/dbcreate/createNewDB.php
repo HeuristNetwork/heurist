@@ -324,6 +324,11 @@
                  ob_flush();
                  flush();
             }
+            
+            function arraytolower($item)
+            {
+                return strtolower($item);
+            }            
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
 
@@ -358,7 +363,21 @@
                     $newDBName = $newDBName . trim($_POST['dbname']);
                     $newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
 
-
+                    $list = mysql__getdatabases();
+                    $list = array_map("arraytolower", $list);
+                    if(in_array(strtolower($newDBName), $list)){
+                        echo ("<p class='error'>Error: database '".$newname."' already exists. Choose different name<br/></p>");
+                        $isCreateNew = true;
+                        return false;
+                    }
+                    
+/*                    
+print $newDBName."<br>";                    
+print in_array(strtolower($newname), $list)."<br>";
+print print_r($list, true)."<br>";*/
+//return false;
+                    
+                    
                     if(!db_create($newname)){
                         $isCreateNew = true;
                         return false;

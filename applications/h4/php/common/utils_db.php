@@ -94,7 +94,7 @@
                         }
                         if ($query) {
                             $res2 = $mysqli->query($query);
-                            $cnt = mysql_num_rows($res2);
+                            $cnt = $res2->num_rows; // mysql_num_rows($res2);
                             $res2->close();
                             if ($cnt < 1) {
                                 continue;
