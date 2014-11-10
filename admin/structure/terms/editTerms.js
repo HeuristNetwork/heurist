@@ -1214,7 +1214,7 @@ function EditTerms() {
                         if(!isNaN(termid))
                         {
                             var arTerm = top.HEURIST.terms.termsByDomainLookup[_currentDomain][termid];
-                            if(!Hul.isnull(alTerm)){
+                            if(!Hul.isnull(arTerm)){
                                 var term = {}; //new Object();
                                 term.id = termid;
                                 term.label = arTerm[fi.trm_Label];

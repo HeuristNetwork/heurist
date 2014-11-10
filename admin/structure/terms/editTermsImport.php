@@ -47,7 +47,7 @@
         if(array_key_exists('error', $res)){
             $failure_msg = $res['error'];
         }else{
-            $success_msg = "Record type imported";
+            $success_msg = "List of terms has been imported.";
             $res_array = json_format($res);
         }
     }
@@ -72,20 +72,23 @@
 
         <script type="text/javascript">
             var result = null;
-            <?php   if ($res_array) { ?>
-                result = <?=$res_array?>;
-                <?php   }
+            <?php 
+                    if ($res_array) {
+                        print 'result = '.$res_array.';';
+                    }
+                    if($success_msg) {
+                        //print 'document.onload = function(){alert("!!!"); window.close(result);}';
+                    }
             ?>
         </script>
 
 
-        <?php   if ($success_msg) { ?>
-            <div class="success"><?= $success_msg ?>
-            </div>
-            <?php       } else if ($failure_msg) { ?>
-            <div class="failure"><?= $failure_msg ?>
-            </div>
-            <?php       }
+        <?php   
+                if ($success_msg) {
+                    print '<div class="success">'.$success_msg.'</div>';
+                } else if ($failure_msg) {
+                    print '<div class="failure">'.$failure_msg.'</div>';
+                }
         ?>
 
         <form action="editTermsImport.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" style="border: 0px;">
