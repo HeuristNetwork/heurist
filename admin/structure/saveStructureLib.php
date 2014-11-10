@@ -1143,7 +1143,7 @@
 				$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)";
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
-error_log("AAAA:".$query);                
+//error_log("AAAA:".$query);                
                 
 				$rows = execSQL($mysqli, $query, $parameters, true);
 				if($rows == "1062"){

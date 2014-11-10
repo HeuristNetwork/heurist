@@ -678,9 +678,12 @@ function EditTerms() {
     */
     function _doSave(needConfirm, noValidation){
 
-        var sName = Dom.get('edName').value.trim();
+        var sName = Dom.get('edName').value.trim().replace(/\s+/g,' ');
+        Dom.get('edName').value = sName;
         var sDesc = Dom.get('edDescription').value.trim();
-        var sCode = Dom.get('edCode').value.trim();
+        Dom.get('edDescription').value = sDesc;
+        var sCode = Dom.get('edCode').value.trim().replace(/\s+/g,' ');
+        Dom.get('edCode').value = sCode;
         var sStatus = Dom.get('trm_Status').value;
 
         var iInverseId = Number(Dom.get('edInverseTermId').value);
