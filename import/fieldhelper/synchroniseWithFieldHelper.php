@@ -1,38 +1,34 @@
 <?php
 
-    /*
-    * Copyright (C) 2005-2013 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
     /**
     * synchroniseWithFieldHelper.php
-    * Read the FieldHelper XML manifests in directories specified in Advanced Properties, 
+    * Read the FieldHelper XML manifests in directories specified in Advanced Properties,
     * and creates Heurist records for indexed files. If there is no manifest, it creates one.
-    * The list of extensions indexed can also be specified in Advanced Properties, otherwise 
+    * The list of extensions indexed can also be specified in Advanced Properties, otherwise
     * it indexes a range of common file types including most text, image, audio and video formats
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2013 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
-    * @version     3.1.0
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    *
     * @package     Heurist academic knowledge management system
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2014 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     3.2
     * @param       includeUgrps=1 will output user and group information in addition to definitions
     * @param       approvedDefsOnly=1 will only output Reserved and Approved definitions
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     * @todo        write Heurist IDs back into FH XML files
     * @todo        update existing records from XML files which have changed
     * @todo        update XML files from Heurist records which have changed
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
     */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
@@ -45,6 +41,7 @@
         return;
     }
 ?>
+
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -54,14 +51,16 @@
     <body class="popup">
 
         <script type="text/javascript">
+
             function update_counts(divid, processed, added, total) {
-                document.getElementById("progress"+divid).innerHTML = (total==0)?"": (" <div style=\"color:green\"> Processed "+processed+" of "+total+". Added records: "+added+"</div>");
+                document.getElementById("progress"+divid).innerHTML = (total==0)?"": (" <div style=\"color:green\"> Processed "
+                    +processed+" of "+total+". Added records: "+added+"</div>");
             }
         </script>
 
         <?php
             if (! is_admin()) {
-                print "<p>FieldHelper synchronisation requires you to be an adminstrator of the Database Managers group.</p></body></html>";
+                print "<p>FieldHelper synchronisation requires you to be an Administrator of the Database Managers group</p></body></html>";
                 return;
             }
 
@@ -97,27 +96,29 @@
             $mediaExts = null;
             $progress_divid = 0;
             $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_FILESTORE_DIR."/generated-reports/",
-                        HEURIST_ICON_DIR,
-                        HEURIST_FILESTORE_DIR."/scratch/",
-                        HEURIST_FILESTORE_DIR."/settings/",
-                        HEURIST_SMARTY_TEMPLATES_DIR,
-                        HEURIST_XSL_TEMPLATES_DIR);
-                if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-                if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-                        
+                HEURIST_FILESTORE_DIR."/generated-reports/",
+                HEURIST_ICON_DIR,
+                HEURIST_FILESTORE_DIR."/scratch/",
+                HEURIST_FILESTORE_DIR."/settings/",
+                HEURIST_SMARTY_TEMPLATES_DIR,
+                HEURIST_XSL_TEMPLATES_DIR);
+            if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
+            if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
+
             mysql_connection_overwrite(DATABASE);
             if(mysql_error()) {
                 die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
             }
 
             print "<h2>ADVANCED USERS</h2>";
-            print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants) listed in Database > Advanced Properties<br>";
-            print "and writes the metadata as records in the current database, with pointers back to the files described by the manifests. <br>";
-            print "If no manifests exist, they are created (and can be read by FieldHelper). New files are added to the existing manifests.<br>&nbsp;<br>";
+            print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)";
+            print " listed in Designer View > Database > Advanced Properties and writes the metadata as records in the current database, ".
+                    "with pointers back to the files described by the manifests. <br>";
+            print "If no manifests exist, they are created (and can be read by FieldHelper). ".
+                    "New files are added to the existing manifests.<br>&nbsp;<br>";
             print "The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>";
             print "Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache";
-            print "Files will need to be uploaded either via direct access to the server or through the file upload function under Advanced > Import";
+            print "Files will need to be uploaded to the server via direct access to the server or through Import > Multi-file upload.";
             print "</p>";
 
             $notfound = array();
@@ -127,8 +128,10 @@
                 }
             }
             if(count($notfound)>0){
-                print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".implode(", ",$notfound).
-                "</b><br />Note: these fields may appear to be present, but do not have the correct origin codes (source of the field definition) for this function to use them.<br />".
+                print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".
+                        implode(", ",$notfound).
+                "</b><br />Note: these fields may appear to be present, but do not have the correct origin codes ".
+                        "(source of the field definition) for this function to use them.<br />".
                 "We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
                 "<ul><li>Go to Designer View > Essentials > Import Structure<br>&nbsp;</li>".
                 "<li>Navigate to the H3CoreDefinitions database<br>&nbsp;</li>".
@@ -143,15 +146,17 @@
 
                 if(HEURIST_DBID==0){ //is not registered
 
-                    print "<p style=\"color:red\">Note: Database must be registered to use this function<br>".
-                    "Register the database using Designer View > Database > Registration - only available to the database creator/owner (user #2)</p>";
+                    print "<p style=\"color:red\">Note: Database must be registered with the Heurist master index to use this function<br>".
+                            "Register the database using Designer View > Database > Registration - ".
+                            "only available to the database creator/owner (user #2)</p>";
 
                 }else{
                     // Find out which folders to parse for XML manifests - specified for FieldHelper indexing in Advanced Properties
                     $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
                     $res1 = mysql_query($query1);
                     if (!$res1 || mysql_num_rows($res1) == 0) {
-                        die ("<p><b>Sorry, unable to read the sysIdentification from the current databsae. Possibly wrong database format, please consult Heurist team");
+                        die ("<p><b>Sorry, unable to read the sysIdentification from the current database. ".
+                                "Possibly wrong database format, please consult Heurist team");
                     }
 
                     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
@@ -159,9 +164,11 @@
                     $mediaFolders = $row1[0];
                     $dirs = explode(';', $mediaFolders); // get an array of folders
 
-                    // The defined list of file extensions for FieldHelper indexing. 
+                    // The defined list of file extensions for FieldHelper indexing.
                     if($row1[1]==null){
-                        $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar";
+                        $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,".
+                                "aif,aiff,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,".
+                                "htm,html,xhtml,ppt,pptx,zip,gzip,tar";
                     }else{
                         $mediaExts = $row1[1]; // user gets to define from scratch so they can restrict what's indexed
                     }
@@ -173,7 +180,7 @@
                         print "<p><b>Extensions to scan:</b> $mediaExts<p>";
                     }
                     print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
-                    "Click here to set media folders</a><p>";
+                        "Click here to set media folders</a><p>";
 
 
                     if (!($mediaFolders=="" || count($dirs) == 0)) {
@@ -187,26 +194,6 @@
                 }
                 exit;
             }
-
-            // ----FORM 2 - MAPPINGS FORM ----------------------------------------------------------------------------------------
-
-            /*
-            if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
-
-            $mediaFolders = $_REQUEST['media'];
-
-            print "<form name='mappings' action='synchroniseWithFieldHelper.php' method='post'>";
-            print "<input name='mode' value='3' type='hidden'>"; // calls the transfer function
-            print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-            print "<input name='media' value='$mediaFolders' type='hidden'>";
-
-            print "Ready to process media folders: <b>$mediaFolders</b><p>";
-
-            print "<input type='submit' value='Import data'><p><hr>\n";
-            exit;
-            }
-
-            */
 
             // ---- visit #3 - PROCESS THE HARVESTING -----------------------------------------------------------------
 
@@ -229,9 +216,6 @@
 
                 print "<div>Syncronization completed</div>";
                 print "<div style=\"color:green\">Total files processed: $rep_counter </div>";
-                /*if($rep_issues!=""){
-                print "<div>Problems: $rep_issues </div>";
-                }*/
             }
 
             // ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
@@ -243,15 +227,15 @@
                 foreach ($dirs as $dir){
 
                     if($dir=="*"){
-                        
+
                         $dir = HEURIST_FILESTORE_DIR;
-                        
+
                     }else{
-                    
+
                         if(substr($dir, -1) != '/'){
                             $dir .= "/";
                         }
-                        
+
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
                             chdir(HEURIST_FILESTORE_DIR);
@@ -263,13 +247,13 @@
                     }
 
                     if(in_array($dir, $system_folders)){
-                        
+
                         print "<div style=\"color:red\">It is not possible to scan system folder $dir</div>";
 
                     }else if($dir && file_exists($dir) && is_dir($dir))
                     {
-                        
-                        
+
+
                         $files = scandir($dir);
                         if($files && count($files)>0)
                         {
@@ -278,8 +262,6 @@
                             $isfirst = true;
 
                             foreach ($files as $filename){
-
-                                /*****DEBUG****///error_log("1>>>>".is_dir($filename)."  ".$filename);
 
                                 if(!($filename=="." || $filename=="..")){
                                     if(is_dir($dir.$filename)){
@@ -302,7 +284,6 @@
                         }
                     }else if ($dir) {
                         print "<div style=\"color:red\">Folder is not found: $dir</div>";
-                        //$rep_issues = $rep_issues."<br/>Directory $dir not found.";
                     }
                 }
             }
@@ -319,10 +300,8 @@
                 error_log("ERROR :".$message);
 
                 $rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
-
-                //print "{\"error\":\"" . addslashes($message) . "\"}";
-                //exit(0);
             }
+
 
             /**
             *
@@ -351,7 +330,6 @@
                 flush();
 
                 if(!is_writable($dir)){
-                    //$rep_issues = "Folder ".$dir." is not writable. Check permissions";
                     print "<div style=\"color:red\">Folder is not writeable. Check permissions</div>";
                     return 0;
                 }
@@ -359,24 +337,20 @@
                 $manifest_file = $dir."fieldhelper.xml";
 
                 //list of all files in given folder - need to treat new files that are not mentioned in manifest file
-                $all_files = scandir($dir); 
-
-                /*****DEBUG****///
+                $all_files = scandir($dir);
 
                 if(file_exists($manifest_file)){
 
-                    //read fieldhelpe.xml
+                    //read fieldhelper.xml
                     if(is_readable($manifest_file)){
 
                         //check write permission
                         if(!is_writable($manifest_file)){
-                            print "<div style=\"color:red\">Manifest is not writable. Check permissions</div>";
-                            //$rep_issues = $rep_issues."<br/> Manifest is not writable in ".$dir;
+                            print "<div style=\"color:red\">Manifest is not writeable. Check permissions.</div>";
                             return 0;
                         }
                     }else{
-                        print "<div style=\"color:red\">Manifest is not readable. Check permissions</div>";
-                        //$rep_issues = $rep_issues."<br> manifest is not readable in ".$dir;
+                        print "<div style=\"color:red\">Manifest is not readable. Check permissions.</div>";
                         return 0;
                     }
 
@@ -384,7 +358,6 @@
 
                     if($fh_data==null || is_string($fh_data)){
                         print "<div style=\"color:red\">Manifest is corrupted</div>";
-                        //$rep_issues = "Manifest file is corrupted";
                         return 0;
                     }
 
@@ -420,12 +393,7 @@
                                     $content = strval($el);// (string)$el;
                                     $key = $el->getName();
 
-
                                     $value = $content;
-                                    /*foreach ($el as $key=>$value2){
-                                    $value = $value2;
-                                    break;
-                                    }*/
 
                                     if($key == "md5"){
 
@@ -433,18 +401,18 @@
 
                                     }else if(@$fieldhelper_to_heurist_map[$key]){
 
-                                         $key2 = $fieldhelper_to_heurist_map[$key];
+                                        $key2 = $fieldhelper_to_heurist_map[$key];
 
-                                         if($key2=="file"){
+                                        if($key2=="file"){
 
-                                                $filename = $dir.$value;
-                                                $filename_base = $value;
+                                            $filename = $dir.$value;
+                                            $filename_base = $value;
 
-                                                $key3 = $fieldhelper_to_heurist_map['file_name'];
-                                                if($key3>0){
-                                                    $details["t:".$key3] = array("1"=>$value);
-                                                }
-                                                $key3 = $fieldhelper_to_heurist_map['file_path'];
+                                            $key3 = $fieldhelper_to_heurist_map['file_name'];
+                                            if($key3>0){
+                                                $details["t:".$key3] = array("1"=>$value);
+                                            }
+                                            $key3 = $fieldhelper_to_heurist_map['file_path'];
                                             if($key3>0){
                                                 if( substr($dir, -1, 1) != '/' )  $dir = $dir.'/';
                                                 $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
@@ -478,13 +446,14 @@
                                         unset($all_files[$ind]);
                                     }
                                 }
-                                
+
                                 if($recordId!=null){ //veify that this record exists
                                     $res = mysql__select_array("Records", "rec_ID", "rec_ID=".$recordId);
                                     if (!(is_array($res) && count($res)>0)){
-                                        print  "<div>File: <i>$filename_base</i> was indexed as rec# $recordId. But this record was not found. File will be reindexed</div>";
+                                        print  "<div>File: <i>$filename_base</i> was indexed as rec# $recordId. ".
+                                            "This record was not found. File will be reindexed</div>";
                                         $recordId = null;
-                                    }  
+                                    }
                                 }
 
                                 if($recordId==null){ //import only new
@@ -504,13 +473,15 @@
                                                 $recordNotes = readEXIF($filename);
 
                                             }else{
-                                                print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">Error: failed to register, no record created</span></div>";
-                                                //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
+                                                print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">".
+                                                    "Error: Failed to register. No record created</span></div>";
                                                 $file_id = null;
                                             }
 
                                         }else{
-                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">File is referenced in fieldhelper.xml but not found on disk, no record created.</span></div>";
+                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">".
+                                                "File is referenced in fieldhelper.xml but was not found on disk.".
+                                                "No record was created.</span></div>";
                                         }
                                     }
 
@@ -525,7 +496,9 @@
                                     //set title by default
                                     if (!array_key_exists("t:".$titleDT, $details)){
                                         $details["t:".$titleDT] = array("1"=>$filename);
-                                        print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: no title recorded in XML manifest for this file, using file path + name</span></div>";
+                                        print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">".
+                                                "Warning: there was no title recorded in the XML manifest for this file.".
+                                                "Using file path + file name as title.</span></div>";
                                     }
 
                                     $new_md5 = null;
@@ -555,7 +528,8 @@
                                     );
 
                                     if (@$out['error']) {
-                                        print "<div>File: <i>$filename_base</i> <span  style='color:red'>Error: ".implode("; ",$out["error"])."</span></div>";
+                                        print "<div>File: <i>$filename_base</i> <span  style='color:red'>Error: ".
+                                            implode("; ",$out["error"])."</span></div>";
                                     }else{
                                         if($new_md5==null){
                                             $new_md5 = md5_file($filename);
@@ -563,13 +537,15 @@
                                         //update xml
                                         if($recordId==null){
                                             if($old_md5!=$new_md5){
-                                                print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: Checksum differs from value in manifest, data file may have been changed</span></div>";
+                                                print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">".
+                                                    "Warning: Checksum differs from value in manifest; ".
+                                                    "data file may have been changed</span></div>";
                                             }
                                             $f_item->addChild("heurist_id", $out["bibID"]);
                                             $f_item->addChild("md5", $new_md5);
                                             $f_item->addChild("filesize", filesize($filename));
 
-                                            
+
                                             $rep_added++;
                                         }else{
                                             $el_heuristid["heurist_id"] = $out["bibID"];
@@ -577,7 +553,8 @@
                                         }
 
                                         if (@$out['warning']) {
-                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: ".implode("; ",$out["warning"])."</span></div>";
+                                            print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: ".
+                                                    implode("; ",$out["warning"])."</span></div>";
                                         }
 
                                     }
@@ -590,7 +567,8 @@
                                 $cnt_files++;
                                 if ($cnt_files % 5 == 0) {
                                     ob_start();
-                                    print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$rep_processed.','.$tot_files.')</script>'."\n";
+                                    print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files
+                                        .','.$rep_processed.','.$tot_files.')</script>'."\n";
                                     ob_flush();
                                     flush();
                                 }
@@ -603,14 +581,12 @@
 
                     if($not_found){
                         print "<div style=\"color:red\">Manifest is either corrupted or empty</div>";
-                        //$rep_issues=$rep_issues."<br>folder $dir cotains corrupted or empty manifest file";
                     }else{
-                        if($rep_processed>0){                         // $rep_add records added. $rep_updated records updated
+                        if($rep_processed>0){
                             print "<div>$rep_processed files processed. $rep_added added. $rep_updated updated.</div>";
                         }
                         if($rep_ignored>0){
-                            print "<div>$rep_ignored files already indexed</div>";
-                            //$rep_issues=$rep_issues."<br> $rep_ignored entries in manifest are ignored for ".$dir;
+                            print "<div>$rep_ignored files already indexed.</div>";
                         }
                     }
 
@@ -620,16 +596,18 @@
 
                     //create empty manifest XML  - TODO!!!!
                     $s_manifest = <<<XML
-<?xml version="1.0" encoding="UTF-8"?>
-<fieldhelper version="1">
-  <info>
-    <AppName>Heurist</AppName>
-    <AppVersion>v 3.0.0 2012-01-01</AppVersion>
-    <AppCopyright>© ArtEresearch, University of Sydney</AppCopyright>
-    <date></date>
-  </info>
-<formatOutput>1</formatOutput></fieldhelper>
-XML;
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <fieldhelper version="1">
+                      <info>
+                        <AppName>Heurist</AppName>
+                        <AppVersion>v 3.0.0 2012-01-01</AppVersion>
+                        <AppCopyright>© ArtEresearch, University of Sydney</AppCopyright>
+                        <date></date>
+                      </info>
+                    <formatOutput>1</formatOutput>
+                    </fieldhelper>
+                    XML;
+
 
                     $fh_data = simplexml_load_string($s_manifest);
                 }
@@ -671,7 +649,8 @@ XML;
                                 $recordNotes = readEXIF($filename);
 
                             }else{
-                                print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">Warning: failed to register, no record created:  .$file_id</span></div>";
+                                print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">".
+                                        "Warning: failed to register. No record created for:  .$file_id</span></div>";
                                 //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
                                 $file_id = null;
                                 continue;
@@ -696,20 +675,20 @@ XML;
                             }
                             $key = $fieldhelper_to_heurist_map['file_path'];
                             if($key>0){
-                                
+
                                 $targetPath = $flleinfo['dirname'];
                                 if(substr($targetPath, -1) != '/'){
                                     $targetPath .= "/";
                                 }
                                 $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath); //getRelativePath2($targetPath);
                                 $details["t:".$key] = array("1"=>  $rel_path);
-                                
+
                                 /*print "<div>".HEURIST_FILESTORE_DIR."</div>";
                                 print "<div>file path :".$targetPath."</div>";
                                 print "<div>relative path :".strpos($targetPath, HEURIST_FILESTORE_DIR)."--".$rel_path."</div>";
                                 print "<div>relative path old :".getRelativePath(HEURIST_FILESTORE_DIR, $targetPath)."<br><br></div>";*/
-                                
-                                
+
+
                             }
                             $key = $fieldhelper_to_heurist_map['extension'];
                             if($key>0){
@@ -740,8 +719,6 @@ XML;
                                 null //+comment
                             );
 
-                            /*****DEBUG****///error_log(">>>>>".filemtime($filename)."  ".date("Y/m/d H:i:s.", filemtime($filename)));
-
                             $f_item = $f_items->addChild("item");
                             $f_item->addChild("filename", htmlspecialchars($flleinfo['basename']));
                             $f_item->addChild("nativePath", htmlspecialchars($filename));
@@ -758,14 +735,14 @@ XML;
                             $f_item->addChild("md5", $new_md5);
                             $f_item->addChild("filesize", filesize($filename));
 
-                            
+
                             if (@$out['error']) {
                                 print "<div>Fle: <i>$filename_base</i> <span style='color:red'>Error: ".implode("; ",$out["error"])."</span></div>";
                             }else{
                                 $f_item->addChild("heurist_id", $out["bibID"]);
                                 $cnt_added++;
                             }
-                            
+
                             $rep_processed_dir++;
                         }//check ext
 
@@ -784,14 +761,14 @@ XML;
 
                 ob_start();
                 if($rep_processed_dir>0){
-                    print "<div style=\"color:green\">$rep_processed_dir processed. $cnt_added records created (new entries added to manifest)</div>";
+                    print "<div style=\"color:green\">$rep_processed_dir processed. $cnt_added records created (new entries added to manifests)</div>";
                 }
                 print '<script type="text/javascript">update_counts('.$progress_divid.','.$cnt_files.','.$cnt_added.',0)</script>'."\n";
                 ob_flush();
                 flush();
 
                 if($rep_processed+$rep_processed_dir>0){
-                    //save modified xml (with updated heurist_id tags
+                    //save modified xml (with updated heurist_id tags)
                     $fh_data->formatOutput = true;
                     $fh_data->saveXML($manifest_file);
                 }
@@ -799,10 +776,11 @@ XML;
                 return $rep_processed+$rep_processed_dir;
             }
 
+
             /**
             * Read EXIF from JPEG files
             *
-            * @param mixed $fielname
+            * @param mixed $filename
             */
             function readEXIF($filename){
 

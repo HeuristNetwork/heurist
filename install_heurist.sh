@@ -101,9 +101,10 @@ $2 rm exemplars.tar.bz2
 
 cd /var/www/html/HEURIST/h3
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 external_h4
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+cd /var/www/html/HEURIST/h3/applications/h4
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
 
 echo "Heurist unpacked"
 

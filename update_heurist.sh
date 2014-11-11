@@ -85,6 +85,17 @@ $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exempl
 $2 tar -xjf exemplars.tar.bz2
 $2 rm exemplars.tar.bz2
 
+# Simlinks to external functions and libraries
+cd /var/www/html/HEURIST/$1
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
+
+# Simlink for H4 externals
+cd /var/www/html/HEURIST/$1/applications/h4
+ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4/ ext
+
+
 echo "Heurist unpacked"
 
 # This installation of elaastic search generated a number of security holes rated HIGH RISK
@@ -107,7 +118,7 @@ echo You will need to edit the configIni.php file in the /var/www/html/HEURIST/$
 echo unless you have a shared heuristConfigIni.php file in /var/www/html/HEURIST
 echo See /var/www/html/HEURIST/$1/parentDirectory_heuristConfigIni.php for instructions
 echo
-echo Please visit Designer View - Utilities - Verify installation to check that required compnents are installed
+echo Please visit Designer View - Utilities - Verify installation to check that required components are installed
 echo and then verify that Heurist runs correctly from the new location, then overwrite
 echo your /var/www/html/HEURIST/h3 directory with /var/www/html/HEURIST/$1
 echo
