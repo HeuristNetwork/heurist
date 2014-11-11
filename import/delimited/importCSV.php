@@ -532,7 +532,7 @@
 
         <input type="hidden" value="<?=$sa_mode?>" name="sa_mode" id="sa_mode"/>
 
-        <b>Records in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
+        <b>Rows in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
         <div class="help" style="float:right;width:240px;text-align:right;">
                 Unprocessed data is retained in buffer on exit
         </div>
@@ -572,12 +572,14 @@
                         $url = 'importCSV.php/import.csv?db='.HEURIST_DBNAME.'&getsession='.@$_REQUEST["import_id"].'&idfield='.@$_REQUEST["recid_field"].'&mode=';
                         
                         $cnt_update  = intval(@$validationRes['count_update']);
+                        $cnt_update_rows  = intval(@$validationRes['count_update_rows']);
                         $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
                         $download_update= ($cnt_update>0)?"<a href='#' onclick='window.open(\"".$url."0\" ,\"_blank\")'>download</a>" :"&nbsp;";
 
                         $cnt_insert  = intval(@$validationRes['count_insert']);
+                        $cnt_insert_rows  = intval(@$validationRes['count_insert_rows']);
                         if($cnt_insert>0){
-                            $show_insert = "<a href='#' onclick='showRecords(\"insert\")'>show</a>";
+                            $show_insert = "<a href='#' onclick='showRecords(\"insert\")' title='show rows to be inserted as new records'>show</a>";
                             $download_insert= "<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>"
                             ." &nbsp;&nbsp; <input type=\"checkbox\" title=\"Do not insert new records. Do update only\" "
                             ." onclick=\"{document.getElementById('ignore_insert').value=this.checked?1:0; }\"> ignore ";
@@ -591,14 +593,23 @@
                     ?>
                     <td><div class="analized2">
                             <table style="display: inline-block; border:none" border="0">
-                                <tr><td>Records matched:</td><td><?=$cnt_update?></td><td width="80"><?=$show_update?></td><td width="120"><?=$download_update?></td></tr>
-                                <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td><?=$show_insert?></td><td><?=$download_insert?></td></tr>
                                 <?php        if($sa_mode==0){ ?>
-                                    <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
+                                    <tr><td>Records matched:</td><td><?=$cnt_update?></td><td>for rows:</td><td><?=$cnt_update_rows?></td>
+                                        <td width="80"><?=$show_update?></td><td width="120"><?=$download_update?></td></tr>
+                                    <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td>for rows:</td><td><?=$cnt_insert_rows?></td>
+                                        <td><?=$show_insert?></td><td><?=$download_insert?></td></tr>
+                                
+                                    <tr><td colspan="3" align="right"><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
                                         <td><?=$cnt_disamb?></td><td><?=$show_disamb?></td><td></td></tr>
-                                    <?php        } else { ?>
+                                <?php        } else { 
+                                    
+                                    //$cnt_update = $cnt_insert + $cnt_update;
+                                    //$imp_session['validation']['recs_update'] = array_merge($imp_session['validation']['recs_update'], $imp_session['validation']['recs_insert']);
+                                    //$cnt_insert = 0;
+                                ?>
+                                    <tr><td>Rows with valid values:</td><td><?=($cnt_insert + $cnt_update)?></td><td><?=$show_update?></td><td><?=$show_insert?"new: ".$show_insert:""?></td></tr>
                                     <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td><td></td></tr>
-                                    <?php        }        ?>
+                                <?php        }        ?>
                             </table>
 
                             <div style="float:right;vertical-align:middle;padding-top:10px">
@@ -632,10 +643,11 @@
 
                 <td>
                             <span class="importing">
-                    <?php 
+                    <?php  
+                          //($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")
                           if($sa_mode==1 && $validationRes){  ?>
                             <span class="analized2">
-                                        <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
+                                        <input type="button" value="Create/Update records"
                                             onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
                     <?php } ?>
                             <span class="importing analized3">
@@ -897,7 +909,7 @@
             if($cnt_error>0){
             ?>
             <div id="main_error" style="display:none;">
-            <h4>RECORDS WITH FIELD ERRORS</h4>
+            <h4>ROWS WITH FIELD ERRORS</h4>
             <hr width="100%" />
             <div>
             </div>

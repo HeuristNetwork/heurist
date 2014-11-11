@@ -158,7 +158,7 @@
     // matching functions ===================================
 
     /**
-    * Finds record ids in heurist database by key fields
+    * Finds record ids in heurist database by key fields - not used
     *
     * @param mixed $mysqli
     * @param mixed $imp_session
@@ -167,7 +167,7 @@
     function matchingSearch($mysqli, $imp_session, $params){
 
         //add result of validation to session
-        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "error"=>array());
+        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>999, "count_insert_rows"=>999, "count_error"=>0, "error"=>array());
         $import_table = $imp_session['import_table'];
 
         //get rectype to import
@@ -549,12 +549,14 @@
     */
     function matchingMultivalues($mysqli, $imp_session, $params){
 
-        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "error"=>array(),
+        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0, "count_insert_rows"=>0, "count_error"=>0, "error"=>array(),
             "recs_insert"=>array(), "recs_update"=>array() );
 
         $import_table = $imp_session['import_table'];
         $multivalue_field_name = $params['multifield']; //name of multivalue field
         $multivalue_field_name_idx = 0;
+        $cnt_update_rows = 0;
+        $cnt_insert_rows = 0;
 
         //disambiguation resolution
         $disamb_ids = @$params['disamb_id'];   //record ids
@@ -673,7 +675,7 @@
         $tmp_idx_update = array(); //to keep indexes
 
 
-        //loop all records in import tabale and detect what is for insert and what for update
+        //loop all records in import table and detect what is for insert and what for update
         $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
         $res = $mysqli->query($select_query);
         if($res){
@@ -681,6 +683,9 @@
             while ($row = $res->fetch_row()){
                 $imp_id = $row[0];
                 $row[0] = $params_dt;
+                
+                $is_update = false;
+                $is_insert = false;
                 
 
                 $multivalue = $row[$multivalue_field_name_idx];
@@ -736,6 +741,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             $rec[0] = $imp_id;
                             $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']); //keep index in rec_insert
                             array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
+                            $is_insert = true;
                             //DEBUG print "<br>push :".print_r($imp_session['validation']['recs_insert'], true);
                             
                         }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){  
@@ -754,7 +760,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             array_unshift($rec, $rec_ID);
                             $tmp_idx_update[$keyvalue] = count($imp_session['validation']['recs_update']); //keep index in rec_update
                             array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
-                            
+                            $is_update = true;
                         }else{
                             
                             /*if($disamb_resolv)
@@ -773,16 +779,21 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
                         if(array_key_exists($keyvalue, $tmp_idx_insert)){
                             $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (",".$imp_id);
-
+                            $is_insert = true;
                             //DEBUG print "<br> added key=".$keyvalue."   idx=".$tmp_idx_insert[$keyvalue]."  line=".$imp_id;
                         }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
                             $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
+                            $is_update = true;
                         }
                         //$imp_session['validation']['recs_update'][]
                         array_push($ids, $pairs[$keyvalue]);
                     }
                 }//foreach multivalues
                 $records[$imp_id] = implode($params['csv_mvsep'], $ids);   //IDS to be added to import table
+                
+                if($is_update) $cnt_update_rows++;
+                if($is_insert) $cnt_insert_rows++;
+                
             }//while import table
         }
 
@@ -838,6 +849,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         // result of work - counts of records to be inserted, updated
         $imp_session['validation']['count_update'] = count($imp_session['validation']['recs_update']);
         $imp_session['validation']['count_insert'] = count($imp_session['validation']['recs_insert']);
+        $imp_session['validation']['count_update_rows'] = $cnt_update_rows;
+        $imp_session['validation']['count_insert_rows'] = $cnt_insert_rows;
         $imp_session['validation']['disambiguation'] = $disambiguation;
         $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
         
@@ -1066,7 +1079,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     function validateImport($mysqli, $imp_session, $params){
 
         //add result of validation to session
-        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_error"=>0, "error"=>array() );
+        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0, "count_insert_rows"=>0, "count_error"=>0, "error"=>array() );
 
         //get rectype to import
         $recordType = @$params['sa_rectype'];
@@ -1078,6 +1091,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $import_table = $imp_session['import_table'];
         $id_field = @$params['recid_field']; //record ID field is always defined explicitly
         $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
+        
+        $cnt_update_rows = 0;
+        $cnt_insert_rows = 0;
 
         //error_log(">>>>".$id_field)   ;
 
@@ -1109,11 +1125,12 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         if(!$id_field){ //ID field not defined - all records will be inserted
             if(!$ignore_insert){
                 $imp_session['validation']["count_insert"] = $imp_session['reccount'];
+                $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];  //all rows will be imported as new records
                 $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
                 $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
             }
         }else{
-
+            
             $cnt_recs_insert_nonexist_id = 0;
 
             // validate selected record ID field
@@ -1138,7 +1155,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     return $wrong_records;
                 }
 
-                if(!$ignore_insert){
+                if(!$ignore_insert){      //WARNING - it ignores possible multivalue index field
                     //find record ID that are not exists in HDB - to insert
                     $query = "select count(imp_id) "
                     ." from ".$import_table
@@ -1161,6 +1178,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 if( $row[0]>0 ){
 
                     $imp_session['validation']['count_update'] = $row[0];
+                    $imp_session['validation']['count_update_rows'] = $row[0];
                     //find first 100 records to display
                     $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
                     ." FROM ".$import_table
@@ -1184,6 +1202,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 if($row){
                     if( $row[0]>0 ){
                         $imp_session['validation']['count_insert'] = $row[0];
+                        $imp_session['validation']['count_insert_rows'] = $row[0];
+                        
                         //find first 100 records to display
                         $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000"; //.$id_field." is null OR "
                         //DEBUG error_log("2.ins >>>>".$select_query);
@@ -1198,6 +1218,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
                 $imp_session['validation']['count_insert_nonexist_id'] = $cnt_recs_insert_nonexist_id;
                 $imp_session['validation']['count_insert'] = $imp_session['validation']['count_insert']+$cnt_recs_insert_nonexist_id;
+                $imp_session['validation']['count_insert_rows'] = $imp_session['validation']['count_insert'];
 
                 $select_query = "SELECT imp_id, ".implode(",",$sel_query)
                 ." FROM ".$import_table
