@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * selectDBForImport.php: Shows a list of registered databases to allow choosing source for structural elements 
+    * selectDBForImport.php: Shows a list of registered databases to allow choosing source for structural elements
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -12,7 +12,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0   
+    * @version     3.1.0
     */
 
     /*
@@ -66,17 +66,17 @@
         <div id="page-inner" style="overflow:auto">
 
             <div id="statusMsg"><img src="../../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
-            The list below shows available databases registered with the HeuristScholar.org Index database 
+            The list below shows available databases registered with the HeuristScholar.org Index database
             which have the same major/minor version as the current database<br />
-            Use the filter to locate a specific term in the name or title. 
+            Use the filter to locate a specific term in the name or title.
             Click the database icon on the left to view available record types in that database.
             <br />
             <b>Bolded</b> databases contain collections of schemas curated by the Heurist team or members of the Heurist community
-            
+
             <br />
-            
+
             <h4>
-                Older (or newer) format registered databases may not be shown, 
+                Older (or newer) format registered databases may not be shown,
                 as this list only shows databases with format version number <?=HEURIST_DBVERSION?>.
             </h4>
 
@@ -115,12 +115,12 @@
 
                 $data = loadRemoteURLContent($reg_url, true); //without proxy
 
-                if($data){                    
+                if($data){
                     $data = json_decode($data);
                     if(!is_array($data)){
                         if(defined("HEURIST_HTTP_PROXY")){
                             $data = loadRemoteURLContent($reg_url, false); //with proxy
-                            if($data){                    
+                            if($data){
                                 $data = json_decode($data);
                                 if(!is_array($data)){
                                     $data = null;
@@ -193,10 +193,11 @@
                         }
                     }
                 }else{
-                    echo 'alert("Can not access '.$reg_url.
-                    '\n\n Please verify your proxy settings\n\n'.
-                    'Special note Feb 2014: this error may be due to a server upgrade which should be complete by the end of the month. '.
-                    'Should you run into this before it is fixed, please advise the Heurist team via a bug report and we will '.
+                    echo 'alert("Cannot access '.$reg_url.
+                    '\n\n Please verify that your proxy settings are not blocking access\n\n'.
+                    'Special note 29 Oct 2014: this error is probably due to migration of our index service between servers. '.
+                    'We expect to have this fixed in about a week or so (we are dependent on the speed of third parties).'.
+                    'Should you run into this before it is fixed, please advise the Heurist team via email or bug report and we will '.
                     'provide you with a workaround.")';
                 }
             ?>

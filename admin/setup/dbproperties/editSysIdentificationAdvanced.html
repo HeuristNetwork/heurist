@@ -81,7 +81,7 @@
                     <div class="input-header-cell">Heurist registration number and format version (0 = not registered)
                     </div>
                     <div class="input-cell"><br />Database Registration number <b>[sys_dbRegisteredID]</b>&nbsp;&nbsp;&nbsp;
-                    Database format version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b>
+                        Database format version <b>[sys_dbVersion].[sys_dbSubVersion].[sys_dbSubSubVersion]</b>
                     </div>
                 </div>
 
@@ -103,7 +103,7 @@
                     <div class="input-header-cell">Addresses from which incoming mail to be harvested may be received
                     </div>
                     <div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=100] <br />
-                    comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored
+                        comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored
                     </div>
                 </div>
                 <div class="input-row">
@@ -128,8 +128,8 @@
                 <div class="input-row">
                     <div class="input-header-cell">Zotero web library key(s) and IDs for synchronisation</div>
                     <div class="input-cell">[textbox : sys_SyncDefsWithDB : : size=160] <br />
-                    enter as Title,UserID,GroupID,Key, separated by |
-                    eg. Artem's library,1958388,268611,YjUxZzcgq1fhCd9YyxgzzVNX | Ian's library,1836383,274864,DuFHBTyVYVhuIhttUotyqBSjb
+                        enter as Title,UserID,GroupID,Key, separated by |
+                        eg. Artem's library,1958388,268611,YjUxZzcgq1fhCd9YyxgzzVNX | Ian's library,1836383,274864,DuFHBTyVYVhuIhttUotyqBSjb
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@
                     <div class="input-header-cell">Additional folder(s) containing files for indexing (Picasa/FieldHelper compatibility)
                     </div>
                     <div class="input-cell">[textbox : sys_MediaFolders : : size=160] <br />
-                    separated by semi-colon ( ; ), child folders are included automatically</div>
+                        separated by semi-colon ( ; ), child folders are included automatically</div>
                 </div>
 
                 <div class="input-row">
@@ -161,13 +161,12 @@
                 </div>
 
 
-                <!-- None of this seems to be referenced anywhere else in the code, I long since forgot what this was even meant to do ...
-                <div class="input-row">
-                <div class="input-header-cell">Default constraints behaviour (advanced)  </div>
-                <div class="input-cell">[dropdown : sys_ConstraintDefaultBehavior : : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards")]
-                If in doubt, leave as 'locktypetotype'</div>
+                <!-- None of this seems to be referenced anywhere else in the code, I long since forgot what this was even meant to do ...-->
+                <div class="input-row" style="visibility:hidden">
+                    <div class="input-header-cell">Default constraints behaviour (advanced)  </div>
+                    <div class="input-cell">[dropdown : sys_ConstraintDefaultBehavior : : enum("locktypetotype", "unconstrainedbydefault", "allownullwildcards")]
+                        If in doubt, leave as 'locktypetotype'</div>
                 </div>
-                -->
 
                 [end-update]
 
