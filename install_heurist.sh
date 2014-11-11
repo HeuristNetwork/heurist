@@ -1,7 +1,7 @@
 #! /bin/sh
 
-# install_heurist.sh: installation script for Heurist on ny flavour of Linux
-# Note: run install_prerequisities_ubuntu.sh first to install php packages, MySQL, SpatialLite etc.
+# install_heurist.sh: installation script for Heurist on any flavour of Linux
+# Note: install prerequisities first - php, php packages, MySQL, Apache - see documentation
 
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
@@ -27,7 +27,7 @@ if [ -z $1 ]
    then
       echo -e "\n\n"
       echo "Please supply version eg. h3.x.x-alpha or h3-alpha, h3-beta, h3-latest (this MUST exist as a tar.bz2 file "
-      echo "on HeuristScholar.org/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
+      echo "on heurist.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
       echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
       echo
       echo "       ./install_heurist.sh h3.2.0-beta sudo"
@@ -35,14 +35,14 @@ if [ -z $1 ]
    fi
 
 # Test download package is valid before we get half way and can't find it ...
-curl --range 0-100 http://heuristscholar.org/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
+curl --range 0-100 http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
 
 rc=$?
 if [ $rc -ne 0 ]
      then
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
-        echo "Please check for the latest version at http://heuristscholar.org/HEURIST/DISTRIBUTION"
+        echo "Please check for the latest version at http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION"
         echo "The parameter should be eg. h3.2.0-beta as given - DO NOT include the url path or .tar.bz2"
         exit
      fi
@@ -73,7 +73,7 @@ $2 mkdir HEURIST
 $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 
 echo -e "Fetching Heurist code from HeuristScholar.org"
-$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm $1.tar.bz2
 # this will fail if h3 already exists, use update script in this case
@@ -83,19 +83,19 @@ $2 rm -rf $1
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 $2 tar -xjf external.tar.bz2
 $2 rm external.tar.bz2
 
-$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
 $2 tar -xjf external_h4.tar.bz2
 $2 rm external_h4.tar.bz2
 
-$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm help.tar.bz2
 
-$2 wget http://heuristscholar.org/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
 $2 tar -xjf exemplars.tar.bz2
 $2 rm exemplars.tar.bz2
 
@@ -108,7 +108,7 @@ $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
 echo "Heurist unpacked"
 
 echo -e "\n\n"
-echo "Creating directories, sandpit database and setting permissions"
+echo "Creating directories, setting up sandpit database and setting permissions"
 
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
 
@@ -169,5 +169,5 @@ echo "You can do this by pasting the following at the command line - you may nee
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/heurist"
+echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/HEURIST/h3"
 echo
