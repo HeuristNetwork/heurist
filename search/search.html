@@ -284,7 +284,7 @@
                             <!-- database name is appended automatically by auto-popup -->
                             <li style="padding-left:5px;">
                                 <a href="../admin/structure/rectypes/manageRectypes.php?popup=1" name="auto-popup" class="verylarge"
-                                    onClick="{return false;}"RE
+                                    onClick="{return false;}"
                                     title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
                                     Record types / fields</a>
                             </li>
@@ -324,6 +324,13 @@
                             </li>
 
                             <li><div class="separator">ANALYSE</div></li>
+
+                            <li style="padding-left:5px;">
+                                <a href="../admin/verification/listDataErrors.php?popup=1" name="auto-popup" class="portrait"
+                                    onClick="{return false;}"
+                                    title="Find records with incorrect structure and inconsistent values (invalid pointer, missing data etc.)">
+                                    Data consistency</a>
+                            </li>
 
                             <li style="padding-left:5px;"><a href="#"
                                 onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'viewers/crosstab/crosstabs.php?' + top.HEURIST.currentQuery_main)"
@@ -701,9 +708,9 @@
                                         onclick='{top.HEURIST.search.executeQuery
                                         ("?w=bookmark&amp;q=tag:\""+top.HEURIST.util.getDisplayPreference("favourites")+"\"&amp;label=My Favourites");}'>
                                         My Favourites
-                                    </a>            
-                                </div>      
-                                
+                                    </a>
+                                </div>
+
                                 <div class=saved-search-subsubheading>
                                     <a id="search-recent" href="#"
                                         onclick='{top.HEURIST.search.executeQuery
