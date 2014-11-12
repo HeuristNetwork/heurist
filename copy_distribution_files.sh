@@ -85,9 +85,8 @@ ls -alt /var/www/html/HEURIST/h3-build
 
 
 echo
-echo Copying installer shellscripts from current instance of code
+echo Copying installer and update shellscripts from root of current instance
 cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-cp xtras_utilities/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
 
 echo
