@@ -22,6 +22,8 @@
 
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../common/db_recsearch.php');
+    require_once (dirname(__FILE__).'/../common/utils_db.php');
+    //require_once (dirname(__FILE__).'/../common/utils_db_script.php');
 
     /* DEBUG
     $_REQUEST['db'] = 'dos_3';
@@ -45,14 +47,30 @@
         $response = recordSearchFacets($system, $_REQUEST);
 
     }else {
-
-        //DEGUG        $currentUser = array('ugr_ID'=>2);
-
-        $need_structure = (@$_REQUEST['f']=='structure');
-        $need_details = (@$_REQUEST['f']=='map' || $need_structure);
         
+        //temorary!!!
+        //verify than recLinks does not exist
+        $isok = true;
+        $value = mysql__select_value($system->get_mysqli(), "SHOW TABLES LIKE 'recLinks'");
+        if($value==null || $value==""){
+            include(dirname(__FILE__).'/../common/utils_db_script.php');
+            
+            if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../common/sqlCreateRecLinks.sql")){
+                $system->addError(HEURIST_DB_ERROR, "Can not execure script sqlCreateRecLinks.sql");
+                $response = $system->getError();
+                $isok = false;
+            }        
+        }
+        if($isok){
+        //temorary!!!
 
-        $response = recordSearch($system, $_REQUEST, $need_structure, $need_details);    
+            //DEGUG        $currentUser = array('ugr_ID'=>2);
+            $need_structure = (@$_REQUEST['f']=='structure');
+            $need_details = (@$_REQUEST['f']=='map' || $need_structure);
+
+            $response = recordSearch($system, $_REQUEST, $need_structure, $need_details);    
+        
+        }
     }
 
     header('Content-type: application/json'); //'text/javascript');

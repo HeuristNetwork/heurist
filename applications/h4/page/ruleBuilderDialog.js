@@ -26,7 +26,6 @@ function addLevel(){
             }).appendTo($('#level1'));                
 }
 
-
 function onInit(success) //callback function of hAPI initialization
 {
     if(success)  //system is inited
@@ -40,6 +39,8 @@ function onInit(success) //callback function of hAPI initialization
         //init toolbar buttons
         $('#btn_add_level1').button().on('click', null, addLevel );
 
+        $('#btn_save').button().on('click', 3, saveRules);
+        
         $('#btn_apply').button().on('click', 3, applyRules);
 
         //create rule builders in case there is parameter 'rules'
@@ -130,7 +131,9 @@ function saveRules(){
         res = {mode:'save', rules:res};
         window.close(res);    
     }
-}
+}                
+
+
 
 //
 //

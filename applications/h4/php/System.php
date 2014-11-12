@@ -110,8 +110,8 @@
                     
                     $this->initPathConstants();
                     
-                     //consts
-                     $this->defineConstants();
+                    //consts
+                    $this->defineConstants();
                 }
                 
                

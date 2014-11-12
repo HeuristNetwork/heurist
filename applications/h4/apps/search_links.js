@@ -184,16 +184,23 @@ $.widget( "heurist.search_links", {
                 this.user_groups.append(
                     $('<div>')
                     .append(this._defineHeader(top.HR('Personal Tags')))
-                    .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, "bookmark") ));
+                    .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, 'bookmark') ));
             }else{
                 this.user_groups.append(
                     $('<div>')
-                    .append(this._defineHeader(top.HR('My Bookmarks'), "bookmark"))
-                    .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, "bookmark") ));
+                    .append(this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
+                    .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, 'bookmark') ));
+                    
                 this.user_groups.append(
                     $('<div>')
-                    .append( this._defineHeader(top.HR('All Records'), "all"))
+                    .append( this._defineHeader(top.HR('All Records'), 'all'))
                     .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID) ));
+                    
+                this.user_groups.append(
+                    $('<div>')
+                    .append( this._defineHeader(top.HR('Rules'), 'rules'))
+                    .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, 'rules') ));
+                    
             }
 
             if(!top.HAPI4.currentUser.usr_GroupsList){
@@ -245,7 +252,11 @@ $.widget( "heurist.search_links", {
             .button({icons: {primary: "ui-icon-circle-plus"}, text:false})
             .click(function( event ) {
                 event.preventDefault();
-                that.editSavedSearch(null, null, domain);
+                if(domain=='rules'){
+                    that.editRules(null);
+                }else{
+                    that.editSavedSearch(null, null, domain);
+                }
                 return false;
             })
             .appendTo($header);
@@ -322,7 +333,7 @@ $.widget( "heurist.search_links", {
         var $ul = $('<div>'); //.css({'padding': '0em 0em !important', 'background-color':'red'});
 
         //add predefined searches
-        if(ugr_ID == top.HAPI4.currentUser.ugr_ID){  //if current user domain may be all or bookmark
+        if(ugr_ID == top.HAPI4.currentUser.ugr_ID && domain!='rules'){  //if current user domain may be all or bookmark
 
             domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
@@ -339,7 +350,7 @@ $.widget( "heurist.search_links", {
                 cnt = 2;
             }
         }else{
-            $ul.attr('id', 'svsu-'+ugr_ID+'-all');
+            $ul.attr('id', 'svsu-'+ugr_ID+'-'+domain);
         }
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
@@ -352,7 +363,7 @@ $.widget( "heurist.search_links", {
 
 
                 try {
-                    facet_params = $.parseJSON(ssearches[svsID][1]);
+                    facet_params = $.parseJSON(ssearches[svsID][_QUERY]);
                     if(this.currentMode=='saved') continue;
                 }
                 catch (err) {
@@ -366,8 +377,13 @@ $.widget( "heurist.search_links", {
                     if(this.currentMode=='saved'){
                         var prms = Hul.parseHeuristQuery(ssearches[svsID][_QUERY]);
                         //var qsearch = prms[0];
-                        domain2  = prms.w;
-                        if(Hul.isempty(prms.q)) continue; //do not show saved searches without Q (rules) in this list
+                        if(Hul.isempty(prms.q)&&!Hul.isempty(prms.rules)){
+                            domain2 = 'rules';
+                        }else{
+                            domain2 = prms.w;    
+                            if(Hul.isempty(prms.q)) continue; //do not show saved searches without Q (rules) in this list
+                        }
+                        
                     }else{
                         domain2  = facet_params.domain;
                     }
@@ -535,18 +551,22 @@ $.widget( "heurist.search_links", {
             }else{
 
                 var request = Hul.parseHeuristQuery(qsearch);
-                //additional params
-                request.f = this.options.searchdetails;
-                request.source = this.element.attr('id');
-                request.qname = qname;
-                request.notes = null; //unset to reduce traffic
+                
+                if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
+                    $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ request.rules ]); //global app event  
+                }else{
+                    //additional params
+                    request.f = this.options.searchdetails;
+                    request.source = this.element.attr('id');
+                    request.qname = qname;
+                    request.notes = null; //unset to reduce traffic
 
-                //that._trigger( "onsearch"); //this widget event
-                //that._trigger( "onresult", null, resdata ); //this widget event
+                    //that._trigger( "onsearch"); //this widget event
+                    //that._trigger( "onresult", null, resdata ); //this widget event
 
-                //get hapi and perform search
-                top.HAPI4.RecordMgr.search(request, $(this.document));
-
+                    //get hapi and perform search
+                    top.HAPI4.RecordMgr.search(request, $(this.document));
+                }
             }
         }
 
@@ -570,6 +590,8 @@ $.widget( "heurist.search_links", {
             var svs_ugrid = $dlg.find('#svs_UGrpID');
             var svs_rules = $dlg.find('#svs_Rules');
             var svs_notes = $dlg.find('#svs_Notes');
+            svs_query.parent().show();
+            svs_ugrid.parent().show();
 
             var isEdit = (parseInt(svsID)>0);
 
@@ -596,8 +618,10 @@ $.widget( "heurist.search_links", {
                 svs_rules.val('');
                 svs_notes.val('');
                 //var domain = 'all';
-                
-                if(!Hul.isempty(squery)) {
+
+                if(Hul.isArray(squery)) { //this is RULES!!!
+                    svs_rules.val(JSON.stringify(squery));
+                }else if(!Hul.isempty(squery)) {
                     svs_query.val( squery );
                 }else if(Hul.isnull(this.currentSearch)){
                     svs_query.val( '' );
@@ -605,7 +629,7 @@ $.widget( "heurist.search_links", {
                     //domain = this.currentSearch.w;
                     //domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
                     svs_query.val( this.currentSearch.q );
-                    svs_rules.val( top.HEURIST4.util.isArray(this.currentSearch.rules)?JSON.stringify(this.currentSearch.rules):this.currentSearch.rules );   //@todo - stringigy????
+                    svs_rules.val( Hul.isArray(this.currentSearch.rules)?JSON.stringify(this.currentSearch.rules):this.currentSearch.rules );   //@todo - stringigy????
                 }
 
                 //fill with list of user groups in case non bookmark search
@@ -623,20 +647,34 @@ $.widget( "heurist.search_links", {
                 }
                 svs_ugrid.parent().show();
             }
+            
+            if(domain=='rules' || (Hul.isempty(svs_query.val()) &&  !Hul.isempty(svs_rules.val())) ){  //THIS IS RULE!!!
+                    svs_query.parent().hide();
+                    svs_ugrid.parent().hide();
+            }
+            
         }
     }
 
     , _updateAfterSave: function(request){
 
         if( parseInt(request.svs_ID) > 0 ){
-            $('#svs-'+request.svs_ID).html(request.svs_Name);
+            $('#svs-'+request.svs_ID).html(request.svs_Name);  //change name on edit
         }else{
-            $('#svsu-'+request.svs_UGrpID+'-'+request.domain).append( this._add_SVSitem(request.svs_Name, request.new_svs_ID) );
+            
+            var prms = Hul.parseHeuristQuery(request.svs_Query);
+            var domain = (Hul.isempty(prms.q)&&!Hul.isempty(prms.rules))?'rules':request.domain;
+            
+            $('#svsu-'+request.svs_UGrpID+'-'+domain).append( this._add_SVSitem(request.svs_Name, request.new_svs_ID) );
         }
     }
     
-    , _editRules:function(ele_rules){
+    /**
+    * public method to edit search rules
+    */
+    , editRules:function(ele_rules){
         
+                /*
                 var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database+'&rules=' + ele_rules.val(); //encodeURIComponent();
                 
                 Hul.showDialog(url, { width:1200, callback: 
@@ -652,6 +690,37 @@ $.widget( "heurist.search_links", {
                             }
                         }
                     }});
+               */     
+
+               var that = this;
+                
+                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+                if(!Hul.isnull(ele_rules)){
+                    url = url + '&rules=' + ele_rules.val();
+                }
+                
+                Hul.showDialog(url, { width:1200, callback: 
+                    function(res){
+                        if(!Hul.isempty(res)) {
+                            if(res.mode == 'apply'){  //&& that._query_request){
+                                
+                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
+                                
+                            }else if(res.mode == 'save') {
+                                
+                                if(Hul.isnull(ele_rules)){ //call from resultListMenu
+                                    that.editSavedSearch(null, res.rules, 'rules');
+                                }else{
+                                    ele_rules.val( JSON.stringify(res.rules) );    
+                                }
+                                /*var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+                                if(app && app.widget){
+                                    $(app.widget).search_links('editSavedSearch', null, res.rules, 'rules'); //call method editSavedSearch(svsID, squery, domain) - save current search
+                                }*/
+                            }
+                        }
+                    }});
+                    
         
     }
 
@@ -686,7 +755,7 @@ $.widget( "heurist.search_links", {
                     .button({icons: {primary: "ui-icon-pencil"}, text:false})
                     .css({'height':'16px', 'width':'16px'})
                     .click(function( event ) {
-                        that._editRules( $dlg.find('#svs_Rules') );
+                        that.editRules( $dlg.find('#svs_Rules') );
                     });
                 
 
@@ -706,9 +775,15 @@ $.widget( "heurist.search_links", {
 
                     allFields.removeClass( "ui-state-error" );
 
-                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 25 )
-                    && Hul.checkLength( svs_query, "Query", message, 1 );
-
+                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 25 );
+                    
+                    if(bValid){
+                        if(svs_query.is(":visible")){
+                            bValid = Hul.checkLength( svs_query, "Query", message, 1 );
+                        }else{
+                            bValid = Hul.checkLength( svs_rules, "Query", message, 1 );
+                        }
+                    }
 
                     if(bValid){
 

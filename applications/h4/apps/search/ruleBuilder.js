@@ -333,7 +333,7 @@ $.widget( "heurist.ruleBuilder", {
             //find all reverse links (pointers and relation that point to selected rt_ID)
             var alldetails = rectypes.typedefs;
             for (rtyID in alldetails)
-            if(rtyID){
+            if(rtyID && rtyID!=rt_ID){
                 details = alldetails[rtyID].dtFields;
                 for (dtyID in details){
                     if(dtyID){
@@ -359,8 +359,18 @@ $.widget( "heurist.ruleBuilder", {
                                 var isnotfound = true;
                                 var i, len = arr_fields.length;
                                 for (i=0;i<len;i++){
-                                    if(arr_fields[i].key == dtyID){
+                                    if(arr_fields[i].key == dtyID){   //this field may be added already
                                         arr_fields[i].rectypes.push(rtyID);
+                                        
+                                        if(arr_fields[i].isreverse && arr_fields[i].title.length<73){
+                                            if(arr_fields[i].title.length>=70){
+                                                arr_fields[i].title = arr_fields[i].title.substr(0,70)+'...';
+                                            }else{
+                                                var rt_name = alldetails[rtyID].commonFields[0];
+                                                arr_fields[i].title = arr_fields[i].title + ', '+rt_name;
+                                            }
+                                        }
+                                        
                                         isnotfound = false;
                                         break;
                                     }
@@ -370,6 +380,7 @@ $.widget( "heurist.ruleBuilder", {
                                 if(isnotfound){ //it means this is reverse
                                 
                                     name = top.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
+                                    var rt_name = alldetails[rtyID].commonFields[0];
                                 
                                     if(details[dtyID][fi_type]=='relmarker'){
                                         
@@ -380,11 +391,11 @@ $.widget( "heurist.ruleBuilder", {
                                             ?  temp.split(",") :[];
                                         if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
                                     
-                                        arr_fields.push({key:dtyID, title:'is '+name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:[rtyID], isreverse:true });
+                                        arr_fields.push({key:dtyID, title:name + ' << ' + rt_name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:[rtyID], isreverse:true });
                                         
                                     }else{
                                         this._has_rev_pointers = '1';
-                                        arr_fields.push({key:dtyID, title:'is '+name, rectypes:[rtyID], isreverse:true });
+                                        arr_fields.push({key:dtyID, title:name + ' << ' + rt_name, rectypes:[rtyID], isreverse:true });
                                     }
                                 }
 
@@ -655,6 +666,7 @@ $.widget( "heurist.ruleBuilder", {
         
         if(!top.HEURIST4.util.isempty(this.options.init_source_rt)){
                     this.select_source_rectype.val(this.options.init_source_rt);  
+                    this.select_source_rectype.prop('disabled', true);
         }
         this._onSelectRectype(); 
             

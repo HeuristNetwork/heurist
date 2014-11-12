@@ -230,20 +230,11 @@ $.widget( "heurist.resultListMenu", {
                 }
 
           }else if(action == "menu-search-rulebuilder"){  
-                
-                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
-                
-                Hul.showDialog(url, { width:1200, callback: 
-                    function(res){
-                        if(!Hul.isempty(res)) {
-                            if(res.mode == 'apply' && that._query_request){
-                                
-                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
-                                
-                                //top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                            }
-                        }
-                    }});
+
+                var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+                if(app && app.widget){
+                    $(app.widget).search_links('editRules', null); //call public method editRules
+                }
                 
                 
           }else if(action == "menu-selected-select-all"){  
