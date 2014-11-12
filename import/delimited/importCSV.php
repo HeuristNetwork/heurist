@@ -36,7 +36,7 @@
 
     $mysqli = mysqli_connection_overwrite(DATABASE);
     mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
-    
+
     if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
         header('Content-type: text/javascript');
@@ -50,13 +50,13 @@
             if( @$_REQUEST["getsession"] ){ //download session
                 download_import_session($_REQUEST["getsession"], @$_REQUEST["idfield"], @$_REQUEST["mode"]);
                 exit();
-        } else
-            if( @$_REQUEST["deleteunmatched"] ){ //download session
-                delete_unmatched_records($_REQUEST["deleteunmatched"], @$_REQUEST["idfield"]);
-                exit();
-            }
-            
-            
+            } else
+                if( @$_REQUEST["deleteunmatched"] ){ //download session
+                    delete_unmatched_records($_REQUEST["deleteunmatched"], @$_REQUEST["idfield"]);
+                    exit();
+                }
+
+
 ?>
 
 <html>
@@ -243,10 +243,10 @@
             </script>
 
             <?php
-        if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
+                if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
 
                     if(count(@$imp_session['errors'])>0){
-                
+
                         $col_count = $imp_session['col_count'];
                         $errors = $imp_session['errors'];
                         $fields = $imp_session['fields'];
@@ -261,10 +261,10 @@
                             print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
                         }
                         print "</table>";
-                    
+
                     }
                     if(count(@$imp_session['err_encoding'])>0){
-                
+
                         $errors = $imp_session['err_encoding'];
 
                         print "<h4>ERROR. Wrong encoding detected in import file. At least ".count($errors)." lines have such issue. Please save in UTF8.</h4>";
@@ -276,9 +276,9 @@
                             print "<tr><td>".$err['no']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
                         }
                         print "</table>";
-                    
+
                     }
-            ?>
+                ?>
 
                 <div class="actionButtons" >
                     <input type="button" value="Cancel"
@@ -294,19 +294,19 @@
 
         }else if(is_array($imp_session) && @$imp_session['fatal_error']){ //preprocessing
         ?>
-                <p style='color:red'>ERROR: <?=$imp_session['fatal_error']?></p>
-                <hr width="100%" />
-                <div class="actionButtons" >
-                    <input type="button" value="Cancel"
-                        onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
-                        style="margin-right: 10px;">
-                </div>
-            </body>
-            </html>
+        <p style='color:red'>ERROR: <?=$imp_session['fatal_error']?></p>
+        <hr width="100%" />
+        <div class="actionButtons" >
+            <input type="button" value="Cancel"
+                onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
+                style="margin-right: 10px;">
+        </div>
+        </body>
+        </html>
 
-        <?php     
+        <?php
             exit();
-        
+
         }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
         ?>
 
@@ -393,7 +393,7 @@
             if($sa_mode==0){ //matching
 
                 if($step==2){  //find  - NOT USED ANYMORE  - we trying to assign IDs at once
-                               // ARTEM TODO: REMOVE REDUNDANT CODE
+                    // ARTEM TODO: REMOVE REDUNDANT CODE
 
                     ob_start();
                     echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
@@ -422,7 +422,7 @@
                         "If you have many such ambiguities you may need to select adidtional key fields or edit the incoming "+
                         "data file to add further matching information.";
                     </script>
-                        
+
                     <?php
                     }else{
                         print '<script>form_vals["auto_switch_to_import"] = "1";</script>';
@@ -454,7 +454,7 @@
                             $res = doImport($mysqli, $imp_session, $_REQUEST);
                         ?>
                     </div>
-                    <br /><br /><input type="button" value="Back" onClick="{showRecords('mapping');}">
+                    <br /><br /><input type="button" value="Back to previous screen" onClick="{showRecords('mapping');}">
                 </div><!-- main_import_result -->
                 <?php
                 }
@@ -512,14 +512,14 @@
                 style="margin-right: 10px; margin-left:20px;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
             <?php if(@$_REQUEST["import_id"]){ ?>
-            <input type="button"
-                value="Clear data" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
-                title="Clear the data for this uploaded file from the server">
-            <input type="button"
-                value="Download data to file"
-                onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
-                title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
-            <?php } ?>
+                <input type="button"
+                    value="Clear data" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
+                    title="Clear the data for this uploaded file from the server">
+                <input type="button"
+                    value="Download data to file"
+                    onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
+                    title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
+                <?php } ?>
         </div>
 
         <?php
@@ -533,10 +533,10 @@
         <input type="hidden" value="<?=$sa_mode?>" name="sa_mode" id="sa_mode"/>
 
         <b>Rows in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
-        <div class="help" style="float:right;width:240px;text-align:right;">
-                Unprocessed data is retained in buffer on exit
+        <div class="help" style="float:right;width:300px;text-align:right;margin-right: 20px;">
+            Note: Data is retained between sessions until cleared
         </div>
-        
+
         <br /><br /><br />
 
         <table style="vertical-align:middle;">
@@ -544,14 +544,14 @@
                 <td>
                     <span class="matching">
                         <span id="btnStartMatch" style="display: none">
-                            <input type="button" value="Start search / match / Assign IDs"
+                            <input type="button" value="Match data against records in database"
                                 onclick="doMatching()" style="font-weight: bold;">
 
                         </span>
                     </span>
                     <span class="importing" id="divPreviousBtn">
-                        <input type="button" value="<< Previous" style="font-weight: bold;"
-                            title="Go to Matching step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
+                        <input type="button" value="<< Match again" style="font-weight: bold;"
+                            title="Go to initial (Matching) step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
                     </span>
                 </td>
 
@@ -568,9 +568,9 @@
                         $cnt_disamb   = count(@$validationRes['disambiguation']);
                         $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
 
-                        
+
                         $url = 'importCSV.php/import.csv?db='.HEURIST_DBNAME.'&getsession='.@$_REQUEST["import_id"].'&idfield='.@$_REQUEST["recid_field"].'&mode=';
-                        
+
                         $cnt_update  = intval(@$validationRes['count_update']);
                         $cnt_update_rows  = intval(@$validationRes['count_update_rows']);
                         $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
@@ -594,30 +594,42 @@
                     <td><div class="analized2">
                             <table style="display: inline-block; border:none" border="0">
                                 <?php        if($sa_mode==0){ ?>
-                                    <tr><td>Records matched:</td><td><?=$cnt_update?></td><td>for rows:</td><td><?=$cnt_update_rows?></td>
-                                        <td width="80"><?=$show_update?></td><td width="120"><?=$download_update?></td></tr>
-                                    <tr><td>New records to create:</td><td><?=$cnt_insert?></td><td>for rows:</td><td><?=$cnt_insert_rows?></td>
-                                        <td><?=$show_insert?></td><td><?=$download_insert?></td></tr>
-                                
-                                    <tr><td colspan="3" align="right"><font<?=($cnt_disamb>0?" color='red'":'')?>>Rows with ambiguous match:</font></td>
-                                        <td><?=$cnt_disamb?></td><td><?=$show_disamb?></td><td></td></tr>
-                                <?php        } else { 
-                                    
-                                    //$cnt_update = $cnt_insert + $cnt_update;
-                                    //$imp_session['validation']['recs_update'] = array_merge($imp_session['validation']['recs_update'], $imp_session['validation']['recs_insert']);
-                                    //$cnt_insert = 0;
-                                ?>
-                                    <tr><td>Rows with valid values:</td><td><?=($cnt_insert + $cnt_update)?></td><td><?=$show_update?></td><td><?=$show_insert?"new: ".$show_insert:""?></td></tr>
+                                    <tr><td width="130">Records matched</td>
+                                        <td><?=$cnt_update?></td>
+                                        <td> &nbsp;&nbsp;&nbsp;&nbsp;rows:</td>
+                                        <td width="40"><?=$cnt_update_rows?></td>
+                                        <td width="50"><?=$show_update?></td>
+                                        <td width="120"><?=$download_update?></td>
+                                    </tr>
+                                    <tr><td>New records to create</td>
+                                        <td><?=$cnt_insert?></td>
+                                        <td>&nbsp;&nbsp;&nbsp;&nbsp;rows:</td>
+                                        <td><?=$cnt_insert_rows?></td>
+                                        <td><?=$show_insert?></td>
+                                        <td><?=$download_insert?></td>
+                                    </tr>
+
+                                    <tr><td><font<?=($cnt_disamb>0?" color='red'":'')?>>Ambiguous matches</font></td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;&nbsp;&nbsp;&nbsp;rows:</td>
+                                        <td><?=$cnt_disamb?></td>
+                                        <td><?=$show_disamb?></td>
+                                    </tr>
+                                    <?php        } else {
+
+                                    ?>
+                                    <tr><td>Rows with valid values:</td>
+                                        <td><?=($cnt_insert + $cnt_update)?></td><td><?=$show_update?></td><td><?=$show_insert?"new: ".$show_insert:""?></td></tr>
                                     <tr><td>Rows with field errors:</td><td><?=$cnt_error?></td><td><?=$show_err?></td><td></td></tr>
-                                <?php        }        ?>
+                                    <?php        }        ?>
                             </table>
 
                             <div style="float:right;vertical-align:middle;padding-top:10px">
                                 <?php if($sa_mode==1){  ?>
                                     <!-- <span class="importing">
-                                        <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
-                                            onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
-                                     -->       
+                                    <input type="button" value="<?=($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")?> records"
+                                    onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
+                                    -->
                                     <?php }
                                     if($cnt_disamb>0){
                                     ?>
@@ -626,7 +638,7 @@
                                         onclick="showRecords('disamb')" style="font-weight: bold;">
                                     <?php }else{ ?>
                                     <span class="matching">
-                                        <input type="button" value="Next >>" title="Go to Import step"
+                                        <input type="button" value="Insert/Update step>>" title="Go to Import step"
                                             onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
                                     <?php
                                     }
@@ -642,24 +654,24 @@
                 ?>
 
                 <td>
-                            <span class="importing">
-                    <?php  
-                          //($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")
-                          if($sa_mode==1 && $validationRes){  ?>
+                    <span class="importing">
+                        <?php
+                            //($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")
+                            if($sa_mode==1 && $validationRes){  ?>
                             <span class="analized2">
-                                        <input type="button" value="Create/Update records"
-                                            onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
-                    <?php } ?>
-                            <span class="importing analized3">
-                                <input  id="btnStartImport" type="submit"
-                                    value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
-                            </span></span>
+                                <input type="button" value="Create/Update records"
+                                    onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
+                            <?php } ?>
+                        <span class="importing analized3">
+                            <input  id="btnStartImport" type="submit"
+                                value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
+                        </span></span>
                 </td>
             </tr>
         </table>
-        
+
         <br />
-        
+
         <div id="tabs_actions">
             <ul>
                 <li><a  style="background-color:F7F7F7;" href="#matching">Search / match</a></li>
@@ -708,17 +720,17 @@
                             for ($i = 0; $i < $len; $i++) {
                                 // Keyfield selection
                                 print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
-                                    .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
-                                    .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
-                                    .'/></span></td>';
+                                .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
+                                .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
+                                .'/></span></td>';
                                 // Unique values
                                 print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td>';
                                 // input column name
                                 print '<td style="padding-left:15px;" class="truncate">'.$imp_session['columns'][$i].'</td>';
                                 // Select mapping for imported column, initially hidden until keyfield checkbox selected
                                 print '<td style="width:306px;">&nbsp;<span style="display:none;">'
-                                    .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px;" onchange="{onFtSelect2('.$i.');}">'
-                                    . '</select></span></td>';
+                                .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px;" onchange="{onFtSelect2('.$i.');}">'
+                                . '</select></span></td>';
                                 // Imported data value for column
                                 print '<td id="impval_'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
                             }
@@ -1076,17 +1088,17 @@
 ?>
 
 <div id="divMatchingPopup" style="display:none;padding:10px;">
-<p>One or more of the records you are trying to update does not yet exist in the database, so it/they need to be created from scratch. However, you have not assigned data for all the required fields, so these records cannot be created.</p> 
+    <p>One or more of the records you are trying to update does not yet exist in the database, so it/they need to be created from scratch. However, you have not assigned data for all the required fields, so these records cannot be created.</p>
 
-<p>Option 1: Hit Cancel, then assign the required data fields so that the missing records can be created. It is essential to check the appropriate radio button to make sure that the values in your input file do not overwrite data for existing (matched) records in the database which may have been edited or imported from another source. </p>
+    <p>Option 1: Hit Cancel, then assign the required data fields so that the missing records can be created. It is essential to check the appropriate radio button to make sure that the values in your input file do not overwrite data for existing (matched) records in the database which may have been edited or imported from another source. </p>
 
-<p>Option 2: Download the non-matching rows as a tab-delimited text file and delete them from the current data before proceeding:  
-<div id="divUnmatchedBtns"><input type="button" id="btnUnMatchDownload" value="Download unmatched rows"/>  <input id="btnUnMatchDelete" type="button" value="Delete unmatched rows"/></div>
-<div id="divUnmatchedRes" class="error"></div>
-</p>
+    <p>Option 2: Download the non-matching rows as a tab-delimited text file and delete them from the current data before proceeding:
+        <div id="divUnmatchedBtns"><input type="button" id="btnUnMatchDownload" value="Download unmatched rows"/>  <input id="btnUnMatchDelete" type="button" value="Delete unmatched rows"/></div>
+        <div id="divUnmatchedRes" class="error"></div>
+    </p>
 
-<p>If you proceed, Heurist will update only the records which have been matched to input rows</p>
-<p><input type="button" id="btnMatchProceed" value="Proceed"/>  <input id="btnMatchCancel" type="button" value="Cancel"/></p>
+    <p>If you proceed, Heurist will update only the records which have been matched to input rows</p>
+    <p><input type="button" id="btnMatchProceed" value="Proceed"/>  <input id="btnMatchCancel" type="button" value="Cancel"/></p>
 
 </div>
 
@@ -1177,7 +1189,7 @@
             else if (! is_readable($filename)) return 'file is not readable';
                 else return 'file could not be read';
         }
-        
+
         //fgetcsv и str_getcsv depends on server locale
         // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
         setlocale(LC_ALL, 'en_US.utf8');
@@ -1218,19 +1230,19 @@
         }
 
         //array( "filename"=>$temp_name, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals )
-        
+
         $preproc = preprocess_uploaded_file($filename);
 
         if(count($preproc['errors'])>0 || count($preproc['err_encoding'])>0){
-            return array("errors"=>$preproc['errors'], 
-                         "col_count"=>$preproc['col_count'],
-                         "fields"=>$preproc['fields'],
-                         "err_encoding"=>$preproc['err_encoding'] 
-                         );
+            return array("errors"=>$preproc['errors'],
+                "col_count"=>$preproc['col_count'],
+                "fields"=>$preproc['fields'],
+                "err_encoding"=>$preproc['err_encoding']
+            );
         }
 
         $filename = $preproc['filename'];
-        
+
         $import_table = "import".date("YmdHis");
 
         //create temporary table import_datetime
@@ -1260,7 +1272,7 @@
         if(strpos($filename,"\\")>0){
             $filename = str_replace("\\","\\\\",$filename);
         }
-        
+
         //load file into table
         $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
         ." CHARACTER SET UTF8"
@@ -1340,7 +1352,7 @@
     multivalues
     */
     function preprocess_uploaded_file($filename){
-                            
+
         $errors = array();
         $err_encoding = array();
         $memos = array();  //multiline fields
@@ -1457,7 +1469,7 @@
                     }
 
                     $line = implode($csv_delimiter, $newfields)."\n";
-                    
+
                     if (fwrite($handle_wr, $line) === FALSE) {
                         return "Cannot write to file ($temp_name)";
                     }

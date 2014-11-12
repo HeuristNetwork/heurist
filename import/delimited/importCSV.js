@@ -34,7 +34,7 @@ function init() {
     $("#div-progress").hide();
 
     var _dialogbox;
-    
+
     var select_rectype = $("#sa_rectype");
     createRectypeSelect( select_rectype.get(0), null, 'select...' );
 
@@ -107,7 +107,7 @@ function init() {
 
             $("#idfield").val(top.HEURIST.rectypes.names[rectype]+' ID');
 
-            /* OLD VERSION - FULLY WORK 
+            /* OLD VERSION - FULLY WORK
             //ID field
             //uncheck id field radiogroup - matching
             $("#idfield").val('');
@@ -122,26 +122,26 @@ function init() {
             $("#new_idfield2").val(sval);
 
             if(sel_rt.length>0){
-                $("#rb_idfield1").attr("checked", true); //ART new
-                onExistingIDfieldSelect();
-                $("#idfield").val(sel_rt[0].value);
+            $("#rb_idfield1").attr("checked", true); //ART new
+            onExistingIDfieldSelect();
+            $("#idfield").val(sel_rt[0].value);
 
-                $('#div_idfield_exist').show();
-                $('#div_idfield_new').hide();
-                $("#span2").html('"'+sel.options[sel.selectedIndex].text+'"');
-                if(sel_rt.length==1){
-                    $("#span1").html('"'+sel_rt.html()+'"  as a field name');
-                    $("#span3").html('this field name');
-                }else{
-                    $("#span1").html(sel_rt.length+' columns');
-                    $("#span3").html('one of existing columns');
-                }
+            $('#div_idfield_exist').show();
+            $('#div_idfield_new').hide();
+            $("#span2").html('"'+sel.options[sel.selectedIndex].text+'"');
+            if(sel_rt.length==1){
+            $("#span1").html('"'+sel_rt.html()+'"  as a field name');
+            $("#span3").html('this field name');
             }else{
-                $('#div_idfield_exist').hide();
-                $('#div_idfield_new').show();
+            $("#span1").html(sel_rt.length+' columns');
+            $("#span3").html('one of existing columns');
+            }
+            }else{
+            $('#div_idfield_exist').hide();
+            $('#div_idfield_new').show();
             }*/
             //---------------------
-            
+
             //import -- id radiogroup
             $('option[class^="idfield_"]').hide(); //hide all
             sel_rt = $('option[class^="idfield_'+rectype+'"]');
@@ -181,14 +181,14 @@ function init() {
 
     //init values for mapping form
     if(!top.HEURIST.util.isnull(form_vals.sa_rectype)){
-        
+
         //alert("reinit "+form_vals.sa_rectype);
-        
+
         select_rectype.val(form_vals.sa_rectype).change();
 
         //init import form
         for (var key in form_vals){
-            if((key.indexOf('sa_dt_')==0 && form_vals[key]!='') 
+            if((key.indexOf('sa_dt_')==0 && form_vals[key]!='')
                 || (key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''))
             {
                 var fieldname = form_vals[key];
@@ -208,25 +208,25 @@ function init() {
             }
         }
         onFtSelect(-1);
-        
+
         if(form_vals.auto_switch_to_import!=1){
-        
-        //init matching form
-        for (var key in form_vals){
-            if(key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''){
-                $('#'+key).parent().show();
-                $('#'+key).val(form_vals[key]);
-                var cb = document.getElementById('cb'+key);
-                if(cb) cb.checked = true;
-                /*$('#cb'+key).attr('checked', 'checked');
-                $('#cb'+key).attr('checked', 'true');
-                $('#cb'+key).prop('checked', 'checked');
-                $('#cb'+key).prop('checked', true);*/
-                //$('#cb'+key).parent().show();
+
+            //init matching form
+            for (var key in form_vals){
+                if(key.indexOf('sa_keyfield_')==0 && form_vals[key]!=''){
+                    $('#'+key).parent().show();
+                    $('#'+key).val(form_vals[key]);
+                    var cb = document.getElementById('cb'+key);
+                    if(cb) cb.checked = true;
+                    /*$('#cb'+key).attr('checked', 'checked');
+                    $('#cb'+key).attr('checked', 'true');
+                    $('#cb'+key).prop('checked', 'checked');
+                    $('#cb'+key).prop('checked', true);*/
+                    //$('#cb'+key).parent().show();
+                }
             }
-        }
-        onFtSelect2(-1);
-        
+            onFtSelect2(-1);
+
         }
 
 
@@ -288,31 +288,31 @@ function init() {
 
     if(form_vals['error_message']){
         if(form_vals['error_message'].indexOf('Mapping')===0){
-            
+
             $("#btnMatchCancel").click(function(){
-                    if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
-                    _dialogbox = null;
+                if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
+                _dialogbox = null;
             });
-            $("#btnMatchProceed").click(function(){ 
+            $("#btnMatchProceed").click(function(){
                 $("#ignore_insert").val(1);
                 $("#input_step").val(2);
                 document.forms[0].submit();
                 if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
                 _dialogbox = null;
             });
-            
-            $("#btnUnMatchDownload").click(function(){ 
+
+            $("#btnUnMatchDownload").click(function(){
                 var url = 'importCSV.php/import.csv?db='+currentDb+'&getsession='+$('#import_id').val()+'&mode=1&idfield='+$("#recid_field").val();
-                window.open(url,'_blank')            
+                window.open(url,'_blank')
             });
-            
+
             var divUnmatchedRes = $("#divUnmatchedRes");
             var divUnmatchedBtns = $("#divUnmatchedBtns");
-            $("#btnUnMatchDelete").click(function(){ 
-                
+            $("#btnUnMatchDelete").click(function(){
+
                 divUnmatchedRes.html('Deleting unmatched records...');
                 divUnmatchedBtns.hide();
-                
+
                 $.ajax({
                     url: top.HEURIST.basePath+'import/delimited/importCSV.php',
                     type: "POST",
@@ -333,18 +333,18 @@ function init() {
                             }
                         }
                     }
-                });                
-                        
+                });
+
             });
-            
-            
-            _dialogbox = top.HEURIST.util.popupElement(top.window, document.getElementById('divMatchingPopup'), 
+
+
+            _dialogbox = top.HEURIST.util.popupElement(top.window, document.getElementById('divMatchingPopup'),
                 {title:'Missed required fields',height:400,width:800});
-        }else{                                                                                      
+        }else{
             alert(form_vals['error_message']);
         }
     }
-    
+
     //form_vals = null;
 
 } //end init function
@@ -424,9 +424,9 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
         r = confirm("There are errors in the data. It is better to fix these in the source file and then "+
             "process it again, as uploading faulty data generally leads to major fix-up work. "+
             "Are you sure you want to proceed?");
-            //"\r\n"+
-            //"Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n"+
-            //"BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
+        //"\r\n"+
+        //"Temporary workaround: You may ignore the errors reported for your multi-value field(s) provided you are sure that your data contains valid terms.\r\n"+
+        //"BEWARE: Any invalid / unmatched terms in multi-value fields will not be imported"
     }
     if(r){
         $("#input_step").val(3); //start real import
@@ -456,7 +456,7 @@ function onExistingIDfieldSelect(){
 // switch modes
 //
 function showUpdMode(newval){
-    
+
     if(!top.HEURIST.util.isnull(newval)){
         $("#sa_mode").val(newval);
     }
@@ -885,16 +885,16 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
                     var name = details[dtyID][fi];
 
                     if(!top.HEURIST.util.isnull(name)){
-                        
+
                         var label = name+' ['+ top.HEURIST.detailTypes.lookups[details[dtyID][fit]]+']';
-                        
+
                         arrterm.push([dtyID, label, (details[dtyID][fir]=="required") ]);
-                            
+
                         if(details[dtyID][fit]=="geo"){
                             arrterm.push([ dtyID+'_long', label+' Longitude', false ]);
                             arrterm.push([ dtyID+'_lat', label+' Latitude', false ]);
-                        }    
-                            
+                        }
+
                     }
                 }
             }
@@ -965,21 +965,21 @@ function createRectypeDetailSelect(selObj, rectype, allowedlist, topOptions, sho
 // add term list preview for error term field
 //
 function showTermListPreview(dty_ID){
-    
-        var td = top.HEURIST.detailTypes.typedefs[dty_ID];
-        if(td) {
-            var deftype = td.commonFields;
-            var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
-            var _currentDomain = (deftype[fi["dty_Type"]]=="enum") ?"enum":"relation";
-            
-            var parentdiv = document.getElementById('termspreview'+dty_ID);
-            parentdiv.innerHTML = '';
-    
-            var el_sel = top.HEURIST.util.createTermSelect(deftype[fi.dty_JsonTermIDTree], deftype[fi.dty_TermIDTreeNonSelectableIDs], _currentDomain, null);
-            el_sel.style.backgroundColor = "#cccccc";
-            el_sel.width = 180;
-            el_sel.style.maxWidth = '180px';
-            el_sel.onchange =  function(event){ event.target.selectedIndex=0; };
-            parentdiv.appendChild(el_sel);
-        }
+
+    var td = top.HEURIST.detailTypes.typedefs[dty_ID];
+    if(td) {
+        var deftype = td.commonFields;
+        var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+        var _currentDomain = (deftype[fi["dty_Type"]]=="enum") ?"enum":"relation";
+
+        var parentdiv = document.getElementById('termspreview'+dty_ID);
+        parentdiv.innerHTML = '';
+
+        var el_sel = top.HEURIST.util.createTermSelect(deftype[fi.dty_JsonTermIDTree], deftype[fi.dty_TermIDTreeNonSelectableIDs], _currentDomain, null);
+        el_sel.style.backgroundColor = "#cccccc";
+        el_sel.width = 180;
+        el_sel.style.maxWidth = '180px';
+        el_sel.onchange =  function(event){ event.target.selectedIndex=0; };
+        parentdiv.appendChild(el_sel);
+    }
 }

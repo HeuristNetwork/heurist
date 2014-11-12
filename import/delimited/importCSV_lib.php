@@ -28,7 +28,7 @@
     $rep_added = 0;
     $rep_updated = 0;
 
-    //a couple functions from h4/utils_db.php
+    //a couple of functions from h4/utils_db.php
     /**
     * returns first row for given query
     *
@@ -49,6 +49,8 @@
         }
         return $result;
     }
+
+
     /**
     * return all rows as index with key as first column in result set
     *
@@ -78,6 +80,7 @@
         }
         return $result;
     }
+
 
     /**
     * insert/update - creates and executes the parmetrized query
@@ -111,7 +114,6 @@
         foreach($record as $fieldname => $value){
 
             if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
-                //$fieldname = $table_prefix.$fieldname;
                 continue;
             }
 
@@ -137,9 +139,6 @@
             $query = $query." where ".$table_prefix."ID=".$rec_ID;
         }
 
-        //DEBUG print
-        //error_log(" upfate: ".$query);
-
         $stmt = $mysqli->prepare($query);
         if($stmt){
             call_user_func_array(array($stmt, 'bind_param'), refValues($params));
@@ -155,7 +154,10 @@
 
         return $ret;
     }
+
+
     // matching functions ===================================
+
 
     /**
     * Finds record ids in heurist database by key fields - not used
@@ -167,7 +169,9 @@
     function matchingSearch($mysqli, $imp_session, $params){
 
         //add result of validation to session
-        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>999, "count_insert_rows"=>999, "count_error"=>0, "error"=>array());
+        $imp_session['validation'] =
+        array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>999, "count_insert_rows"=>999, "count_error"=>0, "error"=>array());
+
         $import_table = $imp_session['import_table'];
 
         //get rectype to import
@@ -176,6 +180,8 @@
         if(intval($recordType)<1){
             return "record type not defined";
         }
+
+
         /*  EXAMPLE for update
 
         use hdb_BoRO_experiments;
@@ -190,7 +196,6 @@
         where d1.dtl_DetailTypeID=1 and d1.dtl_Value = field_1
         and d2.dtl_DetailTypeID=18 and d2.dtl_Value = field_2
         and rec_RecTypeID=10 and rec_ID=d1.dtl_RecID and rec_ID=d2.dtl_RecID))
-
         */
 
         //get fields that will be used in search
@@ -222,6 +227,7 @@
 
                     //array_push($select_query_join_rec, "rec_".$field_type."=".$field_name);
                     array_push($select_query_update_where, "rec_".$field_type."=".$field_name);
+
                 }else{
 
                     $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
@@ -237,22 +243,15 @@
 
                         array_push($select_query_update_from, "defTerms t".$index);
 
-                        /*}else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
-
-                        $where = $where.
-                        " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
-                        */
                     }else if(false && $dt_type == "freetext"){
 
                         $where = $where." (REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=".$field_name.")";
+
                     }else{
+
                         $where = $where." (d".$index.".dtl_Value=".$field_name.")";
-                        //" REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
 
                     }
-
-                    //array_push($select_query_join_rec, "rec_ID=d".$index.".dtl_RecID");
-                    //$select_query_join_det = $select_query_join_det . " left join recDetails d".$index." on ".$where;
 
                     array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
                     array_push($select_query_update_from, "recDetails d".$index);
@@ -260,8 +259,9 @@
 
             }
         }
+
         if(count($sel_query)<1){
-            return "no one key field is selected";
+            return "One, and only one, key field must be selected";
         }
 
         $imp_session['validation']['mapped_fields'] = $mapped_fields;
@@ -273,8 +273,6 @@
         ." WHERE ".implode(" and ",$select_query_update_where)
         ." GROUP BY rec_ID, ".implode(",",$sel_query);
 
-        //DEBUG error_log(">>>".$select_query);
-        //array_push($sel_query, "rec_ID");
         //find records to update
         $res = $mysqli->query($select_query);
         if($res){
@@ -290,8 +288,9 @@
                     if($cnt>4999) break;
                 }
             }
+
         }else{
-            return "SQL error: Can not execute query to calculate number of records to be updated ".$mysqli->error;
+            return "SQL error: Cannot execute query to calculate the number of records to be updated ".$mysqli->error;
         }
 
         //FIND RECORDS FOR INSERT
@@ -304,7 +303,6 @@
         .")) GROUP BY ".implode(",",$sel_query);
 
         $res = $mysqli->query($select_query);
-        //DEBUG error_log(">>>>".$select_query);
         if($res){
             $fres = $mysqli->query('select found_rows()');
             $row = $fres->fetch_row();
@@ -318,12 +316,14 @@
                     if($cnt>4999) break;
                 }
             }
+
         }else{
             return "SQL error: Can not execute query to calculate number of records to be inserted";
         }
 
         return $imp_session;
     }
+
 
     //=================================================================
     /**
@@ -332,7 +332,7 @@
     * @param mixed $mysqli
     * @param mixed $imp_session
     * @param mixed $params
-    * 
+    *
     * Not used anymore!!!! Redirection to  assignMultivalues
     */
     function matchingAssign($mysqli, $imp_session, $params){
@@ -367,17 +367,14 @@
 
             $altquery = "alter table ".$import_table." add column ".$id_field." int(10) ";
 
-            //DEBUG error_log(">>>".$altquery);
-
             if (!$mysqli->query($altquery)) {
-                return "SQL error: can not alter import session table, can not add new index field: " . $mysqli->error;
+                return "SQL error: cannot alter import session table, cannot add new index field: " . $mysqli->error;
             }
         }else{
             $id_field_idx = substr($id_dield,6);
         }
 
         if(@$imp_session['indexes_keyfields'] && @$imp_session['indexes_keyfields'][$id_field]){
-            //DEBUG print "UNSET indexes_keyfields<br>";
 
             unset($imp_session['indexes_keyfields'][$id_field]);
         }
@@ -418,20 +415,13 @@
 
                         //if fieldname is numeric - compare it with dtl_Value directly
                         $where = $where." d".$index.".dtl_Value=t".$index.".trm_ID and "
-                                       ." t".$index.".trm_Label=$field_name ";
-                        //." if(concat('',$field_name * 1) = $field_name,d".$index.".dtl_Value=$field_name,t".$index.".trm_Label=$field_name) ";
+                        ." t".$index.".trm_Label=$field_name ";
 
                         array_push($select_query_update_from, "defTerms t".$index);
 
-                        /*}else if( $dt_type == "resource" ||  $dt_type == "integer" ||  $dt_type == "year" ||  $dt_type == "float") {
-
-                        $where = $where.
-                        " TRIM(d".$index.".dtl_Value)=TRIM(".$field_name.")";
-                        */
                     }else{
 
                         $where = $where." (d".$index.".dtl_Value=".$field_name.")";
-                        //" REPLACE(REPLACE(TRIM(d".$index.".dtl_Value),'  ',' '),'  ',' ')=REPLACE(REPLACE(TRIM(".$field_name."),'  ',' '),'  ',' ')";
 
                     }
 
@@ -454,23 +444,18 @@
         //reset all values
         $updquery = "UPDATE ".$import_table." SET ".$id_field."=NULL WHERE imp_id>0";
         if(!$mysqli->query($updquery)){
-            return "SQL error: can not update import table (clear record id field). ".$updquery;
+            return "SQL error: cannot update import table (cannot clear record ID field). ".$updquery;
         }
         //matched records
         $updquery = "UPDATE ".implode(",",$select_query_update_from)." SET ".$id_field."=rec_ID WHERE "
         .implode(" and ",$select_query_update_where)." and imp_id>0";
 
-        //DEBUG error_log("matched records 1>>>>".$updquery);
         if(!$mysqli->query($updquery)){
             return "SQL error: can not update import table (set record id field) ".$updquery;
         }
 
         //new records   ".implode(",",$sel_query).",
         $mysqli->query("SET SESSION group_concat_max_len = 1000000");
-        /*OLD $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)." FROM ".$import_table
-        . $select_query_join_det.$select_query_join_rec
-        . " WHERE ".implode(" and ",$select_query_join_det_where)  //"$id_field is NULL"
-        . " GROUP BY ". implode(",",$sel_query);*/
 
         //FIND RECORDS FOR INSERT
         $select_query = "SELECT group_concat(imp_id), ".implode(",",$sel_query)
@@ -480,8 +465,6 @@
         ." FROM ".implode(",",$select_query_update_from)
         ." WHERE ".implode(" and ",$select_query_update_where)
         .")) GROUP BY ".implode(",",$sel_query);
-
-        //DEBUG error_log("records to insert 2>>>>".$select_query);
 
         $res = $mysqli->query($select_query);
         if($res){
@@ -498,7 +481,6 @@
                     $ids_part = array_slice($ids,$k,100);
 
                     $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".implode(",",$ids_part).")";  //end($row)
-                    //DEBUG error_log("3>>>>".$updquery);
                     if(!$mysqli->query($updquery)){
                         return "SQL error: can not update import table: mark records for insert. ".$updquery;
                     }
@@ -507,7 +489,7 @@
                 $ind--;
             }
         }else{
-            return "SQL error: can not perform query - find unmatched records ".$select_query;
+            return "SQL error: cannot perform query to find unmatched records ".$select_query;
         }
 
         //calculate distinct number of ids
@@ -524,24 +506,13 @@
             }
         }
 
-        /*
-        $updquery0 =  "SET @pos := -1";
-        $updquery1 = "update ".$import_table.$select_query_join_det.$select_query_join_rec." set ".$id_field."=( SELECT @pos := @pos - 1 ) where rec_ID is null and imp_id>0 group by ". implode(",",$sel_query);
-
-        error_log("2>>>>".$updquery1);
-
-        $mysqli->query($updquery0);
-        if(!$mysqli->query($updquery1)){
-        return "can not update import table: mark records for insert";
-        }
-        */
-
         return $imp_session;
     }
 
+
     //====================================================================
     /**
-    * Perform matching 
+    * Perform matching
     *
     * @param mixed $mysqli
     * @param mixed $imp_session
@@ -549,8 +520,8 @@
     */
     function matchingMultivalues($mysqli, $imp_session, $params){
 
-        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0, "count_insert_rows"=>0, "count_error"=>0, "error"=>array(),
-            "recs_insert"=>array(), "recs_update"=>array() );
+        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0, "count_insert_rows"=>0,
+            "count_error"=>0, "error"=>array(), "recs_insert"=>array(), "recs_update"=>array() );
 
         $import_table = $imp_session['import_table'];
         $multivalue_field_name = $params['multifield']; //name of multivalue field
@@ -562,12 +533,10 @@
         $disamb_ids = @$params['disamb_id'];   //record ids
         $disamb_keys = @$params['disamb_key'];  //key values
         $disamb_resolv = array();
-//DEBUG print "disamb_keys :".print_r($disamb_keys, true)."<br>";            
         if($disamb_keys){
             foreach($disamb_keys as $idx => $keyvalue){
                 $disamb_resolv[$disamb_ids[$idx]] = $keyvalue;  //rec_id => keyvalue
             }
-//DEBUG print "disamb resolution :".print_r($disamb_resolv, true)."<br>";            
         }
 
         //get rectype to import
@@ -578,28 +547,6 @@
         }
 
         //create search query  - based on mapping (search for  sa_keyfield_ - checkboxes in UI)
-        /*  OLD  WORK
-        $select_query_update_from = array("Records");
-        $select_query_update_where = array("rec_RecTypeID=".$recordType);
-
-        $field_type = $params['sa_keyfield_type'];
-        $field_name = $params['sa_keyfield'];
-
-        if($field_type=="url"){ // || $field_type=="id" || $field_type=="scratchpad"){
-        array_push($select_query_update_where, "rec_".$field_type."=?");
-        }else{
-
-        $where = "d".$index.".dtl_DetailTypeID=".$field_type." and (d".$index.".dtl_Value=?)";
-
-        array_push($select_query_update_where, "rec_ID=d".$index.".dtl_RecID and ".$where);
-        array_push($select_query_update_from, "recDetails d".$index);
-        }
-
-        //query to search record ids
-        $search_query = "SELECT rec_ID "
-        ." FROM ".implode(",",$select_query_update_from)
-        ." WHERE ".implode(" and ",$select_query_update_where);
-        */
 
         //for update
         $select_query_update_from = array("Records");
@@ -660,7 +607,6 @@
         ." FROM ".implode(",",$select_query_update_from)
         ." WHERE ".implode(" and ",$select_query_update_where);
 
-        //DEBUG print ">>>>".$search_query;
         $search_stmt = $mysqli->prepare($search_query);
 
         $params_dt = str_repeat('s',count($sel_fields));
@@ -683,17 +629,17 @@
             while ($row = $res->fetch_row()){
                 $imp_id = $row[0];
                 $row[0] = $params_dt;
-                
+
                 $is_update = false;
                 $is_insert = false;
-                
+
 
                 $multivalue = $row[$multivalue_field_name_idx];
 
                 $ids = array();
                 //split multivalue field
                 $values = getMultiValues($multivalue, $params['csv_enclosure'], $params['csv_mvsep']);
-                
+
                 foreach($values as $idx=>$value){
                     $row[$multivalue_field_name_idx] = $value;
                     //verify that not empty
@@ -708,14 +654,7 @@
 
                     $keyvalue = implode($params['csv_mvsep'], $fc);  //csv_mvsep - separator
 
-                    
-/*                if($imp_id==240){
-print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
-//print "DEBUG ".$multivalue."  ".$multivalue_field_name_idx."<br>";
-//print "DEBUG ".$multivalue."  ".implode(",", $sel_fields)."  ".print_r($values, true)."<br>";
-                }*/
-                    
-                    
+
                     if(!@$pairs[$keyvalue]){  //was $value && $value!="" &&
                         //search for ID
 
@@ -726,12 +665,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         while ($search_stmt->fetch()) {
                             //keep pair ID => key value
                             $disamb[$rec_ID] = $rec_Title; //get value from binding
-                            
-                            /* instead of record title we show list of key fields separated by pipes
-                            $keyfields = $row;
-                            array_shift($keyfields);
-                            $disamb[$rec_ID] = implode("|", $keyfields);
-                            */
                         }
 
                         if(count($disamb)==0){ //nothing found - insert
@@ -742,16 +675,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             $tmp_idx_insert[$keyvalue] = count($imp_session['validation']['recs_insert']); //keep index in rec_insert
                             array_push($imp_session['validation']['recs_insert'], $rec); //group_concat(imp_id), ".implode(",",$sel_query)
                             $is_insert = true;
-                            //DEBUG print "<br>push :".print_r($imp_session['validation']['recs_insert'], true);
-                            
-                        }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){  
-                            //either found exact or disamiguation is resolved 
-                        
+
+                        }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){
+                            //either found exact or disamiguation is resolved
+
                             if(count($disamb)>1){
                                 $rec_ID = array_search($keyvalue, $disamb_resolv, true);
                                 print "<br>resolved: ".$keyvalue."   ".$rec_ID.", ";
-                                //DEBUG print "<br> ".$keyvalue."   ".@$disamb_resolv[addslashes($keyvalue)].".";
-                                //$rec_ID = $disamb_resolv[addslashes($keyvalue)];
                             }
 
                             $new_id = $rec_ID;
@@ -762,14 +692,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
                             $is_update = true;
                         }else{
-                            
-                            /*if($disamb_resolv)
-                            foreach ($disamb_resolv as $rec_ID=>$kv){
-                                if($kv==$keyvalue){
-                                    break;
-                                }
-                            }*/
-                            
+
                             $new_id= 'Found:'.count($disamb); //Disambiguation!
                             $disambiguation[$keyvalue] = $disamb;
                         }
@@ -780,72 +703,24 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         if(array_key_exists($keyvalue, $tmp_idx_insert)){
                             $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (",".$imp_id);
                             $is_insert = true;
-                            //DEBUG print "<br> added key=".$keyvalue."   idx=".$tmp_idx_insert[$keyvalue]."  line=".$imp_id;
                         }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
                             $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
                             $is_update = true;
                         }
-                        //$imp_session['validation']['recs_update'][]
                         array_push($ids, $pairs[$keyvalue]);
                     }
                 }//foreach multivalues
                 $records[$imp_id] = implode($params['csv_mvsep'], $ids);   //IDS to be added to import table
-                
+
                 if($is_update) $cnt_update_rows++;
                 if($is_insert) $cnt_insert_rows++;
-                
+
             }//while import table
         }
 
-        //DEBUG print "<br>".print_r($imp_session['validation']['recs_insert'], true);
 
         $search_stmt->close();
 
-        /*   OLD  WORK
-        $search_stmt = $mysqli->prepare($search_query);
-        $search_stmt->bind_param('s', $field_value);
-        $search_stmt->bind_result($rec_ID);
-
-        //already founded IDs
-        $pairs = array();
-        $records = array();
-
-        //loop all records
-        $select_query = "SELECT imp_id, ".$field_name." FROM ".$import_table;
-        $res = $mysqli->query($select_query);
-        if($res){
-        $ind = -1;
-        while ($row = $res->fetch_row()){
-        //split multivalue field
-        $ids = array();
-        $values = getMultiValues($row[1], $params['csv_enclosure'], $params['csv_mvsep']);
-        foreach($values as $idx=>$value){
-        if($value && $value!="" && !@$pairs[$value]){
-        //search for ID
-        $field_value = $value; //assign parametrized value
-        $search_stmt->execute();
-        $fnd = 0;
-        while ($search_stmt->fetch()) {
-        //keep pair ID => key value
-        $pairs[$value] = $rec_ID;
-        $fnd++;
-        }
-        if($fnd==0){
-        $pairs[$value] = $ind;
-        $ind--;
-        }else if($fnd>1){
-        $pairs[$value] = 'Found:'.$fnd; //Disambiguation!
-        }
-        }
-        array_push($ids, $pairs[$value]);
-        }
-        $records[$row[0]] = implode("|", $ids);   //IDS to be added to import table
-        }//while import table
-        }
-        $search_stmt->close();
-        */
-
-        
         // result of work - counts of records to be inserted, updated
         $imp_session['validation']['count_update'] = count($imp_session['validation']['recs_update']);
         $imp_session['validation']['count_insert'] = count($imp_session['validation']['recs_insert']);
@@ -853,17 +728,18 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $imp_session['validation']['count_insert_rows'] = $cnt_insert_rows;
         $imp_session['validation']['disambiguation'] = $disambiguation;
         $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
-        
+
         //MAIN RESULT - ids to be assigned to each record in import table
         $imp_session['validation']['records'] = $records; //imp_id(line#) => list of records ids
 
         return $imp_session;
     }
 
+
     /**
     * Assign record ids to field in import table
     * (negative if not found)
-    * 
+    *
     * since we do match and assign in ONE STEP - first we call matchingMultivalues
     *
     * @param mixed $mysqli
@@ -915,7 +791,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             $id_field = "field_".$field_count;
             $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
             if (!$mysqli->query($altquery)) {
-                return "SQL error: can not alter import session table, can not add new index field: " . $mysqli->error;
+                return "SQL error: cannot alter import session table; cannot add new index field: " . $mysqli->error;
             }
             array_push($imp_session['columns'], $id_fieldname );
             array_push($imp_session['uniqcnt'], count($pairs) );
@@ -935,78 +811,12 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
         $imp_session['indexes_keyfields'][$id_field] = $imp_session['validation']['mapped_fields'];
 
-        //DEBUG print "<br>mapped_fields  ".$id_field."   ".print_r($imp_session['validation']['mapped_fields'],true);
-        //DEBUG print "<br>indexes_keyfields ".print_r($imp_session['indexes_keyfields'],true);   //DEBUG
 
         //add NEW records
         $rep_processed=0;
         $rep_added   = 0;
         $rep_updated = 0;
-        /* OLD WORK
-        $newrecs = array();
-        $details= array( "t:".$field_type => array() );
-        foreach($pairs as $value => $rec_ID){
-        if($rec_ID<0){
-        $details["t:".$field_type][0] = $value;
-        $newrecs[$rec_ID] = doInsertUpdateRecord(null, $params, $details, null);
-        }
-        }
-        */
-        //NOT USED ANYMORE
-        /*
-        if($is_create_records){
 
-            $newrecs = array();
-            $details = array();
-
-            $detDefs = getAllDetailTypeStructures(true);
-            $detDefs = $detDefs['typedefs'];
-            $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
-            $terms_enum = null;
-            $terms_relation = null;
-
-            //create new records
-            foreach($pairs as $value => $rec_ID){
-
-                if($rec_ID<0){
-                    $values = explode($params['csv_mvsep'], $value);
-
-                    $k=1;
-                    foreach ($params as $key => $field_type) {
-                        if(strpos($key, "sa_keyfield_")===0 && is_numeric($field_type)){
-                            $details["t:".$field_type] = array();
-                            $r_value = $values[$k];
-
-                            $dt_type = $detDefs[$field_type]['commonFields'][$idx_dt_type];
-                            if(( $dt_type == "enum" ||  $dt_type == "relationtype")
-                                && !ctype_digit($r_value)) {
-
-                                $r_value = trim_lower_accent($r_value);
-
-                                if($dt_type == "enum"){
-                                    if(!$terms_enum) { //find ALL term IDs
-                                        $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
-                                    }
-                                    $r_value = @$terms_enum[$r_value];
-
-                                }else if($ft_vals[$idx_fieldtype] == "relationtype"){
-                                    if(!$terms_relation){ //find ALL relation IDs
-                                        $terms_relation = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
-                                    }
-                                    $r_value = @$terms_relation[$r_value];
-                                }
-
-                            }
-
-                            $details["t:".$field_type][0] = $r_value;
-                            $k++;
-                        }
-                    }
-                    $newrecs[$rec_ID] = doInsertUpdateRecord(null, $params, $details, null);
-                }
-            }
-        }
-        */
         //update values in import table - replace negative to new one
         foreach($records as $imp_id => $ids){
 
@@ -1027,7 +837,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 //update
                 $updquery = "update ".$import_table." set ".$id_field."='".$ids
                 ."' where imp_id = ".$imp_id;
-                //DEBUG print ("3>>>>".$updquery);
                 if(!$mysqli->query($updquery)){
                     return "SQL error: can not update import table: set ID field ".$mysqli->error."    QUERY:".$updquery;
                 }
@@ -1039,6 +848,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         saveSession($mysqli, $imp_session);
         return $ret_session;
     }
+
 
     /**
     * Split multivalue field
@@ -1068,7 +878,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         return $nv;
     }
 
+
     // import functions =====================================
+
 
     /**
     * 1) Performs mapping validation (required fields, enum, pointers, numeric/date)
@@ -1079,7 +891,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     function validateImport($mysqli, $imp_session, $params){
 
         //add result of validation to session
-        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0, "count_insert_rows"=>0, "count_error"=>0, "error"=>array() );
+        $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0,
+            "count_insert_rows"=>0, "count_error"=>0, "error"=>array() );
 
         //get rectype to import
         $recordType = @$params['sa_rectype'];
@@ -1091,11 +904,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $import_table = $imp_session['import_table'];
         $id_field = @$params['recid_field']; //record ID field is always defined explicitly
         $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
-        
+
         $cnt_update_rows = 0;
         $cnt_insert_rows = 0;
-
-        //error_log(">>>>".$id_field)   ;
 
         //get field mapping and selection query from _REQUEST(params)
         $mapping = array();  // fieldtype ID => fieldname in import table
@@ -1119,9 +930,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
         $imp_session['validation']['mapped_fields'] = $mapped_fields;
-        
+
         // calculate the number of records to insert, update and insert with existing ids
-        // @todo - it has implemented for non-multivalue indexes only
+        // @todo - it has been implemented for non-multivalue indexes only
         if(!$id_field){ //ID field not defined - all records will be inserted
             if(!$ignore_insert){
                 $imp_session['validation']["count_insert"] = $imp_session['reccount'];
@@ -1129,8 +940,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
                 $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
             }
+
         }else{
-            
+
             $cnt_recs_insert_nonexist_id = 0;
 
             // validate selected record ID field
@@ -1143,20 +955,19 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 ." from ".$import_table
                 ." left join Records on rec_ID=".$id_field
                 ." where rec_RecTypeID<>".$recordType;
-                //error_log("check wrong rt: ".$query);
+                // TPDO: I'm not sure whether message below has been correctly interpreted
                 $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-                    "Your input data contains record IDs in the selected ID column for existing records which are of a different type from that specified. The import cannot proceed until this is corrected.",
-                    "Wrong Record Types", $id_field);
+                    "Your input data contain record IDs in the selected ID column for existing records which are not numeric IDs. ".
+                    "The import cannot proceed until this is corrected.","Incorrect record types", $id_field);
                 if(is_array($wrong_records) && count($wrong_records)>0) {
                     $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
-                    //error_log(print_r($imp_session['validation']['mapped_fields'],true));
                     $imp_session = $wrong_records;
                 }else if($wrong_records) {
                     return $wrong_records;
                 }
 
                 if(!$ignore_insert){      //WARNING - it ignores possible multivalue index field
-                    //find record ID that are not exists in HDB - to insert
+                    //find record ID that do not exist in HDB - to insert
                     $query = "select count(imp_id) "
                     ." from ".$import_table
                     ." left join Records on rec_ID=".$id_field
@@ -1171,7 +982,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             // find records to update
             $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
             ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
-            //DEBUG error_log("1.upd >>>>".$select_query);
             $row = mysql__select_array2($mysqli, $select_query);
             if($row){
 
@@ -1185,28 +995,26 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     ." left join Records on rec_ID=".$id_field
                     ." WHERE rec_ID is not null and ".$id_field.">0"
                     ." ORDER BY ".$id_field." LIMIT 5000";
-                    //DEBUG error_log("2.upd >>>>".$select_query);
                     $imp_session['validation']['recs_update'] = mysql__select_array3($mysqli, $select_query, false);
 
                 }
+
             }else{
                 return "SQL error: Can not execute query to calculate number of records to be updated!";
             }
-            
+
             if(!$ignore_insert){
-            
+
                 // find records to insert
                 $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
-                //DEBUG error_log("1.ins >>>>".$select_query);
                 $row = mysql__select_array2($mysqli, $select_query);
                 if($row){
                     if( $row[0]>0 ){
                         $imp_session['validation']['count_insert'] = $row[0];
                         $imp_session['validation']['count_insert_rows'] = $row[0];
-                        
+
                         //find first 100 records to display
-                        $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000"; //.$id_field." is null OR "
-                        //DEBUG error_log("2.ins >>>>".$select_query);
+                        $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." WHERE ".$id_field."<0 LIMIT 5000";
                         $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
                     }
                 }else{
@@ -1265,29 +1073,29 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $query_date_where = array();
 
         $numeric_regex = "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
-        
-        
+
+
         //loop for all fields in record type structure
         foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
 
-           
+
             //find among mappings
             $field_name = @$mapping[$ft_id];
             if(!$field_name){
-                $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previos session
+                $field_name = array_search($recordType.".".$ft_id, $imp_session["mapping"], true); //from previous session
             }
 
-            if(!$field_name && $ft_vals[$idx_fieldtype] == "geo"){ 
+            if(!$field_name && $ft_vals[$idx_fieldtype] == "geo"){
                 //specific mapping for geo fields
-                //it may be mapped to itself of mapped to two fields - lat and long
-                
+                //it may be mapped to itself or mapped to two fields - lat and long
+
                 $field_name1 = @$mapping[$ft_id."_lat"];
                 $field_name2 = @$mapping[$ft_id."_long"];
                 if(!$field_name1 && !$field_name2){
                     $field_name1 = array_search($recordType.".".$ft_id."_lat", $imp_session["mapping"], true);
                     $field_name2 = array_search($recordType.".".$ft_id."_long", $imp_session["mapping"], true);
                 }
-                
+
                 if($ft_vals[$idx_reqtype] == "required"){
                     if(!$field_name1 || !$field_name2){
                         array_push($missed, $ft_vals[0]);
@@ -1296,7 +1104,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         array_push($query_reqs, $field_name2);
                         array_push($query_reqs_where, $field_name1." is null or ".$field_name1."=''");
                         array_push($query_reqs_where, $field_name2." is null or ".$field_name2."=''");
-                    }                
+                    }
                 }
                 if($field_name1 && $field_name2){
                     array_push($query_num, $field_name1);
@@ -1304,8 +1112,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     array_push($query_num, $field_name2);
                     array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='') and NOT($field_name2 REGEXP ".$numeric_regex."))");
                 }
-                
-                
+
+
             }else if($ft_vals[$idx_reqtype] == "required"){
                 if(!$field_name){
                     array_push($missed, $ft_vals[0]);
@@ -1315,18 +1123,15 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 }
             }
 
-            if($field_name){  //mapping exsits
+            if($field_name){  //mapping exists
 
                 $dt_mapping[$field_name] = $ft_id; //$ft_vals[$idx_fieldtype];
-
-                //$field_alias = $imp_session['columns'][substr($field_name,6)];
 
                 if($ft_vals[$idx_fieldtype] == "enum" ||  $ft_vals[$idx_fieldtype] == "relationtype") {
                     array_push($query_enum, $field_name);
                     $trm1 = "trm".count($query_enum);
                     array_push($query_enum_join,
                         " defTerms $trm1 on $trm1.trm_Label=$field_name ");
-                        //" defTerms $trm1 on if(concat('',$field_name * 1) = $field_name,$trm1.trm_ID=$field_name,$trm1.trm_Label=$field_name) ");
                     array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
 
                 }else if($ft_vals[$idx_fieldtype] == "resource"){
@@ -1338,10 +1143,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
                     array_push($query_num, $field_name);
-                    //array_push($query_num_where, "(concat('',$field_name * 1) != $field_name  and not ($field_name is null or $field_name=''))");
                     array_push($query_num_where, "(NOT($field_name is null or $field_name='') and NOT($field_name REGEXP ".$numeric_regex."))");
-                    
-                    
+
+
 
                 }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
@@ -1362,14 +1166,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
         //ignore_required
-        
+
         //1. Verify that all required field are mapped  =====================================================
         if(count($missed)>0  &&
             ($imp_session['validation']['count_insert']>0 ||  // there are records to be inserted
                 ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
             return "Mapping: ".implode(",", $missed);
-            //"The following Required fields have not been mapped to input columns: ".implode(",", $missed);
         }
 
         if($id_field){ //validate only for defined records IDs
@@ -1389,7 +1192,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             ." from $import_table "
             ." where ".$only_for_specified_id."(".$query_reqs_where[$k].")"; // implode(" or ",$query_reqs_where);
             $k++;
-            //DEBUG print "check empty: ".$query;
             $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                 "This field is required - a value must be supplied for every record",
                 "Missing Values", $field);
@@ -1400,11 +1202,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
         }
         //3. In DB: Verify that enumeration fields have correct values =====================================
-        /*
-        "select $field_name from $import_table "
-        ."left join defTerms trm1 on if(concat('',$field_name * 1) = $field_name,trm1.trm_ID=$field_name,trm1.trm_Label=$field_name) "
-        ." where trm1.trm_Label is null";
-        */
         if(!@$imp_session['csv_enclosure']){
             $imp_session['csv_enclosure'] = $params['csv_enclosure'];
         }
@@ -1413,7 +1210,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
 
-        $hwv = " have wrong values";
+        $hwv = " have incorrect values";
         $k=0;
         foreach ($query_enum as $field){
 
@@ -1425,18 +1222,16 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $idx = array_search($field, $sel_query)+1;
 
                 $wrong_records = validateEnumerations($mysqli, $query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType,
-                    "Term list values must match terms defined for the field", "Wrong Terms");
+                    "Term list values read must match existing terms defined for the field", "Invalid Terms");
 
             }else{
 
                 $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
                 ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
-                //DEBUG  error_log("check enum: ".$query);
-                //"Fields mapped as enumeration ".$hwv
                 $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-                    "Term list values must match terms defined for the field",
-                    "Wrong Terms", $field);
+                    "Term list values read must match existing terms defined for the field",
+                    "Invalid Terms", $field);
             }
 
             $k++;
@@ -1466,14 +1261,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 ." from $import_table left join ".$query_res_join[$k]  //implode(" left join ", $query_res_join)
                 ." where ".$only_for_specified_id."(".$query_res_where[$k].")"; //implode(" or ",$query_res_where);
                 $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
-                    "Record pointer fields must reference an existing record in the database",
-                    "Wrong Pointers", $field);
+                    "Record pointer field values must reference an existing record in the database",
+                    "Invalid Pointers", $field);
             }
 
             $k++;
 
             //"Fields mapped as resources(pointers)".$hwv,
-            //if($wrong_records) return $wrong_records;
             if(is_array($wrong_records)) {
                 $imp_session = $wrong_records;
             }else if($wrong_records) {
@@ -1492,26 +1286,21 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
                 $idx = array_search($field, $sel_query)+1;
 
-//error_log("1.validate numeric ".$query);
-                
                 $wrong_records = validateNumericField($mysqli, $query, $imp_session, $field, $idx);
-            
+
             }else{
                 $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
-                ." where ".$only_for_specified_id."(".$query_num_where[$k].")"; //implode(" or ",$query_num_where);
-                
-//error_log("2.validate numeric ".$query);
-                
+                ." where ".$only_for_specified_id."(".$query_num_where[$k].")";
+
                 $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                     "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation",
-                    "Wrong Numerics", $field);
+                    "Invalid Numerics", $field);
             }
-                
+
             $k++;
-                
+
             // "Fields mapped as numeric".$hwv,
-            //if($wrong_records) return $wrong_records;
             if(is_array($wrong_records)) {
                 $imp_session = $wrong_records;
             }else if($wrong_records) {
@@ -1529,21 +1318,20 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 ." from $import_table where ".$only_for_specified_id." 1";
 
                 $idx = array_search($field, $sel_query)+1;
-                
+
                 $wrong_records = validateDateField($mysqli, $query, $imp_session, $field, $idx);
-            
+
             }else{
                 $query = "select imp_id, ".implode(",",$sel_query)
                 ." from $import_table "
                 ." where ".$only_for_specified_id."(".$query_date_where[$k].")"; //implode(" or ",$query_date_where);
                 $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                     "Date values must be in dd-mm-yyyy, dd/mm/yyyy or yyyy-mm-dd formats",
-                    "Wrong Dates", $field);
+                    "Invalid Dates", $field);
             }
 
             $k++;
             //"Fields mapped as date".$hwv,
-            //if($wrong_records) return $wrong_records;
             if(is_array($wrong_records)) {
                 $imp_session = $wrong_records;
             }else if($wrong_records) {
@@ -1555,6 +1343,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
         return $imp_session;
     }
+
 
     /**
     * execute validation query and fill session array with validation results
@@ -1590,14 +1379,15 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
         }else{
-            return "SQL error: Can not perform validation query: ".$query;
+            return "SQL error: Cannot perform validation query: ".$query;
         }
         return null;
     }
 
+
     /**
     * put your comment there...
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $imp_session
@@ -1610,22 +1400,14 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     */
     function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $message, $short_messsage){
 
-        
+
         $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
-        
+
         $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
         $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
         $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-        
-        $dt_type = $dt_def[$idx_fieldtype];
 
-        /*
-        $terms = null;
-        if($dt_type == "enum"){
-            $terms = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
-        }else if($ft_vals[$idx_fieldtype] == "relationtype"){
-            $terms = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
-        }*/
+        $dt_type = $dt_def[$idx_fieldtype];
 
         $res = $mysqli->query($query." LIMIT 5000");
 
@@ -1640,9 +1422,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     $r_value2 = trim_lower_accent($r_value);
                     if($r_value2!=""){
 
-                        if (!isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id )) 
+                        if (!isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id ))
                         {//not found
-                            // if(!@$terms[$r_value2]){ 
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
                         }else{
@@ -1673,14 +1454,15 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
         }else{
-            return "SQL error: Can not perform validation query: ".$query;
+            return "SQL error: Cannot perform validation query: ".$query;
         }
         return null;
     }
 
+
     /**
     * put your comment there...
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $imp_session
@@ -1691,7 +1473,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     */
     function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
 
-        
+
         $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
         $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
 
@@ -1708,9 +1490,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     $r_value2 = trim($r_value);
                     if($r_value2!=""){
 
-                        if (!isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id )) 
+                        if (!isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
                         {//not found
-                            // if(!@$terms[$r_value2]){ 
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
                         }else{
@@ -1732,7 +1513,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $error["recs_error"] = array_slice($wrong_records,0,1000);
                 $error["field_checked"] = $fields_checked;
                 $error["err_message"] = "Record pointer fields must reference an existing record of valid type in the database";
-                $error["short_messsage"] = "Wrong Pointers";
+                $error["short_messsage"] = "Invalid Pointers";
 
                 $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
                 array_push($imp_session['validation']['error'], $error);
@@ -1741,15 +1522,15 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
         }else{
-            return "SQL error: Can not perform validation query: ".$query;
+            return "SQL error: Cannot perform validation query: ".$query;
         }
         return null;
     }
-    
+
 
     /**
     * put your comment there...
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $imp_session
@@ -1763,13 +1544,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         if($res){
             $wrong_records = array();
             while ($row = $res->fetch_row()){
-                
+
                 $is_error = false;
                 $newvalue = array();
                 $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
                 foreach($values as $idx=>$r_value){
                     if($r_value!=null && trim($r_value)!=""){
-                        
+
                         if(!is_numeric($r_value)){
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
@@ -1792,7 +1573,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $error["recs_error"] = array_slice($wrong_records,0,1000);
                 $error["field_checked"] = $fields_checked;
                 $error["err_message"] = "Numeric fields must be pure numbers, they cannot include alphabetic characters or punctuation";
-                $error["short_messsage"] = "Wrong Numerics";
+                $error["short_messsage"] = "Invalid Numerics";
                 $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
                 array_push($imp_session['validation']['error'], $error);
 
@@ -1800,15 +1581,15 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
         }else{
-            return "SQL error: Can not perform validation query: ".$query;
+            return "SQL error: Cannot perform validation query: ".$query;
         }
         return null;
     }
 
-    
+
     /**
     * put your comment there...
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $imp_session
@@ -1822,23 +1603,19 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         if($res){
             $wrong_records = array();
             while ($row = $res->fetch_row()){
-                
+
                 $is_error = false;
                 $newvalue = array();
                 $values = getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
                 foreach($values as $idx=>$r_value){
                     if($r_value!=null && trim($r_value)!=""){
-                        
-                        
+
+
                         if( is_numeric($r_value) && intval($r_value) ){
-                            //$value = strtotime($r_value);
-                            //$value = date('Y-m-d', $r_value.'-1-1');
                             array_push($newvalue, $r_value);
                         }else{
 
                             $date = date_parse($r_value);
-
-//DEBUG error_log($r_value."  ".$date["month"]."/".$date["day"]."/".$date["year"]);                        
 
                             if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
                             {
@@ -1867,7 +1644,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $error["recs_error"] = array_slice($wrong_records,0,1000);
                 $error["field_checked"] = $fields_checked;
                 $error["err_message"] = "Date values must be in dd-mm-yyyy, mm/dd/yyyy or yyyy-mm-dd formats";
-                $error["short_messsage"] = "Wrong Dates";
+                $error["short_messsage"] = "Invalid Dates";
                 $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
                 array_push($imp_session['validation']['error'], $error);
 
@@ -1875,12 +1652,12 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
         }else{
-            return "SQL error: Can not perform validation query: ".$query;
+            return "SQL error: Cannot perform validation query: ".$query;
         }
         return null;
     }
-    
-    
+
+
     /**
     * create or update records
     *
@@ -1898,17 +1675,11 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $recordType = @$params['sa_rectype'];
         $id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
-        //print "<br>INDEX :".$id_field;
-
-        //$is_mulivalue_index = $id_field && in_array(intval(substr($id_field,6)), $imp_session['multivals']);
-
         if($id_field && @$imp_session['indexes_keyfields'][$id_field]){
             $is_mulivalue_index = true;
         }else{
             $is_mulivalue_index = false;
         }
-
-//DEBUG print "<br>IS MULTI ".$is_mulivalue_index."<<  ".print_r(@$imp_session['indexes_keyfields'][$id_field], true);
 
         if(intval($recordType)<1){
             return "record type not defined";
@@ -1926,14 +1697,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 //all mapped fields - they will be used in validation query
                 array_push($sel_query, $field_name);
                 array_push($field_types, $field_type);
-                //TEMP ART $imp_session["mapping"][$field_name] = $recordType.".".$field_type; // to keep used
             }
         }
         if(count($sel_query)<1){
             return "mapping not defined";
         }
-        
-        
+
+
         //indexes
         $recStruc = getRectypeStructures(array($recordType));
         $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
@@ -1942,7 +1712,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
         $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
         $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-        
+
         //get terms name=>id
         $terms_enum = null;
         $terms_relation = null;
@@ -1956,14 +1726,14 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
         if($id_field){  //index field defined - add to list of columns
             $id_field_idx = count($field_types); //last one
-            
+
             $select_query = $select_query." WHERE (".
-                ($ignore_insert? $id_field.">0":"NOT(".$id_field." is null OR ".$id_field."='')").") ORDER BY ".$id_field;
+            ($ignore_insert? $id_field.">0":"NOT(".$id_field." is null OR ".$id_field."='')").") ORDER BY ".$id_field;
         }else{
             if($ignore_insert){
                 return "id field not defined";
             }
-            
+
             //create id field by default - add to import table
 
             $id_fieldname = "ID field for Record type #".$recordType;
@@ -1978,7 +1748,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
                 $altquery = "alter table ".$import_table." add column ".$id_field_def." int(10) ";
                 if (!$mysqli->query($altquery)) {
-                    return "SQL error: can not alter import session table, can not add new index field: " . $mysqli->error;
+                    return "SQL error: cannot alter import session table, cannot add new index field: " . $mysqli->error;
                 }
                 $imp_session['indexes'][$id_field_def] = $recordType;
                 array_push($imp_session['columns'], $id_fieldname);
@@ -2003,7 +1773,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             else if($step<1) $step=1;
 
 
-            $previos_recordId = null;
+                $previos_recordId = null;
             $recordId = null;
             $details = array();
             $details2 = array(); //to keep original for sa_mode=2 (replace all existing value)
@@ -2053,17 +1823,12 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                 if(count($details2)==0){
                                     //record not found - this is insert with predefined ID
                                     $recordId = -$recordId_in_import;
-//DEBUG print "record not found - this is insert with predefined ID ".$recordId."<br>";
-                                    
+
                                 }else{
                                     // record found - update detail according TO settings
                                     $recordId = $recordId_in_import;
-//DEBUG print "record found - update detail according TO settings ".$recordId."<br>";
                                 }
 
-                                //if(!($params['sa_upd']==2 && $params['sa_upd2']==1)){//Delete existing if no new data supplied for record
-                                //    $details2 = $details;   //copy array - original record values
-                                //}
                             }else{
                                 $recordId = null; //insert for negative
                             }
@@ -2076,8 +1841,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         $details = array();
                     }
 
-                    //START FILL DETAILS ============================
-                    
+                    //START TO FILL DETAILS ============================
+
                     if(@$details['imp_id']==null){
                         $details['imp_id'] = array();
                     }
@@ -2085,7 +1850,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
                     $lat = null;
                     $long = null;
-                    
+
                     foreach ($field_types as $index => $field_type) {
 
                         if($field_type=="url"){
@@ -2097,22 +1862,21 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         }else{
 
                             if(substr($field_type, -strlen("_lat")) === "_lat"){
-                                 $field_type = substr($field_type, 0, strlen($field_type)-4);
-                                 $fieldtype_type = "lat";
+                                $field_type = substr($field_type, 0, strlen($field_type)-4);
+                                $fieldtype_type = "lat";
                             }else if (substr($field_type, -strlen("_long")) === "_long"){
-                                 $field_type = substr($field_type, 0, strlen($field_type)-5);
-                                 $fieldtype_type = "long";
+                                $field_type = substr($field_type, 0, strlen($field_type)-5);
+                                $fieldtype_type = "long";
                             }else{
                                 $ft_vals = $recStruc[$recordType]['dtFields'][$field_type]; //field type description
                                 $fieldtype_type = $ft_vals[$idx_fieldtype];
                             }
-                            
+
                             if(strpos($row[$index],$params['csv_mvsep'])!==false){
                                 $values = getMultiValues($row[$index], $params['csv_enclosure'], $params['csv_mvsep']);
 
                                 //  if this is multivalue index field we have to take only current value
                                 if($is_mulivalue_index && @$imp_session['indexes_keyfields'][$id_field][$sel_query[$index]] && $idx2<count($values)){
-                                    //DEBUG  print "<br>".$sel_query[$index]."   ".$idx2."   ".@$values[$idx2];
                                     $values = array($values[$idx2]);
                                 }
                             }else{
@@ -2125,36 +1889,29 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                 $r_value = trim($r_value);
 
                                 if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
-                                    //&& !ctype_digit($r_value)) {
-                                    
-                                    $r_value = trim_lower_accent($r_value);
-                                    
-                                    if ($r_value!="" && isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type )){ 
 
-                                        //print "<br> in csv>>>".$r_value;
+                                    $r_value = trim_lower_accent($r_value);
+
+                                    if ($r_value!="" && isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type )){
+
                                         if($fieldtype_type == "enum"){
                                             if(!$terms_enum) { //find ALL term IDs
-                                                $terms_enum = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
-                                                //print print_r($terms_enum, true);
-                                                //print " <br>try to find=".@$terms_enum["Medaille d'Honneur des Epidemies"];
+                                                $terms_enum = mysql__select_array3($mysqli,
+                                                    "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
                                             }
                                             $value = @$terms_enum[$r_value];
-                                            //print "<br> found>>>".$value;                                        
-                                            /*
-                                            $value = array_search($r_value, $terms_enum, true);
-                                            if($value===false) $value = null;
-                                            */
                                         }else if($fieldtype_type == "relationtype"){
                                             if(!$terms_relation){ //find ALL relation IDs
-                                                $terms_relation = mysql__select_array3($mysqli, "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
+                                                $terms_relation = mysql__select_array3($mysqli,
+                                                    "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
                                             }
                                             $value = @$terms_relation[$r_value];
                                         }
-                                        
+
                                     }
-                                    
+
                                 }else if($fieldtype_type == "geo"){
-                                    
+
                                     //verify WKT
                                     $geoType = null;
                                     //get WKT type
@@ -2165,18 +1922,18 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                     }else if(strpos($r_value,'POLYGON(')!==false){
                                         $geoType = "pl";
                                     }
-                                    
+
                                     if($geoType){
-                                        $value = $geoType." ".$r_value;    
+                                        $value = $geoType." ".$r_value;
                                     }else{
                                         $value = null;
                                     }
 
                                 }else if($fieldtype_type == "lat") {
-                                        $lat = $r_value;    
+                                    $lat = $r_value;
                                 }else if($fieldtype_type == "long"){
                                     //WARNING MILTIVALUE IS NOT SUPPORTED
-                                        $long = $r_value;    
+                                    $long = $r_value;
                                 }else{
                                     //double spaces are removed on preprocess stage $value = trim(preg_replace('/([\s])\1+/', ' ', $r_value));
 
@@ -2193,9 +1950,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                         }
                                     }
                                 }
-                                
+
                                 if($lat && $long){
-                                    $value = "p POINT(".$long."  ".$lat.")";      
+                                    $value = "p POINT(".$long."  ".$lat.")";
                                     //reset
                                     $lat = null;
                                     $long = null;
@@ -2206,12 +1963,11 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                     //Add new data only if field is empty (new data ignored for non-empty fields)
                                     $details_lc = array();
                                     $details2_lc = array();
-                                    
+
                                     if(is_array(@$details["t:".$field_type]))
                                         $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
                                     if(is_array(@$details2["t:".$field_type]))
                                         $details2_lc = array_map('trim_lower_accent', $details2["t:".$field_type]);
-                                    //DEBUG print "<br>".$value."   >>".print_r($details2_lc, true)."   >>".print_r($details2["t:".$field_type], true);
 
                                     if ((!@$details["t:".$field_type] || array_search(trim_lower_accent($value), $details_lc, true)===false) //no duplications
                                         &&
@@ -2220,15 +1976,16 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                         $cnt = count(@$details["t:".$field_type])+1;
                                         $details["t:".$field_type][$cnt] = $value;
                                     }else{
-                                        //DEBUG
-                                        //print (">>>>".$value."   ".print_r($details["t:".$field_type],true)."<br>");
                                     }
                                 }
 
                             }
                         }
                     }//for import data
+
                     //END FILL DETAILS =============================
+
+
 
                     //add - update record for 2 cases: idfield not defined, idfield is multivalue
                     if(!$id_field && count($details)>0){ //id field not defined - insert for each line
@@ -2281,8 +2038,10 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
         //save mapping into import_sesssion
+
         return saveSession($mysqli, $imp_session);
     }
+
 
     //
     //
@@ -2296,10 +2055,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         ." SET ".$id_field."=".$newids
         ." WHERE imp_id = ". $imp_id;
 
-        //DEBUG print "<br>UPD>>>>".$updquery;
         if(!$mysqli->query($updquery)){
-            print "<div style='color:red'>Can not update import table (set record id ".$newids.") for line:".$imp_id.".</div>";
-            //return "can not update import table (set record id)";
+            print "<div style='color:red'>Cannot update import table (set record id ".$newids.") for line:".$imp_id.".</div>";
         }
     }
 
@@ -2313,8 +2070,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     function retainExisiting($details, $details2, $params){
 
         if($params['sa_upd']==2){ //Add and replace all existing value(s) for the record with new data
-
-            //error_log("DET2>>>".print_r($details2, true));
 
             foreach ($details2 as $field_type => $pairs) {
                 if(substr($field_type,0,2)!="t:") continue;
@@ -2334,8 +2089,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
                     $details[$field_type] = $details3;
 
-                    //error_log("DET3>>>".print_r($details3, true));
-
                 }else {
 
                     if($params['sa_upd2']==1){ //delete if no new data provided
@@ -2347,9 +2100,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 }
             }
         }
-        //error_log("FIN>>>".print_r($details, true));
         return $details;
     }
+
 
     //
     //
@@ -2380,6 +2133,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         return $details;
     }
 
+
     //
     //
     //
@@ -2387,14 +2141,10 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
         global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated;
 
-        //DEBUG print "RecordId=".$recordId."<br>";
-        //print print_r($details, true);
-
-
         $import_table = $imp_session['import_table'];
         $recordType = @$params['sa_rectype'];
         //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
-        
+
         //add-update Heurist record
         $out = saveRecord($recordId, $recordType,
             @$details["recordURL"],
@@ -2415,17 +2165,17 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         );
 
         if (@$out['error']) {
-           
-            //special formatting 
+
+            //special formatting
             foreach($out["error"] as $idx=>$value){
-                 $value = str_replace(". You may need to make fields optional. Missed data","",$value);
-                 $k = strpos($value, "Missing data for Required field(s) in");
-                 if($k!==false){
+                $value = str_replace(". You may need to make fields optional. Missing data","",$value);
+                $k = strpos($value, "Missing data for Required field(s) in");
+                if($k!==false){
                     $value = "<span style='color:red'>".substr($value,0,$k+37)."</span>".substr($value,$k+37);
-                 }else{
+                }else{
                     $value  = "<span style='color:red'>".$value."</span>";
-                 }
-                 $out["error"][$idx] = $value;
+                }
+                $out["error"][$idx] = $value;
             }
             foreach($details['imp_id'] as $imp_id){
                 print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["error"]);
@@ -2435,12 +2185,10 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     print "<div style='padding-left:40px'>".$s."</div>";
                 }
                 print "</div>";
-            }                
+            }
 
-            //was one line - now dozen:  print "<div><span style='color:red'>Line: ".implode(",",$details['imp_id']).".</span> ".implode("; ",$out["error"])."</div>";
-            
-            //return "can not insert record ".implode("; ",$out["error"]);
         }else{
+
             if($recordId!=$out["bibID"]){ //}==null){
 
                 if($id_field && ($recordId==null || $recordId>0)){
@@ -2448,10 +2196,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     ." SET ".$id_field."=".$out["bibID"]
                     ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
 
-                    //error_log(">>>>".$updquery);
                     if(!$mysqli->query($updquery)){
-                        print "<div style='color:red'>Can not update import table (set record id ".$out["bibID"].") for lines:".implode(",",$details['imp_id'])."</div>";
-                        //return "can not update import table (set record id)";
+                        print "<div style='color:red'>Cannot update import table (set record id ".$out["bibID"].") for lines:".
+                        implode(",",$details['imp_id'])."</div>";
                     }
                 }
 
@@ -2505,36 +2252,32 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         $query = "select * from $import_table where imp_id=".$rec_id;
         $res = mysql__select_array2($mysqli, $query);
         return $res;
-        //error_log(">>>".$query."  ".json_encode($res));
     }
+
 
     /**
     * remove unmatched records from import data
-    * 
+    *
     * @param mixed $session_id
     * @param mixed $idfield
     */
     function delete_unmatched_records($session_id, $idfield){
-        
+
         global $mysqli;
-        
-        //header('Content-type: text/javascript');
 
         $session = get_import_session($mysqli, $session_id);
-        
+
         if(!is_array($session)){
             print $session;
             return;
         }
-        
+
         $import_table = $session['import_table'];
-      
+
         $query = " DELETE FROM ".$import_table
         ." WHERE ".$idfield."<0";
 
-        //print 33;  return;
         $res = $mysqli->query($query);
-//error_log($query."  ".$res."  ".$mysqli->affected_rows);
         if($res){
             //read content of tempfile and send it to client
             print $mysqli->affected_rows;
@@ -2549,10 +2292,11 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }else{
             print "SQL error: ".$mysqli->error;
         }
-        
-        
+
+
     }
-    
+
+
     /**
     * download seesion data into file
     *
@@ -2607,9 +2351,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         ." ENCLOSED BY '\"'"
         ." LINES TERMINATED BY '\n' ";
 
-//error_log($query."  ".$mode);
-        
-        
         $res = $mysqli->query($query);
         if($res){
             //read content of tempfile and send it to client
@@ -2619,6 +2360,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             print "File can not be downloaded. SQL error: ".$mysqli->error;
         }
     }
+
 
     /**
     * Drop import table and empty session table
@@ -2638,7 +2380,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             "select imp_id, imp_session from sysImportSessions".$where);
 
         if(!$res){
-            $ret = "can not get list of sessions";
+            $ret = "cannot get list of imported files";
         }else{
 
             foreach($res as $id => $session){
@@ -2647,7 +2389,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $query = "drop table IF EXISTS ".$session['import_table'];
 
                 if (!$mysqli->query($query)) {
-                    $ret = "can not drop table: " . $mysqli->error;
+                    $ret = "cannot drop table: " . $mysqli->error;
                     break;
                 }
             }
@@ -2657,8 +2399,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     $where = " where imp_id>0";
                 }
 
-                if (!$mysqli->query("delete from sysImportSessions ".$where)) { //  drop table IF EXISTS sysImportSessions 
-                    $ret = "can not delete data from import session table: " . $mysqli->error;
+                if (!$mysqli->query("delete from sysImportSessions ".$where)) {
+                    $ret = "cannot delete data from list of imported files: " . $mysqli->error;
                 }else{
                     $ret = "ok";
                 }
@@ -2668,6 +2410,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         header('Content-type: text/javascript');
         print json_encode($ret);
     }
+
 
     /**
     * Loads import sessions by ID
@@ -2690,7 +2433,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
             return $session;
         }else{
-            return "Can not load import session id#".$import_id;
+            return "Cannot load imported file #".$import_id;
         }
     }
 
@@ -2708,7 +2451,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         `imp_session` text,
         PRIMARY KEY  (`imp_ID`))";
         if (!$mysqli->query($query)) {
-            return "SQL error: can not create import session table: " . $mysqli->error;
+            return "SQL error: cannot create imported files table: " . $mysqli->error;
         }
 
         $ret = '<option value="0">select uploaded file ...</option>';
@@ -2720,9 +2463,9 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
             $res->close();
         }
-        //return "can not load list of sessions: " . $mysqli->error;
         return $ret;
     }
+
 
     //
     // print list of load data warnings
@@ -2730,10 +2473,10 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
     function renderWarnings($imp_session){
 
         $columns = $imp_session['columns'];
-        
+
         $warnings = $imp_session['load_warnings'];
         foreach ($warnings as $line) {
-            
+
             //replace field names in table to human column names from import file
             while (strpos($line, "field_")>0) {
                 $k = strpos($line, "field_");
@@ -2742,10 +2485,10 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $column_name = $columns[$idx];
                 $line = str_replace($field_name, $column_name, $line);
             }
-            
+
             print $line."<br />";
         }
-        print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+        print '<br /><br /><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">';
     }
 
     //
@@ -2755,15 +2498,15 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
 
         $records = $imp_session['validation']['disambiguation'];
 
-        //$disambiguation[$keyvalue] = $disamb;
-
         if(count($records)>25)
-            print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
+            print '<br/><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');"><br/><br/>';
 
-        print '<div>The following rows match with multiple records. This may be due to the existence of duplicate records in your database, but it is more likely to indicate that you have not chosen all the fields required to correctly disambiguate the incoming rows against existing data records.</div>';
+        print '<div>The following rows match with multiple records. This may be due to the existence of duplicate records in your database,'.
+        ' but you may not have chosen all the fields required to correctly disambiguate the incoming rows'.
+        ' against existing data records.</div>';
         print '<br/><br/>';
 
-        print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr><th>Key values</th><th>Count</th><th>Records in Heurist</th></tr>'; // class="tbmain"
+        print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr><th>Key values</th><th>Count</th><th>Records in Heurist</th></tr>';
 
 
         foreach($records as $keyvalue =>$disamb){
@@ -2781,29 +2524,30 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
             print '</select>&nbsp;';
-            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.'&q=ids:'.implode(",", array_keys($disamb)).'\', \'_blank\');}">view records</a>';
-            print '</td></tr>';
+            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+            '&q=ids:'.implode(",", array_keys($disamb)).'\', \'_blank\');}">view records</a></td></tr>';
         }
 
         print "</table><br />";
-        print '<div>If you proceed without verification, the first matching record will be chosen - this may not be the correct record if you have used an incompete set of fields for matching.</div>';
-        print '<div>Select correct matching and press "Proceed" button to finalize matching step and assign IDS</div><br/>';
-        print '<input type="button" value="Back" onClick="showRecords(\'mapping\');">&nbsp;&nbsp;<input type="button" value="Proceed" onClick="doMatching()">';
+        print '<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records if you have used '.
+        'an incomplete set of fields for matching.</div>';
+        print '<div>Click "Continue" to assign IDs</div><br/>';
+        print '<input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">'.
+        '&nbsp;&nbsp;<input type="button" value="Continue" onClick="doMatching()">';
 
     }
+
 
     //
     // render the list of records as a table
     //
     function renderRecords($type, $imp_session){
-        
+
         if($type=='error'){
             renderRecordsError($imp_session);
             return;
         }
 
-        ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
-        ///DEBUG print print_r(@$validationRes['rec_error'],true);
         $is_missed = false;
 
         if($type=='error'){
@@ -2813,7 +2557,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             $rec_tab = array();
             $rec_tab['count_'.$type] = $imp_session['validation']['count_'.$type];
             $rec_tab['recs_'.$type] = $imp_session['validation']['recs_'.$type];
-            //error_log(print_r($imp_session['validation']['recs_'.$type], true))            ;
             $tabs = array($rec_tab);
         }
 
@@ -2832,23 +2575,19 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
         $k = 0;
-        //$clr = array('red','lime','blue','green','white');
+
         foreach($tabs as $rec_tab)
         {
-            print '<div id="rec__'.$k.'">'; //' style="background-color:'.$clr[$k].'">';
+            print '<div id="rec__'.$k.'">';
             $k++;
 
             $cnt = $rec_tab['count_'.$type];
             $records = $rec_tab['recs_'.$type];
             $mapped_fields = $imp_session['validation']['mapped_fields'];
 
-            //print print_r( @$imp_session['validation']['mapped_fields'], true);
-
             if($cnt>count($records)){
                 print "<div class='error'><b>Only the first ".count($records)." of ".$cnt." rows are shown</b></div>";
             }
-
-            //print "<div>MAPPED2: ".print_r($mapped_fields, true)."</div>";  $checked_field."|".
 
             if($type=="error"){
                 $checked_field  = $rec_tab['field_checked'];
@@ -2856,8 +2595,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                     $checked_field = null; //highlight errors individually
                 }
 
-                print "<div class='error'>Values in red are invalid<br/></div>";
-                print "<div>".$rec_tab['err_message']."<br/><br/></div>";
+                print "<div><span class='error'>Values in red are invalid: ";
+                print "</span> ".$rec_tab['err_message']."<br/><br/></div>";
 
                 $is_missed = (strpos($rec_tab['err_message'], 'a value must be supplied')>0);
             }else{
@@ -2865,7 +2604,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             }
 
             if(count($records)>25)
-                print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
+                print '<br/><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');"><br/><br/>';
 
 
             //all this code only for small asterics
@@ -2896,21 +2635,21 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         $err_col = $m;
                         $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
                         break;
-                    }            
+                    }
                     $m++;
                 }
-                
+
                 if($is_enum){
                     $distinct_value = array();
                     if($records && is_array($records)) {
                         foreach ($records as $row) {
                             $value = $row[$err_col];
                             if(!in_array($value, $distinct_value)){
-                                 array_push($distinct_value, $value);
+                                array_push($distinct_value, $value);
                             }
                         }
                     }
-                
+
                     if(count($distinct_value)>0){
                         //print distinct term values
                         print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
@@ -2918,12 +2657,13 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             print '<div style="margin-left:30px;">'.$value.' </div>';
                         }
                         print '</div>';
-                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.$k.'\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
-                        //  $(\'#distinct_terms\').show()
+                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.
+                        $k.'\'),{\'no-close\':false, \'no-titlebar\':false });}">Get list of unrecognised terms</a> '.
+                        '(can be imported into terms tree)<br/>&nbsp;</div>';
                     }
                 }
-            }//end find distict terms values 
-            
+            }//end find distict terms values
+
             print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
 
             if($type=="update"){
@@ -2951,10 +2691,6 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                 $colname = $colname.'<br><font style="font-size:10px;font-weight:normal">'
                 .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id)."</font>";
 
-                if($err_col == $m){
-                    $colname = $colname.'<br><font color="red">ERROR</font>';
-                }
-
                 $m++;
                 print "<th>".$colname."</th>";
             }
@@ -2977,14 +2713,8 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                                 $value = "<font color='red'>".$value."</font>";
                             }
                             print "<td class='truncate'>";
-                            /*
-                            if($m==0 || ($type=="update" && $m==1)){
-                            print "<td class='truncate'>";
-                            }else{
-                            print "<td>";
-                            }*/
 
-                            print $value."</td>"; //
+                            print $value."</td>";
 
                             $m++;
                         }
@@ -3000,22 +2730,20 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             print '</div>';
         }
 
-        print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+        print '<br /><br /><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">';
 
     }
+
 
     //
     // render the list of records as a table
     //
     function renderRecordsError($imp_session){
 
-        ///DEBUG print "fields ".print_r(@$validationRes['field_checked'],true)."<br> recs";
-        ///DEBUG print print_r($imp_session['validation']['mapped_fields'],true)."<br> ";
-
         $is_missed = false;
 
         $tabs = $imp_session['validation']['error'];
-        
+
         if(count($tabs)>1){
             $k = 0;
 
@@ -3031,39 +2759,36 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
         }
 
         $mapped_fields = $imp_session['validation']['mapped_fields'];
-        
+
         $k = 0;
-        //$clr = array('red','lime','blue','green','white');
+
         foreach($tabs as $rec_tab)
         {
-            print '<div id="rec__'.$k.'">'; //' style="background-color:'.$clr[$k].'">';
+            print '<div id="rec__'.$k.'">';
             $k++;
 
             $cnt = $rec_tab['count_error'];
             $records = $rec_tab['recs_error'];
 
-            
-//print "AAAA".print_r($rec_tab, true)."<br>";            
-            
             if($cnt>count($records)){
                 print "<div class='error'><b>Only the first ".count($records)." of ".$cnt." rows are shown</b></div>";
             }
 
             $checked_field  = $rec_tab['field_checked'];
-            
-            
+
+
             if(in_array(intval(substr($checked_field ,6)), $imp_session['multivals'])){
                 $ismultivalue = true;     //highlight errors individually
             }else{
                 $ismultivalue = false;
             }
-            print "<div class='error'>Values in red are invalid<br/></div>";
-            print "<div>".$rec_tab['err_message']."<br/><br/></div>";
+            print "<div><span class='error'>Values in red are invalid: ";
+            print "</span> ".$rec_tab['err_message']."<br/><br/></div>";
 
             $is_missed = (strpos($rec_tab['err_message'], 'a value must be supplied')>0);
 
             if(count($records)>25)
-                print '<br/><input type="button" value="Back" onClick="showRecords(\'mapping\');"><br/><br/>';
+                print '<br/><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');"><br/><br/>';
 
 
             //all this code only for small asterics
@@ -3094,21 +2819,21 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                         $err_col = $m;
                         $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
                         break;
-                    }            
+                    }
                     $m++;
                 }
-                
+
                 if($is_enum){
                     $distinct_value = array();
                     if($records && is_array($records)) {
                         foreach ($records as $row) {
                             $value = $row[$err_col];
                             if(!in_array($value, $distinct_value)){
-                                 array_push($distinct_value, $value);
+                                array_push($distinct_value, $value);
                             }
                         }
                     }
-                
+
                     if(count($distinct_value)>0){
                         //print distinct term values
                         print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
@@ -3116,13 +2841,14 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             print '<div style="margin-left:30px;">'.$value.' </div>';
                         }
                         print '</div>';
-                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.$k.'\'),{\'no-close\':false, \'no-titlebar\':false });}"><b>Show concise list of incorrect terms</b></a></div>';
-                        //  $(\'#distinct_terms\').show()
+                        print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.
+                        $k.'\'),{\'no-close\':false, \'no-titlebar\':false });}">Get list of unrecognised terms</a>'.
+                        ' (can be imported into terms tree)<br/>&nbsp;</div>';
                     }
                 }
-                
-            }//end find distict terms values 
-            
+
+            }//end find distict terms values
+
             print '<table class="tbmain"  cellspacing="0" cellpadding="2" width="100%"><thead><tr>'; // class="tbmain"
 
             print '<th width="20px">Line #</th>';
@@ -3130,43 +2856,42 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             //HEADER - only error field
             $m=1;
             $err_col = 0;
-            
+
             foreach($mapped_fields as $field_name=>$dt_id) {
 
                 if($field_name==$checked_field){
-                    
+
                     $colname = @$imp_session['columns'][substr($field_name,6)];
 
                     if(@$recStruc[$dt_id][$idx_reqtype] == "required"){
                         $colname = $colname."*";
                     }
                     if($is_enum){
-                        $showlink = '&nbsp;<a href="#" onclick="{showTermListPreview('.$dt_id.')}">show</a>';
+                        $showlink = '&nbsp;<a href="#" onclick="{showTermListPreview('.$dt_id.')}">show list of terms</a>';
                     }else{
                         $showlink = '';
                     }
-                    
+
                     $colname = "<font color='red'>".$colname."</font>"
-                            .'<br><font style="font-size:10px;font-weight:normal">'
-                            .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id).$showlink."</font>"
-                            .'<br><font color="red">ERROR</font>';        
-                            
+                    .'<br><font style="font-size:10px;font-weight:normal">'
+                    .(is_numeric($dt_id) ?$detLookup[$detDefs[$dt_id]['commonFields'][$idx_dt_type]] :$dt_id).$showlink."</font>";
+
                     if($is_enum){
-                        $colname = $colname."<div id='termspreview".$dt_id."'></div>"; //container for 
-                    }                
-                            
+                        $colname = $colname."<div id='termspreview".$dt_id."'></div>"; //container for
+                    }
+
                     print "<th style='min-width:90px'>".$colname."</th>";
                     $err_col = $m;
                     break;
                 }
                 $m++;
             }
-            
+
             //raw row
             print '<th>Record content</th>';
             print "</tr></thead>";
 
-            
+
             $import_table = $imp_session['import_table'];
             //BODY
             if($records && is_array($records)) {
@@ -3188,7 +2913,7 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
                             $s = htmlspecialchars(implode(", ", $res));
                             print "<td title='".$s."'>".$s."</td>";
                         }else{
-                            print "<td>&nbsp;</td>";  
+                            print "<td>&nbsp;</td>";
                         }
                     }
                     print "</tr>";
@@ -3202,77 +2927,45 @@ print "DEBUG ".print_r($fc,true)."  ".$keyvalue."<br>";
             print '</div>';
         }
 
-        print '<br /><br /><input type="button" value="Back" onClick="showRecords(\'mapping\');">';
+        print '<br /><br /><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">';
 
     }
-    
-    
+
+
     function my_strtr($inputStr, $from, $to, $encoding = 'UTF-8') {
-            $inputStrLength = mb_strlen($inputStr, $encoding);
+        $inputStrLength = mb_strlen($inputStr, $encoding);
 
-            $translated = '';
+        $translated = '';
 
-            for($i = 0; $i < $inputStrLength; $i++) {
-                    $currentChar = mb_substr($inputStr, $i, 1, $encoding);
+        for($i = 0; $i < $inputStrLength; $i++) {
+            $currentChar = mb_substr($inputStr, $i, 1, $encoding);
 
-                    $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
+            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
 
-                    if($translatedCharPos === false) {
-                            $translated .= $currentChar;
-                    }
-                    else {
-                            $translated .= mb_substr($to, $translatedCharPos, 1, $encoding);
-                    }
+            if($translatedCharPos === false) {
+                $translated .= $currentChar;
             }
+            else {
+                $translated .= mb_substr($to, $translatedCharPos, 1, $encoding);
+            }
+        }
 
-            return $translated;
-    }    
-    
+        return $translated;
+    }
+
+
     function stripAccents($stripAccents){
         return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
     }
-    //
+
+
     function  trim_lower_accent($item){
-        return mb_strtolower(stripAccents($item)); //stripAccents(mb_strtolower(trim($item)));
+        return mb_strtolower(stripAccents($item));
     }
-    //
+
+
     function  trim_lower_accent2(&$item, $key){
         $item = trim_lower_accent($item);
     }
 
-    /*
-    delimiter $$
-
-    CREATE DEFINER=`root`@`localhost` FUNCTION `trim_spaces`(`dirty_string` text, `trimChar` varchar(1))
-    RETURNS text
-    LANGUAGE SQL
-    NOT DETERMINISTIC
-    CONTAINS SQL
-    SQL SECURITY DEFINER
-    COMMENT ''
-    BEGIN
-    declare cnt,len int(11) ;
-    declare clean_string text;
-    declare chr,lst varchar(1);
-
-    set len=length(dirty_string);
-    set cnt=1;
-    set clean_string='';
-
-    while cnt <= len do
-    set  chr=right(left(dirty_string,cnt),1);
-
-    if  chr <> trimChar OR (chr=trimChar AND lst <> trimChar ) then
-    set  clean_string =concat(clean_string,chr);
-    set  lst=chr;
-    end if;
-
-    set cnt=cnt+1;
-    end while;
-
-    return clean_string;
-    END
-    $$
-    delimiter ;
-    */
 ?>
