@@ -66,8 +66,9 @@ $dbReadonlyPassword = "?????? ENTER PASSWORD HERE ???????"; //required
 
 // *** DO NOT CHANGE ***
 
-$version = "3.2.0"; // sets current program version number
+$version = "3.3.0"; // sets current program version number
                     // 3.2.0 alpha 8th July 2014, beta 21st July 2014
+                    // 3.3.0 beta 11th Nov 2014
 
 // [server]
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
