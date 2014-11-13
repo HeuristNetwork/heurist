@@ -398,7 +398,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             }
             
             var reslist = createSubTreeOptions(null, 0, termTree, termLookup, defaultTermID);
-            if(selObj){
+            if(!selObj){
                 reslist_final = reslist_final.concat( reslist);
             }
         }

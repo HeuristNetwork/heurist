@@ -1284,7 +1284,7 @@
 
 
         if (!$mysqli->query($query)) {
-            return "can not import data: " . $mysqli->error;
+            return "can not import data: ".$mysqli->error;
         }
 
         $warnings = array();

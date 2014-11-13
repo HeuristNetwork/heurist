@@ -294,6 +294,10 @@ HEURIST_HTML_URL
         }
         testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
 
+        if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
+            returnErrorMsgPage(1, "Can not access Heurist File Storage folder ". $defaultRootFileUploadPath .". It is either not found or not writable.");
+        }
+        
         if(strpos($defaultRootFileUploadURL, $REQUEST_PROTOCOL . "://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
                 if( substr($defaultRootFileUploadURL, 0, 1) != '/' ) $defaultRootFileUploadURL = "/" . $defaultRootFileUploadURL;
                 $defaultRootFileUploadURL =  HEURIST_SERVER_URL . $defaultRootFileUploadURL;

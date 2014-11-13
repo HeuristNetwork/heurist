@@ -42,6 +42,23 @@ $.widget( "heurist.search_faceted_wiz", {
     //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", 
     //                                    currentvalue:{text:label, query:value, termid:termid}, history:[currentvalue] }, ]  
 
+/*
+{"isadvanced":false,
+ "rectype_as_facets":false,
+ "fieldtypes":["enum","freetext","year","date","integer","float"],
+ "rectypes":["11"],
+ "facets":[
+    [{"title":"Language - change to required","type":"enum",    "query":"f:99",     "fieldid":"f:99","currentvalue":null,"history":[]}],
+    [{"title":"Family name",                  "type":"freetext","query":"t:10 f:1" ,"fieldid":"f:1", "currentvalue":null,"history":[]},
+     {"title":"Person affected",              "type":"resource","query":"t:13 f:16","fieldid":"f:16"},
+     {"title":"Punishment event(s) - SAVE record first","type":"resource", "query":"f:93","fieldid":"f:93"}],
+    [{"title":"Given name(s)","type":"freetext","query":"t:10 f:18","fieldid":"f:18","currentvalue":null,"history":[]},         lvl2
+     {"title":"Person affected","type":"resource","query":"t:13 f:16","fieldid":"f:16"},                                        lvl1
+     {"title":"Punishment event(s) - SAVE record first","type":"resource","query":"f:93","fieldid":"f:93"}]],"domain":"all"}    lvl0
+
+*/     
+     
+    
 
     step: 0, //current step
     step_panels:[],
@@ -130,6 +147,7 @@ $.widget( "heurist.search_faceted_wiz", {
         $("<div>",{id:'facets_preview'}).css('top','3.2em').appendTo(this.step4);
         this.step_panels.push(this.step4);
 
+        
         this._refresh();
 
     }, //end _create
@@ -349,11 +367,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 opt_date.attr( "checked", ft.indexOf('date') );
                 opt_text.attr( "checked", ft.indexOf('freetext') );
 
-                this.step0.find("#opt_rectype_as_facets").attr( "checked", this.options.params.rectype_as_facets );
-
+                this.step0.find("#opt_mode_simple").attr("checked", !this.options.params.isadvanced );
+                if(!this.options.params.isadvanced) this.step0.find("#opt_mode_simple").click();
                 opt_mode_advanced.attr("checked", this.options.params.isadvanced );
-                opt_mode_advanced.click();
+                if(this.options.params.isadvanced) opt_mode_advanced.click();
 
+                this.step0.find("#opt_rectype_as_facets").attr('checked', this.options.params.rectype_as_facets);
+                
             }else{ //add new saved search
 
                 svs_id.val('');
@@ -391,10 +411,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 this.options.params.rectypes = rectypeIds;
                 var treediv = $(this.step2).find('#field_treeview');
 
-                window.HAPI.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4, fieldtypes:this.options.params.fieldtypes.join() }, function(response){
+                window.HAPI4.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4, fieldtypes:this.options.params.fieldtypes.join() }, function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         //@todo - mark selected
+                        
+                        response.data.rectypes
+                        
+                        
+                        
                         if(!treediv.is(':empty')){
                             treediv.fancytree("destroy");
                         }
@@ -475,6 +500,32 @@ $.widget( "heurist.search_faceted_wiz", {
             }*/
         }
 
+        // ------------------------------------------------------
+        /*  sample:
+    [{"title":"Family name",                  "type":"freetext","query":"t:10 f:1" ,"fieldid":"f:1", "currentvalue":null,"history":[]},
+     {"title":"Person affected",              "type":"resource","query":"t:13 f:16","fieldid":"f:16"},
+     {"title":"Punishment event(s) - SAVE record first","type":"resource", "query":"f:93","fieldid":"f:93"}],
+        */
+        /*
+        var facets = this.options.params.facets;
+        for(var i=0; i<facets.length; i++){
+            var facet = facets[i];
+            for(var j=facet.length-1; j>=0; j--){
+            
+            }
+        }
+        
+        
+        for(var i=0; i<data.rectypes.length; i++){
+           var rectype =  data.rectypes[i];
+           
+           for(var j=0; j<rectype.children.length; j++){
+            
+           }
+        }
+        */
+        
+        
         function __get_queries(node){
 
             var res = [];
@@ -544,7 +595,7 @@ $.widget( "heurist.search_faceted_wiz", {
             }
             */
             return res;
-        }
+        } //end __get_queries ------------------------------------
 
         var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
         var fieldIds = tree.getSelectedNodes(false);

@@ -196,10 +196,12 @@ $.widget( "heurist.search_links", {
                     .append( this._defineHeader(top.HR('All Records'), 'all'))
                     .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID) ));
                     
-                this.user_groups.append(
-                    $('<div>')
-                    .append( this._defineHeader(top.HR('Rules'), 'rules'))
-                    .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, 'rules') ));
+                if(this.currentMode!='faceted'){
+                    this.user_groups.append(
+                        $('<div>')
+                        .append( this._defineHeader(top.HR('Rules'), 'rules'))
+                        .append( this._define_GroupContent(top.HAPI4.currentUser.ugr_ID, 'rules') ));
+                }
                     
             }
 
@@ -522,7 +524,7 @@ $.widget( "heurist.search_links", {
                 }
                 catch (err) {
                     // Do something about the exception here
-                    Hul.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters'), null, "Error");
+                    Hul.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters. Remove this search'), null, "Error");
                 }
 
                 var that = this;
@@ -656,16 +658,21 @@ $.widget( "heurist.search_links", {
         }
     }
 
-    , _updateAfterSave: function(request){
+    , _updateAfterSave: function(request, mode){
 
-        if( parseInt(request.svs_ID) > 0 ){
-            $('#svs-'+request.svs_ID).html(request.svs_Name);  //change name on edit
-        }else{
-            
-            var prms = Hul.parseHeuristQuery(request.svs_Query);
-            var domain = (Hul.isempty(prms.q)&&!Hul.isempty(prms.rules))?'rules':request.domain;
-            
-            $('#svsu-'+request.svs_UGrpID+'-'+domain).append( this._add_SVSitem(request.svs_Name, request.new_svs_ID) );
+        if(this.currentMode == mode)
+        {
+
+            if( parseInt(request.svs_ID) > 0 ){
+                $('#svs-'+request.svs_ID).html(request.svs_Name);  //change name on edit
+            }else{
+
+                var prms = Hul.parseHeuristQuery(request.svs_Query);
+                var domain = (Hul.isempty(prms.q)&&!Hul.isempty(prms.rules))?'rules':request.domain;
+
+                $('#svsu-'+request.svs_UGrpID+'-'+domain).append( this._add_SVSitem(request.svs_Name, request.new_svs_ID) );
+            }
+
         }
     }
     
@@ -732,11 +739,29 @@ $.widget( "heurist.search_links", {
     */
     , editSavedSearch: function(svsID, squery, domain){
 
+        var facetedAllowed = (domain!='rules' && domain!='saved');
+        if(domain=='saved') domain='all';
+        
         var that = this;
-        if( this.currentMode == "faceted") {
+        if( facetedAllowed && this.currentMode == "faceted") {
 
-            this._showSearchFacetedWizard( {svsID:svsID, domain:domain, onsave: function(event, request){
-                that._updateAfterSave(request);
+            var facet_params = {};
+            if(svsID>0){
+                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                if(svs){
+                    try {
+                        facet_params = $.parseJSON(svs[_QUERY]);
+                    }
+                    catch (err) {
+                        // Do something about the exception here
+                        Hul.showMsgDlg(top.HR('Can not init edit for faceted search. Corrupted parameters. Remove this search'), null, "Error");
+                        return;
+                    }
+                }
+            }
+            
+            this._showSearchFacetedWizard( {svsID:svsID, domain:domain, params:facet_params, onsave: function(event, request){
+                that._updateAfterSave(request, 'faceted');
             } });
 
         }else if(  this.edit_dialog==null )
@@ -836,7 +861,7 @@ $.widget( "heurist.search_links", {
 
                                     request.new_svs_ID = svsID;
 
-                                    that._updateAfterSave(request);
+                                    that._updateAfterSave(request, 'saved');
 
 
                                 }else{

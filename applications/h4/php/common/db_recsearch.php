@@ -66,8 +66,10 @@
         return $response;
     }
 
-
-    //$resource - t:20 f:41
+    /**
+    * parses string  $resource - t:20 f:41
+    * and returns array of recordtype and detailtype IDs
+    */
     function _getRt_Ft($resource)
     {
         if($resource){

@@ -18,7 +18,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
 $.widget( "heurist.search_faceted", {
 
     // default options
@@ -388,7 +387,7 @@ $.widget( "heurist.search_faceted", {
                             var cvalue = facets[facet_index][0].history[k];
                             var f_link = this._createFacetLink(facet_index, cvalue);
                             var $span = $("<span>").css('display','inline-block').append(f_link).appendTo($facet_values);
-                            if(k<len-1){
+                            if(k<len){
                                 $span.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
                             }
                         }
@@ -472,7 +471,7 @@ $.widget( "heurist.search_faceted", {
                             }
                             if(cnt>0){
                                 var f_link = that._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(","), count:cnt});
-                                $("<div>").css({"display":"inline-block","min-width":"90px","padding-right":"6px"}).append(f_link).appendTo($facet_values);
+                                $("<div>").css({"display":"inline-block","min-width":"90px","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                             }
                         }
                     }else if(response.type=="rectype"){
@@ -484,7 +483,7 @@ $.widget( "heurist.search_faceted", {
                                 var rtID = cterm[0];
                                 var f_link = that._createFacetLink(facet_index, 
                                     {text:top.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
-                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
+                                $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                             }
                         }
 
@@ -495,7 +494,7 @@ $.widget( "heurist.search_faceted", {
 
                             if(facet_index>=0){
                                 var f_link = that._createFacetLink(facet_index, {text:cterm[0], query: cterm[2] , count:cterm[1]});
-                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
+                                $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                             }
                         }
 
@@ -505,9 +504,9 @@ $.widget( "heurist.search_faceted", {
 
                             if(facet_index>=0){
                                 var f_link = that._createFacetLink(facet_index, {text:cterm[0], query:cterm[2], count:cterm[1]});
-                                $("<div>").css({"display":"inline-block","padding-right":"6px"}).append(f_link).appendTo($facet_values);
+                                $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                                 if(i>50){
-                                    $("<div>").css({"display":"inline-block","padding-right":"6px"}).html('more '+(response.data.length-i)+' results').appendTo($facet_values);
+                                    $("<div>").css({"display":"inline-block","padding":"0 3px"}).html('more '+(response.data.length-i)+' results').appendTo($facet_values);
                                     break;       
                                 }
                             }
@@ -534,7 +533,7 @@ $.widget( "heurist.search_faceted", {
                 }
             }
 
-            window.HAPI.RecordMgr.get_facets(request, __onResponse);            
+            window.HAPI4.RecordMgr.get_facets(request, __onResponse);            
 
         }    
     }

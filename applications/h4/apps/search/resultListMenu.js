@@ -226,7 +226,7 @@ $.widget( "heurist.resultListMenu", {
               
                 var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).search_links('editSavedSearch', null, null, 'all'); //call method editSavedSearch - save current search
+                    $(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
                 }
 
           }else if(action == "menu-search-rulebuilder"){  
