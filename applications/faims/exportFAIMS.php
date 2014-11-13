@@ -1520,17 +1520,24 @@ onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$
                 
                 if($is_repeatable){
                         $action = 'populateCheckBoxGroup';
-                        //Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
-                        //$action = populateCheckBoxGroup("tabgroup1/tab1/locations",locations);
-                        
                 }else if ($termsCount<4) {
                     $action = 'populateRadioGroup';
                 }else{
                     $action = 'populateDropDown';
                 }
                 
-                $load_selectors .= '
-'.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.prepareText($dtdisplayname).'"));');
+                // makeVocab method
+                $makeVocab = 'fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\'",
+                              new FetchCallback() {
+                                onFetch(result) {
+                                '.
+                                    $action.'("'.$headername.'/'.$dtdisplaynamex.'", result);    
+                                }
+                              });
+                              ';
+                // Add to load selectors
+                $load_selectors .= $makeVocab;
+                //$load_selectors .= ''.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.prepareText($dtdisplayname).'"));'); // OLD
             }else if ($dt_type=='resource') {
                 
                 $dt_pointers = $detail[$idx_rst_pointers];
@@ -1677,7 +1684,7 @@ String last_invoker = null;
 List attachedGeometry = null;
 
 /*** EVENTS ***/
-onEvent("control/data", "show", "refreshEntities()");
+onEvent("control/data", "show", "loadEntityTypeList()");
 onEvent("control/data/entityTypeList", "click", "refreshEntities()");
 onEvent("user/usertab/login", "click", "login()"); 
 
@@ -1711,16 +1718,20 @@ onShowSelect(){
         }
     }
     
-        String last_select_callback = tabs_select.get(tabs_select.size()-1);
-    
-        String[] parts = last_select_callback.split("=");
-        String rectype = parts[0]; //rectype to search
-        String fieldpath = parts[1]; //
-    
-        //search entity for given entType    
-        String entName = getEntityNameByTabname( rectype );
-        populateList("selectEntity/data/entityList", fetchEntityList(entName));
-    
+    String last_select_callback = tabs_select.get(tabs_select.size()-1);
+
+    String[] parts = last_select_callback.split("=");
+    String rectype = parts[0]; //rectype to search
+    String fieldpath = parts[1]; //
+
+    //search entity for given entType    
+    String entName = getEntityNameByTabname( rectype );
+    fetchEntityList(entName, new FetchCallback() {
+        onFetch(result) {
+            populateList("selectEntity/data/entityList", result);
+        }
+    });
+        
 }
 //
 // onshow edit form for particular entity
@@ -1793,7 +1804,7 @@ onSelectEntity() {
     //pairs.add(new NameValuePair("selected "+uid, uid));
 
     //fill pointer field    
-    populateDropDown(fieldname, loadEntity(uid) );
+    populateDropdownByQuery(fieldname, uid);
     
     String fieldname_uid = getPointerFiledName(fieldname);
     setFieldValue(fieldname_uid, uid);    
@@ -1827,7 +1838,7 @@ fillPointer(fieldname){
     if(null==res_id || "".equals(res_id) || "null".equals(res_id)){
         clearPointer(fieldname);
     }else{
-        populateDropDown(fieldname, loadEntity(res_id));
+        populateDropdownByQuery(fieldname, res_id);
     }
 }
 
@@ -1876,27 +1887,33 @@ loadEntityById(entid, rectype) {
     //updateRelns();
 }
 
-//
-// load entity by UID (used to populate dropdown for pointer fields)
-//
-loadEntity(uid){
-    return fetchAll(""+
-"SELECT uuid, group_concat(coalesce(measure   || \' \'  || vocabname || \'(\'  ||  freetext ||\'; \'|| (certainty * 100.0) || \'% certain)\',  "+
-"                                     measure   || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
-"                                     vocabname || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
-"                                     measure   || \' \'  || vocabname || \' (\' || (certainty * 100.0) || \'% certain)\',  "+
-"                                       vocabname || \' (\' || freetext  || \')\',  "+
-"                                       measure   || \' (\' || freetext  || \')\',  "+
-"                                     measure   || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
-"                                     vocabname || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
-"                                     freetext  || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
-"                                     measure,  "+
-"                                     vocabname,  "+
-"                                     freetext), \' \') as response  "+
-"FROM (select * from latestNonDeletedArchentIdentifiers order by attributename) "+
-"WHERE uuid = \'"+uid+"\' "+
-"GROUP BY uuid;");
+// Returns the query to load information about a certain entity
+getEntityQuery(uid) {
+    return  "SELECT uuid, group_concat(coalesce(measure   || \' \'  || vocabname || \'(\'  ||  freetext ||\'; \'|| (certainty * 100.0) || \'% certain)\',  "+
+            "                                     measure   || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
+            "                                     vocabname || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
+            "                                     measure   || \' \'  || vocabname || \' (\' || (certainty * 100.0) || \'% certain)\',  "+
+            "                                       vocabname || \' (\' || freetext  || \')\',  "+
+            "                                       measure   || \' (\' || freetext  || \')\',  "+
+            "                                     measure   || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
+            "                                     vocabname || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
+            "                                     freetext  || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
+            "                                     measure,  "+
+            "                                     vocabname,  "+
+            "                                     freetext), \' \') as response  "+
 
+            "FROM (select * from latestNonDeletedArchentIdentifiers order by attributename) "+
+            "WHERE uuid = \'"+uid+"\' "+
+            "GROUP BY uuid;";
+}
+
+// Executes a query for the given uid and then uses the result to populate a dropdown
+populateDropdownByQuery(fieldname, uid) {
+    fetchAll(getEntityQuery(uid), new FetchCallback() {
+        onFetch(result) {
+            populateDropDown(fieldname, result);
+        }
+    });
 }
 
 //
@@ -1932,15 +1949,31 @@ saveEntity(rectype, andclose) {
     if(!isNull(attachedGeometry)){
          data = attachedGeometry;
          attachedGeometry = null;
-    }else if (!isNull(uid)) { 
-        entity = fetchArchEnt(uid); //need for geometry
-        data = entity.getGeometryList();
+         
+    }else if (!isNull(uid)) {
+        //need for geometry
+        fetchArchEnt(uid, new FetchCallback() {
+            onFetch(entity) {
+                data = entity.getGeometryList();   
+            }
+        });   
+        
     }else if( tabs_edit.size()==1 ){ //add geo for main edit only
         //LIMITATION!!!! map data can be assigned for new entity ONLY!!
         data = getCreatedGeometry(); //map data
     }':'').'
+    
     // save record/entity
-    saveTabGroup(rectype, uid, data, null, "saveEntityCallback(\""+rectype+"\", "+andclose+")");
+    saveTabGroup(rectype, uid, data, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", uuid);
+            onClearMap();
+
+            if(andclose){
+                goBack();
+            }
+        }
+    }, true);
 }
 //
 //
@@ -1983,37 +2016,55 @@ clearStacks(){
    last_invoker = null;
 }
 
-/*** main list of records on control/data ***/
+/*** main list of records on control/data ***/    
+//
+// loads all available entity types into a dropdown
+//
+loadEntityTypeList() {
+    // Populate entity type dropdown
+   fetchAll("select aenttypename, aenttypename from aenttype;", new FetchCallback() {
+        onFetch(result) {
+            populateDropDown("control/data/entityTypeList", result);  
+            refreshEntities();  
+        }
+   });
+}
+
 //
 // reload list of records on control/data show or on rectype selection
 //
 refreshEntities() {
 
    clearStacks();
-
    showToast("Fetching all entities...");
-   
-   // populateDropDown("control/data/entityTypeList", getEntityTypeList());
-   String entName = getEntityNameByTabname( getFieldValue("control/data/entityTypeList") );
-   
-   populateList("control/data/entityList", fetchEntityList(entName));
-}
 
-// make vocabulary
-makeVocab(String attrib){
-    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'"+attrib+"\' ");
-    return a;
+   // Populate list of entity types
+   String entName = getFieldValue("control/data/entityTypeList");
+   showToast("Ent name: " + entName);
+   
+   fetchEntityList(entName, new FetchCallback() {
+        onFetch(result) {
+            print("Entity list result: " + result);
+            populateList("control/data/entityList", result);
+        }
+   });
+
 }
 
 /*** USER ***/
 
-getDefaultUsersList() {
-    users = fetchAll("select userid, fname || \' \' || lname from user");
-    return users;
+// Returns a query to select all users
+getUserQuery() {
+    return "select userid, fname || \' \' || lname from user";
 }
 
+// Populates a user dropdown
 populateListForUsers(){
-    populateDropDown("user/usertab/users", getDefaultUsersList());
+    fetchAll(getUserQuery(), new FetchCallback() {
+        onFetch(result) {
+            populateDropDown("user/usertab/users", result);
+        }
+    });
 }
 
 populateListForUsers();
@@ -2022,12 +2073,16 @@ String username = "";
 String device = "";
 
 login(){
-    Object userResult = fetchOne("select userid,fname,lname,email from user where userid=\'" + getFieldValue("user/usertab/users") + "\';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-    userid = userResult.get(0);
-    setUser(user);
-    username = userResult.get(1) + " " + userResult.get(2);
-    showTabGroup("control");
+    // Fetch user
+    fetchOne("select userid,fname,lname,email from user where userid=\'" + getFieldValue("user/usertab/users") + "\';", new FetchCallback() {
+        onFetch(result) {
+            User user = new User(result.get(0),result.get(1),result.get(2),result.get(3));
+            userid = result.get(0);
+            setUser(user);
+            username = result.get(1) + " " + result.get(2);
+            showTabGroup("control");
+        }
+    });
 }
 
 /*** INIT ATTRIBUTES ***/
@@ -2141,11 +2196,16 @@ onLoadData() {
     isEntity = "entity".equals(getMapGeometryLoadedType());
     
     if (isEntity) {
-    
-        String entname = fetchOne("select aenttypename from aenttype join latestnondeletedarchent using (aenttypeid) where uuid = "+uuid+"; ").get(0);
-        String rectype = getTabnameByEntityName(entname);
-    
-        loadEntityById(uuid, rectype);
+        // Fetch entity
+        fetchOne("select aenttypename from aenttype join latestnondeletedarchent using (aenttypeid) where uuid = "+uuid+";", new FetchCallback() {
+            onFetch(entity) {
+                 String entname = entity.get(0);
+                 String rectype = getTabnameByEntityName(entname);
+                 
+                 loadEntityById(uuid, rectype);
+            }
+        });
+               
     } else {
         //to implement loadUIRelationship(uuid);
     }
@@ -2217,10 +2277,14 @@ mapRecord(rectype){
 
     String uid = getEntityId(rectype);
     if (!isNull(uid)) { 
-        entity = fetchArchEnt(uid); 
-        data = entity.getGeometryList();
+        // Fetch entity
+        fetchArchEnt(uid, new FetchCallback() {
+            onFetch(entity) {
+                data = entity.getGeometryList();    
+                //setMapFocusPoint("control/map/map", longitude, latitude);
+            }
+        }); 
         
-        //setMapFocusPoint("control/map/map", longitude, latitude);
     }
 }
 
