@@ -2893,7 +2893,7 @@ class Checkbox extends InputComponent {
 		if (array_key_exists($param_name, $_REQUEST)  or  ($this->inverted and ! array_key_exists($param_name, $_REQUEST)))
 			return $this->checked_value;
 		else
-			return NULL;
+			return 0; // NULL; CHANGED BY IAN TO FIX PROBLEM WITH Database > Properties
 	}
 
 

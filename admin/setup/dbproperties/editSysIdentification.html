@@ -49,7 +49,7 @@
                     top.HEURIST.util.popupTinyElement(this, document.getElementById('divMessage'));
                     setTimeout(function(){
                         top.HEURIST.util.closePopupLast();
-                        }, 500);
+                        }, 1000);
                 }
             }
         </script>
@@ -107,17 +107,21 @@
                     <div class="input-cell">[dropdown : sys_NewRecAccess : Default access outside owner group when records are imported : enum( "hidden", "viewable", "pending", "public")]</div>
                 </div>
 
+
+                <!-- PROBLEM: If these checkboxes are not checked, they set the field to missing, but these are NOT NULL fields,
+                              and although defaulted to 0 at the start, they do not get set by T1000 -->
+
                 <div class="input-row">
                     <div class="input-header-cell">Set 'public' to 'pending' when record edited (use to stage record edits)</div>
-                    <div class="input-cell">[checkbox : sys_SetPublicToPendingOnEdit : : size=20] </div>
+                    <div class="input-cell">[checkbox : sys_SetPublicToPendingOnEdit : : size=1] </div>
                 </div>
 
-                <!-- Sep 2011: bug - even the owners couldn't see the records
+                <!-- Sep 2011: bug - even the owners couldn't see the records -->
                 <div class="input-row">
                 <div class="input-header-cell">Restrict database access to members of the owners group  </div>
                 <div class="input-cell">[checkbox : sys_RestrictAccessToOwnerGroup  : : size=20]</div>
                 </div>
-                -->
+
 
                 <div class="input-row">
                     <div class="input-header-cell">Allow online registration as user (confirmed by Database Owner)  </div>
@@ -128,14 +132,6 @@
                     <div class="input-header-cell">Carry out nightly URL validation (can overload targets)  </div>
                     <div class="input-cell">[checkbox : sys_URLCheckFlag  : : size=20]</div>
                 </div>
-
-                <!-- for the moment we want to stick to standard locations to reduce complexity
-                <h3>Locations</h3>
-                <div class="input-row">
-                <div class="input-header-cell">Full directory path for uploaded files, overrides default (codebase/HEURIST_FILESTORE) if non-blank </div>
-                <div class="input-cell">[textbox : sys_UploadDirectory : : size=30] WARNING: directory must be created manually</div>
-                </div>
-                -->
 
                 [end-update]
 
