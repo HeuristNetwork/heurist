@@ -312,7 +312,7 @@ HEURIST_HTML_URL
     }
 
 
-    if (!defined('HEURIST_UPLOAD_ROOT')) { //upload root is not defined in config - set it by default
+    if (!defined('HEURIST_UPLOAD_ROOT')) { //upload root is not defined in config - set it by default   - NOT USED ANYMORE
 
         //try to detect the real installation path
         // $installDir    /h3/
