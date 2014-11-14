@@ -1402,6 +1402,7 @@ return
 .label {
     text-align: left;
     font-size: 18px;
+    font-weight: bold;
     padding-top: 15px;
 }
 
