@@ -282,7 +282,8 @@ HEURIST_HTML_URL
     //-------------------------------------------------------------------------- PATHS AND URLS ---------
 
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
-    if (isset($defaultRootFileUploadPATH) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+    if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+
         if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
             $defaultRootFileUploadPath.= "/"; // append trailing /
 
@@ -297,7 +298,7 @@ HEURIST_HTML_URL
         if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
             returnErrorMsgPage(1, "Cannot access root filestore directory <b>". $defaultRootFileUploadPath .
             "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), ".
-            "or it is not writeable by PHP (check permissions).");
+            "or it is not writeable by PHP (check permissions).</p>");
         }
 
         if(strpos($defaultRootFileUploadURL, $REQUEST_PROTOCOL . "://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
@@ -306,6 +307,8 @@ HEURIST_HTML_URL
         }
 
         define('HEURIST_UPLOAD_ROOT_URL', $defaultRootFileUploadURL);
+    }else{
+        returnErrorMsgPage(1, "Root filestore directory is not defined. You have to define variable 'defaultRootFileUploadPath' in your configIni.php.");
     }
 
 
