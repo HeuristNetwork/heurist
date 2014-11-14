@@ -26,7 +26,7 @@
 * @package     Heurist academic knowledge management system
 */
 
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+        require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
@@ -1851,7 +1851,8 @@ fillPointer(fieldname){
 newEntity(rectype){
     
     if (isNull(rectype)){
-        rectype = getFieldValue("control/data/entityTypeList");
+        entName = getFieldValue("control/data/entityTypeList"); 
+        rectype = getTabnameByEntityName(entName);
     }
     
     for (String rt : tabs_edit) {
@@ -1876,13 +1877,16 @@ loadEntity() {
 //
 loadEntityById(entid, rectype) {
     
+    // EntID check
     if (isNull(entid)) return;
-    
     showToast(entid);
-    showTabGroup(rectype, entid);
     
+    // Show rectype tabgroup
+    rectype = getTabnameByEntityName(rectype);
+    showTabGroup(rectype, entid);
     setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", entid);
     
+    // Load related entities
     loadRelatedEntities(rectype); 
     //updateRelns();
 }
