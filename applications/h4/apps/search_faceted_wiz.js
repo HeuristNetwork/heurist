@@ -506,7 +506,23 @@ $.widget( "heurist.search_faceted_wiz", {
      {"title":"Person affected",              "type":"resource","query":"t:13 f:16","fieldid":"f:16"},
      {"title":"Punishment event(s) - SAVE record first","type":"resource", "query":"f:93","fieldid":"f:93"}],
         */
-        /*
+         /*
+        var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
+                      
+        tree.visit(function(node){
+                    
+                    if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
+                          //find it among facets  
+                        
+                        var facets = this.options.params.facets;
+                        for(var i=0; i<facets.length; i++){
+                            facets[i][0].fieldid==node.key
+                        }                        
+                        
+                        node.setSelected(true);
+                    }
+        });            
+        
         var facets = this.options.params.facets;
         for(var i=0; i<facets.length; i++){
             var facet = facets[i];
@@ -515,6 +531,17 @@ $.widget( "heurist.search_faceted_wiz", {
             }
         }
         
+       
+        //create unique identificator for leaf fields
+        function __set_queries(parentquery, fields){
+            
+           for(var j=0; j<fields.length; j++){
+               if(!fields[j].children){ //this is leaf - the end
+                   fields[j].query = parentquery + "(" +  + ")";
+               }
+            
+           }
+        }
         
         for(var i=0; i<data.rectypes.length; i++){
            var rectype =  data.rectypes[i];
@@ -523,8 +550,8 @@ $.widget( "heurist.search_faceted_wiz", {
             
            }
         }
-        */
         
+        */
         
         function __get_queries(node){
 
@@ -545,7 +572,11 @@ $.widget( "heurist.search_faceted_wiz", {
                         //root rectypes will be added only once - when full_query is creating
                         // q = "t:"+parent.key+" "+q; 
                     }
-                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q, fieldid:node.key }]; 
+                    
+                    q = "t:"+this.options.params.rectypes.join(",")+" "+q; 
+                    
+                    //final exit when we access root
+                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q, fieldid:node.key }];  
                 }
             }else{
                 fieldnode = parent;
