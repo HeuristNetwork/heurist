@@ -266,6 +266,7 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
         file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled));
         file_put_contents($folder."/arch16N.properties", arrToProps());
         file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport, $rt_geoenabled));
+        file_put_contents($folder."/style.css", getStyling());
         
         //copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
 
@@ -1385,6 +1386,32 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
     
 } // generation of user interface schema
 
+
+/** Returns the Heurist styling */
+function getStyling() {
+return 
+".button {
+    background-color: #1ad;
+    color: #fff;
+    padding: 0px;
+    margin: 2px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.label {
+    text-align: left;
+    font-size: 18px;
+    padding-top: 15px;
+}
+
+.input-field, .text-area {
+    background-color: #eee;
+    margin: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    text-align: left;
+}";  
+}
 
 function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
 
