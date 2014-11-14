@@ -184,11 +184,11 @@ HEURIST_HTML_URL
     }
 
     if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonlyPassword)) { //if these are not specified then we can't do anything
-        returnErrorMsgPage(1, "MySql user account/password not specified. Set in configIni.php");
+        returnErrorMsgPage(1, "MySql user account/password not specified. Please ask your system administrator to set in heuristConfigIni.php");
     }
     if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
         returnErrorMsgPage(1, "Unconfigured or mis-configured Heurist instance. Please ask your system administrator to edit the MySQL passwords".
-            " in the configIni.php file.");
+            " in the heuristConfigIni.php file.");
     }
 
     // refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/dbcreate/createNewDB.php
@@ -282,7 +282,7 @@ HEURIST_HTML_URL
     //-------------------------------------------------------------------------- PATHS AND URLS ---------
 
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
-    if (isset($defaultRootFileUploadURL) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+    if (isset($defaultRootFileUploadPATH) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
         if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
             $defaultRootFileUploadPath.= "/"; // append trailing /
 
@@ -295,9 +295,11 @@ HEURIST_HTML_URL
         testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
 
         if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
-            returnErrorMsgPage(1, "Can not access Heurist File Storage folder ". $defaultRootFileUploadPath .". It is either not found or not writable.");
+            returnErrorMsgPage(1, "Cannot access root filestore directory <b>". $defaultRootFileUploadPath .
+            "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), ".
+            "or it is not writeable by PHP (check permissions).");
         }
-        
+
         if(strpos($defaultRootFileUploadURL, $REQUEST_PROTOCOL . "://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
                 if( substr($defaultRootFileUploadURL, 0, 1) != '/' ) $defaultRootFileUploadURL = "/" . $defaultRootFileUploadURL;
                 $defaultRootFileUploadURL =  HEURIST_SERVER_URL . $defaultRootFileUploadURL;
@@ -362,7 +364,8 @@ HEURIST_HTML_URL
     }
 
     if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
-        returnErrorMsgPage(1, "Can not access Heurist File Storage folder ". $defaultRootFileUploadPath .". It is either not found or not writable.");
+        returnErrorMsgPage(1, "Cannot access root filestore directory <b>". $defaultRootFileUploadPath .
+            "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).");
     }
 
     //File store for this particular instance may be redefined in the database
@@ -379,7 +382,9 @@ HEURIST_HTML_URL
     testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder");
 
     if (!defined('HEURIST_FILESTORE_DIR')){ //fatal error - storage folder is not defined
-        returnErrorMsgPage(1, "Can not access Heurist File Storage folder ". HEURIST_UPLOAD_ROOT . $dbName . '/' .". It is either not found or not writable.");
+    returnErrorMsgPage(1, "Cannot access filestore directory for this database: <b>". HEURIST_UPLOAD_ROOT . $dbName . '/' .
+            "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).");
+
     }
 
     define('HEURIST_FILESTORE_URL', HEURIST_UPLOAD_ROOT_URL . $dbName . '/');    //full url to file store folder

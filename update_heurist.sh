@@ -13,7 +13,7 @@
 # with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
 # Unless required by applicable law or agreed to in writing, software distributed under the License is
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-# See the License for the specific language governing permissions and limitations under the License.
+# See the License for the specific language governing peissions and limitations under the License.
 
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 
@@ -53,11 +53,11 @@ echo
 echo
 echo -e "Fetching Heurist code from heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2"
 echo
-$2 rm $1.tar.bz2
+$2 rm -f $1.tar.bz2
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
-$2 rm $1.tar.bz2
-$2 mkdir /var/www/html/HEURIST/$1
+$2 rm -f $1.tar.bz2
+$2 mkdir -p /var/www/html/HEURIST/$1
 $2 cp -R $1/* /var/www/html/HEURIST/$1
 
 echo
@@ -65,42 +65,42 @@ echo Obtaining updated support files - external, exemplars and help files
 echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-$2 rm external.tar.bz2
+$2 rm -f external.tar.bz2
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 $2 tar -xjf external.tar.bz2
-$2 rm external.tar.bz2
+$2 rm -f external.tar.bz2
 
-$2 rm external_h4.tar.bz2
+$2 rm -f external_h4.tar.bz2
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
 $2 tar -xjf external_h4.tar.bz2
-$2 rm external_h4.tar.bz2
+$2 rm -f external_h4.tar.bz2
 
-$2 rm help.tar.bz2
+$2 rm -f help.tar.bz2
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
-$2 rm help.tar.bz2
+$2 rm -f help.tar.bz2
 
-$2 rm exemplars.tar.bz2
+$2 rm -f exemplars.tar.bz2
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
 $2 tar -xjf exemplars.tar.bz2
-$2 rm exemplars.tar.bz2
+$2 rm -f exemplars.tar.bz2
 
 # Simlinks to external functions and libraries
 cd /var/www/html/HEURIST/$1
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
 
 # Simlink for H4 externals
 cd /var/www/html/HEURIST/$1/applications/h4
-ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4/ ext
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4/ ext
 
 
 echo "Heurist unpacked"
 
 # This installation of elaastic search generated a number of security holes rated HIGH RISK
 # We are therefore removing it pending investigation. Sept 2014
-# $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
+# $2 mkdir -p /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
 # $2 tar -zxvf elasticsearch-1.3.2.tar.gz

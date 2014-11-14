@@ -28,7 +28,7 @@
 */
 
 	/* This file should be called if Heurist attempts to access a database through index.php
-	and there are no Heurist databases, indicating that the installation has not yet been fully configured 
+	and there are no Heurist databases, indicating that the installation has not yet been fully configured
     TODO: it is not currently called and has not been tested (Feb 2014) */
 
 ?>
@@ -49,7 +49,8 @@
 
 
 		print "<h2>Heurist initial setup</h2>";
-		print "No Heurist databases were found. Heurist databases are identified by the prefix defined in your configIni.php file (<b> ".HEURIST_DB_PREFIX." </b>)";
+		print "No Heurist databases were found. Heurist databases are identified by the prefix defined in your (heurist)configIni.php file ".
+            "(<b> ".HEURIST_DB_PREFIX." </b>)";
 		print "<p>This function will create H3Sandpit which is used to register new users, along with the root directory for uploaded files (<b> ".HEURIST_UPLOAD_ROOT." </b>)";
 		print "<p>";
 
@@ -135,7 +136,7 @@
 
 		} else {
 
-			print "<h2>Cancelled</h2> Please edit the configIni.php file and set the required values, then run Heurist again";
+			print "<h2>Cancelled</h2> Please edit the (heurist)configIni.php file and set the required values, then run Heurist again";
 		}
 
 	?>

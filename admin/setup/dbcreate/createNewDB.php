@@ -324,11 +324,11 @@
                  ob_flush();
                  flush();
             }
-            
+
             function arraytolower($item)
             {
                 return strtolower($item);
-            }            
+            }
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
 
@@ -340,8 +340,8 @@
                 if (isset($_POST['dbname'])) {
 
                     // Check that there is a current administrative user who can be made the owner of the new database
-                    $message = "DB Admin username and password have not been set in configIni.php<br/> ".
-                                "Please do so before trying to create a new database.<br>";
+                    $message = "MySQL username and password have not been set in configIni.php ".
+                        "or heuristConfigIni.php<br/> - Please do so before trying to create a new database.<br>";
                     if(ADMIN_DBUSERNAME == "") {
                         if(ADMIN_DBUSERPSWD == "") {
                             echo $message;
@@ -370,14 +370,14 @@
                         $isCreateNew = true;
                         return false;
                     }
-                    
-/*                    
-print $newDBName."<br>";                    
+
+/*
+print $newDBName."<br>";
 print in_array(strtolower($newname), $list)."<br>";
 print print_r($list, true)."<br>";*/
 //return false;
-                    
-                    
+
+
                     if(!db_create($newname)){
                         $isCreateNew = true;
                         return false;

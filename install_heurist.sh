@@ -63,21 +63,19 @@ echo "Changing to /var/www/html and creating html (if required) and HEURIST dire
 # ensure html directory exists - if this is not apache web root, Heurist will be installed but
 # not accessible at the web root address so we make simlinks.
 
-cd /var/www
-# will do nothing if already exists
-$2 mkdir /var/www/html
 
-cd /var/www/html
-# mkdirs will do nothing if directory already exists
-$2 mkdir HEURIST
-$2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
+# mkdir -p will do nothing if directory already exists, creates parents if they don't exist
+$2 mkdir -p /var/www/html/HEURIST
+$2 mkdir -p /var/www/html/HEURIST/scratch
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_SUPPORT
+
+cd /var/www/html/HEURIST/scratch
 
 echo -e "Fetching Heurist code from HeuristScholar.org"
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
-$2 rm $1.tar.bz2
-# this will fail if h3 already exists, use update script in this case
-$2 mkdir /var/www/html/HEURIST/h3
+$2 rm -f $1.tar.bz2
+$2 mkdir -p /var/www/html/HEURIST/h3
 $2 cp -R $1/* /var/www/html/HEURIST/h3/
 $2 rm -rf $1
 
@@ -85,19 +83,19 @@ cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 $2 tar -xjf external.tar.bz2
-$2 rm external.tar.bz2
+$2 rm -f external.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
 $2 tar -xjf external_h4.tar.bz2
-$2 rm external_h4.tar.bz2
+$2 rm -f external_h4.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
-$2 rm help.tar.bz2
+$2 rm -f help.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
 $2 tar -xjf exemplars.tar.bz2
-$2 rm exemplars.tar.bz2
+$2 rm -f exemplars.tar.bz2
 
 cd /var/www/html/HEURIST/h3
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
@@ -111,21 +109,21 @@ echo "Heurist unpacked"
 echo -e "\n\n"
 echo "Creating directories, setting up sandpit database and setting permissions"
 
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE
 
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
 $2 cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 $2 cp -r /var/www/html/HEURIST/h3/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 $2 cp -r /var/www/html/HEURIST/h3/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
+$2 mkdir -p /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 
 # set up override configIni files
 $2 mv /var/www/html/HEURIST/h3/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
@@ -137,10 +135,9 @@ $2 chown -R apache:apache /var/www/html/HEURIST/
 $2 chown -R www-data:www-data /var/www/html/HEURIST/
 
 $2 chmod -R 775  /var/www/html/HEURIST/
-$2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
 # Simlink Heurist root as heurist and codebase as h3 from the root web directory
-# do both /var/www and /var/www/html for good measure
+# do both /var/www and /var/www/html for good measure as some systems have www as web root
 cd /var/www
 $2 ln -s /var/www/html/HEURIST/h3/ h3
 $2 ln -s /var/www/html/HEURIST/ heurist
@@ -164,11 +161,11 @@ echo "of space allocated, such as /srv or /data, and add a simlink to this locat
 echo
 echo "CONFIGURATION:"
 echo
-echo "Edit /var/www/html/HEURIST/heuristConfigIni.php to set your MySQL root user password - twice, clearly documented in file"
+echo "Edit /var/www/html/HEURIST/heuristConfigIni.php to set your MySQL passwords - twice, clearly documented in file"
 echo
 echo "You can do this by pasting the following at the command line - you may need to change nano to pico on some systems:"
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/HEURIST/h3"
+echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/h3 or myserver.com/HEURIST/h3"
 echo
