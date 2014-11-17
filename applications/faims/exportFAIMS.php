@@ -1091,7 +1091,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
        
         $hasattachfile = false;
         
-        $contaier_no = 1; //container for resource field type
+        $container_no = 1; //container for resource field type
         
         $cnt_pertab = 0;
         $issectab = false;
@@ -1138,7 +1138,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                       </group>
                       <group faims_style="large" ref="child2">
                         <label/>
-                        <trigger ref="Update">
+                        <trigger ref="Update" faims_style_class="positive-button">
                             <label>Save</label>
                         </trigger>
                       </group>
@@ -1184,19 +1184,19 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     xml_adopt($group_uids, $input);                                        
                 
                     $container = new SimpleXMLElement(
-                      '<container'.$contaier_no.'>
+                      '<container'.$container_no.'>
                         <child1>
                           <'.$dtdisplaynamex.'/>
                         </child1>
                         <child2>
                           <'.$dtdisplaynamex.'_clearPointer/>
                         </child2>
-                       </container'.$contaier_no.'>');
+                       </container'.$container_no.'>');
                     xml_adopt($tab, $container);                    
                     
                     //add to body/group/tab
                     $container = new SimpleXMLElement(
-                        '<group faims_style="orientation" ref="container'.$contaier_no.'">
+                        '<group faims_style="orientation" ref="container'.$container_no.'">
                           <label/>
                           <group faims_style="even" ref="child1">
                             <label/>
@@ -1233,7 +1233,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                         xml_adopt($group, $trigger);
                     }//for
                     
-                    $contaier_no++;
+                    $container_no++;
                 }//if ignore unconstrained
                 
             }else{
@@ -1348,43 +1348,60 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
         }
 */        
 
+        /** Save, Update, Delete buttons etc. */
+        // Trigger group model
+        $triggers = $tab->addChild('container'.$container_no); 
+        
+        // Trigger group body
+        $triggerGroup = $group->addChild('group');
+        $triggerGroup->addAttribute('faims_style', 'orientation');
+        $triggerGroup->addAttribute('ref', 'container'.$container_no);
+        $triggerGroup->addChild('label', '');
+        $container_no++;
 
-        //add save/delete buttons to last tab
-        $tab->addChild('gap');
-        $gap = $group->addChild('input');
-        $gap->addAttribute('ref', 'gap');
-        $gap->addAttribute('faims_attribute_type', 'freetext');
-        $gap->addAttribute('faims_certainty', 'false');
-        $gap->addAttribute('faims_read_only', 'true');
-        $gap->addChild('label', '' );
-        
+        // AttachGeometry
         if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
-            $tab->addChild('AttachGeometry');
-            $trigger = $group->addChild('trigger');
-            $trigger->addAttribute('ref', 'AttachGeometry');
-            $trigger->addChild('label', getResStrA16n('Attach Geometry from Map') );
+            addEvenTrigger($triggers, $triggerGroup, 'AttachGeometry', 'Attach Geometry from Map', 'neutral-button');
         }
+
+        // Update
+        addEvenTrigger($triggers, $triggerGroup, 'Update', 'Save Entity', 'positive-button');
+        addEvenTrigger($triggers, $triggerGroup, 'UpdateAndClose', 'Save Entity and Close', 'positive-button');
         
-        $tab->addChild('Update');
-        $tab->addChild('UpdateAndClose');
-        $tab->addChild('Delete');
-        
-        $trigger = $group->addChild('trigger');
-        $trigger->addAttribute('ref', 'Update');
-        $trigger->addChild('label', getResStrA16n('Save Entity') );
-        $trigger = $group->addChild('trigger');
-        $trigger->addAttribute('ref', 'UpdateAndClose');
-        $trigger->addChild('label', getResStrA16n('Save Entity and Close') );
-        $trigger = $group->addChild('trigger');
-        $trigger->addAttribute('ref', 'Delete');
-        $trigger->addChild('label', getResStrA16n('Delete Entity') );
-        
+        // Delete
+        addEvenTrigger($triggers, $triggerGroup, 'Delete', 'Delete Entity', 'negative-button');      
 
     }//foreach
     
     return prepareXml($root);
     
 } // generation of user interface schema
+
+/**
+* Adds an event trigger inside a group to the model and body
+* 
+* @param mixed $model XML model
+* @param mixed $body  XML model
+* @param mixed $ref   Trigger reference name
+* @param mixed $label Trigger label name
+* @param mixed $class Trigger class name
+*/
+function addEvenTrigger($model, $body, $ref, $label, $class) {
+    // Model
+    $container = $model->addChild('container_'.$ref);
+    $trigger = $container->addChild($ref);
+
+    // Body
+    $group = $body->addChild('group');
+    $group->addAttribute('ref', 'container_'.$ref);
+    $group->addAttribute('faims_style', 'even');
+    $group->addChild('label', '');
+    
+    $trigger = $group->addChild('trigger');
+    $trigger->addAttribute('ref', $ref);          
+    $trigger->addAttribute('faims_style_class', $class);
+    $trigger->addChild('label', getResStrA16n( $label ) );
+}
 
 
 /** Returns the Heurist styling */
@@ -1414,8 +1431,27 @@ return
 }
 
 .clear-button {
-    background-color: #b11;  
-}";  
+    background-color: #b11; 
+    margin: 0px;
+    margin-top: 20px;
+    padding: 0px; 
+    width: 20px;
+    height: 20px; 
+    text-align: center;
+}
+
+.positive-button {
+    background-color: #181;
+}
+
+.negative-button {
+    background-color: #b11;
+}
+
+
+
+
+";  
 }
 
 function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
