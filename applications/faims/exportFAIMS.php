@@ -1197,9 +1197,11 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     //add to body/group/tab
                     $container = new SimpleXMLElement(
                         '<group faims_style="orientation" ref="container'.$container_no.'">
-                          <label/>
+                          <label/>      
+                          
                           <group faims_style="even" ref="child1">
                             <label/>
+                            
                             <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false">
                                 <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
                                 <item>
@@ -1208,32 +1210,40 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                                 </item>
                             </select1>
                           </group>
+                          
                           <group faims_style="large" ref="child2">
-                            <label/>
+                            <label/>                
                             <trigger ref="'.$dtdisplaynamex.'_clearPointer" faims_style_class="clear-button">
                               <label>X</label>
                             </trigger>
                           </group>
                         </group>');
-                    xml_adopt($group, $container);                    
+                    xml_adopt($group, $container);   
+                    $container_no++;                 
                 
+                    /** Browse buttons */                   
+                    // Trigger group model
+                    $triggers = $tab->addChild('container'.$container_no); 
+                    
+                    // Trigger group body
+                    $triggerGroup = $group->addChild('group');
+                    $triggerGroup->addAttribute('faims_style', 'orientation');
+                    $triggerGroup->addAttribute('ref', 'container'.$container_no);
+                    $triggerGroup->addChild('label', '');
+                    $container_no++;
+                    
                     foreach ($dt_pointers as $rt2) {
-
+                        // Label
                         $rtname2 = $rtStructs['names'][$rt2];
+                        $label = 'Browse '.prepareText($rtname2);
+                        
+                        // Ref
                         $rtnamex2 = getProperName($rtname2, $rt2);
-                        
-                        $tab->addChild($dtdisplaynamex.'_browse_'.$rtnamex2);
-                        
-                        //@todo - specify the exact name of resource - pointer record type
-                        $trigger = new SimpleXMLElement(
-                           '<trigger ref="'.$dtdisplaynamex.'_browse_'.$rtnamex2.'">
-                                <label>'.getResStrA16n('Browse '.prepareText($rtname2)).'</label>
-                            </trigger>'
-                        );
-                        xml_adopt($group, $trigger);
+                        $ref = $dtdisplaynamex.'_browse_'.$rtnamex2;
+
+                        addEvenTrigger($triggers, $triggerGroup, $ref, $label, 'browse-button');
                     }//for
                     
-                    $container_no++;
                 }//if ignore unconstrained
                 
             }else{
@@ -1433,11 +1443,10 @@ return
 .clear-button {
     background-color: #b11; 
     margin: 0px;
-    margin-top: 20px;
+    margin-top: 60px;
     padding: 0px; 
     width: 20px;
     height: 20px; 
-    text-align: center;
 }
 
 .positive-button {
@@ -1448,7 +1457,13 @@ return
     background-color: #b11;
 }
 
+.neutral-button {
+    
+}
 
+.browse-button {
+    background-color: #eda200;
+}
 
 
 ";  
