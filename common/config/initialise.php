@@ -300,6 +300,11 @@ HEURIST_HTML_URL
             "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), ".
             "or it is not writeable by PHP (check permissions).</p>");
         }
+        
+        if(isset($defaultRootFileUploadURL) || $defaultRootFileUploadURL==null || $defaultRootFileUploadURL==""){
+            returnErrorMsgPage(1, "You have to define Root filestore URL (abosulte or relative to server URL)."
+                ."<p>Define variable <b>defaultRootFileUploadURL</b> in your heuristConfigIni</p>");
+        }
 
         if(strpos($defaultRootFileUploadURL, $REQUEST_PROTOCOL . "://")===false && strpos($defaultRootFileUploadURL, HEURIST_SERVER_URL)===false){
                 if( substr($defaultRootFileUploadURL, 0, 1) != '/' ) $defaultRootFileUploadURL = "/" . $defaultRootFileUploadURL;
@@ -308,7 +313,7 @@ HEURIST_HTML_URL
 
         define('HEURIST_UPLOAD_ROOT_URL', $defaultRootFileUploadURL);
     }else{
-        returnErrorMsgPage(1, "Root filestore directory is not defined. You have to define variable 'defaultRootFileUploadPath' in your configIni.php.");
+        returnErrorMsgPage(1, "Root filestore directory is not defined. You have to define variable 'defaultRootFileUploadPath' in your heuristConfigIni.php.");
     }
 
 

@@ -2878,8 +2878,8 @@ top.HEURIST.search = {
 			searchDiv.innerHTML = innerHTML_all_inmenu;
 			searchDiv = document.getElementById("menuSavedFiltersAndLayouts");
 			searchDiv.innerHTML = innerHTML_filters;
-            searchDiv = document.getElementById("selSavedFiltersAndLayouts");
-            searchDiv.innerHTML = innerHTML_filters_opts;
+            //searchDiv = document.getElementById("selSavedFiltersAndLayouts");
+            //searchDiv.innerHTML = innerHTML_filters_opts;
 
             
 			document.getElementById("my-blog-link").onclick = function(event){

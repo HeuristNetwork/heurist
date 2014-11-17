@@ -1210,8 +1210,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                           </group>
                           <group faims_style="large" ref="child2">
                             <label/>
-                            <trigger ref="'.$dtdisplaynamex.'_clearPointer">
-                              <label>Clear</label>
+                            <trigger ref="'.$dtdisplaynamex.'_clearPointer" faims_style_class="clear-button">
+                              <label>X</label>
                             </trigger>
                           </group>
                         </group>');
@@ -1402,6 +1402,7 @@ return
 .label {
     text-align: left;
     font-size: 18px;
+    font-weight: bold;
     padding-top: 15px;
 }
 
@@ -1410,6 +1411,10 @@ return
     margin: 2px;
     border: 1px solid rgba(0, 0, 0, 0.25);
     text-align: left;
+}
+
+.clear-button {
+    background-color: #b11;  
 }";  
 }
 
@@ -1470,8 +1475,12 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
         ';
         
         
-                $event_section .= '
+        // Show edit form
+        $event_section .= '
 onEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
+        // Enable auto saving
+        $event_section .= '
+onEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
         
         $load_related_part = '';
         
@@ -1507,7 +1516,7 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
                 if($issectab || $cnt_pertab>0){
                     
                     $event_section = $event_section.'
-onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", false)");';
+onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, false)");';
                     
                     $headername = $rtnamex."/".$rtnamex.'_'.$dtdisplaynamex;
                     $issectab=true;
@@ -1637,8 +1646,8 @@ if("'.$rtnamex.'".equals(rectype)){'.$load_related_part.'
 
 //event handlers for save/delete
 $event_section = $event_section.'
-onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", false)");
-onEvent("'.$headername.'/UpdateAndClose", "delayclick", "saveEntity(\"'.$rtnamex.'\", true)");
+onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, false)");
+onEvent("'.$headername.'/UpdateAndClose", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, true)");
 onEvent("'.$headername.'/Delete", "delayclick", "deleteEntity(\"'.$rtnamex.'\")");
 ';
         if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
@@ -1962,12 +1971,13 @@ getEntityId(rectype){
 //
 // save new entity
 //
-saveEntity(rectype, andclose) {
-
-    String msg = checkMandatoryAttributes(rectype);
-    if (!(isNull(msg) || "".equals(msg))){ 
-        showWarning("Logic Error", "Cannot save entity without mandatory attributes:\n"+msg);
-        return;
+saveEntity(rectype, checkmandatory, andclose) {
+    if(checkmandatory) {
+        String msg = checkMandatoryAttributes(rectype);
+        if (!(isNull(msg) || "".equals(msg))){ 
+            showWarning("Warning", "Please fill in the following mandatory fields:\n"+msg);     
+            return;
+        }
     }
     
     String uid = getEntityId(rectype);
@@ -2006,21 +2016,9 @@ saveEntity(rectype, andclose) {
         }
     }, true);
 }
-//
-//
-//
-saveEntityCallback(rectype, andclose){
-
-    setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", getLastSavedRecordId());
-    onClearMap();
-    
-    if(andclose){
-        goBack();
-    }
-}
 
 //
-//
+// Deleting entities
 //
 deleteEntity(rectype){
     String uid = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
