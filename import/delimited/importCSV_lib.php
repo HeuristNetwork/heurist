@@ -1072,7 +1072,7 @@
         $query_date_nam = array();
         $query_date_where = array();
 
-        $numeric_regex = "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
+        $numeric_regex = "'^([+-]?[0-9]+\.*)+'"; // "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
 
 
         //loop for all fields in record type structure
