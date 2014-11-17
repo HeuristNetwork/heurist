@@ -62,6 +62,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
     step: 0, //current step
     step_panels:[],
+    current_tree_rectype_ids:null,
 
     // the widget's constructor
     _create: function() {
@@ -402,22 +403,66 @@ $.widget( "heurist.search_faceted_wiz", {
     // 2d step - init fieldtreeview
     , _initStep2_FieldTreeView: function(rectypeIds){
 
-        if(top.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
+        if(top.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds){
             /*if(!this.options.params.rectypes || 
             !($(rectypeIds).not(this.options.params.rectypes).length == 0 && 
             $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
             {
 
+                var that = this;
                 this.options.params.rectypes = rectypeIds;
                 var treediv = $(this.step2).find('#field_treeview');
 
                 window.HAPI4.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4, fieldtypes:this.options.params.fieldtypes.join() }, function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                        //@todo - mark selected
+                        //create unique identificator=query for each leaf fields
+                        function __set_queries(parentquery, recordtype, fields){
+                           
+                           var j; 
+                           for(j=0; j<fields.length; j++){ 
+
+                               var field = fields[j];
+                               var recordtype_new = null;
+                               var parentquery_new = null;
+
+                               if(field.type=='rectype'){
+                                   recordtype_new  = 't:'+field.key;
+                               }else if(field.type=='resource' || field.type=='relmarker'){
+                                   //@todo for relmarker - separate case
+                                   var q = recordtype + ' ' + field.key;
+                                   if(parentquery!=''){
+                                        q = parentquery + '(' + q;
+                                   }
+                                   parentquery_new = q;
+                                   
+                                   if(field.children.length==1){
+                                       recordtype_new = field.rt_ids;
+                                   }
+                               }
+
+                               if(field.children && field.children.length>0){
+                                   __set_queries(parentquery_new?parentquery_new:parentquery, recordtype_new?recordtype_new:recordtype, field.children);
+                                   //__set_queries(parentquery, recordtype_new?recordtype_new:recordtype, field.children);
+                               }else{
+
+                                   var q = field.key;
+                                   if(q=="recTitle") q = "title"                           
+                                   else if(q=="recModified") q = "modified"                               
+
+                                   q = recordtype + ' ' + q
+                                   if(parentquery!=''){
+                                        q = parentquery + '(' + q;
+                                        var nums = parentquery.split('(');
+                                        q = q + new Array( nums.length+1 ).join(')'); 
+                                   }
+                                   fields[j].query = q;
+                               }
+
+                           }
+                        }//function
                         
-                        response.data.rectypes
-                        
+                        __set_queries('', '', response.data.rectypes);                        
                         
                         
                         if(!treediv.is(':empty')){
@@ -472,6 +517,28 @@ $.widget( "heurist.search_faceted_wiz", {
                             //idPrefix: "fancytree-Cb3-"
                         });                        
                         //},1000);
+                        
+                        //restore selection
+                        var facets = that.options.params.facets_new;
+                        if(facets && facets.length>0){
+                        var tree = treediv.fancytree("getTree");
+                        tree.visit(function(node){
+                                        
+                                    if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
+                                        //find it among facets  
+                                        for(var i=0; i<facets.length; i++){
+                                            if(facets[i].query && facets[i].query==node.data.query){
+                                                node.setSelected(true);
+                                                break;        
+                                            }
+                                        }                        
+                                    }
+                            });    
+                        }        
+                        
+                        
+                        
+                        that.current_tree_rectype_ids = rectypeIds;
 
                     }else{
                         top.HEURIST4.util.redirectToError(response.message);
@@ -488,7 +555,9 @@ $.widget( "heurist.search_faceted_wiz", {
         var listdiv = $(this.step3).find("#facets_list");
         listdiv.empty();
 
+        var that = this;
         var facets = [];
+        var facets_new = [];
         var k, len = this.options.params.rectypes.length;
         var isOneRoot = (this.options.params.rectypes.length==1);
         //if more than one root rectype each of them acts as facet
@@ -506,7 +575,7 @@ $.widget( "heurist.search_faceted_wiz", {
      {"title":"Person affected",              "type":"resource","query":"t:13 f:16","fieldid":"f:16"},
      {"title":"Punishment event(s) - SAVE record first","type":"resource", "query":"f:93","fieldid":"f:93"}],
         */
-         /*
+         /*  garbage
         var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
                       
         tree.visit(function(node){
@@ -530,28 +599,9 @@ $.widget( "heurist.search_faceted_wiz", {
             
             }
         }
-        
-       
-        //create unique identificator for leaf fields
-        function __set_queries(parentquery, fields){
-            
-           for(var j=0; j<fields.length; j++){
-               if(!fields[j].children){ //this is leaf - the end
-                   fields[j].query = parentquery + "(" +  + ")";
-               }
-            
-           }
-        }
-        
-        for(var i=0; i<data.rectypes.length; i++){
-           var rectype =  data.rectypes[i];
-           
-           for(var j=0; j<rectype.children.length; j++){
-            
-           }
-        }
-        
         */
+
+       
         
         function __get_queries(node){
 
@@ -573,7 +623,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         // q = "t:"+parent.key+" "+q; 
                     }
                     
-                    q = "t:"+this.options.params.rectypes.join(",")+" "+q; 
+                    q = "t:"+that.options.params.rectypes.join(",")+" "+q; 
                     
                     //final exit when we access root
                     return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q, fieldid:node.key }];  
@@ -640,6 +690,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
                     var facet = __get_queries(node);
                     facets.push( facet ); // { id:node.key, title:node.title, query: squery, fieldid } );
+                    facets_new.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:node.data.query } );
                 }
             }
 
@@ -662,6 +713,7 @@ $.widget( "heurist.search_faceted_wiz", {
             }
 
             this.options.params.facets = facets;  
+            this.options.params.facets_new = facets_new;
 
             return true;
         }else{
