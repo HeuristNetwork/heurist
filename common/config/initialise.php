@@ -301,7 +301,7 @@ HEURIST_HTML_URL
             "or it is not writeable by PHP (check permissions).</p>");
         }
         
-        if(isset($defaultRootFileUploadURL) || $defaultRootFileUploadURL==null || $defaultRootFileUploadURL==""){
+        if(!isset($defaultRootFileUploadURL) || $defaultRootFileUploadURL==null || $defaultRootFileUploadURL==""){
             returnErrorMsgPage(1, "You have to define Root filestore URL (abosulte or relative to server URL)."
                 ."<p>Define variable <b>defaultRootFileUploadURL</b> in your heuristConfigIni</p>");
         }
