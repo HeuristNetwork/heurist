@@ -788,7 +788,7 @@ $.widget( "heurist.search_links", {
 
                 that._fromDataToUI(svsID, squery, domain);
 
-                function __doSave(){
+                function __doSave(){   //save search
 
                     var message = $dlg.find('.messages');
                     var svs_id = $dlg.find('#svs_ID');
