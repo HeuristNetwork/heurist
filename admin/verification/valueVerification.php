@@ -38,7 +38,7 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 
     $allowed_terms = null;
 
-    if($dtyID==null || !@$dtyIDDefs[$dtyID]){
+    if($dtyID==null || !@$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
         $terms = getTermsFromFormat($defs);
         if (($cntTrm = count($terms)) > 0) {
             if ($cntTrm == 1) {  //vocabulary
@@ -82,7 +82,7 @@ function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 }
 
 /**
-* put your comment there...
+* Returns term ID if label is valid and false if invalid
 *
 * @param mixed $defs
 * @param mixed $defs_nonsel
@@ -104,7 +104,7 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
             $allowed_terms = getTermLabels($allowed_terms);
         }
 
-        //keep for fiture use
+        //keep for future use
         if($dtyID!=null){
             $dtyID_term_label[$dtyID] = $allowed_terms;
         }
@@ -114,8 +114,16 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
     }
 
     $label = mb_strtolower($label);
-
-    return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
+    
+    if(is_array($allowed_terms)){
+        $term_ID = array_search($label, $allowed_terms, true);
+    }else{
+        $term_ID = getTermByLabel($label);
+    }
+    
+    return $term_ID;
+    
+    //OLD WAY return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
 }
 
 function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){        

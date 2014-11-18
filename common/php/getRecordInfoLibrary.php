@@ -871,6 +871,19 @@ function getTermLabels($termIDs) {
     return $labels;
 }
 
+function getTermByLabel($label){
+
+    if ($label) {
+        $res = mysql_query("select trm_ID from defTerms where LOWER(trm_Label) = '".mysql_real_escape_string($label)."'" );
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_row($res)) {
+                return $row[0];
+            }
+        }
+    }
+    return false;
+}
+
 /**
  * return array of recType table column names
  */

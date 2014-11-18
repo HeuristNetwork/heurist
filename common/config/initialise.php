@@ -98,6 +98,8 @@ HEURIST_HML_DIR
 HEURIST_HTML_DIR
 HEURIST_HTML_URL
 
+HEURIST_SCRATCHSPACE_DIR
+
     */
 
     require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
@@ -397,6 +399,13 @@ HEURIST_HTML_URL
 
     define('HEURIST_FILESTORE_URL', HEURIST_UPLOAD_ROOT_URL . $dbName . '/');    //full url to file store folder
 
+    // Define the site relative path for rectype icons
+    testDirWriteableAndDefine('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir(), "Temporary directory"); //HEURIST_FILESTORE_DIR . "scratch-space/"
+    if (!defined('HEURIST_SCRATCHSPACE_DIR')) {
+        returnErrorMsgPage(1, "Cannot access system temp directory <b>". sys_get_temp_dir() .
+            "</b><p>Check permissions).");
+    }
+    
     // Define the site relative path for rectype icons
     testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . "rectype-icons/", "Icons directory");
     define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');

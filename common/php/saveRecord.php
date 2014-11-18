@@ -359,6 +359,7 @@
                 }
             }
         }
+        
         if(count($fieldtypesToDelete)>0){
             $deleteDetailsQuery = "delete from recDetails where dtl_RecID=".$recordID." and dtl_DetailTypeId in (" . implode(",", $fieldtypesToDelete) . ")";
 

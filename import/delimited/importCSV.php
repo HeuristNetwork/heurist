@@ -1214,7 +1214,7 @@
         }
 
         if($is_preprocess){
-            $temp_file = tempnam(sys_get_temp_dir(), $filename);
+            $temp_file = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
             if (move_uploaded_file($filename, $temp_file)) {
                 if($len==1){
                     return array("warning"=>"You appear to have only one value per line. This probably indicates that "
@@ -1391,7 +1391,7 @@
         $len = 0;
         $header = null;
 
-        $temp_name = tempnam(sys_get_temp_dir(), $filename);
+        $temp_name = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
         if (!is_writable($temp_name)) {
             return "can not save preprocessed file $temp_name";
         }

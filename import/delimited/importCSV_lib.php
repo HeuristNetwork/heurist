@@ -1169,8 +1169,8 @@
 
         //1. Verify that all required field are mapped  =====================================================
         if(count($missed)>0  &&
-            ($imp_session['validation']['count_insert']>0 ||  // there are records to be inserted
-                ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
+            ($imp_session['validation']['count_insert']>0   // there are records to be inserted
+//  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
             return "Mapping: ".implode(",", $missed);
         }
@@ -1422,7 +1422,8 @@
                     $r_value2 = trim_lower_accent($r_value);
                     if($r_value2!=""){
 
-                        if (!isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id ))
+                        $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                        if (!$term_id)
                         {//not found
                             $is_error = true;
                             array_push($newvalue, "<font color='red'>".$r_value."</font>");
@@ -1713,6 +1714,9 @@
         $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
         $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
 
+        $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
+        $recordTypeStructure = $recStruc[$recordType]['dtFields'];
+        
         //get terms name=>id
         $terms_enum = null;
         $terms_relation = null;
@@ -1807,7 +1811,8 @@
 
                             //save data
                             if($previos_recordId!=null && !$is_mulivalue_index){ //perform action
-                                $details = retainExisiting($details, $details2, $params);
+                            
+                                //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                                 //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
                                 doInsertUpdateRecord($recordId, $params, $details, $id_field);
                             }
@@ -1892,6 +1897,11 @@
 
                                     $r_value = trim_lower_accent($r_value);
 
+                                    if($r_value!=""){
+                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );   
+                                    }
+                                    
+                                    /* OLD WAY
                                     if ($r_value!="" && isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type )){
 
                                         if($fieldtype_type == "enum"){
@@ -1907,8 +1917,7 @@
                                             }
                                             $value = @$terms_relation[$r_value];
                                         }
-
-                                    }
+                                    }*/
 
                                 }else if($fieldtype_type == "geo"){
 
@@ -1959,14 +1968,21 @@
                                 }
 
                                 if($value  &&
-                                    ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
-                                    //Add new data only if field is empty (new data ignored for non-empty fields)
+                                    ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){ 
+                                    //$params['sa_upd']==1 Add new data only if field is empty (new data ignored for non-empty fields)
+                                    
                                     $details_lc = array();
                                     $details2_lc = array();
+                                    
+                                    if($params['sa_upd']==2 && $params['sa_upd2']==1 && @$details["t:".$field_type]["bd:delete"]){
+                                        unset($details["t:".$field_type]["bd:delete"]); //new data is porvided - no need to delete
+                                    }else if($params['sa_upd']==2 && $params['sa_upd2']!=1 && !@$details["t:".$field_type]["bd:delete"]){
+                                        $details["t:".$field_type]["bd:delete"] = "ups!"; //remove old data
+                                    }
 
                                     if(is_array(@$details["t:".$field_type]))
                                         $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
-                                    if(is_array(@$details2["t:".$field_type]))
+                                    if($params['sa_upd']!=2 && is_array(@$details2["t:".$field_type]))
                                         $details2_lc = array_map('trim_lower_accent', $details2["t:".$field_type]);
 
                                     if ((!@$details["t:".$field_type] || array_search(trim_lower_accent($value), $details_lc, true)===false) //no duplications
@@ -1978,6 +1994,14 @@
                                     }else{
                                     }
                                 }
+                                
+                                if($params['sa_upd']==2 && $params['sa_upd2']==1 && !$value && 
+                                    !is_array(@$details["t:".$field_type]) && $rectypeStruc[$field_type][$idx_reqtype] != "required"){ 
+                                    //delete if no new data provided
+                                    $details["t:".$field_type] = array("bd:delete"=>"ups!");
+                                }
+                                
+                                
 
                             }
                         }
@@ -1985,7 +2009,7 @@
 
                     //END FILL DETAILS =============================
 
-
+                    $new_id = null;
 
                     //add - update record for 2 cases: idfield not defined, idfield is multivalue
                     if(!$id_field && count($details)>0){ //id field not defined - insert for each line
@@ -1994,7 +2018,7 @@
 
                     }else if ($is_mulivalue_index){ //idfield is multivalue (now is is assummed that index field is always multivalue)
 
-                        $details = retainExisiting($details, $details2, $params);
+                        //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                         $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
                         if($new_id && is_numeric($new_id)) array_push($new_record_ids, $new_id);
                         $previos_recordId = null;
@@ -2027,7 +2051,7 @@
             $res->close();
 
             if($id_field && count($details)>0 && !$is_mulivalue_index){ //action for last record
-                $details = retainExisiting($details, $details2, $params);
+                //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                 $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field);
             }
             if(!$id_field){
@@ -2061,19 +2085,32 @@
     }
 
 
-    //
+    //    REMOVE - NOT USED
     //  Add and replace all existing value(s) for the record with new data
     //  Retain existing if no new data supplied for record
     //  details2 - original
     //  details - new
     //
-    function retainExisiting($details, $details2, $params){
+    function retainExisiting($details, $details2, $params, $rectypeStruc, $idx_reqtype){
 
+        
+print "NEW ".print_r($details, true)."<br><br>";
+print "original ".print_r($details2, true)."<br><br>";
+        
         if($params['sa_upd']==2){ //Add and replace all existing value(s) for the record with new data
 
             foreach ($details2 as $field_type => $pairs) {
                 if(substr($field_type,0,2)!="t:") continue;
                 if( @$details[$field_type] ){ //replace field type
+                
+                    //array_unshift($details[$field_type], array("bd:delete"=>"ups!"));
+                
+                    $details3 = array("bd:delete"=>"ups!");
+                    foreach ($details[$field_type] as $idx => $value) { //replace 1=>val to bd:id=>val
+                         $details3[$idx] = $value;
+                    }
+                
+                    /*
                     //keep bd id
                     $k = 1;
                     $details3 = array();
@@ -2086,20 +2123,24 @@
                     if(count($details[$field_type])>0){
                         $details3 = array_merge($details3, $details[$field_type]);
                     }
+                    */
 
                     $details[$field_type] = $details3;
 
-                }else {
-
-                    if($params['sa_upd2']==1){ //delete if no new data provided
+                }else {   //no new data supplied for record
+                    /*
+                    if($params['sa_upd2']==1 && $rectypeStruc[$field_type][$idx_reqtype] != "required"){ //delete if no new data provided
                         $details[$field_type] = array("bd:delete"=>"ups!");
                     }else{
                         //$details[$field_type] = $details2[$field_type]; //retain
                     }
-
+                    */
                 }
             }
         }
+        
+print "result ".print_r($details, true)."<br><br>";
+        
         return $details;
     }
 
@@ -2145,6 +2186,8 @@
         $recordType = @$params['sa_rectype'];
         //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
+//DEBUG print "NEW ".print_r($details, true)."<br><br>";        
+        
         //add-update Heurist record
         $out = saveRecord($recordId, $recordType,
             @$details["recordURL"],
@@ -2336,7 +2379,7 @@
 
 
         //export content of import table into tempfile
-        $tmpFile = tempnam(sys_get_temp_dir(), 'export');
+        $tmpFile = tempnam(HEURIST_SCRATCHSPACE_DIR, 'export');
         $tmpFile = $tmpFile."1";
         if(strpos($tmpFile,"\\")>0){
             $tmpFile = str_replace("\\","/",$tmpFile);
@@ -2351,6 +2394,8 @@
         ." ENCLOSED BY '\"'"
         ." LINES TERMINATED BY '\n' ";
 
+//error_log($query);        
+        
         $res = $mysqli->query($query);
         if($res){
             //read content of tempfile and send it to client
