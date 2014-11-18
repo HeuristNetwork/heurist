@@ -37,7 +37,7 @@
     require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
     set_time_limit(600);
-    
+
     $msgInfoSaveRec = array(); //array for containing the warning and error information for the calling code.
 
     //utility function for recording an error message
@@ -64,11 +64,11 @@
     function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised, $pnotes, $rating, $tags, $wgTags, $details, $notifyREMOVE, $notifyADD, $commentREMOVE, $commentMOD, $commentADD, &$nonces=null, &$retitleRecs=null, $modeImport=0) {
         global $msgInfoSaveRec;
         $msgInfoSaveRec = array(); // reset the message array
-     
-     
-//error_log(print_r($details, true));     
-     
-     
+
+
+//error_log(print_r($details, true));
+
+
         mysql_query("start transaction");
         //	$log = " saving record ($recordID) ";
         $recordID = intval($recordID);
@@ -86,7 +86,7 @@
             errSaveRec("cannot change existing record to private note, record save aborted");
             return $msgInfoSaveRec;
         }
-        
+
         $rectypeName = null;
         $res = mysql_query("select rty_Name from defRecTypes where rty_ID=".$rectype);
         if ($res) {
@@ -104,7 +104,7 @@
         $now = date('Y-m-d H:i:s');
 
         $wg = ($wg>=0?$wg:get_user_id());
-     
+
         // public records data
         if (!$recordID || $recordID<0) {  //new record
             //		$log .= "- inserting record ";
@@ -123,14 +123,14 @@
                 $recordID = abs($recordID);
                 $recheader["rec_ID"] = $recordID;
             }
-            
+
             mysql__insert("Records", $recheader);
             if (mysql_error()) {
                 errSaveRec("database record insert error - " . mysql_error());
                 return $msgInfoSaveRec;
             }
             $recordID = mysql_insert_id();
-            
+
         }else{
             $res = mysql_query("select * from Records left join ".USERS_DATABASE.".sysUsrGrpLinks on ugl_GroupID=rec_OwnerUGrpID and ugl_UserID=".get_user_id()." where rec_ID=$recordID");
             $record = mysql_fetch_assoc($res);
@@ -156,8 +156,8 @@
                     "rec_FlagTemporary" => 0,
                     "rec_Modified" => $now
                 ));
-            updateRecordIndexEntry(DATABASE, $rectype, $recordID);   // TODO: Doesn't properly update Elasticsearch 
-            
+            updateRecordIndexEntry(DATABASE, $rectype, $recordID);   // TODO: Doesn't properly update Elasticsearch
+
             if (mysql_error()) {
                 errSaveRec("Database record update error - " . mysql_error());
                 return $msgInfoSaveRec;
@@ -202,9 +202,9 @@
 
         // calculate title, do an update
         //	$log .= "- filling titlemask ";
-        $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$rectype");  
+        $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=$rectype");
         $mask = $mask[0];
-        
+
         $title = fill_title_mask($mask, $recordID, $rectype);
         /*****DEBUG****///error_log("DEBUG >>>>>>MASK=".$mask."=".$title);
 
@@ -215,7 +215,7 @@
         // Update memcache: we can do this here since it's only the public data that we cache.
         updateCachedRecord($recordID);
         updateRecordIndexEntry(USERS_DATABASE, $rectype, $recordID);
-        
+
         // private data
         $bkmk = @mysql_fetch_row(mysql_query("select bkm_ID from usrBookmarks where bkm_UGrpID=" . get_user_id() . " and bkm_recID=" . $recordID));
         $bkm_ID = @$bkmk[0];
@@ -345,7 +345,7 @@
         $ignoreIDs = array();
         $translated = array();
         $translatedIDs = array();
-        
+
         //special case - remove the specified field types
         $fieldtypesToDelete = array();
         foreach ($details as $dtyID => $pairs) {
@@ -355,7 +355,7 @@
                 if($bdID=="bd:delete"){
                         array_push($fieldtypesToDelete, $bdtID);
                         //unset($details[$dtyID][$bdID]);
-                        break; 
+                        break;
                 }
             }
         }
@@ -368,7 +368,7 @@
                 return array("error" => "record ID = $recordID record type = $recordType ");
             }
         }
-        
+
         // second pass to divide the work up in to inserts, updates, deletes, translates and ignores
         foreach ($details as $dtyID => $pairs) {
             if (substr($dtyID, 0, 2) != "t:") continue;	// skip any non t: or non type designators
@@ -376,13 +376,13 @@
 
             $firstDetail = true;
             foreach ($pairs as $bdID => $val) {
-               
+
                 if(strcmp($bdID , "bd:delete")==0){
                     continue;
                 }else if(@$fieldtypesToDelete[$bdtID]){
                    $bdID = "";//signal insert
                 }
-                
+
                 if (substr($bdID, 0, 3) == "bd:") {// this detail corresponds to an existing recDetails: remember its existing dtl_ID
                     if (! ($bdID = intval(substr($bdID, 3)))) continue; // invalid (non integer) id so skip it
                     // check detail exist for the given record
@@ -390,12 +390,12 @@
                     if (mysql_num_rows($resDtl) == 1){
                         $dtlTypeID = (mysql_fetch_row($resDtl));
                         if ($dtlTypeID[0] != $bdtID){// invalid type supplied so skip and give warning
-                            warnSaveRec("invalid detail type supplied $bdtID for existing detail, did not update detail id $bdID ignoring");
+                            warnSaveRec("invalid base field type supplied ($bdtID) for existing value. Did not update recDetails id $bdID (value ignored)");
                             array_push($ignoreIDs,$bdID);
                             continue;
                         }
                     }else{// no existing dtl id for the given record so change this to insert and give warning.
-                        warnSaveRec("detail id $bdID is not part of record $recordID, inserting new detail instead");
+                        warnSaveRec("Field value to be updated (recDetails id $bdID) was not found for record ID $recordID, adding as new value");
                         $oldBdID = $bdID;
                         $bdID = false; // fail test differently to signal translate
                     }
@@ -557,7 +557,7 @@
         $deleteDetailIDsQuery = "select dtl_ID from recDetails where dtl_RecID=$recordID";
         if (count($updateIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . implode(",", $updateIDs) . ")";
         if (count($ignoreIDs)) $deleteDetailIDsQuery .= " and dtl_ID not in (" . implode(",", $ignoreIDs) . ")";
-        
+
         $resDel = mysql_query($deleteDetailIDsQuery);
         if (mysql_error()) {
             errSaveRec("db error while finding details to be deleted for record ID ".$recordID." error : ".mysql_error());
@@ -586,7 +586,7 @@
         //update all details to be kept
         if (count($deleteIDs)) {
             // DELETE IS DISABLED!!!!!!
-            
+
             $deleteDetailsQuery = "delete from recDetails where dtl_ID in (" . implode(",", $deleteIDs) . ")";
 //            mysql_query($deleteDetailsQuery);
             if (mysql_error()) {
