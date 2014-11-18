@@ -1745,7 +1745,7 @@ checkMandatoryAttributes(rectype){
 // load all selectors for terms for every rectype 
 //
 loadAllAttributes(){
-    showToast("load attributes");
+    //showToast("load attributes");
     '.$load_selectors.'
 }
 ';
@@ -1885,7 +1885,7 @@ onSelectEntity() {
     cancelTabGroup("selectEntity", false);
     showTab(rectype+"/"+rectype_tab);
     
-    showToast("selected "+uid);
+    //showToast("selected "+uid);
     
     //ArrayList pairs = new ArrayList();
     //pairs.add(new NameValuePair("selected "+uid, uid));
@@ -1966,7 +1966,7 @@ loadEntityById(entid, rectype) {
     
     // EntID check
     if (isNull(entid)) return;
-    showToast(entid);
+    //showToast(entid);
     
     // Show rectype tabgroup
     rectype = getTabnameByEntityName(rectype);
@@ -2060,6 +2060,10 @@ saveEntity(rectype, checkmandatory, andclose) {
         onSave(uuid, newRecord) {
             setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", uuid);
             onClearMap();
+            
+            if(checkmandatory) {
+                showToast("Successfully saved data!");
+            }
 
             if(andclose){
                 goBack();
@@ -2116,11 +2120,11 @@ loadEntityTypeList() {
 refreshEntities() {
 
    clearStacks();
-   showToast("Fetching all entities...");
+   //showToast("Fetching all entities...");
 
    // Populate list of entity types
    String entName = getFieldValue("control/data/entityTypeList");
-   showToast("Ent name: " + entName);
+   //showToast("Ent name: " + entName);
    
    fetchEntityList(entName, new FetchCallback() {
         onFetch(result) {
