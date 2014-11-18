@@ -144,7 +144,7 @@
         * @param    int [$rtID] origin rectype id
         * @param    int [$dbID] origin database id
         */
-        function defineRTLocalMagic($defString, $rtID, $dbID) { 
+        function defineRTLocalMagic($defString, $rtID, $dbID) {
             $id = $this->rectypeLocalIDLookup($rtID, $dbID);
             if ($id) {
                 //echo "\nRT DEFINING \"" . $defString . "\" AS " . $id;

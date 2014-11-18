@@ -101,7 +101,7 @@
     * @param mixed $record   Base record
     * @param mixed $details  SQL rows            
     */
-    function getTiledImageLayer($record, $details) {
+    function getTiledImageLayer($system, $record, $details) {
         $record->type = "RT_TILED_IMAGE_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
@@ -134,10 +134,11 @@
     * - kmlFile: KML file URL
     * -----------------------------------------
     * 
+    * @param mized $system   System reference
     * @param mixed $record   Base record
     * @param mixed $details  SQL rows            
     */
-    function getKMLLayer($record, $details) {
+    function getKMLLayer($system, $record, $details) {
         $record->type = "RT_KML_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
@@ -154,8 +155,7 @@
                 
             }else if($type == DT_FILE_RESOURCE) {
                 // KML file
-                //$record->kmlFile = getFileURL($system, $detail["dtl_UploadedFileID"]);
-                $record->kmlFile = "TODO";
+                $record->kmlFile = getFileURL($system, $detail["dtl_UploadedFileID"]); 
             }
         }
         return $record;
@@ -175,37 +175,38 @@
     * - zipFile: Zip file url, the zip file contains all of the above files (optional)
     * -----------------------------------------
     * 
+    * @param mized $system   System reference
     * @param mixed $record   Base record
     * @param mixed $details  SQL rows            
     */
-    function getShapeLayer($record, $details) {
+    function getShapeLayer($system, $record, $details) {
         $record->type = "RT_SHAPE_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
             //print_r($detail);
             $type = $detail["dtl_DetailTypeID"]; 
-            $value = $detail["dtl_Value"];
+            $fileID = $detail["dtl_UploadedFileID"];
             $record->files = array();
 
             if($type == DT_SHAPE_FILE) {
                 // Shape file (SHP component)
-                $record->shapeFile = getFileURL($system, $value);
+                $record->shapeFile = getFileURL($system, $fileID);
                 
             }else if($type == DT_DBF_FILE) {
                 // DBF file (DBF component)
-                $record->dbfFile = getFileUrl($system, $value);
+                $record->dbfFile = getFileUrl($system, $fileID);
                 
             }else if($type == DT_SHX_FILE) {
                 // SHX file (SHX component)
-                $record->shxFile = getFileURL($system, $value);
+                $record->shxFile = getFileURL($system, $fileID);
                 
             }else if($type == DT_FILE_RESOURCE) {
                 // File(s)
-                array_push($record->files, getFileURL($system, $value));
+                array_push($record->files, getFileURL($system, $fileID));
                 
             }else if($type == DT_ZIP_FILE) {
                 // Zip file
-                $record->zipFile = getFileURL($system, $value);
+                $record->zipFile = getFileURL($system, $fileID);
    
             }
         }
@@ -222,10 +223,11 @@
     * - mapImage: Map image url
     * -----------------------------------------
     * 
+    * @param mized $system   System reference
     * @param mixed $record   Base record
     * @param mixed $details  SQL rows            
     */
-    function getUntiledImageLayer($record, $details) {
+    function getUntiledImageLayer($system, $record, $details) {
         $record->type = "RT_SHAPE_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
@@ -252,10 +254,11 @@
     * - query: Heurist query string
     * -----------------------------------------
     * 
+    * @param mized $system   System reference
     * @param mixed $record   Base record
     * @param mixed $details  SQL rows            
     */
-    function getMapableQueryLayer($record, $details) {
+    function getMapableQueryLayer($system, $record, $details) {
         $record->type = "RT_QUERY_LAYER";
         while($detail = $details->fetch_assoc()) {  
             // Values
@@ -290,6 +293,7 @@
     function getDataSource($system, $id) {
         global $detailQuery;
         $record = getRecordByID($system, $id);
+        //print_r($record);
 
         // Retrieve extended details
         $query = $detailQuery . $record->id;
@@ -297,24 +301,24 @@
         if($details) {
             // TILED MAP IMAGE LAYER
             if($record->rectypeID == RT_TILED_IMAGE_LAYER) {   
-                $record = getTiledImageLayer($record, $details);    
+                $record = getTiledImageLayer($system, $record, $details);    
             // KML LAYER    
             }else if($record->rectypeID == RT_KML_LAYER){
-                $record = getKMLLayer($record, $details);   
+                $record = getKMLLayer($system, $record, $details);   
             // SHAPE LAYER    
-            }else if($record->rectypeID == RT_SHP_LAYER){ 
-                $record = getShapeLayer($record, $details);  
+            }else if($record->rectypeID == RT_SHP_LAYER){ // TODO: Constant 1017 does not seem to work properly
+                $record = getShapeLayer($system, $record, $details);  
             // UNTILED MAP IMAGE LAYER
             }else if($record->rectypeID == RT_IMAGE_LAYER){
-                $record = getUntiledImageLayer($record, $details);
+                $record = getUntiledImageLayer($system, $record, $details);
             // MAPABLE QUERY LAYER   
             }else if($record->rectypeID == RT_QUERY_LAYER){
-                $record = getMapableQueryLayer($record, $details);    
+                $record = getMapableQueryLayer($system, $record, $details);    
             // UNKNOWN TYPE    
             }else{
                 $record->type = $record->rectypeID;
             }
-        }   
+        }
         
         return $record;
     }
