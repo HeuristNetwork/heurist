@@ -1974,11 +1974,16 @@
                                     $details_lc = array();
                                     $details2_lc = array();
                                     
-                                    if($params['sa_upd']==2 && $params['sa_upd2']==1 && @$details["t:".$field_type]["bd:delete"]){
+                                    /*if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"]){
                                         unset($details["t:".$field_type]["bd:delete"]); //new data is porvided - no need to delete
                                     }else if($params['sa_upd']==2 && $params['sa_upd2']!=1 && !@$details["t:".$field_type]["bd:delete"]){
-                                        $details["t:".$field_type]["bd:delete"] = "ups!"; //remove old data
+                                        $details["t:".$field_type]["bd:delete"] = "ups!"; //if new data are provided then remove old data
+                                    }*/
+                                    
+                                    if($params['sa_upd']==2){
+                                        $details["t:".$field_type]["bd:delete"] = "ups!"; //if new data are provided then remove old data
                                     }
+                                    
 
                                     if(is_array(@$details["t:".$field_type]))
                                         $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
@@ -1995,13 +2000,11 @@
                                     }
                                 }
                                 
-                                if($params['sa_upd']==2 && $params['sa_upd2']==1 && !$value && 
-                                    !is_array(@$details["t:".$field_type]) && $rectypeStruc[$field_type][$idx_reqtype] != "required"){ 
-                                    //delete if no new data provided
-                                    $details["t:".$field_type] = array("bd:delete"=>"ups!");
+                                if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"] 
+                                    && !$value && $rectypeStruc[$field_type][$idx_reqtype] != "required"){ //delete old even if new is not provided
+                                
+                                        $details["t:".$field_type]["bd:delete"] = "ups!";
                                 }
-                                
-                                
 
                             }
                         }
@@ -2697,7 +2700,7 @@ print "result ".print_r($details, true)."<br><br>";
 
                     if(count($distinct_value)>0){
                         //print distinct term values
-                        print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
+                        print '<div style="display:none;padding-bottom:10px;overflow:auto" id="distinct_terms_'.$k.'"><br>';
                         foreach ($distinct_value as $value) {
                             print '<div style="margin-left:30px;">'.$value.' </div>';
                         }

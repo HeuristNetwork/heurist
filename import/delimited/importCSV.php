@@ -800,7 +800,7 @@
                         <label for="sa_upd20" style="font-size:0.9em;">Retain existing if no new data supplied for record</label><br/>
 
                         <input type="radio" <?=@$_REQUEST['sa_upd2']==1?"checked":""?> name="sa_upd2" id="sa_upd21" value="1" class="text" />&nbsp;
-                        <label for="sa_upd21" style="font-size:0.9em;">Delete existing if no new data supplied for record</label>
+                        <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
                     </div>
                 </div>
 
