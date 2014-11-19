@@ -192,6 +192,7 @@
         'DT_LOCATION' => array(2, 27), // TODO : change DT_PLACE_NAME with new update.
         'DT_GEO_OBJECT' => array(2, 28),
         'DT_MIME_TYPE' => array(2, 29),
+        'DT_IMAGE_TYPE' => array(2, 30),
         'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
         'DT_MINMUM_ZOOM_LEVEL' => array(2, 32),
         'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
