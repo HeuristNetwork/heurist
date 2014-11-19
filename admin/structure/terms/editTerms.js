@@ -231,10 +231,10 @@ function EditTerms() {
             }
         }//for
 
-        tv.subscribe("labelClick", _onNodeClick);
+        //tv.subscribe("labelClick", _onNodeClick);
         tv.singleNodeHighlight = true;
 
-        tv.subscribe("clickEvent", tv.onEventToggleHighlight);
+        tv.subscribe("clickEvent", _onNodeClick); //tv.onEventToggleHighlight);
 
         tv.render();
         //first_node.focus();
@@ -315,8 +315,10 @@ function EditTerms() {
     /**
     * Loads values to edit form
     */
-    function _onNodeClick(node){
+    function _onNodeClick(obj){
 
+        var node = obj.node;
+        
         _parentNode = null;
 
         if(_currentNode !== node)
@@ -432,6 +434,10 @@ function EditTerms() {
             Dom.get('formMessage').style.display = "block";
         }
 
+        
+        var ind = _tabView.get("activeIndex");
+        var tv = (ind===0)?_termTree1:_termTree2;
+        tv.onEventToggleHighlight(obj);
     }
 
     /**
@@ -1199,7 +1205,7 @@ function EditTerms() {
     *  Add the list of imported terms
     */
     function _import_complete(context){
-        if(!Hul.isnull(context))
+        if(!Hul.isnull(context) && !Hul.isnull(context.terms))
         {
             top.HEURIST.terms = context.terms;
             var res = context.result,

@@ -43,6 +43,7 @@
     $res_array = null;
 
     $res = upload_termsfile($parent_id, $domain, $has_codes, $has_descr);
+    //$res = array();
     if($res!=null){
         if(array_key_exists('error', $res)){
             $failure_msg = $res['error'];
@@ -76,16 +77,20 @@
                     if ($res_array) {
                         print 'result = '.$res_array.';';
                     }
-                    if($success_msg) {
-                        //print 'document.onload = function(){alert("!!!"); window.close(result);}';
-                    }
             ?>
         </script>
 
-
         <?php   
                 if ($success_msg) {
-                    print '<div class="success">'.$success_msg.'</div>';
+                    ?>
+                    <div style='width:90%;text-align:center;padding-top:30px'>
+                        <div class="success"><?=$success_msg?></div><br/><br/>
+                        <input type="button" value="Done" onClick="window.close(result);">
+                    </div>
+                        </body>
+                        </html>
+                    <?php
+                        exit();
                 } else if ($failure_msg) {
                     print '<div class="failure">'.$failure_msg.'</div>';
                 }
