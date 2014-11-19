@@ -475,7 +475,10 @@ $.widget( "heurist.ruleBuilder", {
                             top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'any', false);
                         }
                         //reduced list of constraints
-                        top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, arr_field.rectypes.length>1?'any':null);
+                        top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
+                        if(arr_field.rectypes.length>1){
+                            top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'any');
+                        }
                         //this._arr_rectypes_subset = arr_field.rectypes;
                         is_not_selected = false;
                         break;
@@ -488,7 +491,11 @@ $.widget( "heurist.ruleBuilder", {
             }
             if(is_not_selected){
                 //show all constraints
-                top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes, this._arr_rectypes.length>1?'any':null);
+                top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
+                if(this._arr_rectypes.length>1){
+                    top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'any');
+                }
+                
                 //this._arr_rectypes_subset = this._arr_rectypes;
             }
             
@@ -622,6 +629,8 @@ $.widget( "heurist.ruleBuilder", {
             }else{
                 query = rt_target + 'links:'+rt_source;     //all links
             }
+            
+            query = query + ' ' + filter;
         }
         return query;  
     },

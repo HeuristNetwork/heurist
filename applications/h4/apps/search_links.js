@@ -555,7 +555,7 @@ $.widget( "heurist.search_links", {
                 var request = Hul.parseHeuristQuery(qsearch);
                 
                 if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
-                    $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ request.rules ]); //global app event  
+                    $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ request.rules ]); //global app event   - see resultList.js for listener
                 }else{
                     //additional params
                     request.f = this.options.searchdetails;
@@ -703,7 +703,7 @@ $.widget( "heurist.search_links", {
                 
                 var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
                 if(!Hul.isnull(ele_rules)){
-                    url = url + '&rules=' + ele_rules.val();
+                    url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
                 
                 Hul.showDialog(url, { width:1200, callback: 
@@ -885,8 +885,8 @@ $.widget( "heurist.search_links", {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 260,
-                    width: 350,
+                    height: 320,
+                    width: 450,
                     modal: true,
                     resizable: false,
                     title: top.HR('Edit saved search'),

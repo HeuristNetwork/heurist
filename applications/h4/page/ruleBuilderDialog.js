@@ -47,7 +47,7 @@ function onInit(success) //callback function of hAPI initialization
         //var rules = top.HEURIST4.util.getUrlParameter('rules',location.search);
         if(!top.HEURIST4.util.isempty(rules)){
 
-            rules = $.parseJSON(rules);
+            if(!top.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
             var i;
             for(i=0; i<rules.length; i++){
 
