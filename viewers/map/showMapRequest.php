@@ -32,6 +32,7 @@
 
 	require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 	require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
+    require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 	require_once("encodePolyline.php");
 
 	/**
@@ -281,8 +282,15 @@ if(mysql_error()) {
 				$rec['error'] = "URL is not defined for image layer";
 
 			}else if($manifest_file){
+                
+                if(file_exists($manifest_file)){
+                    $manifest = simplexml_load_file($manifest_file);    
+                }else{
+                    $content = loadRemoteURLContent($manifest_file, false);
+                    $manifest = simplexml_load_string($content);
+                }
 
-				$manifest = simplexml_load_file($manifest_file);
+				
 				if($manifest==null || is_string($manifest)){ //manifest not found
 
 					$rec['error'] = "Can not load manifest file image layer. ".$manifest_file;
