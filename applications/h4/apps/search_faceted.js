@@ -221,7 +221,7 @@ $.widget( "heurist.search_faceted", {
                 $color,$color,$color,$color,$color];
 
             //debug - current query
-            $('<div>').html(current_query).appendTo(listdiv);
+            //DENUG $('<div>').html(current_query).appendTo(listdiv);
             var clr_index = 0;
 
             for (facet_index=0;facet_index<len2;facet_index++){
@@ -239,17 +239,16 @@ $.widget( "heurist.search_faceted", {
 
                 //add ui                
                 var $facetdiv = $('<div>').appendTo(listdiv);
-                var $facet_header = $("<h4>")
-                .addClass('ui-corner-top')   // ui-header ui-state-active                                                        Math.floor(Math.random() / colors.length)
-                .css({"padding":"0.5em 0.5em 0.5em 0.7em","margin-top":"2px","color":"#FFF",
-                    "background-color":colors[clr_index]}).appendTo($facetdiv);
+                var $facet_header = $("<h4>")    // ui-state-default ui-accordion-header-active ui-state-active ui-accordion-header
+                .addClass('ui-corner-top ui-header ui-accordion-header ui-state-active')   // ui-header ui-state-active                                                        Math.floor(Math.random() / colors.length)
+                .css({"padding":"0.5em 0.5em 0.5em 0.7em","margin-top":"2px"}).appendTo($facetdiv); //,"color":"#FFF","background-color":colors[clr_index]
 
                 clr_index++;
                 if(clr_index>=colors.length){ clr_index=0;}
 
                 var $facet_values = $("<div>", {"id":"fv-"+facet_index})
                 .addClass('ui-widget-content ui-corner-bottom')
-                .css({"padding":"0.5em 0.5em 0.5em 0.7em","min-height":"20px"})
+                .css({"padding":"0.5em 0.5em 0.5em 0.7em","min-height":"20px", "border-top": "0 none"})
                 .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white20.gif) no-repeat center center')
                 .appendTo($facetdiv);
                 $facet_header.html( title );
