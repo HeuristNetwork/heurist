@@ -126,8 +126,8 @@ function addOverlays(doc) {
 * @param doc Map Document object
 */
 function addMapDocumentOverlay(bounds, doc) {
-    var overlay = new HeuristOverlay(bounds, doc.thumbnail, map);
-    overlays.push(overlay);
+    //var overlay = new HeuristOverlay(bounds, doc.thumbnail, map);
+    //overlays.push(overlay);
 }
 
 /**
@@ -137,25 +137,179 @@ function addMapDocumentOverlay(bounds, doc) {
 function addLayerOverlay(bounds, layer, index) {
     console.log("addLayerOverlay");
     console.log(layer);
+     
+    // Determine way of displaying   
+    if(layer !== undefined && layer.dataSource !== undefined) {
+        var source = layer.dataSource;
+        console.log(source);
         
-    if(layer !== undefined) {
-        // Legend
+        // Append to legend
         $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>["+layer.id+"] "+layer.title+"</label>");
+
+        /** MAP IMAGE FILE (TILED) */
+        if(source.rectypeID == map_image_file_tiled) {
+            console.log("MAP IMAGE FILE (tiled)");
+            addTiledMapImageLayer(source);
+            
+        /** MAP IMAGE FILE (NON-TILED) */
+        }else if(source.rectypeID == map_image_file_untiled) {
+            // Map image file (non-tiled)
+            console.log("MAP IMAGE FILE (non-tiled)");
+            addUntiledMapImageLayer(source);
+
+        /** KML FILE OR SNIPPET */
+        }else if(source.rectypeID == kml_file) {
+            console.log("KML FILE or SNIPPET");
+            addKMLLayer(source);
+            
+        /** SHAPE FILE */
+        }else if(source.rectypeID == shape_file) {
+            console.log("SHAPE FILE");
+            addShapeLayer(source);
+  
+        /* MAPPABLE QUERY */
+        }else if(source.rectypeID == mappable_query) {
+            console.log("MAPPABLE QUERY");
+            addQueryLayer(source);
+        }
+    }   
+}
+
+
+/**
+* Adds a tiled map image layer to the map
+* @param source Source object
+*/
+function addTiledMapImageLayer(source) {     
+    // Mime type
+    if(source.mimeType !== undefined) {
+        console.log("Mime type: " + source.mimeType);
+    }
     
-        // Map
-        var overlay = new HeuristOverlay(bounds, layer, map);
-        overlays.push(overlay);
+    // Tiled image type
+    if(source.imageType !== undefined) {
         
-        /*
-        layer.opacity;
-        layer.minZoom;
-        layer.maxZoom;
-        */   
+    }
+    
+    // Tiling schema
+    if(source.tilingSchema !== undefined) {
+        
+    }
+    
+    
+    // Show thumbnail as overlay
+    var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
+    overlays.push(overlay);
+}
+
+/**
+* Adds an untiled map image layer to the map
+* @param source Source object
+*/
+function addUntiledMapImageLayer(source) {
+    // Mime type
+    if(source.mimeType !== undefined) {
+        console.log("Mime type: " + source.mimeType);
+    }
+    
+    // Files
+    if(source.files !== undefined) {
+        for(var i = 0; i < source.files.length; i++) {
+            source.files[i];
+        }
+    }
+    
+
+    // Show thumbnail as overlay
+    var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
+    overlays.push(overlay);
+}
+
+/**
+* Adds a KML layer to the map
+* @param source Source object
+*/
+function addKMLLayer(source) {
+    // KML file
+    if(source.files !== undefined) {
+        var fileURL = source.files[0];
+        console.log("KML file: " + fileURL);
+        
+        // Display on Google Maps
+        var kmlLayer = new google.maps.KmlLayer({
+            url: fileURL,
+            suppressInfoWindows: true,
+            preserveViewport: false,
+            map: map
+        });  
+        overlays.push(kmlLayer);
+          
+    } 
+    
+    
+    // KML snippet
+    if(source.kmlSnippet !== undefined) {
+        /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
+        console.log("KML snippet: " + source.kmlSnippet);
+       
+        // Display on Google Maps
+        var kmlLayer = new google.maps.KmlLayer(source.kmlSnippet, {
+            suppressInfoWindows: true,
+            preserveViewport: false,
+            map: map
+        }); 
+        overlays.push(kmlLayer);
+           
+    }
+}
+
+/**
+* Adds a shape layer to the map
+* @param source Source object
+*/
+function addShapeLayer(source) {
+    // Zip file present?
+    if(source.zipFile !== undefined) {
+        console.log("Zip file: " + source.zipFile);
+    }else{
+        // Individual components
+        source.shpFile;
+        source.dbfFile;
+        source.shxFile;
+        
+        if(source.files !== undefined) {
+            for(var i = 0; i < source.files.length; i++) {
+                source.files[i];
+            }
+        }
+    }
+}
+
+/**
+* Adds a query layer to the map
+* @param source Source object
+*/
+function addQueryLayer(source) {
+     // Query
+    if(source.query !== undefined) {
+        console.log("Query: " + source.query);
     }
 }
 
 
 
+
+
+
+
+
+
+/** Data types */
+var map_image_file_tiled = 11;
+var map_image_file_untiled = 1018;
+var kml_file = 1014;
+var shape_file = 1017;
+var mappable_query = 1021;
 
 /**
 * HeuristOverlay constructor
@@ -163,11 +317,10 @@ function addLayerOverlay(bounds, layer, index) {
 * - image
 * - map
 */
-function HeuristOverlay(bounds, layer, map) {
+function HeuristOverlay(bounds, image, map) {
     // Initialize all properties.
     this.bounds_ = bounds;
-    this.layer_ = layer;
-    this.image_ = layer.thumbnail;
+    this.image_ = image;
     this.map_ = map;
     this.div_ = null;
     
@@ -180,104 +333,6 @@ function HeuristOverlay(bounds, layer, map) {
  * added to the map.
  */
 HeuristOverlay.prototype.onAdd = function() {
-    // Data source check
-    var source = this.layer_.dataSource;
-    
-    /** MAP IMAGE FILE (TILED) */
-    if(source.rectypeID == 11) {
-        console.log("MAP IMAGE FILE (tiled)");
-        
-        // Mime type
-        if(source.mimeType !== undefined) {
-            console.log("Mime type: " + source.mimeType);
-        }
-        
-        // Tiled image type
-        if(source.imageType !== undefined) {
-            
-        }
-        
-        // Tiling schema
-        if(source.tilingSchema !== undefined) {
-            
-        }
-        
-        
-        
-        
-        
-    /** MAP IMAGE FILE (NON-TILED) */
-    }else if(source.rectypeID == 1018) {
-        // Map image file (non-tiled)
-        console.log("MAP IMAGE FILE (non-tiled)");
-        
-        // Mime type
-        if(source.mimeType !== undefined) {
-            console.log("Mime type: " + source.mimeType);
-        }
-        
-        // Files
-        if(source.files !== undefined) {
-            for(var i = 0; i < source.files.length; i++) {
-                source.files[i];
-            }
-        }
-        
-
-        
-    /** KML FILE OR SNIPPET */
-    }else if(source.rectypeID == 1014) {
-        console.log("KML FILE or SNIPPET");
-        
-        // KML file
-        if(source.files !== undefined) {
-            console.log("KML file: " + source.files[0]);    
-        } 
-        
-        // KML snippet
-        if(source.kmlSnippet !== undefined) {
-            console.log("KML snippet: " + source.kmlSnippet);
-               
-        }
-        
-    /** SHAPE FILE */
-    }else if(source.rectypeID == 1017) {
-        console.log("SHAPE FILE");
-        
-        // Zip file present?
-        if(source.zipFile !== undefined) {
-            console.log("Zip file: " + source.zipFile);
-        }else{
-            // Individual components
-            source.shpFile;
-            source.dbfFile;
-            source.shxFile;
-            
-            if(source.files !== undefined) {
-                for(var i = 0; i < source.files.length; i++) {
-                    source.files[i];
-                }
-            }
-            
-            
-        }
-                 
-    /* MAPPABLE QUERY */
-    }else if(source.rectypeID == 1021) {
-        console.log("MAPPABLE QUERY");
-        
-        // Query
-        if(source.query !== undefined) {
-            console.log("Query: " + source.query);
-        }
-           
-    }
-    console.log(source);
-    
-    
-    
-    
-    
     // Image div
     var div = document.createElement('div');
     div.style.borderStyle = 'none';

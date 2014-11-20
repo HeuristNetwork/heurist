@@ -22,8 +22,9 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../common/db_files.php');
     
-    $recordQuery = "SELECT r.rec_ID, r.rec_Title, r.rec_RecTypeID FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
+    $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
     $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
+    
     
     /**
     * Finds the url that belongs to the file with the given fileID in the given system
@@ -44,6 +45,31 @@
             return $paths[0][1];
         }
         return "null";
+    }
+  
+    /**
+    * Retrieves a term by its ID
+    * 
+    * @param mixed $system System reference
+    * @param mixed $id     Term ID                 
+    */
+    function getTermByID($system, $id) {
+        $term = new stdClass();
+    
+        // Select term
+        $query = "SELECT * FROM defTerms WHERE trm_ID=".$id;
+        $res = $system->get_mysqli()->query($query);
+
+        if ($res) {
+            $row = $res->fetch_assoc();
+            if($row) {
+                $term->id = $row["trm_ID"];
+                $term->label = $row["trm_Label"];
+                $term->description = $row["trm_Description"];
+            }
+        } 
+        
+        return $term;    
     }
     
     /**
@@ -85,6 +111,7 @@
         $obj->id = intval($row["rec_ID"]);
         $obj->title = $row["rec_Title"];
         $obj->rectypeID = intval($row["rec_RecTypeID"]);
+        $obj->rectypeName = $row["rty_Name"];
         return $obj;
     }
     
@@ -225,16 +252,15 @@
                     
                 } else if($type == DT_MIME_TYPE) { 
                     // Mime type
-                    $record->mimeType = $value;
+                    $record->mimeType = getTermByID($system, $value);
                     
                 } else if($type == DT_IMAGE_TYPE) {
                     // Tiled image type
-                    $record->imageType = $value;
+                    $record->imageType = getTermByID($system, $value);
 
                 }else if($type == DT_MAP_IMAGE_LAYER_SCHEMA) {
                     // Image tiling schema
-                    // TODODOOO
-                    $record->tilingSchema = $value;
+                    $record->tilingSchema = getTermByID($system, $value);
                     
                     
                 /* SNIPPET */
