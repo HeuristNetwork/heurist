@@ -153,21 +153,30 @@
                 $value = $detail["dtl_Value"];
                 $fileID = $detail["dtl_UploadedFileID"]; 
 
-                // Go through all detail types
+                /* GENERAL */
                 if($type == DT_SHORT_SUMMARY) {
                     // Description
                     $record->description = $value; 
                     
-                }else if($type == DT_THUMBNAIL) {
-                    // Uploaded thumbnail 
-                    $record->thumbnail = getFileURL($system, $fileID);
-                
+                }else if($type == DT_CREATOR) {
+                    // Creators
+                    if(!property_exists($record, "creators")) {
+                        $record->creators = array();   
+                    }
+                    array_push($record->creators, getRecordByID($system, $value));
+                    
+  
+                /* SOURCE */
                 }else if($type == DT_SERVICE_URL) {
                     // Source URL
                     $record->sourceURL = $value;
                     
+                }else if($type == DT_DATA_SOURCE) {
+                    // Data source
+                    $record->dataSource = getDetailedRecord($system, $value);
+
                        
-                /* RECORD POINTERS */
+                /* MAP LAYERS */
                 }else if($type == DT_TOP_MAP_LAYER) { // Recursive
                     // Top map layer 
                     $record->toplayer = getDetailedRecord($system, $value);
@@ -180,7 +189,7 @@
                     array_push($record->layers, getDetailedRecord($system, $value));
  
                 
-                /* MAP DETAILS */
+                /* LOCATION */
                 }else  if($type == DT_LONGITUDE_CENTREPOINT) {
                     // Longitude centrepoint
                     $record->long = floatval($value);
@@ -188,7 +197,9 @@
                 }else if($type == DT_LATITUDE_CENTREPOINT) {
                     // Latitude centrepoint
                     $record->lat = floatval($value);
-                    
+                  
+                  
+                /* ZOOM */  
                 }else if($type == DT_MAXIMUM_ZOOM) {
                     // Maximum zoom
                     $record->maxZoom = floatval($value);
@@ -197,30 +208,39 @@
                     // Minimum zoom
                     $record->minZoom = floatval($value); 
 
+                    
                 }else if($type == DT_OPACITY) {
                     // Opacity
                     $record->opacity = floatval($value);
-                    
-                }else if($type == DT_DATA_SOURCE) {
-                    // Data source
-                    $record->dataSource = getDetailedRecord($system, $value);
-                     
+   
                 }else if($type == DT_MINOR_SPAN) {
                     // Initial minor span
                     $record->minorSpan = floatval($value);
 
+                    
+                /* IMAGE INFO */
+                } else if($type == DT_THUMBNAIL) {
+                    // Uploaded thumbnail 
+                    $record->thumbnail = getFileURL($system, $fileID);
+                    
+                } else if($type == DT_MIME_TYPE) { 
+                    // Mime type
+                    $record->mimeType = $value;
+                    
                 } else if($type == DT_IMAGE_TYPE) {
                     // Tiled image type
                     $record->imageType = $value;
-
-                }else if($type == DT_QUERY_STRING) {
-                    // Heurist query string
-                    $record->query = $value;
 
                 }else if($type == DT_MAP_IMAGE_LAYER_SCHEMA) {
                     // Image tiling schema
                     // TODODOOO
                     $record->tilingSchema = $value;
+                    
+                    
+                /* SNIPPET */
+                }else if($type == DT_QUERY_STRING) {
+                    // Heurist query string
+                    $record->query = $value;
                     
                 }else if($type == DT_KML) {
                     // KML snippet
@@ -229,8 +249,11 @@
                     
                 /* FILES */
                 }else if($type == DT_FILE_RESOURCE) {
-                    // KML file
-                    $record->kmlFile = getFileURL($system, $fileID); 
+                    // File(s)
+                    if(!property_exists($record, "files")) {
+                        $record->files = array();   
+                    }
+                    array_push($record->files, getFileURL($system, $fileID));
                     
                 }else if($type == DT_SHAPE_FILE) {
                     // Shape file (SHP component)
@@ -243,13 +266,6 @@
                 }else if($type == DT_SHX_FILE) {
                     // SHX file (SHX component)
                     $record->shxFile = getFileURL($system, $fileID);
-                    
-                }else if($type == DT_FILE_RESOURCE) {
-                    // File(s)
-                    if(!property_exists($record, "files")) {
-                        $record->files = array();   
-                    }
-                    array_push($record->files, getFileURL($system, $fileID));
                     
                 }else if($type == DT_ZIP_FILE) {
                     // Zip file

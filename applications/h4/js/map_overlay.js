@@ -11,14 +11,9 @@ function addMapOverlay(_map) {
     map = _map;
     map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('legend'));
 
-    // Collapsing legend
+    // Legend collapse listener
     $("#collapse").click(function(e) {
-        var text = $(this).text();
-        if(text == "-") {
-            $(this).text("+");
-        }else{
-            $(this).text("-");
-        }
+        $(this).text() == "-" ? $(this).text("+") : $(this).text("-");  // Update text to + or -
         $("#legend .content").toggle(400);   
     });
     
@@ -48,8 +43,7 @@ function addMapOverlay(_map) {
 function addOptions() {
     // Show options in dropdown
     for(var i = 0; i < data.length; i++) {
-        var doc = data[i];
-        $("#map-doc-select").append("<option value='"+i+"'>["+doc.id+"] "+doc.title+"</option>");
+        $("#map-doc-select").append("<option value='"+i+"'>["+data[i].id+"] "+data[i].title+"</option>");
     } 
     
     // Option listener
@@ -61,9 +55,8 @@ function addOptions() {
         // Show overlays for the selected option 
         var index = $(this).prop("value");
         if(index >= 0 && index < data.length) {
-            // Selected document
-            var doc = data[index];
-            addOverlays(doc);  
+            // Show overlay for selected Map Document
+            addOverlays(data[index]);  
             
             // Listen to checkbox changes
             $("#legend input").change(function(e) {
@@ -150,7 +143,7 @@ function addLayerOverlay(bounds, layer, index) {
         $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>["+layer.id+"] "+layer.title+"</label>");
     
         // Map
-        var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
+        var overlay = new HeuristOverlay(bounds, layer, map);
         overlays.push(overlay);
         
         /*
@@ -170,10 +163,11 @@ function addLayerOverlay(bounds, layer, index) {
 * - image
 * - map
 */
-function HeuristOverlay(bounds, image, map) {
+function HeuristOverlay(bounds, layer, map) {
     // Initialize all properties.
     this.bounds_ = bounds;
-    this.image_ = image;
+    this.layer_ = layer;
+    this.image_ = layer.thumbnail;
     this.map_ = map;
     this.div_ = null;
     
@@ -186,6 +180,104 @@ function HeuristOverlay(bounds, image, map) {
  * added to the map.
  */
 HeuristOverlay.prototype.onAdd = function() {
+    // Data source check
+    var source = this.layer_.dataSource;
+    
+    /** MAP IMAGE FILE (TILED) */
+    if(source.rectypeID == 11) {
+        console.log("MAP IMAGE FILE (tiled)");
+        
+        // Mime type
+        if(source.mimeType !== undefined) {
+            console.log("Mime type: " + source.mimeType);
+        }
+        
+        // Tiled image type
+        if(source.imageType !== undefined) {
+            
+        }
+        
+        // Tiling schema
+        if(source.tilingSchema !== undefined) {
+            
+        }
+        
+        
+        
+        
+        
+    /** MAP IMAGE FILE (NON-TILED) */
+    }else if(source.rectypeID == 1018) {
+        // Map image file (non-tiled)
+        console.log("MAP IMAGE FILE (non-tiled)");
+        
+        // Mime type
+        if(source.mimeType !== undefined) {
+            console.log("Mime type: " + source.mimeType);
+        }
+        
+        // Files
+        if(source.files !== undefined) {
+            for(var i = 0; i < source.files.length; i++) {
+                source.files[i];
+            }
+        }
+        
+
+        
+    /** KML FILE OR SNIPPET */
+    }else if(source.rectypeID == 1014) {
+        console.log("KML FILE or SNIPPET");
+        
+        // KML file
+        if(source.files !== undefined) {
+            console.log("KML file: " + source.files[0]);    
+        } 
+        
+        // KML snippet
+        if(source.kmlSnippet !== undefined) {
+            console.log("KML snippet: " + source.kmlSnippet);
+               
+        }
+        
+    /** SHAPE FILE */
+    }else if(source.rectypeID == 1017) {
+        console.log("SHAPE FILE");
+        
+        // Zip file present?
+        if(source.zipFile !== undefined) {
+            console.log("Zip file: " + source.zipFile);
+        }else{
+            // Individual components
+            source.shpFile;
+            source.dbfFile;
+            source.shxFile;
+            
+            if(source.files !== undefined) {
+                for(var i = 0; i < source.files.length; i++) {
+                    source.files[i];
+                }
+            }
+            
+            
+        }
+                 
+    /* MAPPABLE QUERY */
+    }else if(source.rectypeID == 1021) {
+        console.log("MAPPABLE QUERY");
+        
+        // Query
+        if(source.query !== undefined) {
+            console.log("Query: " + source.query);
+        }
+           
+    }
+    console.log(source);
+    
+    
+    
+    
+    
     // Image div
     var div = document.createElement('div');
     div.style.borderStyle = 'none';
