@@ -283,7 +283,7 @@
                     
                 }else if($type == DT_SHAPE_FILE) {
                     // Shape file (SHP component)
-                    $record->shapeFile = getFileURL($system, $fileID);
+                    $record->shpFile = getFileURL($system, $fileID);
                     
                 }else if($type == DT_DBF_FILE) {
                     // DBF file (DBF component)

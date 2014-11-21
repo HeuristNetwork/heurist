@@ -58,7 +58,12 @@
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/timemap.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/param.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
-        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/kml.js"></script>
+        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/kml.js"></script>     
+        
+        <!-- Shape file converting -->
+        <script type="text/javascript" src="../ext/shapefile/stream.js"></script> 
+        <script type="text/javascript" src="../ext/shapefile/shapefile.js"></script> 
+        <script type="text/javascript" src="../ext/shapefile/dbf.js"></script>
 
         <!-- Mapping -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>

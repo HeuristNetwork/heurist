@@ -1,7 +1,7 @@
 HeuristOverlay.prototype = new google.maps.OverlayView();
 var map;
 var data;
-var overlays = [];
+var overlays = {};
 
 /**
 * Adds a map overlay to the given map.
@@ -63,13 +63,11 @@ function addOptions() {
                 // Hide or display the layer
                 var index = $(this).prop("value");
                 var checked = $(this).prop("checked");
-                console.log("Checked: " + checked);
-                if(checked) {
-                    overlays[index].setMap(map); 
-                }else{
-                    overlays[index].setMap(null);
-                }
-            });
+   
+                // Update overlay
+                var overlay = overlays[index];
+                overlay.setVisibility(checked);                          
+            });      
         }
     });   
 }
@@ -78,13 +76,13 @@ function addOptions() {
 * Removes all overlays 
 */
 function removeOverlays() {
-    if(overlays.length > 0) {
-        for(var i = 0; i < overlays.length; i++) {
-            overlays[i].setMap(null);
-            overlays[i] = null;
+    for(var property in overlays) {
+        if (overlays.hasOwnProperty(property) && overlays[property] !== undefined) {
+            overlays[property].setMap(null);
+            overlays[property] = null;
         }
     }
-    overlays = [];
+    overlays = {};
 }
 
 /**
@@ -143,34 +141,34 @@ function addLayerOverlay(bounds, layer, index) {
         var source = layer.dataSource;
         console.log(source);
         
-        // Append to legend
+        // Append to legend  
         $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>["+layer.id+"] "+layer.title+"</label>");
 
         /** MAP IMAGE FILE (TILED) */
         if(source.rectypeID == map_image_file_tiled) {
             console.log("MAP IMAGE FILE (tiled)");
-            addTiledMapImageLayer(source);
+            addTiledMapImageLayer(source, index);
             
         /** MAP IMAGE FILE (NON-TILED) */
         }else if(source.rectypeID == map_image_file_untiled) {
             // Map image file (non-tiled)
             console.log("MAP IMAGE FILE (non-tiled)");
-            addUntiledMapImageLayer(source);
+            addUntiledMapImageLayer(source, index);
 
         /** KML FILE OR SNIPPET */
         }else if(source.rectypeID == kml_file) {
             console.log("KML FILE or SNIPPET");
-            addKMLLayer(source);
+            addKMLLayer(source, index);
             
         /** SHAPE FILE */
         }else if(source.rectypeID == shape_file) {
             console.log("SHAPE FILE");
-            addShapeLayer(source);
+            addShapeLayer(source, index);
   
         /* MAPPABLE QUERY */
         }else if(source.rectypeID == mappable_query) {
             console.log("MAPPABLE QUERY");
-            addQueryLayer(source);
+            addQueryLayer(source, index);
         }
     }   
 }
@@ -180,7 +178,7 @@ function addLayerOverlay(bounds, layer, index) {
 * Adds a tiled map image layer to the map
 * @param source Source object
 */
-function addTiledMapImageLayer(source) {     
+function addTiledMapImageLayer(source, index) {     
     // Mime type
     if(source.mimeType !== undefined) {
         console.log("Mime type: " + source.mimeType);
@@ -199,14 +197,15 @@ function addTiledMapImageLayer(source) {
     
     // Show thumbnail as overlay
     var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
-    overlays.push(overlay);
+    overlays[index] = overlay; 
 }
+
 
 /**
 * Adds an untiled map image layer to the map
 * @param source Source object
 */
-function addUntiledMapImageLayer(source) {
+function addUntiledMapImageLayer(source, index) {
     // Mime type
     if(source.mimeType !== undefined) {
         console.log("Mime type: " + source.mimeType);
@@ -222,30 +221,29 @@ function addUntiledMapImageLayer(source) {
 
     // Show thumbnail as overlay
     var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
-    overlays.push(overlay);
+    overlays[index] = overlay; 
 }
 
 /**
 * Adds a KML layer to the map
 * @param source Source object
 */
-function addKMLLayer(source) {
+function addKMLLayer(source, index) {
+    var kmlLayer = {};
+    
     // KML file
     if(source.files !== undefined) {
         var fileURL = source.files[0];
         console.log("KML file: " + fileURL);
         
         // Display on Google Maps
-        var kmlLayer = new google.maps.KmlLayer({
+        kmlLayer = new google.maps.KmlLayer({
             url: fileURL,
             suppressInfoWindows: true,
             preserveViewport: false,
             map: map
         });  
-        overlays.push(kmlLayer);
-          
     } 
-    
     
     // KML snippet
     if(source.kmlSnippet !== undefined) {
@@ -253,43 +251,89 @@ function addKMLLayer(source) {
         console.log("KML snippet: " + source.kmlSnippet);
        
         // Display on Google Maps
-        var kmlLayer = new google.maps.KmlLayer(source.kmlSnippet, {
+        kmlLayer = new google.maps.KmlLayer(source.kmlSnippet, {
             suppressInfoWindows: true,
             preserveViewport: false,
             map: map
         }); 
-        overlays.push(kmlLayer);
-           
     }
+    
+    
+    // Set visiblity method
+    kmlLayer.setVisibility = function(checked) {
+        if(checked) {
+            kmlLayer.setMap(map); 
+        }else{
+            kmlLayer.setMap(null);
+        }
+    }
+    
+    overlays[index] = kmlLayer;   
+        
 }
 
 /**
 * Adds a shape layer to the map
 * @param source Source object
 */
-function addShapeLayer(source) {
-    // Zip file present?
+function addShapeLayer(source, index) {
+    // File check
     if(source.zipFile !== undefined) {
+        // Zip file
         console.log("Zip file: " + source.zipFile);
-    }else{
-        // Individual components
-        source.shpFile;
-        source.dbfFile;
-        source.shxFile;
         
-        if(source.files !== undefined) {
-            for(var i = 0; i < source.files.length; i++) {
-                source.files[i];
+        var layer = {};
+        overlays[index] = layer; 
+        
+        
+    }else{
+        console.log("Reading DATA:");
+        
+        // Individual components
+        if(source.shpFile !== undefined && source.dbfFile !== undefined) {
+            // .shp & .dbf
+            new Shapefile({
+                shp: source.shpFile,
+                dbf: source.dbfFile
+            }, function (data) {
+                addGeoJsonToMap(data, index);
+            }); 
+        }
+        
+        
+    }
+}
+
+/**
+* Adds GeoJson data to the map
+* @param data Data returned by the Shapefile parser
+*/
+function addGeoJsonToMap(data, index) {
+    // Add GeoJson to map
+    console.log(data);
+    var features = map.data.addGeoJson(data.geojson);
+    
+    // Set visiblity method
+    data.setVisibility = function(checked) {
+        if(checked) {
+            features = map.data.addGeoJson(data.geojson);     
+        }else{
+            for (var i = 0; i < features.length; i++) {
+                map.data.remove(features[i]);
             }
         }
     }
+    
+    overlays[index] = data;     
 }
+
+
 
 /**
 * Adds a query layer to the map
 * @param source Source object
 */
-function addQueryLayer(source) {
+function addQueryLayer(source, index) {
      // Query
     if(source.query !== undefined) {
         console.log("Query: " + source.query);
