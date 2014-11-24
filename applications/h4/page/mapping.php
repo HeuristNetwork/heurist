@@ -168,18 +168,26 @@
     
     <!-- HTML -->
     <body>
-        <div id="mapping" style="height:100%;width:100%;">
+        <div id="mapping" style="height:100%; width:100%;">
             <!-- Map -->
             <div class="ui-layout-center">
-                <div id="map" style="width:100%;height:100%">Mapping</div>
+                <div id="map" style="width:100%; height:100%">Mapping</div>
             </div>
             
             <!-- Toolbar -->
-            <div class="ui-layout-north" id="toolbar">
+            <div class="ui-layout-north" id="toolbar" style="display: block !important; height: 30px important; z-index:999">
                 <!-- Map document selector -->
                 <i>Map document:</i>
                 <select id="map-doc-select">
-                    <option value="-1">None</option>
+                    <option value="-1" selected="selected" disabled="disabled">None</option>
+                </select>
+                
+                <!-- Menu -->
+                <select id="menu" style="position: fixed; right: 10">
+                    <option value="-1" selected="selected" disabled="disabled">Menu</option>
+                    <option>Google Map/Timeline</option>
+                    <option>Google Earth</option>
+                    <option>Embed Map Code</option>
                 </select>
                 
                 <!-- Legend -->

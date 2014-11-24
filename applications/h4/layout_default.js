@@ -104,9 +104,10 @@ var layouts = [
                     // {appid:'h3_recordDetails'},    //H4 record viewer
 
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
-                    {appid:'h3_recordListExt', options:{title:'Map', url: 'viewers/map/showMap.html'}},    //H3 mapper
+                    {appid:'h3_recordListExt', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=[q]'}},    //H4 map
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
-                    {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }}
+                    {appid:'h3_recordListExt', options:{title:'Connections', url: 'applications/h4/apps/visualize/spring_diagram/springDiagram.php?db=[dbname]'}},    //H4 connections
+                    {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
                     /*                ,
                     {appid:'ha51'},
                     {appid:'ha52'},

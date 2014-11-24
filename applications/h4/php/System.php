@@ -245,9 +245,10 @@
                     define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
                     
                     define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
-                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/filethumbs/' );
+                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/filethumbs/');
 
-                    define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/' );
+                    define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
+                    define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
         
         }
         
