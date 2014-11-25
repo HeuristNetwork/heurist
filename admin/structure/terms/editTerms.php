@@ -54,9 +54,9 @@
         <!-- TreeView source file -->
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
         <!-- END TREEVIEW DEFS-->
-        
+
         <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
-        
+
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <!--<link rel=stylesheet href="../../common/css/admin.css">-->
@@ -159,8 +159,9 @@
                                     Term (label)</label>
                                 <input id="edName" style="width:160px"/>
                                 <div style="padding-left:105;padding-top:3px; font-size:smaller;">
-                                    The term or label describing the category. Term dropdowns are alphabetic.
-                                    <br />Precede terms with 01, 02, 03 ... to control order if required.
+                                    The term or label describing the category. The label is the normal<br/>
+                                    way of expressing the term. Dropdowns are ordered alphabetically.<br />
+                                    Precede terms with 01, 02, 03 ... to control order if required.
                                 </div>
                             </div>
 
@@ -170,7 +171,7 @@
                             <label class="dtyLabel">Description of term</label>
                             <input id="edDescription" style="width:350px; margin-top:5px;" title=""/>
                             <div style="padding-left:105;padding-top:3px; font-size:smaller;">
-                                A concise but comprehensive description of this term or category
+                                A concise but comprehensive description of this term or category.
                             </div>
                         </div>
 
@@ -178,7 +179,8 @@
                             <label class="dtyLabel">Standard code</label>
                             <input id="edCode" style="width:80px; margin-top:5px;"/>
                             <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
-                                A domain or international standard code for this term or category
+                                A domain or international standard code for this term or category.<br/>
+                                May also be used for a local code value to be used in importing data.
                             </div>
                         </div>
 
@@ -280,7 +282,7 @@
             <button onclick="{top.HEURIST.util.closePopupLast();}">Close</button>
         </div>
 
-        
+
                 <div id="divTermMergeConfirm" style="display:none;width:500px;padding:20px">
 
                         <table border="0" cellpadding="2px;">
@@ -292,7 +294,7 @@
                                 <td>Term to be merged:</td>
                                 <td id="lblTerm_toMerge"></td>
                             </tr>
-                            
+
                             <tr>
                                 <td>Label:</td>
                                 <td>
@@ -337,7 +339,7 @@
                                     <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
                                 </td>
                             </tr>
-                            
+
                             <tr style='display:none'>
                                 <td colspan="2">
                                 <label id="lblRetainId"></label>
@@ -345,17 +347,17 @@
                                 </td>
                             </tr>
                         </table>
-                        
-                        
-                        
-<!--                        
+
+
+
+<!--
                         <div>
                             <label class="dtyLabel">Term to be retained:</label>
-                            <label id="lblTerm_toRetain"></label>                            
+                            <label id="lblTerm_toRetain"></label>
                         </div>
                         <div style="padding-top: 4px;">
                             <label class="dtyLabel">Term to be merged:</label>
-                            <label id="lblTerm_toMerge"></label>                            
+                            <label id="lblTerm_toMerge"></label>
                         </div>
 
                         <div style="padding-top: 4px;">
@@ -367,12 +369,12 @@
                             <label for="rbMergeLabel2" id="lblMergeLabel2"></label>
                             </div>
                         </div>
-                        
+
                         <div style="padding-top: 4px;">
                             <label class="dtyLabel">Code:</label>
                             <input id="rbMergeCode1" type="radio" name="rbMergeCode" checked="checked"/>
                             <label for="rbMergeCode1" id="lblMergeCode1"></label>
-                            
+
                             <div style='padding-left:106px;'>
                             <input id="rbMergeCode2" type="radio" name="rbMergeCode"/>
                             <label for="rbMergeCode2" id="lblMergeCode2"></label>
@@ -397,9 +399,9 @@
                         </div>
                 </div>
 
-        
-                
-        
+
+
+
 
         <script  type="text/javascript">
 
