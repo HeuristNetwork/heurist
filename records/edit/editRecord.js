@@ -354,7 +354,7 @@ if (! top.HEURIST.edit) {
                         var recVis = top.HEURIST.edit.record.visibility;
                         var othersAccess = (recVis == "hidden")? "hidden (owners only)" :
                         (recVis == "viewable")? "any logged-in user" :
-                        (recVis == "pending")? "pending publication" : "public (autopublish)";
+                        (recVis == "pending")? "pending publication" : "public";
                         document.getElementById('workgroup-access').innerHTML = othersAccess;
                     } else {
                         document.getElementById('workgroup-access').innerHTML = 'visible';
@@ -491,7 +491,7 @@ if (! top.HEURIST.edit) {
 
 
         /**
-        * this is an internal function that goes through all modules (sidebar tabs) and calls submit if ther is data to be saved
+        * this is an internal function that goes through all modules (sidebar tabs) and calls submit if there are data to be saved
         *
         * @param callback
         *
@@ -633,7 +633,7 @@ if (! top.HEURIST.edit) {
             var link = document.getElementById(top.HEURIST.edit.modules[moduleName]['link-id']);
             if (link) {
                 link.className += ' changed';
-                link.title = "Content has been changed";
+                link.title = "Content has been modified";
             }
 
             $("#close-button").hide();
@@ -705,7 +705,7 @@ if (! top.HEURIST.edit) {
         onbeforeunload: function() {
             var changed = top.HEURIST.edit.is_something_chnaged();
             // FIXME ... we can do better than this
-            if (changed) return "You have made changes to the data for this record.  If you continue, all changes will be lost.";
+            if (changed) return "You have made changes to the data for this record. If you continue, all changes will be lost.";
         },
 
 
@@ -889,9 +889,9 @@ if (! top.HEURIST.edit) {
         */
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
             // Get Detail Type info
-            //0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
-            //6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
-            //10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
+            // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
+            // 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
+            // 10,"dty_TermIDTreeNonSelectableIDs" 11,"dty_PtrTargetRectypeIDs" 12,"dty_ID"
             var dt = top.HEURIST.detailTypes.typedefs[detailTypeID]['commonFields'];
             var dtyFieldNamesIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
             var rfr = null;
@@ -970,7 +970,8 @@ if (! top.HEURIST.edit) {
         * @param rtID
         */
         getConstrainedRectypeList: function(dtyID,rtID) {    //saw TODO: change this to terms pass in scrRectypeID
-            var listConstdRectype = top.HEURIST.rectypes.typedefs[rtID].dtFields[dtyID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs']];
+            var listConstdRectype = top.HEURIST.rectypes.typedefs[rtID].dtFields[dtyID]
+            [top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs']];
             for (var rType in top.HEURIST.edit.record.rtConstraints[rdtID]) {    // saw TODO  need to change this to dTypeID for relmarkers
                 if (first) {
                     listConstdRectype += "" + rType;
@@ -1027,14 +1028,9 @@ if (! top.HEURIST.edit) {
         },
 
 
-        /*
-        uploadsDiv: null,
-        uploadsInProgress: { counter: 0, names: {} },
-        */
-
 
         /**
-        * create snapshot for bookmark
+        * TODO: create snapshot for bookmark
         */
 
 
@@ -1097,11 +1093,11 @@ if (! top.HEURIST.edit) {
 
 
         /**
-        * Note: start uploading file as soon as user has browsed the file
+        * Note: starts uploading file as soon as user has browsed the file
         */
 
         /**
-        * Upload a local file to the database
+        * Upload a local file to the database file directory
         *
         * @param fileInput
         */
@@ -1263,11 +1259,6 @@ if (! top.HEURIST.edit) {
                     var dtID = order[i];
                     if (rfrs[dtID][rstFieldNamesToRdrIndexMap['rst_RequirementType']] == 'forbidden') continue;
 
-                    /*IAN's super trick to avoid Stiv's fury
-                    if(top.HEURIST.database.name == "Arts_eResearch"){
-                    if([150,79,149,57,70,80,151,69,77,74,39].indexOf(Number(dtID))>=0) continue;
-                    }*/
-
                     var newInput = top.HEURIST.edit.createInput(recID, dtID, rectypeID, fieldValues[dtID] || [], container);
                     if (newInput) {
                         inputs.push(newInput);
@@ -1297,7 +1288,7 @@ if (! top.HEURIST.edit) {
                 if (rfrs  &&  rfrs[dtID]) continue;
 
                 var input = top.HEURIST.edit.createInput(recID, dtID, 0, fieldValues[dtID] || [], container);
-                //input.setReadonly(true);
+
                 inputs.push(input);
             }
 
@@ -1320,7 +1311,7 @@ if (! top.HEURIST.edit) {
 
             if (windowRef.HEURIST.uploadsInProgress  &&  windowRef.HEURIST.uploadsInProgress.counter > 0) {
                 // can probably FIXME if it becomes an issue ... register an autosave with the upload completion handler
-                alert("File uploads are in progress ... please wait");
+                alert("File uploads are in progress - please wait");
                 return false;
             }
 
@@ -1398,7 +1389,7 @@ if (! top.HEURIST.edit) {
             }//for inputs
 
             if(duplicatedInputs.length>0){
-                alert("There are duplicated values in your inputs:<br />" + duplicatedInputs.join("<br />"));
+                alert("There are duplicated values in your fields:<br />" + duplicatedInputs.join("<br />"));
                 return false;
             }
 
@@ -1444,7 +1435,7 @@ if (! top.HEURIST.edit) {
             if (missingFields.length == 0) {
                 return true;
             }else{
-                alert("There are problems with your date-time inputs (incorrect format):<br /> - " + missingFields.join("<br /> - "));
+                alert("Incorrectly formatted date-time value for<br /> " + missingFields.join("<br /> - "));
                 firstInput.focus();
                 return false;
             }
@@ -1641,7 +1632,7 @@ if (! top.HEURIST.edit) {
         makeTemporalButton: function(dateBox, doc) {
             var buttonElt = doc.createElement("input");
             buttonElt.type = "button";
-            buttonElt.title = "Pop up widget to enter complex date information (uncertain, fuzzy, radiometric etc.)";
+            buttonElt.title = "Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)";
             buttonElt.className = "temporal-button";
             if (dateBox.dateButton)
                 dateBox.parentNode.insertBefore(buttonElt, dateBox.dateButton.nextSibling);
@@ -1684,7 +1675,7 @@ if (! top.HEURIST.edit) {
                         dateBox.value = temporalToHumanReadableString(str);
                         dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
                         if( dateBox.strTemporal != dateBox.value) {
-                            buttonElt.title = "Edit temporal " + dateBox.strTemporal;
+                            buttonElt.title = "Edit compound date " + dateBox.strTemporal;
                         }
                     }
                     top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
@@ -1786,7 +1777,7 @@ if (! top.HEURIST.edit) {
             var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
             dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
             dupImg.className = "duplicator";
-            dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + " field";
+            dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + " value";
             top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
         }
 
@@ -1807,9 +1798,9 @@ if (! top.HEURIST.edit) {
         if (true || this.repeatable=== true) {    //  saw TODO adjust this code for Cardinality , pass in max number and flag red after max
             for (var i=0; i < fieldValues.length; ++i) {
                 var ele = this.addInput( fieldValues[i] )
-                
+
                 if(!this.repeatable && i>0){
-                        $(ele).after('<div class="prompt" style="color:red">Repeated value for a single value field - please delete</div>');
+                    $(ele).after('<div class="prompt" style="color:red">Repeated value for a single value field - please correct</div>');
                 }
                 //nonsense typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
@@ -1987,7 +1978,7 @@ if (! top.HEURIST.edit) {
         var newInput = this.document.createElement("input");
         newInput.setAttribute("autocomplete", "off");
         newInput.type = "text";
-        newInput.title = "Enter a text string";  //ij
+        newInput.title = "Enter a text string";
         newInput.className = "in";
         newInput.style.display = "block";
         if (bdValue) newInput.value = bdValue.value;
@@ -1996,7 +1987,7 @@ if (! top.HEURIST.edit) {
     };
 
     /**
-    * BibDetailIntegerInput input
+    * BibDetailIntegerInput input  Note: at 2014, this is ? simply for backward compatibility
     *
     * @constructor
     * @return {Object}
@@ -2074,8 +2065,11 @@ if (! top.HEURIST.edit) {
     * @deprecated
     */
     top.HEURIST.edit.inputs.BibDetailDateInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
+
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype = new top.HEURIST.edit.inputs.BibDetailFreetextInput;
+
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailFreetextInput.prototype;
+
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput = function(bdValue) {
         var newDiv = this.document.createElement("div");
         newDiv.className = "date-div";
@@ -2089,7 +2083,7 @@ if (! top.HEURIST.edit) {
         textElt.name = newDiv.name;
         textElt.value = bdValue? bdValue.value : "";
         textElt.className = "in";
-        textElt.title = "Enter a standard format date (yyyy or yyyy-mm-dd)";  //ij
+        textElt.title = "Enter a standard ISO format date (yyyy or yyyy-mm-dd). You may also enter 'today' or 'now', and negative dates for BCE. ";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
         top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
@@ -2100,7 +2094,9 @@ if (! top.HEURIST.edit) {
 
 
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
+
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.typeDescription = "a date value";
+
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.regex = new RegExp("\\S");
 
 
@@ -2126,7 +2122,7 @@ if (! top.HEURIST.edit) {
         textElt.name = newDiv.name;
         textElt.value = bdValue? bdValue.value : "";
         textElt.className = "in resource-date";
-        textElt.title = "Enter a compound date (uncertain, fuzzy or radiometric)";  //ij sw
+        textElt.title = "Enter a date or click the icons to the right. Date can be 'now' or 'today', or year only - negative for BCE.";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
         top.HEURIST.registerEvent(textElt, "change", function() {
@@ -2180,6 +2176,7 @@ if (! top.HEURIST.edit) {
 
     /**
     * BibDetailBlocktextInput input
+    * Input for text fields
     *
     * @constructor
     * @return {Object}
@@ -2193,11 +2190,11 @@ if (! top.HEURIST.edit) {
         var newInput = this.document.createElement("textarea");
         newInput.rows = "3";
         newInput.className = "in";
-        newInput.title = "Enter a single or multi-line (memo) text value"; //ij
+        newInput.title = "Enter a single or multi-line (memo) text value. Drag corner of box to expand."; //ij
         if (bdValue) newInput.value = bdValue.value;
 
         this.addInputHelper.call(this, bdValue, newInput);
-        
+
         return newInput;
     };
 
@@ -2278,7 +2275,7 @@ if (! top.HEURIST.edit) {
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
         removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
-        removeImg.title = "Remove this record reference";
+        removeImg.title = "Remove this record pointer";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         top.HEURIST.registerEvent(removeImg, "click", function() {
             if (! newDiv.readOnly) {
@@ -2314,7 +2311,7 @@ if (! top.HEURIST.edit) {
                 thisRef.chooseResource(newDiv, bdValue.title);
             });
         }
-        
+
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailResourceInput.prototype.addInput
 
@@ -2527,7 +2524,7 @@ if (! top.HEURIST.edit) {
 
         var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
             this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-            (bdValue && bdValue.value ? bdValue.value : null), true);//AO: Ian doesn't want it (this.required!=="required"));
+            (bdValue && bdValue.value ? bdValue.value : null), true);
 
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.style.width = "auto";
@@ -2566,10 +2563,6 @@ if (! top.HEURIST.edit) {
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
 
-        // TODO: Jul 14: cleanup all this commented out stuff (and above and below), is any of it relevant/useful?
-        //var detailType = this.detailType;
-        //var recFieldRequirements = this.recFieldRequirements;
-        //urlSpan.comboboxSelector = newInput;
         urlSpan.thisElement = this;
         urlSpan.bdValue = bdValue;
 
@@ -2819,7 +2812,7 @@ if (! top.HEURIST.edit) {
                     thumbElt.name = inputDiv.name;
                     thumbElt.value = "Web page snapshot";
                     thumbElt.type = "button";
-                    thumbElt.title = "Click here to snapshot the web page indicated by the URL and store as the thumbnail";
+                    thumbElt.title = "Click here to snapshot the web page indicated by the URL and store as the thumbnail field";
                     thumbElt.onclick = function(){top.HEURIST.edit.uploadURL.call(thisRef, fileElt);}
                     inputDiv.appendChild(thumbElt);
                     inputDiv.thumbElt = thumbElt;
@@ -2910,7 +2903,7 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.regex =
     new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.getPrimaryValue = function(input) { return input? input.input.value : ""; };
-    top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.typeDescription = "a geographic value";
+    top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.typeDescription = "a geographic object";
 
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setReadonly = function(readonly) {
         this.parent.setReadonly.call(this, readonly);
@@ -3017,7 +3010,7 @@ if (! top.HEURIST.edit) {
         editLink.className = "geo-edit";
         editLink.onclick = function() {
             if (top.HEURIST.browser.isEarlyWebkit) {
-                alert("Geographic objects use Google Maps API, which doesn't work on this browser - sorry");
+                alert("Geographic objects use Google Maps API, which doesn't work on this browser - please update to a recent version");
                 return;
             }
 
@@ -3075,7 +3068,7 @@ if (! top.HEURIST.edit) {
         }
 
         newDiv.style.width = "auto";
-    
+
         return newDiv;
     }; //top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.addInput
 
@@ -3083,7 +3076,7 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(element, value) {
         if (! value) return; // "cancel"
 
-        var description = this.wktValueToDescription(value); //get human readable string 
+        var description = this.wktValueToDescription(value); //get human readable string
 
         element.input.name = element.input.name.replace(/^_/, "");
         element.input.value = value;
@@ -3131,7 +3124,7 @@ if (! top.HEURIST.edit) {
     */
     top.HEURIST.edit.inputs.BibDetailUnknownInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
-    top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "some value of unknown type";
+    top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.typeDescription = "a value of unknown type";
 
     top.HEURIST.edit.inputs.BibDetailUnknownInput.prototype.addInput = function(bdValue) {
         var dtyFieldNamesToDtIndexMap = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
@@ -3196,7 +3189,7 @@ if (! top.HEURIST.edit) {
                 if (val && val.byRectype) {
                     top.HEURIST.edit.record.relatedRecords = val;
                 }else if(val.error) {
-                    alert(" There was an error on relationship marker: " + val.error);
+                    alert(" Problem with relationship marker: " + val.error);
                 }
             });
         }
@@ -3366,10 +3359,7 @@ if (! top.HEURIST.edit) {
         p.appendChild(this.document.createTextNode("Set up email reminders about this record"));
 
         var tbody = this.fieldset.appendChild(this.document.createElement("div"));
-        //tbody.frameBorder = 0;
         tbody.className = "reminder-table";
-        //var tbody = this.detailTable.appendChild(this.document.createElement("div"));
-        //var tbody = detailTable;
 
         var tr1 = tbody.appendChild(this.document.createElement("div"));
         var tds = [];
@@ -3512,7 +3502,7 @@ if (! top.HEURIST.edit) {
         //td.style.verticalAlign = "baseline";
         //td.style.paddingTop = "10px";
         td.appendChild(this.document.createTextNode("You must Send (now) or Set (periodic) your reminder before saving record. " +
-            "Reminders are sent shortly after midnight (server time) on the reminder day."));
+            "Periodic reminders are normally sent shortly after midnight (server time) on the reminder day."));
 
         var bibIDelt = this.document.createElement("input");
         bibIDelt.type = "hidden";
@@ -3582,10 +3572,8 @@ if (! top.HEURIST.edit) {
 
             // callback
             var vals = eval(json.responseText);
-            if (! vals) {
-                alert("Oops - error while saving reminder");
-            } else if (vals.error) {
-                alert("Error while saving reminder:\n" + vals.error);
+            if ((! vals) || (vals.error)) {
+                alert("Unknown error while saving reminder, server responded:\n" + vals.error);
             } else if (immediate) {
                 alert("Email(s) sent");
             } else {
@@ -3640,8 +3628,6 @@ if (! top.HEURIST.edit) {
         var inputField = inputCell.appendChild(this.document.createElement("input"));
         this.inputs = [ inputField ];
         this.inputs[0].className = "in";
-        //this.inputs[0].style.width = "75ex";
-        //this.inputs[0].style.maxWidth = "90%";
         this.inputs[0].name = "rec_url";
         this.inputs[0].id = "rec_url";
         this.inputs[0].value = defaultValue  ||  "";
@@ -3719,11 +3705,11 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibURLInput.prototype.verify = function() {
         return (this.inputs[0].value != "");
     };
-    
+
     //
     // the same code is in inputUrlInclude
     //
-        
+
     top.HEURIST.edit.inputs.BibDetailURLincludeInput = function() { top.HEURIST.edit.inputs.BibDetailInput.apply(this, arguments); };
     top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.focus = function() { this.inputs[0].textElt.focus(); };
@@ -3739,16 +3725,9 @@ if (! top.HEURIST.edit) {
         var thisRef = this;    // provide input reference for closures
 
         var newDiv = this.document.createElement("div");
-            newDiv.expando = true;
-            newDiv.bdValue = null;
+        newDiv.expando = true;
+        newDiv.bdValue = null;
         this.addInputHelper.call(this, bdValue, newDiv);
-
-        if(this.promptDiv.innerHTML){
-            /* in chrome it give a huge gap - issue was fixed with edit.css
-            var br = this.document.createElement("br");
-            br.style.lineHeight = "2px";
-            newDiv.parentNode.insertBefore(br, this.promptDiv);*/
-        }
 
         var valueVisible = "";
         var valueHidden = "";
@@ -3762,26 +3741,17 @@ if (! top.HEURIST.edit) {
                 if(bdValue.file.remoteURL){
                     //remote resource
                     valueVisible = bdValue.file.remoteURL;
-                    //newDiv.bdValue = valueHidden + '|' + bdValue.file.remoteURL+'|'+bdValue.file.remoteSource+'|'+bdValue.file.mediaType;
                 }else{
                     //local uploaded file or file on server
                     valueVisible = bdValue.file.origName;
-                    //newDiv.bdValue =  valueHidden + '|'+ bdValue.file.URL+'|heurist|'+(bdValue.file.mediaType?bdValue.file.mediaType:'')+'|'+bdValue.file.ext;
+                    //  Deprecated? newDiv.bdValue =  valueHidden + '|'+ bdValue.file.URL+'|heurist|'+
+                    // (bdValue.file.mediaType?bdValue.file.mediaType:'')+'|'+bdValue.file.ext;
                 }
 
                 if(bdValue.file.thumbURL){
                     thumbUrl = bdValue.file.thumbURL;
                 }
 
-            }else{
-                /* old way for real urlinclude - @todo remove
-                valueVisible = bdValue.value;
-                var arr = valueVisible.split("|");
-                if(arr && arr.length>0){
-                    valueVisible = arr[0]; //url only
-                }
-                valueHidden = (bdValue.value)?bdValue.value:"";
-                */
             }
         }
 
@@ -3789,60 +3759,58 @@ if (! top.HEURIST.edit) {
 
 
         var thumbDiv = this.document.createElement("div");
-            thumbDiv.className = "thumbPopup";
-            thumbDiv.style.backgroundImage = "url("+thumbUrl+")";
-            thumbDiv.style.display = "none";
-            newDiv.appendChild(thumbDiv);
+        thumbDiv.className = "thumbPopup";
+        thumbDiv.style.backgroundImage = "url("+thumbUrl+")";
+        thumbDiv.style.display = "none";
+        newDiv.appendChild(thumbDiv);
 
         var hiddenElt = newDiv.hiddenElt = this.document.createElement("input");
-            hiddenElt.name = newDiv.name;
-            hiddenElt.value = hiddenElt.defaultValue = valueHidden;
-            hiddenElt.type = "hidden";
-            newDiv.appendChild(hiddenElt);
+        hiddenElt.name = newDiv.name;
+        hiddenElt.value = hiddenElt.defaultValue = valueHidden;
+        hiddenElt.type = "hidden";
+        newDiv.appendChild(hiddenElt);
 
         var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
-            textElt.type = "text";
-            textElt.title = "Click here to upload file or define the URL";
-            textElt.setAttribute("autocomplete", "off");
-            textElt.className = "resource-title";
-            //textElt.className = "in"; //"resource-title";
-            //textElt.style.width = 500;
-            textElt.onmouseover = function(e){
-                if(top.HEURIST && !top.HEURIST.util.isempty(textElt.value)){
-                    thumbDiv.style.display = "block";
-                }
+        textElt.type = "text";
+        textElt.title = "Click here to upload file or enter the URL";
+        textElt.setAttribute("autocomplete", "off");
+        textElt.className = "resource-title";
+        textElt.onmouseover = function(e){
+            if(top.HEURIST && !top.HEURIST.util.isempty(textElt.value)){
+                thumbDiv.style.display = "block";
             }
-            textElt.onmouseout = function(e){
-                thumbDiv.style.display = "none";
+        }
+        textElt.onmouseout = function(e){
+            thumbDiv.style.display = "none";
+        }
+
+        textElt.onkeypress = function(e) {
+            // refuse non-tab key-input
+            if (! e) e = window.event;
+
+            if (! newDiv.readOnly  &&  e.keyCode != 9  &&  ! (e.ctrlKey  ||  e.altKey  ||  e.metaKey)) {
+                // invoke popup
+                thisRef.defineURL(newDiv);
+                return false;
             }
+            else return true;    // allow tab or control/alt etc to do their normal thing (cycle through controls)
+        };
 
-            textElt.onkeypress = function(e) {
-                // refuse non-tab key-input
-                if (! e) e = window.event;
+        textElt.value = textElt.defaultValue = valueVisible;
 
-                if (! newDiv.readOnly  &&  e.keyCode != 9  &&  ! (e.ctrlKey  ||  e.altKey  ||  e.metaKey)) {
-                    // invoke popup
-                    thisRef.defineURL(newDiv);
-                    return false;
-                }
-                else return true;    // allow tab or control/alt etc to do their normal thing (cycle through controls)
-            };
+        var maxWidth = this.parentElement.width;
+        if(!maxWidth || maxWidth>500){
+            maxWidth = 500;
+        }
 
-            textElt.value = textElt.defaultValue = valueVisible;
+        top.HEURIST.util.autoSize(textElt, {maxWidth:maxWidth});
 
-            var maxWidth = this.parentElement.width;
-            if(!maxWidth || maxWidth>500){
-                    maxWidth = 500;
-            }
-
-            top.HEURIST.util.autoSize(textElt, {maxWidth:maxWidth});
-
-            /*$('input#'+textElt.id).autoGrowInput({
-                comfortZone: 50,
-                minWidth: 20,
-                maxWidth: '90%',
-                id:'#'+textElt.id
-            });*/
+        /*$('input#'+textElt.id).autoGrowInput({
+        comfortZone: 50,
+        minWidth: 20,
+        maxWidth: '90%',
+        id:'#'+textElt.id
+        });*/
 
 
         top.HEURIST.registerEvent(textElt, "click", function() { thisRef.defineURL(newDiv); });
@@ -3851,31 +3819,20 @@ if (! top.HEURIST.edit) {
 
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-            removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
-            removeImg.className = "delete-resource";
-            removeImg.title = "Clear";
-            var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-            top.HEURIST.registerEvent(removeImg, "click", function() {
-                if (! newDiv.readOnly) {
-                    thisRef.clearURL(newDiv);
-                    if (windowRef.changed) windowRef.changed();
-                }
-            });
-
-    /*
-        var editImg = newDiv.appendChild(this.document.createElement("img"));
-            editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
-            editImg.className = "edit-resource";
-            editImg.title = "Edit this record";
-
-        top.HEURIST.registerEvent(editImg, "click", function() {
-            top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value, {
-                callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
-            });
+        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.className = "delete-resource";
+        removeImg.title = "Clear";
+        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+        top.HEURIST.registerEvent(removeImg, "click", function() {
+            if (! newDiv.readOnly) {
+                thisRef.clearURL(newDiv);
+                if (windowRef.changed) windowRef.changed();
+            }
         });
-    */
 
     };
+
+
     /**
     *  returns the value - ulf_ID or combined URL|source|type
     */
@@ -3899,7 +3856,7 @@ if (! top.HEURIST.edit) {
 
         var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
         /*if (element.input.constrainrectype){
-            url += "&t="+element.input.constrainrectype;
+        url += "&t="+element.input.constrainrectype;
         }*/
 
         top.HEURIST.util.popupURL(window, url, {
@@ -3914,7 +3871,6 @@ if (! top.HEURIST.edit) {
                         var r = confirm('You uploaded/changed the file data. If you continue, all changes will be lost.');
                         return r;
                     }else{
-                        //var filedata = (typeof fileJSON == 'String')?top.HEURIST.util.expandJsonStructure(fileJSON) :fileJSON;
                         var filedata = top.HEURIST.util.expandJsonStructure(fileJSON);
                         if(filedata){
                             element.input.setURL(element, ((filedata.remoteSource=='heurist')?filedata.origName:filedata.remoteURL), fileJSON);
@@ -3928,18 +3884,6 @@ if (! top.HEURIST.edit) {
                 }
 
                 return true; //prevent close
-
-
-    /*
-                //it returns url - link to external or heurist file
-                //            source - name of source/service
-                //            type - type of media
-                if(top.HEURIST.util.isempty(url)){
-                    //element.input.setURL(element, "", "");
-                }else{
-                    element.input.setURL(element, url, url+'|'+source+"|"+type);
-                }
-    */
             }
         } );
     };
@@ -3948,6 +3892,7 @@ if (! top.HEURIST.edit) {
     * clear value
     */
     top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.clearURL = function(element) { this.setURL(element, "", ""); };
+
 
     /**
     * assign new URL value - returns from uploadFileOrDefineURL
@@ -3981,8 +3926,8 @@ if (! top.HEURIST.edit) {
     *  TODO - to implement
     */
     top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.calculateDroppedText = function(oldValue, newValue) {};
-        
-    
+
+
 
     top.HEURIST.fireEvent(window, "heurist-edit-js-loaded");
 }
