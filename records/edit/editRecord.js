@@ -3829,7 +3829,7 @@ if (! top.HEURIST.edit) {
                 if (windowRef.changed) windowRef.changed();
             }
         });
-
+        return newDiv;
     };
 
 
