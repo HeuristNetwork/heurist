@@ -45,12 +45,49 @@
         
         <!-- Visualize plugin --> 
         <script type="text/javascript" src="visualize/visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="visualize/visualize.css">                          
+        <link rel="stylesheet" type="text/css" href="visualize/visualize.css">                     
     </head>
     
     <body>
         <!-- Visualize HTML -->
         <?php include "visualize/visualize.html"; ?>
+        
+        <!-- Call from parent iframe -->
+        <script>
+            /** Shows data visually */
+            function showData(data) {
+                console.log("showData called inside springDiagram");
+                
+                // Custom data parsing
+                function getData(data) {
+                    console.log("Custom getData() call");
+                    return data;
+                }
+                
+                // Calculates the line length
+                function getLineLength(record) {
+                    var length = getSetting(setting_linelength);
+                    if(record !== undefined && record.hasOwnProperty("depth")) {
+                        length = length / (record.depth+1);
+                    }
+                    return length;
+                }
+    
+                $("#visualize").visualize({
+                    data: data,
+                    getData: function(data) { return getData(data); },
+                    getLineLength: function(record) { return getLineLength(record); },
+                    
+                    entityradius: 1,
+                    linewidth: 1,
+                    
+                    showCounts: false,
+                    showEntitySettings: false,
+                    showLineWidth: false,
+                    showFormula: false
+                }); 
+            }
+        </script>  
     </body>
     
 </html>

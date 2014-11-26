@@ -155,15 +155,15 @@ $.widget( "heurist.connections", {
         // Content loaded already    
         }else{
             // SPRING DIAGRAM CODE
-            console.log("CONTENT LOADED ALREADY");
+            console.log("CONTENT LOADED ALREADY");  
             
             if(this.options.recordset !== null) {
                 var records = this.options.recordset.getRecords();
                 console.log(records);  
                 
-                // TODO: Update to H4 after Artem adds relationships
-                var data = parseRecSet();  // Parse the Javascript data
-                visualize(data);           // Visualize the data
+                // TODO: Update to H4 completely after Artem adds relationships
+                var data = parseRecSet2(records);  // Parse the Javascript data
+                visualize(data);                   // Visualize the data
             }
             
         }
@@ -315,36 +315,41 @@ function parseRecSet() {
     return data;
 }
 
+
+
+
+
+/** RecSet parsing for Heurist 4 */
+function parseRecSet2(records) {
+    var data = {};
+    var nodes = {};
+    var links = [];
+                      
+    // All nodes
+    for(var id in records) {
+        var node = {id: parseInt(id),
+                    name: records[id][5],
+                    image: top.HAPI4.iconBaseURL+records[id][4],
+                    count: 0,
+                    depth: 1
+                   };
+        nodes[id] = node;
+    }
+    
+    // Construct data object
+    var data = {nodes: nodes, links: links};
+    console.log("DATA");
+    console.log(data);
+    return data;
+}
+
 /** Calls the visualisation plugin */
 function visualize(data) {
-    // Custom data parsing
-    function getData(data) {
-        console.log("Custom getData() call");
-        return data;
-    }
-    
-    // Calculates the line length
-    function getLineLength(record) {
-        var length = getSetting(setting_linelength);
-        if(record !== undefined && record.hasOwnProperty("depth")) {
-            length = length / (record.depth+1);
-        }
-        return length;
-    }
-    
+    console.log("Visualize called in connections.js");
+
     // Call plugin
-    console.log("Calling plugin!");
-    $("#visualisation").visualize({
-        data: data,
-        getData: function(data) { return getData(data); },
-        getLineLength: function(record) { return getLineLength(record); },
-        
-        entityradius: 1,
-        linewidth: 1,
-        
-        showCounts: false,
-        showEntitySettings: false,
-        showLineWidth: false,
-        showFormula: false
-    });  
+    var iframe = $("iframe[src*=springDiagram]");
+    iframe[0].contentWindow.showData(data);
+    
+    
 }
