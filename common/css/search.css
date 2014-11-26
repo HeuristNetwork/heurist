@@ -1025,7 +1025,7 @@ div.hide .saved-search-subheading {
 	top:55px
 }
 #sidebar {
-	bottom: 0;
+	bottom: 0px !important;
 	left: 10px !important;
 	position: absolute;
 	right: 0 !important;

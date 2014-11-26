@@ -4502,7 +4502,9 @@ top.HEURIST.search = {
 
     // appends useful debugging information as email subject to the contact-link object
     setContactLink: function() {
-		document.getElementById("contact-link").href += "?subject=HEURIST%20v" + top.HEURIST.VERSION +
+        var ele = document.getElementById("contact-link");
+        if(ele)
+		ele.href += "?subject=HEURIST%20v" + top.HEURIST.VERSION +
 														"%20user:" + top.HEURIST.get_user_username() +
 														(top.HEURIST.parameters["q"]
 															? "%20q:" + top.HEURIST.parameters["q"]
@@ -4745,6 +4747,7 @@ top.HEURIST.search = {
 */
 	buildMenu: function() {
 
+        /*
 		YAHOO.util.Event.onDOMReady(function() {
 			top.HEURIST.search.myHeuristMenu = new YAHOO.widget.Menu("my-heurist-menu", {
 				context: ["my-heurist-menu-link", "tl", "bl", ["beforeShow", "windowResize"]]
@@ -4754,14 +4757,8 @@ top.HEURIST.search = {
 			$("#my-heurist-menu-link a").bind("click mouseover", function() {
 				top.HEURIST.search.myHeuristMenu.show(); return false;
 			});
-
-
-			/*$(document).bind("click", function(event) {
-					alert(event.target.id);
-			});*/
-
-
 		});
+        */
 
 		//init menu
 		$("ul.sf-menu").supersubs({
@@ -4771,7 +4768,6 @@ top.HEURIST.search = {
 		}).superfish().click(function(){
 				$(this).find("ul").hide();
 			});
-
 
 		//close Assisted search in outside click
 		$("#btnSimpleSearch").click(function(){

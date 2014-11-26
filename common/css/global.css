@@ -865,7 +865,8 @@ ul li ul div.separator {
 }
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 
-#tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator {border-top:1px solid #666;}
+#tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator 
+{border-top:1px solid #666;}
 
 .error{
 	font-size:12px !important;
