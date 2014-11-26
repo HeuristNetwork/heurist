@@ -18,6 +18,62 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* Explanation of faceted search
+
+There are two types of queries: 1) to search facet values 2) to search results
+
+Examples
+1) No levels:   
+
+search results: t:10 f:1:"XXX" - search persons by name
+facet search:   f:1  where t:10 + other current queries
+
+2) One level:
+
+search results: t:10 linked_to:5-61 [t:5 f:1:"XXX"] - search persons where multimedia name is XXX
+facet search:   f:1  where t:5 linkedfrom:10-61 [other current queries(parent query)]
+
+3) Two levels
+
+search results: t:10 linked_to:5-61 [t:5 linked_to:4-15 [t:4 f:1:"XXX"]] - search persons where multimedia has copyright of organization with name is XXX
+facet search:   f:1 where t:4 linkedfrom:5-15 [t:5 linkedfrom:10-61 [other current queries for person]]   - find organization who is copyright of multimedia that belong to person
+
+
+Thus, our definition has the followig structure
+rectype - main record type to search
+domain
+facets:[ [
+code:  10:61:5:15:4:1  to easy init and edit    rt:ft:rt:ft:rt:ft  if link is unconstrained it will be empty  61::15
+title: "Author Name < Multimedia"
+id:  1  - field type id 
+type:  "freetext"  - field type
+levels: [t:4 linkedfrom:5-15, t:5 linkedfrom:10-61]   (the last query in this array is ommitted - it will be current query)
+
+search - main query to search results
+            [linked_to:5-61, t:5 linked_to:4-15, t:4 f:1]    (the last query in the top most parent )
+
+currentvalue:
+history:  - to keep facet values (to avoid redundat search)
+
+],
+the simple (no level) facet
+[
+id: 1
+code: 10:1 
+title: "Family Name"
+type:  "freetext"
+levels: []
+search: [t:10 f:1] 
+]
+
+]
+
+
+
+NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
+            
+*/
+
 $.widget( "heurist.search_faceted", {
 
     // default options

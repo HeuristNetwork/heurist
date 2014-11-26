@@ -123,7 +123,7 @@ $.widget( "heurist.search_links", {
                     }
             });
 
-        }else if(!top.HAPI4.currentUser.usr_SavedSearch){
+        }else if(!top.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
 
             top.HAPI4.SystemMgr.ssearch_get(
                 function(response){

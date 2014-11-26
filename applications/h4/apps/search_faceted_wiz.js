@@ -24,6 +24,60 @@
 */
 
 
+/* Explanation of faceted search
+
+There are two types of queries: 1) to search facet values 2) to search results
+
+Examples
+1) No levels:   
+
+search results: t:10 f:1:"XXX" - search persons by name
+facet search:   f:1  where t:10 + other current queries
+
+2) One level:
+
+search results: t:10 linked_to:5-61 [t:5 f:1:"XXX"] - search persons where multimedia name is XXX
+facet search:   f:1  where t:5 linkedfrom:10-61 [other current queries(parent query)]
+
+3) Two levels
+
+search results: t:10 linked_to:5-61 [t:5 linked_to:4-15 [t:4 f:1:"XXX"]] - search persons where multimedia has copyright of organization with name is XXX
+facet search:   f:1 where t:4 linkedfrom:5-15 [t:5 linkedfrom:10-61 [other current queries for person]]   - find organization who is copyright of multimedia that belong to person
+
+
+Thus, our definition has the followig structure
+rectype - main record type to search
+domain
+facets:[ [
+code:  10:61:5:15:4:1  to easy init and edit    rt:ft:rt:ft:rt:ft  if link is unconstrained it will be empty  61::15
+title: "Author Name < Multimedia"
+id:  1  - field type id 
+type:  "freetext"  - field type
+levels: [t:4 linkedfrom:5-15, t:5 linkedfrom:10-61]   (the last query in this array is ommitted - it will be current query)
+
+search - main query to search results
+            [linked_to:5-61, t:5 linked_to:4-15, t:4 f:1]    (the last query in the top most parent )
+
+currentvalue:
+history:  - to keep facet values (to avoid redundat search)
+
+],
+the simple (no level) facet
+[
+code: 10:1 
+title: "Family Name"
+type:  "freetext"
+id: 1
+levels: []
+search: [t:10 f:1] 
+]
+
+]
+
+NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
+            
+*/
+
 $.widget( "heurist.search_faceted_wiz", {
 
     // default options
@@ -416,7 +470,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 window.HAPI4.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4, fieldtypes:this.options.params.fieldtypes.join() }, function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                        //create unique identificator=query for each leaf fields
+                        //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
                         function __set_queries(parentquery, recordtype, fields){
                            
                            var j; 
@@ -427,18 +481,21 @@ $.widget( "heurist.search_faceted_wiz", {
                                var parentquery_new = null;
 
                                if(field.type=='rectype'){
-                                   recordtype_new  = 't:'+field.key;
+                                   recordtype_new  = field.key;
                                }else if(field.type=='resource' || field.type=='relmarker'){
                                    //@todo for relmarker - separate case
-                                   var q = recordtype + ' ' + field.key;
+                                   var q = recordtype + ':' + field.key.substr(2);
                                    if(parentquery!=''){
-                                        q = parentquery + '(' + q;
+                                        q = parentquery + ':' + q;
                                    }
                                    parentquery_new = q;
-                                   
-                                   if(field.children.length==1){
+
+                                   //unconstrained or one-type constraint                                    
+                                   if(top.HEURIST4.util.isempty(field.rt_ids) || field.rt_ids.indexOf(',')<0){
                                        recordtype_new = field.rt_ids;
+                                       recordtype = field.rt_ids;
                                    }
+                                   
                                }
 
                                if(field.children && field.children.length>0){
@@ -449,14 +506,15 @@ $.widget( "heurist.search_faceted_wiz", {
                                    var q = field.key;
                                    if(q=="recTitle") q = "title"                           
                                    else if(q=="recModified") q = "modified"                               
+                                   else q = q.substr(2);
 
-                                   q = recordtype + ' ' + q
+                                   q = recordtype + ':' + q
                                    if(parentquery!=''){
-                                        q = parentquery + '(' + q;
-                                        var nums = parentquery.split('(');
-                                        q = q + new Array( nums.length+1 ).join(')'); 
+                                        q = parentquery + ':' + q;
+                                        //var nums = parentquery.split('(');
+                                        //q = q + new Array( nums.length+1 ).join(')'); 
                                    }
-                                   fields[j].query = q;
+                                   fields[j].code = q;
                                }
 
                            }
@@ -527,7 +585,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                     if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
                                         //find it among facets  
                                         for(var i=0; i<facets.length; i++){
-                                            if(facets[i].query && facets[i].query==node.data.query){
+                                            if(facets[i].code && facets[i].code==node.data.code){
                                                 node.setSelected(true);
                                                 break;        
                                             }
@@ -688,9 +746,19 @@ $.widget( "heurist.search_faceted_wiz", {
                 var node =  fieldIds[k];      //FancytreeNode
                 //name, type, query,  ranges
                 if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
+                
+                    var ids = node.data.code.split(":");
+                
                     var facet = __get_queries(node);
                     facets.push( facet ); // { id:node.key, title:node.title, query: squery, fieldid } );
-                    facets_new.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:node.data.query } );
+                    facets_new.push( { 
+                            id:ids[ids.length-1],  
+                            code:node.data.code,
+                            title:(node.data.name?node.data.name:node.title), 
+                            type:node.data.type,
+                            levels:[],        //search for facet values
+                            search: []        //search for target rectype
+                             } );
                 }
             }
 
