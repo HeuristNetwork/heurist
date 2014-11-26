@@ -44,6 +44,7 @@ var widgets = [
     //{id:'ha11', name:'Quick Search', url:'apps/search_quick.php'},
     //{id:'ha12', name:'Advanced Search', url:'apps/search_advanced.php'},
     {id:'ha13', name:'Saved searches', widgetname:'search_links', script:'apps/search_links.js'},
+    {id:'ha_search_tree', name:'Saved searches', widgetname:'search_links_tree', script:'apps/search/search_links_tree.js'},
     {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
     {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
 
@@ -97,7 +98,7 @@ var layouts = [
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:true} },   //search
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
-        west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
+        west:{size:160, minsize:160, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,

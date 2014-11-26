@@ -47,9 +47,9 @@
         <script type="text/javascript" src="annotatedTemplate.js"></script>
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
 
-        <div class="banner">
+        <!-- div class="banner">
             <h2>Import record types from Annotated templates on HeuristNetwork.org</h2>
-        </div>
+        </div -->
 
         <div>
             <iframe id="templates" onload="onFrameLoad()" src="http://heuristnetwork.org/annotated-templates" width="100%" height="100%"></iframe>
