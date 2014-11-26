@@ -23,7 +23,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     
-    require_once (dirname(__FILE__).'/../../../php/System.php');
+    require_once (dirname(__FILE__).'/../php/System.php');
     
     $system = new System();
     if(!$system->init(@$_REQUEST['db']) ){                               
@@ -38,7 +38,7 @@
         <title>Database Summary</title>
         
         <!-- Css -->
-        <link rel="stylesheet" type="text/css" href="../../../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <style>
             #container, #settings {
                 width: 100%;
@@ -80,19 +80,19 @@
         </style>
         
         <!-- jQuery -->
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         
         <!-- D3 -->
-        <script type="text/javascript" src="../../../ext/d3/d3.js"></script>
-        <script type="text/javascript" src="../../../ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="../ext/d3/d3.js"></script>
+        <script type="text/javascript" src="../ext/d3/fisheye.js"></script>
         
         <!-- Colpick -->
-        <script type="text/javascript" src="../../../ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../../ext/colpick/colpick.css">
+        <script type="text/javascript" src="../ext/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="../ext/colpick/colpick.css">
         
         <!-- Visualize plugin --> 
-        <script type="text/javascript" src="../visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="../visualize.css">
+        <script type="text/javascript" src="visualize/visualize.js"></script>
+        <link rel="stylesheet" type="text/css" href="visualize/visualize.css">
         
         <!-- On Row Click -->
         <script>
@@ -145,7 +145,7 @@
 
                                 // Image
                                 $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                                $img = "<img src='../../../assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                                $img = "<img src='../assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                                 echo "<td align='center'>$img</td>";
 
                                 // Title
@@ -190,7 +190,7 @@
                                 // Image  
                                 $title = $row["title"];
                                 $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                                $img = "<img src='../../../assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                                $img = "<img src='../assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                                 echo "<td align='center'>$img</td>";
                                 
                                 // Type
@@ -220,13 +220,13 @@
 
                 <!-- D3 visualisation -->
                 <td>
-                    <?php include "../visualize.html"; ?>
+                    <?php include "visualize/visualize.html"; ?>
                 </td>
             </tr>
         </table>
     
         <script>
-            var url = "../../../../../admin/describe/getRectypeRelationsAsJSON.php" + window.location.search;
+            var url = "../php/api/getRectypeRelationsAsJSON.php" + window.location.search;
             console.log("Loading data from: " + url);
             d3.json(url, function(error, json) {
                 // Error check
