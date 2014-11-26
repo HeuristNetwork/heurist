@@ -1790,7 +1790,8 @@ if (! top.HEURIST.edit) {
         var helpText = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
         this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
         this.promptDiv.className = "help prompt";
-        this.promptDiv.innerHTML = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
+        var helpPrompt = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
+        this.promptDiv.innerHTML = helpPrompt;
 
         this.inputs = [];
         var defaultValue = (top.HEURIST.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");
@@ -1805,9 +1806,9 @@ if (! top.HEURIST.edit) {
                 //nonsense typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
             if (fieldValues.length == 0) {
-                this.addInput({"value" :  defaultValue});    // add default value input make it look like bdvalue without id field
+                this.addInput({"value" :  defaultValue} );    // add default value input make it look like bdvalue without id field
             }
-        } else {
+        } else { //not used
             if (fieldValues.length > 0) {
                 typeof fieldValues == "string" ? this.addInput( fieldValues) : this.addInput( fieldValues[0]);
             } else {
@@ -1855,7 +1856,10 @@ if (! top.HEURIST.edit) {
 
         this.elementName = "type:" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
         element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-        element.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
+        
+        var helpPrompt = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
+        
+        element.title = helpPrompt?helpPrompt:this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
         element.setAttribute("bib-detail-type", this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']]);
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
