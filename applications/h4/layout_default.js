@@ -65,8 +65,9 @@ var widgets = [
     {id:'h3_mainMenu', name:'Main Menu Panel', widgetname:'mainMenu', script:'apps/others/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/search/resultList.js'},
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
-    {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'}
-    
+    {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
+    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
+    {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'}
     
 ];
 
@@ -104,9 +105,9 @@ var layouts = [
                     // {appid:'h3_recordDetails'},    //H4 record viewer
 
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
-                    {appid:'h3_recordListExt', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=[q]'}},    //H4 map
+                    {appid:'h4_map', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=[q]'}},    //H4 map
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
-                    {appid:'h3_recordListExt', options:{title:'Connections', url: 'applications/h4/apps/visualize/spring_diagram/springDiagram.php?db=[dbname]'}},    //H4 connections
+                    {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}},    //H4 connections
                     {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
                     /*                ,
                     {appid:'ha51'},
