@@ -78,7 +78,11 @@ function addOptions() {
 function removeOverlays() {
     for(var property in overlays) {
         if (overlays.hasOwnProperty(property) && overlays[property] !== undefined) {
-            overlays[property].setMap(null);
+            try {
+                overlays[property].setVisibility(false);   
+            } catch(err) {
+                console.log(err);
+            }  
             overlays[property] = null;
         }
     }
@@ -147,13 +151,13 @@ function addLayerOverlay(bounds, layer, index) {
         /** MAP IMAGE FILE (TILED) */
         if(source.rectypeID == map_image_file_tiled) {
             console.log("MAP IMAGE FILE (tiled)");
-            addTiledMapImageLayer(source, index);
+            addTiledMapImageLayer(source, bounds, index);
             
         /** MAP IMAGE FILE (NON-TILED) */
         }else if(source.rectypeID == map_image_file_untiled) {
             // Map image file (non-tiled)
             console.log("MAP IMAGE FILE (non-tiled)");
-            addUntiledMapImageLayer(source, index);
+            addUntiledMapImageLayer(source, bounds, index);
 
         /** KML FILE OR SNIPPET */
         }else if(source.rectypeID == kml_file) {
@@ -174,55 +178,71 @@ function addLayerOverlay(bounds, layer, index) {
 }
 
 
+
 /**
 * Adds a tiled map image layer to the map
 * @param source Source object
-*/
-function addTiledMapImageLayer(source, index) {     
-    // Mime type
-    if(source.mimeType !== undefined) {
-        console.log("Mime type: " + source.mimeType);
-    }
+*/                                              
+function addTiledMapImageLayer(source, bounds, index) {  
+    var overlay = {};   
     
-    // Tiled image type
-    if(source.imageType !== undefined) {
+    // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
+     if(source.sourceURL !== undefined) {
+
+        // Tile type
+        var tileType = new google.maps.ImageMapType({
+            getTileUrl: function(coord, zoom) {
+                console.log(coord);
+                console.log(zoom);
+                
+                var bound = Math.pow(2, zoom);
+                var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) + ".png";
+                console.log("URL: " + url);
+                return url;
+            },
+            tileSize: new google.maps.Size(256, 256),
+            minZoom: 1,
+            maxZoom: 20,
+            radius: 1738000,
+            name: "tile"
+        });
         
-    }
-    
-    // Tiling schema
-    if(source.tilingSchema !== undefined) {
-        
-    }
-    
-    
-    // Show thumbnail as overlay
-    var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
+        // Set map options
+        map.overlayMapTypes.insertAt(0, tileType); 
+        console.log("DONE @ tiled image layer!");
+              
+     }
+
     overlays[index] = overlay; 
 }
+
 
 
 /**
 * Adds an untiled map image layer to the map
 * @param source Source object
 */
-function addUntiledMapImageLayer(source, index) {
-    // Mime type
-    if(source.mimeType !== undefined) {
-        console.log("Mime type: " + source.mimeType);
-    }
+function addUntiledMapImageLayer(source, bounds, index) {
+    var overlay = {};
     
-    // Files
-    if(source.files !== undefined) {
-        for(var i = 0; i < source.files.length; i++) {
-            source.files[i];
-        }
-    }
-    
+    // Image
+    if(source.sourceURL !== undefined) {
+        overlay = new HeuristOverlay(bounds, source.sourceURL, map);
 
-    // Show thumbnail as overlay
-    var overlay = new HeuristOverlay(bounds, layer.thumbnail, map);
+        // Set visibility
+        overlay.setVisibility = function(checked) {
+            if(checked) {
+                overlay.setMap(map);   
+            }else{
+                overlay.setMap(null);
+            }
+        }    
+    }
+
     overlays[index] = overlay; 
 }
+
+
 
 /**
 * Adds a KML layer to the map
@@ -271,6 +291,8 @@ function addKMLLayer(source, index) {
     overlays[index] = kmlLayer;   
         
 }
+
+
 
 /**
 * Adds a shape layer to the map
@@ -337,6 +359,9 @@ function addQueryLayer(source, index) {
      // Query
     if(source.query !== undefined) {
         console.log("Query: " + source.query);
+        
+        
+        
     }
 }
 

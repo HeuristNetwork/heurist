@@ -347,7 +347,7 @@ function parseRecSet2(records) {
 function visualize(data) {
     console.log("Visualize called in connections.js");
 
-    // Call plugin
+    // Call showData method of the springDiagram iFrame
     var iframe = $("iframe[src*=springDiagram]");
     iframe[0].contentWindow.showData(data);
     

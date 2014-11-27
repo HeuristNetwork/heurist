@@ -177,7 +177,10 @@ function hMapping(_map, _timeline, _basePath) {
                 scaleControl: true,     
                 overviewMapControl: true,
                 rotateControl: true,
-                scrollwheel: true
+                scrollwheel: true,
+                mapTypeControlOptions: {
+                  mapTypeIds: ["tile"]
+                }
             };
             tmap.map.addControls(mapOptions);
             tmap.getNativeMap().setOptions(mapOptions);
