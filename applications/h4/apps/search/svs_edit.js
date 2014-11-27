@@ -1,17 +1,17 @@
+var Hul = top.HEURIST4.util;
+
 function hSvsEdit(args) {
      var _className = "SvsEdit",
          _version   = "0.4",
-         edit_dialog = null,
-         currentSearch = null;
+         edit_dialog = null;
 
+     const _NAME = 0, _QUERY = 1, _GRPID = 2;         
+         
     /**
     * Initialization
     */
-    function _init(currentSearch) {
-
-        this.currentSearch = currentSearch;
-        
-        
+    function _init(args) {
+        //this.currentSearch = currentSearch;
     }
     
     /**
@@ -20,9 +20,9 @@ function hSvsEdit(args) {
     * squery - need for new - otherwise it takes currentSearch
     * domain need for new 
     */
-    function fromDataToUI(svsID, squery, domain){
+    function _fromDataToUI(svsID, squery, domain){
 
-        var $dlg = this.edit_dialog;
+        var $dlg = edit_dialog;
         if($dlg){
             $dlg.find('.messages').empty();
 
@@ -63,16 +63,20 @@ function hSvsEdit(args) {
 
                 if(Hul.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(squery));
-                }else if(!Hul.isempty(squery)) {
-                    svs_query.val( squery );
-                }else if(Hul.isnull(this.currentSearch)){
-                    svs_query.val( '' );
-                }else{
-                    //domain = this.currentSearch.w;
-                    //domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
-                    svs_query.val( this.currentSearch.q );
-                    svs_rules.val( Hul.isArray(this.currentSearch.rules)?JSON.stringify(this.currentSearch.rules):this.currentSearch.rules );   //@todo - stringigy????
+                    
+                } else if( squery && squery.q ) {
+                    
+                    svs_query.val( squery.q );
+                    svs_rules.val( Hul.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
+                    
+                } else if(!Hul.isempty(squery)){
+                    
+                    svs_query.val( squery ); 
+                } else {
+                    
+                   svs_query.val( '' ); 
                 }
+                
 
                 //fill with list of user groups in case non bookmark search
                 var selObj = svs_ugrid.get(0);
@@ -97,7 +101,245 @@ function hSvsEdit(args) {
             
         }
      }
+     
+    /**
+    * Show faceted search wizard
+    * 
+    * @param params
+    */
+    function _showSearchFacetedWizard ( params ){
 
+        if($.isFunction($('body').search_faceted_wiz)){ //already loaded
+            _showSearchFacetedWizard(params);
+        }else{
+            $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ _showSearchFacetedWizard(params); } );
+        }
+
+    }  
+    
+    // @todo
+    function _editRules(ele_rules) {
+        
+               var that = this;
+                
+                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+                if(!Hul.isnull(ele_rules)){
+                    url = url + '&rules=' + encodeURIComponent(ele_rules.val());
+                }
+                
+                Hul.showDialog(url, { width:1200, callback: 
+                    function(res){
+                        if(!Hul.isempty(res)) {
+                            if(res.mode == 'apply'){  //&& that._query_request){
+                                
+                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
+                                
+                            }else if(res.mode == 'save') {
+                                
+                                if(Hul.isnull(ele_rules)){ //call from resultListMenu - create new rule
+                                    _showDialog('rules', null, res.rules );
+                                }else{
+                                    ele_rules.val( JSON.stringify(res.rules) );    
+                                }
+                            }
+                        }
+                    }});
+        
+        
+    }
+     
+     /**
+     * put your comment there...
+     * 
+     * @param svsID
+     * @param squery
+     * @param mode - faceted, rules or saved
+     * @param callback
+     */
+     function _showDialog( mode, callback, svsID, squery ){
+        
+        var domain = 'all';
+        
+        if (mode == 'faceted'){
+        
+            var facet_params = {};    
+            if(svsID>0){
+                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                if(svs){
+                    try {
+                        facet_params = $.parseJSON(svs[_QUERY]);
+                    }
+                    catch (err) {
+                        // Do something about the exception here
+                        Hul.showMsgDlg(top.HR('Can not init edit for faceted search. Corrupted parameters. Remove this search'), null, "Error");
+                        return;
+                    }
+                }
+            }
+            
+            _showSearchFacetedWizard( {svsID:svsID, domain:domain, params:facet_params, onsave: callback }); 
+            //function(event, request){   that._updateAfterSave(request, 'faceted');
+            
+        }else if (mode == 'rules'){ //@todo
+
+            //create new rules       
+            if(svsID>0){ //edit rules
+                
+            }else{
+                //Hul.isempty(squery)){
+            }
+            
+        }else if(null == edit_dialog){
+                //create new dialog
+                
+            var $dlg = edit_dialog = $( "<div>" ).appendTo(  $('body') );
+
+            //load edit dialogue
+            $dlg.load("apps/svs_edit.html?t="+(new Date().time), function(){
+
+                //find all labels and apply localization
+                $dlg.find('label').each(function(){
+                    $(this).html(top.HR($(this).html()));
+                })
+                
+                $dlg.find("#svs_Rules_edit")                  
+                    .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                    .css({'height':'16px', 'width':'16px'})
+                    .click(function( event ) {
+                        //that.
+                        _editRules( $dlg.find('#svs_Rules') );
+                    });
+                
+
+                var allFields = $dlg.find('input');
+
+                //that.
+                _fromDataToUI(svsID, squery, domain);
+
+                function __doSave(){   //save search
+
+                    var message = $dlg.find('.messages');
+                    var svs_id = $dlg.find('#svs_ID');
+                    var svs_name = $dlg.find('#svs_Name');
+                    var svs_query = $dlg.find('#svs_Query');
+                    var svs_ugrid = $dlg.find('#svs_UGrpID');
+                    var svs_rules = $dlg.find('#svs_Rules');
+                    var svs_notes = $dlg.find('#svs_Notes');
+
+                    allFields.removeClass( "ui-state-error" );
+
+                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 25 );
+                    
+                    if(bValid){
+                        if(svs_query.is(":visible")){
+                            bValid = Hul.checkLength( svs_query, "Query", message, 1 );
+                        }else{
+                            bValid = Hul.checkLength( svs_rules, "Query", message, 1 );
+                        }
+                    }
+
+                    if(bValid){
+
+                        var svs_ugrid = svs_ugrid.val();
+                        var query_to_save = []; 
+                        
+                        var domain = 'all';    
+                        if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
+                            domain = svs_ugrid;    
+                            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
+                            if(domain!="all"){
+                                query_to_save.push('w='+domain);
+                            }
+                        }
+                        if(!Hul.isempty(svs_query.val())){
+                           query_to_save.push('q='+svs_query.val());
+                        }
+                        if(!Hul.isempty(svs_rules.val())){
+                           query_to_save.push('rules='+svs_rules.val());
+                        }
+                        if(!Hul.isempty(svs_notes.val())){
+                           query_to_save.push('notes='+svs_notes.val());
+                        }
+
+                        var request = {  //svs_ID: svsID, //?svs_ID:null,
+                            svs_Name: svs_name.val(),
+                            svs_Query: '?'+query_to_save.join('&'),
+                            svs_UGrpID: svs_ugrid,
+                            domain:domain};
+
+                        var isEdit = ( parseInt(svs_id.val()) > 0 );
+                        if(isEdit){
+                            request.svs_ID = svs_id.val();
+                        }
+
+                        //
+                        top.HAPI4.SystemMgr.ssearch_save(request,
+                            function(response){
+                                if(response.status == top.HAPI4.ResponseStatus.OK){
+
+                                    var svsID = response.data;
+
+                                    if(!top.HAPI4.currentUser.usr_SavedSearch){
+                                        top.HAPI4.currentUser.usr_SavedSearch = {};
+                                    }
+
+                                    top.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
+
+                                    $dlg.dialog( "close" );
+
+                                    request.new_svs_ID = svsID;
+
+                                    callback.call(that, request);
+                                    //@todo that._updateAfterSave(request, 'saved');
+
+
+                                }else{
+                                    message.addClass( "ui-state-highlight" );
+                                    message.text(response.message);
+                                }
+                            }
+
+                        );
+
+                    }
+                }
+
+                allFields.on("keypress",function(event){
+                    var code = (event.keyCode ? event.keyCode : event.which);
+                    if (code == 13) {
+                        __doSave();
+                    }
+                });
+
+
+                $dlg.dialog({
+                    autoOpen: false,
+                    height: 320,
+                    width: 450,
+                    modal: true,
+                    resizable: false,
+                    title: top.HR('Edit saved search'),
+                    buttons: [
+                        {text:top.HR('Save'), click: __doSave},
+                        {text:top.HR('Cancel'), click: function() {
+                            $( this ).dialog( "close" );
+                        }}
+                    ],
+                    close: function() {
+                        allFields.val( "" ).removeClass( "ui-state-error" );
+                    }
+                });
+
+                $dlg.dialog("open");
+
+            });
+        }else{
+            //show dialogue
+            _fromDataToUI(svsID, squery, domain);
+            edit_dialog.dialog("open");
+        }
+         
+     } //end  _showDialog
     
     
     //public members
@@ -106,12 +348,20 @@ function hSvsEdit(args) {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
+        
+        remove: function () { 
+            //remove edit dialog from body
+             edit_dialog.remove();
+             edit_dialog = null;
+        },
 
-
+        showDialog: function( mode, callback, svsID, squery ) { 
+               _showDialog( mode, callback, svsID, squery );
+        }
 
     }
 
-    _init(currentSearch);
+    _init(args);
     return that;  //returns object
 }
     

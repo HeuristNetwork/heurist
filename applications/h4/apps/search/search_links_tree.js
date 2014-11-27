@@ -32,6 +32,7 @@ $.widget( "heurist.search_links_tree", {
     },
 
     currentSearch: null,
+    hSvsEdit: null,
 
     // the constructor
     // create filter+button and div for tree
@@ -204,24 +205,41 @@ this.tree.fancytree({
       node.setActive();
       break;
     case "rename":
-      node.editStart();
+    
+        if(!node.folder && node.key>0){
+            that.editSavedSearch(node.data.isfaceted?'faceted':'saved', function(request) {    
+                   //node.title = request.svs_Name;
+                   node.setTitle(request.svs_Name);
+                   //node.applyPatch({titel: request.svs_Name});
+            }, node.key);
+        }else{
+            node.editStart();      
+        }
+      
       break;
     case "remove":
       that._deleteSavedSearch(node.key, function(){node.remove();});
       break;
-    case "addFolder":
-      if(!node.folder){
+    case "addFolder":  //always create sibling folder
+      /*if(!node.folder){
         node = tree.rootNode;    
-      }
+      }*/
+      node = node.parent;    
       node.editCreateNode("child", {title:"New folder", folder:true});
-        
-      // refNode = node.addChildren({
-      //   title: "New node",
-      //   isNew: true
-      // });
-      // node.setExpanded();
-      // refNode.editStart();
       break;
+
+    case "addSearch":  //add new saved search
+    case "addSearch2": //add new faceted search
+    
+       var isfaceted = (data.cmd == "addSearch2");
+
+      that.editSavedSearch(isfaceted?'faceted':'saved', function(request) {    
+          //update tree after addition
+          node.editCreateNode( node.folder?"child":"after", { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted } );    
+      });
+      
+      break;
+      
     case "addChild":
       node.editCreateNode("child", "New folder");
       // refNode = node.addChildren({
@@ -280,7 +298,7 @@ this.tree.fancytree({
     } else if( c === "X" && e.ctrlKey ) {
       cmd = "cut";
     } else if( c === "N" && e.ctrlKey ) {
-      cmd = "addSibling";
+      cmd = "addSearch";
     } else if( e.which === $.ui.keyCode.DELETE ) {
       cmd = "remove";
     } else if( e.which === $.ui.keyCode.F2 ) {
@@ -307,7 +325,8 @@ this.tree.fancytree({
   this.tree.contextmenu({
     delegate: "span.fancytree-node",
     menu: [
-      {title: "New <kbd>[Ctrl+N]</kbd>", cmd: "addSibling", uiIcon: "ui-icon-plus" },
+      {title: "New <kbd>[Ctrl+N]</kbd>", cmd: "addSearch", uiIcon: "ui-icon-plus" },
+      {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" },
       {title: "Edit <kbd>[F2]</kbd>", cmd: "rename", uiIcon: "ui-icon-pencil" },
       {title: "----"},
       {title: "New folder <kbd>[Ctrl+Shift+N]</kbd>", cmd: "addFolder", uiIcon: "ui-icon-folder-open" },
@@ -554,254 +573,27 @@ this.tree.fancytree({
         }
     }
     
-    /**
-    * public method to edit search rules
-    */
-    , editRules:function(ele_rules){
+    , editSavedSearch: function(mode, callback, svsID, squery){
+
+        if( true ) { //}!Hul.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded
+            
+            if(Hul.isnull(svsID) && Hul.isempty(squery)){
+                squery = this.currentSearch;
+            }
         
-                /*
-                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database+'&rules=' + ele_rules.val(); //encodeURIComponent();
-                
-                Hul.showDialog(url, { width:1200, callback: 
-                    function(res){
-                        if(!Hul.isempty(res)) {
-                            if(res.mode == 'apply'){
-                                if(Hul.isempty(res.rules)){
-                                    ele_rules.val( '' );
-                                }else{
-                                    ele_rules.val( JSON.stringify(res.rules) );    
-                                }
-                                
-                            }
-                        }
-                    }});
-               */     
-
-               var that = this;
-                
-                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
-                if(!Hul.isnull(ele_rules)){
-                    url = url + '&rules=' + encodeURIComponent(ele_rules.val());
-                }
-                
-                Hul.showDialog(url, { width:1200, callback: 
-                    function(res){
-                        if(!Hul.isempty(res)) {
-                            if(res.mode == 'apply'){  //&& that._query_request){
-                                
-                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
-                                
-                            }else if(res.mode == 'save') {
-                                
-                                if(Hul.isnull(ele_rules)){ //call from resultListMenu
-                                    that.editSavedSearch(null, res.rules, 'rules');
-                                }else{
-                                    ele_rules.val( JSON.stringify(res.rules) );    
-                                }
-                                /*var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
-                                if(app && app.widget){
-                                    $(app.widget).search_links('editSavedSearch', null, res.rules, 'rules'); //call method editSavedSearch(svsID, squery, domain) - save current search
-                                }*/
-                            }
-                        }
-                    }});
-                    
-        
-    }
-
-    /**
-    * Public method to add/edit saved search - it opens dialog and allows to edit/create saved search
-    * 
-    * @param svsID
-    * @param domain - bookmark or usergroupID
-    */
-    , editSavedSearch: function(svsID, squery, domain){
-
-        var facetedAllowed = (domain!='rules' && domain!='saved');
-        if(domain=='saved') domain='all';
-        
-        var that = this;
-        if( facetedAllowed && this.currentMode == "faceted") {
-
-            var facet_params = {};
-            if(svsID>0){
-                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
-                if(svs){
-                    try {
-                        facet_params = $.parseJSON(svs[_QUERY]);
-                    }
-                    catch (err) {
-                        // Do something about the exception here
-                        Hul.showMsgDlg(top.HR('Can not init edit for faceted search. Corrupted parameters. Remove this search'), null, "Error");
-                        return;
-                    }
-                }
+            if(null == this.edit_dialog){
+                this.edit_dialog = new hSvsEdit();
             }
             
-            this._showSearchFacetedWizard( {svsID:svsID, domain:domain, params:facet_params, onsave: function(event, request){
-                that._updateAfterSave(request, 'faceted');
-            } });
-
-        }else if(  this.edit_dialog==null )
-        {
-            var $dlg = this.edit_dialog = $( "<div>" ).appendTo( this.element );
-
-            //load edit dialogue
-            $dlg.load("apps/svs_edit.html?t="+(new Date().time), function(){
-
-                //find all labels and apply localization
-                $dlg.find('label').each(function(){
-                    $(this).html(top.HR($(this).html()));
-                })
+            this.edit_dialog.showDialog( mode, callback, svsID, squery  );
                 
-                $dlg.find("#svs_Rules_edit")                  
-                    .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                    .css({'height':'16px', 'width':'16px'})
-                    .click(function( event ) {
-                        that.editRules( $dlg.find('#svs_Rules') );
-                    });
-                
-
-                var allFields = $dlg.find('input');
-
-                that._fromDataToUI(svsID, squery, domain);
-
-                function __doSave(){   //save search
-
-                    var message = $dlg.find('.messages');
-                    var svs_id = $dlg.find('#svs_ID');
-                    var svs_name = $dlg.find('#svs_Name');
-                    var svs_query = $dlg.find('#svs_Query');
-                    var svs_ugrid = $dlg.find('#svs_UGrpID');
-                    var svs_rules = $dlg.find('#svs_Rules');
-                    var svs_notes = $dlg.find('#svs_Notes');
-
-                    allFields.removeClass( "ui-state-error" );
-
-                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 25 );
-                    
-                    if(bValid){
-                        if(svs_query.is(":visible")){
-                            bValid = Hul.checkLength( svs_query, "Query", message, 1 );
-                        }else{
-                            bValid = Hul.checkLength( svs_rules, "Query", message, 1 );
-                        }
-                    }
-
-                    if(bValid){
-
-                        var svs_ugrid = svs_ugrid.val();
-                        var query_to_save = []; 
-                        
-                        var domain = 'all';    
-                        if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
-                            domain = svs_ugrid;    
-                            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
-                            if(domain!="all"){
-                                query_to_save.push('w='+domain);
-                            }
-                        }
-                        if(!Hul.isempty(svs_query.val())){
-                           query_to_save.push('q='+svs_query.val());
-                        }
-                        if(!Hul.isempty(svs_rules.val())){
-                           query_to_save.push('rules='+svs_rules.val());
-                        }
-                        if(!Hul.isempty(svs_notes.val())){
-                           query_to_save.push('notes='+svs_notes.val());
-                        }
-
-                        var request = {  //svs_ID: svsID, //?svs_ID:null,
-                            svs_Name: svs_name.val(),
-                            svs_Query: '?'+query_to_save.join('&'),
-                            svs_UGrpID: svs_ugrid,
-                            domain:domain};
-
-                        var isEdit = ( parseInt(svs_id.val()) > 0 );
-                        if(isEdit){
-                            request.svs_ID = svs_id.val();
-                        }
-
-                        //
-                        top.HAPI4.SystemMgr.ssearch_save(request,
-                            function(response){
-                                if(response.status == top.HAPI4.ResponseStatus.OK){
-
-                                    var svsID = response.data;
-
-                                    if(!top.HAPI4.currentUser.usr_SavedSearch){
-                                        top.HAPI4.currentUser.usr_SavedSearch = {};
-                                    }
-
-                                    top.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
-
-                                    $dlg.dialog( "close" );
-
-                                    request.new_svs_ID = svsID;
-
-                                    that._updateAfterSave(request, 'saved');
-
-
-                                }else{
-                                    message.addClass( "ui-state-highlight" );
-                                    message.text(response.message);
-                                }
-                            }
-
-                        );
-
-                    }
-                }
-
-                allFields.on("keypress",function(event){
-                    var code = (event.keyCode ? event.keyCode : event.which);
-                    if (code == 13) {
-                        __doSave();
-                    }
-                });
-
-
-                $dlg.dialog({
-                    autoOpen: false,
-                    height: 320,
-                    width: 450,
-                    modal: true,
-                    resizable: false,
-                    title: top.HR('Edit saved search'),
-                    buttons: [
-                        {text:top.HR('Save'), click: __doSave},
-                        {text:top.HR('Cancel'), click: function() {
-                            $( this ).dialog( "close" );
-                        }}
-                    ],
-                    close: function() {
-                        allFields.val( "" ).removeClass( "ui-state-error" );
-                    }
-                });
-
-                $dlg.dialog("open");
-
-            });
         }else{
-            //show dialogue
-            this._fromDataToUI(svsID, squery, domain);
-            this.edit_dialog.dialog("open");
+            var that = this;
+            $.getScript(top.HAPI4.basePath+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, callback, svsID, squery); } );
         }
-
+    
     },
-
-
-    //show faceted search wizard
-    _showSearchFacetedWizard: function( params ){
-
-        if($.isFunction($('body').search_faceted_wiz)){ //already loaded
-            showSearchFacetedWizard(params);
-        }else{
-            $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
-        }
-
-    },  
-
+    
 
     // events bound via _on are removed automatically
     // revert other modifications here
