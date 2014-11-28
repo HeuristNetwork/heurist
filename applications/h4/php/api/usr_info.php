@@ -41,7 +41,8 @@
 
         //no enough permission for guest
         if ( $system->get_user_id()<1 && 
-            !( $action=='login' || $action=='reset_password' || $action=="svs_get" || $action=="usr_save" || $action=="usr_get" || $action=="sysinfo" ) ) {
+            !( $action=='login' || $action=='reset_password' || $action=="svs_get" || $action=="svs_savetree"  || $action=="svs_gettree" 
+               || $action=="usr_save" || $action=="usr_get" || $action=="sysinfo" ) ) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED, "Operation denied. Not enough rights");
 
@@ -87,9 +88,10 @@
 
             } else if ($action=="usr_get" && is_numeric(@$_REQUEST['UGrpID'])) {
 
+                $ugrID = $_REQUEST['UGrpID'];
                 //error_log("KUKU ".$_REQUEST['UGrpID']);            
-                if($system->is_admin2($_REQUEST['UGrpID'])){
-                    $res = user_getById($system->get_mysqli(), $_REQUEST['UGrpID']); 
+                if($system->is_admin2($ugrID)){
+                    $res = user_getById($system->get_mysqli(), $ugrID); 
                     if(is_array($res)){
                         $res['ugr_Password'] = '';   
                     }
@@ -119,6 +121,14 @@
 
                 $res = svsGetByUser($system, @$_REQUEST['UGrpID']);
 
+            } else if ($action=="svs_savetree" ) { //save saved searches tree status
+
+                $res = svsSaveTreeData($system->get_user_id(), @$_REQUEST['data']);
+                
+            } else if ($action=="svs_gettree" ) { //save saved searches tree status
+
+                $res = svsGetTreeData($system->get_user_id());
+                
             } else {
 
                 $system->addError(HEURIST_INVALID_REQUEST);

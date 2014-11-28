@@ -142,4 +142,27 @@
 
         }
     }
+    
+    /**
+    * Save saved searches tree data into HEURIST_ICON_DIR
+    * 
+    * in future - save inot text field in user table ???
+    */
+    function svsSaveTreeData($ugrID, $data){
+        
+        $filename = HEURIST_ICON_DIR . $ugrID . '_svstree.json';
+        return file_put_contents ( $filename, $data );
+    }
+    
+    function svsGetTreeData($ugrID){
+        //load saved search tree data
+        
+        $filename = HEURIST_ICON_DIR . $ugrID . '_svstree.json';
+        if(file_exists($filename)){
+            return file_get_contents ($filename);
+        }else{
+            return false;
+        }
+
+    }
 ?>

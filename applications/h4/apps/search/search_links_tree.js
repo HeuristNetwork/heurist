@@ -40,26 +40,57 @@ $.widget( "heurist.search_links_tree", {
 
         var that = this;
 
-        this.search_tree = $( "<div>" ).appendTo( this.element );
-        this.search_faceted = $( "<div>" ).appendTo( this.element ).hide();
+        this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
+        this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide();
         
         this.filter = $( "<div>" ).appendTo( this.search_tree );
         
-        $('<input name="search" placeholder="Filter...">').css('width','100px').appendTo(this.filter);
-        this.btn_reset = $( "<div>" )
+        this.filter_input = $('<input name="search" placeholder="Filter...">')
+                        .css('width','100px').appendTo(this.filter);
+        this.btn_reset = $( "<button>" )
+            .appendTo( this.filter )
+            .button({icons: {
+                    primary: "ui-icon-close"
+                },
+                title: top.HR("Reset"),
+                text:false})
+            .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
+            .attr("disabled", true);
+        this.btn_save = $( "<button>" )
         .appendTo( this.filter )
         .button({icons: {
-                primary: "ui-icon-close"
+                primary: "ui-icon-disk"
             },
-            title: top.HR("Reset"),
+            title: top.HR("Save"),
             text:false})
         .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
-        
-        this._on( this.btn_reset, { click: "doFilterReset" });
-        
-        this.tree = $( "<div>" ).appendTo( this.search_tree );
-        
+
+        this.tree = $( "<div>" ).css({'top':'2em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
         this.edit_dialog = null;
+            
+        // listeners            
+        this.filter_input.keyup(function(e){
+              var leavesOnly = true; //$("#leavesOnly").is(":checked"),
+                  match = $(this).val();
+
+              if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ""){
+                that.btn_reset.click();
+                return;
+              }
+              // Pass a string to perform case insensitive matching
+              var tree = that.tree.fancytree("getTree");
+              var n = tree.filterNodes(match, leavesOnly); //n - found
+             
+              that.btn_reset.attr("disabled", false);
+        });        
+        
+        this._on( this.btn_reset, { click: function(){
+            this.filter_input.val("");
+            var tree = this.tree.fancytree("getTree");
+            tree.clearFilter();            
+        } });
+        this._on( this.btn_save, { click: "_saveTreeData"} );
+        
 
         //global listener
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
@@ -109,6 +140,15 @@ $.widget( "heurist.search_links_tree", {
         }
 
     },
+    
+    _saveTreeData: function(){
+        
+            var tree = this.tree.fancytree("getTree");
+            var d = tree.toDict(true);
+            var request = { data:JSON.stringify(d) };
+            
+            top.HAPI4.SystemMgr.ssearch_savetree( request, function(response){} );
+    },
 
     //
     // redraw accordeon with the list of saved searches, tags, faceted searches
@@ -116,6 +156,10 @@ $.widget( "heurist.search_links_tree", {
     _updateTree: function()
     {
         var that = this;
+        
+        var islogged = (top.HAPI4.currentUser.ugr_ID>0);
+        if(islogged){
+        
         //verify that all required libraries have been loaded
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js                           
             $.getScript(top.HAPI4.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateTree(); } );
@@ -124,24 +168,35 @@ $.widget( "heurist.search_links_tree", {
         //    $.getScript(top.HAPI4.basePath+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateTree(); } );
             alert('dnd ext for tree not loaded')
             return;
+        }else if(!top.HAPI4.currentUser.ugr_SvsTreeData){
+            
+            top.HAPI4.SystemMgr.ssearch_gettree( function(response){
+                if(response.status = top.HAPI4.ResponseStatus.OK){
+                    try {
+                        top.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
+                    }
+                    catch (err) {
+                    }
+                }
+                if(!top.HAPI4.currentUser.ugr_SvsTreeData)
+                        top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
+                        
+                that._updateTree();        
+            } );
+            
+            return;
         }
 
-  var SOURCE = this._define_DefaultTreeData(),
-  CLIPBOARD = null;
+        var CLIPBOARD = null;
         
         
-        var islogged = (top.HAPI4.currentUser.ugr_ID>0);
-
-        //this.user_groups.hide().empty();
-
-        if(islogged){
-
 this.tree.fancytree({
     checkbox: false,
-    titlesTabbable: false,     // Add all node titles to TAB chain
-    source: SOURCE,
+    //titlesTabbable: false,     // Add all node titles to TAB chain
+    source: top.HAPI4.currentUser.ugr_SvsTreeData,
+    quicksearch: true,
 
-    extensions: ["edit", "dnd"],
+    extensions: ["edit", "dnd", "filter"],
 
     dnd: {
       preventVoidMoves: true,
@@ -159,6 +214,9 @@ this.tree.fancytree({
       }
     },
     edit: {
+    },
+    filter: {
+        mode: "hide"
     },
     click: function(event, data) {
         if(!data.node.folder){
@@ -178,7 +236,9 @@ this.tree.fancytree({
         }
         
     }
-  }).on("nodeCommand", function(event, data){
+  })
+  //.css({'height':'100%','width':'100%'})
+  .on("nodeCommand", function(event, data){
     // Custom event handler that is triggered by keydown-handler and
     // context menu:
     var refNode, moveMode,
@@ -209,7 +269,16 @@ this.tree.fancytree({
         if(!node.folder && node.key>0){
             that.editSavedSearch(node.data.isfaceted?'faceted':'saved', function(request) {    
                    //node.title = request.svs_Name;
-                   node.setTitle(request.svs_Name);
+                   var saddition = '';
+                   if(node.data.isfaceted){
+                         saddition = ' [faceted]';
+                   }else{
+                        var prms = Hul.parseHeuristQuery(request.svs_Query);
+                        if(!Hul.isempty(prms.rules)){
+                            saddition = Hul.isempty(prms.q)?' [rules]' :' [+rules]';
+                        }
+                   }
+                   node.setTitle(request.svs_Name + saddition);
                    //node.applyPatch({titel: request.svs_Name});
             }, node.key);
         }else{
@@ -415,7 +484,7 @@ this.tree.fancytree({
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
         
-        var facet_params, domain2, isfaceted = false;
+        var facet_params, domain2, isfaceted = false, saddition = '';
 
         for (var svsID in ssearches)
         {
@@ -427,6 +496,7 @@ this.tree.fancytree({
                     //this is faceted search
                     domain2 = facet_params.domain;
                     isfaceted = true;
+                    saddition = ' [faceted]';
                 }
                 catch (err) {
                         // this is saved search
@@ -434,14 +504,19 @@ this.tree.fancytree({
                         //var qsearch = prms[0];
                         if(Hul.isempty(prms.q)&&!Hul.isempty(prms.rules)){
                             domain2 = 'rules';
+                            saddition = ' [rules]';
                         }else{
+                            if(!Hul.isempty(prms.rules)){
+                                saddition = ' [+rules]';
+                            }
                             domain2 = prms.w;    
                             if(Hul.isempty(prms.q)) continue; //do not show saved searches without Q (rules) in this list
                         }
                 }
                 
                 if(!domain || domain==domain2){
-                    res.push( { title: ssearches[svsID][_NAME], folder:false, key:svsID, isfaceted:isfaceted } );    //, url:ssearches[svsID][_QUERY]
+                    var sname = ssearches[svsID][_NAME] + saddition;
+                    res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted } );    //, url:ssearches[svsID][_QUERY]
                 }
             }
         }
@@ -555,23 +630,6 @@ this.tree.fancytree({
 
     }
 
-    , _updateAfterSave: function(request, mode){
-
-        if(this.currentMode == mode)
-        {
-
-            if( parseInt(request.svs_ID) > 0 ){
-                $('#svs-'+request.svs_ID).html(request.svs_Name);  //change name on edit
-            }else{
-
-                var prms = Hul.parseHeuristQuery(request.svs_Query);
-                var domain = (Hul.isempty(prms.q)&&!Hul.isempty(prms.rules))?'rules':request.domain;
-
-                $('#svsu-'+request.svs_UGrpID+'-'+domain).append( this._add_SVSitem(request.svs_Name, request.new_svs_ID) );
-            }
-
-        }
-    }
     
     , editSavedSearch: function(mode, callback, svsID, squery){
 
@@ -585,7 +643,7 @@ this.tree.fancytree({
                 this.edit_dialog = new hSvsEdit();
             }
             
-            this.edit_dialog.showDialog( mode, callback, svsID, squery  );
+            this.edit_dialog.show( mode, callback, svsID, squery  );
                 
         }else{
             var that = this;
@@ -603,6 +661,7 @@ this.tree.fancytree({
             this.edit_dialog.remove();
         }
 
+        this.btn_save.remove(); 
         this.btn_reset.remove(); 
         this.filter.remove(); 
         this.tree.remove(); 

@@ -564,7 +564,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     padding:0;    
 }
 .ui-menu{
-    z-index: 9999999 !important;
+    z-index: 9999999 !important; 
 }
 .horizontalmenu > .ui-menu-item {
     display: inline-block;

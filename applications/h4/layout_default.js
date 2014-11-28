@@ -98,25 +98,17 @@ var layouts = [
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:true} },   //search
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
-        west:{size:160, minsize:160, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
+        west:{size:200, minsize:200, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[                                      
-                    // {appid:'h3_recordDetails'},    //H4 record viewer
-
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
+                    // it kills layout resize 
                     {appid:'h4_map', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=[q]'}},    //H4 map
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
                     {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}},    //H4 connections
                     {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
-                    /*                ,
-                    {appid:'ha51'},
-                    {appid:'ha52'},
-                    {appid:'ha53'},
-                    {appid:'ha61', name:'H3', options:{url:'http://heuristscholar.org/h3-ao//records/view/renderRecordData.php?db=[dbname]&recID=[recID]'}},
-                    {appid:'ha61', name:'DoS', options:{url:'http://heuristscholar.org/dosh3/[recID]', databases:['dos_3'] }}
-                    */
                 ]
             }]
         }
