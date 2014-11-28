@@ -119,7 +119,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             data: request,
             dataType: "json",
             cache: false,
-            error: function(jqXHR, textStatus, errorThrown ) {
+            error: function( jqXHR, textStatus, errorThrown ) {
                 if(callback){
                     callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
                         message: jqXHR.responseText });
@@ -182,6 +182,8 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber
     *   ssearch_save - save saved search in database
     *   ssearch_delete - delete saved searches by IDs
+    *   ssearch_savetree - save saved search treeview data
+    *   ssearch_gettree - save saved search treeview data
     *   get_defs     - get the desired database structure definition
     *
     * @returns {Object}
@@ -281,7 +283,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'svs_save';
                 _callserver('usr_info', request, callback);
             }
-
+            
             /**
             * Delete saved searches by IDs
             * request : {ids: list of records to be deleted}
@@ -290,8 +292,15 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'svs_delete';
                 _callserver('usr_info', request, callback);
             }
+            
+            ,ssearch_savetree: function(request, callback){
+                if(request) request.a = 'svs_savetree';
+                _callserver('usr_info', request, callback);
+            }
 
-
+            ,ssearch_gettree: function(callback){
+                _callserver('usr_info', {a:'svs_gettree'}, callback);
+            }
             /**
             *  Get the desired database structure definition 
             * request

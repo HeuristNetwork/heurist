@@ -101,14 +101,13 @@
                     }
 
                     $this->start_my_session();
-                    $this->login_verify(); //load user info from session
 
                     define('HEURIST_DBNAME', $this->dbname);
                     define('HEURIST_DBNAME_FULL',$this->dbname_full);
                     //@todo  - test upload and thumb folder exist and writeable
-                    
-                    
                     $this->initPathConstants();
+                    
+                    $this->login_verify(); //load user info from session
                     
                     //consts
                     $this->defineConstants();
@@ -491,6 +490,8 @@
             session_start();
             */
         }
+        
+        
 
         /**
         * Load user info from session

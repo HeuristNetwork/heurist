@@ -110,9 +110,9 @@ function hSvsEdit(args) {
     function _showSearchFacetedWizard ( params ){
 
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
-            _showSearchFacetedWizard(params);
+            showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
-            $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ _showSearchFacetedWizard(params); } );
+            $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
         }
 
     }  
@@ -355,7 +355,7 @@ function hSvsEdit(args) {
              edit_dialog = null;
         },
 
-        showDialog: function( mode, callback, svsID, squery ) { 
+        show: function( mode, callback, svsID, squery ) { 
                _showDialog( mode, callback, svsID, squery );
         }
 
