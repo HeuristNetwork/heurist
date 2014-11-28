@@ -188,12 +188,11 @@ function addTiledMapImageLayer(source, bounds, index) {
     
     // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
      if(source.sourceURL !== undefined) {
-
         // Tile type
         var tileType = new google.maps.ImageMapType({
             getTileUrl: function(coord, zoom) {
-                console.log(coord);
-                console.log(zoom);
+                //console.log(coord);
+                //console.log(zoom);
                 
                 var bound = Math.pow(2, zoom);
                 var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) + ".png";
@@ -208,9 +207,17 @@ function addTiledMapImageLayer(source, bounds, index) {
         });
         
         // Set map options
-        map.overlayMapTypes.insertAt(0, tileType); 
-        console.log("DONE @ tiled image layer!");
-              
+        map.overlayMapTypes.insertAt(index, tileType); 
+
+        // Set visibility
+        overlay.setVisibility = function(checked) {
+            console.log("Setting visibility to: " + checked);
+            if(checked) {
+                map.overlayMapTypes.setAt(index, tileType);    
+            }else{
+                map.overlayMapTypes.setAt(index, null);   
+            }
+        }  
      }
 
     overlays[index] = overlay; 
