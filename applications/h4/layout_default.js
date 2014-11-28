@@ -106,7 +106,7 @@ var layouts = [
                     // {appid:'h3_recordDetails'},    //H4 record viewer
 
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
-                    {appid:'h4_map', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=[q]'}},    //H4 map
+                    {appid:'h4_map', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=""'}},    //H4 map
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
                     {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}},    //H4 connections
                     {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records

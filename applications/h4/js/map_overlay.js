@@ -367,6 +367,23 @@ function addQueryLayer(source, index) {
     if(source.query !== undefined) {
         console.log("Query: " + source.query);
         
+        // Retrieve records for this query
+        top.HAPI4.RecordMgr.search({q: source.query, w: "all", f:"map", l:200},
+            function(response){
+                console.log("QUERY RESPONSE:");
+                console.log(response);
+                
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    // Show info on map
+                    var recset = new hRecordSet(response.data);
+                    console.log(recset);
+                    //mapping.load(recset.toTimemap());
+
+                }else{
+                    alert(response.message);
+                }
+            }
+        ); 
         
         
     }

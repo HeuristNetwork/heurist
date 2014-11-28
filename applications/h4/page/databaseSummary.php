@@ -226,7 +226,7 @@
         </table>
     
         <script>
-            var url = "../php/api/getRectypeRelationsAsJSON.php" + window.location.search;
+            var url = "../php/api/rectype_relations.php" + window.location.search;
             console.log("Loading data from: " + url);
             d3.json(url, function(error, json) {
                 // Error check
