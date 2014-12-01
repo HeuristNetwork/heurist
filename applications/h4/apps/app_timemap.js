@@ -86,21 +86,26 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){
                 this._initmap()
             }else {
-                (this.mapframe).attr('src', 'php/mapping.php?db='+top.HAPI4.database);
+                (this.mapframe).attr('src', 'page/mapping.php?q=""&db='+top.HAPI4.database);
             }
         }
 
     },
 
     _initmap: function(){
+        console.log("_initmap");
         var mapping = document.getElementById('map-frame').contentWindow.mapping;
         //var mapping = $(this.mapframe).contents().mapping;
 
         if(mapping){
-
+            console.log("Mapping not null");
+            console.log(this.options.recordset);
             if(this.options.recordset == null){
                 mapping.load();
             }else{
+                console.log(this.options.recordset.getRecords());
+                console.log(this.options.recordset.toTimemap());
+                
                 mapping.load(this.options.recordset.toTimemap());
             }
             this.recordset_changed = false;

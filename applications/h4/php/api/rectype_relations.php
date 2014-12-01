@@ -60,14 +60,15 @@
     function getRectypes($system) {
         $rectypes = array();
         
-        $query = "SELECT d.rty_ID as id, d.rty_Name as name, d.rty_RecTypeGroupID as groupid, COUNT(r.rec_RecTypeID) as count FROM defRecTypes d LEFT JOIN Records r ON d.rty_ID=r.rec_RecTypeID GROUP BY id";
+        // Select all rectype ids, names and count the occurence in the Record table
+        $query = "SELECT d.rty_ID as id, d.rty_Name as name, COUNT(r.rec_RecTypeID) as count FROM defRecTypes d LEFT JOIN Records r ON d.rty_ID=r.rec_RecTypeID GROUP BY id";
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) {   
             $rectype = new stdClass();
             $rectype->id = $row["id"];
             $rectype->name = $row["name"];
             $rectype->count = $row["count"];
-            $rectype->image = HEURIST_ICON_URL . $row["groupid"] . ".png";
+            $rectype->image = HEURIST_ICON_URL . $row["id"] . ".png";
             array_push($rectypes, $rectype);
         }    
         
@@ -84,14 +85,18 @@
     function getTargets($system, $rectype) {
         $targets = array();
         
-        //$query = "SELECT rst_RecTypeID as id FROM defRecStructure rs WHERE rst_DetailTypeID=" . $rectype->id;
-        $query = "SELECT rs.rst_RecTypeID as id, COUNT(r.rec_ID) as count FROM defRecStructure rs LEFT JOIN Records r ON r.rec_RecTypeID=rs.rst_RecTypeID WHERE rst_DetailTypeID=" .$rectype->id. " GROUP BY rs.rst_RecTypeID";
+        // Select the rectype id's where each detail type points to if the parent record's rectype id = x  
+        $query = "SELECT dt.dty_PtrTargetRectypeIDs as ids FROM Records r INNER JOIN recDetails rd ON r.rec_ID=rd.dtl_RecID INNER JOIN defDetailTypes dt ON rd.dtl_DetailTypeID=dt.dty_ID WHERE r.rec_RecTypeID=" .$rectype->id. " AND dt.dty_PtrTargetRectypeIDs IS NOT NULL AND NULLIF(dt.dty_PtrTargetRectypeIDs, '') IS NOT NULL GROUP BY dt.dty_PtrTargetRectypeIDs";
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) {
-            $target = new stdClass();
-            $target->id = $row["id"];  
-            $target->count = intval($row["count"]);  
-            array_push($targets, $target);
+            // Split ID's and create targets
+            $ids = explode(",", $row["ids"]);
+            foreach($ids as $id) {
+                $target = new stdClass();
+                $target->id = $id;
+                $target->count = 5;
+                array_push($targets, $target);
+            }
         }  
         
         return $targets;
@@ -129,7 +134,7 @@
                                 // Relation
                                 $relation = new stdClass();
                                 $relation->name = "TODO";
-                                $relation->count = $target->count;
+                                $relation->count = 1;
                                 $link->relation = $relation;
                                 
                                 array_push($links, $link);
