@@ -224,16 +224,18 @@ $.widget( "heurist.resultListMenu", {
               
           }else if(action == "menu-search-save"){  //H4
               
-                var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+                var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
+                    $(app.widget).search_links_tree('editSavedSearch', 'saved'); //call public method editRules
+                    //$(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
                 }
 
           }else if(action == "menu-search-rulebuilder"){  
 
-                var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+                var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).search_links('editRules', null); //call public method editRules
+                    $(app.widget).search_links_tree('editSavedSearch', 'rules'); //call public method editRules
+                    // $(app.widget).search_links('editRules', null); //call public method editRules
                 }
                 
                 

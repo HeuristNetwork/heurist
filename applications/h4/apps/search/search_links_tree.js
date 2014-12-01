@@ -151,7 +151,7 @@ $.widget( "heurist.search_links_tree", {
     },
 
     //
-    // redraw accordeon with the list of saved searches, tags, faceted searches
+    // redraw treeview with the list of saved searches, tags, faceted searches
     //
     _updateTree: function()
     {
@@ -207,7 +207,7 @@ this.tree.fancytree({
       },
       dragEnter: function(node, data) {
         // return ["before", "after"];
-        return true;
+        return node.folder ?true :["before", "after"];
       },
       dragDrop: function(node, data) {
         data.otherNode.moveTo(node, data.hitMode);
@@ -264,7 +264,7 @@ this.tree.fancytree({
       node.moveTo(node.getParent(), "after");
       node.setActive();
       break;
-    case "rename":
+    case "rename":   //EDIT
     
         if(!node.folder && node.key>0){
             that.editSavedSearch(node.data.isfaceted?'faceted':'saved', function(request) {    
@@ -287,7 +287,7 @@ this.tree.fancytree({
       
       break;
     case "remove":
-      that._deleteSavedSearch(node.key, function(){node.remove();});
+      that._deleteSavedSearch(node.key, function(){node.remove(); that._saveTreeData(); });
       break;
     case "addFolder":  //always create sibling folder
       /*if(!node.folder){
@@ -304,7 +304,8 @@ this.tree.fancytree({
 
       that.editSavedSearch(isfaceted?'faceted':'saved', function(request) {    
           //update tree after addition
-          node.editCreateNode( node.folder?"child":"after", { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted } );    
+          node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted }, node.folder?"child":"after" );    
+          that._saveTreeData();
       });
       
       break;
@@ -484,21 +485,28 @@ this.tree.fancytree({
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
         
-        var facet_params, domain2, isfaceted = false, saddition = '';
+        
 
         for (var svsID in ssearches)
         {
+            var facet_params = null, domain2, isfaceted = false, saddition = '';
+            
             if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
 
 
                 try {
                     facet_params = $.parseJSON(ssearches[svsID][_QUERY]);
-                    //this is faceted search
-                    domain2 = facet_params.domain;
-                    isfaceted = true;
-                    saddition = ' [faceted]';
+                    
+                    if(facet_params && Hul.isArray(facet_params.rectypes)){
+                        //this is faceted search
+                        domain2 = facet_params.domain;
+                        isfaceted = true;
+                        saddition = ' [faceted]';
+                    }
                 }
                 catch (err) {
+                }
+                if(!isfaceted){
                         // this is saved search
                         var prms = Hul.parseHeuristQuery(ssearches[svsID][_QUERY]);
                         //var qsearch = prms[0];
@@ -547,13 +555,17 @@ this.tree.fancytree({
 
             if(isfaceted){
 
-                var facet_params;
+                var facet_params = null;
                 try {
                     facet_params = $.parseJSON(qsearch);
                 }
                 catch (err) {
+                    facet_params = null;
+                }
+                if(!facet_params || !Hul.isArray(facet_params.rectypes)){
                     // Do something about the exception here
                     Hul.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters. Remove this search'), null, "Error");
+                    return;
                 }
 
                 var that = this;
@@ -630,10 +642,22 @@ this.tree.fancytree({
 
     }
 
-    
     , editSavedSearch: function(mode, callback, svsID, squery){
 
-        if( true ) { //}!Hul.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded
+        var that = this;
+        
+        if(Hul.isnull(callback)){
+            
+           callback = function(request) {    
+                //update tree after addition - add new search to root
+                var node = that.tree.fancytree("getTree").rootNode;
+                node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:false }, "child" );    
+                that._saveTreeData();
+           };
+        }
+        
+        
+        if( true ) { //}!Hul.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded     @todo - load dynamically
             
             if(Hul.isnull(svsID) && Hul.isempty(squery)){
                 squery = this.currentSearch;
@@ -642,11 +666,10 @@ this.tree.fancytree({
             if(null == this.edit_dialog){
                 this.edit_dialog = new hSvsEdit();
             }
-            
+            //this.edit_dialog.callback_method  = callback;
             this.edit_dialog.show( mode, callback, svsID, squery  );
                 
         }else{
-            var that = this;
             $.getScript(top.HAPI4.basePath+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, callback, svsID, squery); } );
         }
     

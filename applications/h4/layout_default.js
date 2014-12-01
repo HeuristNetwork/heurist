@@ -104,8 +104,6 @@ var layouts = [
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[                                      
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
-                    // it kills layout resize 
-                    //{appid:'h4_map', options:{title:'Map', url: 'applications/h4/page/mapping.php?db=[dbname]&q=""'}},    //H4 map
                     {appid:'ha51'}, // H4 map V2
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
                     {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}},    //H4 connections

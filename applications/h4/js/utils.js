@@ -47,6 +47,24 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
 
+    
+    composeHeuristQuery: function(query, domain, rules, notes){
+            var query_to_save = []; 
+            if(!(top.HEURIST4.util.isempty(domain) || domain=="all")){
+                query_to_save.push('w='+domain);
+            }
+            if(!top.HEURIST4.util.isempty(query)){
+               query_to_save.push('q='+query);
+            }
+            if(!top.HEURIST4.util.isempty(rules)){
+               query_to_save.push('rules='+rules);
+            }
+            if(!top.HEURIST4.util.isempty(notes)){
+               query_to_save.push('notes='+notes);
+            }
+            return '?'+query_to_save.join('&');
+    },
+    
     //
     // converts query string to object
     //
@@ -90,6 +108,11 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return Object.prototype.toString.apply(a) === '[object Array]';
     },
 
+    isObject: function (a)
+    {
+        return Object.prototype.toString.apply(a) === '[object Object]';
+    },
+    
     stopEvent: function(e){
         if (!e) e = window.event;
 
