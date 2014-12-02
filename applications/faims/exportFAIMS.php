@@ -1462,7 +1462,7 @@ return
 }
 
 .browse-button {
-    background-color: #eda200;
+    
 }
 
 

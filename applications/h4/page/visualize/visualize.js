@@ -676,10 +676,10 @@ function visualizeData() {
                 return "marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              })
              .attr("markerWidth", function(d) {    
-                return getMarkerWidth(d.relation.count);             
+                return getMarkerWidth(d.targetcount);             
              })
              .attr("markerHeight", function(d) {
-                return getMarkerWidth(d.relation.count);
+                return getMarkerWidth(d.targetcount);
              })
              .attr("refX", function(d) {
                  // Move markers to display a pointer on a straight line
@@ -725,7 +725,7 @@ function visualizeData() {
                 return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
              })
              .style("stroke-dasharray", (function(d) {
-                 if(d.relation.count == 0) {
+                 if(d.targetcount == 0) {
                     return "3, 3"; 
                  } 
              })) 
@@ -744,14 +744,14 @@ function visualizeData() {
     var bottomLines = addLines();
     bottomLines.attr("stroke", linecolor)
                .style("stroke-width", function(d) { 
-                    return 0.5 + getLineWidth(d.relation.count);
+                    return 0.5 + getLineWidth(d.targetcount);
                });
     
     // Top lines
     var topLines = addLines();
     topLines.attr("stroke", "rgba(255, 255, 255, 0.0)")
             .style("stroke-width", function(d) { 
-                   return 8.5 + getLineWidth(d.relation.count);
+                   return 8.5 + getLineWidth(d.targetcount);
             });
     
     // Check what methods to call on drag
@@ -1196,7 +1196,7 @@ function getRecordOverlayData(record) {
                 // Relation
                 var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true};
                 if(settings.showCounts) {
-                    relation.text += ", n=" + link.targetcount;                      
+                    relation.text += ", n=" + link.relation.count;                      
                 }
                 
                 // Add record relation to map

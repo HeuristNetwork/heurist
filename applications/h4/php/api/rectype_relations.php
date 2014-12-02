@@ -65,44 +65,84 @@
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) {   
             $rectype = new stdClass();
-            $rectype->id = $row["id"];
+            $rectype->id = intval($row["id"]);
             $rectype->name = $row["name"];
-            $rectype->count = $row["count"];
+            $rectype->count = intval($row["count"]);
             $rectype->image = HEURIST_ICON_URL . $row["id"] . ".png";
+            
+            //print_r($rectype);
             array_push($rectypes, $rectype);
         }    
         
         return $rectypes;
     }
 
+    /**
+    * Retrieve all detail types of a record type that point to other records
+    * 
+    * @param mixed $system   System reference
+    * @param mixed $rectype  Record type
+    */
+    function getRelations($system, $rectype) {
+        $relations = array();
+        
+        // Select all resource details that have "resource" as their type, filter NULL or empty id's
+        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, COUNT(rd.dtl_ID) as count, dty.dty_PtrTargetRectypeIDs as ids FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID LEFT JOIN recDetails rd ON rd.dtl_DetailTypeID=rst.rst_DetailTypeID WHERE rst.rst_RectypeID=" .$rectype->id. " AND dty.dty_Type LIKE \"resource\" AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') GROUP BY rst.rst_DetailTypeID;";
+        $res = $system->get_mysqli()->query($query);
+        while($row = $res->fetch_assoc()) { 
+            $relation = new stdClass();
+            $relation->id = intval($row["id"]);
+            $relation->name = $row["name"];
+            $relation->count = intval($row["count"]);
+            $relation->ids = $row["ids"];
+            
+            //print_r($relation);
+            array_push($relations, $relation);
+        } 
+        
+        return $relations;  
+    }
     
     /**
-    * Retrieves all records that the given RecType is pointing to
+    * Retrieves all record types that the relationship object points to
     * 
-    * @param mixed $system  System reference
-    * @param mixed $rectype The RecType to do the check for
+    * @param mixed $system   System reference
+    * @param mixed $rectype  Parent rectype
+    * @param mixed $relation Relation object
     */
-    function getTargets($system, $rectype) {
+    function getTargets($system, $rectype, $relation) {
         $targets = array();
         
-        // Select the rectype id's where each detail type points to if the parent record's rectype id = x  
-        $query = "SELECT dt.dty_PtrTargetRectypeIDs as ids FROM Records r INNER JOIN recDetails rd ON r.rec_ID=rd.dtl_RecID INNER JOIN defDetailTypes dt ON rd.dtl_DetailTypeID=dt.dty_ID WHERE r.rec_RecTypeID=" .$rectype->id. " AND dt.dty_PtrTargetRectypeIDs IS NOT NULL AND NULLIF(dt.dty_PtrTargetRectypeIDs, '') IS NOT NULL GROUP BY dt.dty_PtrTargetRectypeIDs";
-        $res = $system->get_mysqli()->query($query);
-        while($row = $res->fetch_assoc()) {
-            // Split ID's and create targets
-            $ids = explode(",", $row["ids"]);
-            foreach($ids as $id) {
+        // Go through all ID's
+        //echo "\nID's for relation #" . $relation->id . ": " . $relation->ids;
+        $ids = explode(",", $relation->ids);
+        
+        foreach($ids as $id) {
+            // Count how many types the $relation points to this id      
+            $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID WHERE r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
+            $res = $system->get_mysqli()->query($query);
+            if($row = $res->fetch_assoc()) {
                 $target = new stdClass();
-                $target->id = $id;
-                $target->count = 5;
+                $target->id = intval($id);
+                $target->count = intval($row["count"]);
+                
+                //print_r($target);
                 array_push($targets, $target);
-            }
-        }  
+            }         
+        }    
         
         return $targets;
     }
     
-    
+    function getIndex($rectypes, $target) {   
+        for($i = 0; $i < sizeof($rectypes); $i++) {
+            if($rectypes[$i]->id == $target->id) {
+                return $i;
+            }
+        }
+        return 0;
+    }
+
     /**
     * Retrieves all links for a certain RecType
     * 
@@ -112,40 +152,28 @@
     function getLinks($system, $rectypes) {
         $links = array();
         
-        // Go through each RecType
-        if(sizeof($rectypes) > 0) {
-            for($i = 0; $i < sizeof($rectypes); $i++) {
-                // Find to which RecTypes this RecType points
-                $targets = getTargets($system, $rectypes[$i]);
-                
-                // Go through each target
-                if(sizeof($targets > 0)) {
-                    foreach($targets as $target) {
-                        // Check what index the link target record has in our $rectypes array
-                        for($j = 0; $j < sizeof($rectypes); $j++) {
-                            if($target->id == $rectypes[$j]->id) {
-                                // Link
-                                $link = new stdClass();
-                                $link->source = $i;
-                                $link->target = $j; 
-                                $link->targetcount = $target->count;
-                                $link->value = 1;
-                                
-                                // Relation
-                                $relation = new stdClass();
-                                $relation->name = "TODO";
-                                $relation->count = 1;
-                                $link->relation = $relation;
-                                
-                                array_push($links, $link);
-                                break;
-                            }   
-                        }      
-                    }
-                }   
-            }
+        // Go through all rectypes
+        for($i = 0; $i < sizeof($rectypes); $i++) {
+            // Find relations
+            $relations = getRelations($system, $rectypes[$i]); 
+            // Find all targets for each relation
+            foreach($relations as $relation) {
+                $targets = getTargets($system, $rectypes[$i], $relation);
+                // Construct a link for each target
+                foreach($targets as $target) {
+                    $link = new stdClass();
+                    
+                    $link->source = $i;
+                    $link->target = getIndex($rectypes, $target);
+                    $link->targetcount = $target->count;
+                    $link->relation = $relation;
+
+                    //print_r($link);
+                    array_push($links, $link);      
+                }
+            }  
         }
-        
+
         return $links;
     }
     
