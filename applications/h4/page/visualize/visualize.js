@@ -1196,7 +1196,7 @@ function getRecordOverlayData(record) {
                 // Relation
                 var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true};
                 if(settings.showCounts) {
-                    relation.text += ", n=" + link.relation.count;                      
+                    relation.text += ", n=" + link.targetcount;                      
                 }
                 
                 // Add record relation to map
@@ -1204,19 +1204,7 @@ function getRecordOverlayData(record) {
                     map[link.relation.name][relation.text] = relation;
                 }
             }
-            
-            // Does this link point to our record?
-            /*
-            if(link.target.id == record.id) {
-                if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = [];
-                }
 
-                var obj = {text: "← " + link.source.name + " (n=" + link.source.count + ")", size: "9px"};
-                map[link.relation.name].push(obj);
-            }
-            */
-            
             // Is our record a relation?
             if(link.relation.id == record.id && link.relation.name == record.name) {
                 // New name?

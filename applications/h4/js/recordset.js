@@ -379,7 +379,7 @@ function hRecordSet(initdata) {
                 for(recID in records)
                     if(recID){
                         aitems.push(recID);
-                        if(aitem.length>limit) break
+                        if(aitems.length>limit) break
                     }
             }else{
                 for(recID in records)

@@ -159,14 +159,15 @@ $.widget( "heurist.connections", {
         }else{
             // SPRING DIAGRAM CODE
             console.log("CONTENT LOADED ALREADY");  
+            console.log(this.options);
             
             if(this.options.recordset !== null) {
                 var records = this.options.recordset.getRecords();
                 console.log(records);  
                 
                 // TODO: Update to H4 completely after Artem adds relationships
-                var data = parseRecSet2(records);  // Parse the Javascript data
-                visualize(data);                   // Visualize the data
+                //var data = parseRecSet2(records);  // Parse the Javascript data
+                //visualize(data);                   // Visualize the data
             }
             
         }
@@ -197,6 +198,8 @@ $.widget( "heurist.connections", {
     },
     
     getRelations: function( recordset ){
+        console.log("getRelations CALLED");
+        console.log(recordset);
         
         if(top.HEURIST4.util.isnull(recordset)) return;
         
@@ -205,25 +208,27 @@ $.widget( "heurist.connections", {
         var records_ids = recordset.getIds(2000);
         if(records_ids.length>0){
             
-                    var callback = function(response)
-                    {
-                        var resdata = null;
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                            //parse response
-                            
-                            // response.data
-                            
-                            //resdata = new hRecordSet(response.data);
-                        }else{
-                            top.HEURIST4.util.showMsgErr(response.message);
-                        }
-                        
-                        that.option("recordset", recordset); //hRecordSet
-                        that.loadanimation(false);
-                        
-                    }
+            var callback = function(response)
+            {
+                var resdata = null;
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    //parse response
+                    console.log("RESPONSE");
+                    console.log(response);
+                    
+                    // response.data
+                    
+                    //resdata = new hRecordSet(response.data);
+                }else{
+                    top.HEURIST4.util.showMsgErr(response.message);
+                }
+                
+                that.option("recordset", recordset); //hRecordSet
+                that.loadanimation(false);
+                
+            }
 
-                    top.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
+            top.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
         
         }
         
