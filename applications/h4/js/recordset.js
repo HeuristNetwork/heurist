@@ -372,13 +372,23 @@ function hRecordSet(initdata) {
         * 
         * @returns {Array}
         */
-        getIds: function(){
+        getIds: function( limit ){
             var aitems = [];
             var recID;
-            for(recID in records)
-                if(recID){
-                    aitems.push(recID);
-                }
+            if(limit>0){
+                for(recID in records)
+                    if(recID){
+                        aitems.push(recID);
+                        if(aitem.length>limit) break
+                    }
+            }else{
+                for(recID in records)
+                    if(recID){
+                        aitems.push(recID);
+                    }
+            }
+
+                
             return aitems;
         },
         

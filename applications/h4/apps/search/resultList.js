@@ -142,7 +142,7 @@ $.widget( "heurist.resultList", {
         
         //-----------------------
                                                             //,'height':'1em'               
-        this.div_progress = $( "<div>" ).css({'position':'absolute','left':2,'right':2,'top':'2em'}).appendTo( this.div_toolbar );
+        this.div_progress = $( "<div>" ).css({'position':'absolute','left':2,'right':2,'top':'2em'}).appendTo( this.div_toolbar ).hide();
                                                                                                
         this.lbl_current_request = $("<div>").css({'display':'inline-block','width':'100px','text-align':'center'}).appendTo(this.div_progress);
         this.span_progress = $("<div>")
@@ -1025,6 +1025,8 @@ $.widget( "heurist.resultList", {
         }else{
             this.span_info.hide();
             this.div_progress.hide();
+            
+            $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ this.options.recordset ]); //global app event
         }
 
 
@@ -1099,7 +1101,7 @@ $.widget( "heurist.resultList", {
                      this._query_request.topids = current_parent_ids[this._res_index].join(','); //list of record ids of parent resultset
                      this._query_request.increment = true;
                      this._query_request.o = 0;
-                     top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+                     top.HAPI4.RecordMgr.search_related(this._query_request, $(this.document));
                 
             }
         }

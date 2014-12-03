@@ -49,7 +49,7 @@ $.widget( "heurist.connections", {
 
         //-----------------------     listener of global events
         this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + ' ' 
-            + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+            + top.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
 
         $(this.document).on(this._events, function(e, data) {
             // Login
@@ -63,10 +63,13 @@ $.widget( "heurist.connections", {
                 that.option("recordset", null);
 
             // Search results
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                that.option("recordset", data); //hRecordSet
-                that.loadanimation(false);
+                //find all relation within given result set
+                that.getRelations( data );
+                
+                //that.option("recordset", data); //hRecordSet
+                //that.loadanimation(false);
 
             // Search start
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
@@ -192,6 +195,40 @@ $.widget( "heurist.connections", {
             //this.dosframe.show();
         }
     },
+    
+    getRelations: function( recordset ){
+        
+        if(top.HEURIST4.util.isnull(recordset)) return;
+        
+        var that = this; 
+        //get first 2000 records and send their IDS to server to get related record IDS
+        var records_ids = recordset.getIds(2000);
+        if(records_ids.length>0){
+            
+                    var callback = function(response)
+                    {
+                        var resdata = null;
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            //parse response
+                            
+                            // response.data
+                            
+                            //resdata = new hRecordSet(response.data);
+                        }else{
+                            top.HEURIST4.util.showMsgErr(response.message);
+                        }
+                        
+                        that.option("recordset", recordset); //hRecordSet
+                        that.loadanimation(false);
+                        
+                    }
+
+                    top.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
+        
+        }
+        
+    }
+    
 
 });
 

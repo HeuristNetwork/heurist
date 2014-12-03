@@ -589,6 +589,64 @@
         return $response;
     }
 
+    /**
+    * Find all related record IDs for given set record IDs
+    * 
+    * @param mixed $system
+    * @param mixed $ids
+    */
+    function recordSearchRealted($system, $ids){
+        
+        if(!@$ids){
+            return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
+        }
+        $ids = explode(",", $ids);
+        
+        $direct = array();
+        $reverse = array();
+        
+        //find all target related records
+        $select_clause = 'SELECT rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM hdb_artem_delete1.reclinks '
+            .'where rl_SourceID in ('.$ids.')';
+        
+        $res = $mysqli->query($query);
+        if (!$res){
+            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+                while ($row = $res->fetch_row()) {
+                    $relation = new stdClass();
+                    $relation->recID = intval($row[0]);
+                    $relation->trmID = intval($row[1]);
+                    $relation->dtID  = intval($row[2]);
+                    array_push($direct, $relation);
+                }
+                $res->close(); 
+        }        
+
+        //find all reverse related records
+        $select_clause = 'SELECT rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM hdb_artem_delete1.reclinks '
+            .'where rl_TargetID in ('.$ids.')';
+        
+        $res = $mysqli->query($query);
+        if (!$res){
+            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+                while ($row = $res->fetch_row()) {
+                    $relation = new stdClass();
+                    $relation->recID = intval($row[0]);
+                    $relation->trmID = intval($row[1]);
+                    $relation->dtID  = intval($row[2]);
+                    array_push($reverse, $relation);
+                }
+                $res->close(); 
+        }        
+        
+        return array("status"=>HEURIST_OK,
+                     "data"=> array("direct"=>$direct, "reverse"=>$reverse));
+        
+    }
+    
+    
 
     /**
     * put your comment there...

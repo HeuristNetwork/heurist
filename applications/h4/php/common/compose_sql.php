@@ -1599,7 +1599,6 @@
                          . (($dty_ID) ?'rl.rl_DetailTypeID='.$dty_ID :'rl.rl_RelationID is null' );
 
             $select = 'TOPBIBLIO.rec_ID in (select rl.rl_TargetID ';
-           
             
             $pquery = &$this->getQuery();
             if ($pquery->parentquery){

@@ -469,7 +469,21 @@ function hAPI(_db, _oninit) { //, _currentUser
                     });                    
                     */
                 }
-                
+            
+            }
+            
+            
+            /**
+            * Search relation within given set of records
+            * 
+            * request { }
+            *  ids - list of record ids
+            * 
+            *  callback - callback function or  $document we have trigger the event
+            */
+            ,search_related: function(request, callback){
+                if(request) request.a = 'related';
+                _callserver('record_search', request, callback);    //standard search 
             }
             
             
@@ -620,6 +634,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             LOGIN: "LOGIN",
             LOGOUT: "LOGOUT",
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
+            ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
             ON_REC_SEARCH_APPLYRULES: "ON_REC_SEARCH_APPLYRULES",
             ON_REC_SEARCHRESULT: "ON_REC_SEARCHRESULT",
             ON_REC_PAGESET: "ON_REC_PAGESET",

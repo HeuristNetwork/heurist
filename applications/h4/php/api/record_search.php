@@ -45,6 +45,10 @@
     }else if(@$_REQUEST['a'] == 'getfacets'){    
 
         $response = recordSearchFacets($system, $_REQUEST);
+        
+    }else if(@$_REQUEST['a'] == 'related'){    
+        
+        $response = recordSearchRealted($system, $_REQUEST['ids']);        
 
     }else {
         
