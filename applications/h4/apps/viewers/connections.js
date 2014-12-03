@@ -212,13 +212,10 @@ $.widget( "heurist.connections", {
             {
                 var resdata = null;
                 if(response.status == top.HAPI4.ResponseStatus.OK){
-                    //parse response
-                    console.log("RESPONSE");
-                    console.log(response);
-                    
-                    // response.data
-                    
-                    //resdata = new hRecordSet(response.data);
+                    // Parse response to spring diagram format
+                    console.log("Successfully retrieved relationship data!");
+                    var data = parseData(recordset.getRecords(), response.data);
+                    visualize(data);
                 }else{
                     top.HEURIST4.util.showMsgErr(response.message);
                 }
@@ -355,19 +352,63 @@ function parseRecSet() {
     console.log("DATA");
     console.log(data);
     return data;
+}     
+
+
+/**
+* Determines links between nodes
+* 
+* @param nodes      All nodes
+* @param relations  Array of relations
+*/
+function getLinks(nodes, relations) {
+    var links = [];
+    
+    // Go through all relations
+    for(var i = 0; i < relations.length; i++) {
+        console.log(relations[i]);
+        
+        // Null check
+        var source = relations[i].recID;
+        var target = relations[i].targetID;
+        
+        console.log("SourceID: " + source);
+        console.log(nodes[source]);
+        console.log("TargetID: " + target);
+        console.log(nodes[target]);
+        
+        
+        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) {
+            console.log("ADDING LINK!");
+            
+            // Construct link
+            var link = {source: nodes[source],
+                        target: nodes[target],
+                        targetcount: 1,
+                        relation: {}
+                       };
+            links.push(link); 
+        }    
+        console.log(".");   
+    }   
+    
+    return links;
 }
 
-
-
-
-
-/** RecSet parsing for Heurist 4 */
-function parseRecSet2(records) {
-    var data = {};
+/**
+* Parses record data and relationship data into usable D3 format
+* 
+* @param records    Object containing all record
+* @param relations  Object containing direct & reverse links
+* 
+* @returns {Object}
+*/
+function parseData(records, relations) {
+    var data = {}; 
     var nodes = {};
     var links = [];
-                      
-    // All nodes
+
+    // Construct nodes for each record
     for(var id in records) {
         var node = {id: parseInt(id),
                     name: records[id][5],
@@ -378,6 +419,10 @@ function parseRecSet2(records) {
         nodes[id] = node;
     }
     
+    // Links
+    links = links.concat( getLinks(nodes, relations.direct)  ); // Direct links
+    links = links.concat( getLinks(nodes, relations.reverse) ); // Reverse links
+
     // Construct data object
     var data = {nodes: nodes, links: links};
     console.log("DATA");
@@ -392,6 +437,4 @@ function visualize(data) {
     // Call showData method of the springDiagram iFrame
     var iframe = $("iframe[src*=springDiagram]");
     iframe[0].contentWindow.showData(data);
-    
-    
 }
