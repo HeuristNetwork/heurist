@@ -161,6 +161,7 @@ $.widget( "heurist.resultList", {
                 if(this._query_request!=null){ //assign new id to search - it prevents further increment search
                     this._query_request.id = Math.round(new Date().getTime() + (Math.random() * 100));                  
                     this.div_progress.hide();
+                    this._searchCompleted();
                     //this._renderProgress();
                 }
             }
@@ -204,7 +205,10 @@ $.widget( "heurist.resultList", {
                 if(that._query_request!=null &&  data.queryid()==that._query_request.id) {  
                 
                     that._renderRecordsIncrementally(data); //hRecordSet
-                    that._doSearchIncrement(); //load next chunk
+                    if(!that._doSearchIncrement()){//load next chunk
+                        that._searchCompleted();
+                    } 
+                    
                 }
 
                 
@@ -1025,8 +1029,6 @@ $.widget( "heurist.resultList", {
         }else{
             this.span_info.hide();
             this.div_progress.hide();
-            
-            $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ this.options.recordset ]); //global app event
         }
 
 
@@ -1049,6 +1051,7 @@ $.widget( "heurist.resultList", {
                     this._query_request.increment = true;
                     this._query_request.o = new_offset;
                     top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+                    return true;
             }else{
                     
          // original rule array
@@ -1101,13 +1104,19 @@ $.widget( "heurist.resultList", {
                      this._query_request.topids = current_parent_ids[this._res_index].join(','); //list of record ids of parent resultset
                      this._query_request.increment = true;
                      this._query_request.o = 0;
-                     top.HAPI4.RecordMgr.search_related(this._query_request, $(this.document));
+                     top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+                     return true;
                 
             }
         }
 
         return false;
     }, 
+    
+    _searchCompleted: function(){
+         if(this.options.recordset && this.options.recordset.length()>0)
+             $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ this.options.recordset ]); //global app event
+    }
     
 
 });
