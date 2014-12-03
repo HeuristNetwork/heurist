@@ -608,8 +608,10 @@
         $mysqli = $system->get_mysqli();
         
         //find all target related records
-        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM reclinks '
+        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
             .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
+       
+//error_log("1>>>".$query);
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -627,8 +629,10 @@
         }        
 
         //find all reverse related records
-        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM reclinks '
+        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
             .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
+
+//error_log("2>>>".$query);
         
         $res = $mysqli->query($query);
         if (!$res){
