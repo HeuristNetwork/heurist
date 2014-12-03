@@ -600,14 +600,16 @@
         if(!@$ids){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
         }
-        $ids = explode(",", $ids);
+        //$ids = explode(",", $ids);
         
         $direct = array();
         $reverse = array();
         
+        $mysqli = $system->get_mysqli();
+        
         //find all target related records
-        $select_clause = 'SELECT rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM hdb_artem_delete1.reclinks '
-            .'where rl_SourceID in ('.$ids.')';
+        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM reclinks '
+            .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -616,16 +618,17 @@
                 while ($row = $res->fetch_row()) {
                     $relation = new stdClass();
                     $relation->recID = intval($row[0]);
-                    $relation->trmID = intval($row[1]);
-                    $relation->dtID  = intval($row[2]);
+                    $relation->targetID = intval($row[1]);
+                    $relation->trmID = intval($row[2]);
+                    $relation->dtID  = intval($row[3]);
                     array_push($direct, $relation);
                 }
                 $res->close(); 
         }        
 
         //find all reverse related records
-        $select_clause = 'SELECT rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM hdb_artem_delete1.reclinks '
-            .'where rl_TargetID in ('.$ids.')';
+        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM reclinks '
+            .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -634,15 +637,20 @@
                 while ($row = $res->fetch_row()) {
                     $relation = new stdClass();
                     $relation->recID = intval($row[0]);
-                    $relation->trmID = intval($row[1]);
-                    $relation->dtID  = intval($row[2]);
+                    $relation->sourceID = intval($row[1]);
+                    $relation->trmID = intval($row[2]);
+                    $relation->dtID  = intval($row[3]);
                     array_push($reverse, $relation);
                 }
                 $res->close(); 
         }        
         
-        return array("status"=>HEURIST_OK,
+        $response = array("status"=>HEURIST_OK,
                      "data"=> array("direct"=>$direct, "reverse"=>$reverse));
+                     
+//error_log(print_r($response, true));
+
+        return $response;                     
         
     }
     
