@@ -35,20 +35,7 @@
     * - db_script()  - see dbScript.php
     */
 
-
-    /**
-    * Add an index.html file to a directory to block browsing files
-    * Does not overwrite an existing file if present
-    *
-    * @param mixed $directory
-    */
-    function add_index_html($directory) {
-        $file = fopen($directory."/index.html",'x');
-        if ($file) { // returns false if file exists - don't overwrite
-            fwrite($file,"Sorry, this folder cannot be browsed");
-            fclose($file);
-        }
-    }
+    require_once('dbScript.php');
 
     function server_connect($verbose = true){
 
@@ -274,5 +261,229 @@
 
         return $res;
     }    
+    
+    //create new empty database 
+    function createDatabaseEmpty($newDBName){
+        
+            $newname = HEURIST_DB_PREFIX . $newDBName;
+
+            if(!db_create($newname)){
+                return false;
+            }
+
+            echo_flush ("<p>Create Database Structure (tables)</p>");
+            if(db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/blankDBStructure.sql")){
+
+                echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                echo_flush ("<p>Addition Referential Constraints</p>");
+                
+                if(db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/addReferentialConstraints.sql")){
+                    
+                    echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                    echo_flush ("<p>Addition Procedures and Triggers</p>");
+                    
+                    if(db_script($newname, dirname(__FILE__)."/../../admin/setup/dbcreate/addProceduresTriggers.sql")){
+                        
+                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+                        return true;       
+                    }
+                }
+            }
+            db_drop($newname);
+            return false;
+    }
+                
+    function createDatabaseFolders($newDBName){
+        
+            // Create a default upload directory for uploaded files eg multimedia, images etc.
+            $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
+            
+            $warnings = !createFolder($newDBName, null, "Please check/create directory by hand. Consult Heurist helpdesk if needed");
+            if($warnings==0){
+                add_index_html($uploadPath); // index file to block directory browsing
+            }
+            
+            if(recurse_copy( dirname(__FILE__)."/../../admin/setup/rectype-icons", $uploadPath."/rectype-icons" )){
+                add_index_html($uploadPath."/rectype-icons"); // index file to block directory browsing
+                add_index_html($uploadPath."/rectype_icons/thumb");
+            }else{
+                echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
+                //echo ("This may be because the directory already exists or the parent folder is not writable<br>");
+                //echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
+                //echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
+                $warnings = 1;
+            }
+            if(recurse_copy( dirname(__FILE__)."/../../admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
+                add_index_html($uploadPath."/smarty-templates"); // index file to block directory browsing
+            }else{
+                echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
+                //echo ("This may be because the directory already exists or the parent folder is not writable<br>");
+                //echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
+                $warnings = 1;
+            }
+            if(recurse_copy( dirname(__FILE__)."/../../admin/setup/xsl-templates", $uploadPath."/xsl-templates" )){
+                add_index_html($uploadPath."/xsl-templates"); // index file to block directory browsing
+            }else{
+                echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
+                //echo ("This may be because the directory already exists or the parent folder is not writable<br>");
+                //echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
+                $warnings = 1;
+            }
+            
+/*        
+            $cmdline = "mkdir -p -m a=rwx ".$uploadPath;
+            $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+            if ($res2 != 0 ) { // TODO: need to properly trap the error and distiguish different versions.
+                // Old uplaod directories hanging around could cause problems if upload file IDs are duplicated,
+                // so should probably NOT allow their re-use
+                echo ("<h3>Warning:</h3> Unable to create $uploadPath directory for database $newDBName<br>&nbsp;<br>");
+                echo ("This may be because the directory already exists or the parent folder is not writable<br>");
+                echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
+                echo($output2);
+                $warnings = 1;
+            } else {
+                add_index_html($uploadpath); // index file to block directory browsing
+            }
+
+            // copy icon and thumbnail directories from default set in the program code (sync. with H3CoreDefinitions)
+            $cmdline = "cp -R ../rectype-icons $uploadPath"; // creates directories and copies icons and thumbnails
+            $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+            if ($res2 != 0 ) {
+                echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
+                echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
+                echo($output2);
+                $warnings = 1;
+            } else {
+            }
+
+            // copy smarty template directory from default set in the program code
+            $cmdline = "cp -R ../smarty-templates $uploadPath";
+            $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+            if ($res2 != 0 ) {
+                echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
+                echo($output2);
+                $warnings = 1;
+            } else {
+                add_index_html($uploadpath."smarty-templates"); // index file to block directory browsing
+            }
+
+            // copy xsl template directories from default set in the program code
+            $cmdline = "cp -R ../xsl-templates $uploadPath";
+            $output2 = exec($cmdline . ' 2>&1', $output, $res2);
+            if ($res2 != 0 ) {
+                echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
+                echo($output2);
+                $warnings = 1;
+            } else {
+                add_index_html($uploadpath."xsl-templates"); // index file to block directory browsing
+            }
+*/
+            // Create all the other standard folders required for the database
+            // index.html files are added by createFolder to block index browsing
+            $warnings =+ createFolder($newDBName, "settings","used to store import mappings and the like");
+            $warnings =+ createFolder($newDBName, "scratch","used to store temporary files");
+            $warnings =+ createFolder($newDBName, "hml-output","used to write published records as hml files");
+            $warnings =+ createFolder($newDBName, "html-output","used to write published records as generic html files");
+            $warnings =+ createFolder($newDBName, "generated-reports","used to write generated reports");
+            $warnings =+ createFolder($newDBName, "backup","used to write files for user data dump");
+            $warnings =+ createFolder($newDBName, "term-images","used for images illustrating terms");
+
+            if ($warnings > 0) {
+                echo "<h2>Please take note of warnings above</h2>";
+                echo "You must create the folders indicated or uploads, icons, templates, publishing, term images etc. will not work<br>";
+                echo "If upload folder is created but icons and template folders are not, look at file permissions on new folder creation";
+            }
+        
+    }
+    
+    //
+    //
+    //
+    function createFolder($newDBName, $name, $msg){
+        
+        $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
+        if($name){
+            $folder = $uploadPath."/".$name;
+        }else{
+            $folder = $uploadPath;
+        }
+
+        if(file_exists($folder) && !is_dir($folder)){
+            if(!unlink($folder)){
+                echo ("<h3>Warning:</h3> Unable to remove folder $folder. We need to create a folder with this name ($msg)<br>");
+                return 1;
+            }
+        }
+
+        if(!file_exists($folder)){
+            if (!mkdir($folder, 0777, true)) {
+                echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
+                return 1;
+            }
+        } else if (!is_writable($folder)) {
+            echo ("<h3>Warning:</h3> Folder $folder already exists and it is not writeable. Check permissions! ($msg)<br>");
+            return 1;
+        }
+
+        add_index_html($folder); // index file to block directory browsing
+
+        return 0;
+    }
+
+    /**
+    * copy folder recursively
+    *     
+    * @param mixed $src
+    * @param mixed $dst
+    */
+    function recurse_copy($src, $dst) { 
+        $res = true;
+        $dir = opendir($src);
+        if (@mkdir($dst, 0777, true)) { 
+        
+            while(false !== ( $file = readdir($dir)) ) { 
+                if (( $file != '.' ) && ( $file != '..' )) { 
+                    if ( is_dir($src . '/' . $file) ) { 
+                        $res = recurse_copy($src . '/' . $file,$dst . '/' . $file); 
+                        if(!$res) break;
+                    } 
+                    else { 
+                        copy($src . '/' . $file,$dst . '/' . $file); 
+                    } 
+                } 
+            } 
+        
+        }else{
+            $res = false;
+        }
+        closedir($dir); 
+        
+        return $res;
+    }    
+    
+    /**
+    * Add an index.html file to a directory to block browsing files
+    * Does not overwrite an existing file if present
+    *
+    * @param mixed $directory
+    */
+    function add_index_html($directory) {
+        $filename = $directory."/index.html";
+        if(!file_exists($filename)){
+            $file = fopen($filename,'x');
+            if ($file) { // returns false if file exists - don't overwrite
+                fwrite($file,"Sorry, this folder cannot be browsed");
+                fclose($file);
+            }
+                    }
+    }
+
+    function echo_flush($msg){
+         ob_start();
+         print $msg;
+         ob_flush();
+         flush();
+    }
+
 
 ?>

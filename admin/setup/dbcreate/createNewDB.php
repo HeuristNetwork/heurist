@@ -30,7 +30,6 @@
     define('NO_DB_ALLOWED',1);
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
     // must be logged in if a dbname is passed to it
     if (!is_logged_in() && HEURIST_DBNAME!="") {
@@ -318,13 +317,6 @@
             }
 
 
-            function echo_flush($msg){
-                 ob_start();
-                 print $msg;
-                 ob_flush();
-                 flush();
-            }
-
             function arraytolower($item)
             {
                 return strtolower($item);
@@ -376,36 +368,11 @@ print $newDBName."<br>";
 print in_array(strtolower($newname), $list)."<br>";
 print print_r($list, true)."<br>";*/
 //return false;
-
-
-                    if(!db_create($newname)){
-                        $isCreateNew = true;
-                        return false;
+                    if(!createDatabaseEmpty($newDBName)){
+                           $isCreateNew = true;
+                           return false;
                     }
 
-                    echo_flush ("<p>Create Database Structure (tables)</p>");
-                    if(db_script($newname, dirname(__FILE__)."/blankDBStructure.sql")){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        db_drop($newname);
-                        return false;
-                    }
-
-                    echo_flush ("<p>Addition Referential Constraints</p>");
-                    if(db_script($newname, dirname(__FILE__)."/addReferentialConstraints.sql")){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        db_drop($newname);
-                        return false;
-                    }
-
-                    echo_flush ("<p>Addition Procedures and Triggers</p>");
-                    if(db_script($newname, dirname(__FILE__)."/addProceduresTriggers.sql")){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        db_drop($newname);
-                        return false;
-                    }
 
 /*
                     //OLD COMMAND LINE APPROACH
@@ -533,74 +500,8 @@ print print_r($list, true)."<br>";*/
                     //	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
                     //	 todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
 
-                    $warnings = 0;
-
-                    // Create a default upload directory for uploaded files eg multimedia, images etc.
-                    $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
-                    $cmdline = "mkdir -p -m a=rwx ".$uploadPath;
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-                    if ($res2 != 0 ) { // TODO: need to properly trap the error and distiguish different versions.
-                        // Old uplaod directories hanging around could cause problems if upload file IDs are duplicated,
-                        // so should probably NOT allow their re-use
-                        echo ("<h3>Warning:</h3> Unable to create $uploadPath directory for database $newDBName<br>&nbsp;<br>");
-                        echo ("This may be because the directory already exists or the parent folder is not writable<br>");
-                        echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
-                        echo($output2);
-                        $warnings = 1;
-                    } else {
-                        add_index_html($uploadpath); // index file to block directory browsing
-                    }
-
-                    // copy icon and thumbnail directories from default set in the program code (sync. with H3CoreDefinitions)
-                    $cmdline = "cp -R ../rectype-icons $uploadPath"; // creates directories and copies icons and thumbnails
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-                    if ($res2 != 0 ) {
-                        echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
-                        echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
-                        echo($output2);
-                        $warnings = 1;
-                    } else {
-                        add_index_html($uploadpath."rectype-icons"); // index file to block directory browsing
-                        add_index_html($uploadpath."rectype_icons/thumb");
-                    }
-
-                    // copy smarty template directory from default set in the program code
-                    $cmdline = "cp -R ../smarty-templates $uploadPath";
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-                    if ($res2 != 0 ) {
-                        echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
-                        echo($output2);
-                        $warnings = 1;
-                    } else {
-                        add_index_html($uploadpath."smarty-templates"); // index file to block directory browsing
-                    }
-
-                    // copy xsl template directories from default set in the program code
-                    $cmdline = "cp -R ../xsl-templates $uploadPath";
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-                    if ($res2 != 0 ) {
-                        echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
-                        echo($output2);
-                        $warnings = 1;
-                    } else {
-                        add_index_html($uploadpath."xsl-templates"); // index file to block directory browsing
-                    }
-
-                    // Create all the other standard folders required for the database
-                    // index.html files are added by createFolder to block index browsing
-                    $warnings =+ createFolder("settings","used to store import mappings and the like");
-                    $warnings =+ createFolder("scratch","used to store temporary files");
-                    $warnings =+ createFolder("hml-output","used to write published records as hml files");
-                    $warnings =+ createFolder("html-output","used to write published records as generic html files");
-                    $warnings =+ createFolder("generated-reports","used to write generated reports");
-                    $warnings =+ createFolder("backup","used to write files for user data dump");
-                    $warnings =+ createFolder("term-images","used for images illustrating terms");
-
-                    if ($warnings > 0) {
-                        echo "<h2>Please take note of warnings above</h2>";
-                        echo "You must create the folders indicated or uploads, icons, templates, publishing, term images etc. will not work<br>";
-                        echo "If upload folder is created but icons and template folders are not, look at file permissions on new folder creation";
-                    }
+                    
+                    createDatabaseFolders($newDBName);
 
                     // Prepare to write to the newly created database
                     mysql_connection_insert($newname);
@@ -633,37 +534,6 @@ print print_r($list, true)."<br>";*/
                 } // isset
 
             } //makedatabase
-
-            //
-            //
-            //
-            function createFolder($name, $msg){
-                global 	$newDBName;
-                $uploadPath = HEURIST_UPLOAD_ROOT.$newDBName;
-                $folder = $uploadPath."/".$name;
-
-                if(file_exists($folder) && !is_dir($folder)){
-                    if(!unlink($folder)){
-                        echo ("<h3>Warning:</h3> Unable to remove folder $folder. We need to create a folder with this name ($msg)<br>");
-                        return 1;
-                    }
-                }
-
-                if(!file_exists($folder)){
-                    if (!mkdir($folder, 0777, true)) {
-                        echo ("<h3>Warning:</h3> Unable to create folder $folder ($msg)<br>");
-                        return 1;
-                    }
-                } else if (!is_writable($folder)) {
-                    echo ("<h3>Warning:</h3> Folder $folder already exists and it is not writeable. Check permissions! ($msg)<br>");
-                    return 1;
-                }
-
-                add_index_html($folder); // index file to block directory browsing
-
-                return 0;
-            }
-
         ?>
     </body>
 </html>
