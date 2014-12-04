@@ -129,8 +129,10 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             
             $tmp_name = $upload["tmp_name"];
             
+            $project_name = substr($upload["name"],0,strpos($upload["name"],".tar.bz"));
+            
             $folder = HEURIST_FILESTORE_DIR."faims/import"; //.;
-            $folder_proj = $folder."/module";
+            $folder_proj = $folder."/".$project_name; //"/module";
 
             //create export folder
             if(!file_exists($folder)){
