@@ -86,14 +86,15 @@
     function getRelations($system, $rectype) {
         $relations = array();
         
-        // Select all resource details that have "resource" as their type, filter NULL or empty id's
-        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, COUNT(rd.dtl_ID) as count, dty.dty_PtrTargetRectypeIDs as ids FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID LEFT JOIN recDetails rd ON rd.dtl_DetailTypeID=rst.rst_DetailTypeID WHERE rst.rst_RectypeID=" .$rectype->id. " AND dty.dty_Type LIKE \"resource\" AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') GROUP BY rst.rst_DetailTypeID;";
+        // Select all relation details that have "dty_PtrTargetRectypeIDs" defined
+        $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, COUNT(rd.dtl_ID) as count, dty.dty_Type as reltype, dty.dty_PtrTargetRectypeIDs as ids FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID LEFT JOIN recDetails rd ON rd.dtl_DetailTypeID=rst.rst_DetailTypeID WHERE rst.rst_RectypeID=" .$rectype->id. " AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') GROUP BY rst.rst_DetailTypeID;";
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) { 
             $relation = new stdClass();
             $relation->id = intval($row["id"]);
             $relation->name = $row["name"];
             $relation->count = intval($row["count"]);
+            $relation->type = $row["reltype"];
             $relation->ids = $row["ids"];
             
             //print_r($relation);
@@ -118,7 +119,7 @@
         $ids = explode(",", $relation->ids);
         
         foreach($ids as $id) {
-            // Count how many types the $relation points to this id      
+            // Count how many times the $relation points to this id      
             $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID WHERE r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
             $res = $system->get_mysqli()->query($query);
             if($row = $res->fetch_assoc()) {
@@ -134,6 +135,13 @@
         return $targets;
     }
     
+    /**
+    * Helper method to find the index of $target in the $rectypes array
+    * 
+    * @param mixed $rectypes Array of rectypes
+    * @param mixed $target   A target object
+    * @return mixed The index
+    */
     function getIndex($rectypes, $target) {   
         for($i = 0; $i < sizeof($rectypes); $i++) {
             if($rectypes[$i]->id == $target->id) {
@@ -177,6 +185,4 @@
         return $links;
     }
     
-    
-
 ?>

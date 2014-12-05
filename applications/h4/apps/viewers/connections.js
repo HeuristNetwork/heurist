@@ -162,12 +162,13 @@ $.widget( "heurist.connections", {
             console.log(this.options);
             
             if(this.options.recordset !== null) {
+                console.log("Showing recordset connections");
                 var records = this.options.recordset.getRecords();
-                console.log(records);  
+                var relations = this.options.relations;
                 
-                // TODO: Update to H4 completely after Artem adds relationships
-                //var data = parseRecSet2(records);  // Parse the Javascript data
-                //visualize(data);                   // Visualize the data
+                // Parse response to spring diagram format
+                var data = parseData(records, relations);
+                visualize(data);
             }
             
         }
@@ -212,8 +213,11 @@ $.widget( "heurist.connections", {
             {
                 var resdata = null;
                 if(response.status == top.HAPI4.ResponseStatus.OK){
-                    // Parse response to spring diagram format
+                    // Store relationships
                     console.log("Successfully retrieved relationship data!");
+                    that.option("relations", response.data);
+                    
+                    // Parse response to spring diagram format
                     var data = parseData(recordset.getRecords(), response.data);
                     visualize(data);
                 }else{
@@ -253,108 +257,6 @@ function getSelectedIDs() {
     return selectedIDs;
 }
 
-/** Parses a recSet into usable data */ 
-function parseRecSet() {
-    var selectedIDs = getSelectedIDs();    
-    var results = top.HEURIST.search.results;
-    var nodes = {};
-    var links = [];
-            
-    // Building nodes
-    for(var id in results.recSet) {
-        // Get details
-        var record = results.recSet[id].record;
-        var depth = results.recSet[id].depth;
-        var name = record["5"];  
-        var group = record["4"];
-        var image = top.HEURIST.iconBaseURL + group + ".png";
-        var selected = selectedIDs.indexOf(id.toString()) > -1;
-
-        // Construct node
-        var node = {id: parseInt(id), name: name, image: image, count: 1, depth: depth, selected: selected};
-        nodes[id] = node;    
-        //console.log("Node #" + id);    
-    }
-    
-    
-    /**
-    * Finds links in a revPtrLinks or revRelLinks object
-    */
-    function findLinks(source, object, type) {
-        var recIDs = object.byRecIDs;
-        for(var recID in recIDs) {
-            //console.log("ID " +id+ " points to recID: " + recID);
-            var target = nodes[recID];
-            if(target !== undefined) {
-                var ids = recIDs[recID];
-                //console.log("RELATION ID's");
-                //console.log(ids);
-                if(ids !== undefined && ids.length > 0) {
-                    for(var i = 0; i < ids.length; i++) {
-                        // Define relation    
-                        //console.log("Relation #" + i + " ID: " + ids[i]);        
-                        var relation = nodes[ids[i]];
-                        if(relation === undefined) {
-                            // Look up the typedef by ID
-                            var typedef = top.HEURIST.detailTypes.typedefs[ids[i]];
-                            //console.log(typedef);
-                            if(typedef !== undefined) {
-                                // Construct relation details
-                                var name = typedef.commonFields[1];
-                                var group = "group";
-                                var image = top.HEURIST.iconBaseURL + group + ".png";
-                                relation = {id: ids[i], name: name, image: image, count: 1, pointer: type.indexOf("ointer")>0};
-                            }
-                        }
-                        
-                        // Construct a link
-                        if(relation !== undefined) {
-                            var link;
-                            if(type.indexOf("ointer")>0) { // Swap source & target
-                                link = {source: target, relation: relation, target: source, targetcount: source.count};
-                            }else{ // Source --> Target
-                                link = {source: source, relation: relation, target: target, targetcount: target.count};
-                            }
-                            //console.log("LINK");
-                            //console.log(link);   
-                            links.push(link);  
-                        }
-                    } 
-                }  
-            }
-        }
-    }
-
-    // Go through all records
-    for(var id in results.recSet) {
-        //console.log("RecSet["+id+"]:");
-        //console.log(results.recSet[id]);
-        var source = nodes[id];
-        
-        // Determine links
-        if(source !== undefined) {
-            var map = {"ptr": "Pointer", "revPtr": "Reverse Pointer", "revPtrLinks": "Reverse pointer link",
-                       "rel": "Relationship", "relLinks": "Relationship marker", "revRelLinks": "Reverse relationship marker"};
-                       
-            for(var key in map) {
-                var object = results.recSet[id][key];
-                //console.log(key + " for recSet["+id+"]");
-                //console.log(object);
-                if(object !== undefined) {
-                    findLinks(source, object, map[key]);
-                }
-            }
-        }
-    }
-    
-    // Construct data object
-    var data = {nodes: nodes, links: links};
-    console.log("DATA");
-    console.log(data);
-    return data;
-}     
-
-
 /**
 * Determines links between nodes
 * 
@@ -365,22 +267,12 @@ function getLinks(nodes, relations) {
     var links = [];
     
     // Go through all relations
-    for(var i = 0; i < relations.length; i++) {
-        console.log(relations[i]);
-        
+    for(var i = 0; i < relations.length; i++) { 
         // Null check
         var source = relations[i].recID;
         var target = relations[i].targetID;
-        
-        console.log("SourceID: " + source);
-        console.log(nodes[source]);
-        console.log("TargetID: " + target);
-        console.log(nodes[target]);
-        
-        
-        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) {
-            console.log("ADDING LINK!");
-            
+
+        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
             // Construct link
             var link = {source: nodes[source],
                         target: nodes[target],
@@ -388,8 +280,7 @@ function getLinks(nodes, relations) {
                         relation: {}
                        };
             links.push(link); 
-        }    
-        console.log(".");   
+        }      
     }   
     
     return links;
@@ -408,20 +299,22 @@ function parseData(records, relations) {
     var nodes = {};
     var links = [];
 
-    // Construct nodes for each record
-    for(var id in records) {
-        var node = {id: parseInt(id),
-                    name: records[id][5],
-                    image: top.HAPI4.iconBaseURL+records[id][4],
-                    count: 0,
-                    depth: 1
-                   };
-        nodes[id] = node;
+    if(records !== undefined && relations !== undefined) {
+        // Construct nodes for each record
+        for(var id in records) {
+            var node = {id: parseInt(id),
+                        name: records[id][5],
+                        image: top.HAPI4.iconBaseURL+records[id][4],
+                        count: 0,
+                        depth: 1
+                       };
+            nodes[id] = node;
+        }
+        
+        // Links
+        links = links.concat( getLinks(nodes, relations.direct)  ); // Direct links
+        links = links.concat( getLinks(nodes, relations.reverse) ); // Reverse links
     }
-    
-    // Links
-    links = links.concat( getLinks(nodes, relations.direct)  ); // Direct links
-    links = links.concat( getLinks(nodes, relations.reverse) ); // Reverse links
 
     // Construct data object
     var data = {nodes: nodes, links: links};
@@ -436,5 +329,7 @@ function visualize(data) {
 
     // Call showData method of the springDiagram iFrame
     var iframe = $("iframe[src*=springDiagram]");
-    iframe[0].contentWindow.showData(data);
+    if(iframe != null && iframe !== undefined && iframe.length >= 1) {
+        iframe[0].contentWindow.showData(data);
+    }
 }

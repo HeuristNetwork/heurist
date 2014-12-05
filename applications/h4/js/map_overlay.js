@@ -5,7 +5,7 @@ var overlays = {};
 
 /**
 * Adds a map overlay to the given map.
-* Performs an API call which contains data, which will be drawed
+* Performs an API call which contains data, which will be drawed upon selection
 */
 function addMapOverlay(_map) {
     map = _map;
