@@ -32,8 +32,7 @@
 
 -- ----------------------------------------------------------------------------
 
-ALTER TABLE `defTranslations`
-ADD CONSTRAINT fk_trn_LanguageCode3 FOREIGN KEY (trn_LanguageCode3) REFERENCES defLanguages (lng_NISOZ3953) ON UPDATE CASCADE;
+ALTER TABLE `defTranslations` ADD CONSTRAINT fk_trn_LanguageCode3 FOREIGN KEY (trn_LanguageCode3) REFERENCES defLanguages (lng_NISOZ3953) ON UPDATE CASCADE;
 
 -- ----------------------------------------------------------------------------
 
