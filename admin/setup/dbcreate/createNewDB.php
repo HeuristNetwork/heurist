@@ -31,15 +31,14 @@
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 
-    // must be logged in if a dbname is passed to it
-    if (!is_logged_in() && HEURIST_DBNAME!="") {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
-        return;
-    }
-
     // must be logged in anyway to define the master user for the database
     if (!is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
+        $spec_case = "";
+        if(HEURIST_DBNAME=='H3Sandpit'){
+            //special case - do no show database name
+            $spec_case = "&register=1";
+        }
+        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.$spec_case.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
         return;
     }
 

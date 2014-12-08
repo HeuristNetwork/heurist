@@ -241,6 +241,17 @@ if(!$needRegistration){
 ?>
 
 <table cellpadding=3 id="login-table" border="0">
+<?php
+if(@$_REQUEST['register']==1 && HEURIST_DBNAME=="H3Sandpit"){
+?>
+        <tr class="input-row">
+            <td colspan="2" style="padding-left:50px">
+                <b>Please enter the username and password you used to register</b>
+            </td>
+        </tr>
+<?php    
+}else{
+?>
 	<tr class="input-row">
 	<td class="input-header-cell">Database name</td>
 	<td class="input-cell" style="padding-top:0px !important;"><h2 style="font-size: 20px"><?php echo HEURIST_DBNAME; ?></h2></td>
@@ -252,6 +263,8 @@ if(!$needRegistration){
 	</tr>
 
 <?php
+}
+
 if ($LOGIN_ERROR){
 echo '<tr class="input-row"><td colspan="2"><p style="margin-left: 100px; color: red;">'.$LOGIN_ERROR.'</p></td></tr>';
 }

@@ -103,10 +103,10 @@ require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
 	                }
                 }
 
-                if (!$_REQUEST['username']  ||  $error) {
+                if (!@$_REQUEST['username']  ||  @$error) {
                     ?>
                     <p>Enter your username OR email address below and a new password will be emailed to you.</p>
-                    <?= $error ?>
+                    <?= @$error ?>
                     <form method="get">
                         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                         Enter username / email:
