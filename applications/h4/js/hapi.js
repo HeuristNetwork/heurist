@@ -722,6 +722,8 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         currentUser: _guestUser,
         sysinfo: {},
+        
+        currentRecordset: null, 
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

@@ -168,12 +168,34 @@ $.widget( "heurist.search_links_tree", {
         //    $.getScript(top.HAPI4.basePath+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateTree(); } );
             alert('dnd ext for tree not loaded')
             return;
-        }else if(!top.HAPI4.currentUser.ugr_SvsTreeData){
+        }else if(!top.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded - load from file [user_id]_svstree.json
             
             top.HAPI4.SystemMgr.ssearch_gettree( function(response){
                 if(response.status = top.HAPI4.ResponseStatus.OK){
                     try {
                         top.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
+                        
+                        //remove nodes that refers to missed search
+                        function __cleandata(data){
+                            if(data.children){
+                                var newchildren = [];
+                                for (var idx in data.children){
+                                  if(idx>=0){
+                                       var node = __cleandata(data.children[idx]);
+                                       if(node!=null)
+                                            newchildren.push(node)
+                                  }
+                                }
+                                data.children = newchildren;
+                            }else if(data.key>0){
+                                return top.HAPI4.currentUser.usr_SavedSearch[data.key]?data:null;
+                            }else{
+                                return data;
+                            }
+                        }                        
+                        
+                        top.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(top.HAPI4.currentUser.ugr_SvsTreeData);
+                        
                     }
                     catch (err) {
                     }
@@ -386,7 +408,7 @@ this.tree.fancytree({
       $(this).trigger("nodeCommand", {cmd: cmd});
       return false;
     }
-  });            
+  });      
   
   /*
    * Context menu (https://github.com/mar10/jquery-ui-contextmenu)

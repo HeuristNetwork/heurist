@@ -25,6 +25,7 @@
         <title>Spring Diagram</title>
 
         <!-- Css -->
+        <!-- link rel="stylesheet" type="text/css" href="../../style3.css" -->
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <style>
             body, html {

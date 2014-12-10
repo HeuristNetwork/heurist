@@ -29,49 +29,18 @@ $.widget( "heurist.resultList", {
         multiselect: true,
         isapplication: true,
         showcounter: true,
-        showmenu: true,
+        showmenu: true
         //searchsource: null,
-        
-        recordset: null   //united recordset
-        // callbacks
-        //onselect: null
     },
     
 
     _query_request: null, //keep current query request
-    _total_count_of_curr_request: 0, //total count for current request (main and rules)
     
     _events: null,
     _lastSelectedIndex: -1,
+    _count_of_divs: 0,
 
-    //_results:{},   // storage for record IDS - results of each rule request
-    _rule_index: -1, // current index 
-    _res_index:  -1, // current index in result array (chunked by 1000)
-    _rules:[],       // flat array of rules for current query request
     
-    /* format
-    
-         rules:{   {parent: index,  // index to top level
-                    level: level,   
-                    query: },    
-            
-         results: { root:[], ruleindex:[  ],  ruleindex:[  ] }    
-    
-    
-         requestXXX - index in rules array?  OR query string?
-    
-            ids:[[1...1000],[1001....2000],....],     - level0
-            request1:{ ids:[],                          level1
-                    request2:{},                        level2
-                    request2:{ids:[], 
-                            request3:{} } },            level3
-                            
-                            
-                            
-                            
-                            
-    
-    */
     
 
     // the constructor
@@ -149,6 +118,7 @@ $.widget( "heurist.resultList", {
             .css({'position':'absolute','right':'100px','left':'100px', 'margin-top':'5px', 'display':'inline-block', 'height':'9px', 'margin':'0px !important'})
             .progressbar().appendTo(this.div_progress);
 
+        //move to search.js         
         this.btn_stop_search = $( "<button>", {text: "stop"} )
               .css({'font-size': '0.8em','position':'absolute','right':'15px'})
               .appendTo( this.div_progress )
@@ -182,9 +152,10 @@ $.widget( "heurist.resultList", {
         //-----------------------     listener of global events
         this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
-            this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' 
-                        + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES 
-                        + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+            this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+                        + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART 
+                        + ' ' + top.HAPI4.Event.ON_REC_SELECT 
+                        + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
         }
 
         $(this.document).on(this._events, function(e, data) {
@@ -195,84 +166,43 @@ $.widget( "heurist.resultList", {
 
             }else  if(e.type == top.HAPI4.Event.LOGOUT)
             {
-                that.option('recordset', null);
+                that._clearAllRecordDivs();
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
-                //that.option('recordset', data); //hRecordSet
                 that.loadanimation(false);
                 
                 if(that._query_request!=null &&  data.queryid()==that._query_request.id) {  
-                
                     that._renderRecordsIncrementally(data); //hRecordSet
-                    if(!that._doSearchIncrement()){//load next chunk
-                        that._searchCompleted();
-                    } 
-                    
                 }
+                
+                //@todo show total number of records ???
+                
 
-                
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
-                
-                if(data){
-                    //create flat rule array
-                    that._doApplyRules(data); //indexes are rest inside this function
-                  
-                    //if rules were applied before - need to remove all records except original and re-render
-                    if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
-                         
-                         //keep json (to possitble save as saved searches)
-                         that._query_request.rules = data;
-                        
-                         // re-render the original set of records only                        
-                         var rec_ids_level0 = [];
-                         
-                         var idx;
-                         var keep_it = that._rules[0].results;
-                         for(idx=0; idx<that._rules[0].results.length; idx++){
-                            rec_ids_level0 = rec_ids_level0.concat(that._rules[0].results[idx]);
-                         }
-                         
-                         var data = that.options.recordset.getSubSetByIds(rec_ids_level0);
-                         that.options.recordset = null;
-                         that._clearAllRecordDivs();
-                         //that.option('recordset', null);
-                         that._rules[0].results = [];
-                         that._renderRecordsIncrementally(data); //hRecordSet
-                         //keep results separated by chunks
-                         that._rules[0].results = keep_it;
-                    
-                         that._doSearchIncrement(); //start search dependent records according to rules        
-                    }
-                }
-                
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 if(data){
                     
-                    if(that._query_request==null || data.source!=that.element.attr('id') || data.id!=that._query_request.id) {  
+                    if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') || 
                         //new search from outside
-                        //reset recordset 
                     
                         var new_title = top.HR(data.qname || 'Search result');
                         var $header = $(".header"+that.element.attr('id'));
                         $header.html(new_title);
                         $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
 
-                        that.option('recordset', null);
+                        that._clearAllRecordDivs();
                         
                         that.loadanimation(true);
                         
-                        if( data.rules!=null ){
-                            //create flat rule array
-                            that._doApplyRules(data.rules);
-                        }
-                        
                         that._renderProgress();
-                        
                     }
                     that._query_request = data;  //keep current query request 
                 }
+                
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                
+                
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
@@ -306,19 +236,9 @@ $.widget( "heurist.resultList", {
         this._refresh();
     },
     
-    _setOption: function( key, value ) {
+    /*_setOption: function( key, value ) {
         this._super( key, value );
-        
-        if(key=='recordset' && value==null){
-            //reset counters and storages
-            this._rule_index = -1; // current index 
-            this._res_index =  -1; // current index in result array (chunked by 1000)
-            this._rules = [];      // flat array of rules for current query request
-            
-            this._clearAllRecordDivs();
-        }
-        //this._refresh();
-    },
+    },*/
     
 
     /* private function */
@@ -411,7 +331,7 @@ $.widget( "heurist.resultList", {
 
     // @todo move record related stuff to HAPI
     // NOT USED 
-    _renderRecords: function(){
+    /*_renderRecords: function(){
 
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
@@ -465,7 +385,7 @@ $.widget( "heurist.resultList", {
             }
         }
 
-    },
+    },*/
 
     _clearAllRecordDivs: function(){
 
@@ -477,6 +397,7 @@ $.widget( "heurist.resultList", {
             this.div_content[0].innerHTML = '';//.empty();  //clear
         }
         
+        this._count_of_divs = 0;
     },
     
     
@@ -485,26 +406,26 @@ $.widget( "heurist.resultList", {
     * 
     * @param recordset
     */
-    _renderRecordsIncrementally: function(recordset){
+    _renderRecordsIncrementally: function( recordset ){
 
         if(recordset)
         {
             //this.loadanimation(false);
-            if(this.options.recordset==null){
+            /*if(this.options.recordset==null){
                 this.options.recordset = recordset;
             }else{
                 //unite record sets 
                 this.options.recordset = this.options.recordset.doUnite(recordset);
-            }   
+            }*/   
             
-            this._total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
+            var total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
             
             this._renderProgress();
 
-            if( this._total_count_of_curr_request > 0 )
+            if( total_count_of_curr_request > 0 )
             {
 
-                if(this.options.recordset.length()<10001){
+                if(this._count_of_divs<10001){
                 
                     var recs = recordset.getRecords();
 
@@ -513,7 +434,8 @@ $.widget( "heurist.resultList", {
                     for(recID in recs) {
                         if(recID){
                             //var recdiv = this._renderRecord(recs[recID]);
-                            html  += this._renderRecord_html(recs[recID]);
+                            html  += this._renderRecord_html(recordset, recs[recID]);
+                            this._count_of_divs++;
                             /*this._on( recdiv, {
                                 click: this._recordDivOnClick
                             });*/
@@ -531,22 +453,8 @@ $.widget( "heurist.resultList", {
                     click: this._recordDivOnClick
                 });
                 
-                //save increment into current rules.results
-                var records_ids = recordset.getIds()
-                if(records_ids.length>0){
-                    // rules:[ {query:query, results:[], parent:index},  ]
-                
-                    var ruleindex = this._rule_index;
-                    if(ruleindex<0){
-                         ruleindex = 0; //root/main search
-                    }
-                    if(top.HEURIST4.util.isempty(this._rules)){
-                         this._rules = [{results:[]}];
-                    }
-                    this._rules[ruleindex].results.push(records_ids);
-                }
 
-            }else if(this._rule_index<1) {
+            }else if(this._count_of_divs<1) {
 
                 var $emptyres = $('<div>')
                 .html(top.HR('No records match the search')+
@@ -575,7 +483,9 @@ $.widget( "heurist.resultList", {
     
     
     /**
-    * create div for given record
+    * create div for given record  
+    * 
+    * NOT USED  - jquery works too slow if there are thousands of divs
     *
     * @param record
     */
@@ -694,11 +604,10 @@ $.widget( "heurist.resultList", {
         return $recdiv;
     },
     
-    _renderRecord_html: function(record){
+    _renderRecord_html: function(recordset, record){
 
-        var recset = this.options.recordset;
         function fld(fldname){
-            return recset.fld(record, fldname);
+            return recordset.fld(record, fldname);
         }
 
         /*
@@ -767,28 +676,34 @@ $.widget( "heurist.resultList", {
 
         //var $allrecs = this.div_content.find('.recordDiv');
 
-        var $rdiv = $(event.target);
+        var $rdiv = $(event.target), 
+            that = this;
 
         if(!$rdiv.hasClass('recordDiv')){
             $rdiv = $rdiv.parents('.recordDiv');
         }
 
-        var selected_rec_ID = $rdiv.attr('recid');
+        var selected_rec_ID = Number($rdiv.attr('recid'));
+        this.div_content.find('.selected_last').removeClass('selected_last');
+        
 
         if(this.options.multiselect && event.ctrlKey){
-
+            
             if($rdiv.hasClass('selected')){
                 $rdiv.removeClass('selected');
+                this._lastSelectedIndex = 0;
                 //$rdiv.removeClass('ui-state-highlight');
             }else{
                 $rdiv.addClass('selected');
+                $rdiv.addClass('selected_last'); 
+                this._lastSelectedIndex = selected_rec_ID;
                 //$rdiv.addClass('ui-state-highlight');
             }
-            lastSelectedIndex = selected_rec_ID;
+            //this._lastSelectedIndex = selected_rec_ID;
             
         }else if(this.options.multiselect && event.shiftKey){
             
-            if(Number(lastSelectedIndex)>0){
+            if(Number(this._lastSelectedIndex)>0){
                 var nowSelectedIndex = selected_rec_ID;
                 
                 this.div_content.find('.selected').removeClass('selected');
@@ -796,10 +711,10 @@ $.widget( "heurist.resultList", {
                 var isstarted = false;
                 
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                        var rec_id = $(rdiv).attr('recid');
+                        var rec_id = Number($(rdiv).attr('recid'));
                         
-                        if(rec_id == lastSelectedIndex || rec_id==nowSelectedIndex){
-                              if(isstarted){
+                        if(rec_id == that._lastSelectedIndex || rec_id==nowSelectedIndex){
+                              if(isstarted){ //stop selection and exit
                                   $(rdiv).addClass('selected');
                                   return false;
                               }
@@ -810,7 +725,8 @@ $.widget( "heurist.resultList", {
                         }
                 });
                 
-                
+                $rdiv.addClass('selected_last');
+                that._lastSelectedIndex = selected_rec_ID; 
                 
             }else{
                 lastSelectedIndex = selected_rec_ID;    
@@ -818,10 +734,11 @@ $.widget( "heurist.resultList", {
             
             
         }else{
-            //remove seletion from all recordDiv
+            //remove selection from all recordDiv
             this.div_content.find('.selected').removeClass('selected');
             $rdiv.addClass('selected');
-            lastSelectedIndex = selected_rec_ID;
+            $rdiv.addClass('selected_last'); 
+            this._lastSelectedIndex = selected_rec_ID;
 
             //var record = this.options.recordset.getById($rdiv.attr('recID'));
         }
@@ -847,13 +764,23 @@ $.widget( "heurist.resultList", {
 
         var selected = {};
         var that = this;
-        this.div_content.find('.selected').each(function(ids, rdiv){
-            var rec_ID = $(rdiv).attr('recid');
-            var record = that.options.recordset.getById(rec_ID);
-            selected[rec_ID] = record;
-        });
+        if(top.HAPI4.currentRecordset){
+            this.div_content.find('.selected').each(function(ids, rdiv){
+                var rec_ID = $(rdiv).attr('recid');
+                if(that._lastSelectedIndex!=rec_ID){
+                    var record = top.HAPI4.currentRecordset.getById(rec_ID);
+                    selected[rec_ID] = record;
+                }
+            });
+            if(Number(this._lastSelectedIndex)>0){
+                var record = top.HAPI4.currentRecordset.getById(this._lastSelectedIndex);
+                selected[this._lastSelectedIndex] = record;
+            }
 
-        return that.options.recordset.getSubSet(selected);
+            return top.HAPI4.currentRecordset.getSubSet(selected);
+        }else{
+            return null
+        }
     },
 
     /**
@@ -865,6 +792,7 @@ $.widget( "heurist.resultList", {
 
         //clear selection
         this.div_content.find('.selected').removeClass('selected');
+        this.div_content.find('.selected_last').removeClass('selected_last');
         
         if( selection && (typeof selection == "function") && selection.isA("hRecordSet") ){
             if(selection.length()>0){
@@ -874,6 +802,9 @@ $.widget( "heurist.resultList", {
                         var rec_id = $(rdiv).attr('recid');
                         if(recIDs_list.indexOf(rec_id)>=0){
                            $(rdiv).addClass('selected'); 
+                           //if(that._lastSelectedIndex==rec_id){
+                           //    $(rdiv).addClass('selected_last'); 
+                           //}
                         }
                 });
             }
@@ -909,214 +840,10 @@ $.widget( "heurist.resultList", {
         }
 
         return false;
-    }, 
-
-    
-    /**
-    * Rules may be applied at once (part of query request) or at any time later
-    *  
-    * 1. At first we have to create flat rule array   
-    */
-    _doApplyRules: function(rules_tree){
-        
-         // original rule array
-         // rules:[ {query:query, levels:[]}, ....  ]           
-         
-         // we create flat array to allow smooth loop
-         // rules:[ {query:query, results:[], parent:index},  ]
-        
-        var flat_rules = [ { results:[] } ];
-        
-        function __createFlatRulesArray(r_tree, parent_index){
-            var i;
-            for (i=0;i<r_tree.length;i++){
-                var rule = { query: r_tree[i].query, results:[], parent:parent_index }
-                flat_rules.push(rule);
-                __createFlatRulesArray(r_tree[i].levels, flat_rules.length-1);
-            }
-        }
-        
-        //it may be json
-        if(!top.HEURIST.util.isempty(rules_tree) && !$.isArray(rules_tree)){
-             rules_tree = $.parseJSON(rules_tree);
-        }
-        
-        __createFlatRulesArray(rules_tree, 0);
-
-        //assign zero level - top most query
-        if(this.options.recordset!=null){  //aplying rules to existing set 
-            
-            //result for zero level retains
-            flat_rules[0].results = this._rules[0].results;
-            
-            this._rule_index = 0; // current index 
-        }else{
-            this._rule_index = -1;
-        }
-        this._res_index = 0; // current index in result array (chunked by 1000)
-        
-        this._rules = flat_rules;
-        
-    },
-    
-    
-    _renderProgress: function(){
-
-        // show current records range and total count
-        if(this.options.showcounter && this.options.recordset && this.options.recordset.length()>0){
-            
-            var s = '';
-            
-            var isTerminated = false; //(this._query_request==null || this.options.recordset.queryid()!=this._query_request.id);
-
-            if(this._rule_index>0 && !isTerminated){ //this search by rules
-                s = 'Rules: '+this._rule_index+' of '+(this._rules.length-1)+'  ';
-            }                
-            s = s + 'Total: '+this.options.recordset.length();
-            this.span_info.html( s );
-            this.span_info.show();
-            
-            if(isTerminated){
-                this.div_progress.hide();
-                return;
-            }
-            
-            var curr_offset = Number(this._query_request.o);
-            curr_offset = (curr_offset>0?curr_offset:0) + Number(this._query_request.l);
-            var tot = this._total_count_of_curr_request;
-            if(curr_offset>tot) curr_offset = tot;
-            
-            if(this._rule_index<1){  //this is main request
-                    
-                    //search in progress
-                     this.lbl_current_request.html(curr_offset==tot?tot:curr_offset+'~'+tot);
-                     
-                     this.span_progress.progressbar( "value", curr_offset/tot*100 );
-                     //this.span_progress.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
-                     this.div_progress.show();
-            
-                     if(curr_offset==tot) {
-                           this.div_progress.delay(500).hide();
-                     }
-                     
-            }else{ //this is rule request
-            
-                     if( this._rule_index < this._rules.length){
-            
-                        var res_steps_count = this._rules[this._rules[this._rule_index].parent].results.length;
-                
-                        this.lbl_current_request.html( (curr_offset==tot?tot:curr_offset+'~'+tot)+' of '+
-                            (this._res_index+1)+'~'+res_steps_count);
-                            
-                        var progress_value = this._res_index/res_steps_count*100 + curr_offset/tot*100/res_steps_count
-                            
-                        this.span_progress.progressbar( "value", progress_value );
-                            
-                        this.div_progress.show();
-                     }
-                
-            }
-            
-            /*var offset = this.options.recordset.offset();
-            var len   = this.options.recordset.length();
-            var total = this.options.recordset.count_total();
-            if(total>0){
-                this.span_info.show();
-                this.span_info.html( (offset+1)+"-"+(offset+len)+"/"+total);
-            }else{
-                this.span_info.html('');
-            }*/
-        }else{
-            this.span_info.hide();
-            this.div_progress.hide();
-        }
-
-
-        
-    },
-
-    //@todo - do not apply rules unless main search is finished
-    //@todo - if search in progress and new rules are applied - stop this search and remove all linked data (only main search remains)
-    _doSearchIncrement: function(){
-
-        if ( this._query_request ) {
-
-            this._query_request.source = this.element.attr('id'); //orig = 'rec_list';
-            
-            
-            var new_offset = Number(this._query_request.o);
-            new_offset = (new_offset>0?new_offset:0) + Number(this._query_request.l);
-            
-            if(new_offset< this._total_count_of_curr_request){ //search for next chunk of data within current request
-                    this._query_request.increment = true;
-                    this._query_request.o = new_offset;
-                    top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
-                    return true;
-            }else{
-                    
-         // original rule array
-         // rules:[ {query:query, levels:[]}, ....  ]           
-         
-         // we create flat array to allow smooth loop
-         // rules:[ {query:query, results:[], parent:index},  ]
-
-                      
-                     // this._rule_index;  current rule
-                     // this._res_index;   curent index in result array (from previous level)
-
-                     var current_parent_ids;
-                     var current_rule;
-                     
-                     while (true){ //while find rule with filled parent's resultset
-                         
-                         if(this._rule_index<1){  
-                             this._rule_index = 1; //start with index 1 - since zero is main resultset
-                             this._res_index = 0;
-                         }else{
-                             this._res_index++;  //goto next 1000 records
-                         }
-                     
-                         if(this._rule_index>=this._rules.length){
-                             this._rule_index = -1; //reset
-                             this._res_index = -1;
-                             this._renderProgress();
-                             return false; //this is the end
-                         }
-                             
-                         current_rule = this._rules[this._rule_index];
-                         //results from parent level
-                         current_parent_ids = this._rules[current_rule.parent].results
-                     
-                         //if we access the end of result set - got to next rule
-                         if(this._res_index >= current_parent_ids.length)
-                         {
-                            this._res_index = -1; 
-                            this._rule_index++;
-                            
-                         }else{
-                            break; 
-                         }
-                     }
-                     
-                     
-                     //create request 
-                     this._query_request.q = current_rule.query;
-                     this._query_request.topids = current_parent_ids[this._res_index].join(','); //list of record ids of parent resultset
-                     this._query_request.increment = true;
-                     this._query_request.o = 0;
-                     top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
-                     return true;
-                
-            }
-        }
-
-        return false;
-    }, 
-    
-    _searchCompleted: function(){
-         if(this.options.recordset && this.options.recordset.length()>0)
-             $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ this.options.recordset ]); //global app event
     }
     
+    , _renderProgress: function(){
+    
+    } 
 
 });

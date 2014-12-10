@@ -375,7 +375,7 @@ $.widget( "heurist.resultListMenu", {
             }
                                                              //encodeURIComponent(JSON.stringify(_data))
             var str = JSON.stringify(_data);
-            var url = top.HAPI4.basePathOld + "search/actions/actionHandler.php";
+            var url = top.HAPI4.basePathOld + "search/actions/actionHandler.php";   //h3 action handler
             var request = {db:top.HAPI4.database, data: str, action: action }
             
             $.ajax({

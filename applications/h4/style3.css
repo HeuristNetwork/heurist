@@ -318,6 +318,10 @@ div .selected, div .selected:hover{
     border-color: #62A7F8;
 }
 
+div .selected_last{             
+    border: 2px solid #62A7F8 !important;
+}
+
 
 .recordDiv .recordIcons {
     white-space: nowrap;

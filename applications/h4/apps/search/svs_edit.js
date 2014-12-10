@@ -48,6 +48,7 @@ function hSvsEdit(args) {
 
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                
                 //svs_ugrid.parent().hide();
                 var request = Hul.parseHeuristQuery(svs[_QUERY]);
                 domain  = request.w;

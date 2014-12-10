@@ -40,7 +40,7 @@ var widgets = [
     {id:'ha01', name:'Databases', widgetname:'about', script:'apps/about.js', minsize:[200,200], size:[300,300], isframe:false },
     {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
 
-    {id:'ha10', name:'Search', widgetname:'search', script:'apps/search.js'},
+    {id:'ha10', name:'Search', widgetname:'search', script:'apps/search/search.js'},
     //{id:'ha11', name:'Quick Search', url:'apps/search_quick.php'},
     //{id:'ha12', name:'Advanced Search', url:'apps/search_advanced.php'},
     {id:'ha13', name:'Saved searches', widgetname:'search_links', script:'apps/search_links.js'},
@@ -95,7 +95,7 @@ var layouts = [
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:80,right:0, border:'none', 'background':'none'} },    //top panel
                 
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:true} },   //search
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
         west:{size:200, minsize:200, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
@@ -106,13 +106,21 @@ var layouts = [
                     {appid:'h3_recordListExt', name: 'Record H3', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'ha51'}, // H4 map V2
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
-                    {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}},    //H4 connections
-                    {appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
+                    {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}}    //H4 connections
+                    //{appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
                 ]
             }]
         }
     },
-    {id:'l02', name:'abandoned', theme:'smoothness',
+    {id:'l02', name:'connections', theme:'smoothness',
+    north:{size:40, resizable:false,
+            apps:[
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
+        ]},    
+        center:{dropable:false, apps:[
+        {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'} }]}  //search result 
+    },
+    {id:'l03', name:'abandoned', theme:'smoothness',
         north:{size:88, resizable:false,
             apps:[
                 {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none', 'background':'none'} },    //about

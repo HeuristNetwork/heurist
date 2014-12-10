@@ -61,8 +61,10 @@
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
-        <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/) -->
-        <script src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"></script>
+        <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/) 
+             src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
+        -->
+        <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>
@@ -80,7 +82,7 @@
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/search/search_links_tree.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
-        <script type="text/javascript" src="apps/search.js"></script>
+        <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/search/resultList.js"></script>
         <!--
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
