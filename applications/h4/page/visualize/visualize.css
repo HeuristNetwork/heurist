@@ -19,6 +19,7 @@
 }     
 
 .space {
+    font-size: 0.7em;
     padding-left: 5px;
     padding-right: 5px;   
     padding-top: 3px;  
@@ -45,10 +46,10 @@
     text-align: center;
 }
 .number-input.small {
-     max-width: 30px;
+     max-width: 40px;
 }
 .number-input.medium {
-    max-width: 45px;
+    max-width: 55px;
 }
 
 .explanation {
@@ -136,7 +137,8 @@ circle.foreground {
 }
 
 circle.selected {
-    fill: #1687E7 !important;
+    fill: #00ff00 !important;
+    /*fill: #1687E7 !important;*/
 }
 
 /** Text above circle */
@@ -179,6 +181,6 @@ text.shadow {
 
 .close-text {
     fill: #fff;
-    font-size: 20px;
+    /*font-size: 20px;*/
     font-weight: bold;
 }

@@ -69,7 +69,7 @@ $.widget( "heurist.recordListExt", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                that._query_request = data;  //keep current query request 
+                if(data) that._query_request = data;  //keep current query request 
                 that.option("recordset", null);
                 that.loadanimation(true);
                 

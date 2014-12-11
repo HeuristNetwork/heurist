@@ -97,7 +97,7 @@ $.widget( "heurist.search_links_tree", {
             that._refresh();
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
-            that.currentSearch = data;
+            if(data) that.currentSearch = data;
         });
 
         this._refresh();

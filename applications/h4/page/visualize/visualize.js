@@ -900,29 +900,36 @@ function visualizeData() {
                        if(!d3.event.defaultPrevented) {
                            // Remove all overlays and create a record overlay
                            removeOverlays();
+                           d.selected = true;
+                           
+                           node.select("circle").style("fill", "#fff"); //.attr("r", 20);
+                           
+                           d3.select(this).select("circle").style("fill", "#0f0"); //.attr("r", 20);
+                           
                            createOverlay(d3.event.offsetX, d3.event.offsetY, "record", "id"+d.id, getRecordOverlayData(d));  
                        }
                   })
                   .call(node_drag);
     
     // Adding the background circles to the nodes
-    var bgcircle = node.append("circle")
+    /*var bgcircle = node.append("circle")
                        .attr("r", function(d) {
                             //console.log("COUNT for " + d.name + ": " + d.count);
                             return getEntityRadius(d.count);
                        })
                        .attr("class", "background")
-                       .attr("fill", entitycolor);
+                       .attr("fill", entitycolor);*/
 
     // Adding the foreground circles to the nodes
     var fgcircle = node.append("circle")
                        .attr("r", circleSize)
-                       .attr("class", function(d) {
+                       /*.attr("class", function(d) {
                             if(d.selected == true) {
                                 return "foreground selected";
                             }
                             return "foreground around";
-                       })
+                       })*/
+                       .style("fill", "#f00")
                        .style("stroke", "#ddd")
                        .style("stroke-opacity", function(d) {
                            if(d.selected == true) {
@@ -1075,12 +1082,8 @@ function visualizeData() {
                 }
                 
             }else{
-                // Straight
-                straightFisheye(topLines);
-                straightFisheye(bottomLines);
-                
                 /** Applies fish eye effect to straight lines */
-                function straightFisheye(lines) {
+                function __straightFisheye(lines) {
                     lines.attr("points", function(d) {
                        return d.source.fisheye.x + "," + d.source.fisheye.y + " " +
                               (d.source.fisheye.x +(d.target.fisheye.x-d.source.fisheye.x)/2) + "," + 
@@ -1088,6 +1091,12 @@ function visualizeData() {
                               d.target.fisheye.x + "," + d.target.fisheye.y;
                     });
                 }
+                
+                // Straight
+                __straightFisheye(topLines);
+                __straightFisheye(bottomLines);
+                
+                
             }
         }); 
     }    
@@ -1146,7 +1155,44 @@ function visualizeData() {
     // Finally apply translate & scale
     //container.attr("transform", "translate("+translateX+","+translateY+")scale("+scale+")");
     container.attr("transform", "translate(0,0)scale("+scale+")");
+    
+    
+    /******************************** SELECTION *******************************/
+    function _recordNodeOnClick(event, node) {
+ /* todo
+            //$.find('g.node.selected_last').removeClass('selected_last');
+            container.selectAll("node").
+        
+           // getLineLength
+            if(event.ctrlKey){  //this.options.multiselect && 
+                
+                if($rdiv.hasClass('selected')){
+                    $rdiv.removeClass('selected');
+                }else{
+                    $rdiv.addClass('selected');
+                    $rdiv.addClass('selected_last'); 
+                }
+                //this._lastSelectedIndex = selected_rec_ID;
+            }            
+            
+            var selected = this.getSelected();
+
+            if(this.options.isapplication){
+                $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
+            }
+            
+            //this._trigger( "onselect", event, selected );
+*/            
+    }
+
+
+     
+    
 }
+
+
+
+
 
 /*************************************** OVERLAY ****************************************/  
 
@@ -1447,9 +1493,6 @@ function removeOverlays() {
     });
 }
 
-
-
- 
 /********************************* MENU ***********************************/
 $(document).ready(function() {
     /* For future usage 

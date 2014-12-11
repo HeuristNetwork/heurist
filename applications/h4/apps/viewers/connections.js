@@ -74,7 +74,7 @@ $.widget( "heurist.connections", {
             // Search start
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                that._query_request = data;  //keep current query request 
+                if(data) that._query_request = data;  //keep current query request 
                 that.option("recordset", null);
                 that.loadanimation(true);
               
@@ -110,11 +110,13 @@ $.widget( "heurist.connections", {
     }, //end _create
 
 
+    /*
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
         this._refresh();
-    },  
+    },
+    */  
 
     /* private function */
     _refresh: function(){
@@ -163,12 +165,20 @@ $.widget( "heurist.connections", {
             
             if(this.options.recordset !== null) {
                 console.log("Showing recordset connections");
-                var records = this.options.recordset.getRecords();
-                var relations = this.options.relations;
                 
-                // Parse response to spring diagram format
-                var data = parseData(records, relations);
-                visualize(data);
+                if(this.options.relations == null){
+                    this.getRelations(this.options.recordset);
+                    
+                }else{
+                
+                    var records = this.options.recordset.getRecords();
+                    var relations = this.options.relations;
+                    
+                    // Parse response to spring diagram format
+                    var data = parseData(records, relations);
+                    visualize(data);
+                
+                }
             }
             
         }
@@ -203,6 +213,13 @@ $.widget( "heurist.connections", {
         console.log(recordset);
         
         if(top.HEURIST4.util.isnull(recordset)) return;
+
+        this.option("relations", null);
+        
+        if(!this.element.is(':visible')){
+                this.option("recordset", recordset);
+                return;
+        }
         
         var that = this; 
         //get first 2000 records and send their IDS to server to get related record IDS
@@ -239,7 +256,7 @@ $.widget( "heurist.connections", {
 });
 
 
-
+/** @TODO move this function inside  ***/
 
 /** Gets the selected IDs from top.HEURIST.search */
 function getSelectedIDs() {

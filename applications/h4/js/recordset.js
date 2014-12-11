@@ -434,6 +434,7 @@ function hRecordSet(initdata) {
                 _records = {};
             }
             return new hRecordSet({
+                queryid: queryid,
                 count: Object.keys(records).length, //$(_records).length,
                 offset: 0,
                 fields: fields,

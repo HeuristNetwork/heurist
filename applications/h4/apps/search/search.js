@@ -71,16 +71,20 @@ $.widget( "heurist.search", {
     _create: function() {
 
         var that = this;
+        
+        this.div_search = $('<div>').css('width','100%').appendTo( this.element );
+        this.div_progress = $('<div>').css('width','100%').appendTo( this.element ).hide();
 
-        this.input_search = $( "<input>", {width: this.options.has_paginator?'30%':'60%'} )
+        
+        this.input_search = $( "<input>", {width: this.options.has_paginator?'30%':'50%'} )
         .css({'margin-right':'0.2em'})
         .addClass("text ui-widget-content ui-corner-all")
-        .appendTo( this.element );
+        .appendTo( this.div_search );
 
         this.div_search_as_guest = $('<span>')
         .css('display', 'inline-black')
         .addClass('logged-out-only')
-        .appendTo( this.element );
+        .appendTo( this.div_search );
 
         this.btn_search_as_guest = $( "<button>", {
             text: top.HR("search")
@@ -92,7 +96,7 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user = $('<span>')
         .addClass('logged-in-only')
-        .appendTo( this.element );
+        .appendTo( this.div_search );
 
         this.btn_search_assistant = $( "<button>", {
             id: 'btn_search_assistant', 
@@ -163,14 +167,14 @@ $.widget( "heurist.search", {
 
         if(this.options.isrectype){
 
-            $("<label>for&nbsp;</label>").appendTo( this.element );
+            $("<label>for&nbsp;</label>").appendTo( this.div_search );
 
             this.select_rectype = $( "<select>" )
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .css('max-width','200px')
             //.val(value)
-            .appendTo( this.element );
+            .appendTo( this.div_search );
         }
 
         // bind click events
@@ -212,7 +216,7 @@ $.widget( "heurist.search", {
                 title: top.HR('records per chunk')
             })
             //.css('width', '4em')
-            .appendTo( this.element )
+            .appendTo( this.div_search )
             .button({icons: { secondary: "ui-icon-triangle-1-s" }});
 
             var smenu = 
@@ -262,115 +266,46 @@ $.widget( "heurist.search", {
             
             
         }
+        
+        
+        //-----------------------
+                                                                                               
+        
+        this.progress_bar = $("<div>")
+            .css({'width':'50%', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
+            .progressbar().appendTo(this.div_progress);
+            
+        this.progress_lbl = $("<div>").css({'position':'absolute','left': '50px', 'top': '4px', 'text-shadow': '1px 1px 0 #fff' })
+            .appendTo(this.progress_bar);     
+            //font-weight: bold;
+       
+        //move to search.js         
+        this.btn_stop_search = $( "<button>", {text: "Stop"} )
+              .css({'display':'inline-block', 'margin-bottom':'15px'})
+              .appendTo( this.div_progress )
+              .button({icons: {
+                  secondary: "ui-icon-cancel"
+                 },text:true});
+
+        this._on( this.btn_stop_search, {
+            click: function(e) {
+                if(this.query_request!=null){ //assign new id to search - it prevents further increment search
+                    this.query_request.id = Math.round(new Date().getTime() + (Math.random() * 100));                  
+                    this._searchCompleted();
+                }
+            }
+        });
+        
+        //-----------------------
 
 
-        //global listener
+        //global listeners
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
             that._refresh();
         });
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
-
-            if(data!=null && top.HEURIST4.util.isempty(data.topids)){ 
-                 top.HEURIST4.current_query_request = data;  //the only place where this values is assigned  
-
-                 if(data.source!=that.element.attr('id') ){
-                    that.query_request = data; //keep for search in current result
-                    that.input_search.val(data.q);
-                    that.options.search_domain = data.w;
-
-                    top.HAPI4.currentRecordset = null;
-                    
-                    //reset counters and storages
-                    that._rule_index = -1; // current index 
-                    that._res_index =  -1; // current index in result array (chunked by 1000)
-                    that._rules = [];      // flat array of rules for current query request
-                    
-                    if( data.rules!=null ){
-                        //create flat rule array
-                        that._doApplyRules(data.rules);
-                    }
-                        
-                    that._renderProgress();
-                    
-                    that._refresh();
-                 }
-            }
-            
-        });
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT+' '+top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, function(e, data){
-            
-            if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-            
-                if(that.query_request!=null &&  data.queryid()==that.query_request.id) {  
-                    
-                    //save increment into current rules.results
-                    var records_ids = data.getIds()
-                    if(records_ids.length>0){
-                        // rules:[ {query:query, results:[], parent:index},  ]
-                        if(that._rule_index==-2){
-                            that._rule_index=0;
-                        }else{
-                            var ruleindex = that._rule_index;
-                            if(ruleindex<0){
-                                 ruleindex = 0; //root/main search
-                            }
-                            if(top.HEURIST4.util.isempty(that._rules)){
-                                 that._rules = [{results:[]}];
-                            }
-                            that._rules[ruleindex].results.push(records_ids);
-                            
-                            //unite
-                            
-                            if(top.HAPI4.currentRecordset==null){
-                                top.HAPI4.currentRecordset = data;
-                            }else{
-                                //unite record sets 
-                                top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.doUnite(data);
-                            }
-                            
-                        }
-                    }
-                    
-                    if(!that._doSearchIncrement()){//load next chunk
-                        that._searchCompleted();
-                    } 
-                }
-                
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
-                
-                
-                if(data){
-                    //create flat rule array
-                    that._doApplyRules(data); //indexes are rest inside this function
-                  
-                    //if rules were applied before - need to remove all records except original and re-render
-                    if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
-                         
-                         //keep json (to possitble save as saved searches)
-                         that.query_request.rules = data;
-                        
-                         //remove results of other rules and re-render the original set of records only                        
-                         var rec_ids_level0 = [];
-                         
-                         var idx;
-                         that._rules[0].results = that._rules[0].results;
-                         for(idx=0; idx<that._rules[0].results.length; idx++){
-                            rec_ids_level0 = rec_ids_level0.concat(that._rules[0].results[idx]);
-                         }
-                         
-                         var recordset_level0 = top.HAPI4.currentRecordset.getSubSetByIds(rec_ids_level0);
-
-                         that._rule_index = -2;
-                         that._res_index = 0;
-                         
-                         //fake result searh event
-                         document.trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ recordset_level0 ]);  //global app event
-                    }
-                }
-                
-            }
-            
-        });
+        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART 
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, function(e, data) { that._onSearchGlobalListener(e, data) } );
 
         this._refresh();
 
@@ -389,7 +324,7 @@ $.widget( "heurist.search", {
     _initPagination: function(){
         this.div_paginator = $('<span>')
         .css('display', 'inline-block')
-        .appendTo( this.element )
+        .appendTo( this.div_search )
         .pagination();
     },
 
@@ -425,6 +360,130 @@ $.widget( "heurist.search", {
             top.HEURIST4.util.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
         }
     },
+    
+    /**
+    * it is called only for the very first search request (except all other: incremental and rules)
+    */
+    _onSearchStart: function(){
+        
+            this.div_search.hide();
+            this.div_progress.show();
+            
+            
+            //reset counters and storages
+            this._rule_index = -1; // current index 
+            this._res_index =  -1; // current index in result array (chunked by 1000)
+            this._rules = [];      // flat array of rules for current query request
+            
+            if( this.query_request.rules!=null ){
+                //create flat rule array
+                this._doApplyRules(this.query_request.rules);
+            }
+            
+            this._renderProgress();
+    },
+    
+    _onSearchGlobalListener: function(e, data){
+
+        var that = this;
+        
+        if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+        
+            if(data!=null && top.HEURIST4.util.isempty(data.topids)){ //topids not defined - this is not rules request
+             
+                 top.HEURIST4.current_query_request = data;  //the only place where this values is assigned  
+                 that.query_request = data; //keep for search in current result
+                 
+                 if(data.source!=that.element.attr('id') ){
+                    top.HAPI4.currentRecordset = null;
+                    that.input_search.val(data.q);
+                    that.options.search_domain = data.w;
+                    that._refresh();
+                 }
+                 
+                 if(top.HAPI4.currentRecordset==null){
+                    that._onSearchStart(); 
+                 }
+            }
+            
+        }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
+            
+                if(that.query_request!=null &&  data.queryid()==that.query_request.id) {  
+                    
+                    //save increment into current rules.results
+                    var records_ids = data.getIds()
+                    if(records_ids.length>0){
+                        // rules:[ {query:query, results:[], parent:index},  ]
+                        if(that._rule_index==-2){
+                            that._rule_index=0;
+                        }else{
+                            var ruleindex = that._rule_index;
+                            if(ruleindex<0){
+                                 ruleindex = 0; //root/main search
+                            }
+                            if(top.HEURIST4.util.isempty(that._rules)){
+                                 that._rules = [{results:[]}];
+                            }
+                            that._rules[ruleindex].results.push(records_ids);
+                            
+                            //unite
+                            if(top.HAPI4.currentRecordset==null){
+                                top.HAPI4.currentRecordset = data;
+                            }else{
+                                //unite record sets 
+                                top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.doUnite(data);
+                            }
+                            
+                        }
+                    }
+                    
+                    that._renderProgress();
+                    if(!that._doSearchIncrement()){//load next chunk
+                        that._searchCompleted();
+                    } 
+                }
+                
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
+                
+                
+                if(data){
+                    //create flat rule array
+                    that._doApplyRules(data); //indexes are rest inside this function
+                  
+                    //if rules were applied before - need to remove all records except original and re-render
+                    if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
+                         
+                         //keep json (to possitble save as saved searches)
+                         that.query_request.rules = data;
+                        
+                         //remove results of other rules and re-render the original set of records only                        
+                         var rec_ids_level0 = [];
+                         
+                         var idx;
+                         that._rules[0].results = that._rules[0].results;
+                         for(idx=0; idx<that._rules[0].results.length; idx++){
+                            rec_ids_level0 = rec_ids_level0.concat(that._rules[0].results[idx]);
+                         }
+                         
+                         //var recordset_level0 
+                         top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.getSubSetByIds(rec_ids_level0);
+
+                         that._rule_index = -2;
+                         that._res_index = 0;
+                         
+                         //fake result searh event
+                         $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event
+                         $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
+                    }
+                }
+                
+            }
+            
+        
+        
+    }, 
+
+    
     /*
     _handleKeyPress: function(e){
     var code = (e.keyCode ? e.keyCode : e.which);
@@ -473,6 +532,9 @@ $.widget( "heurist.search", {
             //that._trigger( "onsearch"); //this widget event
             //that._trigger( "onresult", null, resdata ); //this widget event
 
+            top.HAPI4.currentRecordset = null;
+            //this._onSearchStart();
+            
             //perform search
             top.HAPI4.RecordMgr.search(request, $(this.document));
         }
@@ -662,9 +724,7 @@ $.widget( "heurist.search", {
     ,_destroy: function() {
         
         $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT);
-        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHRESULT+' '+top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES);
-        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART);
-        
+        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT+' '+top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES);
         
         // remove generated elements
         this.btn_search_as_guest.remove();
@@ -681,6 +741,8 @@ $.widget( "heurist.search", {
 
         if(this.div_paginator) this.div_paginator.remove();
 
+        this.div_search.remove();
+        this.div_progress.remove();
     }
     
     //incremental search and rules
@@ -701,6 +763,7 @@ $.widget( "heurist.search", {
             if(new_offset< total_count_of_curr_request){ //search for next chunk of data within current request
                     this.query_request.increment = true;
                     this.query_request.o = new_offset;
+                    this.query_request.source = this.element.attr('id');
                     top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
                     return true;
             }else{
@@ -755,6 +818,7 @@ $.widget( "heurist.search", {
                      this.query_request.topids = current_parent_ids[this._res_index].join(','); //list of record ids of parent resultset
                      this.query_request.increment = true;
                      this.query_request.o = 0;
+                     this.query_request.source = this.element.attr('id');
                      top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
                      return true;
                 
@@ -765,6 +829,10 @@ $.widget( "heurist.search", {
     }
     
     , _searchCompleted: function(){
+        
+         this.div_progress.hide();
+         this.div_search.show();
+        
          if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
              $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
     }    
@@ -820,45 +888,36 @@ $.widget( "heurist.search", {
     
     , _renderProgress: function(){
 
-        return;
-        
         // show current records range and total count
-        if(this.options.showcounter && this.recordset && this.recordset.length()>0){
+        if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0){
             
             var s = '';
-            
-            var isTerminated = false; //(this._query_request==null || this.options.recordset.queryid()!=this._query_request.id);
 
-            if(this._rule_index>0 && !isTerminated){ //this search by rules
+            if(this._rule_index>0){ //this search by rules
                 s = 'Rules: '+this._rule_index+' of '+(this._rules.length-1)+'  ';
             }                
-            s = s + 'Total: '+this.options.recordset.length();
-            this.span_info.html( s );
-            this.span_info.show();
+            s = s + 'Total: ' + top.HAPI4.currentRecordset.length();
             
-            if(isTerminated){
-                this.div_progress.hide();
-                return;
-            }
+            //@todo this.span_info.html( s );
+            //this.span_info.show();
             
-            var curr_offset = Number(this._query_request.o);
-            curr_offset = (curr_offset>0?curr_offset:0) + Number(this._query_request.l);
+            var curr_offset = Number(this.query_request.o);
+            curr_offset = (curr_offset>0?curr_offset:0) + Number(this.query_request.l);
             
-            var tot = (this.options.recordset!=null)?this.options.recordset.count_total():0;
+            var tot = top.HAPI4.currentRecordset.count_total();
             
             if(curr_offset>tot) curr_offset = tot;
             
             if(this._rule_index<1){  //this is main request
                     
                     //search in progress
-                     this.lbl_current_request.html(curr_offset==tot?tot:curr_offset+'~'+tot);
+                     this.progress_lbl.html( (curr_offset==tot)?tot:curr_offset+'~'+tot );
                      
-                     this.span_progress.progressbar( "value", curr_offset/tot*100 );
-                     //this.span_progress.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
-                     this.div_progress.show();
+                     this.progress_bar.progressbar( "value", curr_offset/tot*100 );
+                     //this.progress_bar.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
             
                      if(curr_offset==tot) {
-                           this.div_progress.delay(500).hide();
+                           //this.div_progress.delay(500).hide();
                      }
                      
             }else{ //this is rule request
@@ -867,14 +926,14 @@ $.widget( "heurist.search", {
             
                         var res_steps_count = this._rules[this._rules[this._rule_index].parent].results.length;
                 
-                        this.lbl_current_request.html( (curr_offset==tot?tot:curr_offset+'~'+tot)+' of '+
+                        this.progress_lbl.html( (curr_offset==tot?tot:curr_offset+'~'+tot)+' of '+
                             (this._res_index+1)+'~'+res_steps_count);
                             
                         var progress_value = this._res_index/res_steps_count*100 + curr_offset/tot*100/res_steps_count
                             
-                        this.span_progress.progressbar( "value", progress_value );
+                        this.progress_bar.progressbar( "value", progress_value );
                             
-                        this.div_progress.show();
+                        //this.div_progress.show();
                      }
                 
             }
@@ -889,8 +948,8 @@ $.widget( "heurist.search", {
                 this.span_info.html('');
             }*/
         }else{
-            this.span_info.hide();
-            this.div_progress.hide();
+            this.progress_lbl.html( '' );
+            this.progress_bar.progressbar( "value", 0 );
         }
 
 

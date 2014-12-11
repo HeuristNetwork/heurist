@@ -140,8 +140,8 @@ $.widget( "heurist.pagination", {
 
                 //hide all on start search   
                 that.count_total = 0; //hRecordSet
-                that.query_request = data;
-                if(data.orig != "paginator"){
+                if(data) that.query_request = data;
+                if(data==null || data.orig != "paginator"){
                     that.current_page = 0; //reset
                 }
 
