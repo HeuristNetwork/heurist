@@ -24,9 +24,8 @@ $.widget( "heurist.connections", {
     // default options
     options: {
         title: '',
-        is_single_selection: false, //work with the only record
         recordset: null,
-        selection: null,
+        selection: null, //list of record ids
         url:null
     },
 
@@ -66,7 +65,7 @@ $.widget( "heurist.connections", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                 //find all relation within given result set
-                that.getRelations( data );
+                that._getRelations( data );
                 
                 //that.option("recordset", data); //hRecordSet
                 //that.loadanimation(false);
@@ -77,20 +76,15 @@ $.widget( "heurist.connections", {
                 if(data) that._query_request = data;  //keep current query request 
                 that.option("recordset", null);
                 that.loadanimation(true);
+                //???? that._refresh();
               
             // Record selection  
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
                 if(data && data.source!=that.element.attr('id')) { 
-                   
-                   data = data.selection;
-                
-                   if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                       that.option("selection", data);
-                   }else{
-                       that.option("selection", null);
-                   }
-                }
+                    
+                    that.option("selection", top.HAPI4.getSelection(data.selection, true) ); //get selected ids
+                }            
             }
         });
 
@@ -101,11 +95,11 @@ $.widget( "heurist.connections", {
                 that._refresh();
             }
         });
-        if(!this.options.is_single_selection){
-            this.dosframe.on('load', function(){
-                    that._refresh();
-            });
-        }
+        
+        this.dosframe.on('load', function(){
+                that._refresh();
+        });
+        
         
     }, //end _create
 
@@ -130,29 +124,7 @@ $.widget( "heurist.connections", {
         //refesh if element is visible only - otherwise it costs much resources        
         if(!this.element.is(':visible') || top.HEURIST4.util.isempty(this.options.url)) return;
         
-        // Single selection
-        if(this.options.is_single_selection){
-            
-            var newurl = "common/html/msgNoRecordsSelected.html";
-            
-            if (this.options.selection!=null) {
-                
-                var recIDs_list = this.options.selection.getIds();
-                
-                if(recIDs_list.length>0){
-                     var recID = recIDs_list[recIDs_list.length-1];
-                     newurl = this.options.url.replace("[recID]", recID).replace("[dbname]",  top.HAPI4.database);         
-                }
-            }
-            
-            newurl = top.HAPI4.basePathOld +  newurl;
-                
-            if(this.dosframe.attr('src')!==newurl){
-                this.dosframe.attr('src', newurl);
-            }
-       
-        // Set new source     
-        }else if(this.dosframe.attr('src')!==this.options.url){
+        if(this.dosframe.attr('src')!==this.options.url){
             
             this.options.url = top.HAPI4.basePathOld +  this.options.url.replace("[dbname]",  top.HAPI4.database);
             this.dosframe.attr('src', this.options.url);
@@ -167,7 +139,7 @@ $.widget( "heurist.connections", {
                 console.log("Showing recordset connections");
                 
                 if(this.options.relations == null){
-                    this.getRelations(this.options.recordset);
+                    this._getRelations(this.options.recordset);
                     
                 }else{
                 
@@ -175,8 +147,8 @@ $.widget( "heurist.connections", {
                     var relations = this.options.relations;
                     
                     // Parse response to spring diagram format
-                    var data = parseData(records, relations);
-                    visualize(data);
+                    var data = this._parseData(records, relations);
+                    this._doVisualize(data);
                 
                 }
             }
@@ -208,7 +180,11 @@ $.widget( "heurist.connections", {
         }
     },
     
-    getRelations: function( recordset ){
+    /**
+    * private - send request to server side to find all relation withing given recordset
+    * @param recordset
+    */
+    _getRelations: function( recordset ){
         console.log("getRelations CALLED");
         console.log(recordset);
         
@@ -235,8 +211,8 @@ $.widget( "heurist.connections", {
                     that.option("relations", response.data);
                     
                     // Parse response to spring diagram format
-                    var data = parseData(recordset.getRecords(), response.data);
-                    visualize(data);
+                    var data = that._parseData(recordset.getRecords(), response.data);
+                    that._doVisualize(data);
                 }else{
                     top.HEURIST4.util.showMsgErr(response.message);
                 }
@@ -253,12 +229,100 @@ $.widget( "heurist.connections", {
     }
     
 
+    //@todo - move inside widget
+
+
+    /**
+    * Parses record data and relationship data into usable D3 format
+    * 
+    * @param records    Object containing all record
+    * @param relations  Object containing direct & reverse links
+    * 
+    * @returns {Object}
+    */
+    , _parseData: function (records, relations) {
+        var data = {}; 
+        var nodes = {};
+        var links = [];
+
+        if(records !== undefined && relations !== undefined) {
+            // Construct nodes for each record
+            for(var id in records) {
+                var node = {id: parseInt(id),
+                            name: records[id][5],
+                            image: top.HAPI4.iconBaseURL+records[id][4],
+                            count: 0,
+                            depth: 1
+                           };
+                nodes[id] = node;
+            }
+            
+            
+            /**
+            * Determines links between nodes
+            * 
+            * @param nodes      All nodes
+            * @param relations  Array of relations
+            */
+            function __getLinks(nodes, relations) {
+                var links = [];
+                
+                // Go through all relations
+                for(var i = 0; i < relations.length; i++) { 
+                    // Null check
+                    var source = relations[i].recID;
+                    var target = relations[i].targetID;
+
+                    if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
+                        // Construct link
+                        var link = {source: nodes[source],
+                                    target: nodes[target],
+                                    targetcount: 1,
+                                    relation: {}
+                                   };
+                        links.push(link); 
+                    }      
+                }   
+                
+                return links;
+            }
+                    
+            
+            // Links
+            links = links.concat( __getLinks(nodes, relations.direct)  ); // Direct links
+            links = links.concat( __getLinks(nodes, relations.reverse) ); // Reverse links
+        }
+
+        // Construct data object
+        var data = {nodes: nodes, links: links};
+        console.log("DATA");
+        console.log(data);
+        return data;
+    }
+
+    /** Calls the visualisation plugin */
+    , _doVisualize: function (data) {
+        //console.log("Visualize called in connections.js");
+        
+        if( !top.HEURIST4.util.isnull(this.dosframe) && this.dosframe.length > 0 ){
+            this.dosframe[0].contentWindow.showData(data, this.options.selection, this.document);
+        }
+        /* Call showData method of the springDiagram iFrame
+        var iframe = $("iframe[src*=springDiagram]");
+        if(iframe != null && iframe !== undefined && iframe.length >= 1) {
+            iframe[0].contentWindow.showData(data);
+        }*/
+    }    
+    
+
 });
 
 
 /** @TODO move this function inside  ***/
 
-/** Gets the selected IDs from top.HEURIST.search */
+/** 
+#todo REMOVE
+Gets the selected IDs from top.HEURIST.search */
 function getSelectedIDs() {
     var selectedIDs = [];  
     var recIDs = top.HEURIST.search.getSelectedRecIDs(); 
@@ -274,79 +338,5 @@ function getSelectedIDs() {
     return selectedIDs;
 }
 
-/**
-* Determines links between nodes
-* 
-* @param nodes      All nodes
-* @param relations  Array of relations
-*/
-function getLinks(nodes, relations) {
-    var links = [];
-    
-    // Go through all relations
-    for(var i = 0; i < relations.length; i++) { 
-        // Null check
-        var source = relations[i].recID;
-        var target = relations[i].targetID;
+//@todo - move inside widget
 
-        if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
-            // Construct link
-            var link = {source: nodes[source],
-                        target: nodes[target],
-                        targetcount: 1,
-                        relation: {}
-                       };
-            links.push(link); 
-        }      
-    }   
-    
-    return links;
-}
-
-/**
-* Parses record data and relationship data into usable D3 format
-* 
-* @param records    Object containing all record
-* @param relations  Object containing direct & reverse links
-* 
-* @returns {Object}
-*/
-function parseData(records, relations) {
-    var data = {}; 
-    var nodes = {};
-    var links = [];
-
-    if(records !== undefined && relations !== undefined) {
-        // Construct nodes for each record
-        for(var id in records) {
-            var node = {id: parseInt(id),
-                        name: records[id][5],
-                        image: top.HAPI4.iconBaseURL+records[id][4],
-                        count: 0,
-                        depth: 1
-                       };
-            nodes[id] = node;
-        }
-        
-        // Links
-        links = links.concat( getLinks(nodes, relations.direct)  ); // Direct links
-        links = links.concat( getLinks(nodes, relations.reverse) ); // Reverse links
-    }
-
-    // Construct data object
-    var data = {nodes: nodes, links: links};
-    console.log("DATA");
-    console.log(data);
-    return data;
-}
-
-/** Calls the visualisation plugin */
-function visualize(data) {
-    console.log("Visualize called in connections.js");
-
-    // Call showData method of the springDiagram iFrame
-    var iframe = $("iframe[src*=springDiagram]");
-    if(iframe != null && iframe !== undefined && iframe.length >= 1) {
-        iframe[0].contentWindow.showData(data);
-    }
-}

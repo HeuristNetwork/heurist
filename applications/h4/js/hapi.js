@@ -753,6 +753,26 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
             return _key;  //_key is function
         }
+        
+        /**
+        * 
+        */
+        , getSelection: function(selection, needIds){
+            
+                if (selection == "all") {
+                    selection = that.currentRecordset;
+                }
+                if( selection ) {
+                    if( (typeof selection == "function") && selection.isA("hRecordSet") ){
+                        if(selection.length()>0){
+                            return (needIds) ?selection.getIds():selection; //array of record ids   
+                        }
+                    }else{
+                            return (needIds) ?selection :that.currentRecordset.getSubSetByIds(selection);
+                    }
+                }
+                return null;
+        }
     }
 
     _init(_db, _oninit); //, _currentUser);

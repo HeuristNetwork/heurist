@@ -50,15 +50,9 @@ $.widget( "heurist.rec_viewer_ext", {
                 var _recID;
                 if(data) data = data.selection;
 
-                if( data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                    if(data.length()>0){
-                        var _rec = data.getFirstRecord();
-                        _recID = _rec[2];
-                    }
-                }else if( $.isArray(data) ) {
-                    _recID = data[0];
-                }else {
-                    _recID = data;
+                var res = top.HAPI4.getSelection(data, true);
+                if(top.HEURIST4.util.isArrayNotEmpty(res)){
+                    _recID = res[0];
                 }
 
                 that.option("recID", _recID);

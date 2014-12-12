@@ -40,6 +40,10 @@ var svg;        // The SVG where the visualisation will be executed on
             // Custom functions
             getData: $.noop(),
             getLineLength: function() { return getSetting(setting_linelength); },
+            
+            selectedNodeIds: [],
+            triggerSelection: function(selection){}, 
+            
             showCounts: true,
             
             // UI setting controls
@@ -607,7 +611,7 @@ function visualizeData() {
     var scale = getSetting(setting_scale);
     var translateX = getSetting(setting_translatex);
     var translateY = getSetting(setting_translatey);
-                                                    
+    
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "the-container");    
@@ -900,13 +904,8 @@ function visualizeData() {
                        if(!d3.event.defaultPrevented) {
                            // Remove all overlays and create a record overlay
                            removeOverlays();
-                           d.selected = true;
                            
-                           node.select("circle").style("fill", "#fff"); //.attr("r", 20);
-                           
-                           d3.select(this).select("circle").style("fill", "#0f0"); //.attr("r", 20);
-                           
-                           createOverlay(d3.event.offsetX, d3.event.offsetY, "record", "id"+d.id, getRecordOverlayData(d));  
+                           _recordNodeOnClick(d3.event, d, this);
                        }
                   })
                   .call(node_drag);
@@ -929,7 +928,7 @@ function visualizeData() {
                             }
                             return "foreground around";
                        })*/
-                       .style("fill", "#f00")
+                       .style("fill", "#fff")
                        .style("stroke", "#ddd")
                        .style("stroke-opacity", function(d) {
                            if(d.selected == true) {
@@ -1158,37 +1157,57 @@ function visualizeData() {
     
     
     /******************************** SELECTION *******************************/
-    function _recordNodeOnClick(event, node) {
- /* todo
-            //$.find('g.node.selected_last').removeClass('selected_last');
-            container.selectAll("node").
+    function _recordNodeOnClick(event, data, node) {
+        
+        
+            var needSelect = true;
+            
+            if(settings.selectedNodeIds==null) settings.selectedNodeIds = [];
         
            // getLineLength
             if(event.ctrlKey){  //this.options.multiselect && 
                 
                 if($rdiv.hasClass('selected')){
-                    $rdiv.removeClass('selected');
-                }else{
-                    $rdiv.addClass('selected');
-                    $rdiv.addClass('selected_last'); 
+                    //deselect all others
+                    d3.select(node).select("circle").style("fill", "#fff"); //.attr("r", 20);
+                    needSelect = false;
+                    
+                    var idx = settings.selectedNodeIds.indexOf(data.id);
+                    if (idx > -1) {
+                        settings.selectedNodeIds.splice(idx, 1);
+                    }
                 }
-                //this._lastSelectedIndex = selected_rec_ID;
+            }else{
+                
+                //deselect all
+                var allnodes = container.selectAll(".node");
+                allnodes.select("circle").style("fill", "#fff"); //.attr("r", 20); 
+                settings.selectedNodeIds = [];
             }            
             
-            var selected = this.getSelected();
-
-            if(this.options.isapplication){
-                $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
+            if(needSelect){
+                //select new
+                data.selected = true;
+                d3.select(node).select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
+                createOverlay(event.offsetX, event.offsetY, "record", "id"+data.id, getRecordOverlayData(data));  
+                settings.selectedNodeIds.push(data.id);
             }
             
+
+            settings.triggerSelection.call(this, settings.selectedNodeIds);
+            
+            //if(this.options.isapplication){
+            //    $(this.document).trigger( top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:'d3svg'} );
+            //}
+            
             //this._trigger( "onselect", event, selected );
-*/            
+            
     }
 
 
      
     
-}
+} //end visualizeData
 
 
 

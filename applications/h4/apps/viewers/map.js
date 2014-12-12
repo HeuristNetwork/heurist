@@ -80,6 +80,9 @@ $.widget( "heurist.map", {
                 
                 if(data && data.source!=that.element.attr('id')) { 
                    
+                    
+                    //!!!!! @todo top.HAPI4.getSelection(selection, true);
+                    
                    data = data.selection;
                 
                    if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){

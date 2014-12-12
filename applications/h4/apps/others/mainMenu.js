@@ -25,7 +25,7 @@ $.widget( "heurist.mainMenu", {
         // callbacks
     },
     
-    _selection:null,
+    _selectionRecordIDs:null,
 
     // the widget's constructor
     _create: function() {
@@ -97,11 +97,7 @@ $.widget( "heurist.mainMenu", {
         
         $(this.document).on(top.HAPI4.Event.ON_REC_SELECT, function(e, data) {
                    if(data) data = data.selection;
-                   if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                       that._selection = data;
-                   }else{
-                       that._selection = null
-                   }
+                   _selectionRecordIDs = top.HAPI4.getSelection(data, true);
         });        
         
         this._refresh();
@@ -339,15 +335,11 @@ $.widget( "heurist.mainMenu", {
             
         }else{
             
-            var recIDs_list = [];
-            if (this._selection!=null) {
-                recIDs_list = this._selection.getIds();
-            }
-            if (recIDs_list.length == 0) {
+            if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
                 Hul.showMsgDlg("Select at least one record to export");
                 return false;
             }
-            q = "ids:"+recIDs_list.join(",");
+            q = "ids:"+this._selectionRecordIDs.join(",");
             
         }
         
@@ -414,15 +406,11 @@ $.widget( "heurist.mainMenu", {
             }
         }else{
             
-            var recIDs_list = [];
-            if (this._selection!=null) {
-                recIDs_list = this._selection.getIds();
-            }
-            if (recIDs_list.length == 0) {
+            if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
                 Hul.showMsgDlg("Select at least one record to export");
                 return false;
             }
-            q = "ids:"+recIDs_list.join(",");
+            q = "ids:"+this._selectionRecordIDs.join(",");
         }
 
         if(q!=''){

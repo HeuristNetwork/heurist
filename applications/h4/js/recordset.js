@@ -448,6 +448,8 @@ function hRecordSet(initdata) {
             var _records = {};
             //find all records
             
+            if(!($.isArray(rec_ids) && rec_ids.length>0) ) return null;
+            
             var recID;
             if(Object.keys(records).length<rec_ids.length){
 

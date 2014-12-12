@@ -144,17 +144,10 @@ $.widget( "heurist.rec_list", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
                    if(data) data = data.selection;
-                
-                   //update rec_actions
-                   if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                        if(data.length()>0){
-                            that.action_buttons.rec_actions('option','record_ids', data.getIds());
-                            //that.option("recdata", _recdata);
-                        }
-                        if(that.element.attr('id') != arguments[2]){ 
-                            //@todo - assign set of selected     
-                            //setSelected();
-                        }
+                   
+                   var res = top.HAPI4.getSelection(data, true);
+                   if(res!=null){
+                       that.action_buttons.rec_actions('option','record_ids', res);
                    }
                     
             }

@@ -56,7 +56,7 @@
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
-            function showData(data) {
+            function showData(data, selectedRecordsIds, parentDocument) {
                 console.log("showData called inside springDiagram");
                 
                 // Custom data parsing
@@ -79,6 +79,12 @@
                     getData: function(data) { return getData(data); },
                     getLineLength: function(record) { return getLineLength(record); },
                     
+                    selectedNodeIds: selectedRecordsIds,   //assign current selection
+                    triggerSelection: function(selection){
+                        //parentDocument
+                        $(top.window.document).trigger(top.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
+                    },
+                    
                     entityradius: 1,
                     linewidth: 1,
                     
@@ -87,6 +93,11 @@
                     showLineWidth: false,
                     showFormula: false
                 }); 
+            }
+            
+            // @todo
+            function showSelection(selectedRecordsIds) {
+            
             }
         </script>  
     </body>

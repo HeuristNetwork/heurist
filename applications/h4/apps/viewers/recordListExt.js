@@ -27,7 +27,7 @@ $.widget( "heurist.recordListExt", {
         title: '',
         is_single_selection: false, //work with the only record
         recordset: null,
-        selection: null,
+        selection: null,  //list of selected record ids
         url:null
     },
 
@@ -78,12 +78,8 @@ $.widget( "heurist.recordListExt", {
                 if(data && data.source!=that.element.attr('id')) { 
                    
                    data = data.selection;
-                
-                   if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                       that.option("selection", data);
-                   }else{
-                       that.option("selection", null);
-                   }
+                   that.option("selection", top.HAPI4.getSelection(data, true) );    
+                   
                 }
             }
             //that._refresh();
@@ -141,9 +137,9 @@ $.widget( "heurist.recordListExt", {
             
             var newurl = "common/html/msgNoRecordsSelected.html";
             
-            if (this.options.selection!=null) {
+            if (top.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
                 
-                var recIDs_list = this.options.selection.getIds();
+                var recIDs_list = this.options.selection;
                 
                 if(recIDs_list.length>0){
                      var recID = recIDs_list[recIDs_list.length-1];
@@ -182,8 +178,8 @@ $.widget( "heurist.recordListExt", {
             }
         
             
-            if (this.options.selection!=null) {
-                  var recIDs_list = this.options.selection.getIds();
+            if (top.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
+                  var recIDs_list = this.options.selection;
                   if(!top.HEURIST4.util.isempty(recIDs_list.length)){
                         query_string_sel = query_string + '&q=ids:'+recIDs_list.join(',');
                   }

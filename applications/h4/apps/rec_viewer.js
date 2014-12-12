@@ -77,19 +77,10 @@ $.widget( "heurist.rec_viewer", {
                     _recdata = null;
                     
                 if(data) data = data.selection;
-                
-                if( data && (typeof data.isA == "function") && data.isA("hRecordSet") && (data.length()>0)){
-
-                        _recdata = data;
-                        var _rec = _recdata.getFirstRecord();
-                        _recID = _recdata.fld(_rec, 'rec_ID'); //_rec[2];
-                        //that.option("recdata", _recdata);
-                    /*
-                    }else if( $.isArray(data) ) {
-                    _recID = data[0];
-                    }else {
-                    _recID = data;
-                    */
+                var res = top.HAPI4.getSelection(data, false);
+                if(res!=null && res.length()>0){
+                   _recdata = _recdata.getFirstRecord();
+                   _recID  = _recdata.fld(_rec, 'rec_ID'); //_rec[2];
                 }
                 
                 that.options.recID = _recID;

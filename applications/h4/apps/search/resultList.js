@@ -750,14 +750,14 @@ $.widget( "heurist.resultList", {
                 selected[this._lastSelectedIndex] = record;
             }
 
-            return top.HAPI4.currentRecordset.getSubSet(selected);
+            return top.HAPI4.currentRecordset.getSubSet(selected, this.document);
         }else{
             return null
         }
     },
 
     /**
-    * selection - hRecordSet
+    * selection - hRecordSet or array of record Ids
     * 
     * @param record_ids
     */
@@ -766,26 +766,27 @@ $.widget( "heurist.resultList", {
         //clear selection
         this.div_content.find('.selected').removeClass('selected');
         this.div_content.find('.selected_last').removeClass('selected_last');
-        
-        if( selection && (typeof selection == "function") && selection.isA("hRecordSet") ){
-            if(selection.length()>0){
-                var recIDs_list = _selection.getIds(); //array of record ids   
 
-                this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                        var rec_id = $(rdiv).attr('recid');
-                        if(recIDs_list.indexOf(rec_id)>=0){
-                           $(rdiv).addClass('selected'); 
-                           //if(that._lastSelectedIndex==rec_id){
-                           //    $(rdiv).addClass('selected_last'); 
-                           //}
-                        }
-                });
-            }
-        }else if (selection == "all") {
+        if (selection == "all") {
             this.div_content.find('.recordDiv').addClass('selected');   
-        }        
-        
-        this.triggerSelection();
+        }else{
+
+            var recIDs_list = top.HAPI4.getSelection(selection, true);    
+            if( top.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
+            
+                    this.div_content.find('.recordDiv').each(function(ids, rdiv){
+                            var rec_id = $(rdiv).attr('recid');
+                            if(recIDs_list.indexOf(rec_id)>=0){
+                               $(rdiv).addClass('selected'); 
+                               //if(that._lastSelectedIndex==rec_id){
+                               //    $(rdiv).addClass('selected_last'); 
+                               //}
+                            }
+                    });
+                
+            }    
+        }
+
     },
     
     
