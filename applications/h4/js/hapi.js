@@ -760,7 +760,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         , getSelection: function(selection, needIds){
             
                 if (selection == "all") {
-                    selection = that.currentRecordset;
+                    selection = needIds ?that.currentRecordset.getIds() :that.currentRecordset;
                 }
                 if( selection ) {
                     if( (typeof selection == "function") && selection.isA("hRecordSet") ){

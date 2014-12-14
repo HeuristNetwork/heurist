@@ -81,9 +81,9 @@ $.widget( "heurist.connections", {
             // Record selection  
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
-                if(data && data.source!=that.element.attr('id')) { 
-                    
-                    that.option("selection", top.HAPI4.getSelection(data.selection, true) ); //get selected ids
+                if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
+                  
+                    that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
                 }            
             }
         });
@@ -132,13 +132,14 @@ $.widget( "heurist.connections", {
         // Content loaded already    
         }else{
             // SPRING DIAGRAM CODE
-            console.log("CONTENT LOADED ALREADY");  
-            console.log(this.options);
+            // console.log("CONTENT LOADED ALREADY");  
+            // console.log(this.options);
             
             if(this.options.recordset !== null) {
-                console.log("Showing recordset connections");
+                //console.log("Showing recordset connections");
                 
-                if(this.options.relations == null){
+                if(this.options.relations == null){ //relation not yet loaded
+                    
                     this._getRelations(this.options.recordset);
                     
                 }else{
@@ -185,8 +186,8 @@ $.widget( "heurist.connections", {
     * @param recordset
     */
     _getRelations: function( recordset ){
-        console.log("getRelations CALLED");
-        console.log(recordset);
+        //console.log("getRelations CALLED");
+        //console.log(recordset);
         
         if(top.HEURIST4.util.isnull(recordset)) return;
 
@@ -305,7 +306,14 @@ $.widget( "heurist.connections", {
         //console.log("Visualize called in connections.js");
         
         if( !top.HEURIST4.util.isnull(this.dosframe) && this.dosframe.length > 0 ){
-            this.dosframe[0].contentWindow.showData(data, this.options.selection, this.document);
+            var that = this;
+            this.dosframe[0].contentWindow.showData(data, this.options.selection, 
+                    function(selected){
+                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
+                        { selection:selected, source:that.element.attr('id') } );
+                    }            
+            
+            );
         }
         /* Call showData method of the springDiagram iFrame
         var iframe = $("iframe[src*=springDiagram]");
@@ -313,30 +321,18 @@ $.widget( "heurist.connections", {
             iframe[0].contentWindow.showData(data);
         }*/
     }    
-    
+
+    , _doVisualizeSelection: function (selection) {
+
+            if(top.HEURIST4.util.isnull(this.options.recordset)) return;
+
+            if(!this.element.is(':visible')
+                || top.HEURIST4.util.isnull(this.dosframe) || this.dosframe.length < 1){
+                    return;
+            }
+            
+            this.option("selection", selection);
+            this.dosframe[0].contentWindow.showSelection(this.options.selection);
+    }    
 
 });
-
-
-/** @TODO move this function inside  ***/
-
-/** 
-#todo REMOVE
-Gets the selected IDs from top.HEURIST.search */
-function getSelectedIDs() {
-    var selectedIDs = [];  
-    var recIDs = top.HEURIST.search.getSelectedRecIDs(); 
-    if(recIDs) {
-        for(var key in recIDs) {
-            if(!isNaN(key)) {
-                selectedIDs.push(recIDs[key]);       
-            }
-        }
-    } 
-    console.log("SELECTED IDs");
-    console.log(selectedIDs);
-    return selectedIDs;
-}
-
-//@todo - move inside widget
-

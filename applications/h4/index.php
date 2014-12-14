@@ -80,7 +80,7 @@
         <script type="text/javascript" src="apps/svs_manager.js"></script>
         <script type="text/javascript" src="apps/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
-        <script type="text/javascript" src="apps/search/search_links_tree.js"></script>
+        <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/search/resultList.js"></script>

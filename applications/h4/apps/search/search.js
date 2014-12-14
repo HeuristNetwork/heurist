@@ -353,7 +353,7 @@ $.widget( "heurist.search", {
         }
 
         this.btn_search_as_user.button( "option", "label", this._getSearchDomainLabel(this.options.search_domain));
-        this.btn_search_limit.button( "option", "label", this.limit );
+        if(this.btn_search_limit) this.btn_search_limit.button( "option", "label", this.limit );
 
         if(this.select_rectype){
             this.select_rectype.empty();

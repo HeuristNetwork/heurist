@@ -344,9 +344,9 @@ function appAddContent($container, app, options){
         }else if(app.widgetname=='recordListExt'){
             //DEBUG
             widget = $content.recordListExt( options );
-        }else if(app.widgetname=='search_links_tree'){
+        }else if(app.widgetname=='connections'){
             //DEBUG
-            widget = $content.search_links_tree( options ); 
+            widget = $content.connections( options ); 
         }else if(app.widgetname=='svs_manager'){
                 //DEBUG
                 widget = $content.svs_manager( options ); //options

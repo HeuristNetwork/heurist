@@ -56,7 +56,12 @@
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
-            function showData(data, selectedRecordsIds, parentDocument) {
+            
+            function showSelection( selectedRecordsIds ){
+                 visualizeSelection( selectedRecordsIds );
+            }
+            
+            function showData(data, selectedRecordsIds, onSelectEvent) {
                 console.log("showData called inside springDiagram");
                 
                 // Custom data parsing
@@ -80,10 +85,11 @@
                     getLineLength: function(record) { return getLineLength(record); },
                     
                     selectedNodeIds: selectedRecordsIds,   //assign current selection
-                    triggerSelection: function(selection){
-                        //parentDocument
-                        $(top.window.document).trigger(top.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
-                    },
+                    triggerSelection: onSelectEvent,
+                    /*function(selection){
+                        //parentDocument    top.window.document
+                        $(parentDocument).trigger(top.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
+                    },*/
                     
                     entityradius: 1,
                     linewidth: 1,
@@ -95,10 +101,6 @@
                 }); 
             }
             
-            // @todo
-            function showSelection(selectedRecordsIds) {
-            
-            }
         </script>  
     </body>
     

@@ -735,8 +735,24 @@ $.widget( "heurist.resultList", {
     */
     getSelected: function(){
 
+        var selected = []
+        if(top.HAPI4.currentRecordset){
+            this.div_content.find('.selected').each(function(ids, rdiv){
+                var rec_ID = Number($(rdiv).attr('recid'));
+                if(this._lastSelectedIndex!=rec_ID){
+                    selected.push(rec_ID);
+                }
+            });
+            if(Number(this._lastSelectedIndex)>0){
+                selected.push(this._lastSelectedIndex); 
+            }
+        }
+        return selected;
+        
+        /* it works but returns recordset 
         var selected = {};
         var that = this;
+        
         if(top.HAPI4.currentRecordset){
             this.div_content.find('.selected').each(function(ids, rdiv){
                 var rec_ID = $(rdiv).attr('recid');
@@ -753,7 +769,7 @@ $.widget( "heurist.resultList", {
             return top.HAPI4.currentRecordset.getSubSet(selected, this.document);
         }else{
             return null
-        }
+        }*/
     },
 
     /**
@@ -775,7 +791,7 @@ $.widget( "heurist.resultList", {
             if( top.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
             
                     this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                            var rec_id = $(rdiv).attr('recid');
+                            var rec_id = Number($(rdiv).attr('recid'));
                             if(recIDs_list.indexOf(rec_id)>=0){
                                $(rdiv).addClass('selected'); 
                                //if(that._lastSelectedIndex==rec_id){

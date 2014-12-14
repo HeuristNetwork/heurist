@@ -72,8 +72,10 @@ $.widget( "heurist.resultListMenu", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
+                if(data && data.source!=that.element.attr('id')) { 
                     if(data) data = data.selection;
                     that._selection = top.HAPI4.getSelection(data, false);    
+                }
             }
             //that._refresh();
         });        

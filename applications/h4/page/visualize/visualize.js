@@ -560,6 +560,24 @@ function getEntityRadius(count) {
     return circleSize + executeFormula(count, maxRadius) - 1;
 }
 
+function visualizeSelection(selectedNodeIds) {
+    
+            settings.selectedNodeIds=selectedNodeIds;
+            //deselect all others
+            //var allnodes = container.selectAll(".node");
+            //d3.select(node)
+            d3.selectAll(".node").select("circle").style("fill", "#fff"); //.attr("r", 20);
+            
+            if(selectedNodeIds && selectedNodeIds.length>0){
+                //select new ones
+                var i;
+                for(i=0; i<selectedNodeIds.length; i++){
+                    var node= d3.select(".id"+selectedNodeIds[i]);
+                    node.select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
+                }
+            }            
+}
+
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
 /** Visualizes the data */ 
 function visualizeData() {
@@ -1167,15 +1185,14 @@ function visualizeData() {
            // getLineLength
             if(event.ctrlKey){  //this.options.multiselect && 
                 
-                if($rdiv.hasClass('selected')){
+                var idx = settings.selectedNodeIds.indexOf(data.id);
+                if (idx > -1) {
                     //deselect all others
                     d3.select(node).select("circle").style("fill", "#fff"); //.attr("r", 20);
                     needSelect = false;
                     
-                    var idx = settings.selectedNodeIds.indexOf(data.id);
-                    if (idx > -1) {
-                        settings.selectedNodeIds.splice(idx, 1);
-                    }
+                    settings.selectedNodeIds.indexOf(data.id);
+                    settings.selectedNodeIds.splice(idx, 1);
                 }
             }else{
                 
