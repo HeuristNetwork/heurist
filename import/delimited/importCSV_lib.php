@@ -535,11 +535,11 @@
         $disamb_resolv = array();
         if($disamb_keys){
             foreach($disamb_keys as $idx => $keyvalue){
-                $disamb_resolv[$disamb_ids[$idx]] = $keyvalue;  //rec_id => keyvalue
+                $disamb_resolv[$disamb_ids[$idx]] = str_replace("\'", "'", $keyvalue);  //rec_id => keyvalue
             }
         }
 
-        //get rectype to import
+        //get rectype to import                                                                       
         $recordType = @$params['sa_rectype'];
 
         if(intval($recordType)<1){
@@ -692,6 +692,10 @@
                             array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
                             $is_update = true;
                         }else{
+                            
+                            //if(count($disamb)>1){
+                                //DEBUG print "<br>disambig: ".$keyvalue."   ".print_r($disamb_resolv,true)." res=".array_search($keyvalue, $disamb_resolv, true);
+                            //}
 
                             $new_id= 'Found:'.count($disamb); //Disambiguation!
                             $disambiguation[$keyvalue] = $disamb;
