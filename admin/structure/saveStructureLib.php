@@ -89,7 +89,7 @@
         "rst_PtrFilteredIDs"=>"s",
         "rst_OrderForThumbnailGeneration"=>"i",
         "rst_TermIDTreeNonSelectableIDs"=>"s",
-        "rst_Modified"=>"i",
+        "rst_Modified"=>"s",
         "rst_LocallyModified"=>"i"
     );
 
@@ -100,7 +100,7 @@
 		"rcs_Description"=>"s",
 		"rcs_TermID"=>"i",
 		"rcs_TermLimit"=>"i",
-		"rcs_Modified"=>"i",
+		"rcs_Modified"=>"s",
 		"rcs_LocallyModified"=>"i"
 	);
 
@@ -124,7 +124,7 @@
 		"dty_FieldSetRectypeID"=>"i",
 		"dty_ShowInLists"=>"i",
 		"dty_NonOwnerVisibility"=>"s",
-		"dty_Modified"=>"i",
+		"dty_Modified"=>"s",
 		"dty_LocallyModified"=>"i",
 		"dty_EntryMask"=>"s"
 	);
@@ -136,14 +136,14 @@
 		"rtg_Domain"=>"s",
 		"rtg_Order"=>"i",
 		"rtg_Description"=>"s",
-		"rtg_Modified"=>"i"
+		"rtg_Modified"=>"s"
 	);
 	$dtgColumnNames = array(
 		"dtg_ID"=>"i",
 		"dtg_Name"=>"s",
 		"dtg_Order"=>"i",
 		"dtg_Description"=>"s",
-		"dtg_Modified"=>"i"
+		"dtg_Modified"=>"s"
 	);
 
 	$trmColumnNames = array(
@@ -162,7 +162,7 @@
 		"trm_ChildCount"=>"i",
 		"trm_ParentTermID"=>"i",
 		"trm_Depth"=>"i",
-		"trm_Modified"=>"i",
+		"trm_Modified"=>"s",
 		"trm_LocallyModified"=>"i",
 		"trm_Code"=>"s"
 	);
@@ -1295,8 +1295,8 @@
 				$rows = execSQL($ext_db, $query, $parameters, true);
 
 				if ($rows==0 || is_string($rows) ) {      //ERROR
-					$oper = (($isInsert)?"inserting":"updating");
-					$ret = "Inverse term id: $inverse_termid. SQL error $oper term $trmID in updateTerms: ".$rows; //."  ".htmlspecialchars($query);
+					$oper = (($isInsert)?"inserting":"updating term ".$trmID);
+					$ret = "SQL error $oper in updateTerms: ".$rows; //."  ".htmlspecialchars($query);
 				} else {
 					if($isInsert){
 						$trmID = $ext_db->insert_id;  // new id
