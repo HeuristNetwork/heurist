@@ -41,33 +41,34 @@ var widgets = [
     {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
 
     {id:'ha10', name:'Search', widgetname:'search', script:'apps/search/search.js'},
-    //{id:'ha11', name:'Quick Search', url:'apps/search_quick.php'},
-    //{id:'ha12', name:'Advanced Search', url:'apps/search_advanced.php'},
+
     {id:'ha13', name:'Saved searches', widgetname:'search_links', script:'apps/search_links.js'},
     {id:'ha_search_tree', name:'Saved searches', widgetname:'search_links_tree', script:'apps/search/search_links_tree.js'},
     {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
     {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
 
-    {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'apps/rec_list.js'},
 
+    /* experementals
+    {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'apps/exp/rec_list.js'},
     {id:'ha31', name:'Record', widgetname:'rec_viewer', script:'apps/rec_viewer.js'},
     {id:'ha32', name:'Media', title:'Record media viewer', url:'apps/rec_media.php'},
     {id:'ha33', name:'Relations', title:'Record relations viewer', url:'apps/rec_relation.php'},
     {id:'ha34', name:'Comments', title:'Discussion over record', url:'apps/rec_comments.php'},
-
-    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/app_timemap.js'},
+    
     {id:'ha52', name:'Report', title:'Smarty report system', url:'apps/rep_smarty.php'},
     {id:'ha53', name:'Transform', url:'apps/rep_xslt.php'},
     {id:'ha54', name:'Crosstabs', url:'php/sync/crosstabs.php', isframe:true},
-
-    {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'apps/rec_viewer_ext.js'},
-    
+    {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'apps/exp/rec_viewer_ext.js'},
+    */
 
     {id:'h3_mainMenu', name:'Main Menu Panel', widgetname:'mainMenu', script:'apps/others/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/search/resultList.js'},
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
+
+    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},
     {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
+    
     {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'}
     
 ];
@@ -106,7 +107,7 @@ var layouts = [
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'ha51'}, // H4 map V2
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
-                    {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}}    //H4 connections
+                    {appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}}  //H4 connections
                     //{appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
                 ]
             }]
@@ -118,7 +119,7 @@ var layouts = [
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
         ]},    
         center:{dropable:false, apps:[
-        {appid:'h4_connections', options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'} }]}  //search result 
+        {appid:'h4_connections', options:{title:'Connections'} }]}  //search result 
     },
     {id:'l03', name:'abandoned', theme:'smoothness',
         north:{size:88, resizable:false,
@@ -135,13 +136,6 @@ var layouts = [
                 apps:[                                      //or viewRecord or renderRecordData
                     {appid:'ha31'},    //rec_viewer
                     {appid:'ha54'}     //crosstabs
-                    /*                ,
-                    {appid:'ha51'},
-                    {appid:'ha52'},
-                    {appid:'ha53'},
-                    {appid:'ha61', name:'H3', options:{url:'http://heuristscholar.org/h3-ao//records/view/renderRecordData.php?db=[dbname]&recID=[recID]'}},
-                    {appid:'ha61', name:'DoS', options:{url:'http://heuristscholar.org/dosh3/[recID]', databases:['dos_3'] }}
-                    */
                 ]
             }]
         }

@@ -91,7 +91,7 @@ function hMapping(_map, _timeline, _basePath) {
     * 
     * @param _mapdata
     */
-    function _load(_mapdata){
+    function _load(_mapdata, _selection, _onSelectEventListener){
         mapdata = _mapdata || [];
         
         // TimeMap theme
@@ -169,7 +169,7 @@ function hMapping(_map, _timeline, _basePath) {
             }, tmap);
 
         // Add controls if the map is not initialized yet
-        if(!gmap){ 
+
             var mapOptions = {
                 panControl: true,
                 zoomControl: true,
@@ -179,12 +179,13 @@ function hMapping(_map, _timeline, _basePath) {
                 rotateControl: true,
                 scrollwheel: true,
                 mapTypeControlOptions: {
-                  mapTypeIds: ["tile"]
+                  mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
                 }
             };
-            tmap.map.addControls(mapOptions);
-            tmap.getNativeMap().setOptions(mapOptions);
+        if(!gmap){ 
+           tmap.map.addControls(mapOptions);
         }
+            tmap.getNativeMap().setOptions(mapOptions);
 
         gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
         addMapOverlay(tmap.getNativeMap());
@@ -409,8 +410,12 @@ function hMapping(_map, _timeline, _basePath) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        load: function(_mapdata){
-            _load(_mapdata);
+        load: function(_mapdata, _selection, _onSelectEventListener){
+            _load(_mapdata, _selection, _onSelectEventListener);
+        },
+        
+        showSelection: function(_selection){
+            
         },
 
         onWinResize: function(){

@@ -138,11 +138,11 @@
                 // Mapping data 
                 var mapdata = [];
                 mapping = new hMapping("map", "timeline", top.HAPI4.basePath);
-                var q = '<?=@$_REQUEST['q']?>';
+                var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
 
                 //t:26 f:85:3313  f:1:building
                 // Perform database query if possible
-                if( q )
+                if( !top.HEURIST4.util.isempty(q) )
                 {
                     top.HAPI4.RecordMgr.search({q: q, w: "all", f:"map", l:200},
                         function(response){

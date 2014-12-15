@@ -80,7 +80,7 @@
         <script type="text/javascript" src="apps/svs_manager.js"></script>
         <script type="text/javascript" src="apps/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
-        <script type="text/javascript" src="apps/viewers/connections.js"></script>
+        <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/search/resultList.js"></script>
@@ -262,7 +262,7 @@
                 author: Dr Ian Johnson<br/>
                 programmers: Stephen White and others...</p>
 
-            <p style="margin-top: 1em;">Copyright (C) 2005-2014 <a href="http://sydney.edu.au/arts/eresearch/" target="_blank">University of Sydney</a></p>
+            <p style="margin-top: 1em;">Copyright (C) 2005-2015 <a href="http://sydney.edu.au/arts/eresearch/" target="_blank">University of Sydney</a></p>
 
             <p style="font-size: x-small;margin-top: 1em;">
                 Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except

@@ -25,11 +25,9 @@ $.widget( "heurist.connections", {
     options: {
         title: '',
         recordset: null,
-        selection: null, //list of record ids
-        url:null
+        selection: null //list of record ids
     },
 
-    _query_request: null, //keep current query request
     _events: null,
 
     // the constructor
@@ -37,13 +35,13 @@ $.widget( "heurist.connections", {
 
         var that = this;
         
-        this.div_content = $('<div>')
+        this.framecontent = $('<div>')
                    .css({
                         position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
                         'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
                    .appendTo( this.element );
                    
-        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
+        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.framecontent );
 
 
         //-----------------------     listener of global events
@@ -60,6 +58,7 @@ $.widget( "heurist.connections", {
             }else  if(e.type == top.HAPI4.Event.LOGOUT) { 
                 
                 that.option("recordset", null);
+                that._refresh();
 
             // Search results
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
@@ -73,7 +72,6 @@ $.widget( "heurist.connections", {
             // Search start
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                if(data) that._query_request = data;  //keep current query request 
                 that.option("recordset", null);
                 that.loadanimation(true);
                 //???? that._refresh();
@@ -122,11 +120,11 @@ $.widget( "heurist.connections", {
         }
         
         //refesh if element is visible only - otherwise it costs much resources        
-        if(!this.element.is(':visible') || top.HEURIST4.util.isempty(this.options.url)) return;
+        if( !this.element.is(':visible') ) return;
         
         if(this.dosframe.attr('src')!==this.options.url){
             
-            this.options.url = top.HAPI4.basePathOld +  this.options.url.replace("[dbname]",  top.HAPI4.database);
+            this.options.url = top.HAPI4.basePath + '/page/springDiagram.php?db=' + top.HAPI4.database;
             this.dosframe.attr('src', this.options.url);
           
         // Content loaded already    
@@ -168,15 +166,15 @@ $.widget( "heurist.connections", {
 
         // remove generated elements
         this.dosframe.remove();
-        this.div_content.remove();
+        this.framecontent.remove();
     },
     
     loadanimation: function(show){
         if(show){
             //this.dosframe.hide();
-            this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+            this.framecontent.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
-            this.div_content.css('background','none');
+            this.framecontent.css('background','none');
             //this.dosframe.show();
         }
     },
