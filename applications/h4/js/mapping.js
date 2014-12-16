@@ -31,7 +31,8 @@ function hMapping(_map, _timeline, _basePath) {
     var mapdiv_id = null,
     timelinediv_id = null,
     basePath = '',
-    mapdata = [];
+    mapdata = [],
+    selection = []; //array of selected record ids
 
     var gmap = null,   // background gmap - gmap or other
     tmap = null,  // timemap object
@@ -40,6 +41,26 @@ function hMapping(_map, _timeline, _basePath) {
     keepMinDate = null,
     keepMaxDate = null,
     keepMinNaxDate = true,
+    
+    // TimeMap theme
+    customTheme = new TimeMapTheme({
+            "color": "#0000FF",  //for lines and polygones
+            "icon": basePath + "assets/star-red.png",
+            "iconSize": [16,16],
+            "iconShadow": null,
+            "iconAnchor":[9,17]
+    }),
+        
+    selectionTheme = new TimeMapTheme({
+            "color": "#FF0000",
+            //"icon": customIcon,
+            "iconSize": [16,16],
+            "iconShadow": basePath + "assets/mapshadow.png",
+            "iconShadowSize": [20,20],
+            "iconAnchor":[9,17]
+    }),
+        
+        
 
     timeZoomSteps =  window["Timeline"]?[
         { pixelsPerInterval: 200,  unit: Timeline.DateTime.DAY },
@@ -92,17 +113,10 @@ function hMapping(_map, _timeline, _basePath) {
     * @param _mapdata
     */
     function _load(_mapdata, _selection, _onSelectEventListener){
+
         mapdata = _mapdata || [];
+        selection = _selection || [];
         
-        // TimeMap theme
-        var customIcon = basePath + "assets/star-red.png"
-        var customTheme = new TimeMapTheme({
-            "color": "#0000FF",
-            "icon": customIcon,
-            "iconSize": [16,16],
-            "iconShadow": null,
-            "iconAnchor":[9,17]
-        });
         var tl_theme = Timeline.ClassicTheme.create();
         tl_theme.autoWidth = true;
         tl_theme.mouseWheel = "default";//"zoom";
@@ -111,6 +125,18 @@ function hMapping(_map, _timeline, _basePath) {
         };*/
         tl_theme.event.track.offset = 1.4;
 
+        
+        if(tmap){ 
+                //tmap.deleteDataset("main");
+                //var dataset = tmap.createDataset("main");
+                var dataset = tmap.datasets.main;
+                dataset.clear();
+                dataset.loadItems(mapdata[0].options.items);
+                dataset.show();
+                _onDataLoaded(tmap);
+                return; 
+        }
+        
         // Initialize TimeMap
         tmap = TimeMap.init({
             mapId: mapdiv_id, // Id of gmap div element (required)
@@ -120,7 +146,7 @@ function hMapping(_map, _timeline, _basePath) {
             options: {
                 mapZoom: defaultZoom,
                 theme: customTheme,
-                showMapCtrl: true,
+                //showMapCtrl: true,
                 //ART 201302 useMarkerCluster: (mapdata.count_mapobjects<300),
                 // TODO onlyTimeline: false, //TODO (mapdata.count_mapobjects<1),
                 /*
@@ -135,7 +161,7 @@ function hMapping(_map, _timeline, _basePath) {
                 openInfoWindow: mini ? function () { return false; } : RelBrowser.Mapping.openInfoWindowHandler
                 openInfoWindow: RelBrowser.Mapping.openInfoWindowHandler,
                 */
-                eventIconPath: basePath + "ext/timemap.js/2.0.1/images/"
+                eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
                 // TODO openInfoWindow: _onOpenInfoWindow
             },
 
@@ -182,21 +208,117 @@ function hMapping(_map, _timeline, _basePath) {
                   mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
                 }
             };
+            
         if(!gmap){ 
-           tmap.map.addControls(mapOptions);
+           //tmap.map.addControls(mapOptions);
         }
-            tmap.getNativeMap().setOptions(mapOptions);
+        tmap.getNativeMap().setOptions(mapOptions);
 
         gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
-        addMapOverlay(tmap.getNativeMap());
+        //artem temp   addMapOverlay(tmap.getNativeMap());
     }
 
     function _onDataLoaded(_tmap){
         tmap = _tmap;
+
+        //highlight selection
+        _showSelection(false);
         _renderTimelineZoom();
         _zoomTimeLineToAll();
     }
+    
+    function _showSelection( isreset ){
+        
+        if( isreset || (selection && selection.length>0) ){
+            var dataset = tmap.datasets.main;
+            var lastSelectedItem = null;
+            var items_to_update = [];
+            var items_to_update_data = [];
+            
+            dataset.each(function(item){
 
+                    var idx = selection ?selection.indexOf(Number(item.opts.recid)) :-1;
+                    
+                    var itemdata = {
+                    title: (item.opts.title+'+'),
+                    start: item.opts.start,
+                    end: item.opts.end,
+                    placemarks: [item.opts.places],
+                    options:{
+                        description: item.opts.description,
+                        //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
+                        //link: record.url,  //for timeline popup
+                        recid: item.opts.recid,
+                        rectype: item.opts.rectype,
+                        title: (item.opts.title+'+'),
+                        //thumb: record.thumb_url,
+                        eventIconImage: item.opts.rectype + '.png',
+                        icon: top.HAPI4.iconBaseURL + item.opts.rectype + '.png',
+                        iconShadowSize:[20,20],
+                        start: item.opts.start,
+                        end: item.opts.end,
+                        places: item.opts.places
+                        //,infoHTML: (infoHTML || ''),
+                            }
+                        };
+                    
+                    
+                    if(idx>=0){
+                        //item.changeTheme(selectionTheme, true);
+                        item.opts.theme.icon = top.HAPI4.iconBaseURL + '1.png'; //basePath + "assets/mapshadow.png";
+    //iconShadow = basePath + "assets/mapshadow.png"
+    //icon basePath + 'php/common/rt_icon.php?db='+_database+'&id=' + rectype + '.png',
+                        //data.options.theme = selectionTheme;
+                        
+                        items_to_update.push(item);
+                        
+                        itemdata.options.icon = basePath + "assets/mapshadow.png"; //top.HAPI4.iconBaseURL + '1.png'; 
+                        items_to_update_data.push(itemdata);
+                        
+                        if(idx == selection.length-1)
+                            lastSelectedItem = item;
+                    }else{
+                        //item.changeTheme(customTheme, true);
+                        var usual_icon = top.HAPI4.iconBaseURL + item.opts.rectype + '.png';
+                        if(usual_icon!=item.opts.theme.icon){
+                            item.opts.theme.icon = usual_icon;
+                            items_to_update.push(item);
+                            itemdata.options.icon = usual_icon;
+                            items_to_update_data.push(itemdata);
+                        }
+                    }                
+            });
+           
+            /*
+            if(items_to_update_data.length>0){
+                dataset.clear();
+                dataset.hide();
+                dataset.loadItems(items_to_update_data);
+                dataset.show();
+            }     */
+           
+            
+            if(items_to_update.length>0) {
+                dataset.hide();
+                for (var i=0;i<items_to_update.length;i++){
+                        //items_to_update[i].clear();
+                        dataset.deleteItem(items_to_update[i]);
+                        //dataset.items.push(items_to_update[i]);
+                }
+                dataset.loadItems(items_to_update_data);
+                dataset.show();
+                //_zoomTimeLineToAll(); //tmap.timeline.layout();
+            }
+           
+            
+            if(lastSelectedItem){
+                //lastSelectedItem.openInfoWindow();
+            }
+            
+            
+            //item.timeline.layout();
+        }
+    }
 
     function _onOpenInfoWindow(_item) {
 
@@ -415,7 +537,8 @@ function hMapping(_map, _timeline, _basePath) {
         },
         
         showSelection: function(_selection){
-            
+             selection = _selection || [];
+             _showSelection( true );
         },
 
         onWinResize: function(){

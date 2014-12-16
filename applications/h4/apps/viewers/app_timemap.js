@@ -73,6 +73,7 @@ $.widget( "heurist.app_timemap", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 that.option("recordset", null);
+                that.option("selection", null);
                 that.loadanimation(true);
                 //???? that._refresh();
               
@@ -81,6 +82,7 @@ $.widget( "heurist.app_timemap", {
                 
                 if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
                   
+console.log("_doVisualizeSelection");                  
                     that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
                 }            
             }
@@ -122,15 +124,23 @@ $.widget( "heurist.app_timemap", {
     _initmap: function(){
 
         if( !top.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
-            var that = this;
+            
             
             var mapping = this.mapframe[0].contentWindow.mapping;
+            
+            var that = this;
+            
+            if(!mapping){
+                setTimeout(function(){ that._initmap()}, 1000); //bad idea
+                return;
+            }
             
                 /* DEBUG
                 console.log(this.options.recordset);
                 console.log(this.options.recordset.getRecords());
                 console.log(this.options.recordset.toTimemap());
                 */
+            
             
             mapping.load(this.options.recordset == null? null: this.options.recordset.toTimemap() ,
                             this.options.selection,  //array of record ids
@@ -148,12 +158,13 @@ $.widget( "heurist.app_timemap", {
 
             if(top.HEURIST4.util.isnull(this.options.recordset)) return;
 
+            this.option("selection", selection);
+            
             if(!this.element.is(':visible')
                 || top.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
                     return;
             }
             
-            this.option("selection", selection);
             this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);
     }    
     

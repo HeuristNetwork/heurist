@@ -251,10 +251,10 @@ function hRecordSet(initdata) {
                 wkt         = _getFieldValue(record, 'dtl_Geo');
 
                 item = {
+                    title: recName,
                     start: (startDate || ''),
                     end: (endDate && endDate!=startDate)?endDate:'',
                     placemarks:[],
-                    title: recName,
                     options:{
 
                         description: description,
@@ -262,8 +262,11 @@ function hRecordSet(initdata) {
                         //link: record.url,  //for timeline popup
                         recid: recID,
                         rectype: recTypeID,
+                        title: recName,
                         //thumb: record.thumb_url,
+                        eventIconImage: recTypeID + '.png',
                         icon: top.HAPI4.iconBaseURL + recTypeID + '.png',
+                        iconShadowSize:[20,20],
                         start: (startDate || ''),
                         end: (endDate && endDate!=startDate)?endDate:''
                         //,infoHTML: (infoHTML || ''),
@@ -273,6 +276,7 @@ function hRecordSet(initdata) {
                 shape = _parseCoordinates(type, wkt, 0);
                 if(shape){
                     item.placemarks.push(shape);
+                    item.options.places = shape;
                 }
 
                 aitems.push(item);
@@ -280,6 +284,7 @@ function hRecordSet(initdata) {
 
         var dataset = [
             {
+                id: "main", 
                 type: "basic",
                 options: { items: aitems }
             }

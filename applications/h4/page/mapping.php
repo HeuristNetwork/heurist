@@ -59,6 +59,7 @@
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/param.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/kml.js"></script>     
+        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/manipulation.js"></script>     
         
         <!-- Shape file converting -->
         <script type="text/javascript" src="../ext/shapefile/stream.js"></script> 

@@ -722,6 +722,8 @@ $.widget( "heurist.resultList", {
     
     triggerSelection: function(){
 
+console.log("triggerSelection "+this._lastSelectedIndex);        
+        
         if(this.options.isapplication){
             var selected = this.getSelected();
             $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
@@ -737,9 +739,10 @@ $.widget( "heurist.resultList", {
 
         var selected = []
         if(top.HAPI4.currentRecordset){
+            var that = this;
             this.div_content.find('.selected').each(function(ids, rdiv){
                 var rec_ID = Number($(rdiv).attr('recid'));
-                if(this._lastSelectedIndex!=rec_ID){
+                if(that._lastSelectedIndex!=rec_ID){
                     selected.push(rec_ID);
                 }
             });
