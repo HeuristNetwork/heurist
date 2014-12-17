@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * listDuplicateRecords.php: Lists groups of potential duplicated and allows various actions - 
+    * listDuplicateRecords.php: Lists groups of potential duplicated and allows various actions -
     * ignoring groups in future, merging group members, editing records
     *
     * @package     Heurist academic knowledge management system
@@ -13,7 +13,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0   
+    * @version     3.1.0
     */
 
     /*
@@ -131,7 +131,7 @@
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     </head>
-    
+
     <body class="popup">
         <script type="text/javascript">
             function setAsNonDuplication(){
@@ -164,7 +164,12 @@
                     <option value=15 <?= $fuzziness >= 15 && $fuzziness < 20 ? "selected" : "" ?>>15</option>
                     <option value=20 <?= $fuzziness >= 20 && $fuzziness < 25 ? "selected" : "" ?>>20</option>
                     <option value=25 <?= $fuzziness >= 25 && $fuzziness < 30 ? "selected" : "" ?>>25</option>
-                    <option value=30 <?= $fuzziness >= 30 ? "selected" : "" ?>>30</option>
+                    <option value=30 <?= $fuzziness >= 30 && $fuzziness < 40 ? "selected" : "" ?>>30</option>
+                    <option value=40 <?= $fuzziness >= 40 && $fuzziness < 50 ? "selected" : "" ?>>40</option>
+                    <option value=50 <?= $fuzziness >= 50 && $fuzziness < 60 ? "selected" : "" ?>>50</option>
+                    <option value=60 <?= $fuzziness >= 60 && $fuzziness < 70 ? "selected" : "" ?>>60</option>
+                    <option value=70 <?= $fuzziness >= 70 && $fuzziness < 80 ? "selected" : "" ?>>70</option>
+                    <option value=80 <?= $fuzziness >= 80 ? "selected" : "" ?>>80</option>
                 </select>
                 <input type="hidden" name="db" id="db" value="<?=HEURIST_DBNAME?>">
                 characters of metaphone must match (larger value = fewer matches)
