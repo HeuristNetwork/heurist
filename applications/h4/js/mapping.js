@@ -42,25 +42,17 @@ function hMapping(_map, _timeline, _basePath) {
     keepMaxDate = null,
     keepMinNaxDate = true,
     
+    _onSelectEventListener,
+    
     // TimeMap theme
     customTheme = new TimeMapTheme({
             "color": "#0000FF",  //for lines and polygones
+            "lineColor": "#0000FF",
             "icon": basePath + "assets/star-red.png",
-            "iconSize": [16,16],
+            "iconSize": [25,25],
             "iconShadow": null,
             "iconAnchor":[9,17]
     }),
-        
-    selectionTheme = new TimeMapTheme({
-            "color": "#FF0000",
-            //"icon": customIcon,
-            "iconSize": [16,16],
-            "iconShadow": basePath + "assets/mapshadow.png",
-            "iconShadowSize": [20,20],
-            "iconAnchor":[9,17]
-    }),
-        
-        
 
     timeZoomSteps =  window["Timeline"]?[
         { pixelsPerInterval: 200,  unit: Timeline.DateTime.DAY },
@@ -112,8 +104,9 @@ function hMapping(_map, _timeline, _basePath) {
     * 
     * @param _mapdata
     */
-    function _load(_mapdata, _selection, _onSelectEventListener){
+    function _load(_mapdata, _selection, __onSelectEventListener){
 
+        _onSelectEventListener = __onSelectEventListener;
         mapdata = _mapdata || [];
         selection = _selection || [];
         
@@ -125,8 +118,7 @@ function hMapping(_map, _timeline, _basePath) {
         };*/
         tl_theme.event.track.offset = 1.4;
 
-        
-        if(tmap){ 
+        if(tmap && tmap.datasets){ 
                 //tmap.deleteDataset("main");
                 //var dataset = tmap.createDataset("main");
                 var dataset = tmap.datasets.main;
@@ -162,7 +154,6 @@ function hMapping(_map, _timeline, _basePath) {
                 openInfoWindow: RelBrowser.Mapping.openInfoWindowHandler,
                 */
                 eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
-                // TODO openInfoWindow: _onOpenInfoWindow
             },
 
             bandInfo: [
@@ -186,7 +177,7 @@ function hMapping(_map, _timeline, _basePath) {
                     intervalPixels: timeZoomSteps[timeZoomSteps.length - 1].pixelsPerInterval,
                     zoomIndex: timeZoomSteps.length - 1,
                     zoomSteps: timeZoomSteps,
-                    trackHeight: 1.3,
+                    trackHeight: 2.3,
                     trackGap:    0.2,
                     width: "100%"
                 }
@@ -220,31 +211,53 @@ function hMapping(_map, _timeline, _basePath) {
 
     function _onDataLoaded(_tmap){
         tmap = _tmap;
-
+        
+        var dataset = tmap.datasets.main;
+        dataset.each(function(item){
+             item.opts.openInfoWindow = _onItemSelection;
+        });
+        
         //highlight selection
         _showSelection(false);
         _renderTimelineZoom();
         _zoomTimeLineToAll();
     }
     
-    function _showSelection( isreset ){
+    
+    function _onItemSelection(  ){
+        //that - hMapping
+        //this - item (map item)
         
-        if( isreset || (selection && selection.length>0) ){
-            var dataset = tmap.datasets.main;
-            var lastSelectedItem = null;
-            var items_to_update = [];
-            var items_to_update_data = [];
+        selection = [this.opts.recid];
+        _showSelection(true);
+        //trigger selection
+        _onSelectEventListener.call(that, selection);
+        //TimeMapItem.openInfoWindowBasic.call(this);        
+    }
+    
+    //
+    // isreset - true - remove previous selection
+    //
+    function _showSelection( isreset ){
+
+        var lastSelectedItem = null;
+        var items_to_update = [];
+        var items_to_update_data = [];
+        var dataset = tmap.datasets.main;
+        
+        if ( isreset || (selection && selection.length>0) ){
             
             dataset.each(function(item){
 
-                    var idx = selection ?selection.indexOf(Number(item.opts.recid)) :-1;
+                    var idx = selection ?selection.indexOf(item.opts.recid) :-1;
                     
                     var itemdata = {
-                    title: (item.opts.title+'+'),
+                    title: ''+item.opts.title,
                     start: item.opts.start,
                     end: item.opts.end,
-                    placemarks: [item.opts.places],
-                    options:{
+                    placemarks: item.opts.places,
+                    options:item.opts
+                      /*{
                         description: item.opts.description,
                         //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
                         //link: record.url,  //for timeline popup
@@ -254,36 +267,40 @@ function hMapping(_map, _timeline, _basePath) {
                         //thumb: record.thumb_url,
                         eventIconImage: item.opts.rectype + '.png',
                         icon: top.HAPI4.iconBaseURL + item.opts.rectype + '.png',
-                        iconShadowSize:[20,20],
+
                         start: item.opts.start,
                         end: item.opts.end,
                         places: item.opts.places
                         //,infoHTML: (infoHTML || ''),
-                            }
+                            }*/
                         };
                     
                     
                     if(idx>=0){
-                        //item.changeTheme(selectionTheme, true);
-                        item.opts.theme.icon = top.HAPI4.iconBaseURL + '1.png'; //basePath + "assets/mapshadow.png";
-    //iconShadow = basePath + "assets/mapshadow.png"
-    //icon basePath + 'php/common/rt_icon.php?db='+_database+'&id=' + rectype + '.png',
-                        //data.options.theme = selectionTheme;
                         
                         items_to_update.push(item);
                         
-                        itemdata.options.icon = basePath + "assets/mapshadow.png"; //top.HAPI4.iconBaseURL + '1.png'; 
+                        itemdata.options.eventIconImage = item.opts.rectype + 's.png';
+                        itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
+                        itemdata.options.color = "#FF0000";
+                        itemdata.options.lineColor = "#FF0000";
+
                         items_to_update_data.push(itemdata);
                         
-                        if(idx == selection.length-1)
-                            lastSelectedItem = item;
-                    }else{
-                        //item.changeTheme(customTheme, true);
-                        var usual_icon = top.HAPI4.iconBaseURL + item.opts.rectype + '.png';
-                        if(usual_icon!=item.opts.theme.icon){
-                            item.opts.theme.icon = usual_icon;
+                        //if(idx == selection.length-1) lastSelectedItem = item;
+                        
+                    }else{ //clear selection
+                        //item.opts.theme
+                        //item.changeTheme(customTheme, true); - dont work
+                        var usual_icon = item.opts.rectype + 'm.png';
+                        if(usual_icon != itemdata.options.eventIconImage){
+
                             items_to_update.push(item);
-                            itemdata.options.icon = usual_icon;
+                            
+                            itemdata.options.eventIconImage = usual_icon;
+                            itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
+                            itemdata.options.color = "#0000FF";
+                            itemdata.options.lineColor = "#0000FF";
                             items_to_update_data.push(itemdata);
                         }
                     }                
@@ -299,29 +316,46 @@ function hMapping(_map, _timeline, _basePath) {
            
             
             if(items_to_update.length>0) {
+                var lastRecID = (selection)?selection[selection.length-1]:-1;
+                
                 dataset.hide();
+                var newitem;
                 for (var i=0;i<items_to_update.length;i++){
                         //items_to_update[i].clear();
                         dataset.deleteItem(items_to_update[i]);
                         //dataset.items.push(items_to_update[i]);
+                        newitem = dataset.loadItem(items_to_update_data[i]);
+                        
+                        newitem.opts.openInfoWindow = _onItemSelection;
+                        if(lastRecID==newitem.opts.recid){
+                            lastSelectedItem = newitem;
+                        }
                 }
-                dataset.loadItems(items_to_update_data);
                 dataset.show();
-                //_zoomTimeLineToAll(); //tmap.timeline.layout();
+                //_zoomTimeLineToAll(); //
+                //tmap.timeline.layout();
             }
            
-            
-            if(lastSelectedItem){
-                //lastSelectedItem.openInfoWindow();
-            }
-            
-            
             //item.timeline.layout();
         }
-    }
-
-    function _onOpenInfoWindow(_item) {
-
+        
+        /*var lastRecID = (selection)?selection[selection.length-1]:-1;
+        // loop through all items - change openInfoWindow
+        if(items_to_update.length>0 || !isreset){
+            var k = 0;
+            dataset.each(function(item){
+                item.opts.openInfoWindow = _onItemSelection;
+                //item.showPlacemark();
+                if(lastRecID==item.opts.recid){
+                        lastSelectedItem = item;
+                }
+            });
+        }*/
+        
+        if(lastSelectedItem){
+            TimeMapItem.openInfoWindowBasic.call(lastSelectedItem);
+            //lastSelectedItem.openInfoWindow();
+        }
     }
 
     function _renderTimelineZoom(){

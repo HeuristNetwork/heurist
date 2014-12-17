@@ -347,6 +347,10 @@ function appAddContent($container, app, options){
         }else if(app.widgetname=='app_timemap'){
             //DEBUG
             widget = $content.app_timemap( options ); 
+        }else if(app.widgetname=='connections'){
+            //DEBUG
+            widget = $content.connections( options ); 
+            
         }else if(app.widgetname=='svs_manager'){
                 //DEBUG
                 widget = $content.svs_manager( options ); //options

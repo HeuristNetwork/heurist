@@ -1181,17 +1181,18 @@ function visualizeData() {
             var needSelect = true;
             
             if(settings.selectedNodeIds==null) settings.selectedNodeIds = [];
+            
+            var recID = ""+data.id;
         
            // getLineLength
             if(event.ctrlKey){  //this.options.multiselect && 
                 
-                var idx = settings.selectedNodeIds.indexOf(data.id);
+                var idx = settings.selectedNodeIds.indexOf(recID);
                 if (idx > -1) {
                     //deselect all others
                     d3.select(node).select("circle").style("fill", "#fff"); //.attr("r", 20);
                     needSelect = false;
                     
-                    settings.selectedNodeIds.indexOf(data.id);
                     settings.selectedNodeIds.splice(idx, 1);
                 }
             }else{
@@ -1206,8 +1207,8 @@ function visualizeData() {
                 //select new
                 data.selected = true;
                 d3.select(node).select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
-                createOverlay(event.offsetX, event.offsetY, "record", "id"+data.id, getRecordOverlayData(data));  
-                settings.selectedNodeIds.push(data.id);
+                createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
+                settings.selectedNodeIds.push(recID);
             }
             
 

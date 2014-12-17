@@ -657,7 +657,7 @@ $.widget( "heurist.resultList", {
             $rdiv = $rdiv.parents('.recordDiv');
         }
 
-        var selected_rec_ID = Number($rdiv.attr('recid'));
+        var selected_rec_ID = $rdiv.attr('recid');
         this.div_content.find('.selected_last').removeClass('selected_last');
         
 
@@ -685,7 +685,7 @@ $.widget( "heurist.resultList", {
                 var isstarted = false;
                 
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                        var rec_id = Number($(rdiv).attr('recid'));
+                        var rec_id = $(rdiv).attr('recid');
                         
                         if(rec_id == that._lastSelectedIndex || rec_id==nowSelectedIndex){
                               if(isstarted){ //stop selection and exit
@@ -741,13 +741,13 @@ console.log("triggerSelection "+this._lastSelectedIndex);
         if(top.HAPI4.currentRecordset){
             var that = this;
             this.div_content.find('.selected').each(function(ids, rdiv){
-                var rec_ID = Number($(rdiv).attr('recid'));
+                var rec_ID = $(rdiv).attr('recid');
                 if(that._lastSelectedIndex!=rec_ID){
                     selected.push(rec_ID);
                 }
             });
             if(Number(this._lastSelectedIndex)>0){
-                selected.push(this._lastSelectedIndex); 
+                selected.push(""+this._lastSelectedIndex); 
             }
         }
         return selected;
@@ -794,7 +794,7 @@ console.log("triggerSelection "+this._lastSelectedIndex);
             if( top.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
             
                     this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                            var rec_id = Number($(rdiv).attr('recid'));
+                            var rec_id = $(rdiv).attr('recid');
                             if(recIDs_list.indexOf(rec_id)>=0){
                                $(rdiv).addClass('selected'); 
                                //if(that._lastSelectedIndex==rec_id){

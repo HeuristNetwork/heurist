@@ -41,6 +41,84 @@
         ob_clean();
         flush();        
         readfile($filename);
+    }else{
+        create_rt_icon_with_bg( $rectype_id);
     }
+    
+
+function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct){ 
+    // creating a cut resource 
+    $cut = imagecreatetruecolor($src_w, $src_h); 
+
+    // copying relevant section from background to the cut resource 
+    imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h); 
+
+    // copying relevant section from watermark to the cut resource 
+    imagecopy($cut, $src_im, 0, 0, $src_x, $src_y, $src_w, $src_h); 
+
+    // insert cut resource to destination image 
+    imagecopymerge($dst_im, $cut, $dst_x, $dst_y, 0, 0, $src_w, $src_h, $pct); 
+}     
+    
+//
+//
+//    
+function create_rt_icon_with_bg( $rectype_id, $bg_color ) {
+
+    if(substr($rectype_id,-5,5) == "m.png") {
+        $rectype_id = substr($rectype_id, 0, -5);
+        $bg_color = array(200,200,200);
+        $filename2 = HEURIST_ICON_DIR . $rectype_id . "m.png";
+    }else if(substr($rectype_id,-5,5) == "s.png") {
+        $rectype_id = substr($rectype_id, 0, -5);
+        $bg_color = array(190,228,248);  //#bee4f8
+        $filename2 = HEURIST_ICON_DIR . $rectype_id . "s.png";
+    }else{
+        return;
+    }
+    
+    $filename = HEURIST_ICON_DIR . $rectype_id . ".png";
+    
+    
+//error_log($filename);
+//error_log($filename2);
+    
+    if(file_exists($filename)){
+        
+        $img = imagecreatetruecolor(25, 25);
+        
+        // fill the background color
+        $bg = imagecolorallocate($img, 255, 127, 0);
+        // make the background transparent
+        imagecolortransparent($img, $bg);
+        
+        //draw transparent rectangle
+        imagefilledrectangle($img, 0, 0, 25, 25, $bg);
+        
+        // draw circle
+        $col_ellipse = imagecolorallocate($img, $bg_color[0], $bg_color[1], $bg_color[2]);
+        imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
+        
+        // load icon
+        $img_icon = @imagecreatefrompng($filename);
+        
+        // merge icon
+        imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 75);
+        
+        // output
+        header("Content-type: image/png");
+        
+//error_log("ke");        
+        imagepng($img);        
+        //imagepng($img, $filename2);        
+        
+        //readfile($filename2);
+    
+    
+        imagedestroy($img);
+        imagedestroy($img_icon);    
+    }
+    
+}    
     
 ?>
