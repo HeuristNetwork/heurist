@@ -61,52 +61,30 @@
 
                 <div class="separator_row"></div>
                 <div class="options">
-                    <div class="buttons"><button onclick="location.href='h3/admin/ugrps/editUser.html?db=H3Sandpit'">Register as user</button></div>
-                    <div class="description">A simple one minute registration allows you to use Heurist on this server
-                    (unless disabled by the sysadmin)</div>
+                    <div class="buttons"><button onclick="window.open('h3/admin/ugrps/editUser.html?db=H3Sandpit','heurist')">Register as user</button></div>
+                    <div class="description">A simple one minute registration allows you to use Heurist on this server (after approval by the system adminstrator).</div>
                 </div>
-                <!-- Ian 26/9/13: With Vsn 3.0 we move away from the idea of a shared sandpit to giving users their own individual databases
+
                 <div class="options">
-                <div class="buttons"><button onclick="location.href='search/search.html?db=H3Sandpit'">Use Heurist public database</button></div>
-                <div class="description">A simple one minute registration (above) allows you to try out Heurist on this shared 'sandpit' and,
-                when you are ready, generate your own database(s) for real data.</div>
-                </div>
-                -->
-                <div class="options">
-                    <div class="buttons"><button onclick="location.href='h3/admin/setup/dbcreate/createNewDB.php?db=H3Sandpit'">
+                    <div class="buttons"><button onclick="window.open('h3/admin/setup/dbcreate/createNewDB.php?db=H3Sandpit','heurist')">
                     Create a database</button></div>
                     <div class="description">Create your first database (you must first register as a user). Subsequent databases can be
-                    created with New Database from within an existing database. You become the owner of the new databases created.</div>
+                    created with New Database when logged into an existing database. You become the owner of the new databases created.</div>
                 </div>
                 <div class="separator_row"></div>
 
                 <div class="options">
-                    <div class="buttons"><button onclick="location.href='h3/index.php?db='">Browse databases</button></div>
+                    <div class="buttons"><button onclick="window.open('h3/index.php?db=','heurist')">Open existing database</button></div>
                     <div class="description">Browse the list of databases on this server - you will only be able to open databases
-                    for which you have login credentials</div>
+                    for which you have login credentials.</div>
                 </div>
                 <div class="separator_row"></div>
 
-                <!--
-                <div class="options">
-                <div class="buttons"><button onclick="location.href='admin/ugrps/editUser.html'">Register as new user</button></div>
-                <div class="description">A simple two minute process will get you using our shared databasein which you can create
-                and share (or not) internet bookmarks, bibliographic data and any other form of research data you wish.</div>
-                </div>
-                <div class="separator_row small"></div>
-                -->
-
-                <!-- Broken images and outdated content (related to Heurist vsn 2) at Sep 2013. Would be worth reinstating.
-                <div class="options">
-                <div class="buttons"><button onclick="location.href='context_help/tour.html'">Introductory tour</button></div>
-                <div class="description">A quick overview of Heurist's field of application and capabilities</div>
-                </div>
-                -->
 
                 <div class="options">
-                    <div class="buttons"><button onclick="location.href='http://HeuristNetwork.org'">Heurist Network website</button></div>
+                    <div class="buttons"><button onclick="window.open('http://HeuristNetwork.org','HeuristNetwork')">Heurist Network website</button></div>
                     <div class="description">A one-stop shop for everything Heurist, including full documentation, training
-                        materials, workshops, hosted Heurist services, exemplars and annotated database templates
+                        materials, workshops, hosted Heurist services, exemplars and annotated database templates.
                         </div>
                 </div>
 
