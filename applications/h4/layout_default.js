@@ -91,7 +91,7 @@ options - parameters to init application
 
 */ 
 var layouts = [
-    {id:'l01', name:'h3 classic', theme:'smoothness',
+    {id:'L01', name:'h3 classic', theme:'smoothness', type:'cardinal', 
         north:{size:90, resizable:false,
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:80,right:0, border:'none', 'background':'none'} },    //top panel
@@ -113,7 +113,20 @@ var layouts = [
             }]
         }
     },
-    {id:'l02', name:'connections', theme:'smoothness',
+    {id:'L04', name:'gridster example', theme:'smoothness', type:'gridster', 
+        options:{widget_base_dimensions:[50, 50]},
+        mainmenu: { col:1, row:1, size_x:10, size_y:1, apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},
+        search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'ha10', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},    
+        search_nav:{ col:1, row:2, size_x:3, size_y:10, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
+        
+        pane1:{col:4, row:2, size_x:7, size_y:7, dropable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result 
+        pane2:{col:12, row:2, size_x:7, size_y:7, dropable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},  
+        pane5:{col:20, row:2, size_x:7, size_y:7, dropable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'} }]},
+        pane3:{col:4, row:9, size_x:7, size_y:7, dropable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },  
+        pane4:{col:12, row:9, size_x:7, size_y:7, dropable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},  
+
+    },
+    {id:'L02', name:'connections', theme:'smoothness',
     north:{size:40, resizable:false,
             apps:[
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
@@ -121,7 +134,7 @@ var layouts = [
         center:{dropable:false, apps:[
         {appid:'h4_connections', options:{title:'Connections'} }]}  //search result 
     },
-    {id:'l03', name:'abandoned', theme:'smoothness',
+    {id:'L03', name:'abandoned', theme:'smoothness',
         north:{size:88, resizable:false,
             apps:[
                 {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none', 'background':'none'} },    //about
