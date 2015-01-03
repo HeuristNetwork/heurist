@@ -91,7 +91,7 @@ var svg;        // The SVG where the visualisation will be executed on
             formula: "linear",
             fisheye: false,
             
-            gravity: "touch",
+            gravity: "off",
             attraction: -700,
             
             translatex: 0,
@@ -561,21 +561,21 @@ function getEntityRadius(count) {
 }
 
 function visualizeSelection(selectedNodeIds) {
+
+    settings.selectedNodeIds=selectedNodeIds;
+    //deselect all others
+    //var allnodes = container.selectAll(".node");
+    //d3.select(node)
+    d3.selectAll(".node").select("circle").style("fill", "#fff"); //.attr("r", 20);
     
-            settings.selectedNodeIds=selectedNodeIds;
-            //deselect all others
-            //var allnodes = container.selectAll(".node");
-            //d3.select(node)
-            d3.selectAll(".node").select("circle").style("fill", "#fff"); //.attr("r", 20);
-            
-            if(selectedNodeIds && selectedNodeIds.length>0){
-                //select new ones
-                var i;
-                for(i=0; i<selectedNodeIds.length; i++){
-                    var node= d3.select(".id"+selectedNodeIds[i]);
-                    node.select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
-                }
-            }            
+    if(selectedNodeIds && selectedNodeIds.length>0){
+        //select new ones
+        var i;
+        for(i=0; i<selectedNodeIds.length; i++){
+            var node= d3.select(".id"+selectedNodeIds[i]);
+            node.select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
+        }
+    }            
 }
 
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
@@ -1222,9 +1222,6 @@ function visualizeData() {
             
     }
 
-
-     
-    
 } //end visualizeData
 
 

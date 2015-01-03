@@ -213,7 +213,7 @@ $.widget( "heurist.connections", {
                 var resdata = null;
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     // Store relationships
-                    console.log("Successfully retrieved relationship data!");
+                    console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);
                     
                     // Parse response to spring diagram format
@@ -229,9 +229,7 @@ $.widget( "heurist.connections", {
             }
 
             top.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
-        
         }
-        
     }
     
 
@@ -278,13 +276,19 @@ $.widget( "heurist.connections", {
                     // Null check
                     var source = relations[i].recID;
                     var target = relations[i].targetID;
+                    var dtID = relations[i].dtID;
+                    var type = "Floating relationship";
+                    if(dtID > 0) {
+                        type = top.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                    }
 
+                    // Link check
                     if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
                         // Construct link
                         var link = {source: nodes[source],
                                     target: nodes[target],
                                     targetcount: 1,
-                                    relation: {}
+                                    relation: {name: type}  //top.HEURIST4.detailtypes.typedefs[id].commonfields[1]
                                    };
                         links.push(link); 
                     }      
