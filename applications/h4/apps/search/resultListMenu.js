@@ -132,12 +132,18 @@ $.widget( "heurist.resultListMenu", {
     _initMenu: function(name){
         
         var that = this;
+        var myTimeoutId = -1;
 
         //show hide function
         var _hide = function(ele) {
-                $( ele ).delay(800).hide();
+                myTimeoutId = setTimeout(function() {
+                    $( ele ).hide();
+                }, 800);
+                //$( ele ).delay(800).hide();
             },
             _show = function(ele, parent) {
+                clearTimeout(myTimeoutId);
+                
                 $('.menu-or-popup').hide(); //hide other
                 var menu = $( ele )
                 //.css('width', this.btn_user.width())

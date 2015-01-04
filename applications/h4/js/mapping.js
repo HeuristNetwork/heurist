@@ -118,7 +118,7 @@ function hMapping(_map, _timeline, _basePath) {
         };*/
         tl_theme.event.track.offset = 1.4;
 
-        if(tmap && tmap.datasets){ 
+        if(tmap && tmap.datasets && tmap.datasets.main){ 
                 //tmap.deleteDataset("main");
                 //var dataset = tmap.createDataset("main");
                 var dataset = tmap.datasets.main;

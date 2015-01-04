@@ -61,7 +61,7 @@ var widgets = [
     {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'apps/exp/rec_viewer_ext.js'},
     */
 
-    {id:'h3_mainMenu', name:'Main Menu Panel', widgetname:'mainMenu', script:'apps/others/mainMenu.js'},
+    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'apps/others/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/search/resultList.js'},
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
@@ -119,12 +119,25 @@ var layouts = [
         search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'ha10', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},    
         search_nav:{ col:1, row:2, size_x:3, size_y:10, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         
-        pane1:{col:4, row:2, size_x:7, size_y:7, dropable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result 
-        pane2:{col:12, row:2, size_x:7, size_y:7, dropable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},  
-        pane5:{col:20, row:2, size_x:7, size_y:7, dropable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'} }]},
-        pane3:{col:4, row:9, size_x:7, size_y:7, dropable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },  
-        pane4:{col:12, row:9, size_x:7, size_y:7, dropable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},  
+        pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result 
+        pane2:{col:12, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},  
+        pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'} }]},
+        pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },  
+        pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},  
 
+    },
+    {id:'L05', name:'free example', theme:'smoothness', type:'free', 
+        mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} },
+                  {appid:'ha10', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} }, 
+                  {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
+                  {appid:'h3_resultList', name: 'Search result' },
+                    {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
+                    {appid:'ha51'}, // H4 map V2
+                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
+                    {appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}}  //H4 connections
+                        ]}]
+        }
     },
     {id:'L02', name:'connections', theme:'smoothness',
     north:{size:40, resizable:false,

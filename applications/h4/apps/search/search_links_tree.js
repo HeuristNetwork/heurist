@@ -65,7 +65,9 @@ $.widget( "heurist.search_links_tree", {
             text:false})
         .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
 
-        this.tree = $( "<div>" ).css({'top':'2em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
+        var hasHeader = ($(".header"+that.element.attr('id')).length>0);
+        
+        this.tree = $( "<div>" ).css({'top':hasHeader?'4em':'2em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
         this.edit_dialog = null;
             
         // listeners            

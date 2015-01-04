@@ -83,6 +83,9 @@ function appGetWidgetByName(widgetname){
     return null;
 }
 
+//
+// north-west-east-south layout
+//
 function initLayoutCardinal(){
 
     var layout_opts =  {
@@ -219,7 +222,7 @@ function initLayoutFree(){
             //this div may already exists
             if($('#'+pos).length<1){
                 $pane = $('<div>',{id:pos})
-                        .addClass('.ui-layout-'+pos)
+                        .addClass('ui-layout-'+pos)
                         .appendTo($container);
                 //apply css 
                 if(lpane.css){
@@ -237,7 +240,7 @@ function initLayoutFree(){
     for (i=0; i<panes.length; i++){
         if(reserved.indexOf(panes[i])<0){
              __layoutAddPane(panes[i]);
-             layoutInitPane(layout, panes[i], bg_color);
+             layoutInitPane(panes[i], bg_color);
         }  
     }
     
