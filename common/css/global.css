@@ -114,6 +114,11 @@ a:hover {
     background-repeat: no-repeat;
     padding-left: 16px;
 }
+.inwards-link{
+    background-image:url(../images/inwards-link.png);
+    background-repeat: no-repeat;
+    padding-left: 16px;
+}
 
 .panel {
 	border: 1px solid #BFBFBF;

@@ -32,8 +32,10 @@ var svg;        // The SVG where the visualisation will be executed on
     * @param options Custom options given when this function is called
     */
     $.fn.visualize = function( options ) {
-        console.log("INSIDE VISUALIZE FUNCTION");
+        // Select and clear SVG.
         svg = d3.select("#d3svg");
+        svg.selectAll("*").remove();
+        svg.append("text").text("Processing...").attr("x", "25").attr("y", "25");   
         
         // Default plugin settings
         settings = $.extend({
@@ -508,6 +510,7 @@ function determineMaxCount(data) {
             } 
         }
     }
+    console.log("Max count: " + maxCount);
 }
 
 /** Calculates log base 10 */
@@ -521,6 +524,10 @@ function executeFormula(count, maxSize) {
     // Avoid minus infinity and wrong calculations etc.
     if(count <= 0) {
         count = 1;
+    }
+    
+    if(count > maxCount) {
+        maxCount = count;
     }
     
     //console.log("Count: " + count + ", max count: " + maxCount + ", max Size: " + maxSize);
@@ -592,9 +599,9 @@ function visualizeData() {
     console.log(data); 
       
     // Limit check
-    if(Object.keys(data.nodes).length > 2000) {
+    if((gravity === "touch" || gravity == "on") && Object.keys(data.nodes).length > 1000) {
         svg.selectAll("text")
-           .data(["Sorry, there are too many records to render.", "The limit is set at 2000 records."])
+           .data(["Sorry, there are too many records to render.", "When gravity is enabled the limit is set at 1000 records."])
            .enter()
            .append("text")
            .text(function(d) {
@@ -787,7 +794,7 @@ function visualizeData() {
         d3.event.sourceEvent.stopPropagation();
             
         if(gravity !== "aggressive") {    
-            force.stop() // Stop force from auto positioning
+            force.stop(); // Stop force from auto positioning
             if(gravity === "touch") {
                 svg.selectAll(".node").attr("fixed", function(d, i) {
                     d.fixed = false;
@@ -927,15 +934,21 @@ function visualizeData() {
                        }
                   })
                   .call(node_drag);
-    
+                  
+    // Title
+    var titles = node.append("title")
+                     .text(function(d) {
+                         return d.name;
+                     });
+
     // Adding the background circles to the nodes
-    /*var bgcircle = node.append("circle")
+    var bgcircle = node.append("circle")
                        .attr("r", function(d) {
                             //console.log("COUNT for " + d.name + ": " + d.count);
                             return getEntityRadius(d.count);
                        })
                        .attr("class", "background")
-                       .attr("fill", entitycolor);*/
+                       .attr("fill", entitycolor);
 
     // Adding the foreground circles to the nodes
     var fgcircle = node.append("circle")
@@ -953,7 +966,7 @@ function visualizeData() {
                                return 1;
                            }
                            return .25;
-                       })
+                       });
    
     // Adding icons to the nodes 
     var icon = node.append("svg:image")
@@ -1112,11 +1125,18 @@ function visualizeData() {
                 // Straight
                 __straightFisheye(topLines);
                 __straightFisheye(bottomLines);
-                
-                
             }
         }); 
     }    
+    
+    // Get everything into positon
+    if(gravity == "off") {
+       for(var i = 0; i < 10; i++) {
+           force.tick();
+       }
+       force.stop(); 
+    }
+    
 
     /** Tick handler for curved lines */
     function curvedTick() {
@@ -1176,49 +1196,47 @@ function visualizeData() {
     
     /******************************** SELECTION *******************************/
     function _recordNodeOnClick(event, data, node) {
+        var color = getSetting(setting_entitycolor);
+        var needSelect = true;
         
+        if(settings.selectedNodeIds==null) settings.selectedNodeIds = [];
         
-            var needSelect = true;
+        var recID = ""+data.id;
+    
+       // getLineLength
+        if(event.ctrlKey){  //this.options.multiselect && 
             
-            if(settings.selectedNodeIds==null) settings.selectedNodeIds = [];
-            
-            var recID = ""+data.id;
-        
-           // getLineLength
-            if(event.ctrlKey){  //this.options.multiselect && 
+            var idx = settings.selectedNodeIds.indexOf(recID);
+            if (idx > -1) {
+                //deselect all others
+                d3.select(node).select("circle").style("fill", color); //.attr("r", 20);
+                needSelect = false;
                 
-                var idx = settings.selectedNodeIds.indexOf(recID);
-                if (idx > -1) {
-                    //deselect all others
-                    d3.select(node).select("circle").style("fill", "#fff"); //.attr("r", 20);
-                    needSelect = false;
-                    
-                    settings.selectedNodeIds.splice(idx, 1);
-                }
-            }else{
-                
-                //deselect all
-                var allnodes = container.selectAll(".node");
-                allnodes.select("circle").style("fill", "#fff"); //.attr("r", 20); 
-                settings.selectedNodeIds = [];
-            }            
-            
-            if(needSelect){
-                //select new
-                data.selected = true;
-                d3.select(node).select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
-                createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
-                settings.selectedNodeIds.push(recID);
+                settings.selectedNodeIds.splice(idx, 1);
             }
-            
+        }else{
+            //deselect all
+            var allnodes = container.selectAll(".node");
+            allnodes.select("circle").style("fill", color); //.attr("r", 20); 
+            settings.selectedNodeIds = [];
+        }            
+        
+        if(needSelect){
+            //select new
+            data.selected = true;
+            d3.select(node).select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
+            createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
+            settings.selectedNodeIds.push(recID);
+        }
+        
 
-            settings.triggerSelection.call(this, settings.selectedNodeIds);
-            
-            //if(this.options.isapplication){
-            //    $(this.document).trigger( top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:'d3svg'} );
-            //}
-            
-            //this._trigger( "onselect", event, selected );
+        settings.triggerSelection.call(this, settings.selectedNodeIds);
+        
+        //if(this.options.isapplication){
+        //    $(this.document).trigger( top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:'d3svg'} );
+        //}
+        
+        //this._trigger( "onselect", event, selected );
             
     }
 
@@ -1251,7 +1269,7 @@ function getRecordOverlayData(record) {
     var array = [];
     
     // Header
-    var header = {text: truncateText(record.name), size: "11px", style: "bold", height: 15, enter: true}; 
+    var header = {text: truncateText(record.name, maxLength), size: "11px", style: "bold", height: 15, enter: true}; 
     if(settings.showCounts) {
         header.text += ", n=" + record.count;  
     }
@@ -1310,7 +1328,7 @@ function getRecordOverlayData(record) {
         
         // Convert map to array
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "11px", height: 14, enter: true}); // Heading
+            array.push({text: truncateText(key, maxLength), size: "8px", height: 12, enter: true}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
@@ -1380,6 +1398,9 @@ function createOverlay(x, y, type, selector, info) {
     var overlay = svg.append("g")
                      .attr("class", "overlay "+type+ " " + selector)      
                      .attr("transform", "translate(" +(x+5)+ "," +(y+5)+ ")");
+                     
+    // Title
+    var title = overlay.append("title").text(info[0].text);
                      
     // Draw a semi transparant rectangle       
     var rect = overlay.append("rect")

@@ -29,6 +29,10 @@
    vertical-align: middle; 
 }
 
+.dotted-link {
+    border-bottom: dotted 1px #6A7C99;
+}
+  
 .colorblock {
     cursor: pointer;
     display: inline-block;
@@ -46,10 +50,10 @@
     text-align: center;
 }
 .number-input.small {
-     max-width: 40px;
+     max-width: 25px;
 }
 .number-input.medium {
-    max-width: 55px;
+    max-width: 35px;
 }
 
 .explanation {
