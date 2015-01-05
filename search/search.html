@@ -202,347 +202,362 @@
             <div id="quicklinks">
                 <div id=logged-in></div>
                 <div><br/><br/>
-                        <!-- Note: auto-popup automatically adds ?db= or &db= + database name to end of link -->
-                        
-                        <ul class="sf-menu" style="width:460px">
-                            <li><div style="margin-top: 5px;font-weight: bold;">MY PROFILE</div>
-                                <ul>    
-                                    <li style="padding:10 5 5 0;"><a href="#">PROFILE</a></li>
-                                    
-                                    <li style="padding-left:5px;"><a href="../admin/profile/editPreferences.html" name="auto-popup"
+                    <!-- Note: auto-popup automatically adds ?db= or &db= + database name to end of link -->
+
+                    <ul class="sf-menu" style="width:460px">
+
+                        <li><div style="margin-top: 5px;font-weight: bold;">MY PROFILE</div>
+                            <ul>
+                                <li style="padding:10 5 5 0;"><a href="#">PROFILE</a></li>
+
+                                <li style="padding-left:5px;"><a href="../admin/profile/editPreferences.html" name="auto-popup"
+                                    onClick="{return false;}"
+                                    title="Display preferences relating to behaviours related to this database">Preferences</a>
+                                </li>
+
+                                <li style="padding-left:5px;">
+                                    <a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" class="portrait" name="auto-popup"
                                         onClick="{return false;}"
-                                        title="Display preferences relating to behaviours related to this database">Preferences</a>
-                                    </li>
+                                        title="Delete, combine, rename your personal tags">Manage tags</a>
+                                </li>
 
-                                    <li style="padding-left:5px;">
-                                        <a href="../admin/profile/configureProfile.php?body_only&amp;tag_edit=1" class="portrait" name="auto-popup"
-                                            onClick="{return false;}"
-                                            title="Delete, combine, rename your personal tags">Manage tags</a>
-                                    </li>
+                                <li style="padding-left:5px;"><a href="../admin/profile/manageReminders.php" name="auto-popup"
+                                    onClick="{return false;}"
+                                    title="View and delete automatic notification emails sent from the records you have bookmarked">Manage reminders</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../admin/profile/manageReminders.php" name="auto-popup"
+                                <li class="admin-only" style="padding-left:5px;"><a href="../export/backup/exportMyDataPopup.php" name="auto-popup" class="small"
+                                    title="Retrieves and writes all the data in the database that you own or have bookmarked,
+                                    including attached files, to a ZIP file which you can download from a hyperlink">Export my data</a>
+                                </li>
+
+                                <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">ACCESS</a></li>
+
+                                <li style="padding-left:5px;"><a href="../admin/ugrps/manageGroups.php?popup=yes" name="auto-popup"
+                                    onClick="{return false;}"
+                                    title="List of groups you are member of">My User Groups</a>
+                                </li>
+
+                                <li style="padding-left:5px;"><a href="../admin/ugrps/editUser.html" name="auto-popup"
+                                    onClick="{return false;}"
+                                    title="User personal information">My User Info</a>
+                                </li>
+
+                            </ul>
+                        </li>
+                        <li><div style="margin-top: 5px;font-weight: bold;">DATABASE</div>
+                            <ul>
+
+                                <li style="padding:10 5 5 0;"><a href="#">DATABASE</a></li>
+
+                                <li style="padding-left:5px;"><a href="../common/connect/getListOfDatabases.php?popup=1" name="auto-popup" class="portrait"
+                                    onClick="{return false;}"
+                                    title="Open and login to another Heurist database - current database remains open">
+                                    Open database</a>
+                                </li>
+
+                                <li style="padding-left:5px;"><a href="../admin/setup/dbcreate/createNewDB.php?popup=1" name="auto-popup" class="portrait"
+                                    onClick="{return false;}"
+                                    title="Create a new database on the current server - essential structure elements are populated automatically">
+                                    New database</a>
+                                </li>
+
+                                <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">STRUCTURE</a></li>
+
+                                <li style="padding-left:5px;">
+                                    <a href="../admin/structure/rectypes/manageRectypes.php?popup=1" name="auto-popup" class="verylarge"
                                         onClick="{return false;}"
-                                        title="View and delete automatic notification emails sent from the records you have bookmarked">Manage reminders</a>
-                                    </li>
+                                        title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
+                                        Record types / fields</a>
+                                </li>
 
-                                    <li class="admin-only" style="padding-left:5px;"><a href="../export/backup/exportMyDataPopup.php" name="auto-popup" class="small"
-                                        title="Retrieves and writes all the data in the database that you own or have bookmarked,
-                                        including attached files, to a ZIP file which you can download from a hyperlink">Export my data</a>
-                                    </li>
-
-                                    <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">ACCESS</a></li>
-
-                                    <li style="padding-left:5px;"><a href="../admin/ugrps/manageGroups.php?popup=yes" name="auto-popup"
+                                <li style="padding-left:5px;">
+                                    <a href="../admin/structure/import/annotatedTemplate.php?popup=1" name="auto-popup" class="verylarge"
                                         onClick="{return false;}"
-                                        title="List of groups you are member of">My User Groups</a>
-                                    </li>
+                                        title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
+                                        Annotated templates (beta)</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../admin/ugrps/editUser.html" name="auto-popup"
+                                <li style="padding-left:5px;">
+                                    <a href="../admin/structure/import/selectDBForImport.php?popup=1" name="auto-popup" class="verylarge"
                                         onClick="{return false;}"
-                                        title="User personal information">My User Info</a>
-                                    </li>
+                                        title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
+                                        Import structure</a>
+                                </li>
 
-                                </ul>
-                            </li>    
-                            <li><div style="margin-top: 5px;font-weight: bold;">DATABASE</div>
-                                <ul>
-
-                                    <li style="padding:10 5 5 0;"><a href="#">DATABASE</a></li>
-
-                                    <li style="padding-left:5px;"><a href="../common/connect/getListOfDatabases.php?popup=1" name="auto-popup" class="portrait"
+                                <li style="padding-left:5px;">
+                                    <a href="../admin/structure/fields/manageDetailTypes.php?popup=1" name="auto-popup" class="verylarge"
                                         onClick="{return false;}"
-                                        title="Open and login to another Heurist database - current database remains open">
-                                        Open database</a>
-                                    </li>
+                                        title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
+                                        Manage field types</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../admin/setup/dbcreate/createNewDB.php?popup=1" name="auto-popup" class="portrait"
+                                <li style="padding-left:5px;">
+                                    <a href="../admin/structure/terms/editTerms.php?popup=1" name="auto-popup" class="verylarge"
                                         onClick="{return false;}"
-                                        title="Create a new database on the current server - essential structure elements are populated automatically">
-                                        New database</a>
-                                    </li>
+                                        title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
+                                        Manage terms</a>
+                                </li>
 
-                                    <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">STRUCTURE</a></li>
+                                <li style="padding-left:5px;"><a href="javascript:void(0)"
+                                    onClick="{top.HEURIST.util.reloadStrcuture();}"
+                                    title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
+                                    Refresh lists</a>
+                                </li>
 
-                                    <li style="padding-left:5px;">
-                                        <a href="../admin/structure/rectypes/manageRectypes.php?popup=1" name="auto-popup" class="verylarge"
-                                            onClick="{return false;}"
-                                            title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
-                                            Record types / fields</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;">
-                                        <a href="../admin/structure/import/annotatedTemplate.php?popup=1" name="auto-popup" class="verylarge"
-                                            onClick="{return false;}"
-                                            title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
-                                            Annotated templates (beta)</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;">
-                                        <a href="../admin/structure/import/selectDBForImport.php?popup=1" name="auto-popup" class="verylarge"
-                                            onClick="{return false;}"
-                                            title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-                                            Import structure</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;">
-                                        <a href="../admin/structure/fields/manageDetailTypes.php?popup=1" name="auto-popup" class="verylarge"
-                                            onClick="{return false;}"
-                                            title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
-                                            Manage field types</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;">
-                                        <a href="../admin/structure/terms/editTerms.php?popup=1" name="auto-popup" class="verylarge"
-                                            onClick="{return false;}"
-                                            title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
-                                            Manage terms</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;"><a href="javascript:void(0)"
-                                        onClick="{top.HEURIST.util.reloadStrcuture();}"
-                                        title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
-                                        Refresh lists</a>
-                                    </li>
 
                                     <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">ANALYSE</a></li>
 
                                     <li style="padding-left:5px;">
-                                        <a href="../admin/verification/listDataErrors.php?popup=1" name="auto-popup" class="portrait"
-                                            onClick="{return false;}"
-                                            title="Find records with incorrect structure and inconsistent values (invalid pointer, missing data etc.)">
-                                            Data consistency</a>
+                                    <a href="../admin/verification/listDataErrors.php?popup=1" name="auto-popup" class="portrait"
+                                    onClick="{return false;}"
+                                    title="Find records with incorrect structure and inconsistent values (invalid pointer, missing data etc.)">
+                                    Data consistency</a>
                                     </li>
 
                                     <li style="padding-left:5px;"><a href="#"
-                                        onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'viewers/crosstab/crosstabs.php?' + top.HEURIST.currentQuery_main)"
-                                        title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
-                                        Crosstabs analysis</a>
+                                    onClick="top.HEURIST.search.popupLink(top.HEURIST.baseURL +'viewers/crosstab/crosstabs.php?' + top.HEURIST.currentQuery_main)"
+                                    title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
+                                    Crosstabs analysis</a>
                                     </li>
 
-                                </ul>
-                            </li>
-                            <li><div style="margin-top: 5px;font-weight: bold;">IMPORT</div>
-                                <ul>
+                                    </ul>
+                                    </li>
+                                    <li><div style="margin-top: 5px;font-weight: bold;">IMPORT</div>
+                                    <ul>
 
                                     <li style="padding:10 5 5 0;"><a href="#">IMPORT</a></li>
 
                                     <li class="admin-only" style="padding-left:5px;">
-                                        <a href="../import/delimited/importCSV.php" name="auto-popup" class="landscape"
-                                            onClick="{return false;}" target="_blank"
-                                            title="Import data from delimited text file. Supports matching, record creation, record update." >
-                                            Delimited text(csv, tsv)</a>
+                                    <a href="../import/delimited/importCSV.php" name="auto-popup" class="landscape"
+                                    onClick="{return false;}" target="_blank"
+                                    title="Import data from delimited text file. Supports matching, record creation, record update." >
+                                    Delimited text(csv, tsv)</a>
                                     </li>
 
                                     <li style="padding-left:5px;">
-                                        <a href="../import/biblio/syncZotero.php" name="auto-popup"  class="fixed"
-                                            onClick="{return false;}"
-                                            title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
-                                            Zotero synchronisation</a>
+                                    <a href="../import/biblio/syncZotero.php" name="auto-popup"  class="fixed"
+                                    onClick="{return false;}"
+                                    title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
+                                    Zotero synchronisation</a>
                                     </li>
 
                                     <li class="admin-only" style="padding-left:5px;">
-                                        <a href="../import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed"
-                                            onClick="{return false;}" target="_blank"
-                                            title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
-                                            Index multimedia</a>
+                                    <a href="../import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed"
+                                    onClick="{return false;}" target="_blank"
+                                    title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
+                                    Index multimedia</a>
                                     </li>
 
                                     <li style="padding-left:5px;"><a href="../import/email/emailProcessingSetup.php" name="auto-popup" class="fixed"
+                                    onClick="{return false;}"
+                                    title="Harvest email from a designated IMAP email server (set in Database Administration > Advanced Properties)">
+                                    Harvest emails</a>
+                                </li>
+
+                                <li style="padding-left:5px;"><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" class="portrait"
+                                    onClick="{return false;}"
+                                    title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
+                                    Import hyperlinks</a>
+                                </li>
+
+                                <li style="padding-left:5px;"><a href="../import/importerFramework.php?format=GEO" name="auto-popup" class="fixed"
+                                    onClick="{return false;}"
+                                    title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
+                                    Import KML</a>
+                                </li>
+
+                                <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">UTILITIES</a></li>
+
+                                <li class="admin-only" style="padding-left:5px;"><a href="../import/utilities/manageFilesUpload.php" name="auto-popup" class="fixed"
+                                    onClick="{return false;}" target="_blank"
+                                    title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
+                                    Multi-file upload</a>
+                                </li>
+
+                                <li style="padding-left:5px;"><a href="../import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed"
+                                    onClick="{return false;}" target="_blank"
+                                    title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values">
+                                    Tag-value to CSV</a>
+                                </li>
+
+                                <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">UNMAINTAINED</a></li>
+
+                                <li style="padding-left:5px;"><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large"
+                                    onClick="{return false;}" target="_blank"
+                                    title="Import data from delimited text for one record type at a time, addition only (no matching or merging)" >
+                                    CSV simple import</a>
+                                </li>
+
+                                <li class="admin-only" style="padding-left:5px;"><a href="../import/delimited/updateDetailsFromDelimited.html" class="large"
+                                    onClick="{return false;}" target="_blank"
+                                    title="Update or add fields in existing records from delimited text, specify fields using internal codes" name="auto-popup">
+                                    CSV field updater</a>
+                                </li>
+
+                            </ul>
+                        </li>
+                        <li><div style="margin-top: 5px;font-weight: bold;">EXPORT</div>
+                            <ul>
+
+                                <li style="padding:10 5 5 0"><a href="#">EXPORT</a></li>
+
+                                <li class="admin-only" style="padding-left:5px;">
+                                    <a href="../export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed"
                                         onClick="{return false;}"
-                                        title="Harvest email from a designated IMAP email server (set in Designer View > Advanced Properties)">
-                                        Harvest emails</a>
-                                    </li>
+                                        title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
+                                        Delimited text (csv, tsv)</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../import/hyperlinks/importHyperlinks.php" name="auto-popup" class="portrait"
-                                        onClick="{return false;}"
-                                        title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
-                                        Import hyperlinks</a>
-                                    </li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate HML (Heurist XML format) for current set of search results (current query)"
+                                    onClick="top.HEURIST.search.exportHML(true,false,false);/* (isAll, includeRelated, ishuni)*/" >
+                                    HML</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../import/importerFramework.php?format=GEO" name="auto-popup" class="fixed"
-                                        onClick="{return false;}"
-                                        title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
-                                        Import KML</a>
-                                    </li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate KML for current set of search results (current query)"
+                                    onClick="top.HEURIST.search.exportKML(true);">
+                                    KML</a>
+                                </li>
 
-                                    <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">UTILITIES</a></li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate RSS feed for current set of search results (current query)"
+                                    onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?'+top.HEURIST.currentQuery_main, '_blank');">
+                                    RSS</a>
+                                </li>
 
-                                    <li class="admin-only" style="padding-left:5px;"><a href="../import/utilities/manageFilesUpload.php" name="auto-popup" class="fixed"
-                                        onClick="{return false;}" target="_blank"
-                                        title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
-                                        Multi-file upload</a>
-                                    </li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate Atom feed current set of search results (currrent query)"
+                                    onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?feed=atom&amp;'+top.HEURIST.currentQuery_main, '_blank')">
+                                    Atom</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../import/utilities/convertTagsToCSV.php" name="auto-popup" class="fixed"
-                                        onClick="{return false;}" target="_blank"
-                                        title="Convert file with tag + value per line (space separated), to a CSV file with pipe-separated repeat values">
-                                        Tag-value to CSV</a>
-                                    </li>
+                                <li style="padding-right:5px;height:4px;border-top:solid 1px #ccc"></li>
 
-                                    <li style="padding:10 5 5 0;border-top:solid 1px #ccc"><a href="#">UNMAINTAINED</a></li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate HML for selected records in search results (current selection)"
+                                    onClick="top.HEURIST.search.exportHML(false,false,false);">
+                                    HML - selected</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="../import/delimited/importRecordsFromDelimited.html" name="auto-popup" class="large"
-                                        onClick="{return false;}" target="_blank"
-                                        title="Import data from delimited text for one record type at a time, addition only (no matching or merging)" >
-                                        CSV simple import</a>
-                                    </li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate HML for current set of search results and related records displayed in open levels 1, 2, 3 ..."
+                                    onClick="top.HEURIST.search.exportHML(true,true,false);" >
+                                    HML with related</a>
+                                </li>
 
-                                    <li class="admin-only" style="padding-left:5px;"><a href="../import/delimited/updateDetailsFromDelimited.html" class="large"
-                                        onClick="{return false;}" target="_blank"
-                                        title="Update or add fields in existing records from delimited text, specify fields using internal codes" name="auto-popup">
-                                        CSV field updater</a>
-                                    </li>
-                                                            
-                                </ul>
-                            </li>
-                            <li><div style="margin-top: 5px;font-weight: bold;">EXPORT</div>
-                                <ul>
-                                
-                                    <li style="padding:10 5 5 0"><a href="#">EXPORT</a></li>
+                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                    title="Generate HML for current set of search results (current query) with one record per file, plus manifest"
+                                    onClick="top.HEURIST.search.exportHML(true,false,true);" >
+                                    HML - file-per-record</a>
+                                </li>
 
-                                    <li class="admin-only" style="padding-left:5px;">
-                                        <a href="../export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed"
-                                            onClick="{return false;}"
-                                            title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
-                                            Delimited text (csv, tsv)</a>
-                                    </li>
+                            </ul>
+                        </li>
 
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate HML (Heurist XML format) for current set of search results (current query)"
-                                        onClick="top.HEURIST.search.exportHML(true,false,false);/* (isAll, includeRelated, ishuni)*/" > 
-                                        HML</a>
-                                    </li>
+                        <li><div style="margin-top: 5px;font-weight: bold;">HELP</div>
+                            <ul>
 
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate KML for current set of search results (current query)"
-                                        onClick="top.HEURIST.search.exportKML(true);">
-                                        KML</a>
-                                    </li>
+                                <li style="padding:10 0 5 0"><a href="#">HELP</a></li>
 
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate RSS feed for current set of search results (current query)"
-                                        onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?'+top.HEURIST.currentQuery_main, '_blank');">
-                                        RSS</a>
-                                    </li>
+                                <li class="admin-only" style="padding-left:5px;">
+                                    <a href="../help/index.html" target="_blank"
+                                        title="Comprehensive online help for the Heurist system">
+                                        Online help</a>
+                                </li>
 
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate Atom feed current set of search results (currrent query)"
-                                        onClick="window.open(top.HEURIST.baseURL+'export/xml/feed.php?feed=atom&amp;'+top.HEURIST.currentQuery_main, '_blank')">
-                                        Atom</a>
-                                    </li>
+                                <li class="admin-only" style="padding-left:5px;">
+                                    <a href="http://HeuristNetwork.org"  target="_blank"
+                                        title="Heurist Network website - a source for a wide range of information, services and contacts ">
+                                        Heurist Network</a>
+                                </li>
 
-                                    <li style="padding-right:5px;height:4px;border-top:solid 1px #ccc"></li>
-
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate HML for selected records in search results (current selection)"
-                                        onClick="top.HEURIST.search.exportHML(false,false,false);">
-                                        HML - selected</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate HML for current set of search results and related records displayed in open levels 1, 2, 3 ..."
-                                        onClick="top.HEURIST.search.exportHML(true,true,false);" >
-                                        HML with related</a>
-                                    </li>
-
-                                    <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
-                                        title="Generate HML for current set of search results (current query) with one record per file, plus manifest"
-                                        onClick="top.HEURIST.search.exportHML(true,false,true);" > 
-                                        HML - file-per-record</a>
-                                    </li>
-                                                            
-                                </ul>
-                            </li>
-                            
-                            <li><div style="margin-top: 5px;font-weight: bold;">HELP</div>
-                                <ul>
-                            
-                                    <li style="padding:10 5 5 0"><a href="#">HELP</a></li>
-
-                                    <li class="admin-only" style="padding-left:5px;">
-                                        <a href="../help/index.html" target="_blank"
-                                            title="Comprehensive online help for the Heurist system">
-                                            Online help</a>
-                                    </li>
-
-                                    <li class="admin-only" style="padding-left:5px;">
-                                        <a href="http://HeuristNetwork.org"  target="_blank"
-                                            title="Heurist Network website - a source for a wide range of information, services and contacts ">
-                                            Heurist Network</a>
-                                    </li>
-
-                                    <li class="admin-only"  style="padding-left:5px;" id="reportBug"><a href="#"
-                                        onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false,
+                                <li class="admin-only"  style="padding-left:5px;" id="reportBug"><a href="#"
+                                    onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false,
                                         height: 450,width: 740,callback: _bugReportCallback});return false;"
-                                        title="Click to send a bug report or feature request to the Heurist development team" >
-                                        Bug report</a>
-                                    </li>
+                                    title="Click to send a bug report or feature request to the Heurist development team" >
+                                    Bug report</a>
+                                </li>
 
-                                    <li class="admin-only" style="padding-left:5px;">
-                                        <a id=contact-link href="mailto:info@heuristscholar.org"
-                                            title="Send us email with bug information, comments or new feature requests">
-                                            Contact us</a>
-                                    </li>
+                                <li class="admin-only" style="padding-left:5px;">
+                                    <a id=contact-link href="mailto:info@heuristscholar.org"
+                                        title="Send us email with bug information, comments or new feature requests">
+                                        Contact us</a>
+                                </li>
 
-                                    <li style="padding-right:5px;height:4px;border-top:solid 1px #ccc"></li>
-                                    
-                                    <li class="admin-only" style="padding-left:5px;">
-                                        <a  href="#" onclick="{window.open('../applications/h4/?db='+database, '_blank')}"
-                                            title="New Experimental UI">
-                                            Experimental</a>
-                                    </li>
+                                <li style="padding-right:5px;height:4px;border-top:solid 1px #ccc"></li>
 
-                                </ul>
-                            </li>
-                            
-                            <li>
-                                <div style="font-weight: bold;">
+                                <li class="admin-only" style="padding-left:5px;">
+                                    <a  href="#" onclick="{window.open('../applications/h4/?db='+database, '_blank')}"
+                                        title="New Experimental UI">
+                                        Experimental</a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                        <li><div style="margin-top: 5px;font-weight: bold;">
+                                <div class="logged-in-only" align="left" style="padding-top:0px;display:inline-block;" >
+                                    <span id="link_admin"
+                                        title="Additional administration settings such as registration, database verification and maintenance" >
+                                        <b>Admin</b></span>
+                                </div>
+                            </div>
+
+                        </li>
+
+                        <li>
+                            <div style="font-weight: bold;">
                                 <a href="#" id="rss_feed_link"
                                     title="Data feed for the current query. Drag to bookmarks toolbar or a feed reader"
                                     target="_blank"><img src="../common/images/logo_rss_feed.png"/>&nbsp;</a></div>
-                            </li>
-                        </ul>
-                </div>        
+                        </li>
+                    </ul>
+                </div>
 
-                            <!-- Needs to be updated with new internal codes and/or rethought
-                            <li style="padding-left:5px;"><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="fixed"
-                            onClick="{return false;}"
-                            title="Import bibliographic exchange format files. WARNING: not tested or maintained">
-                            Import Refer file</a>
-                            </li>
-                            -->
-                            <!--
-                            <div class="separator">HARVEST</div>
-                            <li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
-                            title="Settings for web links importer">
-                            Settings<br>(hyperlink harvester)</a></li>
-                            -->
-                            <!-- Calls search.js - setContactLink to set up email link
-                            Leads to JS error if this is removed, comment out body of setContactLink if this is removed
-                            <li style="display:none; padding-left:5px;">
-                            <a id=contact-link title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org">
-                            <b>Contact us 2</b></a>
-                            </li>
-                            -->
-                    <!-- Bug report moved to Help menu above
-                    <li class="admin-only" id="reportBug"><a href="#"
-                    onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false,
-                    height: 450,width: 740,callback: _bugReportCallback});return false;"
-                    title="Click to send a bug report or feature request to the Heurist development team" >
-                    &nbsp;Bug report</a>
-                    </li>
-                    -->
+                <!-- Needs to be updated with new internal codes and/or rethought
+                <li style="padding-left:5px;"><a href="../import/importerFramework.php?format=BIB" name="auto-popup"  class="fixed"
+                onClick="{return false;}"
+                title="Import bibliographic exchange format files. WARNING: not tested or maintained">
+                Import Refer file</a>
+                </li>
+                -->
+                <!--
+                <div class="separator">HARVEST</div>
+                <li><a href="../admin/profile/configImportSettings.php" name="auto-popup" class="small"
+                title="Settings for web links importer">
+                Settings<br>(hyperlink harvester)</a></li>
+                -->
+                <!-- Calls search.js - setContactLink to set up email link
+                Leads to JS error if this is removed, comment out body of setContactLink if this is removed
+                <li style="display:none; padding-left:5px;">
+                <a id=contact-link title="Send us an email with bug information or feature requests" href="mailto:info@heuristscholar.org">
+                <b>Contact us 2</b></a>
+                </li>
+                -->
+                <!-- Bug report moved to Help menu above
+                <li class="admin-only" id="reportBug"><a href="#"
+                onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false,
+                height: 450,width: 740,callback: _bugReportCallback});return false;"
+                title="Click to send a bug report or feature request to the Heurist development team" >
+                &nbsp;Bug report</a>
+                </li>
+                -->
 
-                
+
             </div>
 
 
             <!-- search and menu -->
             <div id="searchpage-header" class="banner searchTable" style="border-bottom:1px solid #696969;">
-                <div class="logged-in-only" align="left" style="padding-top:0px;display:inline-block;" >
+                <div class="logged-in-only" align="left" style="width:100px; padding-top:0px;display:inline-block;" >
+                <!-- Moved to top right menu and renamed Admin 5/12/14
+                    <span>&nbsp;</span>
                     <button id="link_admin"
-                        title="Manage the structure and settings of the database, database verification and maintenance" class="button">
-                        <b>go to DESIGNER VIEW</b></button>
+                    title="Manage the structure and settings of the database, database verification and maintenance" class="button">
+                    <b>go to Designer View</b></button>
+                -->
                 </div>
 
                 <form id="formSearch" style="display:inline-block;" onSubmit="top.HEURIST.search.checkSearchForm();return false;">
@@ -763,8 +778,8 @@
                                 </div>
                                 <ul>
                                     <li><a href="#" onclick='{top.HEURIST.search.showDatabaseSummary();}'>
-                                        Database Summary
-                                    </a></li>
+                                            Database Summary
+                                        </a></li>
 
                                     <li><a href="#">
                                             My Bookmarks
@@ -1102,7 +1117,7 @@
                                         <ul id="menuSavedFiltersAndLayouts">
                                         </ul>
                                     </li>
-                                    
+
                                     <li style="height:4px;border-top:solid 1px #ccc"></li>
 
                                     <li style="padding-bottom: 5px">
@@ -1280,7 +1295,7 @@
             */
             /*_tabView = new YAHOO.widget.TabView('applications', { activeIndex: 0 });
             */
-//alert('icon path:'+top.HEURIST.iconBaseURL);
+            //alert('icon path:'+top.HEURIST.iconBaseURL);
 
             //removed by Ian's request 2012-11-21 top.HEURIST.loadScript("searchTypes.js");
             top.HEURIST.loadScript("search.js");				// search-specific HEURIST functions
