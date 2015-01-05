@@ -539,7 +539,7 @@
             }
         }
 
-        //get rectype to import                                                                       
+        //get rectype to import
         $recordType = @$params['sa_rectype'];
 
         if(intval($recordType)<1){
@@ -679,11 +679,6 @@
                         }else if(count($disamb)==1 ||  array_search($keyvalue, $disamb_resolv, true)!==false){ // @$disamb_resolv[addslashes($keyvalue)]){
                             //either found exact or disamiguation is resolved
 
-                            if(count($disamb)>1){
-                                $rec_ID = array_search($keyvalue, $disamb_resolv, true);
-                                print "<br>resolved: ".$keyvalue."   ".$rec_ID.", ";
-                            }
-
                             $new_id = $rec_ID;
                             $rec = $row;
                             $rec[0] = $imp_id;
@@ -692,11 +687,6 @@
                             array_push($imp_session['validation']['recs_update'], $rec); //rec_ID, group_concat(imp_id), ".implode(",",$sel_query)
                             $is_update = true;
                         }else{
-                            
-                            //if(count($disamb)>1){
-                                //DEBUG print "<br>disambig: ".$keyvalue."   ".print_r($disamb_resolv,true)." res=".array_search($keyvalue, $disamb_resolv, true);
-                            //}
-
                             $new_id= 'Found:'.count($disamb); //Disambiguation!
                             $disambiguation[$keyvalue] = $disamb;
                         }
@@ -1720,7 +1710,7 @@
 
         $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
         $recordTypeStructure = $recStruc[$recordType]['dtFields'];
-        
+
         //get terms name=>id
         $terms_enum = null;
         $terms_relation = null;
@@ -1815,7 +1805,7 @@
 
                             //save data
                             if($previos_recordId!=null && !$is_mulivalue_index){ //perform action
-                            
+
                                 //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                                 //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
                                 doInsertUpdateRecord($recordId, $params, $details, $id_field);
@@ -1902,9 +1892,9 @@
                                     $r_value = trim_lower_accent($r_value);
 
                                     if($r_value!=""){
-                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );   
+                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
                                     }
-                                    
+
                                     /* OLD WAY
                                     if ($r_value!="" && isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type )){
 
@@ -1972,22 +1962,22 @@
                                 }
 
                                 if($value  &&
-                                    ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){ 
+                                    ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
                                     //$params['sa_upd']==1 Add new data only if field is empty (new data ignored for non-empty fields)
-                                    
+
                                     $details_lc = array();
                                     $details2_lc = array();
-                                    
+
                                     /*if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"]){
                                         unset($details["t:".$field_type]["bd:delete"]); //new data is porvided - no need to delete
                                     }else if($params['sa_upd']==2 && $params['sa_upd2']!=1 && !@$details["t:".$field_type]["bd:delete"]){
                                         $details["t:".$field_type]["bd:delete"] = "ups!"; //if new data are provided then remove old data
                                     }*/
-                                    
+
                                     if($params['sa_upd']==2){
                                         $details["t:".$field_type]["bd:delete"] = "ups!"; //if new data are provided then remove old data
                                     }
-                                    
+
 
                                     if(is_array(@$details["t:".$field_type]))
                                         $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
@@ -2003,10 +1993,10 @@
                                     }else{
                                     }
                                 }
-                                
-                                if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"] 
+
+                                if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"]
                                     && !$value && $rectypeStruc[$field_type][$idx_reqtype] != "required"){ //delete old even if new is not provided
-                                
+
                                         $details["t:".$field_type]["bd:delete"] = "ups!";
                                 }
 
@@ -2100,23 +2090,23 @@
     //
     function retainExisiting($details, $details2, $params, $rectypeStruc, $idx_reqtype){
 
-        
+
 print "NEW ".print_r($details, true)."<br><br>";
 print "original ".print_r($details2, true)."<br><br>";
-        
+
         if($params['sa_upd']==2){ //Add and replace all existing value(s) for the record with new data
 
             foreach ($details2 as $field_type => $pairs) {
                 if(substr($field_type,0,2)!="t:") continue;
                 if( @$details[$field_type] ){ //replace field type
-                
+
                     //array_unshift($details[$field_type], array("bd:delete"=>"ups!"));
-                
+
                     $details3 = array("bd:delete"=>"ups!");
                     foreach ($details[$field_type] as $idx => $value) { //replace 1=>val to bd:id=>val
                          $details3[$idx] = $value;
                     }
-                
+
                     /*
                     //keep bd id
                     $k = 1;
@@ -2145,9 +2135,9 @@ print "original ".print_r($details2, true)."<br><br>";
                 }
             }
         }
-        
+
 print "result ".print_r($details, true)."<br><br>";
-        
+
         return $details;
     }
 
@@ -2193,8 +2183,8 @@ print "result ".print_r($details, true)."<br><br>";
         $recordType = @$params['sa_rectype'];
         //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
-//DEBUG print "NEW ".print_r($details, true)."<br><br>";        
-        
+//DEBUG print "NEW ".print_r($details, true)."<br><br>";
+
         //add-update Heurist record
         $out = saveRecord($recordId, $recordType,
             @$details["recordURL"],
@@ -2401,8 +2391,8 @@ print "result ".print_r($details, true)."<br><br>";
         ." ENCLOSED BY '\"'"
         ." LINES TERMINATED BY '\n' ";
 
-//error_log($query);        
-        
+//error_log($query);
+
         $res = $mysqli->query($query);
         if($res){
             //read content of tempfile and send it to client
