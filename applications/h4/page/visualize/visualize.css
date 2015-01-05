@@ -172,7 +172,7 @@ text.shadow {
 }
 
 .close-button {
-    fill: #b00;
+    fill: #fff;
     stroke: #000;
     stroke-width: 1.5; 
     pointer-events: all; 
@@ -180,7 +180,7 @@ text.shadow {
 }
 
 .close-text {
-    fill: #fff;
+    fill: #000;
     /*font-size: 20px;*/
     font-weight: bold;
 }

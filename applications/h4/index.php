@@ -61,6 +61,20 @@
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
+<!--        
+        <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
+        <script type="text/javascript" src="ext/gridster/utils.js"></script>
+        <script type="text/javascript" src="ext/gridster/jquery.collision.js"></script>
+        <script type="text/javascript" src="ext/gridster/jquery.coords.js"></script>
+        <script type="text/javascript" src="ext/gridster/jquery.draggable.js"></script>
+        <script type="text/javascript" src="ext/gridster/jquery.gridster.js"></script>
+-->
+        <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
+        <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
+        
+
+
+        
         <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/) 
              src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
@@ -81,6 +95,7 @@
         <script type="text/javascript" src="apps/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
+        <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/search/resultList.js"></script>
@@ -167,7 +182,13 @@
                                     top.HEURIST4.detailtypes = response.data.detailtypes;
 
                                     //in layout.js - load layout #101
-                                    appInitAll("l01", "#layout_panes");
+                                    
+                                    var layoutid = '<?=@$_REQUEST['ll']?>';
+                                    if(top.HEURIST4.util.isempty(layoutid)){
+                                        layoutid = "L01";
+                                    }
+                                    
+                                    appInitAll(layoutid, "#layout_panes");
                                     /*                        
                                     //get all terms and rectypes   terms:0,
                                     window.HAPI4.SystemMgr.get_defs({terms:'all'}, function(response){

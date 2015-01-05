@@ -29,6 +29,7 @@ $.widget( "heurist.connections", {
     },
 
     _events: null,
+    recordset_changed: true,
 
     // the constructor
     _create: function() {
@@ -57,6 +58,7 @@ $.widget( "heurist.connections", {
             // Logout
             }else  if(e.type == top.HAPI4.Event.LOGOUT) { 
                 
+                that.recordset_changed = true;
                 that.option("recordset", null);
                 that._refresh();
 
@@ -64,6 +66,7 @@ $.widget( "heurist.connections", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                 //find all relation within given result set
+                that.recordset_changed = true;
                 that._getRelations( data );
                 
                 //that.option("recordset", data); //hRecordSet
@@ -73,6 +76,7 @@ $.widget( "heurist.connections", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 that.option("recordset", null);
+                that.option("selection", null);
                 that.loadanimation(true);
                 //???? that._refresh();
               
@@ -113,45 +117,48 @@ $.widget( "heurist.connections", {
     /* private function */
     _refresh: function(){
 
+        /* change title
         if(this.options.title!=''){
             var id = this.element.attr('id');
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
-        }
+        }*/
         
         //refesh if element is visible only - otherwise it costs much resources        
-        if( !this.element.is(':visible') ) return;
+        if( this.element.is(':visible') && this.recordset_changed) {
         
-        if(this.dosframe.attr('src')!==this.options.url){
-            
-            this.options.url = top.HAPI4.basePath + '/page/springDiagram.php?db=' + top.HAPI4.database;
-            this.dosframe.attr('src', this.options.url);
-          
-        // Content loaded already    
-        }else{
-            // SPRING DIAGRAM CODE
-            // console.log("CONTENT LOADED ALREADY");  
-            // console.log(this.options);
-            
-            if(this.options.recordset !== null) {
-                //console.log("Showing recordset connections");
+            if(this.dosframe.attr('src')!==this.options.url){
                 
-                if(this.options.relations == null){ //relation not yet loaded
-                    
-                    this._getRelations(this.options.recordset);
-                    
-                }else{
+                this.options.url = top.HAPI4.basePath + '/page/springDiagram.php?db=' + top.HAPI4.database;
+                this.dosframe.attr('src', this.options.url);
+              
+            // Content loaded already    
+            }else{
+                // SPRING DIAGRAM CODE
+                // console.log("CONTENT LOADED ALREADY");  
+                // console.log(this.options);
                 
-                    var records = this.options.recordset.getRecords();
-                    var relations = this.options.relations;
+                if(this.options.recordset !== null) {
+                    //console.log("Showing recordset connections");
                     
-                    // Parse response to spring diagram format
-                    var data = this._parseData(records, relations);
-                    this._doVisualize(data);
-                
+                    if(this.options.relations == null){ //relation not yet loaded
+                        
+                        this._getRelations(this.options.recordset);
+                        
+                    }else{
+                    
+                        var records = this.options.recordset.getRecords();
+                        var relations = this.options.relations;
+                        
+                        // Parse response to spring diagram format
+                        var data = this._parseData(records, relations);
+                        this._doVisualize(data);
+                    
+                    }
                 }
+                
             }
-            
+        
         }
     },
 
@@ -206,7 +213,7 @@ $.widget( "heurist.connections", {
                 var resdata = null;
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     // Store relationships
-                    console.log("Successfully retrieved relationship data!");
+                    console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);
                     
                     // Parse response to spring diagram format
@@ -222,9 +229,7 @@ $.widget( "heurist.connections", {
             }
 
             top.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
-        
         }
-        
     }
     
 
@@ -271,13 +276,19 @@ $.widget( "heurist.connections", {
                     // Null check
                     var source = relations[i].recID;
                     var target = relations[i].targetID;
+                    var dtID = relations[i].dtID;
+                    var type = "Floating relationship";
+                    if(dtID > 0) {
+                        type = top.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                    }
 
+                    // Link check
                     if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
                         // Construct link
                         var link = {source: nodes[source],
                                     target: nodes[target],
                                     targetcount: 1,
-                                    relation: {}
+                                    relation: {name: type}  //top.HEURIST4.detailtypes.typedefs[id].commonfields[1]
                                    };
                         links.push(link); 
                     }      
@@ -312,6 +323,7 @@ $.widget( "heurist.connections", {
                     }            
             
             );
+            this.recordset_changed = false;
         }
         /* Call showData method of the springDiagram iFrame
         var iframe = $("iframe[src*=springDiagram]");
@@ -324,12 +336,13 @@ $.widget( "heurist.connections", {
 
             if(top.HEURIST4.util.isnull(this.options.recordset)) return;
 
+            this.option("selection", selection);
+            
             if(!this.element.is(':visible')
                 || top.HEURIST4.util.isnull(this.dosframe) || this.dosframe.length < 1){
                     return;
             }
             
-            this.option("selection", selection);
             this.dosframe[0].contentWindow.showSelection(this.options.selection);
     }    
 

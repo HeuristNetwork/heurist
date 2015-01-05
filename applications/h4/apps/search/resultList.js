@@ -50,10 +50,13 @@ $.widget( "heurist.resultList", {
 
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
         
+        var hasHeader = ($(".header"+that.element.attr('id')).length>0);
 
-        this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'3.8em'}).appendTo( this.element );
+        this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
-        .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em','position':'absolute','top':'4em','bottom':'15px'})   //@todo - proper relative layout
+        .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em',
+            'position':'absolute',
+            'top':hasHeader?'4.4em':'2.4em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
@@ -113,7 +116,7 @@ $.widget( "heurist.resultList", {
         
         if(this.options.showmenu){
             this.div_actions = $('<div>')
-                .css({'position':'absolute','top':3,'left':2})
+                //.css({'position':'absolute','top':3,'left':2})
                 .resultListMenu()
                 .appendTo(this.div_toolbar);
         }
@@ -155,11 +158,12 @@ $.widget( "heurist.resultList", {
                     
                     if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') || 
                         //new search from outside
-                    
-                        var new_title = top.HR(data.qname || 'Search result');
                         var $header = $(".header"+that.element.attr('id'));
-                        $header.html(new_title);
-                        $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
+                        if($header.length>0){
+                            var new_title = top.HR(data.qname || 'Search result');
+                            $header.html(new_title);
+                            $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
+                        }
 
                         that._clearAllRecordDivs();
                         that.loadanimation(true);
@@ -657,7 +661,7 @@ $.widget( "heurist.resultList", {
             $rdiv = $rdiv.parents('.recordDiv');
         }
 
-        var selected_rec_ID = Number($rdiv.attr('recid'));
+        var selected_rec_ID = $rdiv.attr('recid');
         this.div_content.find('.selected_last').removeClass('selected_last');
         
 
@@ -685,7 +689,7 @@ $.widget( "heurist.resultList", {
                 var isstarted = false;
                 
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                        var rec_id = Number($(rdiv).attr('recid'));
+                        var rec_id = $(rdiv).attr('recid');
                         
                         if(rec_id == that._lastSelectedIndex || rec_id==nowSelectedIndex){
                               if(isstarted){ //stop selection and exit
@@ -741,13 +745,13 @@ console.log("triggerSelection "+this._lastSelectedIndex);
         if(top.HAPI4.currentRecordset){
             var that = this;
             this.div_content.find('.selected').each(function(ids, rdiv){
-                var rec_ID = Number($(rdiv).attr('recid'));
+                var rec_ID = $(rdiv).attr('recid');
                 if(that._lastSelectedIndex!=rec_ID){
                     selected.push(rec_ID);
                 }
             });
             if(Number(this._lastSelectedIndex)>0){
-                selected.push(this._lastSelectedIndex); 
+                selected.push(""+this._lastSelectedIndex); 
             }
         }
         return selected;
@@ -794,7 +798,7 @@ console.log("triggerSelection "+this._lastSelectedIndex);
             if( top.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
             
                     this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                            var rec_id = Number($(rdiv).attr('recid'));
+                            var rec_id = $(rdiv).attr('recid');
                             if(recIDs_list.indexOf(rec_id)>=0){
                                $(rdiv).addClass('selected'); 
                                //if(that._lastSelectedIndex==rec_id){

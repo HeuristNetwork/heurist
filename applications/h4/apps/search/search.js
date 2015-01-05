@@ -526,7 +526,7 @@ $.widget( "heurist.search", {
                 qsearch = this.query_request.q + ' AND ' + qsearch;
             }
 
-            var request = {q: qsearch, w: this.options.search_domain, f: null /*this.options.searchdetails*/
+            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails
                             , source:this.element.attr('id') };
 
             //that._trigger( "onsearch"); //this widget event

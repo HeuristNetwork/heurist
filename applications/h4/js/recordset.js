@@ -264,9 +264,9 @@ function hRecordSet(initdata) {
                         rectype: recTypeID,
                         title: recName,
                         //thumb: record.thumb_url,
-                        eventIconImage: recTypeID + '.png',
-                        icon: top.HAPI4.iconBaseURL + recTypeID + '.png',
-                        iconShadowSize:[20,20],
+                        eventIconImage: recTypeID + 'm.png',
+                        icon: top.HAPI4.iconBaseURL + recTypeID + 'm.png',
+                        
                         start: (startDate || ''),
                         end: (endDate && endDate!=startDate)?endDate:''
                         //,infoHTML: (infoHTML || ''),
@@ -276,7 +276,9 @@ function hRecordSet(initdata) {
                 shape = _parseCoordinates(type, wkt, 0);
                 if(shape){
                     item.placemarks.push(shape);
-                    item.options.places = shape;
+                    item.options.places = [shape];
+                }else{
+                    item.options.places = [];
                 }
 
                 aitems.push(item);
