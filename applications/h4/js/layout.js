@@ -19,6 +19,21 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+
+
+function appGetWidgetByName(widgetname){
+
+    var i;
+    for(i=0; i<widgets.length; i++){
+        if(widgets[i].widgetname==widgetname){
+            return widgets[i];
+        }
+    }
+    return null;
+}
+
+
 /**
 * Main funtion that inits all stuff
 *  
@@ -66,17 +81,6 @@ function appGetWidgetById(id){
     var i;
     for(i=0; i<widgets.length; i++){
         if(widgets[i].id==id){
-            return widgets[i];
-        }
-    }
-    return null;
-}
-
-function appGetWidgetByName(widgetname){
-
-    var i;
-    for(i=0; i<widgets.length; i++){
-        if(widgets[i].widgetname==widgetname){
             return widgets[i];
         }
     }

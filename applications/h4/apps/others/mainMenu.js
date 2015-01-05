@@ -22,6 +22,8 @@ $.widget( "heurist.mainMenu", {
 
     // default options
     options: {
+        btn_visible_designer:false,
+        btn_visible_newrecord:false
         // callbacks
     },
     
@@ -58,41 +60,47 @@ $.widget( "heurist.mainMenu", {
         
         this.divMainMenu = $( "<div>").css({'float':'right', 'padding-right':'2em', 'text-align':'right' }).appendTo(this.element);
         
-        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).css('padding-bottom','4px').appendTo(this.divMainMenu);
+        this.divProfileItems = $( "<ul>").addClass('horizontalmenu')
+                    .appendTo( $("<div>").css({'display':'float'}).appendTo(this.divMainMenu) );
+        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).css({'font-size':'1.1em','height':'2em','padding-top':'0.2em'}).appendTo(this.divMainMenu);
         
-        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.divMainMenu);
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').css({'display':'float'}).appendTo(this.divMainMenu);
         
-        this._initMenu('Profile');
+        this._initMenu('Profile', this.divProfileItems);
         this._initMenu('Database');
         this._initMenu('Import');
         this._initMenu('Export');
         this._initMenu('Help');
+        this._initMenu('Admin');
         this.divMainMenuItems.menu();
+        this.divProfileItems.menu();
         
         // SECOND LINE --------------------------------------------------
-        this.div_BottomRow = $("<div>").css({ 'position':'absolute', top:46, left: '2px', right:0, 'padding-right': '2em' }).appendTo( this.element );
-        
-        this.btn_switch_to_design = $( "<button>", {
-            text: top.HR("go to designer view")
-        })
-        .css('width','160px')
-        .appendTo( this.div_BottomRow )
-        .button()
-        .click(function( event ) {
-            var url = top.HAPI4.basePathOld + "admin/adminMenu.php?db=" + top.HAPI4.database;        
-            window.open(url, "_blank");
-        });
-        
-        this.btn_add_record = $( "<button>", {
-            text: top.HR("add new record")
-        })
-        .css('float','right')
-        .addClass('logged-in-only')
-        .appendTo( this.div_BottomRow )
-        .button({icons: {
-            primary: "ui-icon-circle-plus"
-        }})
-        .click( function(){ that._addNewRecord(); });
+        if(this.options.btn_visible_designer){
+            this.div_BottomRow = $("<div>").css({ 'position':'absolute', top:46, left: '2px', right:0, 'padding-right': '2em' }).appendTo( this.element );
+            
+            this.btn_switch_to_design = $( "<button>", {
+                text: top.HR("go to designer view")
+            })
+            .css('width','160px')
+            .appendTo( this.div_BottomRow )
+            .button()
+            .click(function( event ) {
+                var url = top.HAPI4.basePathOld + "admin/adminMenu.php?db=" + top.HAPI4.database;        
+                window.open(url, "_blank");
+            });
+            
+            this.btn_add_record = $( "<button>", {
+                text: top.HR("add new record")
+            })
+            .css('float','right')
+            .addClass('logged-in-only')
+            .appendTo( this.div_BottomRow )
+            .button({icons: {
+                primary: "ui-icon-circle-plus"
+            }})
+            .click( function(){ that._addNewRecord(); });
+        }
         
         
         $(this.document).on(top.HAPI4.Event.ON_REC_SELECT, function(e, data) {
@@ -142,6 +150,7 @@ $.widget( "heurist.mainMenu", {
         $(this.document).off(top.HAPI4.Event.ON_REC_SELECT);
         
         // remove generated elements
+        this.btn_Admin.remove();
         this.btn_Profile.remove();
         this.menu_Profile.remove();
         this.btn_Database.remove();
@@ -155,7 +164,7 @@ $.widget( "heurist.mainMenu", {
 
     },
 
-    _initMenu: function(name){
+    _initMenu: function(name, parentdiv){
         
         var that = this;
 
@@ -173,12 +182,24 @@ $.widget( "heurist.mainMenu", {
                 return false;
             };
             
-        var link = $('<a>',{
-            text: name, href:'#'
-        });
+        var link;
+        
+        if(name=='Admin'){
+            link = $('<a>',{
+                text: name,
+                href: top.HAPI4.basePathOld + 'admin/adminMenu.php?db=' + top.HAPI4.database,
+                target: '_blank'
+            });
+        }else{
+            link = $('<a>',{
+                text: name, href:'#'
+            });
+        }
         
         this['btn_'+name] = $('<li>').append(link)
-        .appendTo( this.divMainMenuItems );
+        .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
+        
+        if(name!='Admin'){
         
         this['menu_'+name] = $('<ul>')          
         .load('apps/others/mainMenu'+name+'.html?t='+(new Date().getTime()), function(){
@@ -191,6 +212,8 @@ $.widget( "heurist.mainMenu", {
         })
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();
+        
+        }
         
         this._on( this['btn_'+name], {
             mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},

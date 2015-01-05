@@ -34,6 +34,8 @@ $.widget( "heurist.search", {
 
         has_paginator: false,
         limit: 1000,
+        
+        islinkmode: true, //show buttons or links
 
         // callbacks
         onsearch: null,  //on start search
@@ -98,14 +100,76 @@ $.widget( "heurist.search", {
         .addClass('logged-in-only')
         .appendTo( this.div_search );
 
-        this.btn_search_assistant = $( "<button>", {
-            id: 'btn_search_assistant', 
-            text: top.HR("search assistant")
-        })
-        .appendTo( this.div_search_as_user )
-        .button({icons: {
-            primary: "ui-icon-lightbulb"
-            }, text:false});
+        if(this.options.islinkmode){
+            
+            this.div_search_links = $('<div>').css('width','100%').appendTo( this.div_search );
+            
+            var link = $('<a>',{
+                text: 'Quick', href:'#'
+            }).css('padding-right','1em').appendTo(this.div_search_links);
+            this._on( link, {  click: this.showSearchAssistant });
+            
+            link = $('<a>',{
+                text: 'Advanced', href:'#'
+            }).css('padding-right','1em').appendTo(this.div_search_links);
+            this._on( link, {  click: function(){
+            
+                //call H3 search builder
+                var q = "", 
+                    that = this;
+                if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
+                    q ="&q=" + encodeURIComponent(this.query_request.q);
+                }
+                var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+                
+                Hul.showDialog(url, { callback: 
+                    function(res){
+                        if(!Hul.isempty(res)) {
+                                that.input_search.val(res);
+                                that._doSearch();
+                        }
+                    }});            
+            }});
+            
+            $('<a>',{
+                text: 'Syntax', href:'#'
+            }).css('padding-right','1em').appendTo(this.div_search_links);
+            
+            link = $('<a>',{
+                text: 'Rules', href:'#'
+            }).css('padding-right','1em').appendTo(this.div_search_links);
+            this._on( link, {  click: function(){
+                var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
+                if(app && app.widget){
+                    $(app.widget).search_links_tree('editSavedSearch', 'rules'); //call public method editRules
+                }
+            }});
+            
+            link = $('<a>',{
+                text: 'Save As', href:'#'
+            }).appendTo(this.div_search_links);
+            this._on( link, {  click: function(){
+                var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
+                if(app && app.widget){
+                    $(app.widget).search_links_tree('editSavedSearch', 'saved'); //call public method editRules
+                }
+            }});
+           
+            
+        }else{
+            
+            this.btn_search_assistant = $( "<button>", {
+                id: 'btn_search_assistant', 
+                text: top.HR("search assistant")
+            })
+            .appendTo( this.div_search_as_user )
+            .button({icons: {
+                primary: "ui-icon-lightbulb"
+                }, text:false});
+                
+            //show quick search assistant
+            this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
+        }
 
         this.btn_search_as_user = $( "<button>", {         
             text: top.HR("search")
@@ -161,9 +225,6 @@ $.widget( "heurist.search", {
 
         this.search_assistant = null;
 
-        //show quick search assistant
-        this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
-
 
         if(this.options.isrectype){
 
@@ -210,7 +271,9 @@ $.widget( "heurist.search", {
         }else{
             
             this.limit = top.HAPI4.get_prefs('search_limit');               
+            if(!this.limit) this.limit = 200;
 
+/*  @TODO - move tp preferences          
             this.btn_search_limit = $( "<button>", {
                 text: this.limit,
                 title: top.HR('records per chunk')
@@ -263,6 +326,7 @@ $.widget( "heurist.search", {
                     return false;
                 }
             });
+*/            
             
             
         }
@@ -691,7 +755,7 @@ $.widget( "heurist.search", {
             });
 
             select_rectype.trigger('change');
-            that.btn_search_assistant.click();
+            that.showSearchAssistant(); //that.btn_search_assistant.click();
         });
 
     }
@@ -730,7 +794,7 @@ $.widget( "heurist.search", {
         this.btn_search_as_guest.remove();
         this.btn_search_as_user.remove();
         this.btn_search_domain.remove();
-        this.btn_search_assistant.remove();
+        if(this.btn_search_assistant) this.btn_search_assistant.remove();
         this.search_assistant.remove();
         this.menu_search_domain.remove();
         this.input_search.remove();

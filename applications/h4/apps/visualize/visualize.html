@@ -1,0 +1,154 @@
+<!-- Visualisation HTML -->
+<table id="visualisation" class="fullscreen" cellpadding="4" cellspacing="1">
+    <tr>
+        <!-- SETTINGS -->
+        <td height="25px" style="vertical-align: middle;">
+            <!-- Settings -->
+            <div id="visualisation-settings">
+                <!-- LINE SETINGS -->          
+                <div class="settings space" id="lineSettings">
+                    <b>Lines:</b>
+                    <!-- Line type -->
+                    <div id="linetypeContainer">
+                        <select class="middle" id="linetype">
+                            <option value="straight">straight</option>
+                            <option value="curved">curved</option>
+                        </select>
+                    </div>
+
+                    <!-- Line length --> 
+                    <div id="linelengthContainer">
+                        <i>Length</i>
+                        <input id="linelength" class="number-input medium" type="number" min="1" step="10"/>
+                    </div>
+                    
+                    <!-- Line width -->
+                    <div id="linewidthContainer">
+                        <i>Max width</i>
+                        <input id="linewidth" class="number-input small" type="number" min="1" step="1"/>
+                    </div>
+                    
+                    <!-- Line color -->
+                    <div id="linecolorContainer">
+                        <i>Line color</i>
+                        <div id="linecolor" class="colorblock"></div>
+                    </div>
+                    
+                    <!-- Arrow color -->
+                    <div id="markercolorContainer">
+                        <i>Arrow color</i>
+                        <div id="markercolor" class="colorblock"></div>
+                    </div>
+                </div>
+                
+                <!-- Entity settings -->
+                <div class="settings space" id="entitySettings">
+                    <b>Entitity:</b>
+                    
+                    <div id="entityradiusContainer">
+                        <i>Max radius</i>
+                        <input id="entityradius" class="number-input small" type="number" min="1" step="1"/>
+                    </div>
+                    
+                    <!-- Entity circle color -->
+                    <div id="entitycolorContainer">
+                        <i>Color</i>
+                        <div id="entitycolor" class="colorblock"></div>
+                    </div>
+                </div>
+                
+                <!-- Text settings -->
+                <div class="settings space" id="textSettings">
+                    <b>Labels:</b>
+                    <input id="labelCheckBox" type="checkbox" name="labelCheckBox" checked="checked">
+                    
+                    <!-- Text size -->
+                    <div id="fontsizeContainer">
+                        <i>Font-size</i>
+                        <input id="fontsize" class="number-input small" type="number" min="1" step="1"/>
+                    </div>
+                    
+                    <!-- Text length -->
+                    <div id="textlengthContainer">
+                        <i>Text length</i>
+                        <input id="textlength" class="number-input small" type="number" min="1" step="1"/>
+                    </div>
+                    
+                    <!-- Text color -->
+                    <div id="textcolorContainer">
+                        <i>Color</i>
+                        <div id="textcolor" class="colorblock"></div>
+                    </div>
+                </div>
+                
+                <!-- Transform settings -->
+                <div class="settings space" id="transformSettings">
+                    <div id="formulaContainer">
+                        <b>Transform:</b>
+                        
+                        <!-- Formula -->
+                        <select class="middle" id="formula">
+                            <option value="linear">linear</option>
+                            <option value="logarithmic">logarithmic</option>
+                            <option value="unweighted">unweighted</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Fish eye setting -->
+                    <div id="fisheyeContainer">
+                        <i>Fisheye:</i>
+                        <input id="fisheye" type="checkbox" name="fisheye">
+                    </div>
+                </div>
+                
+                <!-- GRAVITY SETTINGS -->
+                <div class="settings space" id="gravitySettings">
+                    <!-- Gravity setting -->
+                    <div id="gravityContainer">
+                        <b>Gravity:</b>
+                        <select class="middle" id="gravity">
+                            <option value="off">off</option>
+                            <option value="touch">touch</option>
+                            <option value="aggressive">aggressive</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Attraction strength -->
+                    <div id="attractionContainer">
+                        <i>Attraction</i>
+                        <input id="attraction" class="number-input medium" type="number" step="50"/>
+                    </div>
+                </div>
+
+                <!-- HELP INFO -->
+                <div class="settings space">
+                    <i class="explanation">Click entities or links to get information, drag entities to reposition.</i>
+                </div>
+            </div>
+            
+            <!-- Menu -->
+            <div id="visualisation-menu">
+                <button type="button" id="gephi-export">GEPHI export</button>
+                <!-- For future use with more items
+                <ul class="menu-items level1">        
+                    <li class="menu-button">
+                        MENU
+                        <ul class="menu-items level2">
+                            <li class="menu-item"><a href="../viewers/network/diagramUrl.html" class="popup-link">Get URL for diagram</a></li>
+                            <li class="menu-item"><a href="../viewers/network/diagramCode.html" class="popup-link">Embed diagram code</a></li>
+                            <li class="menu-item"><a href="../viewers/network/gephiFormat.html" class="popup-link">Output in Gephi format</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                -->
+            </div>
+         </td> 
+    </tr>
+
+    <tr>
+        <td>
+            <!-- SVG -->
+            <svg id="d3svg" class="fullscreen"></svg>
+        </td>
+    </tr>
+</table>

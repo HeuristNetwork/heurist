@@ -24,6 +24,7 @@ $.widget( "heurist.resultListMenu", {
     // default options
     options: {
         // callbacks
+        show_searchmenu:false
     },
     
     _query_request: {}, //keep current query request
@@ -45,9 +46,10 @@ $.widget( "heurist.resultListMenu", {
 
         this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
         
-        this._initMenu('Search');
+        if(this.options.show_searchmenu) this._initMenu('Search');
         this._initMenu('Selected');
         this._initMenu('Collected');
+        this._initMenu('Shared');
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
@@ -118,8 +120,10 @@ $.widget( "heurist.resultListMenu", {
         $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
         
         // remove generated elements
-        this.btn_Search.remove();
-        this.menu_Search.remove();
+        if(this.btn_Search){
+            this.btn_Search.remove();
+            this.menu_Search.remove();
+        }
         this.btn_Selected.remove();
         this.menu_Selected.remove();
         this.btn_Collected.remove();
@@ -217,7 +221,7 @@ $.widget( "heurist.resultListMenu", {
                     function(res){
                         if(!Hul.isempty(res)) {
                             
-                                that._query_request.q = q;
+                                that._query_request.q = res;
                                 that._query_request.source = that.element.attr('id');
                                 
                                 top.HAPI4.RecordMgr.search(that._query_request, $(that.document));

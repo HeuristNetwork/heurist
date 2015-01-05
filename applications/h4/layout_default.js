@@ -94,9 +94,9 @@ var layouts = [
     {id:'L01', name:'h3 classic', theme:'smoothness', type:'cardinal', 
         north:{size:90, resizable:false,
             apps:[
-                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:80,right:0, border:'none', 'background':'none'} },    //top panel
+                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'50',right:0, border:'none', 'background':'none'} },    //top panel
                 
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:50, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
         west:{size:200, minsize:200, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
