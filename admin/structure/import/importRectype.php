@@ -90,7 +90,8 @@
 
     // Artem TODO: What circumstance woukld give rise to this? Explain how the data is 'wrong'/'incorrect'
     if(!@$data['rec_URL']){
-        error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id);
+        error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
+            " The page may contain an invalid database reference (0 indicates no reference has been set)");
     }
 
 
@@ -103,10 +104,9 @@
 
     $remote_url_params = @$reg_url[1];
     $remote_url = @$reg_url[0];
-    // Artem TODO: What circumstance woukld give rise to this? Explain how the data is 'wrong'/'incorrect'
-    //             qnd how is it differentfrom previous error?
     if(!$remote_url_params || !$remote_url){
-        error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id);
+        error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
+            " The page may contain an invalid database reference (0 indicates no reference has been set)");
     }
 
     $reg_url = $remote_url."common/php/reloadCommonInfo.php?".$remote_url_params;
@@ -134,14 +134,14 @@
     if(!@$def_rts[$rectype_id]){
         error_exit("Sorry, record type $rectype_id was not found in source database # $database_id. Please advise Heurist development team");
     }
-    
+
     if($is_checkonly){
             header("Content-type: text/javascript");
             print json_format(array("ok"=>"Record type ".$rectype_id." is found"));
-            exit();    
+            exit();
     }
-    
-    
+
+
     $sourceIconURL = $defs['icon_url'];
 
     //target(local) definitions
@@ -262,20 +262,20 @@
         $rt_name = @$defs['rectypes']['names'][$recId];
         if(!@$def_rts[$recId]){
              if(!$rt_name){
-                error_exit("Can't find record type #'".$recId."'. in source database");    
+                error_exit("Can't find record type #'".$recId."'. in source database");
              }else{
-                error_exit("Can't find definitions for record type #'".$recId."'. \"$rt_name\" in source database");    
+                error_exit("Can't find definitions for record type #'".$recId."'. \"$rt_name\" in source database");
              }
         }
-        
+
         $grp_id = @$def_rts[$recId]['commonFields'][$idx_rt_grp];
 
         if(!$grp_id){
-            error_exit("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");    
+            error_exit("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");
         }
-        
+
         $src_group=null;
-        
+
         if(@$group_rt_ids[$grp_id]){ //already found
             continue;
         }
@@ -290,12 +290,12 @@
         }
 
         if($src_group==null){
-            error_exit("Can't find group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");    
+            error_exit("Can't find group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
         }
         if(!$grp_name){
-            error_exit("Name of group is empty. Can't add group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");    
+            error_exit("Name of group is empty. Can't add group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
         }
-        
+
         //get name and try to find in target
         $isNotFound = true;
         foreach ($trg_rectypes['groups'] as $idx=>$group){
@@ -551,8 +551,8 @@
             $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
 
             // DEBUG  print "<br>mask before: ".$mask."  rty=".$rectypes_correspondence[$rtyID];
-           
-            // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code 
+
+            // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code
             $res = updateTitleMask( $rectypes_correspondence[$rtyID], $mask);
             if(!is_numeric($res)){
                 error_exit($res);
@@ -966,7 +966,7 @@
         global $trg_terms;
 
         if(!$term_import || $term_import=="") return $term_import;
-        
+
         if(is_array($lvl_src)){
 
             $found = 0;
@@ -981,7 +981,7 @@
             if($found>0){
                 $term_import = $name." ".($found+1);
             }
-            
+
         }
 
         return $term_import;
