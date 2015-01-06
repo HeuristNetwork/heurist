@@ -36,6 +36,8 @@
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
   <title>Send email</title>
 
+  <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+  
   <style>
     #form {
         display: inline-block;
@@ -71,12 +73,27 @@
     }
     
     /** Message */
-    .top {
+    #top {
         width: 100px;
         display: inline-block;
         text-align: right;
         vertical-align: top;
         margin-right: 5px;
+    }
+    
+    #right {
+        display: inline-block;
+    }
+    
+    #redo {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: rgba(255, 255, 255, 0.5);
+        color: #000;
+        border: 1px solid white;
+        font-size: 20px;
+        cursor: pointer;
     }
     
     .row textarea {
@@ -100,14 +117,11 @@
   </style>
 </head>
 
-<body class="popup">
+<body class="popup" onload="setup()">
 
     <div id="form">
         <!-- Selected records -->
-        <div>
-            <span># of records selected: </span>
-            <span>4</span>
-        </div>
+        <span id="selected-records"></span>
         
         <hr>
         
@@ -119,13 +133,13 @@
         
         <!-- First name -->
         <div class="row">
-            <label for="firstname">First name:</label>
+            <label for="firstname">FirstName:</label>
             <select name="firstname" id="firstname"></select>
         </div>
         
         <!-- Family name -->
         <div class="row">
-            <label for="familyname">Family name:</label>
+            <label for="familyname">FamilyName:</label>
             <select name="familyname" id="familyname"></select>
         </div>
         
@@ -133,19 +147,19 @@
         
         <!-- Field #1 -->
         <div class="row">
-            <label for="field1">Field #1:</label>
+            <label for="field1">Field1:</label>
             <select name="field1" id="field1"></select>
         </div>
         
         <!-- Field #2 -->
         <div class="row">
-            <label for="field2">Field #2:</label>
+            <label for="field2">Field2:</label>
             <select name="field2" id="field2"></select>
         </div>
         
         <!-- Field #3 -->
         <div class="row">
-            <label for="field3">Field #3:</label>
+            <label for="field3">Field3:</label>
             <select name="field3" id="field3"></select>
         </div>
         
@@ -159,7 +173,7 @@
         
         <!-- Message -->
         <div class="row">
-            <div class="top">
+            <div id="top">
                 <label for="message" class="required">Message:</label>
                 <br/>
                 <div id="message-info">
@@ -168,18 +182,116 @@
                     #fieldname to include content of field
                 </div>
             </div>
-            <textarea name="message" id="message" rows="15"></textarea>
+            <div id="right">
+                <textarea name="message" id="message" rows="15"></textarea>
+                <textarea name="message" id="message-prepared" rows="15" style="display: none"></textarea>
+                <button id="redo" style="display: none" onclick="redo()">&#10226;</button>
+            </div>
         </div>
         
         <!-- Prepare -->
-        <button id="prepare">Prepare emails</button>
+        <button id="prepare" onClick="prepare()">Prepare emails</button>
     </div>
  
-    
 
-  
+    <!-- Javascript -->
     <script type="text/javascript">
-        //alert("Test");
+        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"]; 
+        var types = ["freetext", "blocktext", "date"/*,"enum"*/];
+        var ids = top.HEURIST.user.selectedRecordIds;
+        var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords();
+        var record;
+        
+        // Sets up all fields
+        function setup() {
+            // Selected records
+            $("#selected-records").html("# of records selected: " + ids.length);
+            
+            // Determine record type of first record
+            for(var r in records) {
+                this.record = records[r];
+                var rectype = record[4];
+                console.log("Rectype of first record: " + rectype);
+                var definition = top.HEURIST4.rectypes.typedefs[rectype];
+                console.log("Definition", definition);
+                
+                // Add record fields to dropdown
+                var options = "<option value=\"-1\" disabled=\"disabled\" selected=\"selected\">Select...</option>";
+                for(var d in definition.dtFields) {
+                    var field = definition.dtFields[d];
+                    console.log("Field", field);
+                    
+                    if(types.indexOf(field[23]) >= 0) { // Appropriate type
+                        options += "<option value=\"" +d+ "\">" + field[0] + "</option>";     
+                    }
+                }
+                console.log("Options", options);
+                
+                // Append options to each dropdown
+                for(var i=0; i < dropdowns.length; i++) {
+                    $(dropdowns[i]).html(options);
+                }
+                
+                break;
+            }
+        }
+        
+        // Changes the text area's
+        function redo() {
+            $("#prepare").text("Prepare emails");    
+            $("#redo").hide();
+            $("#message-prepared").slideToggle(500, function(e) {
+                $("#message").slideToggle(500);
+            })   
+        }
+        
+        // Prepares the email
+        function prepare() {
+            // Raw message
+            var rawMessage =  $("#message").val();
+            console.log("Raw message: " + rawMessage);  
+                
+            // Check action
+            var text = $("#prepare").text();
+            console.log(text);
+            if(text.indexOf("Prepare") >= 0) {
+                // PREPARE EMAILS
+                var message = prepareMessage(rawMessage, record);
+                
+                // Show prepared message in new text area
+                console.log("Prepared message: " + message);
+                $("#message").slideToggle(500, function(e) {
+                    $("#redo").show();
+                    $("#message-prepared").val(message).slideToggle(500);
+                    $("#prepare").text("Send emails");    
+                });
+            }else{
+                // SEND EMAILS
+                for(var r in records) {
+                    var message = prepareMessage(rawMessage, records[r]);
+                    console.log("Prepared message: " + message);
+                }
+            }
+        }
+        
+        // Replaces the raw message text with fields in a record
+        function prepareMessage(message, record) {
+            // Replace hashtags by actual content
+            for(var i=0; i<dropdowns.length; i++) {
+                // Value
+                var val = $(dropdowns[i]).val();
+                console.log(record);
+                var value = record.d[val];
+                
+                if(value != null) {
+                    // Regex
+                    var regex = new RegExp(dropdowns[i], "ig");
+                    message = message.replace(regex, value);
+                }
+            }    
+            return message; 
+        }
+        
     </script>
 </body>
 </html>

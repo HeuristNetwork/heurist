@@ -533,15 +533,16 @@ $.widget( "heurist.resultListMenu", {
     },
     
     openEmaiForm: function() {
-
+        // Selection check
+        var ids = this.getSelectionIds("Select at least one record to bookmark");
+        if(Hul.isempty(ids)) {
+            return;  
+        }
+        
+        // Open URL
         var url = top.HAPI4.basePath+ "page/sendEmail.php?db=" + top.HAPI4.database;
-
-        Hul.showDialog(url, { 
-                        width:500, height:500,
-                        callback: function(value) {//options
-                            alert("Email has been sent");
-                        }
-            });
+        top.HEURIST.user.selectedRecordIds = ids;
+        Hul.showDialog(url, { width:500, height:600 });
         
     },
 
