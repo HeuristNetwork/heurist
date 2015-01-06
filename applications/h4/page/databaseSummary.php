@@ -159,7 +159,7 @@
                         <?php
                             /** RETRIEVING RECORDS WITH CONNECTIONS */
                             // Building query
-                            $query = "SELECT r.rec_RecTypeID as id, d.rty_Name as title, count(*) as count FROM Records r INNER JOIN defRecTypes d ON r.rec_RectypeID=d.rty_ID GROUP BY id ORDER BY count DESC;";
+                            $query = "SELECT r.rec_RecTypeID as id, d.rty_Name as title, count(*) as count FROM Records r INNER JOIN defRecTypes d ON r.rec_RectypeID=d.rty_ID GROUP BY id ORDER BY count DESC, title ASC;";
       
                             // Put record types & counts in the table
                             $res = $system->get_mysqli()->query($query);
@@ -204,7 +204,7 @@
                             echo "<tr class='empty-row'><td class='empty-row'></tr>";
 
                             /** RETRIEVING RECORDS WITH NO CONNECTIONS */
-                            $query = "SELECT rty_ID as id, rty_Name as title FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY rty_Name ASC;";
+                            $query = "SELECT rty_ID as id, rty_Name as title FROM defRecTypes WHERE rty_ID NOT IN (SELECT DISTINCT rec_recTypeID FROM Records) ORDER BY title ASC;";
                             $res = $system->get_mysqli()->query($query);
                             $count = 0;
                             while($row = $res->fetch_assoc()) { // each loop is a complete table row

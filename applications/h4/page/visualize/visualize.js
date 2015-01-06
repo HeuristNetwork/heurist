@@ -954,12 +954,7 @@ function visualizeData() {
     // Adding the foreground circles to the nodes
     var fgcircle = node.append("circle")
                        .attr("r", circleSize)
-                       /*.attr("class", function(d) {
-                            if(d.selected == true) {
-                                return "foreground selected";
-                            }
-                            return "foreground around";
-                       })*/
+                       .attr("class", "foreground")
                        .style("fill", "#fff")
                        .style("stroke", "#ddd")
                        .style("stroke-opacity", function(d) {
@@ -1210,7 +1205,8 @@ function visualizeData() {
             var idx = settings.selectedNodeIds.indexOf(recID);
             if (idx > -1) {
                 //deselect all others
-                d3.select(node).select("circle").style("fill", color); //.attr("r", 20);
+                d3.select(node).select(".foreground").style("fill", "#fff");
+                d3.select(node).select(".background").style("fill", color);
                 needSelect = false;
                 
                 settings.selectedNodeIds.splice(idx, 1);
@@ -1218,14 +1214,16 @@ function visualizeData() {
         }else{
             //deselect all
             var allnodes = container.selectAll(".node");
-            allnodes.select("circle").style("fill", color); //.attr("r", 20); 
+            allnodes.select(".foreground").style("fill", "#fff");
+            allnodes.select(".background").style("fill", color);
             settings.selectedNodeIds = [];
         }            
         
         if(needSelect){
             //select new
             data.selected = true;
-            d3.select(node).select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
+            d3.select(node).select(".foreground").style("fill", "#bee4f8");
+            d3.select(node).select(".background").style("fill", "#bee4f8");
             createOverlay(event.offsetX, event.offsetY, "record", "id"+recID, getRecordOverlayData(data));  
             settings.selectedNodeIds.push(recID);
         }
