@@ -96,7 +96,13 @@ require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 		<div id="delete-message-text" style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;"></div>
 	</div>
 
+<?php
+if(@$_REQUEST['popup']!=1){
+?>    
 	<div class="banner"><h2>Manage Field Types</h2></div>
+<?php
+}
+?>    
 	<div id="page-inner">
 
 <!--   height:auto; max-height:500px;

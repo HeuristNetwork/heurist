@@ -37,11 +37,26 @@ function onInit(success) //callback function of hAPI initialization
         }
 
         //init toolbar buttons
-        $('#btn_add_level1').button().on('click', null, addLevel );
+        $('#btn_add_level1').attr('title', 'explanatory rollover' ).button().on('click', null, addLevel );
 
-        $('#btn_save').button().on('click', 3, saveRules);
+        $('#btn_save').attr('title', 'explanatory rollover' ).button().on('click', 3, saveRules);
         
-        $('#btn_apply').button().on('click', 3, applyRules);
+        //$('#btn_apply').button().on('click', 3, applyRules);
+        $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
+        $( "#helper" ).dialog({
+          autoOpen: true,
+          position: { my: "right bottom", at: "right top", of: $('#btn_help') },
+          show: {
+            effect: "slide",
+            direction : 'right',
+            duration: 1000
+          },
+          hide: {
+            effect: "slide",
+            direction : 'right',
+            duration: 1000
+          }
+        });        
 
         //create rule builders in case there is parameter 'rules'
         //var rules = top.HEURIST4.util.getUrlParameter('rules',location.search);
@@ -67,6 +82,20 @@ function onInit(success) //callback function of hAPI initialization
 
 
 
+    }
+}
+
+//
+//  show/hide help panel
+//
+function showHelp(){
+    var $helper = $("#helper");
+    if($helper.dialog( "isOpen" )){
+        $helper.dialog( "close" );
+        //$helper.hide( 'explode', {}, 1000 );  
+    }else{
+        $helper.dialog( "open" );
+        //$helper.show( 'drop', {}, 1000 );  
     }
 }
 

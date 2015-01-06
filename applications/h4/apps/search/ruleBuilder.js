@@ -52,8 +52,10 @@ $.widget( "heurist.ruleBuilder", {
         this.element.addClass('rulebuilder');
 
         //create list/combobox of source record types
-        var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'250px'}).appendTo(this.element);
+        var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'200px'}).appendTo(this.element);
+        
         this.select_source_rectype = $( "<select>" )
+                .attr('title', 'explanatory rollover' )
                 .addClass('text ui-corner-all')
                 .appendTo( cont );
                 
@@ -61,30 +63,40 @@ $.widget( "heurist.ruleBuilder", {
         
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )
+                .attr('title', 'explanatory rollover' )
                 .addClass('text ui-corner-all')
                 .appendTo( $('<div>').appendTo(this.element) );
         
         //create list/combobox of relation types
         this.select_reltype = $( "<select>" )
+                .attr('title', 'explanatory rollover' )
                 .addClass('text ui-corner-all')
                 .appendTo( $('<div>').appendTo(this.element) ).hide();
         
         //create list/combobox of target record types
         this.select_target_rectype = $( "<select>" )
+                .attr('title', 'explanatory rollover' )
                 .addClass('text ui-corner-all')
                 .appendTo( $('<div>').appendTo(this.element) );
 
         //        
         this.additional_filter = $( "<input>" ).addClass('text ui-corner-all')
+                .attr('title', 'explanatory rollover' )
                 .appendTo( $('<div>').appendTo(this.element) );
         
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
         this.div_btn =  $('<div>').appendTo(this.element);
-        this.btn_delete = $( "<button>", {text:'Delete'} ).button().appendTo(this.div_btn);
 
         if(this.options.level<3)
-        this.btn_add_next_level = $( "<button>", {text:'Add Level'} ).button().appendTo(this.div_btn);
+        this.btn_add_next_level = $( "<button>", {text:'Add Level'} )
+                .attr('title', 'explanatory rollover' )
+                .button().appendTo(this.div_btn);
+
+        this.btn_delete = $( "<button>", {text:'Delete'})
+                .attr('title', 'explanatory rollover' )
+                .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
+
 
         
         /*if(this.options.is_search_allowed){
@@ -484,10 +496,13 @@ $.widget( "heurist.ruleBuilder", {
                         break;
                     }
                 }
-            }
-            if(is_not_relation){
-                //this.label_3.hide();
-                this.select_reltype.hide();    
+                if(is_not_relation){
+                    //this.label_3.hide();
+                    this.select_reltype.show();
+                    top.HEURIST4.util.createSelector(this.select_reltype.get(0), 'pointer');    
+                }
+            }else{
+                this.select_reltype.hide();
             }
             if(is_not_selected){
                 //show all constraints

@@ -88,7 +88,13 @@ if(isForAdminOnly("to modify database structure")){
         <script type="text/javascript" src="manageRectypes.js"></script>
 
         <div>
+<?php
+if(@$_REQUEST['popup']!=1){
+?>    
             <div class="banner"><h2>Record Type and Field definitions</h2></div>
+<?php
+}
+?>    
             <div id="page-inner">
                 <!--
                 <div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"

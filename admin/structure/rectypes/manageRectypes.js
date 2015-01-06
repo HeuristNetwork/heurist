@@ -379,8 +379,8 @@ function RectypeManager() {
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
 
-                        var str1 = top.HEURIST.iconBaseURL + id + ".png?" + curtimestamp;
-                        var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png?" + curtimestamp;
+                        var str1 = top.HEURIST.iconBaseURL + id + ".png#" + curtimestamp;
+                        var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png#" + curtimestamp;
                         var icon ="<div class=\"rectypeImages\">"+
                         "<a href=\"#edit_icon\">"+
                         "<img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
