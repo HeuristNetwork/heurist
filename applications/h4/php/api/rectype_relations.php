@@ -33,6 +33,7 @@
             $result->HeuristBaseURL = HEURIST_BASE_URL;
             $result->HeuristDBName = $dbName;
             
+           
             // Retrieving all nodes
             $rectypes = getRectypes($system);
             $result->nodes = $rectypes;
@@ -117,19 +118,20 @@
         // Go through all ID's
         //echo "\nID's for relation #" . $relation->id . ": " . $relation->ids;
         $ids = explode(",", $relation->ids);
-        
         foreach($ids as $id) {
             // Count how many times the $relation points to this id      
             $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID WHERE r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
-            $res = $system->get_mysqli()->query($query);
-            if($row = $res->fetch_assoc()) {
-                $target = new stdClass();
-                $target->id = intval($id);
-                $target->count = intval($row["count"]);
-                
-                //print_r($target);
-                array_push($targets, $target);
-            }         
+           
+            if($res = $system->get_mysqli()->query($query)) {
+                if($row = $res->fetch_assoc()) {
+                    $target = new stdClass();
+                    $target->id = intval($id);
+                    $target->count = intval($row["count"]);
+                    
+                    //print_r($target);
+                    array_push($targets, $target);
+                }  
+            }
         }    
         
         return $targets;
@@ -164,9 +166,11 @@
         for($i = 0; $i < sizeof($rectypes); $i++) {
             // Find relations
             $relations = getRelations($system, $rectypes[$i]); 
+
             // Find all targets for each relation
             foreach($relations as $relation) {
                 $targets = getTargets($system, $rectypes[$i], $relation);
+                
                 // Construct a link for each target
                 foreach($targets as $target) {
                     $link = new stdClass();

@@ -96,8 +96,8 @@
         <link rel="stylesheet" type="text/css" href="../external/colpick/colpick.css">
         
         <!-- Visualize plugin --> 
-        <script type="text/javascript" src="../common/js/visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="../common/css/visualize.css">
+        <script type="text/javascript" src="../applications/h4/page/visualize/visualize.js"></script>
+        <link rel="stylesheet" type="text/css" href="../applications/h4/page/visualize/visualize.css">
         
         <!-- On Row Click -->
         <script>
@@ -231,7 +231,7 @@
 
                 <!-- D3 visualisation -->
                 <td>
-                    <?php include "../common/html/visualize.html"; ?>
+                    <?php include "../applications/h4/page/visualize/visualize.html"; ?>
                 </td>
             </tr>
         </table>

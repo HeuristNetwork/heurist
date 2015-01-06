@@ -643,7 +643,8 @@ function visualizeData() {
     
     // Adding zoom
     var zoomBehaviour = d3.behavior.zoom()
-                          .scale(scale)
+                          .center([width/2, 0])
+                          //.scale(scale)
                           /*.translate(function(d) {
                               return [5,5];
                           }) */
@@ -653,7 +654,7 @@ function visualizeData() {
     /** Updates the container after a zoom event */             
     function zoomed() {      
         // Translate
-        //console.log(d3.event.translate);   
+        //console.log("Zoomed!", d3.event.translate);   
         if(d3.event.translate !== undefined) {
             if(!isNaN(d3.event.translate[0])) {           
                 putSetting(setting_translatex, d3.event.translate[0]);
@@ -865,7 +866,7 @@ function visualizeData() {
                   .attr("class", function(d) {
                       return "node id" + d.id;
                   }) 
-                  .attr("transform", "translate(100, 100)")
+                  .attr("transform", "translate(10, 10)")
                   .attr("x", function(d) {
                       // Setting 'x' based on localstorage
                       var record = localStorage.getItem(d.id);

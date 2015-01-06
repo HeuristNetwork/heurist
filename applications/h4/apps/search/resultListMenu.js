@@ -277,6 +277,10 @@ $.widget( "heurist.resultListMenu", {
               
                 this.setRatingsPopup();
                 
+          }else if(action == "menu-selected-email") {
+              
+              this.openEmaiForm();
+                
           }else if(action == "menu-selected-ownership"){                  
               
                 this.setWorkgroupPopup();
@@ -526,6 +530,19 @@ $.widget( "heurist.resultListMenu", {
             }
             top.HEURIST.user.workgroups = workgroups;
             top.HEURIST.workgroups = workgroups2;
+    },
+    
+    openEmaiForm: function() {
+
+        var url = top.HAPI4.basePath+ "page/sendEmail.php?db=" + top.HAPI4.database;
+
+        Hul.showDialog(url, { 
+                        width:500, height:500,
+                        callback: function(value) {//options
+                            alert("Email has been sent");
+                        }
+            });
+        
     },
 
     setRatingsPopup: function(bkmkID) {
