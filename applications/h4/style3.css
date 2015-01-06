@@ -293,10 +293,10 @@ H2 {
     font-size:1.2em;
 }
 
-h3:hover > #rec_add_link, div.recordDiv:hover > #rec_edit_link {
+h3:hover > #rec_add_link, div.recordDiv:hover > .rec_edit_link {
     display: block;
 }
-h3 > #rec_add_link, div.recordDiv > #rec_edit_link {
+h3 > #rec_add_link, div.recordDiv > .rec_edit_link {
     position: absolute;
     display: none;
     height: 16px;
@@ -391,7 +391,7 @@ div .selected_last{
     left: 3px;
     position: absolute;
 }
-.thumbs #rec_edit_link {
+.thumbs .rec_edit_link {
     bottom: 1px;
     right:1px;
 }
@@ -440,7 +440,7 @@ div .selected_last{
     display: none;
 }
 
-.icons #rec_edit_link {
+.icons .rec_edit_link {
     right: 1px;
     top: 1px;
 }
@@ -575,4 +575,25 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     display: inline-block;
     float: left;
     width: auto;
+}
+
+/* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon 
+     Remove the jQuery UI Icon 
+     Remove the jQuery UI Text Indent 
+     Bump it up - jQuery UI is -8px  
+      
+     Bump it - jQuery UI is -8px
+     Allow use of icon-large to be properly aligned       
+*/     
+.ui-icon[class*=" icon-"] {
+    background: none repeat scroll 0 0 transparent;
+    text-indent: 0;
+    margin-top: -0.5em;
+}
+
+.ui-button-icon-only .ui-icon[class*=" icon-"] {
+    /*margin-left: -7px;*/
+}
+.ui-icon.icon-large {
+    margin-top: -0.75em;
 }

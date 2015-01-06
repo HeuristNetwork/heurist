@@ -428,7 +428,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
 
                 if(top.HEURIST4.util.isnull(request.l)){
-                    request.l = top.HAPI4.get_prefs('search_limit');
+                    request.l = top.HEURIST.displayPreferences['results-per-page']; //top.HAPI4.get_prefs('search_limit');
                 }
                 
                 //request.chunk = true;

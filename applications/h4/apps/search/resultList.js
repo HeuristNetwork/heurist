@@ -68,10 +68,8 @@ $.widget( "heurist.resultList", {
         */
 
         //-----------------------
-        this.span_info = $("<label>").appendTo(
-            $( "<div>").css({'display':'inline-block','min-width':'10em','padding':'3px 2em 0 300px'}).appendTo( this.div_toolbar ));
-
-        //-----------------------
+        // layout - one button mode - OLD WAY
+        /*
         this.btn_view = $( "<button>", {text: "view"} )
         .css({'float':'right', 'font-size': '0.8em', 'width': '10em'})
         .appendTo( this.div_toolbar )
@@ -110,9 +108,45 @@ $.widget( "heurist.resultList", {
                 $( document ).one( "click", function() {  menu_view.hide(); });
                 return false;
             }
-        });
+        });*/
+        
+        
+        this.mode_selector = $( "<div>" )
+        .css({'float':'right'})
+        .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
+            +'<label for="list_layout_list">'+top.HR('list')+'</label>'
+            +'<input type="radio" id="list_layout_icons" name="list_lo" value="icons"/>'
+            +'<label for="list_layout_icons">'+top.HR('icons')+'</label>'
+            +'<input type="radio" id="list_layout_thumbs" name="list_lo" value="thumbs"/>'
+            +'<label for="list_layout_thumbs">'+top.HR('thumbs')+'</label>')
+        .buttonset()
+        .click(function( event ) {
+            var view_mode = $("input[name='list_lo']:checked").val(); //event.target.value;
+            that._applyViewMode(view_mode);
+            //that._refresh();
+        })
+        .appendTo( this.div_toolbar );
+        
+        $('#list_layout_list').button({icons: {primary: "icon-list"}, text:false});
+        $('#list_layout_icons').button({icons: {primary: "icon-th"}, text:false});
+        $('#list_layout_thumbs').button({icons: {primary: "icon-th-large"}, text:false});
+
+        
+
+        //----------------------
+        
+        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');        
+        if(view_mode){
+            this._applyViewMode(view_mode);
+        }
         
         //----------------------
+        
+        this.span_info = $("<label>").appendTo(
+            $( "<div>").css({'float':'right','min-width':'10em','padding':'3px 2em 0 0px'}).appendTo( this.div_toolbar ));
+
+        //-----------------------
+        
         
         if(this.options.showmenu){
             this.div_actions = $('<div>')
@@ -154,6 +188,8 @@ $.widget( "heurist.resultList", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
+                that.span_info.hide();
+                
                 if(data){
                     
                     if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') || 
@@ -180,7 +216,7 @@ $.widget( "heurist.resultList", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
                 
-                
+                   that.span_info.show();
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
@@ -304,7 +340,9 @@ $.widget( "heurist.resultList", {
         }
         this.div_content.addClass(newmode);
 
-        this.btn_view.button( "option", "label", top.HR(newmode));
+        //this.btn_view.button( "option", "label", top.HR(newmode));
+        $('#list_layout_'+newmode).attr('checked','true');
+
     },
 
     // @todo move record related stuff to HAPI
@@ -420,6 +458,7 @@ $.widget( "heurist.resultList", {
                         }
                     }
                     this.div_content[0].innerHTML += html;   
+                    this.span_info.html(this._count_of_divs); //that.div_content.find('.recordDiv').length);
 
                     /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
                     this._on( lastdiv.nextAll(), {
@@ -430,7 +469,6 @@ $.widget( "heurist.resultList", {
                 this._on( $allrecs, {
                     click: this._recordDivOnClick
                 });
-                
 
             }else if(this._count_of_divs<1) {
 
@@ -558,7 +596,8 @@ $.widget( "heurist.resultList", {
             text:false})
         .click(function( event ) {
             event.preventDefault();
-            window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+            //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+            window.open(top.HAPI4.basePathOld + "edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
         })
         .appendTo($recdiv);
 
@@ -625,7 +664,8 @@ $.widget( "heurist.resultList", {
             + '<div title="'+recTitle+'" class="recordTitle">'
             +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)  
             + '</div>'
-            + '<div id="rec_edit_link" title="Click to edit record" class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+            + '<div title="Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+            //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             + '</div></div>';
 
@@ -656,6 +696,8 @@ $.widget( "heurist.resultList", {
 
         var $rdiv = $(event.target), 
             that = this;
+            
+        var isedit = ($rdiv.parents('.rec_edit_link').length>0); //this is edit click
 
         if(!$rdiv.hasClass('recordDiv')){
             $rdiv = $rdiv.parents('.recordDiv');
@@ -664,6 +706,10 @@ $.widget( "heurist.resultList", {
         var selected_rec_ID = $rdiv.attr('recid');
         this.div_content.find('.selected_last').removeClass('selected_last');
         
+        if(isedit){
+            var url = top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
+            window.open(url, "_new");              
+        }
 
         if(this.options.multiselect && event.ctrlKey){
             

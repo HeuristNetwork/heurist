@@ -71,7 +71,7 @@ $.widget( "heurist.search", {
 
     // the constructor
     _create: function() {
-
+        
         var that = this;
         
         this.div_search = $('<div>').css('width','100%').appendTo( this.element );
@@ -93,7 +93,7 @@ $.widget( "heurist.search", {
         })
         .appendTo( this.div_search_as_guest )
         .button({icons: {
-            primary: "ui-icon-search"
+            //primary: "ui-icon-search"
         }});
 
         this.div_search_as_user = $('<span>')
@@ -132,7 +132,8 @@ $.widget( "heurist.search", {
             }});
             
             $('<a>',{
-                text: 'Syntax', href:'#'
+                text: 'Syntax', 
+                href:  top.HAPI4.basePathOld+'context_help/advanced_search.html', target:'_blank'
             }).css('padding-right','1em').appendTo(this.div_search_links);
             
             link = $('<a>',{
@@ -174,10 +175,10 @@ $.widget( "heurist.search", {
         this.btn_search_as_user = $( "<button>", {         
             text: top.HR("search")
         })
-        .css('width', '12em')
+        .css('width', '14em')
         .appendTo( this.div_search_as_user )
         .button({icons: {
-            primary: "ui-icon-search"
+            //primary: "ui-icon-search"
         }});
 
         this.btn_search_domain = $( "<button>", {
@@ -190,7 +191,7 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user.buttonset();
 
-        var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b,c').split(',');//,r,s';
+        var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
         var smenu = "";
         $.each(dset, function(index, value){
             var lbl = that._getSearchDomainLabel(value);
@@ -270,7 +271,7 @@ $.widget( "heurist.search", {
             }
         }else{
             
-            this.limit = top.HAPI4.get_prefs('search_limit');               
+            this.limit = top.HEURIST.displayPreferences['results-per-page'];  //top.HAPI4.get_prefs('search_limit');
             if(!this.limit) this.limit = 200;
 
 /*  @TODO - move tp preferences          
@@ -339,7 +340,7 @@ $.widget( "heurist.search", {
             .css({'width':'50%', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
             .progressbar().appendTo(this.div_progress);
             
-        this.progress_lbl = $("<div>").css({'position':'absolute','left': '50px', 'top': '4px', 'text-shadow': '1px 1px 0 #fff' })
+        this.progress_lbl = $("<div>").css({'position':'absolute','margin-left':'22%', 'top': '4px', 'text-shadow': '1px 1px 0 #fff' })
             .appendTo(this.progress_bar);     
             //font-weight: bold;
        
@@ -558,11 +559,11 @@ $.widget( "heurist.search", {
     */
     _getSearchDomainLabel: function(value){
         var lbl = null;
-        if(value=='b' || value=='bookmark') { lbl = 'my bookmarks'; }
+        if(value=='b' || value=='bookmark') { lbl = 'Search (Bookmarked)'; }
         else if(value=='r') { lbl = 'recently added'; } //not implemented
             else if(value=='s') { lbl = 'recently selected'; } //not implemented
-                else if(value=='c') { lbl = 'in current'; } //todo
-                    else { lbl = 'all records'; this.options.search_domain='a';}
+                else if(value=='c') { lbl = 'Search (in current)'; } //todo
+                    else { lbl = 'Search'; this.options.search_domain='a';}
         return lbl;
     },
 

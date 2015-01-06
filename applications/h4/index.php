@@ -55,7 +55,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
-
+        <link rel="stylesheet" type="text/css" href="ext/font-awesome/css/font-awesome.min.css" />
+        <!-- <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" /> -->
+        
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
@@ -212,6 +214,12 @@
                                         var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
                                         //top.HEURIST4.query_request = request;
                                         setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
+                                    }else{
+                                        var init_search = top.HEURIST.displayPreferences['defaultSearch']; 
+                                        if(!top.HEURIST4.util.isempty(init_search)){
+                                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                                            setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
+                                        }
                                     }
                                     
                                 }else{
