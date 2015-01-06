@@ -25,7 +25,7 @@
         <title>Spring Diagram</title>
 
         <!-- Css -->
-        <link rel="stylesheet" type="text/css" href="../style3.css">
+        <link rel="stylesheet" type="text/css" href="../../../../common/css/global.css">
         <!-- link rel="stylesheet" type="text/css" href="../../../common/css/global.css" -->
         <style>
             body, html {
@@ -63,6 +63,7 @@
             
             function showData(data, selectedRecordsIds, onSelectEvent) {
                 console.log("showData called inside springDiagram");
+                $("#d3svg").html('<text x="25" y="25" fill="black">Processing...</text>');
                 
                 // Custom data parsing
                 function getData(data) {

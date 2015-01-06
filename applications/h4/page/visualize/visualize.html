@@ -19,13 +19,13 @@
                     <!-- Line length --> 
                     <div id="linelengthContainer">
                         <i>Length</i>
-                        <input id="linelength" class="number-input medium" type="number" min="1" step="10"/>
+                        <input id="linelength" class="number-input medium" />
                     </div>
                     
                     <!-- Line width -->
                     <div id="linewidthContainer">
                         <i>Max width</i>
-                        <input id="linewidth" class="number-input small" type="number" min="1" step="1"/>
+                        <input id="linewidth" class="number-input small" />
                     </div>
                     
                     <!-- Line color -->
@@ -47,7 +47,7 @@
                     
                     <div id="entityradiusContainer">
                         <i>Max radius</i>
-                        <input id="entityradius" class="number-input small" type="number" min="1" step="1"/>
+                        <input id="entityradius" class="number-input small" />
                     </div>
                     
                     <!-- Entity circle color -->
@@ -65,13 +65,13 @@
                     <!-- Text size -->
                     <div id="fontsizeContainer">
                         <i>Font-size</i>
-                        <input id="fontsize" class="number-input small" type="number" min="1" step="1"/>
+                        <input id="fontsize" class="number-input small" />
                     </div>
                     
                     <!-- Text length -->
                     <div id="textlengthContainer">
                         <i>Text length</i>
-                        <input id="textlength" class="number-input small" type="number" min="1" step="1"/>
+                        <input id="textlength" class="number-input small" />
                     </div>
                     
                     <!-- Text color -->
@@ -116,7 +116,7 @@
                     <!-- Attraction strength -->
                     <div id="attractionContainer">
                         <i>Attraction</i>
-                        <input id="attraction" class="number-input medium" type="number" step="50"/>
+                        <input id="attraction" class="number-input medium"/>
                     </div>
                 </div>
 
@@ -148,7 +148,9 @@
     <tr>
         <td>
             <!-- SVG -->
-            <svg id="d3svg" class="fullscreen"></svg>
+            <svg id="d3svg" class="fullscreen">
+                <text x="25" y="25" fill="black">Processing...</text>
+            </svg>
         </td>
     </tr>
 </table>

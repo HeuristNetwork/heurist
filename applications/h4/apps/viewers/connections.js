@@ -279,7 +279,8 @@ $.widget( "heurist.connections", {
                     var dtID = relations[i].dtID;
                     var type = "Floating relationship";
                     if(dtID > 0) {
-                        type = top.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                        //type = top.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                        type = top.HEURIST4.detailtypes.names[dtID];
                     }
 
                     // Link check
