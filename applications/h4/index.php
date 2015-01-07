@@ -101,6 +101,7 @@
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/search/resultList.js"></script>
+        <script type="text/javascript" src="apps/search/search_links_tree.js"></script>
         <!--
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
          script type="text/javascript" src="apps/search.js"></script>

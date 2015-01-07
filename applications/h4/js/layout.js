@@ -552,6 +552,9 @@ function appAddContent($app_container, app, options){
         }else if(app.widgetname=='svs_manager'){
                 //DEBUG
                 widget = $content.svs_manager( options ); //options
+        }else if(app.widgetname=='search_links_tree'){
+                //DEBUG
+                widget = $content.search_links_tree( options ); //options
         }else if(app.widgetname=='search'){
 
                widget = $content.search( options );
