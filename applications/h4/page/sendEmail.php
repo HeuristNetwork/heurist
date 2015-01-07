@@ -196,11 +196,22 @@
 
     <!-- Javascript -->
     <script type="text/javascript">
-        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"]; 
-        var types = ["freetext", "blocktext", "date"/*,"enum"*/];
-        var ids = top.HEURIST.user.selectedRecordIds;
-        var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords();
-        var record;
+        var storage_key = "email";
+        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"]; // ID's of the dropdowns 
+        var types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum", "termlist"]; // Types that can be selected from the dropdown
+        var ids = top.HEURIST.user.selectedRecordIds; // Selected record ID's
+        var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords(); // Array of record objects
+        var record; // First record in the list, used to determine the Record Types
+        
+        // Retrieves an item from localStorage
+        function getItem(name) {
+            return localStorage[storage_key+name];
+        }
+        
+        // Stores an item in localStorage
+        function putItem(name, value) {
+            localStorage[storage_key+name] = value;
+        }
         
         // Sets up all fields
         function setup() {
@@ -211,83 +222,160 @@
             for(var r in records) {
                 this.record = records[r];
                 var rectype = record[4];
-                console.log("Rectype of first record: " + rectype);
                 var definition = top.HEURIST4.rectypes.typedefs[rectype];
-                console.log("Definition", definition);
+                console.log("Rectype: " + rectype + ", definition", definition);
                 
                 // Add record fields to dropdown
                 var options = "<option value=\"-1\" disabled=\"disabled\" selected=\"selected\">Select...</option>";
                 for(var d in definition.dtFields) {
                     var field = definition.dtFields[d];
-                    console.log("Field", field);
-                    
-                    if(types.indexOf(field[23]) >= 0) { // Appropriate type
+                    //console.log("Field", field);
+                    // Appropriate type check
+                    if(types.indexOf(field[23]) >= 0) { 
                         options += "<option value=\"" +d+ "\">" + field[0] + "</option>";     
                     }
                 }
-                console.log("Options", options);
+                //console.log("Options", options);
                 
-                // Append options to each dropdown
+                // Setup dropdowns
                 for(var i=0; i < dropdowns.length; i++) {
+                    // Append options to each dropdown
                     $(dropdowns[i]).html(options);
+                    var selectedIndex = getItem(dropdowns[i]);
+                    if(selectedIndex) {
+                        $(dropdowns[i]).prop("selectedIndex", selectedIndex);
+                    }
+
+                    // Listen to changes
+                    $(dropdowns[i]).change(function(e) {
+                        var id = $(this).attr("id");
+                        var value = $(this).prop("selectedIndex");
+                        ///console.log("Checkbox " + id + " changed to " + value);  
+                        putItem("#"+id, value);
+                        redo();
+                    });
                 }
-                
                 break;
             }
+            
+            // Setup subject field
+            $("#subject").on("keyup", function(e) {
+                var text = $(this).val();
+                putItem("subject", text);     
+            });
+            $("#subject").val(getItem("subject"));
+            
+            // Setup message field
+            $("#message").on("keyup", function(e) {
+                var text = $(this).val();
+                putItem("message", text);
+            });
+            $("#message").val(getItem("message"));
+            
         }
         
         // Changes the text area's
         function redo() {
             $("#prepare").text("Prepare emails");    
             $("#redo").hide();
-            $("#message-prepared").slideToggle(500, function(e) {
-                $("#message").slideToggle(500);
+            $("#message-prepared").slideUp(500, function(e) {
+                $("#message").slideDown(500);
             })   
         }
         
         // Prepares the email
-        function prepare() {
+        function prepare() {    
             // Raw message
             var rawMessage =  $("#message").val();
             console.log("Raw message: " + rawMessage);  
                 
+            // Definition
+            var rectype = record[4];
+            var definition = top.HEURIST4.rectypes.typedefs[rectype];
+            console.log("Definition", definition);
+            
             // Check action
-            var text = $("#prepare").text();
-            console.log(text);
-            if(text.indexOf("Prepare") >= 0) {
+            var buttonText = $("#prepare").text()
+            if(buttonText.indexOf("Prepare") >= 0) { // Check button text
                 // PREPARE EMAILS
-                var message = prepareMessage(rawMessage, record);
+                var message = prepareMessage(rawMessage, record, definition.dtFields);
                 
                 // Show prepared message in new text area
                 console.log("Prepared message: " + message);
-                $("#message").slideToggle(500, function(e) {
-                    $("#redo").show();
-                    $("#message-prepared").val(message).slideToggle(500);
+                $("#message").slideUp(500, "linear", function(e) {
+                    $("#redo").slideDown(500);
+                    $("#message-prepared").val(message).slideDown(500);
                     $("#prepare").text("Send emails");    
                 });
             }else{
                 // SEND EMAILS
+                var data = {};
+                data.subject = $("#subject").val();
+                data.header = "header";
+                data.emails = {};
+ 
+                // Construct a message based on record data
                 for(var r in records) {
-                    var message = prepareMessage(rawMessage, records[r]);
-                    console.log("Prepared message: " + message);
+                    var object = {};
+                    
+                    // Email
+                    object.email = getValue(records[r], $("#email").val());  // Determine e-mail address(es) [comma seperated]
+
+                    // Message 
+                    var message = prepareMessage(rawMessage, records[r], definition.dtFields); // Determine message
+
+                    // TODO: Send out e-mail
+                    //sendEmail($email_to, $email_title, $email_text, $email_header);
+                    
                 }
             }
         }
         
+        // Determines the actual record value at the given index
+        function getValue(record, type, index) {
+            console.log("Getting value for record", record);
+            
+            // Determine type
+            if(type == "freetext" || type =="blocktext" || type == "date") {
+                return record.d[index];
+
+            }else if(type == "memo") {
+                 alert("Memo");
+                 
+            }else if(type == "seperator") {
+                         alert("sep");
+                         
+            }else if(type == "numeric") {
+                         alert("num");
+
+            }else if(type == "enum") {
+                var enumID = record.d[index];
+                if(enumID) {
+                    return top.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
+                }
+                  
+            }else if(type == "termlist") {
+                         alert("terms");
+                         
+            } 
+ 
+            return "undefined";
+        }
+        
         // Replaces the raw message text with fields in a record
-        function prepareMessage(message, record) {
+        function prepareMessage(message, record, fields) {
             // Replace hashtags by actual content
             for(var i=0; i<dropdowns.length; i++) {
-                // Value
-                var val = $(dropdowns[i]).val();
-                console.log(record);
-                var value = record.d[val];
-                
-                if(value != null) {
-                    // Regex
-                    var regex = new RegExp(dropdowns[i], "ig");
-                    message = message.replace(regex, value);
+                // Index selected in the dropdown
+                var index = $(dropdowns[i]).val();   // Record index
+                var value = "?";
+                if(index && index > 0) {
+                    value = getValue(record, fields[index][23], index); // Record value at the given index
                 }
+                
+                // Regex
+                var regex = new RegExp(dropdowns[i], "ig"); // Replace #xxx case insensitive
+                message = message.replace(regex, value);    // Replace all occurences with @value
             }    
             return message; 
         }

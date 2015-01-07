@@ -470,7 +470,20 @@ function handleSettingsInUI() {
 
             // Listen to gravity changes
             $("#gravity").change(function() {
-                putSetting(setting_gravity,  $(this).val());
+                var gravity = $(this).val();
+                putSetting(setting_gravity,  gravity);
+                
+                // Update gravity impact on nodes
+                svg.selectAll(".node").attr("fixed", function(d, i) {
+                    if(gravity == "aggressive") {
+                        d.fixed = false;
+                        return false;
+                    }else{
+                        d.fixed = true;
+                        return true;
+                    }
+                });
+                
                 visualizeData();
             });
         }else{
@@ -815,7 +828,7 @@ function visualizeData() {
         
         // Update the location in localstorage
         var record = getSetting(d.id); 
-        console.log("Record", record);
+        //console.log("Record", record);
         var obj;
         if(record === null) {
             obj = {}; 
@@ -855,7 +868,7 @@ function visualizeData() {
         } 
         
         // Check if force may resume
-        if(gravity !== "off") {    
+        if(gravity !== "off") {
             force.resume(); 
         } 
     }
@@ -918,15 +931,6 @@ function visualizeData() {
                       if(record && gravity !== "aggressive") { 
                           d.fixed = true;
                           return true;
-                          /*
-                          if(d.x > 0 && d.x < width && d.y > 0 && d.y < height && gravity !== "aggressive") {
-                                d.fixed = true;
-                                return true;
-                          }else{
-                                d.fixed = false;
-                                return false; 
-                          }
-                          */
                       }          
                       return false;
                   })        
@@ -1131,10 +1135,11 @@ function visualizeData() {
     
     // Get everything into positon
     if(gravity == "off") {
-       for(var i = 0; i < 10; i++) {
-           force.tick();
-       }
-       force.stop(); 
+        for(var i=0; i<100; i++) {
+            force.tick();
+        }
+        node.attr("fixed", true);
+        force.stop(); 
     }
     
     /** Tick handler for curved lines */
@@ -1186,13 +1191,11 @@ function visualizeData() {
     /** Updates node locations */
     function updateNodes() {
         node.attr("transform", function(d) { 
-            // LocalStorage check
-            //var record = getSetting(d.id);
-           // if(record == undefined) {
-                var obj = {px: d.px, py: d.py, x: d.x, y: d.y};
-                putSetting(d.id, JSON.stringify(obj));
-           // }
+            // Store new position
+            var obj = {px: d.px, py: d.py, x: d.x, y: d.y};
+            putSetting(d.id, JSON.stringify(obj));
             return "translate(" + d.x + "," + d.y + ")"; 
+            
         });
     }
     

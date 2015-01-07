@@ -56,6 +56,10 @@
                 padding: 2px 1px;
             }
             
+            .show {
+                display: none;
+            }
+            
             .empty-row {
                 border: none !important;
                 padding:8px;
@@ -153,7 +157,7 @@
                             <th class="space" width="200">Record&nbsp;type</th>
                             <th class="space">Link</th>
                             <th class="space">Count</th>
-                            <th class="space">Show <input type='checkbox' id="show-all"></th>
+                            <th class="space show">Show <input type='checkbox' id="show-all"></th>
                         </tr>
 
                         <?php
@@ -191,9 +195,9 @@
 
                                 // Show
                                 if($count < 10) {
-                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
+                                    echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "' checked='checked'></td>";
                                 }else{
-                                    echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
+                                    echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
                                 }
                                 echo "</tr>";
                                 $count++;
@@ -233,11 +237,11 @@
                                 echo "<td align='center'>0</td>";
                                 
                                 // Show
-                                echo "<td align='center'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
+                                echo "<td align='center' class='show'><input type='checkbox' class='show-record' name='" .$title. "'></td>";
                                 
                                 echo "</tr>";
                                 $count++;
-                            }
+                            }//endwhile
                         ?>
 
                     </table>
@@ -253,8 +257,10 @@
     
         <script>
            $("#expand").click(function(e) {
-               // Change visibility
-               $("#visualisation-column").slideToggle(500);
+                // Show visualisation elements
+                $(this).remove();
+                $(".show").slideToggle(500);
+                $("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL
                 var url = "../php/api/rectype_relations.php" + window.location.search;
