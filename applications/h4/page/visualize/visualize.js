@@ -567,20 +567,20 @@ function getEntityRadius(count) {
     return circleSize + executeFormula(count, maxRadius) - 1;
 }
 
+// Visualizes selected nodes
 function visualizeSelection(selectedNodeIds) {
 
     settings.selectedNodeIds=selectedNodeIds;
     //deselect all others
-    //var allnodes = container.selectAll(".node");
-    //d3.select(node)
-    d3.selectAll(".node").select("circle").style("fill", "#fff"); //.attr("r", 20);
+    d3.selectAll(".node").select(".foreground").style("fill", "#fff");
+    d3.selectAll(".node").select(".background").style("fill", "#fff");
     
     if(selectedNodeIds && selectedNodeIds.length>0){
         //select new ones
-        var i;
-        for(i=0; i<selectedNodeIds.length; i++){
+        for(var i=0; i<selectedNodeIds.length; i++){
             var node= d3.select(".id"+selectedNodeIds[i]);
-            node.select("circle").style("fill", "#bee4f8"); //.attr("r", 20);
+            node.select(".foreground").style("fill", "#bee4f8");   
+            node.select(".background").style("fill", "#bee4f8");     
         }
     }            
 }
@@ -814,7 +814,8 @@ function visualizeData() {
         d.y += d3.event.dy;
         
         // Update the location in localstorage
-        var record = localStorage.getItem(d.id);
+        var record = getSetting(d.id); 
+        console.log("Record", record);
         var obj;
         if(record === null) {
             obj = {}; 
@@ -869,7 +870,7 @@ function visualizeData() {
                   .attr("transform", "translate(10, 10)")
                   .attr("x", function(d) {
                       // Setting 'x' based on localstorage
-                      var record = localStorage.getItem(d.id);
+                      var record = getSetting(d.id);
                       if(record) {
                           var obj = JSON.parse(record);
                           if("x" in obj) { // Check if attribute is valid
@@ -880,7 +881,7 @@ function visualizeData() {
                   })
                   .attr("y", function(d) {
                       // Setting 'y' based on localstorage
-                      var record = localStorage.getItem(d.id);
+                      var record = getSetting(d.id);
                       if(record) {
                           var obj = JSON.parse(record);
                           if("y" in obj) { // Check if attribute is valid
@@ -891,7 +892,7 @@ function visualizeData() {
                   })
                   .attr("px", function(d) {
                       // Setting 'px' based on localstorage
-                      var record = localStorage.getItem(d.id);
+                      var record = getSetting(d.id);
                       if(record) {
                          var obj = JSON.parse(record);
                          if("px" in obj) { // Check if attribute is valid
@@ -902,7 +903,7 @@ function visualizeData() {
                   })
                   .attr("py", function(d) {
                       // Setting 'py' based on localstorage
-                      var record = localStorage.getItem(d.id);
+                      var record = getSetting(d.id);
                       if(record) {
                           var obj = JSON.parse(record);
                           if("py" in obj) { // Check if attribute is valid
@@ -913,8 +914,11 @@ function visualizeData() {
                   })
                   .attr("fixed", function(d) {
                       // Setting 'fixed' based on localstorage
-                      var record = localStorage.getItem(d.id);
-                      if(record) {
+                      var record = getSetting(d.id);
+                      if(record && gravity !== "aggressive") { 
+                          d.fixed = true;
+                          return true;
+                          /*
                           if(d.x > 0 && d.x < width && d.y > 0 && d.y < height && gravity !== "aggressive") {
                                 d.fixed = true;
                                 return true;
@@ -922,7 +926,8 @@ function visualizeData() {
                                 d.fixed = false;
                                 return false; 
                           }
-                      }           
+                          */
+                      }          
                       return false;
                   })        
                   .on("click", function(d) {
@@ -930,7 +935,6 @@ function visualizeData() {
                        if(!d3.event.defaultPrevented) {
                            // Remove all overlays and create a record overlay
                            removeOverlays();
-                           
                            _recordNodeOnClick(d3.event, d, this);
                        }
                   })
@@ -1133,7 +1137,6 @@ function visualizeData() {
        force.stop(); 
     }
     
-
     /** Tick handler for curved lines */
     function curvedTick() {
         updateCurvedLines(bottomLines);
@@ -1158,9 +1161,7 @@ function visualizeData() {
         });
 
         // Update node locations
-        node.attr("transform", function(d) { 
-             return "translate(" + d.x + "," + d.y + ")"; 
-        });
+        updateNodes();
     }
     
     /** Tick handler for straight lines */  
@@ -1178,10 +1179,20 @@ function visualizeData() {
                   (d.source.y +(d.target.y-d.source.y)/2) + " " +  
                   d.target.x + "," + d.target.y;
         });
-
-         // Update node locations
+        // Update node locations
+        updateNodes();
+    }
+    
+    /** Updates node locations */
+    function updateNodes() {
         node.attr("transform", function(d) { 
-             return "translate(" + d.x + "," + d.y + ")"; 
+            // LocalStorage check
+            //var record = getSetting(d.id);
+           // if(record == undefined) {
+                var obj = {px: d.px, py: d.py, x: d.x, y: d.y};
+                putSetting(d.id, JSON.stringify(obj));
+           // }
+            return "translate(" + d.x + "," + d.y + ")"; 
         });
     }
     
@@ -1230,13 +1241,10 @@ function visualizeData() {
         
 
         settings.triggerSelection.call(this, settings.selectedNodeIds);
-        
         //if(this.options.isapplication){
         //    $(this.document).trigger( top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:'d3svg'} );
         //}
-        
-        //this._trigger( "onselect", event, selected );
-            
+        //this._trigger( "onselect", event, selected ); 
     }
 
 } //end visualizeData
