@@ -279,7 +279,7 @@ $.widget( "heurist.resultListMenu", {
                 
           }else if(action == "menu-selected-email") {
               
-              this.openEmaiForm();
+              this.openEmailForm();
                 
           }else if(action == "menu-selected-ownership"){                  
               
@@ -532,15 +532,15 @@ $.widget( "heurist.resultListMenu", {
             top.HEURIST.workgroups = workgroups2;
     },
     
-    openEmaiForm: function() {
+    openEmailForm: function() {
         // Selection check
-        var ids = this.getSelectionIds("Select at least one record to bookmark");
+        var ids = this.getSelectionIds("Select at least one record to e-mail");
         if(Hul.isempty(ids)) {
             return;  
         }
         
         // Open URL
-        var url = top.HAPI4.basePath+ "page/sendEmail.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePath+ "php/send_email.php?db=" + top.HAPI4.database;
         top.HEURIST.user.selectedRecordIds = ids;
         Hul.showDialog(url, { width:500, height:600 });
         

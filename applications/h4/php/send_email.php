@@ -26,14 +26,40 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/common/utils_mail.php');
 
-?>
+// POST request    
+if(isset($_POST['data'])) {
+    $data = json_decode($_POST['data']);
+    $response = "";
+
+    $subject = $data->subject;  // Email subject
+    $header = $data->header;    // Email header
+    foreach($data->emails as $email) {
+        // Determine message & recipients
+        $message = $email->message;       // Email message
+        $recipients = $email->recipients; // One or more e-mail adresses
+        foreach($recipients as $recipient) {
+            // Check if the e-mail address is valid
+            if(filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+                // Send e-mail
+                $result = sendEmail($recipient, $subject, $message, $header); // utils_mail.php 
+                $response .= $recipient . " --> " . $result . "\n";    
+            }else{
+                $response .= $recipient . " --> invalid e-mail address\n";
+            }
+        }
+    }
+    
+    echo $response;
+    exit(); 
+}
+   
+// GET REQUEST 
+?> 
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
   <title>Send email</title>
 
   <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -196,9 +222,13 @@
 
     <!-- Javascript -->
     <script type="text/javascript">
-        var storage_key = "email";
+        var storage_key = "email"; // Key used to store data
         var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"]; // ID's of the dropdowns 
-        var types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum", "termlist"]; // Types that can be selected from the dropdown
+        var text_types = ["freetext", "blocktext"]; // Text only types for the dropdowns
+        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum", "termlist"]; // All types that can be selected from the dropdown
+        var definitions; // Record type field definitions
+        var rectype_index = 4; // Record type index in object
+        var type_index = 23; // Field type index in object
         var ids = top.HEURIST.user.selectedRecordIds; // Selected record ID's
         var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords(); // Array of record objects
         var record; // First record in the list, used to determine the Record Types
@@ -213,6 +243,55 @@
             localStorage[storage_key+name] = value;
         }
         
+        // Determines valid options
+        function determineOptions(types) {
+            // Determine options
+            var options = []; 
+            for(var d in definitions) { // Go through each field for the first record type
+                var field = definitions[d]; 
+                // Appropriate type check
+                if(types.indexOf(field[type_index]) >= 0) { // Check if this field is allowed 
+                    options.push({name: field[0], value: d}); 
+                }
+            }  
+            
+            // Sort alphabetically
+            options.sort(function(a, b) {
+                return a.name.localeCompare(b.name);
+            });
+            console.log("Determined options", options);
+            
+            // Generate HTML  
+            var html = "<option value=\"-1\" disabled=\"disabled\" selected=\"selected\">Select...</option>";
+            if(options.length > 0) {
+                for(var i=0; i<options.length; i++) {
+                    html += "<option value=\"" +options[i].value+ "\">" + options[i].name + "</option>"; // Add field to dropdown    
+                }
+            }
+            return html;
+        }
+        
+        // Fills a dropdown with options
+        function fillDropdown(i, options) {
+            // Append options to each dropdown
+            $(dropdowns[i]).html(options);
+            
+            // Remember last selected index
+            var selectedIndex = getItem(dropdowns[i]);
+            if(selectedIndex) {
+                $(dropdowns[i]).prop("selectedIndex", selectedIndex);
+            }
+
+            // Listen to dropdown hanges
+            $(dropdowns[i]).change(function(e) {
+                var id = $(this).attr("id"); // Dropdown ID
+                var value = $(this).prop("selectedIndex"); // Selected dropdown index
+                ///console.log("Checkbox " + id + " changed to " + value);  
+                putItem("#"+id, value); // Store data
+                redo(); // Message needs to be re-done
+            });
+        }
+        
         // Sets up all fields
         function setup() {
             // Selected records
@@ -220,120 +299,53 @@
             
             // Determine record type of first record
             for(var r in records) {
-                this.record = records[r];
-                var rectype = record[4];
-                var definition = top.HEURIST4.rectypes.typedefs[rectype];
-                console.log("Rectype: " + rectype + ", definition", definition);
+                this.record = records[r]; // Reference to first record
+                var rectype = record[rectype_index]; // Record type of first record
+                this.definitions = top.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
+                console.log("Rectype: " + rectype + ", definitions", definitions);
                 
-                // Add record fields to dropdown
-                var options = "<option value=\"-1\" disabled=\"disabled\" selected=\"selected\">Select...</option>";
-                for(var d in definition.dtFields) {
-                    var field = definition.dtFields[d];
-                    //console.log("Field", field);
-                    // Appropriate type check
-                    if(types.indexOf(field[23]) >= 0) { 
-                        options += "<option value=\"" +d+ "\">" + field[0] + "</option>";     
-                    }
-                }
-                //console.log("Options", options);
+                // TEXT ONLY DROPDOWNS
+                var text_options = determineOptions(text_types);
+                fillDropdown(0, text_options);
+                fillDropdown(1, text_options);
+                fillDropdown(2, text_options);
                 
-                // Setup dropdowns
-                for(var i=0; i < dropdowns.length; i++) {
-                    // Append options to each dropdown
-                    $(dropdowns[i]).html(options);
-                    var selectedIndex = getItem(dropdowns[i]);
-                    if(selectedIndex) {
-                        $(dropdowns[i]).prop("selectedIndex", selectedIndex);
-                    }
-
-                    // Listen to changes
-                    $(dropdowns[i]).change(function(e) {
-                        var id = $(this).attr("id");
-                        var value = $(this).prop("selectedIndex");
-                        ///console.log("Checkbox " + id + " changed to " + value);  
-                        putItem("#"+id, value);
-                        redo();
-                    });
-                }
+                // OTHER DROPDOWNS
+                var all_options = determineOptions(all_types);
+                fillDropdown(3, all_options);
+                fillDropdown(4, all_options);
+                fillDropdown(5, all_options);
                 break;
             }
             
             // Setup subject field
             $("#subject").on("keyup", function(e) {
                 var text = $(this).val();
-                putItem("subject", text);     
+                putItem("subject", text); // Store subject text    
             });
-            $("#subject").val(getItem("subject"));
+            $("#subject").val(getItem("subject")); // Set subject text
             
             // Setup message field
             $("#message").on("keyup", function(e) {
                 var text = $(this).val();
-                putItem("message", text);
+                putItem("message", text); // Store message text
             });
-            $("#message").val(getItem("message"));
+            $("#message").val(getItem("message")); // Set message text
             
         }
         
-        // Changes the text area's
+        // Swaps the text area's
         function redo() {
             $("#prepare").text("Prepare emails");    
-            $("#redo").hide();
-            $("#message-prepared").slideUp(500, function(e) {
-                $("#message").slideDown(500);
+            $("#redo").hide(); // Hide redeo button
+            $("#message-prepared").slideUp(500, function(e) {  // Hide prepared message
+                $("#message").slideDown(500);  // Show raw message
             })   
         }
         
-        // Prepares the email
-        function prepare() {    
-            // Raw message
-            var rawMessage =  $("#message").val();
-            console.log("Raw message: " + rawMessage);  
-                
-            // Definition
-            var rectype = record[4];
-            var definition = top.HEURIST4.rectypes.typedefs[rectype];
-            console.log("Definition", definition);
-            
-            // Check action
-            var buttonText = $("#prepare").text()
-            if(buttonText.indexOf("Prepare") >= 0) { // Check button text
-                // PREPARE EMAILS
-                var message = prepareMessage(rawMessage, record, definition.dtFields);
-                
-                // Show prepared message in new text area
-                console.log("Prepared message: " + message);
-                $("#message").slideUp(500, "linear", function(e) {
-                    $("#redo").slideDown(500);
-                    $("#message-prepared").val(message).slideDown(500);
-                    $("#prepare").text("Send emails");    
-                });
-            }else{
-                // SEND EMAILS
-                var data = {};
-                data.subject = $("#subject").val();
-                data.header = "header";
-                data.emails = {};
- 
-                // Construct a message based on record data
-                for(var r in records) {
-                    var object = {};
-                    
-                    // Email
-                    object.email = getValue(records[r], $("#email").val());  // Determine e-mail address(es) [comma seperated]
-
-                    // Message 
-                    var message = prepareMessage(rawMessage, records[r], definition.dtFields); // Determine message
-
-                    // TODO: Send out e-mail
-                    //sendEmail($email_to, $email_title, $email_text, $email_header);
-                    
-                }
-            }
-        }
-        
-        // Determines the actual record value at the given index
+         // Determines the actual record value at the given index
         function getValue(record, type, index) {
-            console.log("Getting value for record", record);
+            //console.log("Getting value for record", record);
             
             // Determine type
             if(type == "freetext" || type =="blocktext" || type == "date") {
@@ -359,7 +371,7 @@
                          
             } 
  
-            return "undefined";
+            return null;
         }
         
         // Replaces the raw message text with fields in a record
@@ -370,7 +382,7 @@
                 var index = $(dropdowns[i]).val();   // Record index
                 var value = "?";
                 if(index && index > 0) {
-                    value = getValue(record, fields[index][23], index); // Record value at the given index
+                    value = getValue(record, fields[index][type_index], index); // Record value at the given index
                 }
                 
                 // Regex
@@ -378,6 +390,55 @@
                 message = message.replace(regex, value);    // Replace all occurences with @value
             }    
             return message; 
+        }
+        
+        // Prepares the email
+        function prepare() {    
+            // Raw message
+            var rawMessage =  $("#message").val();
+            //console.log("Raw message: " + rawMessage);  
+ 
+            // Check action
+            var buttonText = $("#prepare").text()
+            if(buttonText.indexOf("Prepare") >= 0) { // Check button text to determine action
+                // PREPARE EMAILS
+                var message = prepareMessage(rawMessage, record, definitions);
+                
+                // Show prepared message in new text area
+                //console.log("Prepared message: " + message);
+                $("#message").slideUp(500, "linear", function(e) {
+                    $("#redo").slideDown(500);
+                    $("#message-prepared").val(message).slideDown(500);
+                    $("#prepare").text("Send emails");    
+                });
+            }else{
+                // SEND EMAILS
+                var data = {};
+                data.subject = $("#subject").val();
+                data.header = "header";
+                data.emails = [];
+ 
+                // Construct a message based on record data
+                for(var r in records) {
+                    var email = {};
+                    
+                    // Email
+                    var emailIndex = $("#email").val();  // Dropdown index
+                    var emailType = definitions[emailIndex][type_index];  // Field type
+                    email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
+                    
+                    // Message
+                    email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
+                    data.emails.push(email);
+                }
+                
+                // Send data to PHP file, everything is checked server-sided
+                console.log("Data to send", data);
+                $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
+                    console.log("Posted data, response: ", response);
+                    alert(response);  
+                });
+            }
         }
         
     </script>
