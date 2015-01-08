@@ -47,6 +47,7 @@ var svg;        // The SVG where the visualisation will be executed on
             triggerSelection: function(selection){}, 
             
             showCounts: true,
+            limit: 2000,
             
             // UI setting controls
             showLineSettings: true,
@@ -94,7 +95,7 @@ var svg;        // The SVG where the visualisation will be executed on
             fisheye: false,
             
             gravity: "off",
-            attraction: -700,
+            attraction: -3000,
             
             translatex: 0,
             translatey: 0,
@@ -106,9 +107,15 @@ var svg;        // The SVG where the visualisation will be executed on
         checkStoredSettings();
         handleSettingsInUI();
 
-        // Transform
-        console.log("CALLING VISUALIZE DATA");
-        visualizeData();
+        // Check visualisation limit
+        console.log("SETTINGS.DATA", settings.data);
+        var amount = Object.keys(settings.data.nodes).length;
+        if(amount > settings.limit) {
+             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set at ' +settings.limit+ ' records, you are trying to visualize ' +amount+ ' records</text>');  
+             return; 
+        }else{
+            visualizeData();    
+        }
  
         return this;
     };
@@ -275,7 +282,7 @@ function handleSettingsInUI() {
                     var color = "#"+hex; 
                     
                     putSetting(setting_linecolor, color);
-                    $(".link").attr("stroke", color);
+                    $(".bottom.link").attr("stroke", color);
             
                     $(el).css('background-color', color);
                     $(el).colpickHide();
@@ -649,32 +656,32 @@ function visualizeData() {
     var scale = getSetting(setting_scale);
     var translateX = getSetting(setting_translatex);
     var translateY = getSetting(setting_translatey);
-    
+    console.log("Scale: " + scale + ", translateX " + translateX + ", translateY " + translateY);
+
     // Append zoomable container       
     var container = svg.append("g")
-                       .attr("id", "the-container");    
-    
+                       .attr("id", "the-container")
+                       .attr("transform", "translate("+translateX+", "+translateY+")scale("+scale+")"); 
+                       
     // Adding zoom
     var zoomBehaviour = d3.behavior.zoom()
-                          .center([width/2, 0])
-                          //.scale(scale)
-                          /*.translate(function(d) {
-                              return [5,5];
-                          }) */
-                          .scaleExtent([0.1, 5])
+                          .translate([translateX, translateY])
+                          .scale(scale)
+                          .scaleExtent([0.05, 10])
                           .on("zoom", zoomed);
      
     /** Updates the container after a zoom event */             
     function zoomed() {      
         // Translate
-        //console.log("Zoomed!", d3.event.translate);   
+        console.log("Zoomed!", d3.event.translate);   
         if(d3.event.translate !== undefined) {
             if(!isNaN(d3.event.translate[0])) {           
-                putSetting(setting_translatex, d3.event.translate[0]);
+                putSetting(setting_translatex, d3.event.translate[0]); 
             }
             if(!isNaN(d3.event.translate[1])) {    
                 putSetting(setting_translatey, d3.event.translate[1]);
             }
+            console.log("translateX " + getSetting(setting_translatex) + ", translateY " + getSetting(setting_translatey));
         }
         // Scale
         //console.log(d3.event.scale);
@@ -741,7 +748,7 @@ function visualizeData() {
              .attr("d", "M0,-5L10,0L0,5");
     
     /** Add lines */        
-    function addLines() {
+    function addLines(clazz) {
         // Add the chosen lines [using the linetype setting]  
         var lines;
         if(linetype == "curved") {
@@ -762,7 +769,7 @@ function visualizeData() {
          
         // Adding shared attributes
         lines.attr("class", function(d) {
-                return "link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                return clazz + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
              }) 
              .attr("marker-mid", function(d) {
                 return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")";
@@ -784,14 +791,14 @@ function visualizeData() {
     }
     
     // Bottom lines
-    var bottomLines = addLines();
+    var bottomLines = addLines("bottom");
     bottomLines.attr("stroke", linecolor)
                .style("stroke-width", function(d) { 
                     return 0.5 + getLineWidth(d.targetcount);
                });
     
     // Top lines
-    var topLines = addLines();
+    var topLines = addLines("top");
     topLines.attr("stroke", "rgba(255, 255, 255, 0.0)")
             .style("stroke-width", function(d) { 
                    return 8.5 + getLineWidth(d.targetcount);
@@ -1198,11 +1205,6 @@ function visualizeData() {
             
         });
     }
-    
-    // Finally apply translate & scale
-    //container.attr("transform", "translate("+translateX+","+translateY+")scale("+scale+")");
-    container.attr("transform", "translate(0,0)scale("+scale+")");
-    
     
     /******************************** SELECTION *******************************/
     function _recordNodeOnClick(event, data, node) {

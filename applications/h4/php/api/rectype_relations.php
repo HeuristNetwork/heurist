@@ -61,7 +61,7 @@
     function getRectypes($system) {
         $rectypes = array();
         
-        // Select all rectype ids, names and count the occurence in the Record table
+        // Select all rectype ids, names and count the occurence in the Record table. The defRectypes table is used to retrieve all record types in a certain database an the Records table is used to determine the occurence.
         $query = "SELECT d.rty_ID as id, d.rty_Name as name, COUNT(r.rec_RecTypeID) as count FROM defRecTypes d LEFT JOIN Records r ON d.rty_ID=r.rec_RecTypeID GROUP BY id";
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) {   
@@ -87,7 +87,7 @@
     function getRelations($system, $rectype) {
         $relations = array();
         
-        // Select all relation details that have "dty_PtrTargetRectypeIDs" defined
+        // Select all relation details that have "dty_PtrTargetRectypeIDs" defined.  The defRecStructure table is used to determine the structure of a record. The defDetailTypes and recDetails tabes are used to ultimately get access to the "dty.dty_PtrTargetRectypeIDs" field. This field stores a comma seperated links of record types where this record points to. 
         $query = "SELECT rst_DetailTypeID as id, rst_DisplayName as name, COUNT(rd.dtl_ID) as count, dty.dty_Type as reltype, dty.dty_PtrTargetRectypeIDs as ids FROM defRecStructure rst INNER JOIN defDetailTypes dty ON rst.rst_DetailTypeID=dty.dty_ID LEFT JOIN recDetails rd ON rd.dtl_DetailTypeID=rst.rst_DetailTypeID WHERE rst.rst_RectypeID=" .$rectype->id. " AND NOT (dty.dty_PtrTargetRectypeIDs IS NULL OR dty.dty_PtrTargetRectypeIDs='') GROUP BY rst.rst_DetailTypeID;";
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) { 
@@ -119,8 +119,8 @@
         //echo "\nID's for relation #" . $relation->id . ": " . $relation->ids;
         $ids = explode(",", $relation->ids);
         foreach($ids as $id) {
-            // Count how many times the $relation points to this id      
-            $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID WHERE r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
+            // Count how many times the $relation points to this id. The recLinks table is used to determine record links. rl_sourceID and rl_targetID details are looked up in the Records table. Actual relationships are then filtered by using the record type id and detail type id of $relation and the record type id of the target record.   
+            $query = "SELECT COUNT(r2.rec_ID) as count, rl.rl_DetailTypeID, r1.rec_Title, r1.rec_RecTypeID, r2.rec_Title, r2.rec_RecTypeID FROM recLinks rl INNER JOIN Records r1 ON r1.rec_ID=rl.rl_SourceID INNER JOIN Records r2 ON r2.rec_ID=rl.rl_TargetID WHERE rl.rl_DetailTypeID=" .$relation->id. " AND r1.rec_RecTypeID=" .$rectype->id. " AND r2.rec_RecTypeID=".$id;
            
             if($res = $system->get_mysqli()->query($query)) {
                 if($row = $res->fetch_assoc()) {
@@ -175,10 +175,13 @@
                 foreach($targets as $target) {
                     $link = new stdClass();
                     
+                    // Records
                     $link->source = $i;
                     $link->target = getIndex($rectypes, $target);
-                    $link->targetcount = $target->count;
                     $link->relation = $relation;
+                    // Counts
+                    $link->targetcount = $target->count; 
+                    $link->relation->count = $target->count;
 
                     //print_r($link);
                     array_push($links, $link);      

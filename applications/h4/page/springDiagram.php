@@ -56,12 +56,14 @@
         <!-- Call from parent iframe -->
         <script>
             /** Shows data visually */
+            var limit = 2000;
             
             function showSelection( selectedRecordsIds ){
                  visualizeSelection( selectedRecordsIds );
             }
             
             function showData(data, selectedRecordsIds, onSelectEvent) {
+                // Processing...
                 console.log("showData called inside springDiagram");
                 $("#d3svg").html('<text x="25" y="25" fill="black">Processing...</text>');
                 

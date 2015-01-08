@@ -432,12 +432,17 @@ if(isset($_POST['data'])) {
                     data.emails.push(email);
                 }
                 
+                // Include e-mail to current user/database owner
+                var owner = {recipients: [top.HAPI4.sysinfo.dbowner_email], message: rawMessage};
+                data.emails.push(owner);
+                
                 // Send data to PHP file, everything is checked server-sided
                 console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
                     alert(response);  
                 });
+
             }
         }
         
