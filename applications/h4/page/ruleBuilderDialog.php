@@ -71,11 +71,11 @@
             .rulebuilder>div{
                 text-align:left;
                 display: inline-block;
-                width:160px;
+                width:200px;
             }
             .rulebuilder>div>select{
-                min-width:150px;
-                max-width:150px;
+                min-width:180px;
+                max-width:180px;
             }
         </style>
     </head>
@@ -83,10 +83,11 @@
         <div style="overflow:hidden;width:100%;height:100%">
 
             <div style="position:absolute;width:98%;top:0" class="rulebuilder">
-                <div style="width:200px;font-weight:bold">Source</div>
-                <div style="font-weight:bold">Field</div>
-                <div style="font-weight:bold">Relation Type</div>
-                <div style="font-weight:bold">Target</div><div>Filter</div>
+                <div style="width:220px;font-weight:bold">Starting point (entity type)</div>
+                <div style="width:195px;font-weight:bold">Relationship Field</div>
+                <div style="width:195px;font-weight:bold">Relationship Type</div>
+                <div style="width:195px;font-weight:bold">Target entity type</div>
+                <div style="font-weight:bold">Optional Filter (query)</div>
             </div>      
         
             <div style="position:absolute;width:98%;top:2em;bottom:4em;overflow-y:auto" id="level1">
@@ -107,7 +108,7 @@ When multiple rules are applied, they operate in turn on the initial selection s
             </div>
             
             <div style="position:absolute;width:98%;height:2em;bottom:10px">
-                <button id="btn_add_level1">Add Level 1</button> 
+                <button id="btn_add_level1">Add new starting point</button> 
                 <button id="btn_save">Save Rules</button>
                 <!-- <button id="btn_apply">Apply Rules</button> -->
                 <span style="float:right"><button id="btn_help">Help</button></span>

@@ -509,7 +509,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 
 .ui-accordion .ui-accordion-content {
-    padding: 1em 0.8em;
+    padding: 0.1em;
 }
 
 /* for yox viewer */

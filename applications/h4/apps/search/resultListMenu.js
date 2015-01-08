@@ -638,11 +638,12 @@ $.widget( "heurist.resultListMenu", {
 //-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------    
     
     selectAll: function(){
+         this._selection = top.HAPI4.getSelection('all', false);    
          $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:"all", source:this.element.attr('id')} );
     },
 
     selectNone: function(){
-         //this._selection = null;
+         this._selection = null;
          $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:null, source:this.element.attr('id')} );
     },
 

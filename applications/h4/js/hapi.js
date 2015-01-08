@@ -760,10 +760,10 @@ function hAPI(_db, _oninit) { //, _currentUser
         , getSelection: function(selection, needIds){
             
                 if (selection == "all") {
-                    selection = needIds ?that.currentRecordset.getIds() :that.currentRecordset;
+                    selection = needIds ?this.currentRecordset.getIds() :this.currentRecordset;
                 }
                 if( selection ) {
-                    if( (typeof selection == "function") && selection.isA("hRecordSet") ){
+                    if( (typeof selection.isA == "function") && selection.isA("hRecordSet") ){
                         if(selection.length()>0){
                             return (needIds) ?selection.getIds():selection; //array of record ids   
                         }

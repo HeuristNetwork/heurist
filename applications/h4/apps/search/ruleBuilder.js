@@ -52,7 +52,7 @@ $.widget( "heurist.ruleBuilder", {
         this.element.addClass('rulebuilder');
 
         //create list/combobox of source record types
-        var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'200px'}).appendTo(this.element);
+        var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'220px'}).appendTo(this.element);
         
         this.select_source_rectype = $( "<select>" )
                 .attr('title', 'explanatory rollover' )
@@ -82,14 +82,14 @@ $.widget( "heurist.ruleBuilder", {
         //        
         this.additional_filter = $( "<input>" ).addClass('text ui-corner-all')
                 .attr('title', 'explanatory rollover' )
-                .appendTo( $('<div>').appendTo(this.element) );
+                .appendTo( $('<div>').css({'width':'170px'}).appendTo(this.element) );
         
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
-        this.div_btn =  $('<div>').appendTo(this.element);
+        this.div_btn =  $('<div>').css({'width':'120px'}).appendTo(this.element);
 
         if(this.options.level<3)
-        this.btn_add_next_level = $( "<button>", {text:'Add Level'} )
+        this.btn_add_next_level = $( "<button>", {text:'Add Next'} )
                 .attr('title', 'explanatory rollover' )
                 .button().appendTo(this.div_btn);
 
@@ -176,7 +176,9 @@ $.widget( "heurist.ruleBuilder", {
         
         //check if parent rulebuilder has no more children
         if(this.element.parent().children('.rulebuilder').length==1){
-           this.element.parent().find("select").prop('disabled', false);
+           this.element.parent().find("select").each(function(idx, sel){ 
+                if($(sel).find("option").length>1) 
+                    $(sel).prop('disabled', false); });
         }
         
         this.element.remove();
@@ -273,6 +275,14 @@ $.widget( "heurist.ruleBuilder", {
     //update relation and target selectors
     _onSelectRectype: function(event){
         
+            //remove ian's trailing &gt;
+            function __trimeIanGt(name){
+                   name = name.trim();
+                   if(name.substr(name.length-1,1)=='>') name = name.substr(0,name.length-2);
+                   return name;
+            }
+        
+        
             var rt_ID = this.select_source_rectype.val(); //event.target.value;
             
             //find all relation types
@@ -311,6 +321,8 @@ $.widget( "heurist.ruleBuilder", {
                         var name = details[dtyID][fi_name];
 
                         if(!top.HEURIST4.util.isempty(name)){
+                            
+                            name = __trimeIanGt(name);
                             
                             //find constraints
                             var constraints = details[dtyID][fi_rectypes];
@@ -356,6 +368,8 @@ $.widget( "heurist.ruleBuilder", {
 
                             if(!top.HEURIST4.util.isempty(name)){
                                 
+                                name = __trimeIanGt(name);
+                                
                                 //find constraints
                                 var constraints = details[dtyID][fi_rectypes];
                                 constraints = ( typeof(constraints) === "string" && !top.HEURIST4.util.isempty(constraints) )
@@ -392,6 +406,8 @@ $.widget( "heurist.ruleBuilder", {
                                 if(isnotfound){ //it means this is reverse
                                 
                                     name = top.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
+                                    name = __trimeIanGt(name);
+                                    
                                     var rt_name = alldetails[rtyID].commonFields[0];
                                 
                                     if(details[dtyID][fi_type]=='relmarker'){
@@ -438,14 +454,16 @@ $.widget( "heurist.ruleBuilder", {
             }
             */
             if(arr_fields.length>1){
-               arr_fields.unshift({key:'', title:'any'});
+               arr_fields.unshift({key:'', title:'any'}); //add any as a first element
+               this.select_fields.prop('disabled', false);
                //this.select_fields.show();
             }else{
                //this.select_fields.hide();
+               this.select_fields.prop('disabled', true);
             }
             
             top.HEURIST4.util.createSelector(this.select_fields.get(0), arr_fields);
-            this.select_fields.val('')
+            this.select_fields.val('');
             this._onSelectFieldtype();
             
             // selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray
@@ -484,12 +502,16 @@ $.widget( "heurist.ruleBuilder", {
                             is_not_relation = false;
                             //this.label_3.show();
                             this.select_reltype.show();
+                            this.select_reltype.prop('disabled', false);
                             top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'any', false);
                         }
                         //reduced list of constraints
                         top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
                         if(arr_field.rectypes.length>1){
                             top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'any');
+                            this.select_target_rectype.prop('disabled', false);
+                        }else{
+                            this.select_target_rectype.prop('disabled', true);
                         }
                         //this._arr_rectypes_subset = arr_field.rectypes;
                         is_not_selected = false;
@@ -499,7 +521,8 @@ $.widget( "heurist.ruleBuilder", {
                 if(is_not_relation){
                     //this.label_3.hide();
                     this.select_reltype.show();
-                    top.HEURIST4.util.createSelector(this.select_reltype.get(0), 'pointer');    
+                    top.HEURIST4.util.createSelector(this.select_reltype.get(0), 'pointer');
+                    this.select_reltype.prop('disabled', true);    
                 }
             }else{
                 this.select_reltype.hide();
@@ -510,6 +533,7 @@ $.widget( "heurist.ruleBuilder", {
                 if(this._arr_rectypes.length>1){
                     top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'any');
                 }
+                this.select_target_rectype.prop('disabled', this.select_target_rectype.find("option").length==1);
                 
                 //this._arr_rectypes_subset = this._arr_rectypes;
             }

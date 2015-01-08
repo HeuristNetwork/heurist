@@ -33,6 +33,7 @@ $.widget( "heurist.search_links_tree", {
 
     currentSearch: null,
     hSvsEdit: null,
+    treeviews:{},
 
     // the constructor
     // create filter+button and div for tree
@@ -69,6 +70,7 @@ $.widget( "heurist.search_links_tree", {
 
         this.accordeon = $( "<div>" ).css({'top':hasHeader?'4em':'2em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
         
+        
         this.edit_dialog = null;
             
         // listeners            
@@ -81,17 +83,20 @@ $.widget( "heurist.search_links_tree", {
                 return;
               }
               // Pass a string to perform case insensitive matching
-              var tree = that.tree.fancytree("getTree");
-              var n = tree.filterNodes(match, leavesOnly); //n - found
+              for (var groupID in that.treeviews)
+                if(groupID){
+                    var n = that.treeviews[groupID].filterNodes(match, leavesOnly); //n - found
+                }
              
               that.btn_reset.attr("disabled", false);
         });        
         
         this._on( this.btn_reset, { click: function(){
-            this.filter_input.val("");
-            //@todo for all trees
-            //var tree = this.tree.fancytree("getTree");
-            //tree.clearFilter();            
+              this.filter_input.val("");
+              for (var groupID in this.treeviews)
+                if(groupID){
+                    this.treeviews[groupID].clearFilter();
+                }
         } });
         this._on( this.btn_save, { click: "_saveTreeData"} );
         
@@ -146,15 +151,18 @@ $.widget( "heurist.search_links_tree", {
     },
     
     _saveTreeData: function(){
-        
-        //@todo - for all trees
-        /*
-            var tree = this.tree.fancytree("getTree");
-            var d = tree.toDict(true);
-            var request = { data:JSON.stringify(d) };
+
+            var treeData = {};        
+              for (var groupID in this.treeviews)
+                if(groupID){
+                    var d = this.treeviews[groupID].toDict(true);
+                    
+                    treeData[groupID] = d;
+                }
+          
+            var request = { data:JSON.stringify(treeData) };
             
             top.HAPI4.SystemMgr.ssearch_savetree( request, function(response){} );
-       */     
     },
 
     //
@@ -167,6 +175,8 @@ $.widget( "heurist.search_links_tree", {
             //@todo clear accordeon and show login button
             return;
         }
+        
+        this.treeviews = {};
         
         var that = this;
         
@@ -181,7 +191,7 @@ $.widget( "heurist.search_links_tree", {
         }else if(!top.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded - load from file [user_id]_svstree.json
             
             top.HAPI4.SystemMgr.ssearch_gettree( function(response){
-                /*  TEMP
+                
                 if(response.status = top.HAPI4.ResponseStatus.OK){
                     try {
                         top.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
@@ -209,9 +219,9 @@ $.widget( "heurist.search_links_tree", {
                         top.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(top.HAPI4.currentUser.ugr_SvsTreeData);
                     }
                     catch (err) {
-                    }
+                    }  
                 }
-                */
+                
                 if(!top.HAPI4.currentUser.ugr_SvsTreeData) //treeview was not saved - define tree data by default
                         top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
                         
@@ -531,6 +541,8 @@ $.widget( "heurist.search_links_tree", {
   });
   
   
+        this.treeviews[groupID] = tree.fancytree("getTree");
+  
         return tree;
 
     },
@@ -620,8 +632,8 @@ $.widget( "heurist.search_links_tree", {
                 }
                 
                 if(!domain || domain==domain2){
-                    var sname = ssearches[svsID][_NAME] + saddition;
-                    res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted, iconclass:'ui-icon-heart' } );    //, url:ssearches[svsID][_QUERY]
+                    var sname = ssearches[svsID][_NAME] + saddition;                     //, iconclass:'ui-icon icon-share-alt'
+                    res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted } );    //, url:ssearches[svsID][_QUERY]
                 }
             }
         }
@@ -764,7 +776,7 @@ $.widget( "heurist.search_links_tree", {
                 this.edit_dialog = new hSvsEdit();
             }
             //this.edit_dialog.callback_method  = callback;
-            this.edit_dialog.show( mode, callback, svsID, squery  );
+            this.edit_dialog.show( mode, callback, svsID, squery );
                 
         }else{
             $.getScript(top.HAPI4.basePath+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, callback, svsID, squery); } );
