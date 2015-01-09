@@ -587,24 +587,6 @@ function getEntityRadius(count) {
     return circleSize + executeFormula(count, maxRadius) - 1;
 }
 
-// Visualizes selected nodes
-function visualizeSelection(selectedNodeIds) {
-
-    settings.selectedNodeIds=selectedNodeIds;
-    //deselect all others
-    d3.selectAll(".node").select(".foreground").style("fill", "#fff");
-    d3.selectAll(".node").select(".background").style("fill", "#fff");
-    
-    if(selectedNodeIds && selectedNodeIds.length>0){
-        //select new ones
-        for(var i=0; i<selectedNodeIds.length; i++){
-            var node= d3.select(".id"+selectedNodeIds[i]);
-            node.select(".foreground").style("fill", "#bee4f8");   
-            node.select(".background").style("fill", "#bee4f8");     
-        }
-    }            
-}
-
 /***********************************START OF VISUALISATION FUNCIONS***********************************/
 /** Visualizes the data */ 
 function visualizeData() {
@@ -617,22 +599,6 @@ function visualizeData() {
     var data = settings.getData.call(this, settings.data);
     console.log("RECORD DATA");
     console.log(data); 
-      
-    // Limit check
-    if((gravity === "touch" || gravity == "on") && Object.keys(data.nodes).length > 1000) {
-        svg.selectAll("text")
-           .data(["Sorry, there are too many records to render.", "When gravity is enabled the limit is set at 1000 records."])
-           .enter()
-           .append("text")
-           .text(function(d) {
-               return d;
-           })
-           .attr("x", width/2-100)
-           .attr("y", function(d,i) {
-               return height/2 + i*15;
-           });             
-        return false;
-    }    
    
     // Line settings
     var linetype = getSetting(setting_linetype);
@@ -661,7 +627,7 @@ function visualizeData() {
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "the-container")
-                       .attr("transform", "translate("+translateX+", "+translateY+")scale("+scale+")"); 
+                       .attr("transform", "translate("+translateX+", "+translateY+")scale("+scale+")");
                        
     // Adding zoom
     var zoomBehaviour = d3.behavior.zoom()
@@ -670,31 +636,44 @@ function visualizeData() {
                           .scaleExtent([0.05, 10])
                           .on("zoom", zoomed);
      
-    /** Updates the container after a zoom event */             
-    function zoomed() {      
-        // Translate
-        console.log("Zoomed!", d3.event.translate);   
-        if(d3.event.translate !== undefined) {
-            if(!isNaN(d3.event.translate[0])) {           
-                putSetting(setting_translatex, d3.event.translate[0]); 
+    /** Updates the container after a zoom event */    
+    var rightClicked = false;         
+    function zoomed() { 
+        // Trying to select a group of nodes?
+        if(rightClicked) {
+            console.log("Translate before", d3.event);
+            console.log(d3.event.translate);
+            d3.event.translate[0] -= d3.event.sourceEvent.movementX;
+            d3.event.translate[1] -= d3.event.sourceEvent.movementY;
+            console.log("Translate after", d3.event.translate);
+            
+        }else{
+ 
+            // Translate
+            //console.log("Zoomed!", d3.event.translate);   
+            if(d3.event.translate !== undefined) {
+                if(!isNaN(d3.event.translate[0])) {           
+                    putSetting(setting_translatex, d3.event.translate[0]); 
+                }
+                if(!isNaN(d3.event.translate[1])) {    
+                    putSetting(setting_translatey, d3.event.translate[1]);
+                }
+                //console.log("translateX " + getSetting(setting_translatex) + ", translateY " + getSetting(setting_translatey));
             }
-            if(!isNaN(d3.event.translate[1])) {    
-                putSetting(setting_translatey, d3.event.translate[1]);
-            }
-            console.log("translateX " + getSetting(setting_translatex) + ", translateY " + getSetting(setting_translatey));
-        }
-        // Scale
-        //console.log(d3.event.scale);
-        if(!isNaN(d3.event.scale)) {
-            putSetting(setting_scale, d3.event.scale);
-        }   
-        // Transform         
-        var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
-        //console.log("ZOOMED --> " + transform);
-        container.attr("transform", transform);
-        updateOverlays();           
+            // Scale
+            //console.log(d3.event.scale);
+            if(!isNaN(d3.event.scale)) {
+                putSetting(setting_scale, d3.event.scale);
+            }   
+            // Transform  
+            var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
+            //console.log("ZOOMED --> " + transform);
+            container.attr("transform", transform);
+            updateOverlays();
+        } 
+          
     }  
-    svg.call(zoomBehaviour); 
+   svg.call(zoomBehaviour); 
 
     // Creating D3 force
     determineMaxCount(data);
@@ -823,32 +802,44 @@ function visualizeData() {
                 });
             }
         }
+        
+        d3.select(this).select(".foreground").style("fill", "#bee4f8");
+        d3.select(this).select(".background").style("fill", "#bee4f8");
     }
 
     /** Caled when a dragging move event occurs */
     function dragmove(d, i) {  
-        // Update locations
-        d.px += d3.event.dx;
-        d.py += d3.event.dy;
-        d.x += d3.event.dx;
-        d.y += d3.event.dy;
-        
-        // Update the location in localstorage
-        var record = getSetting(d.id); 
-        //console.log("Record", record);
-        var obj;
-        if(record === null) {
-            obj = {}; 
-        }else{
-            obj = JSON.parse(record);
-        }  
-        
-        // Set attributes 'x' and 'y' and store object
-        obj.px = d.px;
-        obj.py = d.py;
-        obj.x = d.x;
-        obj.y = d.y;
-        putSetting(d.id, JSON.stringify(obj));
+        // Update all selected nodes
+        svg.selectAll(".node").each(function(d, i) {
+            var color = d3.select(this).select(".foreground").style("fill");//.attr("fill"); 
+            console.log("color: " + color);
+            if(color == "rgb(190, 228, 248)") {
+                console.log("SELECTED NODE");
+                
+                // Update locations
+                d.px += d3.event.dx;
+                d.py += d3.event.dy;
+                d.x += d3.event.dx;
+                d.y += d3.event.dy;
+                
+                // Update the location in localstorage
+                var record = getSetting(d.id); 
+                //console.log("Record", record);
+                var obj;
+                if(record === null) {
+                    obj = {}; 
+                }else{
+                    obj = JSON.parse(record);
+                }  
+                
+                // Set attributes 'x' and 'y' and store object
+                obj.px = d.px;
+                obj.py = d.py;
+                obj.x = d.x;
+                obj.y = d.y;
+                putSetting(d.id, JSON.stringify(obj));
+            }   
+        });
     
         // Update nodes & lines                                                           
         if(linetype == "curved") { 
@@ -858,7 +849,7 @@ function visualizeData() {
         }
         
         // Update overlay
-        updateOverlays();
+        updateOverlays(); 
     }
     
     /** Called when a dragging event ends */
@@ -1014,13 +1005,101 @@ function visualizeData() {
                                 return truncateText(d.name, maxLength);
                             });
     }
+
+    // Selection element
+    var selector = svg.append("g")
+                      .attr("class", "selection");        
+    var selection = selector.append("rect")
+                            .attr("id", "selection")
+                            .attr("x", 0)
+                            .attr("y", 0);
+    
+    var positions = {};
+    svg.on("contextmenu", function(data, index) {
+        console.log("Mouse down");
+        rightClicked = true;
+        d3.event.preventDefault();
+
+        // X-position
+        positions.x1 = d3.event.offsetX; 
+        positions.clickX1 = d3.event.x;
+       
+        // Y-position 
+        positions.y1 = d3.event.offsetY; 
+        positions.clickY1 = d3.event.y;
+        
+        // Deselect all nodes
+        var color = getSetting(setting_entitycolor);
+        d3.selectAll(".node").select(".foreground").style("fill", "#fff");
+        d3.selectAll(".node").select(".background").style("fill", color);
+    });
+
+    svg.on("mousemove", function() {
+        if(rightClicked) {
+            // X-positions
+            positions.x2 = d3.event.offsetX;
+            positions.clickX2 = d3.event.x;
+
+            if(positions.x1 < positions.x2) {
+                selection.attr("x", positions.x1);   
+            }else{
+                selection.attr("x", positions.x2);
+            }
+            selection.attr("width", Math.abs(positions.x2-positions.x1));
+            
+            
+            // Y-positions
+            positions.y2 = d3.event.offsetY;
+            positions.clickY2 = d3.event.y;
+            
+            if(positions.y1 < positions.y2) {
+                selection.attr("y", positions.y1);   
+            }else{
+                selection.attr("y", positions.y2);
+            }
+            selection.attr("height", Math.abs(positions.y2-positions.y1));
+            selection.style("display", "block");
+        }
+    });
+    
+    svg.on("mouseup", function() {
+        console.log("Mouse up"); 
+        if(rightClicked) {
+            rightClicked = false;
+            selection.style("display", "none"); 
+            
+            // Container offset
+            var transX = parseInt(container.attr("translateX"));
+            var transY = parseInt(container.attr("translateY"));
+            //console.log("TransX: " + transX + ", transY: " + transY);
+
+            // Select nodes
+            d3.selectAll(".node").each(function(d, i) {
+                var nodePos = $(".node.id"+d.id).offset();
+                
+                // X in selection box?
+                if((nodePos.left >= positions.clickX1 && nodePos.left <= positions.clickX2) ||
+                   (nodePos.left <= positions.clickX1 && nodePos.left >= positions.clickX2)) {
+                    // Y in selection box?
+                    if((nodePos.top >= positions.clickY1 && nodePos.top <= positions.clickY2) ||
+                       (nodePos.top <= positions.clickY1 && nodePos.left >= positions.clickY2)) {    
+                           // Node is in selection box
+                           console.log(d.name + " is in selection box!");
+                           d3.select(this).select(".background").style("fill", "#bee4f8");
+                           d3.select(this).select(".foreground").style("fill", "#bee4f8");         
+                    }
+                }
+            
+            });
+        }
+        
+    });
     
     // Fish eye check
     if(fisheyeEnabled == "true") {
         // Create fish eye
         var fisheye = d3.fisheye.circular()
-                                .radius(300)
-                                .distortion(2);
+                                .radius(250);
                                 
         // Listen to mouse movements                         
         svg.on("mousemove", function() {
@@ -1098,7 +1177,7 @@ function visualizeData() {
             // Lines
             if(linetype == "curved") {
                 // Curved
-                force.stop();
+                //force.stop();
                 curvedFisheye(topLines);
                 curvedFisheye(bottomLines);
                 
@@ -1255,6 +1334,24 @@ function visualizeData() {
 } //end visualizeData
 
 
+
+// Visualizes selected nodes
+function visualizeSelection(selectedNodeIds) {
+
+    settings.selectedNodeIds=selectedNodeIds;
+    //deselect all others
+    d3.selectAll(".node").select(".foreground").style("fill", "#fff");
+    d3.selectAll(".node").select(".background").style("fill", "#fff");
+    
+    if(selectedNodeIds && selectedNodeIds.length>0){
+        //select new ones
+        for(var i=0; i<selectedNodeIds.length; i++){
+            var node= d3.select(".id"+selectedNodeIds[i]);
+            node.select(".foreground").style("fill", "#bee4f8");   
+            node.select(".background").style("fill", "#bee4f8");     
+        }
+    }            
+}
 
 
 
@@ -1560,7 +1657,12 @@ function removeOverlays() {
     });
 }
 
-/********************************* MENU ***********************************/
+
+
+
+
+
+/********************************* GEPHI ***********************************/
 $(document).ready(function() {
     /* For future usage 
     // Menu popup link click

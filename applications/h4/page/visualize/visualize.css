@@ -188,3 +188,13 @@ text.shadow {
     /*font-size: 20px;*/
     font-weight: bold;
 }
+
+/** Selection */
+#selection {
+    fill: #fff;
+    fill-opacity: 0.3;
+    stroke: #000;
+    stroke-dasharray: 5,5;
+    stroke-width: 1.5;
+    cursor: crosshair;
+}

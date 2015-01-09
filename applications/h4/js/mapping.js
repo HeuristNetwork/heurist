@@ -207,6 +207,7 @@ function hMapping(_map, _timeline, _basePath) {
 
         gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
         //artem temp   addMapOverlay(tmap.getNativeMap());
+        addMapOverlay(tmap.getNativeMap());
     }
 
     function _onDataLoaded(_tmap){
