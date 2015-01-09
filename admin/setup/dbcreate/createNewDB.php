@@ -174,10 +174,10 @@
         <?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
 
         <div id="page-inner" style="overflow:auto">
-            <div id="loading" style="display:none">
-                <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
-                <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
-            </div>
+        <div id="loading" style="display:none">
+            <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
+            <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
+        </div>
 
         <?php
             $newDBName = "";
@@ -203,18 +203,15 @@
                 }else{
                 */
 
-                //ob_flush();
-                //flush();
-
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 makeDatabase(); // this does all the work <<<*************************************************
 
                 echo_flush( '<script type="text/javascript">hideProgress();</script>' );
-           }
+            }
 
             if($isCreateNew){
-        ?>
+            ?>
 
             <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
                 <h3>Enter the password set by your system administrator for new database creation:</h3>
@@ -225,76 +222,29 @@
 
             <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
                 <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>"
-                   method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
-
-
-                    <?php if(!is_logged_in()) { ?>
-                        <!-- what on earth are we doing setting up a new user at this point. This is redundant code.
-                             The least they can do is login to the sandpit. Now checking at the start.
-                        <div id="detailTypeValues" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
-                            <div style="padding-left:160px">
-                                Define master user for new database
-                            </div>
-                            <div class="input-row required">
-                                <div class="input-header-cell" for="ugr_FirstName">Given name</div>
-                                <div class="input-cell"><input id="ugr_FirstName" name="ugr_FirstName" style="width:50;" maxlength="40" /></div>
-                            </div>
-
-                            <div class="input-row required">
-                                <div class="input-header-cell" for="ugr_LastName">Family name</div>
-                                <div class="input-cell"><input id="ugr_LastName" name="ugr_LastName" style="width:50;" maxlength="63" /></div>
-                            </div>
-                            <div class="input-row required">
-                                <div class="input-header-cell" for="ugr_eMail">Email</div>
-                                <div class="input-cell"><input id="ugr_eMail" name="ugr_eMail" style="width:200;" maxlength="100"
-                                    onKeyUp="document.getElementById('ugr_Name').value=this.value;"/></div>
-                            </div>
-                            <div class="input-row required">
-                                <div class="input-header-cell" for="ugr_Name">Login name</div>
-                                <div class="input-cell"><input id="ugr_Name" name="ugr_Name" style="width:200;" maxlength="63"
-                                    onkeypress="{onKeyPress(event)}" onblur="{setUserPartOfName()}"/></div>
-                            </div>
-                            <div class="input-row required">
-                                <div class="input-header-cell" for="ugr_Password">Password</div>
-                                <div class="input-cell"><input id="ugr_Password" name="ugr_Password" type="password" style="width:50;"
-                                    maxlength="40" />
-                                    <div class="help prompt help1" >
-                                        <div style="color:red;">Warning: http traffic is not encrypted.
-                                            please don't use an important password such as institutional login</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="input-row required">
-                                <div class="input-header-cell" for="ugr_Password2">Repeat password</div>
-                                <div class="input-cell"><input id="ugr_Password2" type="password" style="width:50;" maxlength="40" />
-                                </div>
-                            </div>
-                        </div>
-                        -->
-                        <?php } ?>
-
+                    method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
 
                     <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px; padding-top: 10px;">
                         <input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1"
                             class="labelBold">Standard database</label>
                         <div style="padding-left: 38px;padding-bottom:10px">
-                            Gives an uncluttered database with essential record and field types. Recommended for general use
-                            </div>
+                            Gives an uncluttered database with essential record & field types. Recommended for general use
+                        </div>
                         <input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">HuNI Core schema</label>
                         <div style="padding-left: 38px;">The <a href="http://huni.net.au" target=_blank>
-                            Humanities Networked Infrastructure (HuNI)</a>
+                                Humanities Networked Infrastructure (HuNI)</a>
                             core entities and field definitions, facilitating harvesting into the HuNI aggregate
-                            </div>
+                        </div>
                         <input type="radio" name="dbtype" value="2" id="rb3" disabled="true"/><label for="rb3" class="labelBold">
-                        FAIMS Core schema (not yet available)</label>
+                            FAIMS Core schema (not yet available)</label>
                         <div style="padding-left: 38px;">The <a href="http://fedarch.org" target=_blank>
-                            Federated Archaeological Information Management System (FAIMS)</a>
+                                Federated Archaeological Information Management System (FAIMS)</a>
                             core entities and field definitions, providing a minimalist framework for archaeological fieldwork databases</div>
 
                         <p><ul>
-                        <li>After the database is created, we suggest visiting Browse Templates and Import Structure menu entries to
-                            download pre-configured templates or individual record types and fields.</li>
-                        <li>New database creation may take up to 20 seconds. New databases are created on the current server.</li>
+                            <li>After the database is created, we suggest visiting Browse Templates and Import Structure menu entries to
+                                download pre-configured templates or individual record types and fields.</li>
+                            <li>New database creation may take up to 20 seconds. New databases are created on the current server.</li>
                             <li>You will become the owner and administrator of the new database.</li>
                         </ul><p>
                     </div>
@@ -332,7 +282,7 @@
 
                     // Check that there is a current administrative user who can be made the owner of the new database
                     $message = "MySQL username and password have not been set in configIni.php ".
-                        "or heuristConfigIni.php<br/> - Please do so before trying to create a new database.<br>";
+                    "or heuristConfigIni.php<br/> - Please do so before trying to create a new database.<br>";
                     if(ADMIN_DBUSERNAME == "") {
                         if(ADMIN_DBUSERPSWD == "") {
                             echo $message;
@@ -362,84 +312,10 @@
                         return false;
                     }
 
-/*
-print $newDBName."<br>";
-print in_array(strtolower($newname), $list)."<br>";
-print print_r($list, true)."<br>";*/
-//return false;
                     if(!createDatabaseEmpty($newDBName)){
-                           $isCreateNew = true;
-                           return false;
-                    }
-
-
-/*
-                    //OLD COMMAND LINE APPROACH
-                    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                        $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e\"create database `$newname`\"";
-                    } else {
-                        $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'create database `$newname`'";
-                    }
-
-                    $output1 = exec($cmdline . ' 2>&1', $output, $res1);
-                    if ($res1 != 0 ) {
-                        echo ("<p class='error'>Error code $res1 on MySQL exec: Unable to create database $newname<br>&nbsp;<br>");
-                        echo("\n\n");
-
-                        if(is_array($output)){
-                            $isExists = (strpos($output[0],"1007")>0);
-                        }else{
-                            $sqlErrorCode = split(" ", $output);
-                            $isExists = (count($sqlErrorCode) > 1 &&  $sqlErrorCode[1] == "1007");
-                        }
-                        if($isExists){
-                            echo "<strong>A database with that name already exists.</strong>";
-                        }
-                        echo "</p>";
                         $isCreateNew = true;
                         return false;
                     }
-
-                    // At this point a database exists, so need cleanup if anythign goes wrong later
-
-                    // Create the Heurist structure for the newly created database, using the template SQL file
-                    // This file sets up the table definitions and inserts a few critical values
-                    // it does not set referential integrity constraints or triggers
-                    $cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < blankDBStructure.sql";
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-
-                    if ($res2 != 0 ) {
-                        echo ("<p class='error'>Error $res2 on MySQL exec: Unable to load blankDBStructure.sql into database $newname<br>");
-                        echo ("Please check whether this file is valid; consult Heurist support if needed<br>&nbsp;<br></p>");
-                        echo($output2);
-                        cleanupNewDB($newname);
-                        return false;
-                    }
-
-                    // Add referential constraints
-                    $cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addReferentialConstraints.sql";
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-
-                    if ($res2 != 0 ) {
-                        echo ("<p class='error'>Error $res2 on MySQL exec: Unable to load addReferentialConstraints.sql into database $newname<br>");
-                        echo ("Please check whether this file is valid; consult Heurist support if needed<br>&nbsp;<br></p>");
-                        echo($output2);
-                        cleanupNewDB($newname);
-                        return false;
-                    }
-
-                    // Add procedures and triggers
-                    $cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D$newname < addProceduresTriggers.sql";
-                    $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-
-                    if ($res2 != 0 ) {
-                        echo ("<p class='error'>Error $res2 on MySQL exec: Unable to load addProceduresTriggers.sql for database $newname<br>");
-                        echo ("Please check whether this file is valid; consult Heurist support if needed<br>&nbsp;<br></p>");
-                        echo($output2);
-                        cleanupNewDB($newname);
-                        return false;
-                    }
-*/
 
 
                     // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
@@ -499,7 +375,7 @@ print print_r($list, true)."<br>";*/
                     //	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
                     //	 todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
 
-                    
+
                     createDatabaseFolders($newDBName);
 
                     // Prepare to write to the newly created database
@@ -513,7 +389,6 @@ print print_r($list, true)."<br>";*/
                         ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                     // TODO: error check, although this is unlikely to fail
 
-
                     echo "<hr>";
                     echo "<h2>New database '$newDBName' created successfully</h2>";
 
@@ -521,10 +396,9 @@ print print_r($list, true)."<br>";*/
                     echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
                     echo "<p>Click here to log in to your new database: <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href=\"".
-                        HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".HEURIST_BASE_URL."?db=".$newDBName.
-                        "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
-                    echo "<p>Use Database > Structure > Record types/fields in the menu at top right of the main database page<br/>".
-                         "to set up record types, fields, terms and other settings for your new database</p>";
+                    HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".
+                    HEURIST_BASE_URL."?db=".$newDBName.
+                    "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
 
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
