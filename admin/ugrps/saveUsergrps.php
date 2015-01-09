@@ -271,14 +271,31 @@
 			if(!$isInsert){
 				$ret = checkPermission($type, $recID);
 				if($ret!=null) return $ret;
-			}
+            }else{
+                //remove ugr_ID
+                $idx = array_search('ugr_ID', $colNames);
+                if($idx>=0){
+                    unset($colNames[$idx]);
+                    unset($values[$idx]);
+                }
+            }
 
+            //add password by default
+            if(array_search('ugr_Password', $colNames)===false){
+                array_push($colNames, 'ugr_Password');
+                array_push($values, '');
+            }
+            if(array_search('ugr_Name', $colNames)===false){
+                array_push($colNames, 'ugr_Name');
+                array_push($values, $values[array_search('ugr_eMail', $colNames)]);
+            }
+            
 			$query = "";
 			$fieldNames = "";
 			$parameters = array("");
 			$fieldNames = join(",",$colNames);
 			$tmp_password = "";
-
+            
 			foreach ($colNames as $colName) {
 
 				$val = array_shift($values);
@@ -287,7 +304,7 @@
 				{
 
 
-					if($colName == "ugr_Password"){
+					if(($type=='user') && ($colName == "ugr_Password")){
 						$tmp_password = $val;
 						$s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
 						$salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
@@ -330,6 +347,9 @@
 					$query = "update sysUGrps set ".$query." where ugr_ID = $recID";
 				}
 
+//error_log("Query=".$query);
+//error_log(print_r($parameters, true));                
+                
 				$rows = execSQL($db, $query, $parameters, true);
 
 				if ($rows==0 || is_string($rows) ) {

@@ -82,12 +82,12 @@
         $res = array();
         $children = array();
         //add default fields
-        if($mode==3) array_push($children, array('key'=>'recID', type=>'integer', 'title'=>'ID'));
-        array_push($children, array('key'=>'recTitle',    type=>'freetext',  'title'=>'RecTitle'));
-        array_push($children, array('key'=>'recModified', type=>'date',      'title'=>'Modified'));
+        if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID'));
+        array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  'title'=>'RecTitle'));
+        array_push($children, array('key'=>'recModified', 'type'=>'date',      'title'=>'Modified'));
         if($mode==3) {
-            array_push($children, array('key'=>'recURL',      type=>'freetext',  'title'=>'URL'));
-            array_push($children, array('key'=>'recWootText', type=>'blocktext', 'title'=>'WootText'));
+            array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL'));
+            array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText'));
         }
 
         if($recTypeId && is_numeric($recTypeId)){

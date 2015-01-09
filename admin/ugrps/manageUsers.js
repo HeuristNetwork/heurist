@@ -648,7 +648,8 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			}
 
 			function __showCoverall(){
-				if(top.HEURIST.util.coverallDiv && top.HEURIST.util.coverallDiv.style.visibility == "visible"){
+				if(top.HEURIST.util.coverallDiv && top.HEURIST.util.coverallDiv.style.visibility != "visible"){
+                    top.HEURIST.util.coverallDiv.style.visibility = "visible";
 					setTimeout(__showCoverall, 100);
 				}else{
 					top.HEURIST.util.startLoadingPopup();
