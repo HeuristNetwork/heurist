@@ -99,7 +99,7 @@ var layouts = [
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:50, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
-        west:{size:200, minsize:200, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
+        west:{size:230, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,

@@ -137,7 +137,7 @@ $.widget( "heurist.search", {
             }).css('padding-right','1em').appendTo(this.div_search_links);
             
             link = $('<a>',{
-                text: 'Rules', href:'#'
+                text: 'Rule Sets', href:'#'
             }).css('padding-right','1em').appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');

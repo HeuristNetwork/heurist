@@ -21,7 +21,7 @@ function hSvsEdit(args) {
     * squery - need for new - otherwise it takes currentSearch
     * domain need for new 
     */
-    function _fromDataToUI(svsID, squery, domain){
+    function _fromDataToUI(svsID, squery, groupID){
 
         var $dlg = edit_dialog;
         if($dlg){
@@ -41,7 +41,7 @@ function hSvsEdit(args) {
                 [{key:'bookmark', title:top.HR('My Bookmarks')}, 
                  {key:'all', title:top.HR('All Records')}],
                 function(){
-                    svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
+                    svs_ugrid.val(Hul.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
             });
             
             var isEdit = (parseInt(svsID)>0);
@@ -49,10 +49,13 @@ function hSvsEdit(args) {
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
                 
-                //svs_ugrid.parent().hide();
+                
                 var request = Hul.parseHeuristQuery(svs[_QUERY]);
                 domain  = request.w;
                 svs_ugrid.val(svs[_GRPID]==top.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
+                
+                svs_ugrid.parent().hide();
+                //svs_ugrid.attr('disabled', true);
                 
                 svs_id.val(svsID);
                 svs_name.val(svs[_NAME]);
@@ -67,6 +70,7 @@ function hSvsEdit(args) {
                 svs_name.val('');
                 svs_rules.val('');
                 svs_notes.val('');
+                
                 //var domain = 'all';
 
                 if(Hul.isArray(squery)) { //this is RULES!!!
@@ -83,7 +87,7 @@ function hSvsEdit(args) {
                    svs_query.val( '' ); 
                 }
                 
-                svs_ugrid.val('all');
+                //svs_ugrid.val('all');
 
                 //fill with list of user groups in case non bookmark search
                 /*var selObj = svs_ugrid.get(0);
@@ -93,7 +97,8 @@ function hSvsEdit(args) {
                 }else{
                     svs_ugrid.val(domain);
                 }*/
-                //svs_ugrid.parent().show();
+                svs_ugrid.parent().show();
+                svs_ugrid.attr('disabled', !Hul.isempty(groupID));
             }
             
             /* never need to hide! 
@@ -148,6 +153,7 @@ function hSvsEdit(args) {
                                      squery.rules = res.rules;
                                      //squery = Hul.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
                                     
+                                    //mode, groupID, svsID, squery, callback
                                     _showDialog('saved', null, null, squery );
                                 }else{
                                     ele_rules.val( JSON.stringify(res.rules) );    
@@ -167,9 +173,7 @@ function hSvsEdit(args) {
      * @param mode - faceted, rules or saved
      * @param callback
      */
-     function _showDialog( mode, callback, svsID, squery ){
-        
-        var domain = 'all';
+     function _showDialog( mode, groupID, svsID, squery, callback ){
         
         if(callback){
             callback_method = callback;  
@@ -192,7 +196,7 @@ function hSvsEdit(args) {
                 }
             }
             
-            _showSearchFacetedWizard( {svsID:svsID, domain:domain, params:facet_params, onsave: callback_method }); 
+            _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, onsave: callback_method }); 
             //function(event, request){   that._updateAfterSave(request, 'faceted');
             
         }else if (mode == 'rules' && Hul.isnull(svsID)){ //it happens for new rules only
@@ -224,7 +228,7 @@ function hSvsEdit(args) {
                 var allFields = $dlg.find('input');
 
                 //that.
-                _fromDataToUI(svsID, squery, domain);
+                _fromDataToUI(svsID, squery, groupID);
 
                 function __doSave(){   //save search
 
@@ -341,7 +345,7 @@ function hSvsEdit(args) {
             });
         }else{
             //show dialogue
-            _fromDataToUI(svsID, squery, domain);
+            _fromDataToUI(svsID, squery, groupID);
             edit_dialog.dialog("open");
         }
          
@@ -361,8 +365,8 @@ function hSvsEdit(args) {
              edit_dialog = null;
         },
 
-        show: function( mode, callback, svsID, squery ) { 
-             _showDialog( mode, callback, svsID, squery );
+        show: function( mode, groupID, svsID, squery, callback ) { 
+             _showDialog( mode, groupID, svsID, squery, callback );
         }
 
     }

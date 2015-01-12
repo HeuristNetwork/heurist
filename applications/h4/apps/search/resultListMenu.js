@@ -711,10 +711,12 @@ $.widget( "heurist.resultListMenu", {
 
         if(!Hul.isempty(this._collection)){
             
-            var  app = appGetWidgetByName('search_links');  //appGetWidgetById('ha13');
+            var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
             if(app && app.widget){
                 //call method editSavedSearch - save collection as search
-                $(app.widget).search_links('editSavedSearch', null, 'ids:'+this._collection.join(","), 'all');
+
+                // mode, groupID, svsID, squery
+                $(app.widget).search_links('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
             }
         }
         
