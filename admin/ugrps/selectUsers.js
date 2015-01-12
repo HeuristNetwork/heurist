@@ -28,8 +28,8 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 /**
-* manageUsers.js
-* UserManager object for listing and editing of users
+* selectUsers.js
+* SelectManager object for listing and searching of users
 *
 * @version 2011.0510
 * @author: Artem Osmakov
@@ -40,7 +40,7 @@
 * @package Heurist academic knowledge management system
 * @todo
 **/
-var userManager;
+var selectManager;
 
 //aliases
 var Dom = YAHOO.util.Dom,
@@ -56,7 +56,7 @@ var Dom = YAHOO.util.Dom,
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2011.0510
 */
-function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
+function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 	var _className = "UserManager",
 		_myDataTable,
@@ -149,18 +149,18 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 		var nstyle2 = (filter_group==="all")?"none":"inline-block";
 
 		//hide both buttons in case not admin
-		Dom.get("pnlCtrlEdit1").style.display	 = nstyle;
-		Dom.get("pnlCtrlEdit2").style.display	 = nstyle;
+		$("#pnlCtrlEdit1").css('display',nstyle);
+        $("#pnlCtrlEdit2").css('display',nstyle);
 
 		//hide only select button in case all groups
-		Dom.get("pnlFilterByRole").style.display = nstyle2;
-		Dom.get("btnSelectAdd1").style.display	 = nstyle2;
-		Dom.get("btnSelectAdd2").style.display	 = nstyle2;
-
+        $("#pnlFilterByRole").css('display',nstyle2);
+        $("#btnSelectAdd1").css('display',nstyle2);
+        $("#btnSelectAdd2").css('display',nstyle2);
+        
 		if(!top.HEURIST.is_admin()){
 			//hide create new user for non admin - IJ req 27-09-2012
-			Dom.get("pnlAdd1").style.display = "none";
-			Dom.get("pnlAdd2").style.display = "none";
+			$("#pnlAdd1").css('display','none');
+			$("#pnlAdd2").css('display','none');
 		}
 
 		if(_myDataTable) {
@@ -289,10 +289,10 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 					grpID = top.HEURIST.parameters.grpID;
 
-					_isSelection = (top.HEURIST.parameters.selection === "1");
+					_isSelection = true; //(top.HEURIST.parameters.selection === "1");
 
-					_setMode("selection", _isSelection);
-					_setMode("listing", !_isSelection);
+					_setMode("selection", true);
+					_setMode("listing", false);//!_isSelection);
 
 					if (!_db) {
 						_db = (top.HEURIST.parameters && top.HEURIST.parameters.db?
@@ -509,52 +509,6 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			});
 		}
 
-		//click on action images
-		_myDataTable.subscribe('linkClickEvent', function(oArgs){
-				var dt = this;
-				var elLink = oArgs.target;
-				var oRecord = dt.getRecord(elLink);
-				var recID = oRecord.getData("id");
-
-				if(elLink.hash === "#edit_user") {
-					YAHOO.util.Event.stopEvent(oArgs.event);
-					_editUser(recID, false);
-
-				}else if(elLink.hash === "#kickoff_user"){
-					YAHOO.util.Event.stopEvent(oArgs.event);
-
-					var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
-
-					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
-								"&oldrole=member&role=delete&recIDs="+encodeURIComponent(recID);
-                    var params = {method:'changeRole', db:_db, recID:groupToBeUpdated, oldrole:'member', role:'delete', recIDs:recID};
-					_updateRoles(params);
-
-				}else if(elLink.hash === "#delete_user"){
-
-					YAHOO.util.Event.stopEvent(oArgs.event);
-
-						var value = confirm("Do you really want to delete user '"+oRecord.getData('fullname')+"'?");
-						if(value) {
-
-							function _updateAfterDelete(context) {
-
-								if(!Hul.isnull(context))
-								{
-									dt.deleteRow(oRecord.getId(), -1);
-									alert("User #"+recID+" was deleted");
-								}
-							}
-
-							var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
-							var callback = _updateAfterDelete;
-							var params = "method=deleteUser&db=" + _db + "&recID=" + recID;
-							top.HEURIST.util.getJsonData(baseurl, callback, params);
-
-						}
-				}
-
-		});
 			// Subscribe to events for row selection
 			_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
 			_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
@@ -634,57 +588,6 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			_updateFilter(); //fill table after creation
 
 	}//end of initialization =====================
-
-	/**
-	*
-	*/
-	function _updateRoles(params) {
-
-			function __onUpdateRoles(context) {
-				if(!Hul.isnull(context)){
-					_updateFilter();
-				}
-				//top.HEURIST.util.finishLoadingPopup();
-				//top.HEURIST.util.sendCoverallToBack();
-			}
-
-			function __showCoverall(){
-				if(top.HEURIST.util.coverallDiv && top.HEURIST.util.coverallDiv.style.visibility != "visible"){
-                    top.HEURIST.util.coverallDiv.style.visibility = "visible";
-					setTimeout(__showCoverall, 100);
-				}else{
-					top.HEURIST.util.startLoadingPopup();
-				}
-			}
-
-			//__showCoverall();
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
-//console.log('uupdate rol '+params);
-			//DOES NOT WORK top.HEURIST.util.getJsonData(baseurl, __onUpdateRoles, params);
-            
-        $.ajax({
-            url: baseurl,
-            type: "GET",
-            data:params,
-            dataType: "json",
-            cache: false,
-            error: function( jqXHR, textStatus, errorThrown ) {
-                alert(textStatus);
-                /*if(callback){
-                    callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                        message: jqXHR.responseText });
-                }
-                //message:'Error connecting server '+textStatus});
-                */
-            },
-            success: function( response, textStatus, jqXHR ){
-                    if(!Hul.isnull(response)){
-                        _updateFilter();
-                    }
-            }
-        });            
-            
-	}
 
 	//
 	//
@@ -948,80 +851,6 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 	} //end init listener
 
 	/**
-	* call new popup - to edit User
-	*/
-	function _editUser(user, isApproval) {
-		var URL = "";
-
-		var userID = (!Hul.isnull(user))?Number(user):0;
-
-		if(userID>0) {
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID+(isApproval?"&approve=1":"");
-		}
-		else if(!top.HEURIST.is_admin()){
-			return; //IJ req 27-09-12 - only dbowner is able to create new users
-		}else {
-			//add new user to specified group
-			var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
-			if(!Hul.isnull(groupToBeUpdated) && groupToBeUpdated!=="all") {
-				groupToBeUpdated = "&groupID="+groupToBeUpdated;
-			}else{
-				groupToBeUpdated = "&recID=-1";
-			}
-
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + groupToBeUpdated;
-		}
-		top.HEURIST.util.popupURL(top, URL, {
-			"close-on-blur": false,
-			"no-resize": false,
-			height: 620,
-			width: 740,
-			callback: function(context) {
-				if(!Hul.isnull(context)){
-
-					//update id
-					var recID = Math.abs(Number(context.result[0]));
-
-					//refresh table
-					_updateFilter();
-
-				}
-			}
-		});
-	}
-
-	/**
-	* Opens popup for selection of existing user to current group
-	*/
-	function _findAndAddUser() {
-
-		var groupToBeUpdated = (Hul.isnull(_grpID)?filterByGroup.value:_grpID);
-
-		var url = top.HEURIST.baseURL + "admin/ugrps/selectUsers.php?db=" +
-										_db + "&selection=1&popup=yes&grpID="+groupToBeUpdated;
-
-		function __onUserSelection(usersSelected){
-				if(!Hul.isempty(usersSelected)){
-//DEBUG alert(usersSelected);
-
-					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
-								"&role=member&recIDs="+encodeURIComponent(usersSelected);
-                    var params = {method:'changeRole', db:_db, recID:groupToBeUpdated, role:'member', recIDs:usersSelected};
-					_updateRoles(params);
-				}
-		}
-
-		top.HEURIST.util.popupURL(top, url,
-		{   "close-on-blur": false,
-			"no-resize": false,
-			height: 600,
-			width: 820,
-			callback: __onUserSelection
-		});
-
-	}
-
-	/**
 	* show either selection or listing controls
 	*/
 	function _setMode(className, val)
@@ -1073,13 +902,6 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				_callback_func();
 			}
 		},
-
-		/**
-		* @param user - userID or email
-		*/
-		editUser: function(user){ _editUser( user, false ); },
-
-		findAndAddUser: function(){ _findAndAddUser(); },
 
 		//not used
 		showInfo: function(recID, event){ _showInfoToolTip( recID, event ); },

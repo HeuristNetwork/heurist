@@ -136,6 +136,7 @@
 					//$rv['rectypes'] = getAllRectypeStructures();
 				}
 			}
+            
 			break;
 
 		case 'saveGroup':
@@ -185,14 +186,23 @@
 			break;
 
 	}//end of switch
-	$db->close();
-
+    
+    if(@$rv && is_array(@$rv['error']) && count($rv['error'])==0){
+         unset($rv['error']);
+    }
+	
 	print json_format($rv);
-	/*
-	if (@$rv) {
-	print json_format($rv);
+	
+	/*if (@$rv) {
+	    error_log("RES = ".json_format($rv));
 	}*/
 
+    if(@$db){
+        $db->close();   
+    }else{
+        error_log("connection is closeD ALREADY!!!!");
+    }
+    
 	exit();
 
 	/**
@@ -695,7 +705,6 @@
 		if($newRole=="delete"){
 
 			$ret['results'] = array();
-			$ret['errors'] = array();
 
 			foreach ($arrUsers as $userID) {
 
@@ -709,21 +718,24 @@
 
 					/*****DEBUG****///error_log("DELETED DELETED DELETED DELETED DELETED DELETED DELETED DELETED ");
 					$query = "delete from sysUsrGrpLinks where ugl_UserID=$userID and ugl_GroupID=$grpID";
+                    
 					$rows = execSQL($db, $query, null, true);
 					if ($rows==0 || is_string($rows) ) {
 						// error delete reference for this user
-						array_push($ret['errors'], "db error deleting relations for user# $userID");
+                        if(!@$ret['errors']) $ret['errors'] = array();
+						array_push($ret['errors'], "db error deleting relations for user# $userID ".$rows);
 					}else{
 						array_push($ret['results'], $userID);
 					}
 				}else{
+                    if(!@$ret['errors']) $ret['errors'] = array();
 					array_push($ret['errors'], $error);
 				}
 			}
 
 		}else if($oldRole!=null){ //modification of role
 
-			$ret['errors'] = array();
+			//$ret['errors'] = array();
 			$ret['results'] = array();
 
 			foreach ($arrUsers as $userID) {
@@ -733,11 +745,13 @@
 				$error = null;
                 if($userID==2 && $grpID==1){
                     $error = "Not possible to change role for database owner";
+                    if(!@$ret['errors']) $ret['errors'] = array();
                     array_push($ret['errors'], $error);
                 }else if($oldRole=="admin" && $newRole=="member"){
 					$error = checkLastAdmin($userID, $grpID);
 					if($error){
-						array_push($ret['errors'], $error);
+                        if(!@$ret['errors']) $ret['errors'] = array();
+   					    array_push($ret['errors'], $error);
 					}
 				}
 				if($error==null){
@@ -745,6 +759,7 @@
 					$rows = execSQL($db, $query, null, true);
 
 					if ($rows==0 || is_string($rows) ) {
+                        if(!@$ret['errors']) $ret['errors'] = array();
 						array_push($ret['errors'], "DB error changing roles in sysUsrGrpLinks for group $grpID, user $userID - ".$rows);
 					} else {
 						array_push($ret['results'], $userID);
@@ -784,25 +799,33 @@
 
 				$query	= $query." ON DUPLICATE KEY UPDATE ugl_Role='$newRole'";
 
+//error_log($query);                
+                
 				$rows = execSQL($db, $query, null, true);
 
+
+                
 				if ($rows==0 || is_string($rows) ) {
 					$ret['error'] = "DB error setting role in sysUsrGrpLinks - ".$rows;
 				} else {
 					$ret['result'] = $resIDs;
 				}
 			}
+            
+//error_log("RES ".print_r($ret, true));                            
 
 		}
-
-
+        
 		//update group info for affected users
-		if($updateSession){
+		/*  TEMP - it does not work and affects on request (called several times)
+        if($updateSession){
 			foreach ($arrUsers as $userID) {
 					$groups = reloadUserGroups($userID);
 					updateSessionForUser($userID, 'user_access', $groups);
 			}
 		}
+        */
+
 		//if($is_myself_affected){
 		//	updateSessionInfo();
 		//}
