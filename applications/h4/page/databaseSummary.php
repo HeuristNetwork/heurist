@@ -116,7 +116,11 @@
         <link rel="stylesheet" type="text/css" href="../ext/colpick/colpick.css">
         
         <!-- Visualize plugin --> 
+        <script type="text/javascript" src="visualize/settings.js"></script>
+        <script type="text/javascript" src="visualize/overlay.js"></script>
+        <script type="text/javascript" src="visualize/gephi.js"></script>
         <script type="text/javascript" src="visualize/visualize.js"></script>
+        
         <link rel="stylesheet" type="text/css" href="visualize/visualize.css">
         
         <!-- On Row Click -->

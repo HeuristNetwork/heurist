@@ -119,6 +119,29 @@
                         <input id="attraction" class="number-input medium"/>
                     </div>
                 </div>
+                
+                <!-- MOUSE SETTINGS --> 
+                <div class="settings space" id="mouseSettings">
+                    <div id="mouseContainer">
+                        <b>Mouse:</b>
+                    </div>
+                        
+                    <!-- Drag -->
+                    <div id="dragContainer">
+                        <img id="drag" class="mouse-icon selected" title="Default dragging mode" src="visualize/drag.png">
+                    </div>
+                    
+                    <!-- Selection -->
+                    <div id="selectionContainer">
+                        <img id="selection" class="mouse-icon" title="Select multiple nodes" src="visualize/selection.png">
+                    </div>
+                    
+                    <!-- Overlay -->
+                    <div id="overlayContainer">
+                        <img id="information" class="mouse-icon" title="Retrieve information on click" src="visualize/information.png">
+                    </div>
+                
+                </div>
 
                 <!-- HELP INFO -->
                 <div class="settings space">
@@ -126,9 +149,11 @@
                 </div>
             </div>
             
+            
+            
             <!-- Menu -->
             <div id="visualisation-menu">
-                <button type="button" id="gephi-export">GEPHI export</button>
+                <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI export</button>
                 <!-- For future use with more items
                 <ul class="menu-items level1">        
                     <li class="menu-button">

@@ -4,12 +4,26 @@
     height: 100%;
 }
 
+/*
+.drag {
+    cursor: url('visualize/drag.png'), all-scroll;
+}
+
+.information {
+    cursor: url('visualize/information.png'), help;
+}
+
+.selection {
+    cursor: url('visualize/selection.png'), crosshair;
+}
+*/
+
 /** Visualisation settings */
 #visualisation-settings {
     max-width: 90%;
     float: left; 
 }
-
+      
 .settings {
     display: inline-block;
 }  
@@ -33,6 +47,16 @@
     border-bottom: dotted 1px #6A7C99;
 }
   
+.mouse-icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    padding: 2px;
+}
+.mouse-icon.selected {
+    background: #d5d5d5;
+}
+
 .colorblock {
     cursor: pointer;
     display: inline-block;
@@ -116,7 +140,7 @@
 
 /** Record hover */
 g:hover {
-    cursor: pointer;
+    /*cursor: pointer;*/
 }
 
 /** Lines between records */
@@ -126,7 +150,7 @@ g:hover {
 }
 
 .link:hover {
-    cursor: pointer;
+    /*cursor: pointer;*/
 }
 
 /** Circle around icon */
@@ -196,5 +220,4 @@ text.shadow {
     stroke: #000;
     stroke-dasharray: 5,5;
     stroke-width: 1.5;
-    cursor: crosshair;
 }

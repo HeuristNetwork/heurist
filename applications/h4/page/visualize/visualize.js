@@ -1,6 +1,14 @@
 /**
 * Visualisation plugin
-* Requires:
+* Requirements:
+* 
+* Internal Javascript:
+* - settings.js
+* - overlay.js
+* - gephi.js
+* - visualize.js
+* 
+* External Javascript:
 * - jQuery          http://jquery.com/
 * - D3              http://d3js.org/
 * - D3 fisheye      https://github.com/d3/d3-plugins/tree/master/fisheye
@@ -12,25 +20,36 @@
 * - image
 * - count
 * 
-* Available settings:
-* - color
-* - backgroundColor
-* - query
-* etc.
+* Available settings and their default values:
+* - linetype: "straight",
+* - linelength: 100,
+* - linewidth: 15,
+* - linecolor: "#22a",
+* - markercolor: "#000",
 * 
-
+* - entityradius: 30,
+* - entitycolor: "#b5b5b5",
 * 
+* - labels: true,
+* - fontsize: "8px",
+* - textlength: 60,
+* - textcolor: "#000",
 * 
+* - formula: "linear",
+* - fisheye: false,
 * 
+* - gravity: "off",
+* - attraction: -3000,
+* 
+* - translatex: 0,
+* - translatey: 0,
+* - scale: 1
 */
 
 var settings;   // Plugin settings object
 var svg;        // The SVG where the visualisation will be executed on
 (function ( $ ) {
-    /**
-    * jQuery plugin hook, this is where the magic happens
-    * @param options Custom options given when this function is called
-    */
+    // jQuery extension
     $.fn.visualize = function( options ) {
         // Select and clear SVG.
         svg = d3.select("#d3svg");
@@ -40,7 +59,7 @@ var svg;        // The SVG where the visualisation will be executed on
         // Default plugin settings
         settings = $.extend({
             // Custom functions
-            getData: $.noop(),
+            getData: $.noop(), // Needs to be overriden with custom function
             getLineLength: function() { return getSetting(setting_linelength); },
             
             selectedNodeIds: [],
@@ -102,13 +121,11 @@ var svg;        // The SVG where the visualisation will be executed on
             scale: 1
         }, options );
  
-        console.log("CALLING FUNCTIONS");
-        // Handle settings
+        // Handle settings (settings.js)
         checkStoredSettings();
         handleSettingsInUI();
 
         // Check visualisation limit
-        console.log("SETTINGS.DATA", settings.data);
         var amount = Object.keys(settings.data.nodes).length;
         if(amount > settings.limit) {
              $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set at ' +settings.limit+ ' records, you are trying to visualize ' +amount+ ' records</text>');  
@@ -121,402 +138,6 @@ var svg;        // The SVG where the visualisation will be executed on
     };
 }( jQuery ));
     
-    
-    
-/*********************************** START OF SETTING FUNCTIONS **************************************/
-/** SETTING NAMES */
-var setting_linetype      = "setting_linetype";
-var setting_linelength    = "setting_linelength";
-var setting_linewidth     = "setting_linewidth";
-var setting_linecolor     = "setting_linecolor";
-var setting_markercolor   = "setting_markercolor";
-var setting_entityradius  = "setting_entityradius";
-var setting_entitycolor   = "setting_entitycolor";
-var setting_labels        = "setting_labels";
-var setting_fontsize      = "setting_fontsize";
-var setting_textlength    = "setting_textlength";
-var setting_textcolor     = "setting_textcolor";
-var setting_formula       = "setting_formula";
-var setting_gravity       = "setting_gravity";
-var setting_attraction    = "setting_attraction";
-var setting_fisheye       = "setting_fisheye";
-var setting_translatex    = "setting_translatex";
-var setting_translatey    = "setting_translatey";
-var setting_scale         = "setting_scale";  
-
-/**
-* Returns a URL parameter
-* @param name Name of the parameter
-*/
-function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-
-/**
-* Returns the database name from the search query string
-*/
-function getDatabaseName() {
-    return getParameterByName("db");
-}
-
-/**
-* Returns the current displayed URL
-* 
-*/
-function getURL() {
-    return window.location.href; 
-}
-
-/**
- * Returns a setting from the localStorage
- * @param setting The setting to retrieve
- */
-function getSetting(setting) {
-    return localStorage.getItem(getURL()+setting);
-}
-
-/**
-* Stores a value in the localStorage
-*/
-function putSetting(key, value) {
-    localStorage.setItem(getURL()+key, value);
-}
-
-/**
-* Checks if a setting has been set, if not it sets the default value
-* @param key    Localstorage key
-* @param value  The default value
-*/
-function checkSetting(key, value) {
-    var obj = getSetting(key);
-    if(obj === null) {
-        putSetting(key, value);
-    }
-}
-
-/**
- * This function makes sure the default settings are stored in the localStorage.
- * @param settings The plugin settings object
- */
-function checkStoredSettings() {
-    checkSetting(   setting_linetype,      settings.linetype    );
-    checkSetting(   setting_linelength,    settings.linelength  );
-    checkSetting(   setting_linewidth,     settings.linewidth   );
-    checkSetting(   setting_linecolor,     settings.linecolor   );
-    checkSetting(   setting_markercolor,   settings.markercolor );
-    checkSetting(   setting_entityradius,  settings.entityradius);
-    checkSetting(   setting_entitycolor,   settings.entitycolor );
-    checkSetting(   setting_labels,        settings.labels      );
-    checkSetting(   setting_fontsize,      settings.fontsize    );
-    checkSetting(   setting_textlength,    settings.textlength  );
-    checkSetting(   setting_textcolor,     settings.textcolor   );
-    checkSetting(   setting_formula,       settings.formula     );
-    checkSetting(   setting_gravity,       settings.gravity     );
-    checkSetting(   setting_attraction,    settings.attraction  );
-    checkSetting(   setting_fisheye,       settings.fisheye     );
-    checkSetting(   setting_translatex,    settings.translatex  );
-    checkSetting(   setting_translatey,    settings.translatey  );
-    checkSetting(   setting_scale,         settings.scale       );
-}
-
-/**
-* This function sets the settings in the UI
-*/
-function handleSettingsInUI() {
-    // LINE SETTINGS
-    if(settings.showLineSettings) {
-        /** LINE TYPE SETTING */
-        if(settings.showLineType) {
-            // Set line type setting in UI
-            $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
-            
-            // Listens to linetype selection changes
-            $("#linetype").change(function(e) {
-                putSetting(setting_linetype, $("#linetype").val());
-                visualizeData();
-            });
-        }else{
-            $("#linetypeContainer").remove();
-        }
-        
-        /** LINE LENGTH SETTING */
-        if(settings.showLineLength) {
-            // Set line length setting in UI
-            $("#linelength").val(getSetting(setting_linelength));
-            
-            // Listen to line length changes
-            $("#linelength").change(function() {
-                putSetting(setting_linelength, $(this).val());
-                visualizeData();
-            });
-        }else{
-            $("#linelengthContainer").remove();
-        }
-        
-        /** LINE WIDTH SETTING */
-        if(settings.showLineWidth) {
-            // Set line width setting in UI
-            $("#linewidth").val(getSetting(setting_linewidth));
-            
-            // Listen to line width changes
-            $("#linewidth").change(function() {
-                putSetting(setting_linewidth, $(this).val());
-                visualizeData();
-            });
-        }else{
-            $("#linewidthContainer").remove();
-        }
-        
-        /** LINE COLOR SETTING */
-        if(settings.showLineColor) {
-            // Set line color setting in UI
-            $("#linecolor").css("background-color", getSetting(setting_linecolor));
-
-            // Listen to 'line color' selection changes
-            $('#linecolor').colpick({
-                layout: 'hex',
-                onSubmit: function(hsb, hex, rgb, el) {
-                    var color = "#"+hex; 
-                    
-                    putSetting(setting_linecolor, color);
-                    $(".bottom.link").attr("stroke", color);
-            
-                    $(el).css('background-color', color);
-                    $(el).colpickHide();
-                }
-            });
-        }else{
-            $("#linecolorContainer").remove();
-        }
-        
-        /** MARKER COLOR SETTING */
-        if(settings.showMarkerColor) {
-            // Set marker color in UI
-            $("#markercolor").css("background-color", getSetting(setting_markercolor));
-            
-            // Listen to 'marker color' selection changes
-            $('#markercolor').colpick({
-                layout: 'hex',
-                onSubmit: function(hsb, hex, rgb, el) {
-                    var color = "#"+hex; 
-                    
-                    putSetting(setting_markercolor, color);
-                    $("marker").attr("fill", color);
-                    
-                    $(el).css('background-color', color);
-                    $(el).colpickHide();
-                }
-            });
-        }else{
-            $("#markercolorContainer").remove();
-        }
-    }else{
-        $("#lineSettings").remove();
-    }
-    
-    // ENTITY SETTINGS
-    if(settings.showEntitySettings) {
-        /**  MAX RADIUS SETTING */
-        if(settings.showEntityRadius) {
-            // Set entity radius setting in UI
-            $("#entityradius").val(getSetting(setting_entityradius));
-            
-            // Listen to line width changes
-            $("#entityradius").change(function() {
-                putSetting(setting_entityradius, $(this).val());
-                visualizeData();
-            });
-        }else{
-            $("#entityradiusContainer").remove();
-        }
-        
-        /** COUNT COLOR SETTING */
-        if(settings.showEntityColor) {
-            // Set count color in UI
-            $("#entitycolor").css("background-color", getSetting(setting_entitycolor));
-
-            // Listen to 'count color' selection changes
-            $('#entitycolor').colpick({
-                layout: 'hex',
-                onSubmit: function(hsb, hex, rgb, el) {
-                    var color = "#"+hex; 
-                    
-                    putSetting(setting_entitycolor, color);
-                    $(".background").attr("fill", color);
-                    
-                    $(el).css('background-color', color);
-                    $(el).colpickHide();
-                }
-            });
-        }else{
-            $("#entitycolorSettings").remove();
-        }
-    }else{
-        $("#entitySettings").remove();
-    }
-    
-    // LABEL SETTINGS
-    if(settings.showTextSettings) {
-        /** Labels visible */
-        if(settings.showLabels) {
-            // Set checkbox value
-            if(getSetting(setting_labels) == "false") {
-                $("#labelCheckBox").prop("checked", false);
-            }
-            
-            // Listen to changes
-            $("#labelCheckBox").change(function(e) {
-                putSetting(setting_labels, $(this).is(':checked'));
-                visualizeData();
-            });
-        }else{
-            $("#labelCheckBox").remove();
-        }
-        
-        /** TEXT FONT SIZE SETTING */
-        if(settings.showFontSize) {
-            // Set font size setting in UI
-            $("#fontsize").val(parseInt(getSetting(setting_fontsize)));
-            
-            // Listen to font size changes
-            $("#fontsize").change(function() {
-                putSetting(setting_fontsize, $(this).val()+"px");
-                $(".node text").css("font-size", getSetting(setting_fontsize), "important");
-                $(".node text").each(function() {
-                    this.style.setProperty("font-size", getSetting(setting_fontsize), "important"); 
-                });
-          
-            });
-        }else{
-            $("#fontsizeContainer").remove();
-        }
-        
-        /** TEXT LENGTH SETTING */
-        if(settings.showTextLength) {
-            // Set text length in UI
-            $("#textlength").val(getSetting(setting_textlength));
-            
-            // Listen to text length changes
-            $("#textlength").change(function() {
-                putSetting(setting_textlength, $(this).val());
-                visualizeData();
-            });
-        }else{
-            $("#textlengthContainer").remove();
-        }
-        
-        /** TEXT COLOR SETTING */
-        if(settings.showTextColor) {
-            // Set text color in UI
-            $("#textcolor").css("background-color", getSetting(setting_textcolor));
-
-            // Listen to 'count color' selection changes
-            $('#textcolor').colpick({
-                layout: 'hex',
-                onSubmit: function(hsb, hex, rgb, el) {
-                    var color = "#"+hex; 
-                    
-                    putSetting(setting_textcolor, color);
-                    $(".namelabel").attr("fill", color);
-                    
-                    $(el).css('background-color', color);
-                    $(el).colpickHide();
-                }
-            });
-        }else{
-            $("#textcolorContainer").remove();
-        }
-    }else{
-        $("#textSettings").remove();
-    }
-    
-    // TRANSFORM SETTINGS
-    if(settings.showTransformSettings) {
-        /** LINE LENGTH SETTING */
-        if(settings.showFormula) {
-            // Set formula setting in UI
-            $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
-
-            // Listen to formula changes
-            $("#formula").change(function() {
-                putSetting(setting_formula, $(this).val());
-                visualizeData();
-            });
-        }else{
-            $("#formulaContainer").remove();
-        }
-
-        /** FISH EYE */
-        if(settings.showFishEye) {
-            // Set fish eye setting in UI
-            if(getSetting(setting_fisheye) === "true") {
-                $("#fisheye").prop("checked", true);
-            }
-            
-            // Listen to fisheye changes
-            $("#fisheye").change(function(e) {
-                putSetting(setting_fisheye, $(this).is(':checked'));
-                visualizeData();
-            });
-        }else{
-            $("#fisheyeContainer").remove();
-        }
-    }else{
-        $("#transformSettings").remove();
-    }
-    
-    // GRAVITY SETTINGS
-    if(settings.showGravitySettings) {
-        /** GRAVITY SETTING */
-        if(settings.showGravity) {
-            // Set gravity setting in UI
-            $("#gravity option[value='" +getSetting(setting_gravity)+ "']").attr("selected", true);
-
-            // Listen to gravity changes
-            $("#gravity").change(function() {
-                var gravity = $(this).val();
-                putSetting(setting_gravity,  gravity);
-                
-                // Update gravity impact on nodes
-                svg.selectAll(".node").attr("fixed", function(d, i) {
-                    if(gravity == "aggressive") {
-                        d.fixed = false;
-                        return false;
-                    }else{
-                        d.fixed = true;
-                        return true;
-                    }
-                });
-                
-                visualizeData();
-            });
-        }else{
-            $("#gravityContainer").remove();
-        }
-        
-        /** ATTRACTION SETTING */
-        if(settings.showAttraction) {
-            // Set attraction setting in UI
-            $("#attraction").val(getSetting(setting_attraction));
-            
-            // Listen to attraction changes
-            $("#attraction").change(function() {
-                putSetting(setting_attraction, $(this).val());
-                visualizeData();
-            });
-        }else{
-            $("#attractionContainer").remove();
-        }
-    }else{
-        $("#gravitySettings").remove();
-    }
-}
-/************************************ END OF SETTING FUNCTIONS ***************************************/
-
-
 
 /*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
 var maxCount; 
@@ -639,39 +260,28 @@ function visualizeData() {
     /** Updates the container after a zoom event */    
     var rightClicked = false;         
     function zoomed() { 
-        // Trying to select a group of nodes?
-        if(rightClicked) {
-            console.log("Translate before", d3.event);
-            console.log(d3.event.translate);
-            d3.event.translate[0] -= d3.event.sourceEvent.movementX;
-            d3.event.translate[1] -= d3.event.sourceEvent.movementY;
-            console.log("Translate after", d3.event.translate);
-            
-        }else{
- 
-            // Translate
-            //console.log("Zoomed!", d3.event.translate);   
-            if(d3.event.translate !== undefined) {
-                if(!isNaN(d3.event.translate[0])) {           
-                    putSetting(setting_translatex, d3.event.translate[0]); 
-                }
-                if(!isNaN(d3.event.translate[1])) {    
-                    putSetting(setting_translatey, d3.event.translate[1]);
-                }
-                //console.log("translateX " + getSetting(setting_translatex) + ", translateY " + getSetting(setting_translatey));
+        // Translate
+        //console.log("Zoomed!", d3.event.translate);   
+        if(d3.event.translate !== undefined) {
+            if(!isNaN(d3.event.translate[0])) {           
+                putSetting(setting_translatex, d3.event.translate[0]); 
             }
-            // Scale
-            //console.log(d3.event.scale);
-            if(!isNaN(d3.event.scale)) {
-                putSetting(setting_scale, d3.event.scale);
-            }   
-            // Transform  
-            var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
-            //console.log("ZOOMED --> " + transform);
-            container.attr("transform", transform);
-            updateOverlays();
-        } 
-          
+            if(!isNaN(d3.event.translate[1])) {    
+                putSetting(setting_translatey, d3.event.translate[1]);
+            }
+            //console.log("translateX " + getSetting(setting_translatex) + ", translateY " + getSetting(setting_translatey));
+        }
+        // Scale
+        //console.log(d3.event.scale);
+        if(!isNaN(d3.event.scale)) {
+            putSetting(setting_scale, d3.event.scale);
+        }   
+        
+        // Transform  
+        var transform = "translate("+d3.event.translate+")scale("+d3.event.scale+")";
+        //console.log("ZOOMED --> " + transform);
+        container.attr("transform", transform);
+        updateOverlays();
     }  
    svg.call(zoomBehaviour); 
 
@@ -763,7 +373,6 @@ function visualizeData() {
                  removeOverlays();
                  var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
                  createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
-                 
              });
              
         return lines;
@@ -1008,30 +617,39 @@ function visualizeData() {
 
     // Selection element
     var selector = svg.append("g")
-                      .attr("class", "selection");        
+                      .attr("class", "selector");        
     var selection = selector.append("rect")
                             .attr("id", "selection")
                             .attr("x", 0)
                             .attr("y", 0);
     
     var positions = {};
-    svg.on("contextmenu", function(data, index) {
-        console.log("Mouse down");
-        rightClicked = true;
+    
+    svg.on("contextmenu", function() {
         d3.event.preventDefault();
+    });
+    
+    svg.on("mousedown", function() {
+        console.log("Mouse down");
+        rightClicked = $("#selection").hasClass("selected");
+        if(rightClicked) {
+            d3.event.preventDefault();
+            svg.on(".zoom", null);
+            console.log("Unbinded zoom");
 
-        // X-position
-        positions.x1 = d3.event.offsetX; 
-        positions.clickX1 = d3.event.x;
-       
-        // Y-position 
-        positions.y1 = d3.event.offsetY; 
-        positions.clickY1 = d3.event.y;
-        
-        // Deselect all nodes
-        var color = getSetting(setting_entitycolor);
-        d3.selectAll(".node").select(".foreground").style("fill", "#fff");
-        d3.selectAll(".node").select(".background").style("fill", color);
+            // X-position
+            positions.x1 = d3.event.offsetX; 
+            positions.clickX1 = d3.event.x;
+           
+            // Y-position 
+            positions.y1 = d3.event.offsetY; 
+            positions.clickY1 = d3.event.y;
+            
+            // Deselect all nodes
+            var color = getSetting(setting_entitycolor);
+            d3.selectAll(".node").select(".foreground").style("fill", "#fff");
+            d3.selectAll(".node").select(".background").style("fill", color);
+        }
     });
 
     svg.on("mousemove", function() {
@@ -1063,7 +681,7 @@ function visualizeData() {
     });
     
     svg.on("mouseup", function() {
-        console.log("Mouse up"); 
+        console.log("Mouse up, rightClicked="+rightClicked);
         if(rightClicked) {
             rightClicked = false;
             selection.style("display", "none"); 
@@ -1091,8 +709,13 @@ function visualizeData() {
                 }
             
             });
+        }else{
+            // Remove all selections
+            var color = getSetting(setting_entitycolor);
+            d3.selectAll(".node").select(".background").style("fill", color);
+            d3.selectAll(".node").select(".foreground").style("fill", "#fff");
         }
-        
+        svg.call(zoomBehaviour); 
     });
     
     // Fish eye check
@@ -1353,430 +976,17 @@ function visualizeSelection(selectedNodeIds) {
     }            
 }
 
-
-
-/*************************************** OVERLAY ****************************************/  
-
-/**
-* Truncates text after 80 characaters
-* @param text The text to truncate
-*/
-function truncateText(text, maxLength) {
-    if(text !== null) {
-        if(text.length > maxLength) {
-            return text.substring(0, maxLength-1) + "...";
-        }
-        return text;
-    }
-    return "[no name]"; 
-}
-
-/** Finds all outgoing links from a clicked record */
-function getRecordOverlayData(record) {
-    console.log(record);
-    var maxLength = getSetting(setting_textlength);
-    var array = [];
-    
-    // Header
-    var header = {text: truncateText(record.name, maxLength), size: "11px", style: "bold", height: 15, enter: true}; 
-    if(settings.showCounts) {
-        header.text += ", n=" + record.count;  
-    }
-    array.push(header);    
-
-    // Going through the current displayed data
-    var data = settings.getData.call(this, settings.data); 
-    if(data && data.links.length > 0) {
-        var map = {};
-        for(var i = 0; i < data.links.length; i++) {
-            var link = data.links[i];
-            //console.log(link);
-              
-            // Does our record point to this link?
-            if(link.source.id == record.id) {
-                console.log(link.source.name + " -> " + link.target.name);
-                // New name?
-                if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = {};
-                }
-                
-                // Relation
-                var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true};
-                if(settings.showCounts) {
-                    relation.text += ", n=" + link.targetcount;                      
-                }
-                
-                // Add record relation to map
-                if(map[link.relation.name][relation.text] == undefined) {
-                    map[link.relation.name][relation.text] = relation;
-                }
-            }
-
-            // Is our record a relation?
-            if(link.relation.id == record.id && link.relation.name == record.name) {
-                // New name?
-                if(!map.hasOwnProperty(link.relation.name)) {
-                    map[link.relation.name] = {};
-                }
-               
-                // Relation
-                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", height: 12, indent: true};
-                if(settings.showCounts) {
-                    relation.text += ", n=" + link.relation.count
-                }
-                  
-                // Add relation to map
-                if(map[link.relation.name][relation.text] == undefined) {
-                    map[link.relation.name][relation.text] = relation;
-                }
-            }
-        }
+$(document).ready(function(e) {
+    // Cursor
+    $("#d3svg").css("cursor", "url('" +$("#drag").attr("src")+ "') 8 8, pointer");
+    $(".mouse-icon").click(function(e) {
+        // Indicate the icon is selected
+        $(".mouse-icon").removeClass("selected");
+        $(this).addClass("selected"); 
         
-        console.log("MAP");
-        console.log(map);
-        
-        // Convert map to array
-        for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "8px", height: 12, enter: true}); // Heading
-            for(text in map[key]) {
-                array.push(map[key][text]);    
-            }
-        }
-    }
-
-    return array;
-}
-
-/** Finds all relationships between the source and target */
-function getRelationOverlayData(line) {
-    console.log(line);
-    var array = [];
-    var maxLength = getSetting(setting_textlength);
-    
-    // Header
-    var header1 = truncateText(line.source.name, maxLength);
-    var header2 = truncateText(line.target.name, maxLength);
-    if(header1.length+header2.length > maxLength) {
-        array.push({text: header1 + " ↔", size: "11px", style: "bold", height: 15});
-        array.push({text: header2, size: "11px", style: "bold", height: 10, enter: true});
-    }else{
-        array.push({text: header1+" ↔ "+header2, size: "11px", style: "bold", height: 15, enter: true}); 
-    }
-
-    // Going through the current displayed data
-    var data = settings.getData.call(this, settings.data); 
-    if(data && data.links.length > 0) {
-        var map = {};
-        for(var i = 0; i < data.links.length; i++) {
-            var link = data.links[i];
-            //console.log(link);
-            
-            // Pointing to target
-            if(link.source.id == line.source.id && link.target.id == line.target.id) {
-                var relation = {text: "➜ " + truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
-                if(settings.showCounts) {
-                    relation.text += ", n=" + link.relation.count
-                }
-                array.push(relation);  
-            }
-   
-           // Pointing to source 
-           if(link.source.id == line.target.id && link.target.id == line.source.id) {
-                var relation = {text: "← "+ truncateText(link.relation.name, maxLength), size: "9px", height: 11}; 
-                if(settings.showCounts) {
-                    relation.text += ", n=" + link.relation.count
-                }
-                array.push(relation);  
-            }
-        }
-    }
-    
-    return array;
-}
-
-/**
-* Creates an overlay on the location that the user has clicked on.
-* @param x Coord-x
-* @param y Coord-y
-* @param record Record info
-*/
-function createOverlay(x, y, type, selector, info) {
-    svg.select(".overlay."+selector).remove();
-
-    // Add overlay container            
-    var overlay = svg.append("g")
-                     .attr("class", "overlay "+type+ " " + selector)      
-                     .attr("transform", "translate(" +(x+5)+ "," +(y+5)+ ")");
-                     
-    // Title
-    var title = overlay.append("title").text(info[0].text);
-                     
-    // Draw a semi transparant rectangle       
-    var rect = overlay.append("rect")
-                      .attr("class", "semi-transparant")              
-                      .attr("x", 0)
-                      .attr("y", 0)
-                      .on("drag", overlayDrag);
-            
-    // Adding text 
-    var offset = 10;  
-    var indent = 5;
-    var position = 0;
-    var text = overlay.selectAll("text")
-                      .data(info)
-                      .enter()
-                      .append("text")
-                      .text(function(d) {
-                          return d.text;
-                      })
-                      .attr("x", function(d, i) {
-                          // Indent check
-                          if(d.indent) {
-                            return offset+indent;
-                          }
-                          return offset;
-                      })        // Some left padding
-                      .attr("y", function(d, i) {
-                          // Multiline check
-                          if(!d.multiline) { 
-                              position += d.height;
-                          }
-                          return position; // Position calculation
-                      })
-                      .attr("font-weight", function(d) {  // Font weight based on style property
-                          return d.style;
-                      })
-                      .style("font-size", function(d) {   // Font size based on size property
-                          return d.size;
-                      }, "important");
-                      
-                  
-    // Calculate optimal rectangle size
-    var maxWidth = 1;
-    var maxHeight = 1;                              
-    for(var i = 0; i < text[0].length; i++) {
-        var bbox = text[0][i].getBBox();
-
-        // Width
-        var width = bbox.width;
-        if(width > maxWidth) {
-            maxWidth = width;
-        }
-        
-        // Height
-        var y = bbox.y;
-        if(y > maxHeight) {
-            maxHeight = y;
-        }
-    }
-    maxWidth  += offset*3.5;
-    maxHeight += offset*2; 
-    
-    // Set optimal width & height
-    rect.attr("width", maxWidth)
-        .attr("height", maxHeight);
-  
-    // Close button
-    var buttonSize = 15;
-    var close = overlay.append("g")
-                       .attr("class", "close")
-                       .attr("transform", "translate("+(maxWidth-buttonSize)+",0)")
-                       .on("click", function(d) {
-                           removeOverlay(selector);                              
-                       });
-                       
-    // Close rectangle                                                                     
-    close.append("rect")
-           .attr("class", "close-button")
-           .attr("width", buttonSize)
-           .attr("height", buttonSize)
-
-    // Close text        
-    close.append("text")
-         .attr("class", "close-text")
-         .text("X")
-         .attr("x", buttonSize/4)
-         .attr("y", buttonSize*0.75);
-         
-    /** Handles dragging events on overlay */
-    function overlayDrag(d) {
-        overlay.attr("transform", "translate("+d.x+","+d.y+")");
-    }                 
-}
-
-
-/** Repositions all overlays */
-function updateOverlays() {
-    $(".overlay").each(function() {
-        // Get information
-        var pieces = $(this).attr("class").split(" ");
-        var type = pieces[1];
-        var id = pieces[2];
-        //console.log("Type: " + type + ", id:" + id);
-        
-        // Select element to align to
-        var bbox;
-        if(type == "record") {
-            bbox = $(".node."+id + " .icon")[0].getBoundingClientRect();
-        }else{
-            bbox = $(".link."+id)[0].getBoundingClientRect();
-        }
-        //console.log(bbox);
-        
-        // Update position 
-        var svgPos = $("svg").position();
-        x = bbox.left + bbox.width/2 - svgPos.left
-        y = bbox.top + bbox.height/2 - svgPos.top;  
-        $(this).attr("transform", "translate("+x+","+y+")");
-    });
-    
-    /*
-    
-    
-    if(pos && svgPos) {
-        var x = pos.left - svgPos.left;
-        var y = pos.top - svgPos.top;
-        $(".overlay.id"+id).attr("transform", "translate("+x+","+y+")");   
-    }
-    */
-}
-
-/** Removes the overlay with the given ID */
-function removeOverlay(selector) {
-    $(".overlay."+selector).fadeOut(300, function() {
-        $(this).remove();
-   }); 
-}
-
-/** Removes all overlays */
-function removeOverlays() {
-    $(".overlay").each(function() {
-        $(this).fadeOut(300, function() {
-            $(this).remove();
-        })
-    });
-}
-
-
-
-
-
-
-/********************************* GEPHI ***********************************/
-$(document).ready(function() {
-    /* For future usage 
-    // Menu popup link click
-    $(".popup-link").click(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        var width = $(window).width() / 1.5;
-        var height = $(window).height() / 1.5;
-        
-        var url = $(this).attr("href");
-        top.HEURIST.util.popupURL(top, url, {height:height, width:width});
-    });
-    */
-    
-    $("#gephi-export").click(function(e) {
-        getGephiFormat();
-    });
+        // Update cursor
+        var src = $(this).attr("src");
+        console.log(src);
+        $("#d3svg").css("cursor", "url('"+src+"') 8 8, pointer");
+    });    
 });
-
-/** Constructs an URL that shows the results independently */
-function getCustomURL() {
-    // Get search data
-    var data = settings.getData.call(this, settings.data);
-    console.log(data);
-    
-    // Construct ID's
-    var ids = [];
-    for(var key in data.nodes) {
-        ids.push(data.nodes[key].id);
-    }
-
-    // Construct url
-    var json = JSON.stringify(ids);
-    var url = location.protocol + "//" + location.host + location.pathname + 
-              "?db=" + getDatabaseName() + "&ids=" + json;
-              
-    console.log("URL: " + url);
-    return url;
-}
-
-/** Function to download */
-function download(filename, text) {
-   
-}
-
-/** Transforms the visualisation into Gephi format */
-function getGephiFormat() {
-    // Get data
-    var data = settings.getData.call(this, settings.data);
-    console.log("GEPHI DATA");
-    console.log(data);
-    
-    // META
-    var gexf = '<?xml version="1.0" encoding="UTF-8"?>';
-    gexf +=      '<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">';
-    gexf +=        '<meta lastmodifieddate="2014-10-10">';
-    gexf +=          '<creator>HeuristNetwork.org</creator>';
-    gexf +=          '<description>Visualisation export</description>';
-    gexf +=        '</meta>' ;
-    gexf +=        '<graph mode="static" defaultedgetype="directed">';
-    
-    // NODE ATTRIBUTES
-    gexf += '<attributes class="node">';
-    gexf +=     '<attribute id="0" title="name" type="string"/>';
-    gexf +=     '<attribute id="1" title="image" type="string"/>';
-    gexf +=     '<attribute id="2" title="count" type="float"/>';
-    gexf += '</attributes>';
-    
-    // EDGE ATTRIBUTES
-    gexf += '<attributes class="edge">';
-    gexf +=     '<attribute id="0" title="relation-id" type="float"/>';
-    gexf +=     '<attribute id="1" title="relation-name" type="string"/>';
-    gexf +=     '<attribute id="2" title="relation-image" type="string"/>';
-    gexf +=     '<attribute id="3" title="relation-count" type="float"/>';
-    gexf += '</attributes>';
-     
-    // NODES
-    gexf += '<nodes>';
-    for(var key in data.nodes) {
-        var node = data.nodes[key];
-        gexf += '<node id="'+node.id+'" label="'+node.name+'">';
-        gexf +=     '<attvalues>';
-        gexf +=         '<attvalue for="0" value="'+node.name+'"/>';
-        gexf +=         '<attvalue for="1" value="'+node.image+'"/>';
-        gexf +=         '<attvalue for="2" value="'+node.count+'"/>';
-        gexf +=     '</attvalues>'; 
-        gexf += '</node>';
-    }
-    gexf += '</nodes>';
-    
-    // EDGES
-    gexf += '<edges>';
-    for(var i = 0; i < data.links.length; i++) {
-        var edge = data.links[i]; 
-        gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'+edge.targetcount+'">';
-        gexf +=     '<attvalues>';  
-        gexf +=         '<attvalue for="0" value="'+edge.relation.id+'"/>';      
-        gexf +=         '<attvalue for="1" value="'+edge.relation.name+'"/>';
-        gexf +=         '<attvalue for="2" value="'+edge.relation.image+'"/>';
-        gexf +=         '<attvalue for="3" value="'+edge.targetcount+'"/>';
-        gexf +=     '</attvalues>'; 
-        gexf += '</edge>';
-    }
-    gexf += '</edges>';
-    
-    // COMPLETE
-    gexf +=         '</graph>';
-    gexf +=       '</gexf>';
-    
-    // DOWNLOAD
-    var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(gexf));
-    pom.setAttribute('download', getDatabaseName()+".gexf");
-    pom.click();
-    
-}
