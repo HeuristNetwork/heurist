@@ -206,14 +206,12 @@
                 <div class="adminSection">
                     <ul>
                         <?php
-                            /* Removed functions which are now on home/search page 5/12/14 to convert Designer View to DB Administration
                             menuEntry('---','Open database','../common/connect/getListOfDatabases.php',
                                 'List the databases on the current server to which you have access '.
                                 '(you are identified by the email address attached to your current user login)');
 
                             menuEntry('','New database','setup/dbcreate/createNewDB.php',
                                 'Create a new database on the current server - essential structure elements are populated automatically');
-                            */
                             menuEntry('---','Clone database','setup/dboperations/cloneDatabase.php?db='.HEURIST_DBNAME,
                                 'Clones an identical database from the currrent database with all data, users, attached files, templates etc.');
 
@@ -256,12 +254,11 @@
                 <div class="adminSection">
                     <ul>
                         <?php
-                            /* Removed functions which are now on home/search page 5/12/14 to convert Designer View to DB Administration
                             menuEntry('---','Record types and fields','structure/rectypes/manageRectypes.php?db='.HEURIST_DBNAME,
                                 'Add new or modify existing record types, including general characteristics '.
                                 'and the data fields and rules which compose a record');
 
-                            menuEntry('','Browse templates (Beta)','structure/import/annotatedTemplate.php?db='.HEURIST_DBNAME,
+                            menuEntry('','Annotated templates','structure/import/annotatedTemplate.php?db='.HEURIST_DBNAME,
                                 'Browse documented record type templates on the Heurist Network site '.
                                 'and selectively import them into the current database');
 
@@ -273,7 +270,7 @@
                                 'Browse and edit the base field definitions referenced by record types (often shared by multiple record types)');
                             menuEntry('','Manage terms','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
                                 'Browse and edit the terms used for relationship types and for other enumerated (term list) fields');
-                            */
+
                             menuEntry('','Relationship constraints','structure/rectypes/editRectypeConstraints.php?db='.HEURIST_DBNAME,
                                 'Define overal constraints on the record types which can be related, including allowable '.
                                 'relationship types between specific record types');

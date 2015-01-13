@@ -88,7 +88,7 @@
             For many record types, they will just render the title field, or the title with some additional contextual information.<br/>
             For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
             This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
-            If the title mask is invalid please edit the record type (see under Essentials in the menu on the left)
+            If the title mask is invalid please edit the record type (see under Structure in the menu on the left)
             and correct the title mask for the record type.<br/>
             <?php
                echo "<br/><hr>\n";
