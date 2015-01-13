@@ -304,11 +304,12 @@ $.widget( "heurist.connections", {
             links = links.concat( __getLinks(nodes, relations.reverse) ); // Reverse links
         }
 
-        // Construct data object
-        var data = {nodes: nodes, links: links};
-        console.log("DATA");
-        console.log(data);
-        return data;
+        // Construct data object with nodes as array
+        var array = [];
+        for(var id in nodes) {
+            array.push(nodes[id]);
+        }
+        return {nodes: array, links: links};
     }
 
     /** Calls the visualisation plugin */

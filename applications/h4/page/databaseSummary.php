@@ -40,7 +40,7 @@
         <!-- Css -->
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <style>
-            #container {
+            #rectypes {
                 height: 100%;
             }
             
@@ -118,7 +118,9 @@
         <!-- Visualize plugin --> 
         <script type="text/javascript" src="visualize/settings.js"></script>
         <script type="text/javascript" src="visualize/overlay.js"></script>
+        <script type="text/javascript" src="visualize/selection.js"></script>
         <script type="text/javascript" src="visualize/gephi.js"></script>
+        <script type="text/javascript" src="visualize/drag.js"></script>
         <script type="text/javascript" src="visualize/visualize.js"></script>
         
         <link rel="stylesheet" type="text/css" href="visualize/visualize.css">
@@ -144,7 +146,7 @@
     </head>
 
     <body class="popup">
-        <table id="container" border="0" cellspacing="0" cellpadding="2" align="center">
+        <table id="rectypes" border="0" cellspacing="0" cellpadding="2" align="center">
             <tr>
                 <td id="visualisation-details" style="width: 350px">
                     <!-- Record count table -->

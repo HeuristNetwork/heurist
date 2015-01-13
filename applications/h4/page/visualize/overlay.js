@@ -16,7 +16,7 @@ function truncateText(text, maxLength) {
 
 /** Finds all outgoing links from a clicked record */
 function getRecordOverlayData(record) {
-    console.log(record);
+    //console.log(record);
     var maxLength = getSetting(setting_textlength);
     var array = [];
     
@@ -37,7 +37,7 @@ function getRecordOverlayData(record) {
               
             // Does our record point to this link?
             if(link.source.id == record.id) {
-                console.log(link.source.name + " -> " + link.target.name);
+                //console.log(link.source.name + " -> " + link.target.name);
                 // New name?
                 if(!map.hasOwnProperty(link.relation.name)) {
                     map[link.relation.name] = {};
@@ -74,10 +74,8 @@ function getRecordOverlayData(record) {
                 }
             }
         }
-        
-        console.log("MAP");
-        console.log(map);
-        
+        console.log("Record overlay data", map);
+
         // Convert map to array
         for(key in map) {                                   
             array.push({text: truncateText(key, maxLength), size: "8px", height: 12, enter: true}); // Heading
@@ -134,6 +132,7 @@ function getRelationOverlayData(line) {
         }
     }
     
+    console.log("Line overlay data", array);
     return array;
 }
 
@@ -146,9 +145,9 @@ function getRelationOverlayData(line) {
 function createOverlay(x, y, type, selector, info) {
     svg.select(".overlay."+selector).remove();
     
-    // Info cursor
-    var information = $("#information").hasClass("selected");
-     if(information) {
+    // Show overlays?
+    var showOverlay = $("#overlay").hasClass("selected");
+     if(showOverlay) {
         // Add overlay container            
         var overlay = svg.append("g")
                          .attr("class", "overlay "+type+ " " + selector)      

@@ -47,7 +47,9 @@
         <!-- Visualize plugin --> 
         <script type="text/javascript" src="visualize/settings.js"></script>
         <script type="text/javascript" src="visualize/overlay.js"></script>
+        <script type="text/javascript" src="visualize/selection.js"></script>
         <script type="text/javascript" src="visualize/gephi.js"></script>
+        <script type="text/javascript" src="visualize/drag.js"></script>
         <script type="text/javascript" src="visualize/visualize.js"></script>
         <link rel="stylesheet" type="text/css" href="visualize/visualize.css">                     
     </head>
@@ -69,7 +71,7 @@
                 // Processing...
                 console.log("showData called inside springDiagram");
                 $("#d3svg").html('<text x="25" y="25" fill="black">Processing...</text>');
-                
+
                 // Custom data parsing
                 function getData(data) {
                     console.log("Custom getData() call");
@@ -102,7 +104,6 @@
                     
                     showCounts: false,
                     showEntitySettings: false,
-                    showLineWidth: false,
                     showFormula: false
                 }); 
             }
