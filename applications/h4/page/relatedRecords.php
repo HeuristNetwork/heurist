@@ -1,14 +1,14 @@
 <?php
 
-    /** 
+    /**
     * Standalone search for related recprds. It may be used separately or wihin widget in iframe (for example in recordListExt )
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -50,14 +50,14 @@
         <!-- @todo load this 4 scripts dynamically -->
         <!-- script type="text/javascript" src="../apps/search.js"></script>
         <script type="text/javascript" src="relatedRecords.js"></script-->
-        
+
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
 
         <script type="text/javascript" src="../apps/search/ruleBuilder.js"></script>
         <script type="text/javascript" src="../apps/search/resultList.js"></script>
-        
+
         <script type="text/javascript">
             if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){
             <?php
@@ -68,7 +68,7 @@
             }
 
             var relatedRecords, ruleBuilder;
-            
+
             var ruleBuilders = [], counter = 0;
 
             function onInit(success) //callback function of hAPI initialization
@@ -78,22 +78,22 @@
                             if(!top.HR){
                                 var prefs = top.HAPI4.get_prefs();
                                 //loads localization
-                                top.HR = window.HAPI4.setLocale(prefs['layout_language']); 
+                                top.HR = window.HAPI4.setLocale(prefs['layout_language']);
                             }
-                            
+
                             //init toolbar buttons
                             $('#btn_add_level1').button().on('click', 1, addRuleBuilder);
                             $('#btn_add_level2').button().button("disable").on('click', 2, addRuleBuilder);
                             $('#btn_add_level3').button().button("disable").on('click', 3, addRuleBuilder);
-                            
-                            
+
+
                             /*
                             ruleBuilder = $("<div>").appendTo($("body"));
                             var options = {};
-                            //add rule builder
+                            //add rule sets builder
                             ruleBuilder.ruleBuilder( options );
                             */
-                            
+
                             //add record list widget
                             /*options = { showmenu: false };
                             var $container = $("<div>").appendTo($("body"));
@@ -101,56 +101,56 @@
 
                         }
             }
-            
+
             function addRuleBuilder(event){
                 counter++;
                 var level = event.data;
                 var ruleBuilder = $("<div>",{id:'rb'+counter}).ruleBuilder({level:level, onremove:removeRoleBuilder}).appendTo($('#level'+level));
                 ruleBuilders.push(ruleBuilder);
-                
+
                 updateButtons();
             }
-            
+
             function removeRoleBuilder(event, data){
 
                 var level = $('#'+data.id).ruleBuilder('option' , 'level');
                 var remove_on_levels_above = (level<3 && $('#level'+(level+1)).children().length>0 && $(('#level'+level)).children().length==1);
-                
+
                 function _onDelete(){
-                    
-                    
+
+
                     $.each(ruleBuilders, function( index, value ) {
                         if(value.attr('id') == data.id){
-                            ruleBuilders.splice(index, 1);   
+                            ruleBuilders.splice(index, 1);
                             return false;
                         }
                     });
-                
+
                     $('#'+data.id).remove();
-                    
+
                     if(remove_on_levels_above){ //remove ALL on dependent levels
                         var index = 0;
                         while (index < ruleBuilders.length){
                             var $div = $(ruleBuilders[index]);
                             if($div.ruleBuilder('option' , 'level')>level){
-                                ruleBuilders.splice(index, 1);                                                                   
+                                ruleBuilders.splice(index, 1);
                                 $div.remove();
                             }else{
                                 index++;
                             }
                         }
                     }
-                
+
                     updateButtons();
                 }
-                
+
                 if(remove_on_levels_above){
                     top.HEURIST4.util.showMsgDlg('You remove the last rule per level. All rules for dependent levels will be removed also. Please confirm',  _onDelete);
                 }else{
                     _onDelete();
                 }
             }
-            
+
             // update add button disability
             function updateButtons(){
                 var val = $('#level2').children().length>0?"enable":"disable";
@@ -158,7 +158,7 @@
                 val = $('#level1').children().length>0?"enable":"disable";
                 $('#btn_add_level2').button(val);
             }
-            
+
             //
             //
             //
@@ -167,10 +167,10 @@
                 if(ruleBuilder && rectypes){
                     ruleBuilder.ruleBuilder('option', 'recordtypes', rectypes );
                     ruleBuilder.ruleBuilder('option', 'query_request', query_request );
-                } 
+                }
                 */
             }
-            
+
             $(document).ready(function() {
 
                 if(!top.HAPI4){
@@ -182,17 +182,17 @@
                 }
 
             });
-            
+
         </script>
 
     </head>
     <body>
         <div id="toolbar"><button id="btn_add_level1">Add Level 1</button><button id="btn_add_level2">Add Level 2</button><button id="btn_add_level3">Add Level 3</button></div>
-        
+
         <div id="level1"></div>
-        
+
         <div id="level2" style="padding-top:15px"></div>
-        
+
         <div id="level3" style="padding-top:15px"></div>
     </body>
 </html>
