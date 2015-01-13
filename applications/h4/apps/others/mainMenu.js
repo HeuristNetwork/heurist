@@ -34,16 +34,17 @@ $.widget( "heurist.mainMenu", {
 
         var that = this;
 
-        this.element
+        this.element.css('height','100%').addClass('ui-heurist-header2')
         // prevent double click to select text
         .disableSelection();
 
         this.div_logo = $( "<div>")
         .addClass('logo')
-        .css('width','160px')
-        .css('float','left')
-        .appendTo( this.element )
-        .button();
+        .css({'width':'198px', 'height':'56px', 'float':'left', 'margin-top':'6px'})
+        .appendTo( this.element );
+        //.button();
+        
+        $("<div>").css({'font-size':'0.8em', 'text-align':'center', 'padding-top':'36px', 'width':'100%'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_logo );
 
         // bind click events
         this._on( this.div_logo, {
@@ -51,20 +52,20 @@ $.widget( "heurist.mainMenu", {
         });
 
         //'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'
-        this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'text-align':'center' }).appendTo(this.element);
+        this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'padding-top':'14px', 'text-align':'center' }).appendTo(this.element);
 
-        $("<div>").css({'font-size':'1.6em', 'font-style':'italic'}).text(top.HAPI4.database).appendTo( this.div_dbname );
-        $("<div>").css({'font-size':'0.8em'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_dbname );
+        $("<div>").css({'font-size':'1.3em', 'font-weight':'bold'}).text(top.HAPI4.database).appendTo( this.div_dbname );
+        //'font-style':'italic'
+        //$("<div>").css({'font-size':'0.8em'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_dbname );
 
         // MAIN MENU-----------------------------------------------------
         
-        this.divMainMenu = $( "<div>").css({'float':'right', 'padding-right':'2em', 'text-align':'right' }).appendTo(this.element);
+        this.divMainMenu = $( "<div>").css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'500px' }).appendTo(this.element);
         
-        this.divProfileItems = $( "<ul>").addClass('horizontalmenu')
-                    .appendTo( $("<div>").css({'display':'float'}).appendTo(this.divMainMenu) );
-        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).css({'font-size':'1.1em','height':'2em','padding-top':'0.2em'}).appendTo(this.divMainMenu);
+        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).css({'font-size':'1.1em', 'padding-top':'0.5em', 'padding-right': '1.5em', 'float':'right'}).appendTo(this.divMainMenu);
+        this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         
-        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').css({'display':'float'}).appendTo(this.divMainMenu);
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').css({'float':'right'}).appendTo( this.divMainMenu );
         
         this._initMenu('Profile', this.divProfileItems);
         this._initMenu('Database');
@@ -89,7 +90,8 @@ $.widget( "heurist.mainMenu", {
                 var url = top.HAPI4.basePathOld + "admin/adminMenu.php?db=" + top.HAPI4.database;        
                 window.open(url, "_blank");
             });
-            
+        }
+        if(this.options.btn_visible_newrecord){
             this.btn_add_record = $( "<button>", {
                 text: top.HR("add new record")
             })

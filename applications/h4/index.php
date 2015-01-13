@@ -169,7 +169,7 @@
                                     prefs['layout_theme']+'/jquery-ui.css" />');
                             }else{
                                 //default BASE theme
-                                cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />');
+                                cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />');
                             }
                             //add theme link to html header
                             $("head").append(cssLink);

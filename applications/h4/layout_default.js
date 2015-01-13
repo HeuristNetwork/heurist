@@ -92,14 +92,14 @@ options - parameters to init application
 */ 
 var layouts = [
     {id:'L01', name:'h3 classic', theme:'smoothness', type:'cardinal', 
-        north:{size:100, resizable:false,
+        north:{size:130, resizable:false,
             apps:[
-                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'50',right:0, border:'none', 'background':'none'} },    //top panel
+                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'60',right:0, border:'none', 'background':'none'} },    //top panel
                 
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:50, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:60, left:0, height:60, right:0, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search '#8ea9b9'
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
-        west:{size:230, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
+        west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,

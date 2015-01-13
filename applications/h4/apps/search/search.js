@@ -32,10 +32,13 @@ $.widget( "heurist.search", {
 
         searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
 
+        leftmargin: '240px',
+        
         has_paginator: false,
         limit: 1000,
         
         islinkmode: true, //show buttons or links
+        btn_visible_newrecord: true,
 
         // callbacks
         onsearch: null,  //on start search
@@ -74,12 +77,36 @@ $.widget( "heurist.search", {
         
         var that = this;
         
-        this.div_search = $('<div>').css('width','100%').appendTo( this.element );
-        this.div_progress = $('<div>').css('width','100%').appendTo( this.element ).hide();
+        this.element.addClass('ui-heurist-header1');
+        
+        var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
+                  '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
+                  
+        if(this.options.btn_visible_newrecord){
+            this.btn_add_record = $( "<button>", {
+                text: top.HR("Add New Record")
+            })
+            //.css('float','center')
+            .addClass('logged-in-only')
+            .appendTo( 
+                  $('<div>')
+                        .css({'width':this.options.leftmargin,'height':'2em','padding-top':'10px','text-align':'center','float':'left'})
+                        .appendTo( this.element )                    
+            )
+            .button({icons: {
+                primary: "ui-icon-circle-plus"
+            }})
+            .click( function(){ that._addNewRecord(); });
+        }else{
+            this.element.css('padding-left',this.options.leftmargin);
+        }
+        
+        this.div_search   = $('<div>').css({'float':'left','height':'100%','padding-top':'10px'}).appendTo( this.element );
+        this.div_progress = $('<div>').css({'float':'left','height':'100%','padding-top':'10px'}).appendTo( this.element ).hide();
 
         
-        this.input_search = $( "<input>", {width: this.options.has_paginator?'30%':'50%'} )
-        .css({'margin-right':'0.2em'})
+        this.input_search = $( "<input>" )   //this.options.has_paginator?'30%':'50%'} )
+        .css({'margin-right':'0.2em', 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_search );
 
@@ -102,7 +129,8 @@ $.widget( "heurist.search", {
 
         if(this.options.islinkmode){
             
-            this.div_search_links = $('<div>').css('width','100%').appendTo( this.div_search );
+            this.div_search_links = $('<div>').css({'text-align':'right', 'width':'30%', 'max-width':'500px' })
+                    .appendTo( this.div_search );
             
             var link = $('<a>',{
                 text: 'Quick', href:'#'
@@ -340,7 +368,7 @@ $.widget( "heurist.search", {
             .css({'width':'50%', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
             .progressbar().appendTo(this.div_progress);
             
-        this.progress_lbl = $("<div>").css({'position':'absolute','margin-left':'22%', 'top': '4px', 'text-shadow': '1px 1px 0 #fff' })
+        this.progress_lbl = $("<div>").css({'position':'absolute','margin-left':'22%', 'top': '14px', 'text-shadow': '1px 1px 0 #fff' })
             .appendTo(this.progress_bar);     
             //font-weight: bold;
        
@@ -1020,6 +1048,31 @@ $.widget( "heurist.search", {
 
         
     }
+    
+    , _addNewRecord: function(){
+        
+        
+        var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
+        
+        Hul.showDialog(url, { height:450, width:700, 
+                    callback:function(responce) {
+/*                        
+                var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
+                top.HEURIST.util.getJsonData(
+                    sURL,
+                    function(responce){
+                        if(responce){
+                            top.HEURIST.rectypes.usageCount = responce;
+                            top.HEURIST.search.createUsedRectypeSelector(true);
+                        }
+                    },
+                    "db="+_db+"&action=usageCount");
+*/                        
+                    }
+            });
+            
+    }
+    
     
 
 });

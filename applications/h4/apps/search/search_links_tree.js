@@ -28,7 +28,8 @@ $.widget( "heurist.search_links_tree", {
     options: {
         isapplication:true,  // send and recieve the global events
         searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-
+        btn_visible_dbstructure: true,
+        btn_visible_filter: false
     },
 
     currentSearch: null,
@@ -42,63 +43,86 @@ $.widget( "heurist.search_links_tree", {
         var that = this;
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
-        this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide();
+        this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
+
+        if(this.options.btn_visible_dbstructure){
+            this.btn_db_dtructure = $( "<button>", {
+                text: top.HR("Database Summary")
+            })
+            .addClass('logged-in-only')
+            .appendTo( $( "<div>" ).css({'height':'4em', 'width':'100%', 'text-align':'center'}).appendTo( this.search_tree ) )
+            .button({icons: {
+                primary: "ui-icon-circle-plus"
+            }})
+            .click( function(){ that._showDbSummary(); });
+        }
         
-        this.filter = $( "<div>" ).appendTo( this.search_tree );
+        if(this.options.btn_visible_filter){
         
-        this.filter_input = $('<input name="search" placeholder="Filter...">')
-                        .css('width','100px').appendTo(this.filter);
-        this.btn_reset = $( "<button>" )
+            this.filter = $( "<div>" ).css({'height':'2em', 'width':'100%'}).appendTo( this.search_tree );
+            
+            this.filter_input = $('<input name="search" placeholder="Filter...">')
+                            .css('width','100px').appendTo(this.filter);
+            this.btn_reset = $( "<button>" )
+                .appendTo( this.filter )
+                .button({icons: {
+                        primary: "ui-icon-close"
+                    },
+                    title: top.HR("Reset"),
+                    text:false})
+                .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
+                .attr("disabled", true);
+            this.btn_save = $( "<button>" )
             .appendTo( this.filter )
             .button({icons: {
-                    primary: "ui-icon-close"
+                    primary: "ui-icon-disk"
                 },
-                title: top.HR("Reset"),
+                title: top.HR("Save"),
                 text:false})
             .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
-            .attr("disabled", true);
-        this.btn_save = $( "<button>" )
-        .appendTo( this.filter )
-        .button({icons: {
-                primary: "ui-icon-disk"
-            },
-            title: top.HR("Save"),
-            text:false})
-        .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
+            
+        }
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
+        
+        var toppos = 0;
+        if(this.options.btn_visible_dbstructure) toppos = toppos + 4;
+        if(this.options.btn_visible_filter) toppos = toppos + 2;
+        if(hasHeader) toppos = toppos + 2;
 
-        this.accordeon = $( "<div>" ).css({'top':hasHeader?'4em':'2em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
+        this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
         
         
         this.edit_dialog = null;
             
-        // listeners            
-        this.filter_input.keyup(function(e){
-              var leavesOnly = true; //$("#leavesOnly").is(":checked"),
-                  match = $(this).val();
+        if(this.options.btn_visible_filter){
+            // listeners            
+            this.filter_input.keyup(function(e){
+                  var leavesOnly = true; //$("#leavesOnly").is(":checked"),
+                      match = $(this).val();
 
-              if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ""){
-                that.btn_reset.click();
-                return;
-              }
-              // Pass a string to perform case insensitive matching
-              for (var groupID in that.treeviews)
-                if(groupID){
-                    var n = that.treeviews[groupID].filterNodes(match, leavesOnly); //n - found
-                }
-             
-              that.btn_reset.attr("disabled", false);
-        });        
-        
-        this._on( this.btn_reset, { click: function(){
-              this.filter_input.val("");
-              for (var groupID in this.treeviews)
-                if(groupID){
-                    this.treeviews[groupID].clearFilter();
-                }
-        } });
-        this._on( this.btn_save, { click: "_saveTreeData"} );
+                  if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ""){
+                    that.btn_reset.click();
+                    return;
+                  }
+                  // Pass a string to perform case insensitive matching
+                  for (var groupID in that.treeviews)
+                    if(groupID){
+                        var n = that.treeviews[groupID].filterNodes(match, leavesOnly); //n - found
+                    }
+                 
+                  that.btn_reset.attr("disabled", false);
+            });        
+            
+            this._on( this.btn_reset, { click: function(){
+                  this.filter_input.val("");
+                  for (var groupID in this.treeviews)
+                    if(groupID){
+                        this.treeviews[groupID].clearFilter();
+                    }
+            } });
+            this._on( this.btn_save, { click: "_saveTreeData"} );
+        }
         
 
         //global listener
@@ -817,14 +841,27 @@ $.widget( "heurist.search_links_tree", {
             this.edit_dialog.remove();
         }
 
-        this.btn_save.remove(); 
-        this.btn_reset.remove(); 
-        this.filter.remove(); 
+        if(this.filter){
+            this.btn_save.remove(); 
+            this.btn_reset.remove(); 
+            this.filter.remove(); 
+        }
         this.accordeon.remove(); 
         //this.tree.remove(); 
         
         this.search_tree.remove(); 
         this.search_faceted.remove(); 
+    }
+    
+    , _showDbSummary: function(){
+        
+        var url = top.HAPI4.basePath+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
+        
+        var body = this.document.find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+        
+        Hul.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
+            
     }
 
 });

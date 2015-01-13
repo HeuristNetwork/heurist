@@ -491,8 +491,8 @@ function appCreatePanel($pane_content, app, needcontent){
         appAddContent($d, application, app.options);
 
         $d.addClass('ui-widget-content')
-        .addClass('ui-corner-all')
-        .css('padding','0.2em');
+        .addClass('ui-corner-all');
+        //.css('padding','0.2em');
     }
 
     if(app.css){

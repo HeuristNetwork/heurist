@@ -56,7 +56,7 @@ $.widget( "heurist.resultList", {
         this.div_content = $( "<div>" )
         .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em',
             'position':'absolute',
-            'top':hasHeader?'4.4em':'2.4em','bottom':'15px'})   //@todo - proper relative layout
+            'top':hasHeader?'5em':'3em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
@@ -112,7 +112,7 @@ $.widget( "heurist.resultList", {
         
         
         this.mode_selector = $( "<div>" )
-        .css({'float':'right'})
+        .css({'float':'right', 'padding-top': '0.5em'})
         .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
             +'<label for="list_layout_list">'+top.HR('list')+'</label>'
             +'<input type="radio" id="list_layout_icons" name="list_lo" value="icons"/>'
@@ -143,7 +143,7 @@ $.widget( "heurist.resultList", {
         //----------------------
         
         this.span_info = $("<label>").appendTo(
-            $( "<div>").css({'float':'right','min-width':'10em','padding':'3px 2em 0 0px'}).appendTo( this.div_toolbar ));
+            $( "<div>").css({'float':'right','min-width':'10em','padding':'5px 2em 0 0px'}).appendTo( this.div_toolbar ));
 
         //-----------------------
         
