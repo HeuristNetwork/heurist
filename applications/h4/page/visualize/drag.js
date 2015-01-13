@@ -37,29 +37,29 @@ function addNodes() {
         }
         
         // Attributes
-        d3.select(this).attr("class", "node id"+d.id)
-                       .attr("transform", "translate(10, 10)")
-                       .attr("x", d.x) 
-                       .attr("y", d.y)
-                       .attr("px", d.px)
-                       .attr("py", d.py)
-                       .attr("fixed", function(d) {
-                           if(record && gravity !== "aggressive") {
-                               d.fixed = true;
-                               return true;
-                           }
-                           return false;
-                       })    
-                      .on("click", function(d) {
-                           // Check if it's not a click after dragging
-                           if(!d3.event.defaultPrevented) {
-                               // Remove all overlays and create a record overlay
-                               removeOverlays();
-                               onRecordNodeClick(d3.event, d, ".node.id"+d.id);
-                           }
-                      })
-                      .call(drag);
-        
+        d3.select(this)
+          .attr("class", "node id"+d.id)
+          .attr("transform", "translate(10, 10)")
+          .attr("x", d.x) 
+          .attr("y", d.y)
+          .attr("px", d.px)
+          .attr("py", d.py)
+          .attr("fixed", function(d) {
+              if(record && gravity == "off") {
+                  d.fixed = true;
+                  return true;
+              }
+              return false;
+          })    
+         .on("click", function(d) {
+              // Check if it's not a click after dragging
+              if(!d3.event.defaultPrevented) {
+                  // Remove all overlays and create a record overlay
+                  removeOverlays();
+                  onRecordNodeClick(d3.event, d, ".node.id"+d.id);
+              }
+         })
+         .call(drag);
      });            
      return nodes;
 }
@@ -81,24 +81,16 @@ function updateNodes() {
 /** Called when a dragging event starts */
 function dragstart(d, i) {
     d3.event.sourceEvent.stopPropagation();
-       
-       /* 
-    if(gravity !== "aggressive") {    
-        force.stop(); // Stop force from auto positioning
-        if(gravity === "touch") {
-            svg.selectAll(".node").attr("fixed", function(d, i) {
-                d.fixed = false;
-                return false;
-            });
-        }
-    }     */
-    if(getSetting(setting_gravity) == "touch") {
-        svg.selectAll(".node")
-           .attr("fixed", function(d, i) {
-                d.fixed = false;
-                return false;
-           });   
-    }
+    force.stop();
+
+    // Fixed node positions?
+    var gravity = getSetting(setting_gravity);
+    svg.selectAll(".node")
+       .attr("fixed", function(d, i) {
+            d.fixed = (gravity == "off");
+            return d.fixed;
+       }); 
+    d.fixed = true; 
     
     updateCircles(".node.id"+d.id, selectionColor, selectionColor);
 }
@@ -144,13 +136,12 @@ function dragmove(d, i) {
 /** Called when a dragging event ends */
 function dragend(d, i) {
     // Update nodes & lines
-    d.fixed = (getSetting(setting_gravity) == "aggressive");
+    d.fixed = (getSetting(setting_gravity) !== "aggressive");
+    console.log("Fixed: ", d.fixed);
     tick();
     
     // Check if force may resume
-    /*
     if(gravity !== "off") {
         force.resume(); 
     } 
-    */
 }

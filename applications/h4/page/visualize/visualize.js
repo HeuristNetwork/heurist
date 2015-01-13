@@ -212,6 +212,8 @@ function getEntityRadius(count) {
 /** Visualizes the data */ 
 var data; // Currently visualised dataset
 var zoomBehaviour;
+var force;
+
 function visualizeData() {
     svg.selectAll("*").remove();
     addSelectionBox();
@@ -224,7 +226,7 @@ function visualizeData() {
     // Container with zoom and force
     var container = addContainer();
     svg.call(zoomBehaviour); 
-    var force = addForce();
+    force = addForce();
 
     // Lines 
     addMarkerDefinitions();
@@ -245,14 +247,15 @@ function visualizeData() {
         addLabels("shadow", "#000");
         addLabels("namelabel", getSetting(setting_textcolor));
     }
+    console.log("EVERYTHING HAS BEEN ADDED");
 
     // Get everything into positon when gravity is off.
     if(getSetting(setting_gravity) == "off") {
-        for(var i=0; i<100; i++) {
+        for(var i=0; i<10; i++) {
             force.tick();
         }
         d3.selectAll(".node").attr("fixed", true);
-        //force.stop(); 
+        force.stop();
     }
     
 } //end visualizeData
