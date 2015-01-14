@@ -441,6 +441,8 @@ if(isset($_POST['data'])) {
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
                     alert(response);  
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.status + " --> " + jqXHR.responseText);
                 });
 
             }

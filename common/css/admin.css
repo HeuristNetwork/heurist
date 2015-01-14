@@ -638,3 +638,28 @@ div#termsFilter.popup {
 #page, #sidebar, #center-panel {
     border: 1px solid #FFFFFF;
 }
+
+/* JJ: dbStatistics.php */
+.three-lines {
+    overflow: hidden;
+    height: 3em;
+}
+#deleteDatabases {
+    float: right;
+    margin-bottom: 3px;
+}
+#authorized {
+    margin-top: 10px;
+}
+.progress-bar {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.progress-bar .progress {
+    margin-top: 5px;
+    display: block;
+    text-align: center !important;
+}
+.progress-bar .bar {
+    width: 100%;
+}

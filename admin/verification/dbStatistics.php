@@ -20,16 +20,21 @@
 */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../configIni.php');
 
     if(isForAdminOnly("to get information on all databases on this server")){
         return;
     }
 
     mysql_connection_select();
-
     $dbs = mysql__getdatabases(true);
-
-
+    $sysadmin = is_systemadmin();
+    $sysadmin = true;
+  
+    /**
+    * Selects the value after a query
+    * @param mixed $query Query to execute
+    */
     function mysql__select_val($query) {
         $res = mysql_query($query);
         if (!$res) {
@@ -45,8 +50,11 @@
             0;
         }
     }
-
-
+    
+    /**
+    * Calculates the directory size
+    * @param mixed $dir Directory to check
+    */
     function dirsize($dir)
     {
         @$dh = opendir($dir);
@@ -96,33 +104,61 @@
         <!-- TOOLTIP -->
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
         <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
-
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-
+        
+        <!-- Heurist CSS -->
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">    
+
+        <!-- jQuery UI -->
+        <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/ui/jquery-ui.js"></script>      
+        <link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery.ui.dialog.css">        
     </head>
 
     <body class="popup yui-skin-sam">
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
-        <div id="page-inner">
+        <div id="page-inner">    
+            <?php echo "System admin: <a class='dotted-link' href='mailto:" .$sysAdminEmail. "'>" .$sysAdminEmail. "</a>"; ?>
+            <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button> <?php } ?>
             <div id="tabContainer"></div>
         </div>
 
+        <div id="db-verification" title="Verification" style="display: none">
+            <div>
+                <span>Deletion password:</span>
+                <input id="db-password" type="password" placeholder="password">
+            </div>
+            <button id="pw-check" onclick="checkPassword()">Submit</button>
+               
+            <div id="authorized" style="display: none">
+                <div>Correct password</div>
+                <div>Starting to delete selected databases</div>
+                
+                <div class="progress-bar">
+                    <span class="progress">0/0</span>
+                    <progress class="bar" value="0" max="100"></progress>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- Generate table -->
         <script type="text/javascript">
             //v2
             var showTimer,hideTimer;
             var arr = [
                 <?php
                     $com = "";
+                    $i = 0;
                     foreach ($dbs as $db){
 
-                        $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,', ',ugr_Department,' ',"
-                            ."ugr_Organisation,' ',ugr_State,' ',ugr_Interests) FROM ".$db.".sysUGrps where ugr_id=2");
+                        $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,' ',ugr_Organisation) ".
+                                                   "FROM ".$db.".sysUGrps where ugr_id=2");
                         $owner = str_replace("'","\'",$owner);
                         $owner = str_replace("\n","",$owner);
 
-                        //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access
+                        //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
 
                         print $com."['". substr($db, 4) ."',".
                         mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1").",".
@@ -140,25 +176,30 @@
                         round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",'".
                         mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
                         mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
-                        $owner."']";
+                        $owner."','".
+                        $sysadmin."']";
 
                         $com = ",\n";
-
-                    }//foreach
+                        
+                        if($i++ >= 10) {
+                            break;
+                        }
+                    }//foreach 
                 ?>
             ];
-
 
             var myDataSource = new YAHOO.util.LocalDataSource(arr, {
                 responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
                 responseSchema : {
                     fields: ["dbname","db_regid","cnt_recs", "cnt_vals", "cnt_rectype",
                         "cnt_fields", "cnt_terms", "cnt_groups", "cnt_users", "db_version",
-                        "size_db", "size_file", "date_mod", "date_login","owner"]
+                        "size_db", "size_file", "date_mod", "date_login","owner","deleteable"]
             }});
 
             var myColumnDefs = [
-                { key: "dbname", label: "Name", sortable:true, className:'left'},
+                { key: "dbname", label: "Name", sortable:true, className:'left', formatter: function(elLiner, oRecord, oColumn, oData) {
+                    elLiner.innerHTML = "<a href='../../?db="+oRecord.getData('dbname')+"' class='dotted-link' target='_blank'>"+oRecord.getData('dbname')+"</a>";
+                }},
                 { key: "db_regid", label: "Reg ID", sortable:true, className:'right'},
                 { key: "cnt_recs", label: "Records", sortable:true, className:'right'},
                 { key: "cnt_vals", label: "Values", sortable:true, className:'right'},
@@ -171,11 +212,15 @@
                 { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
                 { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
                 { key: "date_mod", label: "Modified", sortable:true},
-                { key: "date_login", label: "Access", sortable:true}
-                /*{ key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
-                elLiner.innerHTML = "<div style='max-width:100px' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
-                }
-                }*/
+                { key: "date_login", label: "Access", sortable:true},
+                { key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
+                    elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
+                }}
+                <?php if($sysadmin) { ?>
+                    ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
+                    }}
+                <?php } ?> 
             ];
 
             var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
@@ -219,5 +264,94 @@
             });
         </script>
 
+        <!-- Delete databases -->
+        <script>    
+            var databases = [];
+            var password;
+            
+            /**
+            * Returns the values of checkboxes that have been selected             
+            */
+            function getSelectedDatabases() {
+                this.databases = [];
+                var checkboxes = document.getElementsByTagName("input");
+                if(checkboxes.length > 0) {
+                    for(var i=0; i<checkboxes.length; i++) {
+                        if(checkboxes[i].checked) {
+                            databases.push(checkboxes[i].value);   
+                        }
+                    }    
+                } 
+            }
+            
+            /**  
+            * Makes an API call to delete each selected database             
+            */
+            function deleteDatabases() {
+                // Determine selected databases
+                getSelectedDatabases();
+                console.log("Databases to delete", databases);
+                if(databases.length == 0) {
+                    alert("Select at least one database to delete"); 
+                    return false;  
+                }
+                
+                // Verificate user
+                $("#db-verification").dialog({ autoOpen: false }).dialog("open");
+            }
+            
+            /**
+            * Checks if the database deletion password is correct
+            */
+            function checkPassword() {
+                var submit = document.getElementById("pw-check");
+                submit.disabled = true;
+
+                // Authenticate user
+                this.password = document.getElementById("db-password").value;
+                $.post("deleteDB.php", {password: password}, function(response) {
+                    // Succesful, post requests to delete databases
+                    submit.parentNode.removeChild(submit);
+                    $("#authorized").slideDown(500);
+                    updateProgress(0);
+                    postDeleteRequest(0);  
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    // Invalid
+                    alert(jqXHR.status + ": " + jqXHR.responseText);
+                    submit.disabled = false;
+                });
+            }
+          
+            /**
+            * Posts a delete request to the server for the database at the given index
+            */
+            function postDeleteRequest(i) {
+                if(i < databases.length) {
+                    // Delete database
+                    $.post("deleteDB.php", {password: password, dbname: databases[i]}, function(response) {
+                        //alert(response); 
+                        $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>"); 
+                        postDeleteRequest(i+1);
+                        updateProgress(i+1);
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        alert(textStatus);
+                    }); 
+                }else{
+                    // All post-requests have finished.
+                    $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
+                    $("#authorized").append("<div style='font-weight: bold'>Please reload the page if you want to do delete more databases</div>");
+                }   
+            }
+            
+            /**
+            * Updates the progress bar
+            */
+            function updateProgress(count) {
+                $(".progress").text(count+"/"+databases.length);
+                $(".bar").attr("value", (count*100/databases.length));
+            }
+        
+            
+        </script>
     </body>
 </html>

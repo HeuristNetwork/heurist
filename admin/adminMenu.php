@@ -386,7 +386,7 @@
 
                             menuEntry('','Clear database locks','verification/removeDatabaseLocks.php?db='.HEURIST_DBNAME,
                                 'Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions');
-                            menuEntry('','Database usage statistics (slow)','describe/dbStatistics.php?db='.HEURIST_DBNAME,
+                            menuEntry('','Database usage statistics (slow)','verification/dbStatistics.php?db='.HEURIST_DBNAME,
                                 'Size and usage statistics for all Heurist databases on this server');
 
                             menuEntry('','Inter-database transfer','../import/direct/getRecordsFromDB.php?db='.HEURIST_DBNAME,

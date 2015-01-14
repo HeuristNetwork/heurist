@@ -107,6 +107,9 @@ if (!@$bugEmail) $bugEmail = "info@heuristscholar.org"; // recommended, set to y
 
 if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
 
+// A simple challenge password for deletion of databases. If left blank, nobody can delete databases
+if(!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion="";
+
 // [server]
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
 // for example $serverName = "heuristscholar.org";  Be sure to include the port if not port 80

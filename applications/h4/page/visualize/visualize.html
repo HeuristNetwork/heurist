@@ -19,13 +19,13 @@
                     <!-- Line length --> 
                     <div id="linelengthContainer">
                         <i>Length</i>
-                        <input id="linelength" class="number-input medium" />
+                        <input id="linelength" class="number-input medium" type="number" min="1" step="25" />
                     </div>
                     
                     <!-- Line width -->
                     <div id="linewidthContainer">
                         <i>Max width</i>
-                        <input id="linewidth" class="number-input small" />
+                        <input id="linewidth" class="number-input small" type="number" min="1" step="5" />
                     </div>
                     
                     <!-- Line color -->
@@ -47,7 +47,7 @@
                     
                     <div id="entityradiusContainer">
                         <i>Max radius</i>
-                        <input id="entityradius" class="number-input small" />
+                        <input id="entityradius" class="number-input small" type="number" min="1" step="5" />
                     </div>
                     
                     <!-- Entity circle color -->
@@ -65,13 +65,13 @@
                     <!-- Text size -->
                     <div id="fontsizeContainer">
                         <i>Font-size</i>
-                        <input id="fontsize" class="number-input small" />
+                        <input id="fontsize" class="number-input small" type="number" min="5" step="1" />
                     </div>
                     
                     <!-- Text length -->
                     <div id="textlengthContainer">
                         <i>Text length</i>
-                        <input id="textlength" class="number-input small" />
+                        <input id="textlength" class="number-input small" type="number" min="5" step="5" />
                     </div>
                     
                     <!-- Text color -->
@@ -116,7 +116,7 @@
                     <!-- Attraction strength -->
                     <div id="attractionContainer">
                         <i>Attraction</i>
-                        <input id="attraction" class="number-input medium"/>
+                        <input id="attraction" class="number-input medium" type="number" step="100" />
                     </div>
                 </div>
                 
@@ -145,7 +145,7 @@
 
                 <!-- HELP INFO -->
                 <div class="settings space">
-                    <i class="explanation">Click entities or links to get information, drag entities to reposition.</i>
+                    <i class="explanation">Shows constrained relationships only. Click entities or links to get information, drag entities to reposition.</i>
                 </div>
             </div>
             

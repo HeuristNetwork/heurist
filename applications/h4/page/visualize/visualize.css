@@ -72,15 +72,15 @@
     text-align: center;
 }
 .number-input.small {
-     max-width: 25px;
+     max-width: 40px;
 }
 .number-input.medium {
-    max-width: 35px;
+    max-width: 50px;
 }
 
 .explanation {
     color: #444;
-    font-size: 10px
+    font-size: 8px !important;
 }
 
 /** Visualisation menu */

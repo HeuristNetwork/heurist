@@ -77,6 +77,7 @@ $httpProxyAuth = "";
 $indexServerAddress="";
 $indexServerPort="";
 $passwordForDatabaseCreation="";
+$passwordForDatabaseDeletion="";
 $defaultRootFileUploadPath ="";
 $defaultRootFileUploadURL = "";
 $sysAdminEmail = "";

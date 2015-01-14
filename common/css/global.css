@@ -104,22 +104,6 @@ a:hover {
 	width: 4px;
 }
 
-.external-link{
-	background-image:url(../images/external_link_16x16.gif);
-	background-repeat: no-repeat;
-	padding-left: 16px;
-}
-.internal-link{
-    background-image:url(../images/jump.png);
-    background-repeat: no-repeat;
-    padding-left: 16px;
-}
-.inwards-link{
-    background-image:url(../images/inwards-link.png);
-    background-repeat: no-repeat;
-    padding-left: 16px;
-}
-
 .panel {
 	border: 1px solid #BFBFBF;
 	font-size: 85%;
@@ -514,6 +498,7 @@ P {color:#333333;font-size:11px;line-height:21px;}
 H2 i {font-size:inherit;}
 
 /******* links and id-specific styles ********/
+/******* links and id-specific styles ********/
 A:link {color:#6A7C99;text-decoration: none;}
 A:visited {color:#6A7C99;text-decoration: none;}
 A:active {color:#6A7C99;text-decoration: none;}
@@ -528,13 +513,19 @@ a#dbSearch-link #dbname span {text-transform: uppercase; color:#DBDFE6}
 a#dbSearch-link #dbname a {font-size:14px;color: #FFF;}
 a#dbSearch-link #dbname:hover, a#dbsearch-link:hover {text-decoration:none;}
 a#dbSearch-link #dbname:hover {padding-right:10px; background-color:RGBA(100,100,100,0.6);
-	-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;
-	-webkit-box-shadow:inset  0 1px 3px #666;-moz-box-shadow:inset  0 1px 3px #666;box-shadow:inset  0 1px 3px #666;
-	background-image:url(../images/b_databasePressed.png);}
+        -moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;
+        -webkit-box-shadow:inset  0 1px 3px #666;-moz-box-shadow:inset  0 1px 3px #666;box-shadow:inset  0 1px 3px #666;
+        background-image:url(../images/b_databasePressed.png);}
 
 .banner A, .banner A:hover, .banner input {background-position:2px 5px;background-repeat:no-repeat;border-right:1px solid #D6D6D6;display:inline-block;font-weight:bold;height:19px;padding:6px 13px 0 0;text-decoration:none;}
 .banner A:hover {background-color: RGBA(150, 150, 150, 0.1);}
 #version { color:#909090;font-size:10px;font-style:normal;font-weight:bold;height:11px;left:80px;line-height:10px;padding:0 3px;position:absolute;top:36px; }
+
+.dotted-link { border-bottom: 1px dotted #6A7C99;}
+.external-link{ background-image:url(../images/external_link_16x16.gif); background-repeat: no-repeat; padding-left: 16px;}
+.internal-link{ background-image:url(../images/jump.png); background-repeat: no-repeat; padding-left: 16px;}
+.inwards-link{ background-image:url(../images/inwards-link.png); background-repeat: no-repeat; padding-left: 16px;}
+
 
 /****** search and button styling from search page *****/
 #toolbar select, #query-input {border:0 solid #666666;height:22px;margin-right:-3px;}

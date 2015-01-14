@@ -263,6 +263,53 @@
 
         return $res;
     }
+    
+     /**
+    * Dump all tables (except csv import cache) into text files
+    * It is assumed that all tables exist and empty in target db
+    *
+    * @param mixed $db
+    * @param mixed $verbose
+    */
+    function db_dump($db){
+        $output = "";
+
+        $mysqli = server_connect();
+        if($mysqli && $mysqli->select_db($db)){
+            $tables = $mysqli->query("SHOW TABLES");
+            if($tables){
+
+                $mysqli->query("SET foreign_key_checks = 0");
+                $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+
+                while ($table = $tables->fetch_row()) {
+                    $table = $table[0];
+                    $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
+                    $res = $mysqli->query("SELECT * FROM ".$db.".`".$table."` INTO OUTFILE /".$db."/".$table.".txt");
+
+                    if($res){
+                        $output .= "<br/>".$table." has been dumped to file";
+                    }else{
+                        $output .= "<br/>Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error;
+                        break;
+                    }
+
+                    $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
+                }
+
+                $mysqli->query("SET foreign_key_checks = 1");
+
+            }else{
+                $output .= "<br/>Error: Can not get list of table in database ".$db;
+            }
+
+            $mysqli->close();
+        }else{
+            $output .= "<br/>Failed to select database ".$db;
+        }
+
+        return $output;
+    }
 
 
 

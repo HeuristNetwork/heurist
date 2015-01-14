@@ -100,7 +100,7 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
     }
     
     function is_systemadmin() { 
-            return (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin']=="1");
+        return (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin']=="1");
     }
 
 	function is_admin($contx = 'database',$ug = 0) {
