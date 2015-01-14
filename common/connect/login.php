@@ -59,6 +59,7 @@ if (@$_REQUEST['logout']) {
     unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname']);
     unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id']);
     unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access']);
+    unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin']);
     unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['search-results']);
     unset($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['sessionid']);
     
@@ -142,6 +143,7 @@ if(!$needRegistration){
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_realname'] = $user[USERS_FIRSTNAME_FIELD] . ' ' . $user[USERS_LASTNAME_FIELD];
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_id'] = $user[USERS_ID_FIELD];
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
+            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = (defined('HEURIST_MAIL_TO_ADMIN') && (@$user[USERS_EMAIL_FIELD]==HEURIST_MAIL_TO_ADMIN))?"1":"0";
 
 
             $time = 0;

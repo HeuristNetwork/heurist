@@ -92,10 +92,15 @@ if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
 	function get_user_username() { return ''; }
 	function get_group_ids() { return array(0); } //everyone is part of the AllUsersGroup
 	function is_admin() { return false; }
+    function is_systemadmin() { return false; }
 	function is_logged_in() { return true; }
 }else{
 	function is_logged_in() {
 		return _is_logged_in();
+    }
+    
+    function is_systemadmin() { 
+            return (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin']=="1");
     }
 
 	function is_admin($contx = 'database',$ug = 0) {
