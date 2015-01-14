@@ -123,7 +123,7 @@
 
             } else if ($action=="svs_savetree" ) { //save saved searches tree status
 
-                $res = svsSaveTreeData($system->get_user_id(), @$_REQUEST['data']);
+                $res = svsSaveTreeData($system, @$_REQUEST['data']);
                 
             } else if ($action=="svs_gettree" ) { //save saved searches tree status
 

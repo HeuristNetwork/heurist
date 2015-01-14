@@ -43,7 +43,7 @@ function addLevel(){
         onremove: function(event, data){
             $('#'+data.id).remove();    //remove this rule sets builder
         }
-    }).appendTo($('#level1'));
+    }).insertBefore($('#div_add_level'));
 }
 
 function onInit(success) //callback function of hAPI initialization
@@ -64,8 +64,8 @@ function onInit(success) //callback function of hAPI initialization
         //$('#btn_apply').button().on('click', 3, applyRules);
         $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
-            autoOpen: true, width:500,
-            position: { my: "right bottom", at: "right bottom", of: $('body') },
+            autoOpen: true, width:800,
+            position: { my: "right bottom", at: "right top", of: $('#btn_help') },
             show: {
                 effect: "slide",
                 direction : 'right',
@@ -92,7 +92,7 @@ function onInit(success) //callback function of hAPI initialization
                         $('#'+data.id).remove();    //remove this rule sets builder
 
                     }
-                }).appendTo($('#level1'));
+                }).insertBefore($('#div_add_level'));
 
             }
 

@@ -487,8 +487,6 @@
         }
     }
 
-
-
     function echo_flush($msg){
         ob_start();
         print $msg;

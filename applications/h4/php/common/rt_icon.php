@@ -42,7 +42,7 @@
         flush();        
         readfile($filename);
     }else{
-        create_rt_icon_with_bg( $rectype_id);
+        create_rt_icon_with_bg( $rectype_id );
     }
     
 
@@ -63,7 +63,7 @@ function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, 
 //
 //
 //    
-function create_rt_icon_with_bg( $rectype_id, $bg_color ) {
+function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
 
     if(substr($rectype_id,-5,5) == "m.png") {
         $rectype_id = substr($rectype_id, 0, -5);

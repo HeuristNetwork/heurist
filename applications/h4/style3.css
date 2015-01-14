@@ -597,3 +597,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .ui-icon.icon-large {
     margin-top: -0.75em;
 }
+
+.fancytree-container{
+    overflow:hidden !important;
+}

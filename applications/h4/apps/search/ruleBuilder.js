@@ -87,16 +87,17 @@ $.widget( "heurist.ruleBuilder", {
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
 
-        this.div_btn =  $('<div>').css({'width':'120px'}).appendTo(this.element);
+        this.div_btn =  $('<div>').css({'width':(this.options.level<3)?'11em':'6em','margin-left':'0.5em'}).appendTo(this.element);
 
+        this.btn_delete = $( "<button>", {text:'Delete'})
+        .attr('title', 'Delete this step in the rule' )
+        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
+        
         if(this.options.level<3)
             this.btn_add_next_level = $( "<button>", {text:'Add Next'} )
             .attr('title', 'Adds another step to this rule' )
             .button().appendTo(this.div_btn);
 
-        this.btn_delete = $( "<button>", {text:'Delete'})
-        .attr('title', 'Delete this step in the rule' )
-        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
 
 
 

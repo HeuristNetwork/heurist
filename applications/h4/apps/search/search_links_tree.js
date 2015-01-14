@@ -46,14 +46,13 @@ $.widget( "heurist.search_links_tree", {
         this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
 
         if(this.options.btn_visible_dbstructure){
+            
             this.btn_db_dtructure = $( "<button>", {
                 text: top.HR("Database Summary")
             })
             .addClass('logged-in-only')
-            .appendTo( $( "<div>" ).css({'height':'4em', 'width':'100%', 'text-align':'center'}).appendTo( this.search_tree ) )
-            .button({icons: {
-                primary: "ui-icon-circle-plus"
-            }})
+            .appendTo( $( "<div>" ).css({'height':'4em', 'width':'100%', 'padding':'0.5em 3em'}).appendTo( this.search_tree ) )
+            .button() //({icons: {primary: "ui-icon-circle-plus"}})
             .click( function(){ that._showDbSummary(); });
         }
         
@@ -90,7 +89,7 @@ $.widget( "heurist.search_links_tree", {
         if(this.options.btn_visible_filter) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;
 
-        this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':'0', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
+        this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':0, 'right':0, 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
         
         
         this.edit_dialog = null;
@@ -194,7 +193,7 @@ $.widget( "heurist.search_links_tree", {
     //
     _updateAccordeon: function(){
         
-        var islogged = (top.HAPI4.currentUser.ugr_ID>0);
+        var islogged = (top.HAPI4.is_logged());
         if(!islogged){
             //@todo clear accordeon and show login button
             return;
@@ -355,6 +354,7 @@ $.widget( "heurist.search_links_tree", {
       },
       dragDrop: function(node, data) {
         data.otherNode.moveTo(node, data.hitMode);
+        that._saveTreeData();
       }
     },
     edit: {
@@ -433,6 +433,7 @@ $.widget( "heurist.search_links_tree", {
       }*/
       node = node.parent;    
       node.editCreateNode("child", {title:"New folder", folder:true});
+      that._saveTreeData();
       break;
 
     case "addSearch":  //add new saved search
@@ -645,7 +646,7 @@ $.widget( "heurist.search_links_tree", {
                         //var qsearch = prms[0];
                         if(Hul.isempty(prms.q)&&!Hul.isempty(prms.rules)){
                             domain2 = 'rules';
-                            saddition = ' [rules]';
+                            saddition = '';//' [rules]';
                         }else{
                             if(!Hul.isempty(prms.rules)){
                                 saddition = ' [+rules]';
@@ -786,6 +787,9 @@ $.widget( "heurist.search_links_tree", {
                     //update tree after addition - add new search to root
                     if(Hul.isnull(node)){
                         groupID = request.svs_UGrpID
+                        if(groupID == top.HAPI4.currentUser.ugr_ID){
+                               groupID = request.domain; //all or bookmarks
+                        }
                         var tree = that.treeviews[groupID];
                         node = tree.rootNode;  
                         node.folder = true;  
@@ -806,15 +810,18 @@ $.widget( "heurist.search_links_tree", {
                     }else{
                         var prms = Hul.parseHeuristQuery(request.svs_Query);
                         if(!Hul.isempty(prms.rules)){
-                            saddition = Hul.isempty(prms.q)?' [rules]' :' [+rules]';
+                            saddition = Hul.isempty(prms.q)?'' :' [+rules]';
                         }
                     }
                     node.setTitle(request.svs_Name + saddition);
+                    that._saveTreeData();
                 }
            };
         
         
         if( true ) { //}!Hul.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded     @todo - load dynamically
+            
+            if(groupID=="rules" && Hul.isempty(svsID)) mode="rules";
             
             if(Hul.isnull(svsID) && Hul.isempty(squery)){
                 squery = this.currentSearch;

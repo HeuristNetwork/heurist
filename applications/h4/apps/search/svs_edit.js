@@ -75,10 +75,11 @@ function hSvsEdit(args) {
 
                 if(Hul.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(squery));
+                    svs_query.val('');
                     
-                } else if( squery && squery.q ) {
+                } else if( squery && (squery.q || squery.rules) ) {
                     
-                    svs_query.val( squery.q );
+                    svs_query.val( Hul.isempty(squery)?'':squery.q );
                     svs_rules.val( Hul.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
                     
                 } else if(!Hul.isempty(squery)){
@@ -97,9 +98,18 @@ function hSvsEdit(args) {
                 }else{
                     svs_ugrid.val(domain);
                 }*/
-                svs_ugrid.parent().show();
+                //svs_ugrid.parent().show();
                 svs_ugrid.attr('disabled', !Hul.isempty(groupID));
             }
+            
+            if(Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val())){
+                 svs_query.parent().hide();
+                 svs_ugrid.parent().hide();
+            }else{
+                  svs_query.parent().show();
+                  if(!isEdit) svs_ugrid.parent().show();
+            }
+            
             
             /* never need to hide! 
             if(domain=='rules' || (Hul.isempty(svs_query.val()) &&  !Hul.isempty(svs_rules.val())) ){  //THIS IS RULE!!!
@@ -138,7 +148,7 @@ function hSvsEdit(args) {
                 Hul.showDialog(url, { width:1200, callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
-                            if(res.mode == 'apply'){  //&& that._query_request){
+                            if(res.mode == 'apply'){ //NOT USED ANYMORE //&& that._query_request){
                                 
                                 $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
                                 
@@ -201,12 +211,13 @@ function hSvsEdit(args) {
             
         }else if (mode == 'rules' && Hul.isnull(svsID)){ //it happens for new rules only
 
+             squery.q = ''; // from rule builder we always save pure query only
              _editRules(null, squery);
             
         }else if(null == edit_dialog){
                 //create new dialog
                 
-            var $dlg = edit_dialog = $( "<div>" ).appendTo(  $('body') );
+            var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
             $dlg.load("apps/svs_edit.html?t="+(new Date().time), function(){
@@ -266,9 +277,11 @@ function hSvsEdit(args) {
                         if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
                             domain = svs_ugrid;    
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID;
-                            if(domain!="all"){
-                                query_to_save.push('w='+domain);
-                            }
+                            //if(domain!="all"){query_to_save.push('w='+domain);}
+                        }
+                        if(Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val())){   //PURE RULE SET
+                            domain = 'rules';
+                            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
                         }
                         
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
@@ -324,7 +337,7 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 320,
+                    height: 340,
                     width: 450,
                     modal: true,
                     resizable: false,

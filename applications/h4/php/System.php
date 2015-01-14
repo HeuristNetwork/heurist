@@ -22,6 +22,7 @@
     require_once (dirname(__FILE__).'/consts.php');
     require_once (dirname(__FILE__).'/common/utils_db.php');
     require_once (dirname(__FILE__).'/common/db_users.php');
+    require_once (dirname(__FILE__).'/common/utils_file.php');
 
     /**
     *  Class that contains mysqli (dbconnection), current user and system settings
@@ -249,6 +250,10 @@
                     define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
                     define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
         
+                    $folder = HEURIST_FILESTORE_DIR . 'settings/';
+                    if(folderCreate($folder, true)){
+                        define('HEURIST_SETTING_DIR', $folder);
+                    }
         }
         
         private function getInstallPath(){

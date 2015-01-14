@@ -148,18 +148,31 @@
     * 
     * in future - save inot text field in user table ???
     */
-    function svsSaveTreeData($ugrID, $data){
+    function svsSaveTreeData($system, $data){
         
-        $filename = HEURIST_ICON_DIR . $ugrID . '_svstree.json';
-        return file_put_contents ( $filename, $data );
+        if(defined('HEURIST_SETTING_DIR')){
+            
+            $ugrID = $system->get_user_id();
+            $filename = HEURIST_SETTING_DIR . $ugrID . '_svstree.json';
+            
+            $res = file_put_contents ( $filename, $data );
+            return $res;
+        }else{
+            $system->addError(HEURIST_SYSTEM_FATAL, "Settings folder is not accessible");
+            return false;
+        }
     }
     
     function svsGetTreeData($ugrID){
         //load saved search tree data
         
-        $filename = HEURIST_ICON_DIR . $ugrID . '_svstree.json';
-        if(file_exists($filename)){
-            return file_get_contents ($filename);
+        if(defined('HEURIST_SETTING_DIR')){
+            $filename = HEURIST_SETTING_DIR . $ugrID . '_svstree.json';
+            if(file_exists($filename)){
+                return file_get_contents ($filename);
+            }else{
+                return false;
+            }
         }else{
             return false;
         }

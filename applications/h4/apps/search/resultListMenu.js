@@ -716,7 +716,7 @@ $.widget( "heurist.resultListMenu", {
                 //call method editSavedSearch - save collection as search
 
                 // mode, groupID, svsID, squery
-                $(app.widget).search_links('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
+                $(app.widget).search_links_tree('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
             }
         }
         

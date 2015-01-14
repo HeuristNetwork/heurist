@@ -92,11 +92,11 @@ options - parameters to init application
 */ 
 var layouts = [
     {id:'L01', name:'h3 classic', theme:'smoothness', type:'cardinal', 
-        north:{size:130, resizable:false,
+        north:{size:'11.5em', resizable:false,
             apps:[
-                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'60',right:0, border:'none', 'background':'none'} },    //top panel
+                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'5em',right:0, border:'none', 'background':'none'} },    //top panel
                 
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:60, left:0, height:60, right:0, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search '#8ea9b9'
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'5em', left:0, height:'5em', right:0, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search '#8ea9b9'
                 //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
         ]},
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches

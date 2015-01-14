@@ -32,7 +32,7 @@ $.widget( "heurist.search", {
 
         searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
 
-        leftmargin: '240px',
+        leftmargin: '300px',
         
         has_paginator: false,
         limit: 1000,
@@ -79,8 +79,8 @@ $.widget( "heurist.search", {
         
         this.element.addClass('ui-heurist-header1');
         
-        var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
-                  '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
+        //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
+        //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
                   
         if(this.options.btn_visible_newrecord){
             this.btn_add_record = $( "<button>", {
@@ -90,7 +90,7 @@ $.widget( "heurist.search", {
             .addClass('logged-in-only')
             .appendTo( 
                   $('<div>')
-                        .css({'width':this.options.leftmargin,'height':'2em','padding-top':'10px','text-align':'center','float':'left'})
+                        .css({'width':this.options.leftmargin,'height':'2em','padding':'1.5em 3em','float':'left'}) //'float':'left'
                         .appendTo( this.element )                    
             )
             .button({icons: {
@@ -101,12 +101,13 @@ $.widget( "heurist.search", {
             this.element.css('padding-left',this.options.leftmargin);
         }
         
-        this.div_search   = $('<div>').css({'float':'left','height':'100%','padding-top':'10px'}).appendTo( this.element );
-        this.div_progress = $('<div>').css({'float':'left','height':'100%','padding-top':'10px'}).appendTo( this.element ).hide();
+        this.div_search   = $('<div>').css({'height':'100%','padding-top':'1.5em', 'min-width':'500px', 'display':'inline-block'}).appendTo( this.element );
+                
+        this.div_progress = $('<div>').css({'height':'100%','padding-top':'1.5em', 'min-width':'500px'}).appendTo( this.element ).hide();
 
         
         this.input_search = $( "<input>" )   //this.options.has_paginator?'30%':'50%'} )
-        .css({'margin-right':'0.2em', 'width':'30%', 'max-width':'500px'})
+        .css({'margin-right':'0.2em','width':'400px'}) //, 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_search );
 
@@ -129,7 +130,8 @@ $.widget( "heurist.search", {
 
         if(this.options.islinkmode){
             
-            this.div_search_links = $('<div>').css({'text-align':'right', 'width':'30%', 'max-width':'500px' })
+            //$('<br>').appendTo( this.div_search );
+            this.div_search_links = $('<div>').css({'text-align':'right','width':'400px'}) //, 'width':'30%', 'max-width':'500px' })
                     .appendTo( this.div_search );
             
             var link = $('<a>',{
@@ -365,10 +367,10 @@ $.widget( "heurist.search", {
                                                                                                
         
         this.progress_bar = $("<div>")
-            .css({'width':'50%', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
+            .css({'width':'450px', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
             .progressbar().appendTo(this.div_progress);
             
-        this.progress_lbl = $("<div>").css({'position':'absolute','margin-left':'22%', 'top': '14px', 'text-shadow': '1px 1px 0 #fff' })
+        this.progress_lbl = $("<div>").css({'position':'absolute','margin-left':'180px', 'top': '1.6em', 'text-shadow': '1px 1px 0 #fff' })
             .appendTo(this.progress_bar);     
             //font-weight: bold;
        
@@ -459,8 +461,11 @@ $.widget( "heurist.search", {
     */
     _onSearchStart: function(){
         
-            this.div_search.hide();
-            this.div_progress.show();
+            //this.div_search.hide();
+            //this.div_progress.show();
+
+            this.div_search.css('display','none');
+            this.div_progress.css('display','inline-block'); 
             
             
             //reset counters and storages
@@ -670,7 +675,7 @@ $.widget( "heurist.search", {
     , _initSearchAssistant: function(){
 
         var $dlg = this.search_assistant = $( "<div>" )
-        .addClass('text ui-corner-all ui-widget-content')  // menu-or-popup
+        .addClass('text ui-corner-all ui-widget-content ui-heurist-bg-light')  // menu-or-popup
         .zIndex(9999)
         .css('position','absolute')
         .appendTo( this.document.find('body') )
@@ -923,8 +928,11 @@ $.widget( "heurist.search", {
     
     , _searchCompleted: function(){
         
-         this.div_progress.hide();
-         this.div_search.show();
+         this.div_progress.css('display','none'); 
+         this.div_search.css('display','inline-block');
+        
+         //this.div_progress.hide();
+         //this.div_search.show();
         
          if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
              $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
@@ -1004,7 +1012,7 @@ $.widget( "heurist.search", {
             if(this._rule_index<1){  //this is main request
                     
                     //search in progress
-                     this.progress_lbl.html( (curr_offset==tot)?tot:curr_offset+'~'+tot );
+                     this.progress_lbl.html( (curr_offset==tot)?tot:'Loading '+curr_offset+' of '+tot );
                      
                      this.progress_bar.progressbar( "value", curr_offset/tot*100 );
                      //this.progress_bar.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
