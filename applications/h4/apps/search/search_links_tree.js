@@ -294,7 +294,7 @@ $.widget( "heurist.search_links_tree", {
     
     _defineHeader: function(name, domain){
 
-        var $header = $('<h3>'+name+'</h3>');
+        var $header = $('<h3>'+name+'</h3>').addClass('accordeon-header');
         /*
         var that = this;
 
@@ -331,7 +331,7 @@ $.widget( "heurist.search_links_tree", {
         var treeData = top.HAPI4.currentUser.ugr_SvsTreeData[groupID] && top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children
                              ?top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
         
-        var tree = $("<div>");
+        var tree = $("<div>").css('padding-bottom','20px');
         
         tree.fancytree({
     checkbox: false,

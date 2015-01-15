@@ -569,6 +569,10 @@ $.widget( "heurist.search", {
                          that._rule_index = -2;
                          that._res_index = 0;
                          
+                         this.div_search.css('display','none');
+                         this.div_progress.css('display','inline-block'); 
+                         this._renderProgress();
+                         
                          //fake result searh event
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
@@ -802,7 +806,7 @@ $.widget( "heurist.search", {
         var ctn = this.search_assistant.find("#fld_enum").is(':visible') ?this.search_assistant.find("#sa_termvalue").val() 
         :this.search_assistant.find("#sa_fieldvalue").val();    
 
-        var asc = ($("#sa_sortasc:checked").length > 0 ? "" : "-");
+        var asc = ($("#sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = $("#sa_sortby").val();
         srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
 

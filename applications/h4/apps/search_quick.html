@@ -23,11 +23,11 @@
 <fieldset class="ui-heurist-bg-light">
     <div>
         <div class="header"><label for="sa_rectype">Record type</label></div>
-        <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
     </div>
     <div>
         <div class="header"><label for="sa_fieldtype">Field</label></div>
-        <select name="sa_fieldtype" id="sa_fieldtype" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        <select name="sa_fieldtype" id="sa_fieldtype" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
     </div>
     <div id="fld_contain">
         <div class="header"><label for="sa_fieldvalue">Contains</label></div>
@@ -35,16 +35,23 @@
     </div>
     <div id="fld_enum">
         <div class="header"><label for="sa_termvalue">Is</label></div>
-        <select name="sa_termvalue" id="sa_termvalue" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        <select name="sa_termvalue" id="sa_termvalue" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
     </div>
     <div>
-        <div class="header"><label for="sa_sortby">Sort By</label></div>
-        <select name="sa_sortby" id="sa_sortby" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        <div class="header"><label for="sa_sortby">Sort by</label></div>
+        <select name="sa_sortby" id="sa_sortby" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
     </div>
     <div>
+        <div class="header"><label for="sa_sortasc">Sort direction</label></div>
+        <select name="sa_sortasc" id="sa_sortasc" class="text ui-widget-content ui-corner-all" style="min-width:220px">
+            <option value="0">Ascending (A..Z, 1..9)</option>
+            <option value="1">Descending (Z..A, 9..1)</option>
+        </select>
+    </div>
+<!--    <div>
         <div class="header"><label for="sa_sortasc">Sort Ascending:</label></div>
         <input type="checkbox" name="sa_sortasc" id="sa_sortasc" class="ui-widget-content ui-corner-all" />
-    </div>
+    </div> -->
     <br />
     <br />
 </fieldset>

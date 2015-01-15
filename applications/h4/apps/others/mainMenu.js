@@ -212,8 +212,9 @@ $.widget( "heurist.mainMenu", {
         this['menu_'+name] = $('<ul>')          
         .load('apps/others/mainMenu'+name+'.html?t='+(new Date().getTime()), function(){
             that['menu_'+name].addClass('menu-or-popup')
-            .css('position','absolute')
+            .css({'position':'absolute', 'padding':'5px'})
             .appendTo( that.document.find('body') )
+            .addClass('ui-menu-divider-heurist')
             .menu({select: function(event, ui){ that._menuActionHandler(event, ui.item.attr('id')); return false; }});
             
             that._initLinks(that['menu_'+name]);
@@ -309,23 +310,26 @@ $.widget( "heurist.mainMenu", {
     _menuActionHandler: function(event, action){
     
           var that = this;
+          var p = false;
           if(action == "menu-export-hml-0"){ 
-                this.exportHML(true,false,false);
+                this.exportHML(true,false,false); p=true;
           }else if(action == "menu-export-hml-1"){ 
-                this.exportHML(false,false,false);
+                this.exportHML(false,false,false); p=true;
           }else if(action == "menu-export-hml-2"){ 
-                this.exportHML(true,true,false);
+                this.exportHML(true,true,false); p=true;
           }else if(action == "menu-export-hml-3"){ 
-                this.exportHML(true,false,true);
+                this.exportHML(true,false,true); p=true;
           }else if(action == "menu-export-kml"){ 
-                this.exportKML(true);
+                this.exportKML(true); p=true;
           }else if(action == "menu-export-rss"){ 
-                this.exportFeed('rss');
+                this.exportFeed('rss'); p=true;
           }else if(action == "menu-export-atom"){ 
-                this.exportFeed('atom');
+                this.exportFeed('atom'); p=true;
           }
-              
-          event.preventDefault();
+          
+          if( p ){
+            event.preventDefault();
+          }
     },
     
     _addNewRecord: function(){

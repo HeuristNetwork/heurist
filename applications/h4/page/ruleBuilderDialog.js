@@ -131,7 +131,7 @@ function getRulesArray(){
     var rules = [];
     $.each($('.level1'), function( index, value ) {
         var subrule = $(value).ruleBuilder("getRules");
-        rules.push(subrule);
+        if(!top.HEURIST4.util.isempty(subrule)) rules.push(subrule);
     });
     return rules;
     /*
