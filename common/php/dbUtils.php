@@ -36,6 +36,7 @@
     */
 
     require_once('dbScript.php');
+    require_once('dbDumper.php');
 
     function server_connect($verbose = true){
 
@@ -264,6 +265,63 @@
         return $res;
     }
     
+    
+    /* backup the db OR just a table */
+    function backup_tables($host,$user,$pass,$name,$tables = '*')
+    {
+        $link = mysql_connect($host,$user,$pass);
+        mysql_select_db($name,$link);
+        
+        //get all of the tables
+        if($tables == '*')
+        {
+            $tables = array();
+            $result = mysql_query('SHOW TABLES');
+            while($row = mysql_fetch_row($result))
+            {
+                $tables[] = $row[0];
+            }
+        }
+        else
+        {
+            $tables = is_array($tables) ? $tables : explode(',',$tables);
+        }
+        
+        //cycle through
+        foreach($tables as $table)
+        {
+            $result = mysql_query('SELECT * FROM '.$table);
+            $num_fields = mysql_num_fields($result);
+            
+            $return.= 'DROP TABLE '.$table.';';
+            $row2 = mysql_fetch_row(mysql_query('SHOW CREATE TABLE '.$table));
+            $return.= "\n\n".$row2[1].";\n\n";
+            
+            for ($i = 0; $i < $num_fields; $i++) 
+            {
+                while($row = mysql_fetch_row($result))
+                {
+                    $return.= 'INSERT INTO '.$table.' VALUES(';
+                    for($j=0; $j<$num_fields; $j++) 
+                    {
+                        $row[$j] = addslashes($row[$j]);
+                        $row[$j] = ereg_replace("\n","\\n",$row[$j]);
+                        if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; } else { $return.= '""'; }
+                        if ($j<($num_fields-1)) { $return.= ','; }
+                    }
+                    $return.= ");\n";
+                }
+            }
+            $return.="\n\n\n";
+        }
+        
+        //save file
+        $handle = fopen("/heur-filestore/".$db."/dump/".$name.".sql", "w+");
+        //$handle = fopen('db-backup-'.time().'-'.(md5(implode(',',$tables))).'.sql','w+');
+        fwrite($handle,$return);
+        fclose($handle);
+    }
+
      /**
     * Dump all tables (except csv import cache) into text files
     * It is assumed that all tables exist and empty in target db
@@ -271,44 +329,79 @@
     * @param mixed $db
     * @param mixed $verbose
     */
-    function db_dump($db){
-        $output = "";
-
+    function db_dump($db) {
+        // Create directory
+        $directory = "/heur-filestore/".$db."/dump";
+        mkdir($directory, 0777, true);
+        
+        // Create file
+        $filename = $directory."/".$db."_".time().".sql";  
+        $file = fopen($filename, "a+");
+              
         $mysqli = server_connect();
-        if($mysqli && $mysqli->select_db($db)){
-            $tables = $mysqli->query("SHOW TABLES");
+        if($mysqli && $mysqli->select_db("hdb_".$db)){
+            $tables = $mysqli->query("SHOW TABLES"); // Select all tables of the database
             if($tables){
-
-                $mysqli->query("SET foreign_key_checks = 0");
-                $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
-
+                // Start to dump all tables 
                 while ($table = $tables->fetch_row()) {
+                    $output = "";
                     $table = $table[0];
-                    $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
-                    $res = $mysqli->query("SELECT * FROM ".$db.".`".$table."` INTO OUTFILE /".$db."/".$table.".txt");
-
-                    if($res){
-                        $output .= "<br/>".$table." has been dumped to file";
-                    }else{
-                        $output .= "<br/>Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error;
-                        break;
+                    
+                    // Select everything in the table
+                    $result = $mysqli->query('SELECT * FROM '.$table);
+                    $num_fields = mysqli_field_count($mysqli);
+                    
+                    // Drop table sql
+                    $output.= 'DROP TABLE IF EXISTS `'.$table.'`;';
+                    
+                    // Create table sql
+                    $row2 = mysqli_fetch_row($mysqli->query('SHOW CREATE TABLE '.$table));
+                    $output.= "\n\n".$row2[1].";\n\n";
+                    
+                    // Insert values sql
+                    for ($i = 0; $i < $num_fields; $i++) {
+                        while($row = $result->fetch_row()) {
+                            $output.= 'INSERT INTO '.$table.' VALUES(';
+                            for($j=0; $j<$num_fields; $j++) {
+                                $row[$j] = addslashes($row[$j]);
+                                $row[$j] = ereg_replace("\n","\\n",$row[$j]);
+                                
+                                if (isset($row[$j])) { 
+                                    $output.= '"'.$row[$j].'"' ;
+                                } else { 
+                                    $output.= '""';
+                                }
+                                
+                                if ($j<($num_fields-1)) { 
+                                    $output.= ',';
+                                }
+                            }
+                            $output.= ");\n";
+                        }
                     }
-
-                    $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
+                    
+                     // Write table sql to file
+                    $output.="\n\n\n";
+                    fwrite($file, $output);
                 }
-
-                $mysqli->query("SET foreign_key_checks = 1");
-
-            }else{
-                $output .= "<br/>Error: Can not get list of table in database ".$db;
             }
 
             $mysqli->close();
         }else{
-            $output .= "<br/>Failed to select database ".$db;
-        }
+            echo "Failed to connect to database hdb_".$db;
+            return false;
+        }     
+        
+        // Close file
+        fclose($file);
+        chmod($filename, 0777);
+        
+        // Echo output
+        $size = filesize($filename) / pow(1024,2);
+        echo "<br/>Successfully dumped ".$db." to ".$filename;
+        echo "<br/>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
 
-        return $output;
+        return true;
     }
 
 

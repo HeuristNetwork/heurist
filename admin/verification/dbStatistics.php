@@ -128,9 +128,9 @@
             <div>
                 <span>Deletion password:</span>
                 <input id="db-password" type="password" placeholder="password">
+                <button id="pw-check" onclick="checkPassword()">Submit</button>
             </div>
-            <button id="pw-check" onclick="checkPassword()">Submit</button>
-               
+
             <div id="authorized" style="display: none">
                 <div>Correct password</div>
                 <div>Starting to delete selected databases</div>
@@ -297,7 +297,14 @@
                 }
                 
                 // Verificate user
-                $("#db-verification").dialog({ autoOpen: false }).dialog("open");
+                $("#db-verification").dialog({ 
+                    autoOpen: false,
+                    modal: true,
+                    width: "90%"
+                })
+                .dialog("open");
+                
+                
             }
             
             /**
@@ -328,7 +335,7 @@
             function postDeleteRequest(i) {
                 if(i < databases.length) {
                     // Delete database
-                    $.post("deleteDB.php", {password: password, dbname: databases[i]}, function(response) {
+                    $.post("deleteDB.php", {password: password, database: databases[i]}, function(response) {
                         //alert(response); 
                         $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>"); 
                         postDeleteRequest(i+1);
