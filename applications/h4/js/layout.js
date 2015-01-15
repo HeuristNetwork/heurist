@@ -536,9 +536,9 @@ function appAddContent($app_container, app, options){
         if(app.widgetname=='recordDetails'){
             //DEBUG
             widget = $content.recordDetails();
-        }else if(app.widgetname=='resultList'){
+        }else if(app.widgetname=='mainMenu'){
             //DEBUG
-            widget = $content.resultList( options );
+            widget = $content.mainMenu( options );
         }else if(app.widgetname=='recordListExt'){
             //DEBUG
             widget = $content.recordListExt( options );
@@ -552,9 +552,9 @@ function appAddContent($app_container, app, options){
         }else if(app.widgetname=='svs_manager'){
                 //DEBUG
                 widget = $content.svs_manager( options ); //options
-        }else if(app.widgetname=='search_links_tree'){
+        /*}else if(app.widgetname=='search_links_tree'){
                 //DEBUG
-                widget = $content.search_links_tree( options ); //options
+                widget = $content.search_links_tree( options ); //options*/
         }else if(app.widgetname=='search'){
 
                widget = $content.search( options );

@@ -20,6 +20,8 @@ function hSvsEdit(args) {
     * 
     * squery - need for new - otherwise it takes currentSearch
     * domain need for new 
+    * 
+    * return false if saved search and true if rules
     */
     function _fromDataToUI(svsID, squery, groupID){
 
@@ -75,10 +77,11 @@ function hSvsEdit(args) {
 
                 if(Hul.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(squery));
+                    svs_query.val('');
                     
-                } else if( squery && squery.q ) {
+                } else if( squery && (squery.q || squery.rules) ) {
                     
-                    svs_query.val( squery.q );
+                    svs_query.val( Hul.isempty(squery)?'':squery.q );
                     svs_rules.val( Hul.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
                     
                 } else if(!Hul.isempty(squery)){
@@ -97,9 +100,22 @@ function hSvsEdit(args) {
                 }else{
                     svs_ugrid.val(domain);
                 }*/
-                svs_ugrid.parent().show();
+                //svs_ugrid.parent().show();
                 svs_ugrid.attr('disabled', !Hul.isempty(groupID));
             }
+            
+            var isRules = Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val()); 
+            
+            if(isRules){
+                 svs_query.parent().hide();
+                 svs_ugrid.parent().hide();
+                 return true;
+            }else{
+                  svs_query.parent().show();
+                  if(!isEdit) svs_ugrid.parent().show();
+                  return false;
+            }
+            
             
             /* never need to hide! 
             if(domain=='rules' || (Hul.isempty(svs_query.val()) &&  !Hul.isempty(svs_rules.val())) ){  //THIS IS RULE!!!
@@ -138,7 +154,7 @@ function hSvsEdit(args) {
                 Hul.showDialog(url, { width:1200, callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
-                            if(res.mode == 'apply'){  //&& that._query_request){
+                            if(res.mode == 'apply'){ //NOT USED ANYMORE //&& that._query_request){
                                 
                                 $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
                                 
@@ -154,9 +170,9 @@ function hSvsEdit(args) {
                                      //squery = Hul.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
                                     
                                     //mode, groupID, svsID, squery, callback
-                                    _showDialog('saved', null, null, squery );
+                                    _showDialog('saved', null, null, squery ); //open new dialog
                                 }else{
-                                    ele_rules.val( JSON.stringify(res.rules) );    
+                                    ele_rules.val( JSON.stringify(res.rules) ); //assign new tules    
                                 }
                             }
                         }
@@ -174,7 +190,7 @@ function hSvsEdit(args) {
      * @param callback
      */
      function _showDialog( mode, groupID, svsID, squery, callback ){
-        
+
         if(callback){
             callback_method = callback;  
         } 
@@ -201,15 +217,17 @@ function hSvsEdit(args) {
             
         }else if (mode == 'rules' && Hul.isnull(svsID)){ //it happens for new rules only
 
+            if(Hul.isnull(squery)) squery = {};
+             squery.q = ''; // from rule builder we always save pure query only
              _editRules(null, squery);
             
         }else if(null == edit_dialog){
                 //create new dialog
                 
-            var $dlg = edit_dialog = $( "<div>" ).appendTo(  $('body') );
+            var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
-            $dlg.load("apps/svs_edit.html?t="+(new Date().time), function(){
+            $dlg.load("apps/search/svs_edit.html?t="+(new Date().time), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
@@ -218,6 +236,7 @@ function hSvsEdit(args) {
                 
                 $dlg.find("#svs_Rules_edit")                  
                     .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                    .attr('title', top.HR('Edit Rule Set'))
                     .css({'height':'16px', 'width':'16px'})
                     .click(function( event ) {
                         //that.
@@ -225,10 +244,10 @@ function hSvsEdit(args) {
                     });
                 
 
-                var allFields = $dlg.find('input');
+                var allFields = $dlg.find('input, textarea');
 
                 //that.
-                _fromDataToUI(svsID, squery, groupID);
+                var isRules = _fromDataToUI(svsID, squery, groupID);
 
                 function __doSave(){   //save search
 
@@ -242,18 +261,18 @@ function hSvsEdit(args) {
 
                     allFields.removeClass( "ui-state-error" );
 
-                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 25 );
+                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 30 );
                     
                     if(bValid){
                         
-                        var bOk1 = Hul.checkLength( svs_query, "Query", null, 1 );
-                        var bOk2 = Hul.checkLength( svs_rules, "Rules", null, 1 );
-                        if(!(bOk1 || bOk2)){
+                        var bOk = Hul.checkLength( svs_query, "Query", null, 1 );
+                        if(!bOk) bOk = Hul.checkLength( svs_rules, "Rules", null, 1 );
+                        if(!bOk){
                                 message.text("Define query, rules or both.");
                                 message.addClass( "ui-state-highlight" );
                                 setTimeout(function() {
                                     message.removeClass( "ui-state-highlight", 1500 );
-                                    }, 500 );
+                                }, 500 );
                                 bValid = false;         
                         }
                     }
@@ -266,9 +285,11 @@ function hSvsEdit(args) {
                         if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
                             domain = svs_ugrid;    
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID;
-                            if(domain!="all"){
-                                query_to_save.push('w='+domain);
-                            }
+                            //if(domain!="all"){query_to_save.push('w='+domain);}
+                        }
+                        if(Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val())){   //PURE RULE SET
+                            domain = 'rules';
+                            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
                         }
                         
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
@@ -324,11 +345,11 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 320,
+                    height: 360,
                     width: 450,
                     modal: true,
                     resizable: false,
-                    title: top.HR('Edit saved search'),
+                    title: top.HR(isRules?'Edit Rule Set':'Edit saved search'),
                     buttons: [
                         {text:top.HR('Save'), click: __doSave},
                         {text:top.HR('Cancel'), click: function() {
@@ -336,7 +357,7 @@ function hSvsEdit(args) {
                         }}
                     ],
                     close: function() {
-                        allFields.val( "" ).removeClass( "ui-state-error" );
+                        allFields.val( "input, textarea" ).removeClass( "ui-state-error" );
                     }
                 });
 
@@ -345,7 +366,8 @@ function hSvsEdit(args) {
             });
         }else{
             //show dialogue
-            _fromDataToUI(svsID, squery, groupID);
+            var isRules = _fromDataToUI(svsID, squery, groupID);
+            edit_dialog.dialog("option",'title', top.HR(isRules?'Edit Rule Set':'Edit saved search'));
             edit_dialog.dialog("open");
         }
          

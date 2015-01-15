@@ -458,7 +458,7 @@ $.widget( "heurist.resultList", {
                         }
                     }
                     this.div_content[0].innerHTML += html;   
-                    this.span_info.html(this._count_of_divs); //that.div_content.find('.recordDiv').length);
+                    this.span_info.html("Records: "+this._count_of_divs); //that.div_content.find('.recordDiv').length);
 
                     /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
                     this._on( lastdiv.nextAll(), {
@@ -467,7 +467,8 @@ $.widget( "heurist.resultList", {
                 }
                 $allrecs = this.div_content.find('.recordDiv');
                 this._on( $allrecs, {
-                    click: this._recordDivOnClick
+                    click: this._recordDivOnClick,
+                    mouseover: this._recordDivOnHover
                 });
 
             }else if(this._count_of_divs<1) {
@@ -565,7 +566,7 @@ $.widget( "heurist.resultList", {
         //record type icon
         $('<img>',{
             src:  top.HAPI4.basePath+'assets/16x16.gif',
-            title: '@todo rectypeTitle'.htmlEscape()
+            title: '@todo rectypeTitle'
         })
         //!!! .addClass('rtf')
         .css('background-image', 'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)')
@@ -647,7 +648,7 @@ $.widget( "heurist.resultList", {
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
-        var recTitle = fld('rec_Title');//.htmlescape();
+        var recTitle = top.HEURIST4.util.htmlEscape(fld('rec_Title'));
         
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
@@ -657,8 +658,8 @@ $.widget( "heurist.resultList", {
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
             + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
             + html_thumb 
-            + '<div class="recordIcons" recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="@todo rectypeTitle" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             + '</div>'
             + '<div title="'+recTitle+'" class="recordTitle">'
@@ -688,6 +689,17 @@ $.widget( "heurist.resultList", {
         .appendTo($recdiv);*/
         
         
+    },
+
+    _recordDivOnHover: function(event){
+        var $rdiv = $(event.target);
+        if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
+            
+              $rdiv = $rdiv.parents('.recordDiv')
+              var rectypeID = $rdiv.attr('rectype');
+              var title = top.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
+              $rdiv.attr('title', title);
+        }
     },
    
     _recordDivOnClick: function(event){

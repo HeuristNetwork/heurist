@@ -177,12 +177,6 @@
 
     // ---- COPY FUNCTION -----------------------------------------------------------------
 
-    function echo_flush($msg){
-         print $msg;
-         ob_flush();
-         flush();
-    }
-
     function cloneDatabase($targetdbname) {
         set_time_limit(0);
         

@@ -87,16 +87,17 @@ $.widget( "heurist.ruleBuilder", {
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
 
-        this.div_btn =  $('<div>').css({'width':'120px'}).appendTo(this.element);
+        this.div_btn =  $('<div>').css({'width':(this.options.level<3)?'11em':'6em','margin-left':'0.5em'}).appendTo(this.element);
 
+        this.btn_delete = $( "<button>", {text:'Delete'})
+        .attr('title', 'Delete this step in the rule' )
+        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
+        
         if(this.options.level<3)
             this.btn_add_next_level = $( "<button>", {text:'Add Next'} )
             .attr('title', 'Adds another step to this rule' )
             .button().appendTo(this.div_btn);
 
-        this.btn_delete = $( "<button>", {text:'Delete'})
-        .attr('title', 'Delete this step in the rule' )
-        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
 
 
 
@@ -524,7 +525,7 @@ $.widget( "heurist.ruleBuilder", {
             if(is_not_relation){
                 //this.label_3.hide();
                 this.select_reltype.show();
-                top.HEURIST4.util.createSelector(this.select_reltype.get(0), 'pointer');
+                top.HEURIST4.util.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
                 this.select_reltype.prop('disabled', true);
             }
         }else{
@@ -634,10 +635,11 @@ $.widget( "heurist.ruleBuilder", {
 
         if(!top.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
             var fld = this._findField(dt_ID);
-            if(this.select_reltype.is(":visible")){
-                linktype = (fld && fld.isreverse)?3:4; //relatiom to/from
+            if(rel_term_id=="pointer"){
+                rel_term_id = '';
+                linktype = (fld && fld.isreverse)?1:2; //link to/from
             }else{
-                linktype = (fld && fld.isreverse)?1:2; //kink to/from
+                linktype = (fld && fld.isreverse)?3:4; //relatiom to/from
             }
         }
 

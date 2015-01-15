@@ -41,7 +41,7 @@
         <title>Rule Set Builder</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../style3.css">
 
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -79,10 +79,9 @@
             }
         </style>
     </head>
-    <body>
-        <div style="overflow:hidden;width:100%;height:100%">
-
-            <div style="position:absolute;width:98%;top:0" class="rulebuilder">
+    <body style="overflow:hidden">
+        <div style="height:100%">
+            <div style="position:absolute;width:99%;top:0" class="rulebuilder">
                 <div style="width:220px;font-weight:bold">Starting point (entity type)</div>
                 <div style="width:195px;font-weight:bold">Relationship Field</div>
                 <div style="width:195px;font-weight:bold">Relationship Type</div>
@@ -90,8 +89,11 @@
                 <div style="font-weight:bold">Optional Filter (query)</div>
             </div>
 
-            <div style="position:absolute;width:98%;top:2em;bottom:4em;overflow-y:auto" id="level1">
+            <div style="position:absolute;width:99%;top:2em;bottom:4em;overflow-y:auto" id="level1">
+            
+                <div id="div_add_level"><button id="btn_add_level1">Add New Rule</button></div>
             </div>
+            
 
             <!-- Slide-in help text - displays at start by default, can be closed and reopened -->
             <div id="helper" title="Rules and Rule sets">
@@ -127,11 +129,11 @@
             </div>
 
 
-            <div style="position:absolute;width:98%;height:2em;bottom:10px">
-                <button id="btn_add_level1">Add New Rule</button>
+            <div style="position:absolute;width:99%;height:2em;bottom:10px; text-align:right">
+                
                 <button id="btn_save">Save Rule Set</button>
                 <!-- <button id="btn_apply">Apply Rules</button> -->
-                <span style="float:right"><button id="btn_help">Help</button></span>
+                <button id="btn_help">Help</button>
             </div>
         </div>
     </body>

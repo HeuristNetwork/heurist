@@ -107,6 +107,10 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     {
         return Object.prototype.toString.apply(a) === '[object Array]';
     },
+    
+    htmlEscape: function(s) {
+        return s?s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;"):'';
+    },
 
     isObject: function (a)
     {

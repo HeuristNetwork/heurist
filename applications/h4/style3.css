@@ -148,12 +148,14 @@ iframe {
 
 /* INPUT FORM ----------------------------------   */
 fieldset {
-    padding:2px; border:0; margin-top:10px;
+    padding:1em; border:0; margin-top:10px;
 }
-
 fieldset > div, .input-row{
     display:table-row;
-    padding-bottom:0.4em;
+    /*padding-bottom:0.2em;*/
+}
+fieldset > div > input.text, fieldset > div > select.text{
+    margin-bottom: 0.5em;
 }
 
 fieldset > div > .header, 
@@ -163,7 +165,7 @@ fieldset > div > .header_narrow{
     min-width:150px;
     text-align:right;
     padding-top:0.4em;
-    padding-right:0.4em;
+    padding-right:1em;
 }
 fieldset > div > .header_narrow{
     width:50px;
@@ -597,3 +599,47 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .ui-icon.icon-large {
     margin-top: -0.75em;
 }
+
+.fancytree-container{
+    overflow:hidden !important;
+}
+
+.accordeon-header{
+    background:none !important;
+    border: none !important;
+    font-weight:bold !important;
+    padding-bottom: 0 !important;
+    padding-left: 1.2em !important;
+}
+
+.accordeon-header > .ui-accordion-header-icon{
+    left: 0 !important;
+    margin-top: -4px !important;
+}
+
+
+/* chrome, safari - size of scrollbar  todo: MOVE to theme!!!! */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: rgba(142,169,185,0.8); 
+    /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);*/
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(142,169,185,0.4); 
+}
+/*
+::-webkit-scrollbar-button {
+    background: #8ea9b9
+}*/

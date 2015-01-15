@@ -174,6 +174,7 @@ $.widget( "heurist.resultListMenu", {
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
+            .addClass('ui-menu-divider-heurist')
             .menu({select: function(event, ui){ event.preventDefault(); that._menuActionHandler(ui.item.attr('id')); return false; }})
         })
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
@@ -716,7 +717,7 @@ $.widget( "heurist.resultListMenu", {
                 //call method editSavedSearch - save collection as search
 
                 // mode, groupID, svsID, squery
-                $(app.widget).search_links('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
+                $(app.widget).search_links_tree('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
             }
         }
         
