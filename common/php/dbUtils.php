@@ -36,7 +36,6 @@
     */
 
     require_once('dbScript.php');
-    require_once('dbDumper.php');
 
     function server_connect($verbose = true){
 
@@ -264,63 +263,6 @@
 
         return $res;
     }
-    
-    
-    /* backup the db OR just a table */
-    function backup_tables($host,$user,$pass,$name,$tables = '*')
-    {
-        $link = mysql_connect($host,$user,$pass);
-        mysql_select_db($name,$link);
-        
-        //get all of the tables
-        if($tables == '*')
-        {
-            $tables = array();
-            $result = mysql_query('SHOW TABLES');
-            while($row = mysql_fetch_row($result))
-            {
-                $tables[] = $row[0];
-            }
-        }
-        else
-        {
-            $tables = is_array($tables) ? $tables : explode(',',$tables);
-        }
-        
-        //cycle through
-        foreach($tables as $table)
-        {
-            $result = mysql_query('SELECT * FROM '.$table);
-            $num_fields = mysql_num_fields($result);
-            
-            $return.= 'DROP TABLE '.$table.';';
-            $row2 = mysql_fetch_row(mysql_query('SHOW CREATE TABLE '.$table));
-            $return.= "\n\n".$row2[1].";\n\n";
-            
-            for ($i = 0; $i < $num_fields; $i++) 
-            {
-                while($row = mysql_fetch_row($result))
-                {
-                    $return.= 'INSERT INTO '.$table.' VALUES(';
-                    for($j=0; $j<$num_fields; $j++) 
-                    {
-                        $row[$j] = addslashes($row[$j]);
-                        $row[$j] = ereg_replace("\n","\\n",$row[$j]);
-                        if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; } else { $return.= '""'; }
-                        if ($j<($num_fields-1)) { $return.= ','; }
-                    }
-                    $return.= ");\n";
-                }
-            }
-            $return.="\n\n\n";
-        }
-        
-        //save file
-        $handle = fopen("/heur-filestore/".$db."/dump/".$name.".sql", "w+");
-        //$handle = fopen('db-backup-'.time().'-'.(md5(implode(',',$tables))).'.sql','w+');
-        fwrite($handle,$return);
-        fclose($handle);
-    }
 
      /**
     * Dump all tables (except csv import cache) into text files
@@ -329,22 +271,37 @@
     * @param mixed $db
     * @param mixed $verbose
     */
-    function db_dump($db) {
-        // Create directory
-        $directory = "/heur-filestore/".$db."/dump";
-        mkdir($directory, 0777, true);
+    function db_dump($db, $verbose=true) {
+        // Create dump directory
+        $directory = HEURIST_UPLOAD_ROOT.$db;
+        if(!file_exists($directory)) {
+            mkdir($directory, 0777, true);
+        }
         
         // Create file
-        $filename = $directory."/".$db."_".time().".sql";  
+        $filename = $directory."/hdb_".$db."_".time().".sql";  
         $file = fopen($filename, "a+");
               
         $mysqli = server_connect();
         if($mysqli && $mysqli->select_db("hdb_".$db)){
-            $tables = $mysqli->query("SHOW TABLES"); // Select all tables of the database
+            // SQL settings
+            $settings = "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n
+                         /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n
+                         /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n
+                         /*!40101 SET NAMES utf8 */;\n
+                         /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\n
+                         /*!40103 SET TIME_ZONE='+00:00' */;\n
+                         /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;\n
+                         /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n
+                         /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n
+                         /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n";
+            fwrite($file, $settings);
+            
+            // Dump all tables of the database
+            $tables = $mysqli->query("SHOW TABLES"); 
             if($tables){
                 // Start to dump all tables 
                 while ($table = $tables->fetch_row()) {
-                    $output = "";
                     $table = $table[0];
                     
                     // Select everything in the table
@@ -352,13 +309,14 @@
                     $num_fields = mysqli_field_count($mysqli);
                     
                     // Drop table sql
-                    $output.= 'DROP TABLE IF EXISTS `'.$table.'`;';
+                    $output = '\n\nDROP TABLE IF EXISTS `'.$table.'`;';
                     
                     // Create table sql
                     $row2 = mysqli_fetch_row($mysqli->query('SHOW CREATE TABLE '.$table));
-                    $output.= "\n\n".$row2[1].";\n\n";
+                    $output.= $row2[1].";\n\n";
                     
                     // Insert values sql
+                    $output .= '/*!40000 ALTER TABLE '.$table.' DISABLE KEYS */;';
                     for ($i = 0; $i < $num_fields; $i++) {
                         while($row = $result->fetch_row()) {
                             $output.= 'INSERT INTO '.$table.' VALUES(';
@@ -379,6 +337,7 @@
                             $output.= ");\n";
                         }
                     }
+                    $output .= '/*!40000 ALTER TABLE '.$table.' ENABLE KEYS */;';
                     
                      // Write table sql to file
                     $output.="\n\n\n";
@@ -386,9 +345,11 @@
                 }
             }
 
+            fwrite($file, "SET FOREIGN_KEY_CHECKS=1;\n");
+            fwrite($file, "SET sql_mode = 'TRADITIONAL';\n");
             $mysqli->close();
         }else{
-            echo "Failed to connect to database hdb_".$db;
+            if($verbose) echo "Failed to connect to database hdb_".$db;
             return false;
         }     
         
@@ -397,14 +358,107 @@
         chmod($filename, 0777);
         
         // Echo output
-        $size = filesize($filename) / pow(1024,2);
-        echo "<br/>Successfully dumped ".$db." to ".$filename;
-        echo "<br/>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
+        if($verbose) {
+            $size = filesize($filename) / pow(1024,2);
+            echo "<br/>Successfully dumped ".$db." to ".$filename;
+            echo "<br/>Size of SQL dump: ".sprintf("%.2f", $size)." MB";
+        }
 
         return true;
     }
 
+    /**
+    * Zips everything in a directory
+    * 
+    * @param mixed $source       Source folder
+    * @param mixed $destination  Destination file
+    */
+    function zip($source, $destination, $verbose=true) {
+        if (!extension_loaded('zip') || !file_exists($source)) {
+            echo "<br/>The file or directory at ".$source." does not exist";
+            return false;
+        }
 
+        $zip = new ZipArchive();
+        if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+            if($verbose) echo "<br/>Failed to create zip file at ".$destination;
+            return false;
+        }
+
+        $source = str_replace('\\', '/', realpath($source));
+
+        if (is_dir($source) === true) {
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+            foreach ($files as $file) {
+                $file = str_replace('\\', '/', $file);
+
+                // Ignore "." and ".." folders
+                if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                    continue;
+
+                // Determine real path
+                $file = realpath($file);
+                if (is_dir($file) === true) { // Directory
+                    $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+                } 
+                else if (is_file($file) === true) { // File
+                    $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+                }
+            }
+        } else if (is_file($source) === true) {
+            $zip->addFromString(basename($source), file_get_contents($source));
+        }
+
+        // Close zip and show output if verbose
+        $numFiles = $zip->numFiles;
+        $zip->close();
+        $size = filesize($destination) / pow(1024, 2);
+        
+        if($verbose) {
+            echo "<br/>Successfully dumped data from ".$source." to ".$destination;
+            echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+        }
+        return true;
+    }
+   
+    
+    /**
+    * "Deletes" a database: makes a .sql dump of the database content
+    * and zips all files related to this db.
+    * 
+    * @param mixed $db Database name WITHOUT hdb extension
+    */
+    function db_delete($db, $verbose=true) {
+        if(db_dump($db)) {
+            // Create DELETED_DATABASES directory if needed
+            $folder = HEURIST_UPLOAD_ROOT."DELETED_DATABASES/";
+            if(!file_exists($folder)) {
+                mkdir($folder, 0777, true);   
+            }
+            
+            // Zip $source to $file
+            $source = HEURIST_UPLOAD_ROOT.$db;
+            $destination = $folder.$db."_".time().".zip"; 
+            if(zip($source, $destination)) {
+                // Delete $source folder
+                deleteFolder($source);
+                if($verbose) echo "<br/>Folder ".$source." has been deleted";
+                
+                // Delete from MySQL
+                $mysqli = server_connect();
+                $mysqli->query("DROP DATABASE hdb_".$db);
+                $mysqli->close();
+                if($verbose) echo "<br/>Database ".$db." has been dropped";
+                return true;
+            }else{
+                if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
+            } 
+        }else{
+            if($verbose) echo "<br/>Failed to dump database ".$db." to a .sql file";
+        }
+        return false;
+    }
 
     //create new empty database
     function createDatabaseEmpty($newDBName){
@@ -528,6 +582,27 @@
         return 0;
     }
 
+    /**
+    * Deletes a folder and all its files recursively
+    * 
+    * @param mixed $dir Directory to remove
+    */
+    function deleteFolder($dir) { 
+        if (is_dir($dir)) { 
+            $objects = scandir($dir); 
+            foreach ($objects as $object) { 
+                if ($object != "." && $object != "..") { 
+                    if (filetype($dir."/".$object) == "dir") {
+                        rmdir($dir."/".$object);    
+                    } else {
+                        unlink($dir."/".$object);  
+                    }  
+                } 
+            } 
+            reset($objects); 
+            rmdir($dir); 
+         } 
+    }
 
 
     /**

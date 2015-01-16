@@ -1,41 +1,12 @@
 <?php                                                
-    require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../configIni.php');
+    require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
     
-    /** Zips the $db directory */
-    function zip_directory($db) {
-        $result = "";
-        $input = "/heur-filestore/".$db;
-        $zip_file = "/DELETED_DATABASES/".$db."_".time().".zip"; 
-
-        if ($handle = opendir($input)) {
-            $zip = new ZipArchive();
-
-            if ($zip->open($zip_file, ZIPARCHIVE::CREATE)!==TRUE) 
-            {
-                echo "Unable to open/create zip file ".$zip_file;
-                return false;
-            }
-            echo "<br/>Zip file has been created at ".$zip_file;
-             
-            // Recursively add all files to ZIP
-            while (false !== ($file = readdir($handle))) 
-            {
-                $zip->addFile($input."/".$file);
-            }
-            closedir($handle);
-            
-            // Echo result
-            $size = filesize($zip_file) / pow(1024, 2);
-            echo "<br/>The zip file contains ".$zip->numFiles." files and is ".sprintf("%.2f", $size)."MB";
-
-            $zip->close();
-            return true;
-        }else{
-            echo "Unable to open directory ".$input;
-            return false;
-        }
+    /** Db check */
+    if(!is_systemadmin) {
+        echo "You must be logged in as a system administrator to delete databases";
+        exit();
     }
     
     /** Password check */
@@ -48,13 +19,9 @@
             if($comparison == 0) {
                 // Correct password, check if db is set
                 if(isset($_POST['database'])) {
+                    // "Delete" database
                     $db = $_POST['database']; 
-                    
-                    // Dump database to .sql file
-                    if(db_dump($db)) { // dbUtils.php
-                        // Zip directory
-                        zip_directory($db);
-                    }
+                    db_delete($db); // dbUtils.php
                     
                 }else{
                     // Authorization call

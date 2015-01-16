@@ -29,7 +29,7 @@
     mysql_connection_select();
     $dbs = mysql__getdatabases(true);
     $sysadmin = is_systemadmin();
-    $sysadmin = true;
+    //$sysadmin = true; // Force system admin rights
   
     /**
     * Selects the value after a query
@@ -124,6 +124,8 @@
             <div id="tabContainer"></div>
         </div>
 
+        <?php if($sysadmin) { ?>
+        <!-- Database verification dialog -->
         <div id="db-verification" title="Verification" style="display: none">
             <div>
                 <span>Deletion password:</span>
@@ -142,8 +144,9 @@
             </div>
             
         </div>
+        <?php } ?>
         
-        <!-- Generate table -->
+        <!-- Table generation script -->
         <script type="text/javascript">
             //v2
             var showTimer,hideTimer;
@@ -264,7 +267,8 @@
             });
         </script>
 
-        <!-- Delete databases -->
+        <?php if($sysadmin) { ?>
+        <!-- Delete databases scipt -->
         <script>    
             var databases = [];
             var password;
@@ -357,8 +361,7 @@
                 $(".progress").text(count+"/"+databases.length);
                 $(".bar").attr("value", (count*100/databases.length));
             }
-        
-            
         </script>
+        <?php } ?>
     </body>
 </html>
