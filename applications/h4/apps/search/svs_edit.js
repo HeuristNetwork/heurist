@@ -234,6 +234,8 @@ function hSvsEdit(args) {
                     $(this).html(top.HR($(this).html()));
                 })
                 
+                //$dlg.find("#svs_btnset").position({my: "left top", at: "right top", of: $dlg.find('#svs_Rules') });
+                
                 $dlg.find("#svs_Rules_edit")                  
                     .button({icons: {primary: "ui-icon-pencil"}, text:false})
                     .attr('title', top.HR('Edit Rule Set'))
@@ -241,7 +243,17 @@ function hSvsEdit(args) {
                     .click(function( event ) {
                         //that.
                         _editRules( $dlg.find('#svs_Rules') );
-                    });
+                    })
+                    .position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
+                    
+                $dlg.find("#svs_Rules_clear")                  
+                    .button({icons: {primary: "ui-icon-close"}, text:false})
+                    .attr('title', top.HR('Clear Rule Set'))
+                    .css({'height':'16px', 'width':'16px'})
+                    .click(function( event ) {
+                        $dlg.find('#svs_Rules').val('');
+                    })
+                    .position({my: "left top", at: "right top", of: $dlg.find("#svs_Rules") });
                 
 
                 var allFields = $dlg.find('input, textarea');
@@ -345,7 +357,7 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 360,
+                    height: 400,
                     width: 450,
                     modal: true,
                     resizable: false,

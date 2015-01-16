@@ -566,7 +566,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 
 .horizontalmenu {
-    border:none;
+    border:none !important;
     background:none;
     padding:0;    
 }
@@ -604,41 +604,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     overflow:hidden !important;
 }
 
-.accordeon-header{
-    background:none !important;
-    border: none !important;
-    font-weight:bold !important;
-    padding-bottom: 0 !important;
-    padding-left: 1.2em !important;
-}
 
-.accordeon-header > .ui-accordion-header-icon{
-    left: 0 !important;
-    margin-top: -4px !important;
-}
-
-
-/* chrome, safari - size of scrollbar  todo: MOVE to theme!!!! */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-/* Track */
-::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
-    -webkit-border-radius: 10px;
-    border-radius: 10px;
-}
-/* Handle */
-::-webkit-scrollbar-thumb {
-    -webkit-border-radius: 10px;
-    border-radius: 10px;
-    background: rgba(142,169,185,0.8); 
-    /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);*/
-}
-::-webkit-scrollbar-thumb:window-inactive {
-    background: rgba(142,169,185,0.4); 
-}
 /*
 ::-webkit-scrollbar-button {
     background: #8ea9b9

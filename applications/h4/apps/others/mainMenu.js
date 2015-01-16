@@ -214,7 +214,7 @@ $.widget( "heurist.mainMenu", {
             that['menu_'+name].addClass('menu-or-popup')
             .css({'position':'absolute', 'padding':'5px'})
             .appendTo( that.document.find('body') )
-            .addClass('ui-menu-divider-heurist')
+            //.addClass('ui-menu-divider-heurist')
             .menu({select: function(event, ui){ that._menuActionHandler(event, ui.item.attr('id')); return false; }});
             
             that._initLinks(that['menu_'+name]);

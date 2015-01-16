@@ -25,7 +25,7 @@ $.widget( "heurist.resultList", {
 
     // default options
     options: {
-        view_mode: 'list', // list|icons|thumbnails   @toimplement detail, condenced
+        view_mode: null, // list|icons|thumbnails   @toimplement detail, condenced
         multiselect: true,
         isapplication: true,
         showcounter: true,
@@ -133,13 +133,6 @@ $.widget( "heurist.resultList", {
 
         
 
-        //----------------------
-        
-        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');        
-        if(view_mode){
-            this._applyViewMode(view_mode);
-        }
-        
         //----------------------
         
         this.span_info = $("<label>").appendTo(
@@ -330,19 +323,27 @@ $.widget( "heurist.resultList", {
             var oldmode = this.options.view_mode;
             this.options.view_mode = newmode;
             //this.option("view_mode", newmode);
-            this.div_content.removeClass(oldmode);
+            if(oldmode)this.div_content.removeClass(oldmode);
 
             //save viewmode is session
             top.HAPI4.SystemMgr.save_prefs({'rec_list_viewmode': newmode});
 
         }else{
+            //load saved value
+            if(!this.options.view_mode){
+                this.options.view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
+            }
+            if(!this.options.view_mode){
+                this.options.view_mode = 'list'; //default value
+            }
+            
             newmode = this.options.view_mode;
         }
         this.div_content.addClass(newmode);
 
         //this.btn_view.button( "option", "label", top.HR(newmode));
-        $('#list_layout_'+newmode).attr('checked','true');
-
+        $('#list_layout_'+newmode).attr('checked','checked');
+        this.mode_selector.buttonset('refresh');
     },
 
     // @todo move record related stuff to HAPI

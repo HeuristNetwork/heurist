@@ -745,7 +745,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         if($dlg.length==0){
             $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
         }
-        return $dlg;
+        return $dlg.removeClass('ui-heurist-border');
     },
 
     showMsgDlgUrl: function(url, buttons, title){
@@ -818,6 +818,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
         
         $dlg = top.HEURIST4.util.getMsgDlg();
+        
+        $dlg.addClass('ui-heurist-border');
 
         if(message!=null){
             $dlg.empty();

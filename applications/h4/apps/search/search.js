@@ -185,7 +185,9 @@ $.widget( "heurist.search", {
                     $(app.widget).search_links_tree('editSavedSearch', 'saved'); //call public method editRules
                 }
             }});
-           
+            
+            this.div_search_links.find('a').css({ 'text-decoration':'none', 'font-size':'0.9em',  
+                'color':  this.div_search_links.find('.ui-widget-content').css('color') });
             
         }else{
             
@@ -370,7 +372,7 @@ $.widget( "heurist.search", {
             .css({'width':'450px', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
             .progressbar().appendTo(this.div_progress);
             
-        this.progress_lbl = $("<div>").css({'position':'absolute','margin-left':'180px', 'top': '1.6em', 'text-shadow': '1px 1px 0 #fff' })
+        this.progress_lbl = $("<div>").css({'position':'absolute', 'top': '1.6em', 'text-shadow': '1px 1px 0 #fff' })
             .appendTo(this.progress_bar);     
             //font-weight: bold;
        
@@ -576,6 +578,8 @@ $.widget( "heurist.search", {
                          //fake result searh event
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
+                    } else if(!top.HEURIST.util.isempty(that._rules)){
+                        Hul.showMsgFlash('Rule sets require an initial search result as a starting point.',1200,top.HR('Warning'));
                     }
                 }
                 
@@ -1009,14 +1013,14 @@ $.widget( "heurist.search", {
             var curr_offset = Number(this.query_request.o);
             curr_offset = (curr_offset>0?curr_offset:0) + Number(this.query_request.l);
             
-            var tot = top.HAPI4.currentRecordset.count_total();
+            var tot = top.HAPI4.currentRecordset.count_total();  //count of records in current request
             
             if(curr_offset>tot) curr_offset = tot;
             
             if(this._rule_index<1){  //this is main request
                     
                     //search in progress
-                     this.progress_lbl.html( (curr_offset==tot)?tot:'Loading '+curr_offset+' of '+tot );
+                     this.progress_lbl.css('margin-left','180px').html( (curr_offset==tot)?tot:'Loading '+curr_offset+' of '+tot );
                      
                      this.progress_bar.progressbar( "value", curr_offset/tot*100 );
                      //this.progress_bar.html( $('<div>').css({'background-color':'blue', 'width': curr_offset/tot*100+'%'}) );
@@ -1028,11 +1032,29 @@ $.widget( "heurist.search", {
             }else{ //this is rule request
             
                      if( this._rule_index < this._rules.length){
-            
+
+                        //count of chunks of previous result set = number of queries
                         var res_steps_count = this._rules[this._rules[this._rule_index].parent].results.length;
-                
-                        this.progress_lbl.html( (curr_offset==tot?tot:curr_offset+'~'+tot)+' of '+
-                            (this._res_index+1)+'~'+res_steps_count);
+                        
+                        s = "Applying rule set ";
+                        if(this._rules.length>2) //more than 1 rule
+                           s  = s + this._rule_index+' of '+(this._rules.length-1);
+                        s = s + '. ';  
+                        var alts = s;
+                        
+                        //show how many queries left    
+                        var queries_togo = res_steps_count - (this._res_index+1);
+                        if(queries_togo>0)
+                            s = s + queries_togo + ' quer' + (queries_togo>1?'ies':'y') + ' to go. ';
+                        //count the total amount of loaded records for this rule   
+                        var cnt_loaded = 0;
+                        $.each(this._rules[this._rule_index].results, function(index, value){ cnt_loaded = cnt_loaded + value.length; });
+                        s = s + 'Loaded '+cnt_loaded;
+            
+                        //alternative 
+                        alts = alts + "Loaded " + (curr_offset==tot ?tot:curr_offset+' of '+tot)+' for query '+  (this._res_index+1)+' of '+res_steps_count;
+                            
+                        this.progress_lbl.css('margin-left','10px').html(alts);    
                             
                         var progress_value = this._res_index/res_steps_count*100 + curr_offset/tot*100/res_steps_count
                             

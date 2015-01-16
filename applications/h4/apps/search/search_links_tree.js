@@ -294,7 +294,7 @@ $.widget( "heurist.search_links_tree", {
     
     _defineHeader: function(name, domain){
 
-        var $header = $('<h3>'+name+'</h3>').addClass('accordeon-header');
+        var $header = $('<h3>'+name+'</h3>').addClass('tree-accordeon-header');
         /*
         var that = this;
 
@@ -338,6 +338,34 @@ $.widget( "heurist.search_links_tree", {
     //titlesTabbable: false,     // Add all node titles to TAB chain
     source: treeData,
     quicksearch: true,
+    
+    renderNode: function(event, data) {
+        // Optionally tweak data.node.span
+        var node = data.node;
+        if(true || node.data.cstrender){
+          var $span = $(node.span);
+          var s = '';
+          if(node.data.isrules){
+                s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">';
+          }else if(node.data.isfaceted){
+                s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
+          }
+          if(s==''){
+                $span.find("> span.fancytree-title").text(node.title);
+          }else{
+                $span.find("> span.fancytree-title").html(node.title + s);
+          }
+          
+          //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
+          
+          //.css({fontStyle: "italic"});
+          /*$span.find("> span.fancytree-icon").css({
+//                      border: "1px solid green",
+            backgroundImage: "url(skin-custom/customDoc2.gif)",
+            backgroundPosition: "0 0"
+          });*/
+        }
+      },    
 
     extensions: ["edit", "dnd", "filter"],
 
@@ -413,26 +441,35 @@ $.widget( "heurist.search_links_tree", {
         if(!node.folder && node.key>0){
             that.editSavedSearch(node.data.isfaceted?'faceted':'saved', groupID, node.key, null, node);
         }else{
-            node.editStart();      
+            node.editStart();   
         }
       
       break;
     case "remove":
-      that._deleteSavedSearch(node.key, node.title, function(){
-            node.remove(); 
-            that._saveTreeData(); 
-            
-            if(that.treeviews[groupID].count()<1){
-                $("#addlink"+groupID).css('display', 'block');
+        if(node.folder){
+            if(node.countChildren()>0){
+                Hul.showMsgFlash('Can not delete non-empty folder. Delete dependent entries first.',1200,top.HR('Warning'));
+            }else{
+                node.remove(); 
+                that._saveTreeData(); 
             }
-      });
+        }else{
+              that._deleteSavedSearch(node.key, node.title, function(){
+                    node.remove(); 
+                    that._saveTreeData(); 
+                    
+                    if(that.treeviews[groupID].count()<1){
+                        $("#addlink"+groupID).css('display', 'block');
+                    }
+              });
+        }
       break;
     case "addFolder":  //always create sibling folder
       /*if(!node.folder){
         node = tree.rootNode;    
       }*/
-      node = node.parent;    
-      node.editCreateNode("child", {title:"New folder", folder:true});
+      //node = node.parent;    
+      node.editCreateNode( node.folder?"child":"after", {title:"New folder", folder:true});
       that._saveTreeData();
       break;
 
@@ -530,16 +567,16 @@ $.widget( "heurist.search_links_tree", {
   tree.contextmenu({
     delegate: "span.fancytree-node",
     menu: [
-      {title: "New <kbd>[Ctrl+N]</kbd>", cmd: "addSearch", uiIcon: "ui-icon-plus" },
+      {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
       {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" },
-      {title: "Edit <kbd>[F2]</kbd>", cmd: "rename", uiIcon: "ui-icon-pencil" },
+      {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
       {title: "----"},
-      {title: "New folder <kbd>[Ctrl+Shift+N]</kbd>", cmd: "addFolder", uiIcon: "ui-icon-folder-open" },
-      {title: "Delete <kbd>[Del]</kbd>", cmd: "remove", uiIcon: "ui-icon-trash" },
+      {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
+      {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" },  // <kbd>[Del]</kbd>
       {title: "----"},
-      {title: "Cut <kbd>Ctrl+X</kbd>", cmd: "cut", uiIcon: "ui-icon-scissors"},
-      {title: "Copy <kbd>Ctrl-C</kbd>", cmd: "copy", uiIcon: "ui-icon-copy"},
-      {title: "Paste as child<kbd>Ctrl+V</kbd>", cmd: "paste", uiIcon: "ui-icon-clipboard", disabled: true }
+      {title: "Cut", cmd: "cut", uiIcon: "ui-icon-scissors"}, // <kbd>Ctrl+X</kbd>
+      {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},  // <kbd>Ctrl-C</kbd>
+      {title: "Paste as child", cmd: "paste", uiIcon: "ui-icon-clipboard", disabled: true } //<kbd>Ctrl+V</kbd>
       ],
     beforeOpen: function(event, ui) {
       var node = $.ui.fancytree.getNode(ui.target);
@@ -623,7 +660,7 @@ $.widget( "heurist.search_links_tree", {
 
         for (var svsID in ssearches)
         {
-            var facet_params = null, domain2, isfaceted = false, saddition = '';
+            var facet_params = null, domain2, isfaceted = false, isrules = fasle, saddition = '';
             
             if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
 
@@ -650,6 +687,7 @@ $.widget( "heurist.search_links_tree", {
                         }else{
                             if(!Hul.isempty(prms.rules)){
                                 saddition = ' [+rules]';
+                                isrules = true;
                             }
                             domain2 = prms.w;    
                             if(Hul.isempty(prms.q)) continue; //do not show saved searches without Q (rules) in this list
@@ -657,8 +695,8 @@ $.widget( "heurist.search_links_tree", {
                 }
                 
                 if(!domain || domain==domain2){
-                    var sname = ssearches[svsID][_NAME] + saddition;                     //, iconclass:'ui-icon icon-share-alt'
-                    res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted } );    //, url:ssearches[svsID][_QUERY]
+                    var sname = ssearches[svsID][_NAME]; // + saddition;                     //, iconclass:'ui-icon icon-share-alt'
+                    res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted, isrules:isrules } );    //, url:ssearches[svsID][_QUERY]
                 }
             }
         }
@@ -775,6 +813,11 @@ $.widget( "heurist.search_links_tree", {
             }, "Confirmation");                 
 
     }
+    
+    , _hasRules: function(query){
+          var prms = Hul.parseHeuristQuery(query);
+          return (!Hul.isempty(prms.rules));
+    }
 
     // mode: saved, rules, faceted
     , editSavedSearch: function(mode, groupID, svsID, squery, node){
@@ -795,7 +838,7 @@ $.widget( "heurist.search_links_tree", {
                         node.folder = true;  
                     }
                     var isfaceted = (mode=='faceted');
-                    node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted }, node.folder?"child":"after" );    
+                    node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted, isrules:that._hasRules(request.svs_Query) }, node.folder?"child":"after" );    
                     
                     that._saveTreeData();
                     
@@ -805,15 +848,14 @@ $.widget( "heurist.search_links_tree", {
                 
                     //edit - changed only title in treeview
                     var saddition = '';
+                    node.data.isrules = false;
                     if(node.data.isfaceted){
                          saddition = ' [faceted]';
                     }else{
-                        var prms = Hul.parseHeuristQuery(request.svs_Query);
-                        if(!Hul.isempty(prms.rules)){
-                            saddition = Hul.isempty(prms.q)?'' :' [+rules]';
-                        }
+                        node.data.isrules = that._hasRules(request.svs_Query);
                     }
-                    node.setTitle(request.svs_Name + saddition);
+                    node.setTitle(request.svs_Name); // + saddition);
+                    node.render(true);
                     that._saveTreeData();
                 }
            };
