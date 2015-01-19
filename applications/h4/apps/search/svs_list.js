@@ -1,5 +1,5 @@
 /**
-* Accordeon view in navigation panel: saved, faceted and tag searches
+* Accordeon/treeview in navigation panel: saved, faceted and tag searches
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,7 +22,7 @@ var Hul = top.HEURIST4.util;
 //constants 
 const _NAME = 0, _QUERY = 1, _GRPID = 2;
 
-$.widget( "heurist.search_links_tree", {
+$.widget( "heurist.svs_list", {
 
     // default options
     options: {
@@ -35,7 +35,7 @@ $.widget( "heurist.search_links_tree", {
     currentSearch: null,
     hSvsEdit: null,
     treeviews:{},
-
+    
     // the constructor
     // create filter+button and div for tree
     _create: function() {
@@ -90,7 +90,18 @@ $.widget( "heurist.search_links_tree", {
         if(hasHeader) toppos = toppos + 2;
 
         this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':0, 'right':0, 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
+
+        this.helper_top = $( '<div>'+top.HR('right-click entries for actions')+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
+        if(!top.HAPI4.get_prefs('help_on')) this.helper_top.hide();
         
+        this.helper_btm = $( '<div>'
++'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
++'This is a faceted search. It allows the user to drill-down into the database on a set of pre-selected database fields.</p>'
++'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
++'This is a search with addition of a Rule Set. The initial search is expanded to a larger set of records by following a set of rules specifying which pointers and relationships to follow.'
+        +'</p></div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
+        if(!top.HAPI4.get_prefs('help_on')) this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+
         
         this.edit_dialog = null;
             
@@ -254,17 +265,17 @@ $.widget( "heurist.search_links_tree", {
             return;
         }        
         
-        this.accordeon.append(
+        this.helper_btm.before(
                 $('<div>')
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
         
-        this.accordeon.append(
+        this.helper_btm.before(
             $('<div>')
             .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
             .append( this._defineContent('bookmark') ) );
             
-        this.accordeon.append(
+        this.helper_btm.before(
             $('<div>')
             .append( this._defineHeader(top.HR('All Records'), 'all'))
             .append( this._defineContent('all') ));
@@ -275,7 +286,7 @@ $.widget( "heurist.search_links_tree", {
         {
             if(groupID){
                 var name = groups[groupID][1];
-                this.accordeon.append(
+                this.helper_btm.before(
                     $('<div>')
                     .append( this._defineHeader(name, groupID))
                     .append( this._defineContent(groupID) ));
@@ -660,7 +671,7 @@ $.widget( "heurist.search_links_tree", {
 
         for (var svsID in ssearches)
         {
-            var facet_params = null, domain2, isfaceted = false, isrules = fasle, saddition = '';
+            var facet_params = null, domain2, isfaceted = false, isrules = false, saddition = '';
             
             if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
 

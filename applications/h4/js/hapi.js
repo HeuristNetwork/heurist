@@ -428,7 +428,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
 
                 if(top.HEURIST4.util.isnull(request.l)){
-                    request.l = top.HEURIST.displayPreferences['results-per-page']; //top.HAPI4.get_prefs('search_limit');
+                    request.l = top.HAPI4.get_prefs('search_limit'); //top.HEURIST.displayPreferences['results-per-page'];
                 }
                 
                 //request.chunk = true;
@@ -704,14 +704,13 @@ function hAPI(_db, _oninit) { //, _currentUser
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
                 //preferences by default
-                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'cupertino', layout_style:'johnson', 'search_limit':200};
+                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'heurist', 'search_limit':1000};
             }
             if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];    
             }else{
                 var res = that.currentUser['ugr_Preferences'][name]
-                if(!res && 'search_limit'==name) res = 200;
-                if(!res && 'layout_style'==name) res = 'johnson';
+                if(!res && 'search_limit'==name) res = 1000;
                 return res;
             }
         },

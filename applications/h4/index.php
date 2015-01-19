@@ -51,9 +51,12 @@
 ?>
 <html>
     <head>
-        <title><?=HEURIST_TITLE ?></title>
+        <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+        <link rel=icon href="favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
         <link rel="stylesheet" type="text/css" href="ext/font-awesome/css/font-awesome.min.css" />
         <!-- <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" /> -->
@@ -101,7 +104,7 @@
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
-        <script type="text/javascript" src="apps/search/search_links_tree.js"></script>
+        <script type="text/javascript" src="apps/search/svs_list.js"></script>
         <!--
         <script type="text/javascript" src="apps/search/resultList.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
@@ -165,18 +168,21 @@
                             window.HR = window.HAPI4.setLocale(prefs['layout_language']); 
 
                             //loads theme (style for layout) - SINCE WE BACK TO H3 - always use default theme
-                            if(false && prefs['layout_theme'] && prefs['layout_theme']!="base" ){
+                            if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
                                 cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
                                     prefs['layout_theme']+'/jquery-ui.css" />');
                             }else{
                                 //default BASE theme
-                                cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />');
+                                cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
                             }
                             //add theme link to html header
                             $("head").append(cssLink);
                             $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
                             //$("head").append($('<link rel="stylesheet" type="text/css" href="../../common/css/global.css?t='+(new Date().getTime())+'">'));
 
+                            
+                            //top.HAPI4.database+'. HEURIST_TITLE
+                            window.document.title = window.document.title+' v'+top.HAPI4.sysinfo.version;
 
                             //load database structure (record types, field types, terms) definitions
                             window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
@@ -189,7 +195,10 @@
                                     
                                     var layoutid = '<?=@$_REQUEST['ll']?>';
                                     if(top.HEURIST4.util.isempty(layoutid)){
-                                        layoutid = "L01";
+                                        layoutid = top.HAPI4.get_prefs('layout_id');
+                                        if(top.HEURIST4.util.isempty(layoutid)){
+                                            layoutid = "L01";
+                                        }
                                     }
                                     
                                     appInitAll(layoutid, "#layout_panes");

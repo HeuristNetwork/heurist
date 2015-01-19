@@ -42,8 +42,7 @@ var widgets = [
 
     {id:'ha10', name:'Search', widgetname:'search', script:'apps/search/search.js'},
 
-    {id:'ha13', name:'Saved searches', widgetname:'search_links', script:'apps/search_links.js'},
-    {id:'ha_search_tree', name:'Saved searches', widgetname:'search_links_tree', script:'apps/search/search_links_tree.js'},
+    {id:'ha_search_tree', name:'Saved searches', widgetname:'svs_list', script:'apps/search/svs_list.js'},
     {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
     {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
 
@@ -91,13 +90,11 @@ options - parameters to init application
 
 */ 
 var layouts = [
-    {id:'L01', name:'h3 classic', theme:'smoothness', type:'cardinal', 
-        north:{size:'11.5em', resizable:false,
+    {id:'L01', name:'Heurist Def', theme:'heurist', type:'cardinal', 
+        north:{size:'11.5em', resizable:false, overflow:'hidden',
             apps:[
-                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'5em',right:0, border:'none', 'background':'none'} },    //top panel
-                
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'5em', left:0, height:'5em', right:0, border:'none', 'background':'none'}, options:{has_paginator:false} },   //search '#8ea9b9'
-                //{appid:'ha15', hasheader:false, css:{position:'absolute', top:44, left:800, height:40, width:600, border:'none', 'background':'none'} }  //pagination               
+                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'5em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'5em', left:0, height:'5em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 
@@ -113,7 +110,7 @@ var layouts = [
             }]
         }
     },
-    {id:'L04', name:'gridster example', theme:'smoothness', type:'gridster', 
+ /*   {id:'L04', name:'gridster example', theme:'smoothness', type:'gridster', 
         options:{widget_base_dimensions:[50, 50]},
         mainmenu: { col:1, row:1, size_x:10, size_y:1, apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},
         search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'ha10', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},    
@@ -125,11 +122,11 @@ var layouts = [
         pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },  
         pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},  
 
-    },
-    {id:'L05', name:'free example', theme:'smoothness', type:'free', 
+    }, */
+    {id:'L05', name:'Free example', theme:'heurist', type:'free', 
         mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
-            apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} },
-                  {appid:'ha10', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} }, 
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
+                  {appid:'ha10', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} }, 
                   {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
                   {appid:'h3_resultList', name: 'Search result' },
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
@@ -139,15 +136,15 @@ var layouts = [
                         ]}]
         }
     },
-    {id:'L02', name:'connections', theme:'smoothness',
+/*    {id:'L02', name:'connections', theme:'smoothness',
     north:{size:40, resizable:false,
             apps:[
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
         ]},    
         center:{dropable:false, apps:[
         {appid:'h4_connections', options:{title:'Connections'} }]}  //search result 
-    },
-    {id:'L03', name:'abandoned', theme:'smoothness',
+    }, */
+    {id:'L03', name:'abandoned', theme:'basic',
         north:{size:88, resizable:false,
             apps:[
                 {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none', 'background':'none'} },    //about
@@ -155,13 +152,13 @@ var layouts = [
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
                 {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none', 'background':'none'} }  //pagination               
         ]},
-        west:{size:160, minsize:160, apps:[{appid:'ha13', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        center:{minsize:300, dropable:true, apps:[{appid:'ha21', dockable:true, dragable:false }]},  //search result 
+        west:{size:160, minsize:160, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
+        center:{minsize:300, dropable:true, apps:[{appid:'h3_resultList', dockable:true, dragable:false }]},  //search result 
         east:{size:'50%', minsize:300, dropable:true,
             tabs:[{dockable:true, dragable:true, resizable:true,
                 apps:[                                      //or viewRecord or renderRecordData
-                    {appid:'ha31'},    //rec_viewer
-                    {appid:'ha54'}     //crosstabs
+                    {appid:'h3_recordListExt'},    
+                    {appid:'ha51'}     
                 ]
             }]
         }

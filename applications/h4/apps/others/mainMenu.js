@@ -35,6 +35,7 @@ $.widget( "heurist.mainMenu", {
         var that = this;
 
         this.element.css('height','100%').addClass('ui-heurist-header2')
+        //
         // prevent double click to select text
         .disableSelection();
 
@@ -42,9 +43,13 @@ $.widget( "heurist.mainMenu", {
         .addClass('logo')
         .css({'width':'198px', 'height':'56px', 'float':'left', 'margin-top':'6px'})
         .appendTo( this.element );
-        //.button();
+
+        if(top.HAPI4.get_prefs('layout_theme')!='heurist'){
+            this.div_logo.button();
+        }
         
-        $("<div>").css({'font-size':'0.8em', 'text-align':'center', 'padding-top':'36px', 'width':'100%'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_logo );
+        
+        $("<div>").css({'font-size':'0.8em', 'text-align':'center', 'padding-top':'32px', 'width':'100%'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_logo );
 
         // bind click events
         this._on( this.div_logo, {
@@ -60,7 +65,7 @@ $.widget( "heurist.mainMenu", {
 
         // MAIN MENU-----------------------------------------------------
         
-        this.divMainMenu = $( "<div>").css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'500px' }).appendTo(this.element);
+        this.divMainMenu = $( "<div>").css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' }).appendTo(this.element);
         
         this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'}).css({'font-size':'1.1em', 'padding-top':'0.5em', 'padding-right': '1.5em', 'float':'right'}).appendTo(this.divMainMenu);
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
@@ -200,7 +205,7 @@ $.widget( "heurist.mainMenu", {
             });
         }else{
             link = $('<a>',{
-                text: name, href:'#'
+                text: top.HR(name), href:'#'
             });
         }
         
@@ -311,7 +316,9 @@ $.widget( "heurist.mainMenu", {
     
           var that = this;
           var p = false;
-          if(action == "menu-export-hml-0"){ 
+          if(action == "menu-profile-preferences"){
+                this._editPreferences(); p=true;
+          }else if(action == "menu-export-hml-0"){ 
                 this.exportHML(true,false,false); p=true;
           }else if(action == "menu-export-hml-1"){ 
                 this.exportHML(false,false,false); p=true;
@@ -325,6 +332,8 @@ $.widget( "heurist.mainMenu", {
                 this.exportFeed('rss'); p=true;
           }else if(action == "menu-export-atom"){ 
                 this.exportFeed('atom'); p=true;
+          }else if(action == "menu-help-inline"){ 
+                this._toggleHelp(); p=true;
           }
           
           if( p ){
@@ -473,9 +482,153 @@ $.widget( "heurist.mainMenu", {
                     window.open(url, '_blank');
             }
         }
+    },
+    
+    
+    /**
+    * Open Edit Preferences dialog
+    */
+    _editPreferences: function()
+    {
+        var $dlg = $("#heurist-dialog").addClass('ui-heurist-bg-light');
+        $dlg.empty();
+
+        $dlg.load("apps/profile/profile_preferences.html?t="+(new Date().time), function(){
+
+            //find all labels and apply localization
+            $dlg.find('label').each(function(){
+                $(this).html(top.HR($(this).html()));
+            })
+            $dlg.find('.header').css({'min-width':'300px', 'width':'300px'});
+
+            populateLanguages(); //fill list of languages
+            populateLayouts(); //fill list of layouts
+
+            //assign values to form fields from top.HAPI4.currentUser['ugr_Preferences']
+            var prefs = top.HAPI4.currentUser['ugr_Preferences'];
+            var allFields = $dlg.find('input,select');
+
+            var currentTheme = prefs['layout_theme'];
+            var themeSwitcher = $("#layout_theme").themeswitcher({currentTheme:currentTheme,
+                onSelect: function(){
+                    currentTheme = this.currentTheme;
+            }});
+
+            //form prefs to ui
+            allFields.each(function(){
+                if(prefs[this.id] || top.HEURIST.displayPreferences[this.id]){
+                    if($(this).hasClass('h3pref')){
+                        
+                        var val = top.HEURIST.displayPreferences[this.id];
+                        if(this.type=="checkbox"){
+                            this.checked = (val=="true");
+                        }else{
+                            $(this).val(val);    
+                        }
+                        
+                    }else if(this.type=="checkbox"){
+                        this.checked = (prefs[this.id]=="1" || prefs[this.id]=="true")
+                    }else{
+                        $(this).val(prefs[this.id]);
+                    }
+                };
+            });
+
+            //save to preferences
+            function __doSave(){
+
+                var request = {};
+                var h3pref = [], h3pref_val = [], val;
+
+                allFields.each(function(){
+                    if($(this).hasClass('h3pref')){
+                        if(this.type=="checkbox"){
+                            val = this.checked?"true":"false";
+                        }else{
+                            val = $(this).val();    
+                        }
+                        h3pref.push(this.id);
+                        h3pref_val.push(val);
+                    }else if(this.type=="checkbox"){
+                        request[this.id] = this.checked?"1":"0";
+                    }else{
+                        request[this.id] = $(this).val();
+                    }
+                });
+                request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
+                //$('#layout_theme').themeswitcher.
+
+                //save H3 preferences
+                if(top.HEURIST && top.HEURIST.util){
+                    //top.HEURIST.util.setDisplayPreference(h3pref,h3pref_val);
+                }
+                
+                //save preferences in session
+                top.HAPI4.SystemMgr.save_prefs(request,
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+
+                            var prefs = top.HAPI4.currentUser['ugr_Preferences'];
+                            var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
+                                prefs['layout_theme'] != request['layout_theme'] ||
+                                prefs['layout_id'] != request['layout_id']);
+
+                            top.HAPI4.currentUser['ugr_Preferences'] = request;
+                            /*allFields.each(function(){
+                            top.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
+                            });*/
+
+                            $dlg.dialog( "close" );
+
+                            if(ask_reload){
+                                top.HEURIST4.util.showMsgDlg('Reload page to apply new settings?',
+                                    function(){
+                                        window.location.reload();
+                                    }, 'Confirmation');
+                            }
+
+                        }else{
+                            var message = $dlg.find('.messages');
+                            message.addClass( "ui-state-highlight" );
+                            message.text(response.message);
+                        }
+                    }
+                );
+            }
+
+            $dlg.dialog({
+                autoOpen: true,
+                height: 600,
+                width: 800,
+                modal: true,
+                resizable: false,
+                draggable: true,
+                title: top.HR("Preferences"),
+                buttons: [
+                    {text:top.HR('Save'), click: __doSave},
+                    {text:top.HR('Cancel'), click: function() {
+                        $( this ).dialog( "close" );
+                    }}
+                ]
+            })
+        });
+
+    },
+    
+    _toggleHelp: function(){
+        
+        var ishelp = (top.HAPI4.get_prefs('help_on')=='1');
+        
+        if(ishelp){
+            $('.heurist-helper1').css('display','none');
+            $('.heurist-helper2').css('visibility','hiddden');
+        }else{
+            $('.heurist-helper1').css('display','block');
+            $('.heurist-helper2').css('visibility','visible');
+        }
+        
+        top.HAPI4.currentUser['ugr_Preferences']['help_on'] = ishelp?'0':'1';
     }
-    
-    
     
 
 });

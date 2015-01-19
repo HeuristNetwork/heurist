@@ -86,8 +86,8 @@
 
     //---------------------------------
 
-    define('HEURIST_TITLE', 'Heurist new UI');
-    $talkToSysAdmin="Please advise your system administrator or email info - a t - heuristscholar.org for assistance.";
+    define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2014 The University of Sydney.');
+    $talkToSysAdmin="Please advise your system administrator or email info - at - heuristscholar.org for assistance.";
 
     /**
     * Response status for ajax requests. See ResponseStatus in hapi.js

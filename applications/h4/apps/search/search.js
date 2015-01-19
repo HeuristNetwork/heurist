@@ -88,22 +88,24 @@ $.widget( "heurist.search", {
             })
             //.css('float','center')
             .addClass('logged-in-only')
+            .addClass('ui-heurist-btn-header1')
             .appendTo( 
                   $('<div>')
                         .css({'width':this.options.leftmargin,'height':'2em','padding':'1.5em 3em','float':'left'}) //'float':'left'
                         .appendTo( this.element )                    
             )
             .button({icons: {
-                primary: "ui-icon-circle-plus"
+                primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
             }})
             .click( function(){ that._addNewRecord(); });
         }else{
             this.element.css('padding-left',this.options.leftmargin);
         }
         
-        this.div_search   = $('<div>').css({'height':'100%','padding-top':'1.5em', 'min-width':'500px', 'display':'inline-block'}).appendTo( this.element );
+        //'height':'100%',
+        this.div_search   = $('<div>').css({'padding-top':'1.5em', 'min-width':'500px', 'display':'inline-block'}).appendTo( this.element );
                 
-        this.div_progress = $('<div>').css({'height':'100%','padding-top':'1.5em', 'min-width':'500px'}).appendTo( this.element ).hide();
+        this.div_progress = $('<div>').css({'padding-top':'1.5em', 'min-width':'500px'}).appendTo( this.element ).hide();
 
         
         this.input_search = $( "<input>" )   //this.options.has_paginator?'30%':'50%'} )
@@ -120,6 +122,7 @@ $.widget( "heurist.search", {
             text: top.HR("search")
         })
         .appendTo( this.div_search_as_guest )
+        .addClass('ui-heurist-btn-header1')
         .button({icons: {
             //primary: "ui-icon-search"
         }});
@@ -170,9 +173,9 @@ $.widget( "heurist.search", {
                 text: 'Rule Sets', href:'#'
             }).css('padding-right','1em').appendTo(this.div_search_links);
             this._on( link, {  click: function(){
-                var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
+                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).search_links_tree('editSavedSearch', 'rules'); //call public method editRules
+                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method editRules
                 }
             }});
             
@@ -180,9 +183,9 @@ $.widget( "heurist.search", {
                 text: 'Save As', href:'#'
             }).appendTo(this.div_search_links);
             this._on( link, {  click: function(){
-                var  app = appGetWidgetByName('search_links_tree');  //appGetWidgetById('ha13');
+                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).search_links_tree('editSavedSearch', 'saved'); //call public method editRules
+                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method editRules
                 }
             }});
             
@@ -196,6 +199,7 @@ $.widget( "heurist.search", {
                 text: top.HR("search assistant")
             })
             .appendTo( this.div_search_as_user )
+            .addClass('ui-heurist-btn-header1')            
             .button({icons: {
                 primary: "ui-icon-lightbulb"
                 }, text:false});
@@ -207,16 +211,18 @@ $.widget( "heurist.search", {
         this.btn_search_as_user = $( "<button>", {         
             text: top.HR("search")
         })
-        .css('width', '14em')
+        .css('width', '10em')   
         .appendTo( this.div_search_as_user )
+        .addClass('ui-heurist-btn-header1')
         .button({icons: {
-            //primary: "ui-icon-search"
+            secondary: "ui-icon-search"
         }});
 
         this.btn_search_domain = $( "<button>", {
             text: top.HR("search option")
         })
         .appendTo( this.div_search_as_user )
+        .addClass('ui-heurist-btn-header1')
         .button({icons: {
             primary: "ui-icon-triangle-1-s"
             }, text:false});
@@ -303,7 +309,7 @@ $.widget( "heurist.search", {
             }
         }else{
             
-            this.limit = top.HEURIST.displayPreferences['results-per-page'];  //top.HAPI4.get_prefs('search_limit');
+            this.limit = top.HAPI4.get_prefs('search_limit'); //top.HEURIST.displayPreferences['results-per-page'];
             if(!this.limit) this.limit = 200;
 
 /*  @TODO - move tp preferences          
@@ -379,6 +385,7 @@ $.widget( "heurist.search", {
         //move to search.js         
         this.btn_stop_search = $( "<button>", {text: "Stop"} )
               .css({'display':'inline-block', 'margin-bottom':'15px'})
+              .addClass('ui-heurist-btn-header1')
               .appendTo( this.div_progress )
               .button({icons: {
                   secondary: "ui-icon-cancel"
@@ -449,7 +456,7 @@ $.widget( "heurist.search", {
             $(this.element).find('span.logged-out-only').show();
         }
 
-        this.btn_search_as_user.button( "option", "label", this._getSearchDomainLabel(this.options.search_domain));
+        this.btn_search_as_user.button( "option", "label", top.HR(this._getSearchDomainLabel(this.options.search_domain)));
         if(this.btn_search_limit) this.btn_search_limit.button( "option", "label", this.limit );
 
         if(this.select_rectype){
@@ -579,7 +586,7 @@ $.widget( "heurist.search", {
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
                     } else if(!top.HEURIST.util.isempty(that._rules)){
-                        Hul.showMsgFlash('Rule sets require an initial search result as a starting point.',1200,top.HR('Warning'));
+                        Hul.showMsgFlash('Rule sets require an initial search result as a starting point.',2000,top.HR('Warning'));
                     }
                 }
                 
@@ -600,7 +607,7 @@ $.widget( "heurist.search", {
     */
     _getSearchDomainLabel: function(value){
         var lbl = null;
-        if(value=='b' || value=='bookmark') { lbl = 'Search (Bookmarked)'; }
+        if(value=='b' || value=='bookmark') { lbl = 'Bookmarks'; }
         else if(value=='r') { lbl = 'recently added'; } //not implemented
             else if(value=='s') { lbl = 'recently selected'; } //not implemented
                 else if(value=='c') { lbl = 'Search (in current)'; } //todo
@@ -691,7 +698,7 @@ $.widget( "heurist.search", {
 
         var that = this;                
         //load template            
-        $dlg.load("apps/search_quick.html?t="+(new Date().getTime()), function(){
+        $dlg.load("apps/search/search_quick.html?t="+(new Date().getTime()), function(){
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){

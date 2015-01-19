@@ -74,6 +74,7 @@ regional['ru'] = {
     'Email to':'Контакт',
     'User information has been saved successfully':'Информация о пользователе сохранена',
 
+    'Database': 'База Данных',
     'Select database': 'Выберите базу данных',
     'My User Info' : 'Мои данные',
     'My Groups' : 'Мои группы',
@@ -106,7 +107,7 @@ regional['ru'] = {
     'fields':'поля',
 
     'add': 'добавить',
-    'add new record' : 'добавить запись',
+    'Add New Record' : 'Добавить запись',
     'tags': 'ярлыки',
     'share': 'доступ',
     'more': 'ещё',
@@ -147,6 +148,9 @@ regional['ru'] = {
     'Personal Files':'Личные файлы',
     'Delete selected files': 'Удалить отмеченные файлы',
 
+    'Profile': 'Профиль',
+    'Admin': 'Админ',
+    
     'Preferences' : 'Настройки',
     'Layout configuration file': 'Файл конфигурации интерфейса',
     'Language':'Язык',
@@ -165,6 +169,10 @@ regional['ru'] = {
     'Delete saved search': 'Удалить сохраненный поиск',
     'Manage Saved Searches': 'Управление сохр.поисками',
     'Create new saved search': 'Создать поиск',
+
+    'Database Summary': 'Сводка базы данных',
+    'Rule Sets': 'Зависимости',
+    
 
     'Delete? Please confirm': 'Удалить? Подвтердите',
 
@@ -274,7 +282,7 @@ regional['nl'] = {
     'fields':'velden',
 
     'add': 'voeg toe',
-    'add new record' : 'voeg nieuwe gegevens toe',
+    'Add New Record' : 'Voeg nieuwe gegevens toe',
     'tags': 'labels',
     'share': 'deel',
     'more': 'meer',
