@@ -770,14 +770,18 @@ if (! top.HEURIST.edit) {
         * @param container -DOM element to attach this separator
         */
         createSeparator: function(label,container) {
-            var dt = top.HEURIST.edit.createFakeDetailType("fakeSep",label,"separator",label,null,null,null)
-            var rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,1);
+            if(top && top.HEURIST){
+                var dt = top.HEURIST.edit.createFakeDetailType("fakeSep",label,"separator",label,null,null,null)
+                var rfr = top.HEURIST.edit.createFakeFieldRequirement(dt,null,null,null,null,1);
 
-            var newSeparator = new top.HEURIST.edit.inputs.BibDetailSeparator("sep1", dt, rfr, [], container);
-            if (newSeparator){
-                top.HEURIST.edit.allInputs.push(newSeparator);
+                var newSeparator = new top.HEURIST.edit.inputs.BibDetailSeparator("sep1", dt, rfr, [], container);
+                if (newSeparator){
+                    top.HEURIST.edit.allInputs.push(newSeparator);
+                }
+                return newSeparator;
+            }else{
+                return null;
             }
-            return newSeparator;
         },
 
 

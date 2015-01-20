@@ -389,7 +389,13 @@ $.widget( "heurist.svs_list", {
       },
       dragEnter: function(node, data) {
         // return ["before", "after"];
-        return node.folder ?true :["before", "after"];
+        if(node.tree._id == data.otherNode.tree._id){
+            return node.folder ?true :["before", "after"];    
+        }else{
+            return false;
+        }
+        
+        
       },
       dragDrop: function(node, data) {
         data.otherNode.moveTo(node, data.hitMode);

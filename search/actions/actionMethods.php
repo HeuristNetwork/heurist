@@ -146,10 +146,10 @@
       $processedTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $processedRecIDs, 'tagString' => $baseTag));
       $result[$resIndex] = "Added field type $dtyName to ".count($processedRecIDs). " Record(s).\n\n";
       $result['count']['processed'] = count($processedRecIDs);
-      $result['added'] = array('recIDs' => $processedRecIDs, 'queryString' => "tag=\"$baseTag\"", 'tagResults' => $processedTagResult);
+      $result['added'] = array('recIDs' => $processedRecIDs, 'queryString' => "tag:\"$baseTag\"", 'tagResults' => $processedTagResult);
       updateRecTitles($processedRecIDs);
     }
-    if ($inAccessibleRecCnt > 0) {
+    if (@$inAccessibleRecCnt > 0) {
       if (!@$resIndex ) {
             $resIndex = 'none';
             $result[$resIndex] = '';

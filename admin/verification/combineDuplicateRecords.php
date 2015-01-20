@@ -178,12 +178,17 @@
 					    $rec_requirements =  array();
 
 					    while ($req = mysql_fetch_assoc($res)) $rec_requirements[$req['rst_RecTypeID']][$req['rst_DetailTypeID']]= $req;
-					    $res = mysql_query('select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")');
+                        
+//DEBUG error_log("REQ = ".print_r($rec_requirements, true));
+                        
+                        $query2 = 'select * from Records where rec_ID in ('.$_REQUEST['bib_ids'].') order by find_in_set(rec_ID, "'.$_REQUEST['bib_ids'].'")';
+					    $res = mysql_query($query2);
 					    $records = array();
 					    $counts = array();
 					    $rec_references = array();
 					    $invalid_rec_references = array();
 					    while ($rec = mysql_fetch_assoc($res)) $records[$rec['rec_ID']] = $rec;
+                        
 					    foreach($records as $index => $record){
 						    $rec_references = mysql__select_array('recDetails', 'dtl_RecID', 'dtl_Value='.$records[$index]['rec_ID'].' and dtl_DetailTypeID in ('.join(',', array_keys($reference_bdts)).')');
 						    if ($rec_references){
@@ -241,6 +246,9 @@
 							    print '<table>';
 							    foreach ($record['details'] as $rd_type => $detail) {
 								    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
+                                    if(!@$rec_requirements[$record['rec_RecTypeID']][$rd_type]) continue;
+
+//DEBUG error_log("check rt=".$record['rec_RecTypeID']."  dt=".$rd_type."   ".@$rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType']);
 								    $reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
 								    $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
 								    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
@@ -251,7 +259,8 @@
                                                 $rd_temp = $rg['dtl_Geo'];   
                                             }
                                             else if ($rg['trm_Label']){
-                                                $rd_temp = $rg['trm_Label']." (".$rg['dtl_Value'].")";   
+                                                $rd_temp = $rg['trm_Label']." (".$rg['dtl_Value'].")"; 
+                                                //$temp = $rg['dtl_Value']; //trm_ID
                                             }
 										    else {
                                                 $rd_temp = $rg['dtl_Value'];   
@@ -346,7 +355,7 @@
 								    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
 								    // check to see if the master record already has the same detail with the identical value ignoring leading and trailing spaces
 								    $removeIndices = array();
-								    if (! $is_master && $_SESSION['master_details'][$rd_type]){
+								    if (! $is_master && @$_SESSION['master_details'][$rd_type]){
 									    $master_details =  $_SESSION['master_details'][$rd_type];
 									    foreach ($detail as $i => $d_detail){
 										    foreach ($master_details as $m_detail){
@@ -363,13 +372,17 @@
 									    unset($detail[$i]);
 								    }
 								    if (count($detail) == 0) continue;
+                                    if(!@$rec_requirements[$master_rec_type][$rd_type]) continue;
 								    $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
 								    $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
 								    print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
 								    //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
 								    //keep_dt_### where ### is detail Type id and mark both "checked" for master record
 								    print '<td style="padding-left:10px;">';
-								    $repeatCount =  intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
+                                    if(@$rec_requirements[$master_rec_type][$rd_type])
+								        $repeatCount = intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
+                                    else
+                                        $repeatCount = 0;
 								    $detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
 								    if (is_array($detail)) {
 									    if ($repeatCount != 1){//repeatable
@@ -514,8 +527,20 @@
 		}
 		*/
         else if (in_array($rd_type, array_keys($enum_bdts))) {
-                $title = mysql_fetch_assoc(mysql_query('select trm_Label from defTerms where trm_ID ='.$rd_val));
-                return $title['trm_Label'];
+                if(Is_integer($rd_val)){
+                        $res = mysql_query('select trm_Label from defTerms where trm_ID ='.$rd_val);
+                        if($res){
+                            $title = mysql_fetch_assoc($res);
+                            return $title['trm_Label'];
+                        }else  {
+                            return $rd_val;
+                        }
+                            
+                }else{
+                        return $rd_val;
+                }
+                        
+                
 		} else
 		return $rd_val;
 	}
@@ -668,9 +693,12 @@
 		// process to be deleted dup bookmarks
 		foreach ($delete_bkm_IDs as $delete_dup_bkm_ID) {
 			//copy soon to be deleted dup bookmark data to master record bookmark  by concat notes and pwd_reminder, max of ratings and copy zotero if non existant
-			$master_bkm_ID = $dup_delete_bkm_ID_to_master_bmk_id[$delete_dup_bkm_ID];
-			$master_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$master_bkm_ID));
-			$delete_dup_pers_record = mysql_fetch_assoc(mysql_query('select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID));
+			$master_bkm_ID = @$dup_delete_bkm_ID_to_master_bkm_id[$delete_dup_bkm_ID];
+            $res1 = mysql_query('select * from usrBookmarks where bkm_ID='.$master_bkm_ID);
+            $res2 = mysql_query('select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID);
+            if(!($res1 && $res2)) continue;
+			$master_pers_record = mysql_fetch_assoc($res1);
+			$delete_dup_pers_record = mysql_fetch_assoc($res2);
 			//        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
 			$master_pers_record['bkm_PwdReminder'] .= "; ". $delete_dup_pers_record['bkm_PwdReminder'];
 			$master_pers_record['bkm_Rating'] = max($master_pers_record['bkm_Rating'],$delete_dup_pers_record['bkm_Rating']);

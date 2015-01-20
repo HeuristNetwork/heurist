@@ -60,16 +60,26 @@
 
 var recIDs, rtyID, dtyID, sValue, rValue, sFileID, rFileID, sWkt, rWkt;
 var scopeSelect,fieldSelect,fieldScopeCB,inputDiv,statusDiv;
-var resultSetIDs, selectedResultSetIDs, allSelectedIDs, recCnt , rtyIDs = [];
+var resultSetIDs, selectedResultSetIDs, allSelectedIDs, resultSetTypes, recCnt , rtyIDs = [];
 var hBase = window.location.protocol + "//" + window.location.host +
 			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 
 function init () {
   top.HEURIST.edit.calendarViewer = calendarViewer;
-  resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs;
-  selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
-  allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
+  
+  if(top.HEURIST.search){
+    resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs; //all records
+    selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get(); //selected in zero level
+    allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get(); //slected from all levels
+    resultSetTypes = top.HEURIST.search.results.infoByDepth[0].rectypes;
+  }else{ // fake for H4
+    resultSetIDs = top.HEURIST.search4.recids_all;
+    selectedResultSetIDs = top.HEURIST.search4.recids_sel;
+    allSelectedIDs = top.HEURIST.search4.recids_sel;
+    resultSetTypes = top.HEURIST.search4.rectypes;
+  }  
+  
   inputDiv = document.getElementById("inputDiv");
   statusDiv = document.getElementById("statusDiv");
   fieldScopeCB = document.getElementById("fieldscope");
@@ -96,14 +106,36 @@ function fillScope(){
     }
   }
 //find all types for result and add option for each with counts.
-  for (var rty in top.HEURIST.search.results.infoByDepth[0].rectypes){
-    rtyIDs.push(rty);
-    opt = new Option("All "+top.HEURIST.rectypes.pluralNames[rty]+" N = "+top.HEURIST.rectypes.usageCount[rty],rty);
-    scopeSelect.appendChild(opt);
+  if(top.HEURIST.util.isArray(resultSetTypes)){
+      for (var rty in resultSetTypes){
+        if(rty>=0){
+            rty = resultSetTypes[rty];
+            rtyIDs.push(rty);
+            opt = new Option("All "+top.HEURIST.rectypes.pluralNames[rty]+" N = "+top.HEURIST.rectypes.usageCount[rty],rty);
+            scopeSelect.appendChild(opt);
+        }
+      }
+  }else{
+    for (var rty in top.HEURIST.search.results.infoByDepth[0].rectypes){
+        rtyIDs.push(rty);
+        opt = new Option("All "+top.HEURIST.rectypes.pluralNames[rty]+" N = "+top.HEURIST.rectypes.usageCount[rty],rty);
+        scopeSelect.appendChild(opt);
+    }
   }
 // add onchange handler to fill fieldSelect
   scopeSelect.onchange = fillFields;
 }
+
+function getRecType(recID){
+     if(top.HEURIST.search){
+        return top.HEURIST.search.results.recSet[recID].record[4];
+     }else{ 
+        var record = top.HAPI4.currentRecordset.getById(recID) ;
+        return top.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
+     }
+}
+
+
 
 function fillFields(){
   var dtys = {}, dtyNames = [],dtyNameToID = {};
@@ -119,7 +151,7 @@ function fillFields(){
       rtyIDs = [];
       for(i in resultSetIDs){
         recID = resultSetIDs[i];
-        rty = top.HEURIST.search.results.recSet[recID].record[4];
+        rty = getRecType(recID);
         if (!rtys[rty]){
           rtys[rty] = 1;
           rtyIDs.push(rty);
@@ -131,7 +163,7 @@ function fillFields(){
       rtyIDs = [];
       for(i in selectedResultSetIDs){
         recID = selectedResultSetIDs[i];
-        rty = top.HEURIST.search.results.recSet[recID].record[4];
+        rty = getRecType(recID);
         if (!rtys[rty]){
           rtys[rty] = 1;
           rtyIDs.push(rty);
@@ -143,7 +175,7 @@ function fillFields(){
       rtyIDs = [];
       for(i in allSelectedIDs){
         recID = allSelectedIDs[i];
-        rty = top.HEURIST.search.results.recSet[recID].record[4];
+        rty = getRecType(recID);
         if (!rtys[rty]){
           rtys[rty] = 1;
           rtyIDs.push(rty);
@@ -219,7 +251,7 @@ function cbRemove(results){
     html += "<p style=\"color: red;\">"+results.problem+"</p>";
   }
   if (results.count && (results.count.rtyRecs || results.count.passed)){
-    if (results.count.processed > 0) {
+    if (results.count.processed > 0 && top.HEURIST.search) {
       html += '<br><input type=\"button\" value=\"Requery\"'+
               ' title=\"Click to force re-query in order to show updated results\"'+
               ' onclick="top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);">';
@@ -236,7 +268,7 @@ function cbRemove(results){
     }
     if (results.count.processed > 0) {
       html += "<li><strong> Records processed ..... "+results.count.processed+"</strong>"+
-              "...<a target=_new title=\" View Delete results -tagged "+ results.deleted.tagResults +"\""+
+              "...<a target=_new title=\" View Delete results "+ "\""+  //-tagged results.deleted.tagResults +
               " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.deleted.queryString)+"\">view processed records</a></li>";
     }
     if (results.count.noMatch > 0) {
@@ -311,7 +343,13 @@ function removeFieldValues() {
   _data.dtyName = fieldSelect.options[fieldSelect.selectedIndex].label;
   if (rtyID) _data.rtyID = rtyID;
   statusDiv.innerHTML = "<div id=\"loading\"/>";
-  top.HEURIST.search.executeAction( "delete_detail", _data, cbRemove);
+  
+  if(top.HEURIST.search){
+    top.HEURIST.search.executeAction( "delete_detail", _data, cbRemove );
+  }else{
+    top.HEURIST.search4.executeAction( "delete_detail", _data, cbRemove );
+  }
+  
 //alert("the search value is "+ sValue +  "\r\n search fileID = " + sFileID  + " search wkt = " + sWkt);
 
 }

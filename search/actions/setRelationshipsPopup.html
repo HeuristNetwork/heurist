@@ -80,7 +80,13 @@ function init () {
 	var relTypeSelectDiv = document.getElementById("relationship-type-div");
 	relTargetInput = document.getElementById("related-record");
 
-	recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().get().length;
+    if(top.HEURIST.search){
+	    recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().get().length;
+    }
+    //if(!top.HEURIST.rectypes){
+    //    top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php?db="+database);    // core HEURIST object definitions (dynamically generated)
+    //}
+    
 	var reltypDT = top.HEURIST.magicNumbers['DT_RELATION_TYPE'];
 	var relRT = top.HEURIST.magicNumbers['RT_RELATION'];
 	var relTypeTerms = top.HEURIST.rectypes.typedefs[relRT].dtFields[reltypDT][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree']];
@@ -118,10 +124,17 @@ function selectRelRecord() {
 }
 
 function save () {	// xhrFormSubmit only uses the form's action and elements(name & value) properties
+
+    if(top.HEURIST.search){
+        recIDs_list = top.HEURIST.search.getSelectedRecIDs().get().join(",");
+    }else{
+        recIDs_list = document.getElementById("record-selected").innerHTML;
+    }
+
 	var fakeForm = {
 		action: top.HEURIST.basePath + "records/relationships/saveRelationships.php?db=" + database,
 		elements: [
-			{ name: "recID", value: top.HEURIST.search.getSelectedRecIDs().get().join(",") },
+			{ name: "recID", value: recIDs_list },
 			{ name: "save-mode", value: "new" },
 			{ name: "RelTermID", value: relTypeSelect.value },
 			{ name: "RelatedRecID", value: relTargetID }
@@ -161,6 +174,7 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
 
   </script>
 
+   <div id="record-selected" style="display:none"></div>
    <p><span id="record-count"></span> selected records</p>
 
    <div id="relationship-type-div">Relationship type:

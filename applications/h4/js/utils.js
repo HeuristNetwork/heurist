@@ -973,7 +973,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                         
                         var onloadCallback = options['onpopupload'];
                         if(onloadCallback){
-                                onloadCallback.apply(opener, $dosframe[0]);
+                                onloadCallback.call(opener, $dosframe[0]);
                         }
                         
                         $dlg.css('background','none');

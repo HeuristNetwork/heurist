@@ -70,7 +70,9 @@ $.widget( "heurist.resultListMenu", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
                 
-                    if(data) that._query_request = data;  //keep current query request 
+                    if(data) {
+                        that._query_request = jQuery.extend({}, data); //keep current query request 
+                    }
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
@@ -221,11 +223,7 @@ $.widget( "heurist.resultListMenu", {
                 Hul.showDialog(url, { callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
-                            
-                                that._query_request.q = res;
-                                that._query_request.source = that.element.attr('id');
-                                
-                                top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                                that.reloadSearch(res);
                         }
                     }});
               
@@ -256,7 +254,15 @@ $.widget( "heurist.resultListMenu", {
               
           }else if(action == "menu-selected-select-show"){  //show selection as separate search
 
-                this.selectShow();                
+                this.selectShow();   
+                
+          }else if(action == "menu-selected-relateto"){  //show add relation dialog
+
+                this.addRelationshipsPopup();   
+
+          }else if(action == "menu-selected-merge"){  //show add relation dialog
+
+                this.fixDuplicatesPopup();   
               
           }else if(action == "menu-selected-tag"){                  
               
@@ -370,8 +376,7 @@ $.widget( "heurist.resultListMenu", {
                     }else if(context.ok){
                         
                         Hul.showMsgFlash(context.ok);
-                        that._query_request.source = that.element.attr('id');
-                        top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                        that.reloadSearch();
                         
                         /*Hul.showMsgDlg(context.ok+
                         "<br><br>Information changes will be visible on re-run the current search."+
@@ -386,11 +391,12 @@ $.widget( "heurist.resultListMenu", {
             }
                                                              //encodeURIComponent(JSON.stringify(_data))
             var str = JSON.stringify(_data);
-            var url = top.HAPI4.basePathOld + "search/actions/actionHandler.php";   //h3 action handler
-            var request = {db:top.HAPI4.database, data: str, action: action }
+            var baseurl = top.HAPI4.basePathOld + "search/actions/actionHandler.php";   //h3 action handler
             
+            /* it can not prase reponse properly
+            var request = {db:top.HAPI4.database, data: str, action: action }
             $.ajax({
-                url: url,
+                url: baseurl,
                 type: "POST",
                 data: request,
                 dataType: "json",
@@ -400,8 +406,25 @@ $.widget( "heurist.resultListMenu", {
                     _requestCallBack();
                 },
                 success: (typeof cbAction == "function" ? cbAction : _requestCallBack)
-            });
+            });*/
             
+            
+            var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
+            var params = "db="+top.HAPI4.database+"&action="+action+"&data=" + encodeURIComponent(str);
+            top.HEURIST.util.getJsonData(baseurl, callback, params);
+            
+            
+    },
+    
+    reloadSearch: function(query){
+
+            if(!Hul.isempty(query)){
+                this._query_request.q = query;
+            }
+                                
+            this._query_request.id = null;
+            this._query_request.source = this.element.attr('id');
+            top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
     },
 
     getSelectionIds: function(msg){
@@ -700,9 +723,7 @@ $.widget( "heurist.resultListMenu", {
                 window.open(url, "_blank");
             }else{
                 this._query_request.w = 'all';
-                this._query_request.q =  'ids:'+this._collection.join(",");
-                this._query_request.source = this.element.attr('id');
-                top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+                that.reloadSearch('ids:'+this._collection.join(","));                                
             }
         }
         
@@ -755,17 +776,17 @@ $.widget( "heurist.resultListMenu", {
         
         var that = this;        
         var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
-
+        
         Hul.showDialog(url, { 
                     onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
                             var ele = frame.contentDocument.getElementById("ids");
+                            if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
                             ele.value = recIDs_list.join(",");
                             frame.contentDocument.forms[0].submit();
                         },
                     callback: function(context) {
-                            if (context==="reload") { //something was deleted
-                                 that._query_request.source = that.element.attr('id');
-                                 top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                            if (context==="reload") { //something was deleted - refresh
+                                that.reloadSearch();                                
                             }
                         }
             });
@@ -783,69 +804,143 @@ $.widget( "heurist.resultListMenu", {
     },
         
     
+//-------------------------------------- RELATION, MERGE -------------------------------    
+    
+    addRelationshipsPopup: function(){
+        
+        var recIDs_list = this.getSelectionIds("Select at least one record to add relationships");
+        if(Hul.isempty(recIDs_list)) return;
+
+        var that = this;        
+        
+        if(!top.HEURIST.rectypes){
+            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addRelationshipsPopup(); } );
+            return
+        }
+        
+        var url = top.HAPI4.basePathOld + "search/actions/setRelationshipsPopup.html?db=" + top.HAPI4.database;
+        
+        Hul.showDialog(url, { 
+                    onpopupload: function(frame){
+                            var ele = frame.contentDocument.getElementById("record-count");
+                            if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
+                            
+                            ele.innerHTML = recIDs_list.length;
+                            ele = frame.contentDocument.getElementById("record-selected");
+                            ele.innerHTML = recIDs_list.join(",");
+                        },
+                    callback: function(context) {
+                              that.reloadSearch();                                
+                        }
+            });
+        
+    },
+    
+    fixDuplicatesPopup: function(){
+        
+        
+        var recIDs_list = this.getSelectionIds(null);
+        if(Hul.isempty(recIDs_list) || recIDs_list.length<2){
+            Hul.showMsgDlg("Select at least two records to identify/merge duplicate records");
+            return;
+        }
+
+        var that = this;        
+        var url = top.HAPI4.basePathOld + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + top.HAPI4.database;
+        
+        Hul.showDialog(url, { 
+                    callback: function(context) {
+                              that.reloadSearch();                                
+                        }
+            });
+        
+    },
+
+    
 //-------------------------------------- ADD, REPALCE, DELETE FIELD VALUES -------------------------------    
 
     addDetailPopup: function() {
- /*       
-        var recIDs_list = this.getSelectionIds();
-        if(Hul.isempty(recIDs_list)){
-            recIDs_list
-        }
-        if(Hul.isempty(recIDs_list)) return;
-
-        var url = top.HAPI4.basePathOld+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database ;
-
-        //fake 
-  resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs;
-  selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get();
-  allSelectedIDs = top.HEURIST.search.getSelectedRecIDs().get();
-  top.HEURIST.search.results.infoByDepth[0].rectypes
-  
-  top.HEURIST.search.results.recSet[recID].record[4]  //rectype id
-  top.HEURIST.search.executeQuery
-  top.HEURIST.search.executeAction( "add_detail", _data, cbSave )
-
         
-        Hul.showDialog(url);
-
-        
-        var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
-        if (recIDs_list.length == 0) {
-            recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
-        }
-        if (recIDs_list.length == 0) {
-            alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+        var recIDs_all = top.HAPI4.getSelection("all", true);
+        if (Hul.isempty(recIDs_all)) {
+            Hul.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
             return;
         }
-        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/addDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
-*/        
+        var recIDs_sel = this.getSelectionIds();
+        
+        var that = this;   
+        
+        if(!top.HEURIST.rectypes){
+            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addDetailPopup(); } );
+            return
+        }
+             
+        var url = top.HAPI4.basePathOld+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database ;
+
+        //substitutes
+        top.HEURIST.search4 = {};
+        top.HEURIST.search4.recids_all = recIDs_all;
+        top.HEURIST.search4.recids_sel = recIDs_sel;
+        top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
+        top.HEURIST.search4.executeAction = this.executeAction;
+        
+        Hul.showDialog(url);
     },
 
     replaceDetailPopup: function() {
-        /*var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
-        if (recIDs_list.length == 0) {
-            recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
-        }
-        if (recIDs_list.length == 0) {
-            alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+        
+        var recIDs_all = top.HAPI4.getSelection("all", true);
+        if (Hul.isempty(recIDs_all)) {
+            Hul.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
             return;
         }
-        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/replaceDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
-        */
+        var recIDs_sel = this.getSelectionIds();
+        
+        var that = this;   
+        
+        if(!top.HEURIST.rectypes){
+            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.replaceDetailPopup(); } );
+            return
+        }
+             
+        var url = top.HAPI4.basePathOld+ "search/actions/replaceDetailPopup.html?db=" + top.HAPI4.database ;
+
+        //substitutes
+        top.HEURIST.search4 = {};
+        top.HEURIST.search4.recids_all = recIDs_all;
+        top.HEURIST.search4.recids_sel = recIDs_sel;
+        top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
+        top.HEURIST.search4.executeAction = this.executeAction;
+        
+        Hul.showDialog(url);
     },
 
     deleteDetailPopup: function() {
-        /*
-        var recIDs_list = top.HEURIST.search.getSelectedRecIDs().get();
-        if (recIDs_list.length == 0) {
-            recIDs_list = top.HEURIST.search.results.infoByDepth[0].recIDs;
-        }
-        if (recIDs_list.length == 0) {
-            alert("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+        
+        var recIDs_all = top.HAPI4.getSelection("all", true);
+        if (Hul.isempty(recIDs_all)) {
+            Hul.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
             return;
         }
-        top.HEURIST.util.popupURL(window, top.HEURIST.basePath+ "search/actions/deleteDetailPopup.html" + (top.HEURIST.database && top.HEURIST.database.name ? "?db=" + top.HEURIST.database.name : ""));
-        */
+        var recIDs_sel = this.getSelectionIds();
+        
+        var that = this;   
+        
+        if(!top.HEURIST.rectypes){
+            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.deleteDetailPopup(); } );
+            return
+        }
+             
+        var url = top.HAPI4.basePathOld+ "search/actions/deleteDetailPopup.html?db=" + top.HAPI4.database ;
+
+        //substitutes
+        top.HEURIST.search4 = {};
+        top.HEURIST.search4.recids_all = recIDs_all;
+        top.HEURIST.search4.recids_sel = recIDs_sel;
+        top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
+        top.HEURIST.search4.executeAction = this.executeAction;
+        
+        Hul.showDialog(url);
     },
         
     

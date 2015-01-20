@@ -94,7 +94,6 @@
 
         <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
-        <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
         <script type="text/javascript" src="apps/search_faceted.js"></script>
@@ -105,8 +104,9 @@
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/svs_list.js"></script>
-        <!--
         <script type="text/javascript" src="apps/search/resultList.js"></script>
+        <!--
+        <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
          script type="text/javascript" src="apps/search.js"></script>
         <script type="text/javascript" src="apps/profile.js"></script>

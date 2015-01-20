@@ -135,7 +135,7 @@ print '<div><span id=errors>0</span> errors</div>';
 
 		if($recs_count>0){
 			$rtUsage = updateRecTypeUsageCount();
-			print '<script type="text/javascript">top.HEURIST.rectypes.usageCount = '.json_format($rtUsage).';if(top.HEURIST.search){top.HEURIST.search.createUsedRectypeSelector(true);};</script>'."\n";
+			print '<script type="text/javascript">if(top.HEURIST.rectypes)top.HEURIST.rectypes.usageCount = '.json_format($rtUsage).';if(top.HEURIST.search){top.HEURIST.search.createUsedRectypeSelector(true);};</script>'."\n";
 		}
 
 		//print '<p><b>' . $recs_count . '</b> records, <b>' . $rels_count . '</b> relationships and <b>' . $bkmk_count . '</b> associated bookmarks deleted</p>';
