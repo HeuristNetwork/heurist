@@ -30,8 +30,10 @@
         <link rel=stylesheet href="../../common/css/edit.css">
         <title>Select record ...</title>
         <style>
-            #search {height: 100px;left: 0;margin-bottom: 10px;position: relative;top: 0;}
-            #results {bottom: 26px;display: block;left: 0;overflow-y: auto;position: absolute;right: 0;top: 120px;}
+            /* sets position of the grey section relative to top of popup - alter in sync with position of top of results*/
+            #search {height: 120px;left: 0;margin-bottom: 10px;position: relative;top: 0;}
+            /* sets position of the list of results relative to top of popup */
+            #results {bottom: 26px;display: block;left: 0;overflow-y: auto;position: absolute;right: 0;top: 130px;}
             body.popup {padding: 0 !important; overflow: hidden;}
             .result_row {padding:1ex 10px 0 10px;}
             .result_row .id{width:10ex;display:inline-block;text-align: right;color:#999;}
@@ -39,7 +41,7 @@
             div.result_row:hover{cursor: pointer;}
         </style>
     </head>
-    <body class="popup" width="550">
+    <body class="popup" width="650">
         <script src="../../common/js/utilsLoad.js"></script>
         <script>
             if (window == top) { // core HEURIST object definitions (dynamically generated)
@@ -48,7 +50,7 @@
         </script>
 
         <form onSubmit="this.submit(); return false;">
-            <div style="margin-top: 10px; margin-left: 10px; margin-bottom: 10px;" >
+            <div style="margin-top: 0px; margin-left: 10px; margin-bottom: 0px;" >
             </div>
             <div id="search" class="banner" style="top:0;">
 
@@ -62,9 +64,9 @@
                                     style="padding: 1px 18px 1px 2px; margin: 6px; width: 100%;"></div>
                                 <div id="help-div" class="help prompt"
                                     style="width: 300px; margin-left: 20px; font-size: smaller;">
-                                    Enter search (partial match), hit [enter] or click
-                                    <img src="../../common/images/magglass_12x11.gif"
-                                        onClick="document.forms[0].submit()" style="vertical-align: middle;"></div>
+                                    Select below or search on title here.
+                                    [enter] or <img src="../../common/images/magglass_12x11.gif"
+                                        onClick="document.forms[0].submit()" style="vertical-align: middle;"> to search</div>
                             </div>
                         </td>
                         <td style="width: 1px; vertical-align: middle;">
@@ -81,7 +83,7 @@
                             in <select id="t" name="t" style="width: 90%;"
                             onChange="document.forms[0].submit('record-search-type')"></select>
                         </td>
-                        <td style="width: 80px; padding: 0 5px;">
+                        <td style="width: 80px; padding: 10 5px;">
                             <div class="radio" style="white-space:nowrap;">
                                 <label for=r-all>
                                     <input type=radio name=r id=r-all value=all
@@ -103,11 +105,12 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="5" rowspan="1" style="padding-top: 10px; padding-left: 30px;">
+                        <td colspan="5" rowspan="1" style="padding-top: 0px; padding-left: 30px;">
                             <b>or</b> &nbsp;&nbsp;&nbsp;
-                            <a href="#" title="Create and edit target record"
+                            <a href="#" style="border: 3px; border-style: outset; border-color: black;"
+                            title="Create and edit a new record, which will become the target of the pointer field"
                             onClick=" return addRecord();">
-                            <img src="../../common/images/add-record-small.png" style="border: 1px;"/>
+                            &nbsp;&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>
                             &nbsp;&nbsp;<b>Create a new record</b></a>
                             &nbsp;&nbsp;<i>Record becomes target of current pointer field</i>
                         </td>

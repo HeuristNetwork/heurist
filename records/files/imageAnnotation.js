@@ -13,7 +13,7 @@
 */
 
 /**
-* Toolbar to create/edit image markers  
+* Toolbar to create/edit image markers
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -25,7 +25,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
@@ -129,7 +129,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			lblInfo = document.createElement('label');
 			lblInfo.id = 'lblInfoCoords';
 			lblInfo.style.color = '#ff0000';
-			lblInfo.innerHTML = "Image annotation feature is disabled. No appropriate record type found. Import from Core definitions or create new one";
+			lblInfo.innerHTML = "To enable image annotation, use Database>Import Structure to obtain Annotation record type (2-15) from H3ToolSupport database";
 			edittoolbar.appendChild(lblInfo);
 			image_digitizer_container.appendChild(edittoolbar);
 

@@ -144,7 +144,7 @@ function EditTerms() {
         }
     }
 
-    
+
     /**
     *	Fills the given treeview with the appropriate content
     */
@@ -318,7 +318,7 @@ function EditTerms() {
     function _onNodeClick(obj){
 
         var node = obj.node;
-        
+
         _parentNode = null;
 
         if(_currentNode !== node)
@@ -434,7 +434,7 @@ function EditTerms() {
             Dom.get('formMessage').style.display = "block";
         }
 
-        
+
         var ind = _tabView.get("activeIndex");
         var tv = (ind===0)?_termTree1:_termTree2;
         tv.onEventToggleHighlight(obj);
@@ -504,7 +504,7 @@ function EditTerms() {
             Dom.get('formInverse').style.display = "block";
             //clear search result - since some terms may be removed/renamed
             Dom.get('resSearchInverse').innerHTML = "";
-            
+
         }else{
             Dom.get('btnInverseSetClear').value = 'set';
             Dom.get('edInverseTerm').value = "";
@@ -543,10 +543,10 @@ function EditTerms() {
     function _doTermMerge(retain_nodeid, nodeid){
 
         var _dialogbox;
-        
+
         var _updateResult = function(context){
                 if(!Hul.isnull(context) && !context.error){
-        
+
                         top.HEURIST.terms = context.terms;
 
                         /*_isSomethingChanged = true;
@@ -562,13 +562,13 @@ function EditTerms() {
         };
 
         var _updateOnServer = function(){
-            
+
                         var trmLabel = $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
-                        
+
                         var retain_nodeid = $(top.document).find('#lblRetainId').html();
                         var nodeid = $(top.document).find('#lblMergeId').html();
 
-                        
+
                         if(Hul.isempty(trmLabel)){
                             alert('Term label can not be empty');
                             return;
@@ -584,26 +584,26 @@ function EditTerms() {
                         $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
 
                         var str = YAHOO.lang.JSON.stringify(oTerms);
-                        
+
                         //alert(str);
-                        
+
                         var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
                         var callback = _updateResult;
                         var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
                         Hul.getJsonData(baseurl, callback, params);
-                        
-            
+
+
             if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
             _dialogbox = null;
         };
 
-        
+
         var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
                              fi = top.HEURIST.terms.fieldNamesToIndex;
 
         var arTerm = termsByDomainLookup[nodeid];
         $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['+arTerm[fi.trm_ConceptID]+']');
-        
+
         if(Hul.isempty(arTerm[fi.trm_Label])){
             $('#mergeLabel2').hide();
         }else{
@@ -625,11 +625,11 @@ function EditTerms() {
             $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
             $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
         }
-        
+
 
         var arTerm2 = termsByDomainLookup[retain_nodeid];
         $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['+arTerm2[fi.trm_ConceptID]+']');
-        
+
         if(Hul.isempty(arTerm2[fi.trm_Label])){
             $('#mergeLabel2').hide();
             $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
@@ -654,17 +654,17 @@ function EditTerms() {
             $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
             $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
         }
-        
+
         $('#lblRetainId').html(retain_nodeid);
         $('#lblMergeId').html(nodeid);
-        
+
         //fill elements of con
         var ele = document.getElementById('divTermMergeConfirm');
-        
+
         $("#btnMergeCancel").click(function(){if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);});
         $("#btnMergeOK").click( _updateOnServer );
 
-        
+
         //show confirmation dialog
         _dialogbox = Hul.popupElement(top, ele,
             {
@@ -674,11 +674,11 @@ function EditTerms() {
                 height: 300,
                 width: 400
         });
-        
-        
+
+
     }
-    
-    
+
+
     /**
     * Saves the term on server side
     */
@@ -726,7 +726,7 @@ function EditTerms() {
                 return;
             }
             if(_currTreeView === _termTree2 && Dom.get('cbInverseTermOther').checked && iInverseId==null){
-                alert("Find inverse term");
+                alert("Please find inverse term, or select non-directional in the radio buttons");
                 Dom.get('edInverseTermId').setFocus();
                 return;
             }
@@ -745,7 +745,7 @@ function EditTerms() {
             if(noValidation || _validateDups(_currentNode, sName, sCode)){
 
                 var needReload = (_currentNode.data.parent_id != iParentId || _currentNode.data.inverseid != iInverseId);
-                
+
                 _currentNode.label = sName;
                 _currentNode.data.description = sDesc;
                 _currentNode.data.termcode = sCode;
@@ -785,7 +785,7 @@ function EditTerms() {
         }
         return true;
     }
-    
+
     function _getNextSiblingId(node){
         var sibs = node.getSiblings();
         if(sibs!=null){
@@ -828,7 +828,7 @@ function EditTerms() {
         */
 
 
-        var needReload = _needReload;                 
+        var needReload = _needReload;
 
         var oTerms = {terms:{
             colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
@@ -887,9 +887,9 @@ function EditTerms() {
                                             node2.data.inverseid = node.data.id;
                                     }
                                 }*/
-                                
-                                
-                                
+
+
+
                                 //update ID field
                                 if(_currentNode ===  node){
                                     Dom.get('edId').value = item;
@@ -927,7 +927,7 @@ function EditTerms() {
             Hul.getJsonData(baseurl, callback, params);
         }
     }
-    
+
 
     /**
     * new of existing node
@@ -965,9 +965,9 @@ function EditTerms() {
                 Dom.get('formEditor').style.display = "none";
 
                 function __updateAfterDelete(context) {
-                    
+
                     if(!Hul.isnull(context) && !context['error']){
-                            
+
                             top.HEURIST.terms = context.terms;
                             //remove from tree
                             _currTreeView.popNode(_currentNode);
@@ -1004,12 +1004,12 @@ function EditTerms() {
 
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
         var nodeid = _currentNode.data.id;
-        
+
         //_keepCurrentParent = _getNextSiblingId(_currentNode);
-        //if(_keepCurrentParent==null) 
+        //if(_keepCurrentParent==null)
         _keepCurrentParent = _currentNode.data.parent_id;
-        
-        
+
+
         var url = top.HEURIST.basePath +
             "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
@@ -1030,10 +1030,10 @@ function EditTerms() {
                             Dom.get('edParentId').value = newparent_id;
                         }
                         _doSave(false, true);
-                        
+
                         keep_target_newparent_id = newparent_id;
-                        
-                        /*//reselct the edited node 
+
+                        /*//reselct the edited node
                         var node = _findNodeById(nodeid, true);
                         if(!Hul.isnull(node)){
                             _onNodeClick(node);
@@ -1046,22 +1046,22 @@ function EditTerms() {
 
 
     }
-    
+
     /**
     * Open popup and select term to be merged
     */
     function _mergeTerms(){
-        
+
         if(_currentNode===null) return;
 
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
         var retain_nodeid = _currentNode.data.id;
-        
+
         //_keepCurrentParent = _getNextSiblingId(_currentNode);
-        //if(_keepCurrentParent==null) 
+        //if(_keepCurrentParent==null)
         _keepCurrentParent = _currentNode.data.parent_id;
-        
-        
+
+
         var url = top.HEURIST.basePath +
             "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
@@ -1077,16 +1077,16 @@ function EditTerms() {
                 width: 450,
                 callback: function(merge_nodeid) {
                     if(merge_nodeid && merge_nodeid !== "root") {
-                        
+
                         _doTermMerge(retain_nodeid, merge_nodeid);
-                        
+
                         return true;
                     }
                 }
         });
-        
+
     }
-    
+
 
     /**
     * Adds new child term for current term or adds new root term
@@ -1467,9 +1467,9 @@ function EditTerms() {
     //
     var that = {
 
-        doSave: function(){ 
+        doSave: function(){
             _keepCurrentParent = null;
-            _doSave(false, false); 
+            _doSave(false, false);
         },
         doDelete: function(){ _doDelete(true); },
         doAddChild: function(isRoot){ _doAddChild(isRoot); },
