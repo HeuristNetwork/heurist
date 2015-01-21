@@ -58,10 +58,11 @@
 
 // *** DO NOT CHANGE VERSION NUMBER ***
 
-$version = "3.4.0"; // sets current program version number, determined by Heurist development lead
+$version = "3.5.0"; // sets current program version number, determined by Heurist development lead
                     // 3.2.0 alpha 8th July 2014, beta 21st July 2014
                     // 3.3.0 beta 11th Nov 2014
                     // 3.3.0 27th Nov 2014 / 3.4.0-beta
+                    // 3.4.0 22nd Jan 2015
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
