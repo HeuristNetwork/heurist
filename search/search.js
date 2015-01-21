@@ -44,17 +44,17 @@ String.prototype.htmlEscape = function() {
 var _TAB_RECORDVIEW = 0,
 	_TAB_MAP = 1,
 	_TAB_SMARTY = 2,
-    _TAB_DIAGRAM = 3,
-    _TAB_TRANSFORM = 4,
+    _TAB_TRANSFORM = 3,
+    _TAB_DIAGRAM = 4,
 	_tabView = null;
 
 var appnameToTabIDMap = {'record':0,'Record':0,'record view':0,'Record View':0,
 						'map':1,'Map':1,'map view':1,'Map View':1,
 						'report':2,'Report':2,'report view':2,'Report View':2,
-                        'diagram':3,'Diagram':3,'diagram view':3,'Diagram View':3, 
-						'transform':4,'Transform':4,'transform view':4,'Transform View':4};
+						'transform':3,'Transform':3,'transform view':3,'Transform View':3}
+                        //'diagram':4,'Diagram':4,'diagram view':4,'Diagram View':4} 
 
-var tabIDToAppnameMap = ['record','map','report','diagram','transform'];
+var tabIDToAppnameMap = ['record','map','report','transform'];//,'diagram'];
 
 var appInterface = {};
 
@@ -119,7 +119,7 @@ top.HEURIST.search = {
 				top.HEURIST.search.updateRssFeedLink();
 				top.HEURIST.search.updateRecordView();
 				top.HEURIST.search.updateMapOrSmarty();
-                top.HEURIST.search.updateDiagramView();
+                //art top.HEURIST.search.updateDiagramView();
 			});
 		}
 //			top.HEURIST.registerEvent(window, "load", top.HEURIST.search.clearRelatesRows);
@@ -615,7 +615,7 @@ top.HEURIST.search = {
 		window.heuristListeners["heurist-related-recordset-loaded"] = [];
         console.log("HEURIST_RELATED_RECORDSET_LOADED");
 		top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.applyFilterAndLayout);
-        top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.updateDiagramView);
+        //art top.HEURIST.registerEvent(window, "heurist-related-recordset-loaded", top.HEURIST.search.updateDiagramView);
 
 		top.HEURIST.util.getJsonData(URL,
 				function(related) {	// callback function to process related record results into HEURIST search results
@@ -1001,7 +1001,7 @@ top.HEURIST.search = {
 			top.HEURIST.search.filterRelated(level);
 		}
 		top.HEURIST.search.updateMapRelated();
-        top.HEURIST.search.updateDiagramView();
+        //art top.HEURIST.search.updateDiagramView();
 	},
 
     getLink_toggleOff_loadRelatedRecords: function(level){
@@ -1736,7 +1736,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.filterRelated(0);
 		top.HEURIST.search.updateRecordView();
 		top.HEURIST.search.updateMapRelated();
-        top.HEURIST.search.updateDiagramView();
+        //art top.HEURIST.search.updateDiagramView();
 
 		top.HEURIST.registerEvent(window, "load", function() {top.HEURIST.search.trimAllLinkTexts(0);});
 		top.HEURIST.registerEvent(window, "load", function() {
@@ -2689,7 +2689,7 @@ top.HEURIST.search = {
 		top.HEURIST.search.setSelectedCount();
 		top.HEURIST.search.updateRecordView(recID);
 		top.HEURIST.search.updateMapOrSmarty();
-        top.HEURIST.search.updateDiagramView(recID);
+        //art top.HEURIST.search.updateDiagramView(recID);
 
 		return false;
 
@@ -3446,7 +3446,7 @@ top.HEURIST.search = {
 	},
     
     // JJ
-    // Updates the diagram view
+    // Updates the diagram view   - NOT USED since this tab is disabled
     //
     updateDiagramView: function(recID) {
         console.log("updateDiagramView() called!");
@@ -3771,7 +3771,7 @@ top.HEURIST.search = {
 		if(fireEvent){
 			top.HEURIST.search.updateMapOrSmarty();
 		}
-        top.HEURIST.search.updateDiagramView();
+        //art top.HEURIST.search.updateDiagramView();
 
 		return;
 	},
