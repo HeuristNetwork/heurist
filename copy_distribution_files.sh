@@ -1,4 +1,7 @@
 #! /bin/sh
+set -e
+set -u
+set -o pipefail
 
 # copy_distribution_files.sh: Creates a distribution package in h3-build from a Heurist working directory
 
@@ -41,7 +44,7 @@ echo "Heurist Vsn 3 distribution builder - run from /var/www/html/HEURIST/h3-xx 
 # and files in the subdirectory of this directory specified by the parameter
 
 # no effect if already exists
-mkdir /var/www/html/HEURIST/h3-build
+mkdir -p /var/www/html/HEURIST/h3-build
 
 echo
 echo removing existing h3-build/$1
@@ -50,7 +53,7 @@ rm -rf /var/www/html/HEURIST/h3-build/$1
 echo
 echo copying files to /var/www/html/HEURIST/h3-build/$1
 
-mkdir /var/www/html/HEURIST/h3-build/$1
+mkdir -p /var/www/html/HEURIST/h3-build/$1
 
 # Copy all the files in the root of h3-xx
 cp -r *.* /var/www/html/HEURIST/h3-build/$1
@@ -105,7 +108,7 @@ echo ---------------------------------------------------------------------------
 echo
 echo "Now complete distribution (if code ready) with:"
 echo
-echo "    cp /var/www/html/HEURIST/h3-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION"
+echo "    sudo cp /var/www/html/HEURIST/h3-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION"
 echo
 echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
 echo and the installation is dependant on the filename parameter to find this folder

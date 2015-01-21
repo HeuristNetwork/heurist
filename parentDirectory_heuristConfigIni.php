@@ -12,7 +12,7 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Tom Murtagh, Kim Jackson, Stephen White
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
+* @version     3.4
 */
 
 /*
@@ -77,10 +77,10 @@ if (!@$dbHost) $dbHost= ""; //optional, blank = localhost ie. datsbase on same s
 
 if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
 
-// The URL to the default root file path defined above. Can be rrelative to root web address or absolute
+// The URL to the default root file path defined above. Can be relative to root web address or absolute
 // eg. http://heurist.sydney.edu.au/HEURIST/HEURIST_FILESTORE/
 
-if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "http://?????????/HEURIST/HEURIST_FILESTORE/"; //REQUIRED
+if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "/HEURIST/HEURIST_FILESTORE/"; //REQUIRED
 
 // [email]
 
