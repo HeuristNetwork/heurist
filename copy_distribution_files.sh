@@ -100,6 +100,7 @@ tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ exemplars/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
+# specific to sydney.heurist.edu.au server
 chown -R apache:apache /var/www/html/HEURIST/DISTRIBUTION
 
 echo
