@@ -52,7 +52,9 @@ $.widget( "heurist.ruleBuilder", {
         this.element.addClass('rulebuilder');
 
         //create list/combobox of source record types
-        var cont = $('<div>').css({'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'220px'}).appendTo(this.element);
+        var cont = $('<div>')
+            .css({'padding-top':(this.options.level==1?'1.2em':0),
+                'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'220px'}).appendTo(this.element);
 
         this.select_source_rectype = $( "<select>" )
         .attr('title', 'The starting point entity type for this rule. The result set will be expanded by following pointers/relationships from/to this type' )
@@ -91,11 +93,13 @@ $.widget( "heurist.ruleBuilder", {
 
         this.btn_delete = $( "<button>", {text:'Delete'})
         .attr('title', 'Delete this step in the rule' )
+        .css('font-size','0.8em')
         .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
         
         if(this.options.level<3)
             this.btn_add_next_level = $( "<button>", {text:'Add Next'} )
             .attr('title', 'Adds another step to this rule' )
+            .css('font-size','0.8em')
             .button().appendTo(this.div_btn);
 
 

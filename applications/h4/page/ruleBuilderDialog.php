@@ -91,7 +91,7 @@
 
             <div style="position:absolute;width:99%;top:2em;bottom:4em;overflow-y:auto" id="level1">
             
-                <div id="div_add_level"><button id="btn_add_level1">Add New Rule</button></div>
+                <div id="div_add_level" style="padding-top:1em;"><button id="btn_add_level1">Add New Rule</button></div>
             </div>
             
 

@@ -151,7 +151,7 @@ function hSvsEdit(args) {
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
                 
-                Hul.showDialog(url, { width:1200, callback: 
+                Hul.showDialog(url, { width:1200, height:600, callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
                             if(res.mode == 'apply'){ //NOT USED ANYMORE //&& that._query_request){

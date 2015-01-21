@@ -62,7 +62,7 @@ $.widget( "heurist.recordListExt", {
             {
                 that.option("recordset", null);
 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){     //@todo with incremental
 
                 that.option("recordset", data); //hRecordSet
                 that.loadanimation(false);

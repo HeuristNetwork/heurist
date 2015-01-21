@@ -161,7 +161,7 @@ regional['ru'] = {
 
     'Click to save current search':'Сохранить поиск как ссылку',
     'My Bookmarks': 'Мои закладки',
-    'All Records': 'Все записи',
+    'My Searches': 'Мои запросы',
     'Predefined searches': 'Рекомендуемые запросы',
     'Recent changes': 'Свежие записи',
     'All (date order)': 'Все (сорт по дате)',

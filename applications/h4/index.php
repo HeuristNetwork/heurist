@@ -91,6 +91,7 @@
         <script type="text/javascript" src="js/recordset.js"></script>
         <script type="text/javascript" src="js/hapi.js"></script>
         <script type="text/javascript" src="js/layout.js"></script>
+        <script type="text/javascript" src="apps/others/help_tips.js"></script>
 
         <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
@@ -232,6 +233,8 @@
                                             setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
                                         }
                                     }
+                                    
+                                    showTipOfTheDay(true);
                                     
                                 }else{
                                     top.HEURIST4.util.redirectToError(response.message);

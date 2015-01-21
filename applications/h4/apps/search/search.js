@@ -124,7 +124,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_as_guest )
         .addClass('ui-heurist-btn-header1')
         .button({icons: {
-            //primary: "ui-icon-search"
+            secondary: "ui-icon-search"
         }});
 
         this.div_search_as_user = $('<span>')
@@ -264,6 +264,9 @@ $.widget( "heurist.search", {
 
         this.search_assistant = null;
 
+//        .addClass('heurist-bookmark-search')
+//        .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
+        
 
         if(this.options.isrectype){
 
@@ -283,7 +286,10 @@ $.widget( "heurist.search", {
         });
 
         this._on( this.btn_search_as_guest, {
-            click: "_doSearch"
+            click: function(){
+                that.option("search_domain", "a");
+                that._doSearch();
+            }
         });
 
         this._on( this.input_search, {
@@ -840,8 +846,9 @@ $.widget( "heurist.search", {
         $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT+' '+top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES);
         
         // remove generated elements
-        this.btn_search_as_guest.remove();
-        this.btn_search_as_user.remove();
+        //this.btn_search_allonly.remove();  // bookamrks search off
+        this.btn_search_as_guest.remove(); // bookamrks search on
+        this.btn_search_as_user.remove();  // bookamrks search on
         this.btn_search_domain.remove();
         if(this.btn_search_assistant) this.btn_search_assistant.remove();
         this.search_assistant.remove();

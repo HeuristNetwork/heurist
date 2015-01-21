@@ -92,7 +92,7 @@ $.widget( "heurist.svs_list", {
         this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':0, 'right':0, 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
         this.helper_top = $( '<div>'+top.HR('right-click entries for actions')+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
-        if(!top.HAPI4.get_prefs('help_on')) this.helper_top.hide();
+        if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
         
         this.helper_btm = $( '<div>'
 +'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
@@ -100,7 +100,7 @@ $.widget( "heurist.svs_list", {
 +'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
 +'This is a search with addition of a Rule Set. The initial search is expanded to a larger set of records by following a set of rules specifying which pointers and relationships to follow.'
         +'</p></div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
-        if(!top.HAPI4.get_prefs('help_on')) this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+        if(top.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
 
         
         this.edit_dialog = null;
@@ -272,12 +272,14 @@ $.widget( "heurist.svs_list", {
         
         this.helper_btm.before(
             $('<div>')
+            .addClass('heurist-bookmark-search')
+            .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
             .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
             .append( this._defineContent('bookmark') ) );
             
         this.helper_btm.before(
             $('<div>')
-            .append( this._defineHeader(top.HR('All Records'), 'all'))
+            .append( this._defineHeader(top.HR('My Searches'), 'all'))
             .append( this._defineContent('all') ));
             
         var groups = top.HAPI4.currentUser.usr_GroupsList;
@@ -632,7 +634,7 @@ $.widget( "heurist.svs_list", {
         var treeData = {
             rules:{title: top.HR('Rule Sets'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'rules') },
             bookmark:{title: top.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'bookmark') },
-            all:{title: top.HR('All Records'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'all') }
+            all:{title: top.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'all') }
         };
         
         var groups = top.HAPI4.currentUser.usr_GroupsList;

@@ -28,6 +28,7 @@ $.widget( "heurist.mainMenu", {
     },
     
     _selectionRecordIDs:null,
+    _current_query_string:'',
 
     // the widget's constructor
     _create: function() {
@@ -110,10 +111,24 @@ $.widget( "heurist.mainMenu", {
         }
         
         
-        $(this.document).on(top.HAPI4.Event.ON_REC_SELECT, function(e, data) {
+        $(this.document).on(top.HAPI4.Event.ON_REC_SELECT + ' ' + top.HAPI4.Event.ON_REC_SELECTON_REC_SEARCHSTART, 
+            function(e, data) {
+                if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+                    if(data) {
+                        var query_request = data;   
+                        
+                        that._current_query_string = '&w='+query_request.w;
+                        if(!top.HEURIST4.util.isempty(query_request.q)){
+                            that._current_query_string = that._current_query_string 
+                                        + '&q=' + encodeURIComponent(query_request.q);
+                        }
+                    }
+                }else{
                    if(data) data = data.selection;
                    _selectionRecordIDs = top.HAPI4.getSelection(data, true);
-        });        
+                    
+                }
+            });        
         
         this._refresh();
 
@@ -154,7 +169,7 @@ $.widget( "heurist.mainMenu", {
     // custom, widget-pecific, cleanup.
     _destroy: function() {
         
-        $(this.document).off(top.HAPI4.Event.ON_REC_SELECT);
+        $(this.document).off(top.HAPI4.Event.ON_REC_SELECT + ' ' + top.HAPI4.Event.ON_REC_SELECTON_REC_SEARCHSTART);
         
         // remove generated elements
         this.btn_Admin.remove();
@@ -301,7 +316,12 @@ $.widget( "heurist.mainMenu", {
                             options.width=dim.w*0.8;
                         }
                         
-                        top.HEURIST4.util.showDialog(link.attr('href'), options);
+                        var url = link.attr('href');
+                        if (link.hasClass('currentquery')) {
+                            url = url + that._current_query_string
+                        }
+                        
+                        top.HEURIST4.util.showDialog(url, options);
                       
                         event.preventDefault();
                         return false;
@@ -333,7 +353,13 @@ $.widget( "heurist.mainMenu", {
           }else if(action == "menu-export-atom"){ 
                 this.exportFeed('atom'); p=true;
           }else if(action == "menu-help-inline"){ 
-                this._toggleHelp(); p=true;
+              
+                var ishelp_on = (top.HAPI4.get_prefs('help_on')=='1')?'0':'1';
+                top.HAPI4.currentUser['ugr_Preferences']['help_on'] = ishelp_on;
+              
+                this._toggleHelp(ishelp_on); p=true;
+          }else if(action == "menu-help-tipofday"){ 
+                showTipOfTheDay(false); p=true;
           }
           
           if( p ){
@@ -486,10 +512,12 @@ $.widget( "heurist.mainMenu", {
     
     
     /**
-    * Open Edit Preferences dialog
+    * Open Edit Preferences dialog (@todo? move into separate file?)
     */
     _editPreferences: function()
     {
+        var that = this;
+        
         var $dlg = $("#heurist-dialog").addClass('ui-heurist-bg-light');
         $dlg.empty();
 
@@ -573,13 +601,23 @@ $.widget( "heurist.mainMenu", {
                                 prefs['layout_theme'] != request['layout_theme'] ||
                                 prefs['layout_id'] != request['layout_id']);
 
+                            //check help toggler and bookmark search - show/hide
+                            if(prefs['help_on'] != request['help_on']){
+                                 that._toggleHelp(request['help_on']);
+                            }
+                            if(prefs['bookmarks_on'] != request['bookmarks_on']){
+                                 $('.heurist-bookmark-search').css('display',
+                                        (request['bookmarks_on']=='1')?'block':'none');
+                            }
+                                
+                                
                             top.HAPI4.currentUser['ugr_Preferences'] = request;
                             /*allFields.each(function(){
                             top.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
                             });*/
 
                             $dlg.dialog( "close" );
-
+                            
                             if(ask_reload){
                                 top.HEURIST4.util.showMsgDlg('Reload page to apply new settings?',
                                     function(){
@@ -615,19 +653,16 @@ $.widget( "heurist.mainMenu", {
 
     },
     
-    _toggleHelp: function(){
+    _toggleHelp: function(ishelp_on){
         
-        var ishelp = (top.HAPI4.get_prefs('help_on')=='1');
-        
-        if(ishelp){
-            $('.heurist-helper1').css('display','none');
-            $('.heurist-helper2').css('visibility','hiddden');
-        }else{
+        if(ishelp_on=='1'){
             $('.heurist-helper1').css('display','block');
             $('.heurist-helper2').css('visibility','visible');
+        }else{
+            $('.heurist-helper1').css('display','none');
+            $('.heurist-helper2').css('visibility','hiddden');
         }
         
-        top.HAPI4.currentUser['ugr_Preferences']['help_on'] = ishelp?'0':'1';
     }
     
 
