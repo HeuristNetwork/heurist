@@ -49,7 +49,7 @@ if (_is_logged_in()) {
 	}
 	// update cookie expiry time. Besides make sure thah php.ini session.gc_maxlifetime set to the similar value
 	if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive']) {
-		$rv = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', HEURIST_SERVER_NAME);
+		$rv = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/'); //, HEURIST_SERVER_NAME);
 	}
 //	if (((! defined('REPLACE_DBNAME'))  ||  strtoupper(REPLACE_DBNAME) != 'DISABLED')&& defined("HEURIST_DBNAME")) {
 //		$_SESSION['heurist_last_used_dbname'] = HEURIST_DBNAME ;
@@ -225,7 +225,7 @@ function startMySession(){
 		session_id($_COOKIE['heurist-sessionid']);
 	} else {
 		session_id(sha1(rand()));
-		setcookie('heurist-sessionid', session_id(), 0, '/', HEURIST_SERVER_NAME);
+		setcookie('heurist-sessionid', session_id(), 0, '/'); //, HEURIST_DOMAIN);
 	}
 
 	session_cache_limiter('none');

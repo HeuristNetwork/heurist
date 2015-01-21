@@ -481,7 +481,8 @@
                 //session_id(sha1(rand()));
                 session_start();
                 $session_id = session_id();
-                setcookie('heurist-sessionid', $session_id, 0, '/', HEURIST_SERVER_NAME);
+                
+                setcookie('heurist-sessionid', $session_id, 0, '/');//, HEURIST_SERVER_NAME);
             }
 
             /*
@@ -536,7 +537,7 @@
 
                 if (@$_SESSION[$this->dbname_full]['keepalive']) {
                     //update cookie - to keep it alive
-                    setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', HEURIST_SERVER_NAME);
+                    setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
                 }
        
             }
@@ -587,7 +588,7 @@
                             $time = time() + 7*24*60*60;
                             $_SESSION[$this->dbname_full]['keepalive'] = true;
                         }
-                        $cres = setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);
+                        $cres = setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_SERVER_NAME);
                         if(!$cres){
                             error_log("Cookie no SAVED");
                         }

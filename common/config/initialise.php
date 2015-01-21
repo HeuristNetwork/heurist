@@ -72,6 +72,7 @@
     */
 
     /*
+HEURIST_DOMAIN       - host (domain name) WITHOUT port
 HEURIST_SERVER_NAME  - host (domain name) with port  eg. heuristscholar.org:80
 HEURIST_SERVER_URL   - with protocol  http://heuristscholar.org
 HEURIST_CURRENT_URL  - current url
@@ -112,6 +113,10 @@ HEURIST_SCRATCHSPACE_DIR
 
     if (!$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
+        define('HEURIST_DOMAIN', $_SERVER["SERVER_NAME"]);
+    }else{
+        $k = strpos($serverName,":");
+        define('HEURIST_DOMAIN', ($k>0)?substr($serverName,0,$k-1):$serverName );
     }
 
     $isSecure = false;
@@ -127,6 +132,7 @@ HEURIST_SCRATCHSPACE_DIR
 //error_log("https=".@$_SERVER['HTTPS']."  HTTP_X_FORWARDED_PROTO=".@$_SERVER['HTTP_X_FORWARDED_PROTO']."  HTTP_X_FORWARDED_SSL=".@$_SERVER['HTTP_X_FORWARDED_SSL']);
 //error_log("protocol ".$REQUEST_PROTOCOL);
 
+    
     define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
     $serverBaseURL = $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME;
     define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port

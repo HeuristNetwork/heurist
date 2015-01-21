@@ -156,7 +156,7 @@ if(!$needRegistration){
                 $time = time() +  90*24*60*60; //remember for 90 days
                 $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive'] = true;
             }
-            setcookie('heurist-sessionid', session_id(), $time, '/', HEURIST_SERVER_NAME);
+            setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_DOMAIN);
 
             /* bookkeeping */
             mysql_connection_overwrite(USERS_DATABASE);
@@ -165,7 +165,7 @@ if(!$needRegistration){
 
             mysql_connection_select(USERS_DATABASE);
 
-            if ($last_uri){
+            if (@$last_uri){
                 header('Location: ' . $last_uri);
             }
 
@@ -239,6 +239,10 @@ if(!$needRegistration){
 <?php
 	echo "<input type=hidden name=last_uri value={$last_uri}>\n";
 
+    //echo "SESSION=".print_r(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'],true)."<br>";
+    //  var/log/apache2
+    //  var/www
+    
 	if (! is_logged_in() ) {
 ?>
 
@@ -267,7 +271,7 @@ if(@$_REQUEST['register']==1 && HEURIST_DBNAME=="H3Sandpit"){
 <?php
 }
 
-if ($LOGIN_ERROR){
+if (@$LOGIN_ERROR){
 echo '<tr class="input-row"><td colspan="2"><p style="margin-left: 100px; color: red;">'.$LOGIN_ERROR.'</p></td></tr>';
 }
 if($needRegistration){
