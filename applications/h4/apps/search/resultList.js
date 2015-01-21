@@ -1,9 +1,9 @@
 /**
-* Query result listing. 
-* 
+* Query result listing.
+*
 * NO Requires apps/rec_actions.js (must be preloaded)
 * Requires apps/search/resultListMenu.js (must be preloaded)
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2014 University of Sydney
@@ -32,16 +32,16 @@ $.widget( "heurist.resultList", {
         showmenu: true
         //searchsource: null,
     },
-    
+
 
     _query_request: null, //keep current query request
-    
+
     _events: null,
     _lastSelectedIndex: -1, //required for shift-click selection
     _count_of_divs: 0,
 
-    
-    
+
+
 
     // the constructor
     _create: function() {
@@ -49,7 +49,7 @@ $.widget( "heurist.resultList", {
         var that = this;
 
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
-        
+
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
@@ -94,7 +94,7 @@ $.widget( "heurist.resultList", {
         }})
         .hide();
 
-        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');        
+        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
         if(view_mode){
             this._applyViewMode(view_mode);
         }
@@ -109,8 +109,8 @@ $.widget( "heurist.resultList", {
                 return false;
             }
         });*/
-        
-        
+
+
         this.mode_selector = $( "<div>" )
         .css({'float':'right', 'padding-top': '0.5em'})
         .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
@@ -126,35 +126,35 @@ $.widget( "heurist.resultList", {
             //that._refresh();
         })
         .appendTo( this.div_toolbar );
-        
+
         $('#list_layout_list').button({icons: {primary: "icon-list"}, text:false});
         $('#list_layout_icons').button({icons: {primary: "icon-th"}, text:false});
         $('#list_layout_thumbs').button({icons: {primary: "icon-th-large"}, text:false});
 
-        
+
 
         //----------------------
-        
+
         this.span_info = $("<label>").appendTo(
             $( "<div>").css({'float':'right','min-width':'10em','padding':'5px 2em 0 0px'}).appendTo( this.div_toolbar ));
 
         //-----------------------
-        
-        
+
+
         if(this.options.showmenu){
             this.div_actions = $('<div>')
                 //.css({'position':'absolute','top':3,'left':2})
                 .resultListMenu()
                 .appendTo(this.div_toolbar);
         }
-        
-        
+
+
         //-----------------------     listener of global events
         this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
             this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
-                        + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART 
-                        + ' ' + top.HAPI4.Event.ON_REC_SELECT 
+                        + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
+                        + ' ' + top.HAPI4.Event.ON_REC_SELECT
                         + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
         }
 
@@ -171,21 +171,21 @@ $.widget( "heurist.resultList", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
                 that.loadanimation(false);
-                
-                if(that._query_request!=null &&  data.queryid()==that._query_request.id) {  
+
+                if(that._query_request!=null &&  data.queryid()==that._query_request.id) {
                     that._renderRecordsIncrementally(data); //hRecordSet
                 }
-                
+
                 //@todo show total number of records ???
-                
+
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 that.span_info.hide();
-                
+
                 if(data){
-                    
-                    if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') || 
+
+                    if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                         //new search from outside
                         var $header = $(".header"+that.element.attr('id'));
                         if($header.length>0){
@@ -196,25 +196,25 @@ $.widget( "heurist.resultList", {
 
                         that._clearAllRecordDivs();
                         that.loadanimation(true);
-                        
+
                         that._renderProgress();
-                        
+
                     }
-                    that._query_request = data;  //keep current query request 
-                    
+                    that._query_request = data;  //keep current query request
+
                 }else{ //fake restart
                         that._clearAllRecordDivs();
                         that.loadanimation(true);
                 }
-                
+
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
-                
+
                    that.span_info.show();
-                
+
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
-                
+
                 //this selection is triggered by some other app - we have to redraw selection
-                if(data && data.source!=that.element.attr('id')) { 
+                if(data && data.source!=that.element.attr('id')) {
                       that.setSelected(data.selection);
                 }
             }
@@ -229,10 +229,10 @@ $.widget( "heurist.resultList", {
         }
         */
 
-        
 
-        
-        
+
+
+
         this._refresh();
 
     }, //end _create
@@ -242,11 +242,11 @@ $.widget( "heurist.resultList", {
         this._superApply( arguments );
         this._refresh();
     },
-    
+
     /*_setOption: function( key, value ) {
         this._super( key, value );
     },*/
-    
+
 
     /* private function */
     _refresh: function(){
@@ -336,7 +336,7 @@ $.widget( "heurist.resultList", {
             if(!this.options.view_mode){
                 this.options.view_mode = 'list'; //default value
             }
-            
+
             newmode = this.options.view_mode;
         }
         this.div_content.addClass(newmode);
@@ -347,7 +347,7 @@ $.widget( "heurist.resultList", {
     },
 
     // @todo move record related stuff to HAPI
-    // NOT USED 
+    // NOT USED
     /*_renderRecords: function(){
 
         if(this.div_content){
@@ -382,10 +382,10 @@ $.widget( "heurist.resultList", {
                 var $emptyres = $('<div>')
                 .html(top.HR('No records match the search')+
                     '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
-                        ?'Note: some records are only visible to members of particular workgroups'
+                        ?'Note: some records may only be visible to members of particular workgroups'
                         :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
                 )
-                .appendTo(this.div_content);                   
+                .appendTo(this.div_content);
 
                 if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
                     var domain = this._query_request.w
@@ -407,20 +407,20 @@ $.widget( "heurist.resultList", {
     _clearAllRecordDivs: function(){
 
         //this.options.recordset = null;
-        
+
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
             this.div_content[0].innerHTML = '';//.empty();  //clear
         }
-        
+
         this._count_of_divs = 0;
     },
-    
-    
+
+
     /**
     * Add new divs and join recordset
-    * 
+    *
     * @param recordset
     */
     _renderRecordsIncrementally: function( recordset ){
@@ -431,19 +431,19 @@ $.widget( "heurist.resultList", {
             /*if(this.options.recordset==null){
                 this.options.recordset = recordset;
             }else{
-                //unite record sets 
+                //unite record sets
                 this.options.recordset = this.options.recordset.doUnite(recordset);
-            }*/   
-            
+            }*/
+
             var total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
-            
+
             this._renderProgress();
 
             if( total_count_of_curr_request > 0 )
             {
 
                 if(this._count_of_divs<10001){
-                
+
                     var recs = recordset.getRecords();
 
                     var html = '';
@@ -458,7 +458,7 @@ $.widget( "heurist.resultList", {
                             });*/
                         }
                     }
-                    this.div_content[0].innerHTML += html;   
+                    this.div_content[0].innerHTML += html;
                     this.span_info.html("Records: "+this._count_of_divs); //that.div_content.find('.recordDiv').length);
 
                     /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
@@ -477,10 +477,10 @@ $.widget( "heurist.resultList", {
                 var $emptyres = $('<div>')
                 .html(top.HR('No records match the search')+
                     '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
-                        ?'Note: some records are only visible to members of particular workgroups'
+                        ?'Note: some records may only be visible to members of particular workgroups'
                         :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
                 )
-                .appendTo(this.div_content);                   
+                .appendTo(this.div_content);
 
                 if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
                     var domain = this._query_request.w
@@ -498,11 +498,11 @@ $.widget( "heurist.resultList", {
         }
 
     },
-    
-    
+
+
     /**
-    * create div for given record  
-    * 
+    * create div for given record
+    *
     * NOT USED  - jquery works too slow if there are thousands of divs
     *
     * @param record
@@ -619,10 +619,10 @@ $.widget( "heurist.resultList", {
         }
         */
 
-        
+
         return $recdiv;
     },
-    
+
     _renderRecord_html: function(recordset, record){
 
         function fld(fldname){
@@ -650,28 +650,28 @@ $.widget( "heurist.resultList", {
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
         var recTitle = top.HEURIST4.util.htmlEscape(fld('rec_Title'));
-        
+
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
         }
-    
+
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
             + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
-            + html_thumb 
+            + html_thumb
             + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             + '</div>'
             + '<div title="'+recTitle+'" class="recordTitle">'
-            +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)  
+            +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
             + '</div>'
             + '<div title="Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
             //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             + '</div></div>';
 
-            
+
         return html;
 
         /*$('<div>',{
@@ -688,28 +688,28 @@ $.widget( "heurist.resultList", {
             window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);*/
-        
-        
+
+
     },
 
     _recordDivOnHover: function(event){
         var $rdiv = $(event.target);
         if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
-            
+
               $rdiv = $rdiv.parents('.recordDiv')
               var rectypeID = $rdiv.attr('rectype');
               var title = top.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
               $rdiv.attr('title', title);
         }
     },
-   
+
     _recordDivOnClick: function(event){
 
         //var $allrecs = this.div_content.find('.recordDiv');
 
-        var $rdiv = $(event.target), 
+        var $rdiv = $(event.target),
             that = this;
-            
+
         var isedit = ($rdiv.parents('.rec_edit_link').length>0); //this is edit click
 
         if(!$rdiv.hasClass('recordDiv')){
@@ -718,38 +718,38 @@ $.widget( "heurist.resultList", {
 
         var selected_rec_ID = $rdiv.attr('recid');
         this.div_content.find('.selected_last').removeClass('selected_last');
-        
+
         if(isedit){
             var url = top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
-            window.open(url, "_new");              
+            window.open(url, "_new");
         }
 
         if(this.options.multiselect && event.ctrlKey){
-            
+
             if($rdiv.hasClass('selected')){
                 $rdiv.removeClass('selected');
                 this._lastSelectedIndex = 0;
                 //$rdiv.removeClass('ui-state-highlight');
             }else{
                 $rdiv.addClass('selected');
-                $rdiv.addClass('selected_last'); 
+                $rdiv.addClass('selected_last');
                 this._lastSelectedIndex = selected_rec_ID;
                 //$rdiv.addClass('ui-state-highlight');
             }
             //this._lastSelectedIndex = selected_rec_ID;
-            
+
         }else if(this.options.multiselect && event.shiftKey){
-            
+
             if(Number(this._lastSelectedIndex)>0){
                 var nowSelectedIndex = selected_rec_ID;
-                
+
                 this.div_content.find('.selected').removeClass('selected');
-                
+
                 var isstarted = false;
-                
+
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
                         var rec_id = $(rdiv).attr('recid');
-                        
+
                         if(rec_id == that._lastSelectedIndex || rec_id==nowSelectedIndex){
                               if(isstarted){ //stop selection and exit
                                   $(rdiv).addClass('selected');
@@ -761,20 +761,20 @@ $.widget( "heurist.resultList", {
                             $(rdiv).addClass('selected');
                         }
                 });
-                
+
                 $rdiv.addClass('selected_last');
-                that._lastSelectedIndex = selected_rec_ID; 
-                
+                that._lastSelectedIndex = selected_rec_ID;
+
             }else{
-                lastSelectedIndex = selected_rec_ID;    
+                lastSelectedIndex = selected_rec_ID;
             }
-            
-            
+
+
         }else{
             //remove selection from all recordDiv
             this.div_content.find('.selected').removeClass('selected');
             $rdiv.addClass('selected');
-            $rdiv.addClass('selected_last'); 
+            $rdiv.addClass('selected_last');
             this._lastSelectedIndex = selected_rec_ID;
 
             //var record = this.options.recordset.getById($rdiv.attr('recID'));
@@ -782,16 +782,16 @@ $.widget( "heurist.resultList", {
 
         this.triggerSelection();
     },
-    
+
     triggerSelection: function(){
 
-console.log("triggerSelection "+this._lastSelectedIndex);        
-        
+console.log("triggerSelection "+this._lastSelectedIndex);
+
         if(this.options.isapplication){
             var selected = this.getSelected();
             $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
         }
-        
+
         //this._trigger( "onselect", event, selected );
     },
 
@@ -810,15 +810,15 @@ console.log("triggerSelection "+this._lastSelectedIndex);
                 }
             });
             if(Number(this._lastSelectedIndex)>0){
-                selected.push(""+this._lastSelectedIndex); 
+                selected.push(""+this._lastSelectedIndex);
             }
         }
         return selected;
-        
-        /* it works but returns recordset 
+
+        /* it works but returns recordset
         var selected = {};
         var that = this;
-        
+
         if(top.HAPI4.currentRecordset){
             this.div_content.find('.selected').each(function(ids, rdiv){
                 var rec_ID = $(rdiv).attr('recid');
@@ -840,7 +840,7 @@ console.log("triggerSelection "+this._lastSelectedIndex);
 
     /**
     * selection - hRecordSet or array of record Ids
-    * 
+    *
     * @param record_ids
     */
     setSelected: function(selection){
@@ -850,28 +850,28 @@ console.log("triggerSelection "+this._lastSelectedIndex);
         this.div_content.find('.selected_last').removeClass('selected_last');
 
         if (selection == "all") {
-            this.div_content.find('.recordDiv').addClass('selected');   
+            this.div_content.find('.recordDiv').addClass('selected');
         }else{
 
-            var recIDs_list = top.HAPI4.getSelection(selection, true);    
+            var recIDs_list = top.HAPI4.getSelection(selection, true);
             if( top.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
-            
+
                     this.div_content.find('.recordDiv').each(function(ids, rdiv){
                             var rec_id = $(rdiv).attr('recid');
                             if(recIDs_list.indexOf(rec_id)>=0){
-                               $(rdiv).addClass('selected'); 
+                               $(rdiv).addClass('selected');
                                //if(that._lastSelectedIndex==rec_id){
-                               //    $(rdiv).addClass('selected_last'); 
+                               //    $(rdiv).addClass('selected_last');
                                //}
                             }
                     });
-                
-            }    
+
+            }
         }
 
     },
-    
-    
+
+
     loadanimation: function(show){
         if(show){
             this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
@@ -882,7 +882,7 @@ console.log("triggerSelection "+this._lastSelectedIndex);
 
     /**
     * search with the same criteria for all reocrds (assumed before it was for bookmarks)
-    * 
+    *
     * @returns {Boolean}
     */
     _doSearch4: function(){
@@ -897,9 +897,9 @@ console.log("triggerSelection "+this._lastSelectedIndex);
 
         return false;
     }
-    
+
     , _renderProgress: function(){
-    
-    } 
+
+    }
 
 });
