@@ -42,12 +42,12 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 				$tDate[$tag] = $val;
 			}
             
-            if ($tDate["CLD"] && $tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
+            if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
                 $cld = $tDate["CL2"]." ".$tDate["CLD"];
             }
             
-            $is_greg_or_julian = ((!$tDate["CLD"]) || 
-                                strtolower($tDate["CLD"])=='gregorian' || strtolower($tDate["CLD"])=='julian');
+            $is_greg_or_julian = ((!@$tDate["CLD"]) || 
+                                strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
 
 			switch ($tDate["TYP"]){
 				case 's'://simple

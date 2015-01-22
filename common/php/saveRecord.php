@@ -615,7 +615,7 @@
             mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . implode(",", $insertQueryValues));
             $first_bd_id = mysql_insert_id();
             if (mysql_error()) {
-                errSaveRec("db error while inserting '" . $insertQueryValues . "' for record ID ".$recordID." error : ".mysql_error());
+                errSaveRec("db error while inserting '" . implode(",", $insertQueryValues) . "' for record ID ".$recordID." error : ".mysql_error());
                 return array("error" => "record ID = $recordID record type = $recordType ");
             }
             $retval["inserted"] = range($first_bd_id, $first_bd_id + count($insertQueryValues) - 1);

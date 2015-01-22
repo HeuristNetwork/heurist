@@ -129,9 +129,16 @@ function ShowReps() {
     function _init() {
         _setLayout(true, false); //aftert load show viewer only
 
-        _sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
-        document.getElementById('cbUseAllRecords2').value = _sQueryMode;
-        document.getElementById('cbUseAllRecords1').value = _sQueryMode;
+        if(top.HEURIST4){
+            _sQueryMode = "all";
+            $('#cbUseAllRecords1').hide();
+            $('#cbUseAllRecords2').hide();
+        }else{
+            _sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+            document.getElementById('cbUseAllRecords2').value = _sQueryMode;
+            document.getElementById('cbUseAllRecords1').value = _sQueryMode;
+        }
+        
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -1577,7 +1584,7 @@ function ShowReps() {
     //
     function _getQuery(){
         if(_sQueryMode=="all"){
-            return top.HEURIST.currentQuery_all;
+            return top.HEURIST.currentQuery_all_ ?top.HEURIST.currentQuery_all_ :top.HEURIST.currentQuery_all;
         }else if(_sQueryMode=="selected"){
             return top.HEURIST.currentQuery_sel;
         }else {

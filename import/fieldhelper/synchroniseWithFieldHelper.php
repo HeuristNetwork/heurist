@@ -40,8 +40,20 @@
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
     }
+//create empty manifest XML  - TODO!!!!
+$s_manifest = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<fieldhelper version="1">
+  <info>
+    <AppName>Heurist</AppName>
+    <AppVersion>v 3.0.0 2012-01-01</AppVersion>
+    <AppCopyright>© ArtEresearch, University of Sydney</AppCopyright>
+    <date></date>
+  </info>
+<formatOutput>1</formatOutput>
+</fieldhelper>
+XML;
 ?>
-
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -593,21 +605,6 @@
 
                 }//manifest does not exists
                 else{
-
-                    //create empty manifest XML  - TODO!!!!
-                    $s_manifest = <<<XML
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <fieldhelper version="1">
-                      <info>
-                        <AppName>Heurist</AppName>
-                        <AppVersion>v 3.0.0 2012-01-01</AppVersion>
-                        <AppCopyright>© ArtEresearch, University of Sydney</AppCopyright>
-                        <date></date>
-                      </info>
-                    <formatOutput>1</formatOutput>
-                    </fieldhelper>
-                    XML;
-
 
                     $fh_data = simplexml_load_string($s_manifest);
                 }

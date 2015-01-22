@@ -91,10 +91,10 @@ options - parameters to init application
 */ 
 var layouts = [
     {id:'L01', name:'Heurist Def', theme:'heurist', type:'cardinal', 
-        north:{size:'11.5em', resizable:false, overflow:'hidden',
+        north:{size:'12.2em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'5em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'5em', left:0, height:'5em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'5em', left:0, height:'6em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false }]},  //search result 

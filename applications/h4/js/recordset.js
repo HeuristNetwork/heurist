@@ -33,6 +33,7 @@ function hRecordSet(initdata) {
     //limit = 1000, use length()
     fields = [],       //array of field names
     records = null,      //list of records objects {recId:[], ....}
+    
     rectypes = [],      // unique list of record types
     structures = null;  //record structure definitions for all rectypes in this record set
 

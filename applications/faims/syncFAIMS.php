@@ -1268,7 +1268,7 @@ print "RECID ".$recID." for ".$faims_id."<br>";
     if($rs)
     while ($row = $rs->fetchArray(SQLITE3_NUM))
     {                                           
-        if($faims_id!=$row[0]){ 
+    if($faims_id!=$row[0]){ 
 
             //another relation - save previous
             if($details && count($details)>0){

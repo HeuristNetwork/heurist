@@ -73,7 +73,9 @@
         $noCache = (@$args["nocache"]==1);
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
-		/*****DEBUG****///error_log("QUERY:".$query);
+		/*****DEBUG****///
+//error_log(print_r($args, true));        
+//error_log("QUERY in getSearchResults:".$query);
 
 		$res = mysql_query($query);
 

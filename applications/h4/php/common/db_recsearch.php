@@ -716,7 +716,7 @@
 
 //error_log("parent query ".print_r($query_top, true));
         
-        }else if( @$params['topids'] ){
+        }else if( @$params['topids'] ){ //if topids are defined we use them as starting point for following rule query
          
             $query_top = array();
             
@@ -743,13 +743,15 @@
         
         $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
         
-//error_log("query ".print_r($aquery, true));        
+//
+error_log("query ".print_r($aquery, true));        
         
         $chunk_size = 1001;
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
         //DEGUG 
-//error_log("AAA ".$query);
+//
+error_log("AAA ".$query);
 
         $res = $mysqli->query($query);
         if (!$res){

@@ -73,6 +73,7 @@
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../applications/h4/ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
@@ -263,8 +264,11 @@
 
                 <span id="recordCount"></span>
 
-                <ul id="rep_list" class="horizontal menu">
-                    <li style="width:130px;"><span class="button">Menu</span>
+                <div id="btnRepPrint" onclick="onPrint()" class="button" 
+                    style=" position: absolute; right: 84px; top:5px; height: 17px !important;">Print</div>
+                
+                <ul id="rep_list" class="horizontal menu" style="float:right">
+                    <li style="width:130px;"><span id="btnRepMenu" class="button">Menu</span> <!--  class="button" -->
                         <ul id="toolMenuItems">
                         </ul>
                     </li>
@@ -539,7 +543,30 @@
                 //$('#lnkDel').css('display', 'none  !important');
                 //$('.linkadmin').css('visibility', 'visible');
 
+                var s = '';
+                
+                if(top.HEURIST.is_logged_in()){
+                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                        s =  '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
+                             '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
+                    } else {
+                        s = s + '<li> <a href="#" >Manage (Admins only)</a></li>';
+                    }
+                    
+                    s = s + '<li><a href="#" onClick="onPublish()" class="separator">Publish report</a></li>';
+                    
+                    s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export</a></li>' +
+                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
+                    
+                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                        s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
+                    }
+                }
+                 s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (top.HEURIST.is_logged_in()?'class="separator"':'') +'>Refresh</a></li>';
+                
 
+                /* OLD MENU ORDER
+                
                 var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print report</a></li>'+
                 '<li><a href="#" onClick="onFile()">Get URL for report</a></li>';
 
@@ -558,6 +585,11 @@
                     '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
 
                 }
+                */
+                
+                //$('#btnRepPrint').button( {icon:'ui-icon-print'} );
+                //$('#btnRepMenu').button( {icon:'ui-icon-gear'} );
+                
 
                 var elem = document.getElementById('toolMenuItems');
                 elem.innerHTML = s;

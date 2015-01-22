@@ -76,8 +76,8 @@ $.widget( "heurist.search", {
     _create: function() {
 
         var that = this;
-
-        this.element.addClass('ui-heurist-header1');
+        this.element.css('height','100%').addClass('ui-heurist-header1');
+        
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
@@ -91,8 +91,8 @@ $.widget( "heurist.search", {
             .addClass('ui-heurist-btn-header1')
             .appendTo(
                   $('<div>')
-                        .css({'width':this.options.leftmargin,'height':'2em','padding':'1.5em 3em','float':'left'}) //'float':'left'
-                        .appendTo( this.element )
+                        .css({'height':'2em','padding':'1.5em 6em 0 3em','float':'left'}) //'float':'left' 'width':this.options.leftmargin,
+                        .appendTo( this.element )                    
             )
             .button({icons: {
                 primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
