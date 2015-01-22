@@ -1,18 +1,18 @@
 <?php
 
-    /** 
+    /**
     *  Main script
-    * 
+    *
     *  1) System init on server side (see System.php) - connects to database , if db parameter is missed redirects to database selecion page
     *  2) System init on client side (see hapi.js) - init hAPI object
-    *  3) Load localization, theme and basic database structure definition 
-    * 
+    *  3) Load localization, theme and basic database structure definition
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -43,11 +43,11 @@
             exit();
         }
     }else{
-        //db parameter is missed redirects to database selecion page 
+        //db parameter is missed redirects to database selecion page
         header('Location: php/databases.php');
         exit();
     }
-    
+
 ?>
 <html>
     <head>
@@ -56,17 +56,17 @@
 
         <link rel=icon href="favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-        
+
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
         <link rel="stylesheet" type="text/css" href="ext/font-awesome/css/font-awesome.min.css" />
         <!-- <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" /> -->
-        
+
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
-<!--        
+<!--
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
         <script type="text/javascript" src="ext/gridster/utils.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.collision.js"></script>
@@ -76,11 +76,11 @@
 -->
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
         <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
-        
 
 
-        
-        <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/) 
+
+
+        <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/)
              src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
@@ -165,10 +165,11 @@
                         if(success)  //system is inited
                         {
                             var prefs = window.HAPI4.get_prefs();
-                            //loads localization
-                            window.HR = window.HAPI4.setLocale(prefs['layout_language']); 
 
-                            //loads theme (style for layout) - SINCE WE BACK TO H3 - always use default theme
+                            //loads localization
+                            window.HR = window.HAPI4.setLocale(prefs['layout_language']);
+
+                            //loads theme (style for layout) - as we are using H3 functions always use default theme
                             if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
                                 cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
                                     prefs['layout_theme']+'/jquery-ui.css" />');
@@ -176,14 +177,13 @@
                                 //default BASE theme
                                 cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
                             }
+
                             //add theme link to html header
                             $("head").append(cssLink);
                             $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
-                            //$("head").append($('<link rel="stylesheet" type="text/css" href="../../common/css/global.css?t='+(new Date().getTime())+'">'));
 
-                            
                             //top.HAPI4.database+'. HEURIST_TITLE
-                            window.document.title = window.document.title+' v'+top.HAPI4.sysinfo.version;
+                            window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
 
                             //load database structure (record types, field types, terms) definitions
                             window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
@@ -193,7 +193,7 @@
                                     top.HEURIST4.detailtypes = response.data.detailtypes;
 
                                     //in layout.js - load layout #101
-                                    
+
                                     var layoutid = '<?=@$_REQUEST['ll']?>';
                                     if(top.HEURIST4.util.isempty(layoutid)){
                                         layoutid = top.HAPI4.get_prefs('layout_id');
@@ -201,9 +201,10 @@
                                             layoutid = "L01";
                                         }
                                     }
-                                    
+
                                     appInitAll(layoutid, "#layout_panes");
-                                    /*                        
+
+                                    /*
                                     //get all terms and rectypes   terms:0,
                                     window.HAPI4.SystemMgr.get_defs({terms:'all'}, function(response){
                                     if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -217,8 +218,8 @@
                                     }
                                     });
                                     */
-                                    
-                                    //perform search in case parameter "q" is defined
+
+                                    //perform search in the case that parameter "q" is defined
                                     var qsearch = '<?=@$_REQUEST['q']?>';
                                     if(!top.HEURIST4.util.isempty(qsearch)){
                                         var qdomain = '<?=@$_REQUEST['w']?>';
@@ -227,30 +228,25 @@
                                         //top.HEURIST4.query_request = request;
                                         setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
                                     }else{
-                                        var init_search = top.HEURIST.displayPreferences['defaultSearch']; 
+                                        var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                                         if(!top.HEURIST4.util.isempty(init_search)){
                                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                                             setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
                                         }
                                     }
-                                    
+
                                     showTipOfTheDay(true);
-                                    
-                                }else{
+
+                                }else{  // failed to load database structure
+
                                     top.HEURIST4.util.redirectToError(response.message);
                                 }
                             });
-                            /*window.HAPI4.SystemMgr.get_defs({detailtypes:'all', mode:2}, function(response){
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
-                            top.HEURIST4.detailtypes = response.data.detailtypes;
-                            }else{
 
-                            }
-                            });*/
+                        }else{  // Failed to initialise system
 
-                        }else{
                             //top.HEURIST4.util.redirectToError
-                            alert("Can not initialize system");
+                            alert("Cannot initialize system, please consult Heurist developers");
                         }
                 });
 
@@ -264,35 +260,35 @@
                         resizable: false,
                         draggable: false,
                         hide: {
-                            effect: "explode",
-                            duration: 1000
+                            effect: "puff",
+                            duration: 500
                         }
                     }
                 );
-                
-                
+
+
                 // OLD H3 stuff
                 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                 top.HEURIST.baseURL = window.HAPI4.basePathOld;
                 top.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                 top.HEURIST.database = {  name: window.HAPI4.database };
-                
+
             });
-            
+
         </script>
 
     </head>
     <body style="background-color:#c9c9c9">
-    
-    
-        <!-- These are old H3 stuff - it needs for support old features in popups
+
+
+        <!-- These are old H3 stuff - needed to support existing features in popups
         <script src="../../common/php/loadHAPI.php"></script> -->
-        <script src="../../common/js/utilsLoad.js"></script> 
+        <script src="../../common/js/utilsLoad.js"></script>
         <script src="../../common/php/displayPreferences.php"></script>
-        <!-- 
+        <!--
         <script src="../../common/php/getMagicNumbers.php"></script>
-        These are old H3 stuff - it needs for support old features in popups -->
-    
+        These are old H3 stuff - needed to support existing features in popups -->
+
         <div id="layout_panes" style="height:100%">
             &nbsp;
         </div>
@@ -303,12 +299,12 @@
             <p style="margin-top: 1em;">version     <?=HEURIST_VERSION?></p>
             <p style="margin-top: 1em;">
                 author: Dr Ian Johnson<br/>
-                programmers: Stephen White and others...</p>
+                programmers: Artem Osmakov, Tom Murtagh, Kim Jackson, Stephen White and others...</p>
 
             <p style="margin-top: 1em;">Copyright (C) 2005-2015 <a href="http://sydney.edu.au/arts/eresearch/" target="_blank">University of Sydney</a></p>
 
             <p style="font-size: x-small;margin-top: 1em;">
-                Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+                Licensed under the GNU General Public License Version 3.0 (the "License"); you may not use this file except
                 in compliance with the License. You may obtain a copy of the License at
                 <a href="http://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 

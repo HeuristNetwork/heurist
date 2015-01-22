@@ -112,7 +112,7 @@ $.widget( "heurist.resultList", {
 
 
         this.mode_selector = $( "<div>" )
-        .css({'float':'right', 'padding-top': '0.5em'})
+        .css({'float':'right', 'padding-top': '0.5em', 'padding-right': '2em'})
         .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
             +'<label for="list_layout_list">'+top.HR('list')+'</label>'
             +'<input type="radio" id="list_layout_icons" name="list_lo" value="icons"/>'

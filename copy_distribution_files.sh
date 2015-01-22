@@ -60,7 +60,9 @@ cp -r *.* /var/www/html/HEURIST/h3-build/$1
 
 # Remember to add any new directories here
 cp -r admin /var/www/html/HEURIST/h3-build/$1
-cp -r applications /var/www/html/HEURIST/h3-build/$1
+cp -r applications/faims /var/www/html/HEURIST/h3-build/$1
+cp -r applications/huni /var/www/html/HEURIST/h3-build/$1
+cp -r applications/h4 /var/www/html/HEURIST/h3-build/$1
 cp -r common /var/www/html/HEURIST/h3-build/$1
 cp -r context_help /var/www/html/HEURIST/h3-build/$1
 cp -r documentation /var/www/html/HEURIST/h3-build/$1
@@ -72,7 +74,8 @@ cp -r search /var/www/html/HEURIST/h3-build/$1
 cp -r viewers /var/www/html/HEURIST/h3-build/$1
 
 # remove any superfluous files - add others as appropriate
-rm -f /var/www/html/HEURIST/h3-build/$1/*.sh
+# Might as well leave shell files in
+# rm -f /var/www/html/HEURIST/h3-build/$1/*.sh
 
 # Now zip it all up as a tarball for distribution on the Heurist web site
 

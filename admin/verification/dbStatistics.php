@@ -30,7 +30,7 @@
     $dbs = mysql__getdatabases(true);
     $sysadmin = is_systemadmin();
     //$sysadmin = true; // Force system admin rights
-  
+
     /**
     * Selects the value after a query
     * @param mixed $query Query to execute
@@ -50,7 +50,7 @@
             0;
         }
     }
-    
+
     /**
     * Calculates the directory size
     * @param mixed $dir Directory to check
@@ -104,21 +104,21 @@
         <!-- TOOLTIP -->
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
         <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
-        
+
         <!-- Heurist CSS -->
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">    
+        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
 
         <!-- jQuery UI -->
         <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/ui/jquery-ui.js"></script>      
+        <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery-ui.css">
-        <link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery.ui.dialog.css">        
+        <link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery.ui.dialog.css">
     </head>
 
     <body class="popup yui-skin-sam">
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
-        <div id="page-inner">    
+        <div id="page-inner">
             <?php echo "System admin: <a class='dotted-link' href='mailto:" .$sysAdminEmail. "'>" .$sysAdminEmail. "</a>"; ?>
             <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button> <?php } ?>
             <div id="tabContainer"></div>
@@ -136,16 +136,16 @@
             <div id="authorized" style="display: none">
                 <div>Correct password</div>
                 <div>Starting to delete selected databases</div>
-                
+
                 <div class="progress-bar">
                     <span class="progress">0/0</span>
                     <progress class="bar" value="0" max="100"></progress>
                 </div>
             </div>
-            
+
         </div>
         <?php } ?>
-        
+
         <!-- Table generation script -->
         <script type="text/javascript">
             //v2
@@ -183,11 +183,8 @@
                         $sysadmin."']";
 
                         $com = ",\n";
-                        
-                        if($i++ >= 10) {
-                            break;
-                        }
-                    }//foreach 
+
+                    }//foreach
                 ?>
             ];
 
@@ -223,7 +220,7 @@
                     ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
                     }}
-                <?php } ?> 
+                <?php } ?>
             ];
 
             var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
@@ -269,12 +266,12 @@
 
         <?php if($sysadmin) { ?>
         <!-- Delete databases scipt -->
-        <script>    
+        <script>
             var databases = [];
             var password;
-            
+
             /**
-            * Returns the values of checkboxes that have been selected             
+            * Returns the values of checkboxes that have been selected
             */
             function getSelectedDatabases() {
                 this.databases = [];
@@ -282,35 +279,35 @@
                 if(checkboxes.length > 0) {
                     for(var i=0; i<checkboxes.length; i++) {
                         if(checkboxes[i].checked) {
-                            databases.push(checkboxes[i].value);   
+                            databases.push(checkboxes[i].value);
                         }
-                    }    
-                } 
+                    }
+                }
             }
-            
-            /**  
-            * Makes an API call to delete each selected database             
+
+            /**
+            * Makes an API call to delete each selected database
             */
             function deleteDatabases() {
                 // Determine selected databases
                 getSelectedDatabases();
                 console.log("Databases to delete", databases);
                 if(databases.length == 0) {
-                    alert("Select at least one database to delete"); 
-                    return false;  
+                    alert("Select at least one database to delete");
+                    return false;
                 }
-                
+
                 // Verificate user
-                $("#db-verification").dialog({ 
+                $("#db-verification").dialog({
                     autoOpen: false,
                     modal: true,
                     width: "90%"
                 })
                 .dialog("open");
-                
-                
+
+
             }
-            
+
             /**
             * Checks if the database deletion password is correct
             */
@@ -325,14 +322,14 @@
                     submit.parentNode.removeChild(submit);
                     $("#authorized").slideDown(500);
                     updateProgress(0);
-                    postDeleteRequest(0);  
+                    postDeleteRequest(0);
                 }).fail(function(jqXHR, textStatus, errorThrown) {
                     // Invalid
                     alert(jqXHR.status + ": " + jqXHR.responseText);
                     submit.disabled = false;
                 });
             }
-          
+
             /**
             * Posts a delete request to the server for the database at the given index
             */
@@ -340,20 +337,20 @@
                 if(i < databases.length) {
                     // Delete database
                     $.post("deleteDB.php", {password: password, database: databases[i]}, function(response) {
-                        //alert(response); 
-                        $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>"); 
+                        //alert(response);
+                        $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
                         postDeleteRequest(i+1);
                         updateProgress(i+1);
                     }).fail(function(jqXHR, textStatus, errorThrown) {
                         alert(textStatus);
-                    }); 
+                    });
                 }else{
                     // All post-requests have finished.
                     $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
                     $("#authorized").append("<div style='font-weight: bold'>Please reload the page if you want to do delete more databases</div>");
-                }   
+                }
             }
-            
+
             /**
             * Updates the progress bar
             */

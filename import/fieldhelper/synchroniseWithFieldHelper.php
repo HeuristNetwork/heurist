@@ -248,7 +248,7 @@
 
                     if(in_array($dir, $system_folders)){
 
-                        print "<div style=\"color:red\">It is not possible to scan system folder $dir</div>";
+                        print "<div style=\"color:red\">Files are not scanned in system folder $dir</div>";
 
                     }else if($dir && file_exists($dir) && is_dir($dir))
                     {
