@@ -54,10 +54,11 @@ $.widget( "heurist.ruleBuilder", {
         //create list/combobox of source record types
         var cont = $('<div>')
             .css({'padding-top':(this.options.level==1?'1.2em':0),
-                'padding-left':( (this.options.level-1)*20)+'px', 'text-align':'left','width':'220px'}).appendTo(this.element);
+                  'text-align':'left','width':'230px'}).appendTo(this.element);
 
         this.select_source_rectype = $( "<select>" )
         .attr('title', 'The starting point entity type for this rule. The result set will be expanded by following pointers/relationships from/to this type' )
+        .css({'margin-left':( (this.options.level-1)*20)+'px'})
         .addClass('text ui-corner-all')
         .appendTo( cont );
 
@@ -82,14 +83,14 @@ $.widget( "heurist.ruleBuilder", {
         .appendTo( $('<div>').appendTo(this.element) );
 
         //
-        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all')
+        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all').css({'width':'155px'})
         .attr('title', 'Add an additional Heurist query string which will filter the set of records retrieved by this rule' )
-        .appendTo( $('<div>').css({'width':'170px'}).appendTo(this.element) );
+        .appendTo( $('<div>').css({'width':'160px'}).appendTo(this.element) );
 
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
 
-        this.div_btn =  $('<div>').css({'width':(this.options.level<3)?'11em':'6em','margin-left':'0.5em'}).appendTo(this.element);
+        this.div_btn =  $('<div>').css({'width':(this.options.level<3)?'12em':'6em'}).appendTo(this.element); //,'margin-left':'0.5em'
 
         this.btn_delete = $( "<button>", {text:'Delete'})
         .attr('title', 'Delete this step in the rule' )
@@ -97,7 +98,7 @@ $.widget( "heurist.ruleBuilder", {
         .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
         
         if(this.options.level<3)
-            this.btn_add_next_level = $( "<button>", {text:'Add Next'} )
+            this.btn_add_next_level = $( "<button>", {text:'Add Next (Lvl '+this.options.level+')'} )
             .attr('title', 'Adds another step to this rule' )
             .css('font-size','0.8em')
             .button().appendTo(this.div_btn);

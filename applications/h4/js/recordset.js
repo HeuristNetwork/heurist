@@ -33,6 +33,7 @@ function hRecordSet(initdata) {
     //limit = 1000, use length()
     fields = [],       //array of field names
     records = null,      //list of records objects {recId:[], ....}
+    order = [], //array of record IDs in specified order
     
     rectypes = [],      // unique list of record types
     structures = null;  //record structure definitions for all rectypes in this record set
@@ -49,6 +50,7 @@ function hRecordSet(initdata) {
         rectypes = response.rectypes;
         records = response.records;  //$.isArray(records)
         structures = response.structures;
+        order = response.order;
         //@todo - merging
     }
 
@@ -381,24 +383,38 @@ function hRecordSet(initdata) {
         * @returns {Array}
         */
         getIds: function( limit ){
+            
+            if(limit>0){
+                return order.slice(0, 1999);
+            }
+            
+            return order;
+        },
+        
+        //get ids for given array of records
+        getIds2: function( recs, limit ){
+            
             var aitems = [];
             var recID;
             if(limit>0){
-                for(recID in records)
+                for(recID in recs)
                     if(recID){
                         aitems.push(recID);
                         if(aitems.length>limit) break
                     }
             }else{
-                for(recID in records)
+                aitems = Object.keys(records);
+                /*
+                for(recID in recs)
                     if(recID){
                         aitems.push(recID);
-                    }
+                    }*/
             }
 
                 
             return aitems;
         },
+        
         
         /*
         getIdsChunked: function(chunk){
@@ -441,14 +457,17 @@ function hRecordSet(initdata) {
             if(_records==null){
                 _records = {};
             }
+            var ord = getIds2(_records);
+            
             return new hRecordSet({
                 queryid: queryid,
-                count: Object.keys(records).length, //$(_records).length,
+                count: ord.length, //$(_records).length,
                 offset: 0,
                 fields: fields,
                 rectypes: rectypes,
                 structures: structures,
-                records: _records
+                records: _records,
+                order: ord
             });
         },
 
@@ -491,10 +510,16 @@ function hRecordSet(initdata) {
             
             //join records
             var records2 = recordset2.getRecords();
-            var records_new = records;
-            for (recid in records2){
+            var order2 = recordset2.getOrder();
+            
+            var order_new = order, records_new = records, idx, recid;
+            
+            for (idx=0;idx<order.length;idx++){
+                recid = order[idx];
+                //for (recid in records2){
                 if(recid){ //&& !records[recid]){
                     records_new[recid] = records2[recid];
+                    order_new.push(recid);
                 }
             }
             //join structures
@@ -524,7 +549,8 @@ function hRecordSet(initdata) {
                 fields: fields,
                 rectypes: rectypes2,
                 structures: structures,
-                records: records_new
+                records: records_new,
+                order: order_new
             });
         },
         
@@ -534,7 +560,8 @@ function hRecordSet(initdata) {
         * @type Number
         */
         length: function(){
-            return Object.keys(records).length; //$(records).length;
+            //return Object.keys(records)
+            return order.length; //$(records).length;
         },
 
         /**
@@ -558,17 +585,25 @@ function hRecordSet(initdata) {
         getRecords: function(){
             return records;
         },
+        
+        getOrder: function(){
+            return order;
+        },
 
         /**
         * Returns first record from recordSet
         */
         getFirstRecord: function(){
-            var recid;
+            
+            if(order.length>0){
+                return records[order[0]];
+            }
+            /*var recid;
             for (recid in records){
                 if(recid){
                     return records[recid];
                 }
-            }
+            }*/
             return null;
         },
 

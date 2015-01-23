@@ -140,15 +140,16 @@ H2 span {
 ul#rep_list.menu li span {
 	background-color: white !important;
 
-	background-image: url("../images/blue-down-triangle.png") !important;
-	background-position: right center;
+	background-image: url("../images/gear.png") !important;
+	background-position: center center;
 	background-repeat: no-repeat;
 
 	display: inline-block;
 	height: 17px !important;
-	padding: 0 26px 0 0;
+    width: 22px;
+	/*padding: 0 26px 0 0;
 	text-align: left;
-	width: 44px;
+	width: 44px;*/
 }
 ul#rep_list.menu > li:hover {
 	background-color: rgba(0, 0, 0, 0);

@@ -1057,7 +1057,7 @@ function ShowReps() {
     //
     function _addVariable(nodedata, varname){
         var res= "",
-        insertMode = Dom.get("selInsertMode").value;
+        insertMode = $("#selInsertMode").val();
 
         //var varname = nodedata.id; //was prefix+nodedata.this_id
         var parname = _getVariableName(nodedata.parent_full_id);
@@ -1251,13 +1251,26 @@ function ShowReps() {
             }
 
             
-            var topWindowDims = top.HEURIST.util.innerDimensions(window);
-            var xpos = topWindowDims.w - 400;
+            if(top.HEURIST4){
+                //show jquery dialog
+                 $(ele).dialog({
+                    autoOpen: true,
+                    height: 260,
+                    width: 400,
+                    modal: false,
+                    title: title,
+                    position: { my: "right top", at: "left bottom", of: $(elt) }
+                 });
+                
+            }else{
+                var topWindowDims = top.HEURIST.util.innerDimensions(window);
+                var xpos = topWindowDims.w - 400;
 
-            var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
-                "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
+                var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
+                    "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
             //
-            insertPopupID = w.id;
+                insertPopupID = w.id;
+            }
         }
 
         if(top.HEURIST.util.popups.list.length>0){ //close previous

@@ -111,7 +111,7 @@ $.widget( "heurist.help_tips", {
         
         var idx = this.options.current_tip; 
         
-        if(top.HEURIST4.util.isnull(idx) || idx<0) idx = 1;
+        if(top.HEURIST4.util.isnull(idx) || isNaN(idx) || idx<0) idx = 1;
         
         var that = this;
         

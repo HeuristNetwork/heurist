@@ -524,7 +524,7 @@ $.widget( "heurist.search", {
                 if(that.query_request!=null &&  data.queryid()==that.query_request.id) {
 
                     //save increment into current rules.results
-                    var records_ids = data.getIds()
+                    var records_ids = data.getIds();
                     if(records_ids.length>0){
                         // rules:[ {query:query, results:[], parent:index},  ]
                         if(that._rule_index==-2){

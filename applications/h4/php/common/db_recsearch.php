@@ -743,15 +743,13 @@
         
         $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
         
-//
-error_log("query ".print_r($aquery, true));        
+//error_log("query ".print_r($aquery, true));        
         
         $chunk_size = 1001;
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
         //DEGUG 
-//
-error_log("AAA ".$query);
+//error_log("AAA ".$query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -778,16 +776,19 @@ error_log("AAA ".$query);
                 $rectype_structures  = array();
                 $rectypes = array();
                 $records = array();
+                $order = array();
                     
                     // load all records
                     while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //1000 maxim allowed chunk
                         array_push( $row, fileGetThumbnailURL($system, $row[2]) );
                         $records[$row[2]] = $row;
+                        array_push($order, $row[2]);
                         if(!array_key_exists($row[4], $rectypes)){
                             $rectypes[$row[4]] = 1;
                         }
                     }
                     $res->close();
+                    
                     
                     $rectypes = array_keys($rectypes);
                     //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
@@ -848,6 +849,7 @@ error_log("AAA ".$query);
                             "offset"=>get_offset($params),
                             "fields"=>$fields,
                             "records"=>$records,
+                            "order"=>$order,
                             "rectypes"=>$rectypes,
                             "structures"=>$rectype_structures));
 

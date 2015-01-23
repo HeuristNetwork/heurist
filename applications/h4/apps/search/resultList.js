@@ -54,9 +54,9 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
-        .css({'left':0,'right':'15px','overflow-y':'auto','padding':'0.5em',
+        .css({'left':0,'right':'0.3em','overflow-y':'auto','padding':'0.5em',
             'position':'absolute',
-            'top':hasHeader?'5em':'3em','bottom':'15px'})   //@todo - proper relative layout
+            'top':hasHeader?'4.4em':'2em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
@@ -112,7 +112,7 @@ $.widget( "heurist.resultList", {
 
 
         this.mode_selector = $( "<div>" )
-        .css({'float':'right', 'padding-top': '0.5em', 'padding-right': '2em'})
+        .css({'float':'right', 'padding-right': '2em'})  //'padding-top': '0.5em',
         .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
             +'<label for="list_layout_list">'+top.HR('list')+'</label>'
             +'<input type="radio" id="list_layout_icons" name="list_lo" value="icons"/>'
@@ -445,10 +445,13 @@ $.widget( "heurist.resultList", {
                 if(this._count_of_divs<10001){
 
                     var recs = recordset.getRecords();
+                    
+                    var recorder = recordset.getOrder();
 
                     var html = '';
-                    var recID;
-                    for(recID in recs) {
+                    var recID, idx;
+                    for(idx=0; idx<recorder.length; idx++) {
+                        recID = recorder[idx];
                         if(recID){
                             //var recdiv = this._renderRecord(recs[recID]);
                             html  += this._renderRecord_html(recordset, recs[recID]);
@@ -469,7 +472,19 @@ $.widget( "heurist.resultList", {
                 $allrecs = this.div_content.find('.recordDiv');
                 this._on( $allrecs, {
                     click: this._recordDivOnClick,
-                    mouseover: this._recordDivOnHover
+                    mouseover: this._recordDivOnHover,
+                    dblclick: function(event){ //start edit on dblclick
+                     
+                        var $rdiv = $(event.target);
+                        if(!$rdiv.hasClass('recordDiv')){
+                            $rdiv = $rdiv.parents('.recordDiv');
+                        }
+                        var recID = $rdiv.attr('recid');
+
+                        event.preventDefault();
+                        window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                        
+                    }
                 });
 
             }else if(this._count_of_divs<1) {
@@ -599,7 +614,7 @@ $.widget( "heurist.resultList", {
         .click(function( event ) {
             event.preventDefault();
             //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
-            window.open(top.HAPI4.basePathOld + "edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+            window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
         })
         .appendTo($recdiv);
 
@@ -785,7 +800,7 @@ $.widget( "heurist.resultList", {
 
     triggerSelection: function(){
 
-console.log("triggerSelection "+this._lastSelectedIndex);
+//console.log("triggerSelection "+this._lastSelectedIndex);
 
         if(this.options.isapplication){
             var selected = this.getSelected();

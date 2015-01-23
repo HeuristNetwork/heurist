@@ -82,7 +82,7 @@
     <body style="overflow:hidden">
         <div style="height:100%">
             <div style="position:absolute;width:99%;top:0" class="rulebuilder">
-                <div style="width:220px;font-weight:bold">Starting point (entity type)</div>
+                <div style="width:230px;font-weight:bold">Starting point (entity type)</div>
                 <div style="width:195px;font-weight:bold">Relationship Field</div>
                 <div style="width:195px;font-weight:bold">Relationship Type</div>
                 <div style="width:195px;font-weight:bold">Target entity type</div>

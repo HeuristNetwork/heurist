@@ -3569,11 +3569,10 @@ top.HEURIST.search = {
 			}
 			top.HEURIST.currentQuery_all = encodeURI(query_string + '&q=ids:' + recIDs.join(","));
             
-            if(p["q"] && p["q"].toLowerCase().indexOf('sortby')>=0){
+            if(p["q"] && p["q"].toLowerCase().indexOf('sortby')>=0){  //keep order for smarty output
                 
-                //preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)
-                //var myregexp = /\[(\d+)\]\[(\d+)\]/;
-                //var match = myregexp.exec(text);
+                //var myregexp = /\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/;
+                //var match = p["q"].match(myregexp);
                 
                 top.HEURIST.currentQuery_all_ = encodeURI( query_string + '&q='+p["q"] );
             }else{

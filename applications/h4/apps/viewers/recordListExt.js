@@ -194,6 +194,13 @@ $.widget( "heurist.recordListExt", {
                   top.HEURIST.otalQueryResultRecordCount = 0;
             }
             
+            if(query_string_main.toLowerCase().indexOf('sortby')>=0){  //keep order for smarty output
+                top.HEURIST.currentQuery_all_ = query_string_main;
+            }else{
+                top.HEURIST.currentQuery_all_ = top.HEURIST.currentQuery_all
+            }
+            
+            
             top.HEURIST.currentQuery_all  = query_string_all;
             top.HEURIST.currentQuery_sel  = query_string_sel;
             top.HEURIST.currentQuery_main = query_string_main;
