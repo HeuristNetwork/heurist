@@ -124,13 +124,13 @@ XML;
 
             print "<h2>ADVANCED USERS</h2>";
             print "This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)";
-            print " listed in Designer View > Database > Advanced Properties and writes the metadata as records in the current database, ".
-                    "with pointers back to the files described by the manifests. <br>";
-            print "If no manifests exist, they are created (and can be read by FieldHelper). ".
+            print " listed in Admin > Database > Advanced Properties and writes the metadata as records in the current database, ".
+                    "with pointers back to the files described by the manifests.";
+            print "<p>If no manifests exist, they are created (and can be read by FieldHelper). ".
                     "New files are added to the existing manifests.<br>&nbsp;<br>";
             print "The current database may already contain data; new records are appended, existing records are unaffected.<br>&nbsp;<br>";
-            print "Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache";
-            print "Files will need to be uploaded to the server via direct access to the server or through Import > Multi-file upload.";
+            print "Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache or www-data (as appropriate).";
+            print "<p>Files will need to be uploaded to the server via direct access to the server or through Import > Multi-file upload.";
             print "</p>";
 
             $notfound = array();
@@ -143,9 +143,9 @@ XML;
                 print "<p style='color:brown;'> Warning: There are no fields in this database to hold the following information: <b>".
                         implode(", ",$notfound).
                 "</b><br />Note: these fields may appear to be present, but do not have the correct origin codes ".
-                        "(source of the field definition) for this function to use them.<br />".
-                "We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
-                "<ul><li>Go to Designer View > Essentials > Import Structure<br>&nbsp;</li>".
+                        "(source of the field definition) for this function to use them.".
+                "<p>We recommend importing the appropriate fields by (re)importing the Digital Media Item record type as follows".
+                "<ul><li>Go to Admin > Structure > Import Structure<br>&nbsp;</li>".
                 "<li>Navigate to the H3CoreDefinitions database<br>&nbsp;</li>".
                 "<li>Check 'Show existing record types'</li>&nbsp;".
                 "<li>Check 'Click the download icon on the Digital Media Item'</li></ul>".
@@ -186,13 +186,14 @@ XML;
                     }
 
                     if ($mediaFolders=="" || count($dirs) == 0) {
-                        print ("<p><b>It seems that there are no media folders specified for this database</b>");
-                    }else{
+                        $mediaFolders = HEURIST_FILESTORE_DIR; // default to the data folder for this database
+                        //print ("<p><b>It seems that there are no media folders specified for this database</b>");
+                    }
                         print "<p><b>Folders to scan :</b> $mediaFolders<p>";
                         print "<p><b>Extensions to scan:</b> $mediaExts<p>";
-                    }
+
                     print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
-                        "Click here to set media folders</a><p>";
+                        "Click here to set media folders (database file directory descendants scanned by default)</a><p>";
 
 
                     if (!($mediaFolders=="" || count($dirs) == 0)) {
