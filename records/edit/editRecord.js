@@ -2311,8 +2311,19 @@ if (! top.HEURIST.edit) {
 
         top.HEURIST.registerEvent(ViewRec, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-                window.open(top.HEURIST.basePath +"records/view/viewRecord.php?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
-                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
+                
+                var url = top.HEURIST.basePath +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
+                        (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
+                
+                if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
+                        top.HEURIST.util.popupURL(top, url, { width: 600, height: 500 });
+                        return false;
+                }
+                
+                
+                
+//                link_open((top.HEURIST.basePath +"records/view/viewRecord.php?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
+//(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
             }
         });
 
