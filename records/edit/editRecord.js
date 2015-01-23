@@ -1860,9 +1860,9 @@ if (! top.HEURIST.edit) {
 
         this.elementName = "type:" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
         element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-        
+
         var helpPrompt = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
-        
+
         element.title = helpPrompt?helpPrompt:this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
         element.setAttribute("bib-detail-type", this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']]);
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2302,14 +2302,18 @@ if (! top.HEURIST.edit) {
                 window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
                     (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
             }
-            // TODO: remove?
-            //                top.HEURIST.util.popupURL(window,
-            //                            top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
-            //                                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
-            //                            {callback: function(bibTitle) {
-            //                                if (bibTitle) textElt.defaultValue = textElt.value = bibTitle;
-            //                                }
-            //                            });
+        });
+
+        var ViewRec = newDiv.appendChild(this.document.createElement("img"));
+        ViewRec.src = top.HEURIST.basePath +"common/images/magglass_15x14.gif";
+        ViewRec.className = "view-resource";
+        ViewRec.title = "View the record linked via this pointer field";
+
+        top.HEURIST.registerEvent(ViewRec, "click", function() {
+            if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
+                window.open(top.HEURIST.basePath +"records/view/viewRecord.php?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
+                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
+            }
         });
 
         if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]
@@ -2567,6 +2571,7 @@ if (! top.HEURIST.edit) {
         //        urlSpan.style['float'] = "right";
         urlSpan.style.cursor = "pointer";
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
+        var viewRec = urlSpan.appendChild(this.document.createElement("img"));
         editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
@@ -3664,6 +3669,7 @@ if (! top.HEURIST.edit) {
             urlOutput.appendChild(this.document.createTextNode(displayValue));
 
             inputCell.editImg = editImg;
+            inputCell.viewRec = viewRec;
             inputCell.appendChild(urlOutput);
 
             if(canEdit){
@@ -3675,6 +3681,10 @@ if (! top.HEURIST.edit) {
                 editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
                 urlSpan.appendChild(editImg);
                 urlSpan.appendChild(this.document.createTextNode("edit"));
+                var viewRec = urlSpan.appendChild(this.document.createElement("img"));
+                viewRec.src = top.HEURIST.basePath+"common/images/magglass_15x14.gif.png";
+                urlSpan.appendChild(viewRec);
+                urlSpan.appendChild(this.document.createTextNode("view"));
 
                 urlSpan.onclick = function() {
                     inputCell.removeChild(urlOutput);
@@ -3697,11 +3707,17 @@ if (! top.HEURIST.edit) {
             if (this.inputCell.editImg){
                 this.inputCell.editImg.setAttribute("disabled","disabled");
             }
+            if (this.inputCell.viewRec){
+                this.inputCell.viewRec.setAttribute("disabled","disabled");
+            }
             this.inputCell.inputField.setAttribute("disabled","disabled");
         } else {
             this.inputCell.className = this.inputCell.className.replace(/\s*\breadonly\b/, "");
             if (this.inputCell.editImg){
                 this.inputCell.editImg.removeAttribute("disabled");
+            }
+            if (this.inputCell.viewRec){
+                this.inputCell.viewRec.removeAttribute("disabled");
             }
             this.inputCell.inputField.removeAttribute("disabled");
         }
