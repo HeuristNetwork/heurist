@@ -86,8 +86,8 @@ echo
 
 
 # Everything normally lives in /var/www/HEURIST or /var/www/html/HEURIST with appropriate simlinks
-
 # apache on Ubuntu used to install at /var/www, now it installs at /var/www/html
+# so we get the user to supply the installation path to avoid problems
 
 # mkdir -p will do nothing if directory already exists, creates parents if they don't exist
 mkdir -p $2/HEURIST
@@ -125,11 +125,11 @@ tar -xjf exemplars.tar.bz2
 rm -f exemplars.tar.bz2
 
 cd $2/HEURIST/h3
-ln -s $2/HEURIST/HEURIST_SUPPORT/external external
-ln -s $2/HEURIST/HEURIST_SUPPORT/exemplars exemplars
-ln -s $2/HEURIST/HEURIST_SUPPORT/help help
+ln -fs $2/HEURIST/HEURIST_SUPPORT/external external
+ln -fs $2/HEURIST/HEURIST_SUPPORT/exemplars exemplars
+ln -fs $2/HEURIST/HEURIST_SUPPORT/help help
 cd $2/HEURIST/h3/applications/h4
-ln -s $2/HEURIST/HEURIST_SUPPORT/external_h4 ext
+ln -fs $2/HEURIST/HEURIST_SUPPORT/external_h4 ext
 
 
 # This installation of elaastic search generated a number of security holes rated HIGH RISK
@@ -188,7 +188,7 @@ echo "CONFIGURATION:"
 echo
 echo "Edit $2/HEURIST/heuristConfigIni.php to set your MySQL passwords - twice, clearly documented in file"
 echo "and the path and relative URL to your Heurist filestore, eg. /var/www/html/HEURIST/HEURIST_FILESTORE/"
-echo "and /HEURIST/HEURIST_FILESTORE, as well as contact details for the adminstrator""
+echo "and /HEURIST/HEURIST_FILESTORE, as well as contact details for the adminstrator"
 echo
 echo "You can do this by pasting the following at the command line - you may need to change nano to pico on some systems:"
 echo

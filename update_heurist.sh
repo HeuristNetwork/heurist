@@ -105,14 +105,14 @@ tar -xjf exemplars.tar.bz2
 rm -f exemplars.tar.bz2
 
 # Simlinks to external functions and libraries
-cd $2/$1
-ln -s $2/HEURIST_SUPPORT/external external
-ln -s $2/HEURIST_SUPPORT/help help
-ln -s $2/HEURIST_SUPPORT/exemplars exemplars
-
+# this will fail in strict mode, and they should be there
+# cd $2/$1
+# ln -s $2/HEURIST_SUPPORT/external external
+# ln -s $2/HEURIST_SUPPORT/help help
+# ln -s $2/HEURIST_SUPPORT/exemplars exemplars
 # Simlink for H4 externals
-cd $2/$1/applications/h4
-ln -s $2/HEURIST_SUPPORT/external_h4/ ext
+# cd $2/$1/applications/h4
+# ln -s $2/HEURIST_SUPPORT/external_h4/ ext
 
 
 echo "Heurist unpacked"

@@ -60,9 +60,12 @@ cp -r *.* /var/www/html/HEURIST/h3-build/$1
 
 # Remember to add any new directories here
 cp -r admin /var/www/html/HEURIST/h3-build/$1
-cp -r applications/faims /var/www/html/HEURIST/h3-build/$1
-cp -r applications/huni /var/www/html/HEURIST/h3-build/$1
-cp -r applications/h4 /var/www/html/HEURIST/h3-build/$1
+# if you don't have this it will not make the Faims directory
+# and copies the faims files to the applications directory
+mkdir -p /var/www/html/HEURIST/h3-build/$1/applications
+cp -r applications/faims /var/www/html/HEURIST/h3-build/$1/applications
+cp -r applications/huni /var/www/html/HEURIST/h3-build/$1/applications
+cp -r applications/h4 /var/www/html/HEURIST/h3-build/$1/applications
 cp -r common /var/www/html/HEURIST/h3-build/$1
 cp -r context_help /var/www/html/HEURIST/h3-build/$1
 cp -r documentation /var/www/html/HEURIST/h3-build/$1
