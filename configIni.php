@@ -96,6 +96,9 @@ $websiteThumbnailPassword = "";
 // in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
+
+//$defaultFaimsModulesPath = '/var/www/faims/modules/';
+
 if (is_file($parentIni)){
 	include_once($parentIni);
 }

@@ -244,11 +244,11 @@ function hMapping(_map, _timeline, _basePath) {
         var lastSelectedItem = null;
         var items_to_update = [];
         var items_to_update_data = [];
-        var dataset = tmap.datasets.main;
+        var dataset = tmap.datasets.main;  //take main dataset
         
         if ( isreset || (selection && selection.length>0) ){
             
-            dataset.each(function(item){
+            dataset.each(function(item){ //loop trough all items
 
                     var idx = selection ?selection.indexOf(item.opts.recid) :-1;
                     
@@ -277,11 +277,12 @@ function hMapping(_map, _timeline, _basePath) {
                         };
                     
                     
-                    if(idx>=0){
+                    if(idx>=0){ //this item is selected
                         
                         items_to_update.push(item);
                         
-                        itemdata.options.eventIconImage = item.opts.rectype + 's.png';
+                        //was itemdata  
+                        itemdata.options.eventIconImage = item.opts.rectype + 's.png';   //it will have selected record (blue bg)
                         itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
                         itemdata.options.color = "#FF0000";
                         itemdata.options.lineColor = "#FF0000";
@@ -293,15 +294,17 @@ function hMapping(_map, _timeline, _basePath) {
                     }else{ //clear selection
                         //item.opts.theme
                         //item.changeTheme(customTheme, true); - dont work
-                        var usual_icon = item.opts.rectype + 'm.png';
+                        var usual_icon = item.opts.rectype + 'm.png'; //it will have usual gray bg
                         if(usual_icon != itemdata.options.eventIconImage){
 
                             items_to_update.push(item);
                             
+                            //was itemdata
                             itemdata.options.eventIconImage = usual_icon;
                             itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
                             itemdata.options.color = "#0000FF";
                             itemdata.options.lineColor = "#0000FF";
+                            
                             items_to_update_data.push(itemdata);
                         }
                     }                
@@ -320,6 +323,7 @@ function hMapping(_map, _timeline, _basePath) {
                 var lastRecID = (selection)?selection[selection.length-1]:-1;
                 
                 dataset.hide();
+                
                 var newitem;
                 for (var i=0;i<items_to_update.length;i++){
                         //items_to_update[i].clear();

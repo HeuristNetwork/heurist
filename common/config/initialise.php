@@ -55,6 +55,7 @@
     $memcachedHost - host for the memcached server
     $memcachedPort - port for the memcached server
     $defaultRootFileUploadPath - root location for uploaded files/record type icons/templates etc.
+    $defaultFaimsModulesPath 
     $siteRelativeIconUploadBasePath - Document root relative pathname of a directory where Heurist can store uploaded icons
     $sysAdminEmail - email address of system administrator
     $infoEmail - redirect info@ emails to this address
@@ -100,6 +101,8 @@ HEURIST_HTML_DIR
 HEURIST_HTML_URL
 
 HEURIST_SCRATCHSPACE_DIR
+
+HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise redefined in ini fuile
 
     */
 
@@ -222,7 +225,7 @@ HEURIST_SCRATCHSPACE_DIR
 
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
     if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
-
+        
         if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
             $defaultRootFileUploadPath.= "/"; // append trailing /
 
@@ -448,6 +451,21 @@ HEURIST_SCRATCHSPACE_DIR
         define('HEURIST_HTML_URL', HEURIST_FILESTORE_URL . 'html-output/');
     }
 
+    // FAIMS MODULES
+    if(isset($defaultFaimsModulesPath)){
+         if(file_exists($defaultFaimsModulesPath) && is_dir($defaultFaimsModulesPath)){
+             define('HEURIST_FAIMS_DIR', $defaultFaimsModulesPath);
+         }
+         //testDirWriteableAndDefine('HEURIST_FAIMS_DIR', $defaultFaimsModulesPath, "Faims modules folder", false);
+    }
+    if (!defined('HEURIST_FAIMS_DIR')) {
+         $path = HEURIST_FILESTORE_DIR . 'faims';
+         if(file_exists($path) && is_dir($path)){
+             define('HEURIST_FAIMS_DIR', $path);
+         }
+         //testDirWriteableAndDefine('HEURIST_FAIMS_DIR', HEURIST_FILESTORE_DIR . 'faims', "Faims modules folder");
+    }
+    
 //--------------------------------------------------------------------------------------------------------------
 
     // ID of Heurist System User Group which has special privileges - deprecated, although more generally

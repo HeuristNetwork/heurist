@@ -106,7 +106,8 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
     $step = @$_REQUEST['step'];
 
-    $mode_dir = (@$_REQUEST['mode']=='0');
+    $mode_dir = @$_REQUEST['mode'];
+    if(!$mode_dir) $mode_dir = 1; //by default - file
 
     $upload = @$_FILES["file"];
     $dbname_faims = null;
@@ -114,11 +115,16 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 //DEBUG echo print_r($upload, true)."<br>";
     if($step=='1'){
     
-    if(!$mode_dir){
+    if($mode_dir==1){
     
         if ($upload["error"] > 0 && $upload["error"] < 4)
         {
             echo "<p class='err_message'>Upload error: ".$upload["error"]."</p>";
+            if($upload['error']==1){
+                echo "<p class='err_message'>The uploaded file exceeds the upload_max_filesize directive in php.ini.</p>";
+            }else if($upload['error']==1){
+                echo "<p class='err_message'>Failed to write file to disk.</p>";
+            }
             
         }else if(!@$upload["tmp_name"]){
             
@@ -129,7 +135,11 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             
             $tmp_name = $upload["tmp_name"];
             
-            $project_name = substr($upload["name"],0,strpos($upload["name"],".tar.bz"));
+            if(strpos($upload["name"],".tar.bz")<0){
+                $project_name = substr($upload["name"],0,strpos($upload["name"],".tar.bz2"));
+            }else{
+                $project_name = substr($upload["name"],0,strpos($upload["name"],".tar.bz"));
+            }
             
             $folder = HEURIST_FILESTORE_DIR."faims/import"; //.;
             $folder_proj = $folder."/".$project_name; //"/module";
@@ -163,7 +173,8 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 $tarfile = $folder . "/project.".(strpos($upload["name"],".tar.bz")>0?"bz2":"gz");
 
 /*debug print "<br>temp :".$tmp_name;
-print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
+print "<br>".$upload["name"]."   ".$tarfile."<br>";
+*/
 
                 print "<h3>Extracting FAIMS database from tarball to<br />".$folder_proj."/db.sqlite3</h3><br>";
                 ob_flush();flush();
@@ -199,7 +210,8 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
 
         }
         
-        
+    }elseif($mode_dir==2){
+        $dbname_faims = @$_REQUEST['faims_module'];
     }else{
         $dbname_faims = @$_REQUEST['faims'];
     }
@@ -225,8 +237,10 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";*/
         print "<form name='selectdb' action='syncFAIMS.php' method='post' enctype='multipart/form-data'>";
         print "<input name='step' value='1' type='hidden'>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
-        print "<div><input type='radio' ".($mode_dir?"":"checked='true'")." name='mode' value='1'><div class='lbl_form'>Upload FAIMS db or project tar:</div><input type='file' name='file'></div>";
-        print "<div><input type='radio' ".($mode_dir?"checked='true'":"")." name='mode' value='0'><div class='lbl_form'>Or specify server path to FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
+        print "<div><input type='radio' ".($mode_dir==1?"checked='true'":"")." name='mode' value='1'><div class='lbl_form'>Upload FAIMS db or project tar:</div><input type='file' name='file'></div>";
+        print "<div><input type='radio' ".($mode_dir==0?"checked='true'":"")." name='mode' value='0'><div class='lbl_form'>Or specify server path to FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
+        print "<div><input type='radio' ".($mode_dir==2?"checked='true'":"")." name='mode' value='2'><div class='lbl_form'>Or select from the list of modules:</div><select name='faims_module'>".getListOfModules()."</select></div>";
+        
         print "<div><div class='lbl_form'>Check to verify structure (no data import):</div><input name='showstr' value='1' type='checkbox'></div>";
         print "<div><div class='lbl_form'></div><input type='submit' value='Start' /></div>";
         print "</form></div></body></html>";
@@ -954,7 +968,7 @@ print  "<div>Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyNam
 
             $details = array();
 
-            echo "Entity id:".$row[0]."  ".$row[1]."  ".$row[2]."  ".$row[3]."<br>";
+            echo "Entity id:".$row[0]."  time=".$row[1]."  atype=".$row[2]."  geo=".$row[3]."<br>";
             $faims_id = $row[0];
             $faims_atype = $row[2];
             $faims_time = $row[1];
@@ -976,7 +990,7 @@ print  "<div>Added Record type ".$rtyId." based on FAIMS ".$attrID." | ".$rtyNam
                 //find the existing record in Heurist database
                 $recID = getRecordByFaimsId($faims_id);
                
-print "RECID ".$recID." for ".$faims_id."<br>";
+print "RECID ".($recID>0?$recID:"NEW")." for ".$faims_id."<br>";
                 
             }else{
                 $recID = 0;
@@ -1002,7 +1016,8 @@ print "RECID ".$recID." for ".$faims_id."<br>";
             $details = null;
             continue;
         }
-
+        
+        //4 av.freeText, 5 av.VocabID, 6 av.AttributeID, 7 av.Measure, 8 av.Certainty
         //attr id, freetext, measure, certainity, vocabid
         echo "<div style='padding-left:30px'>".$row[6]."  ".$row[4]."  ".$row[7]."  ".$row[8]."  ".$row[5]."  "."</div>";
 
@@ -1277,17 +1292,20 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 
                 //since hiearchy is a graph in faims - it may be many-to-many relationship
                 foreach ($details["t:".DT_PRIMARY_RESOURCE] as $idx=>$recId_Source) {
+                    if($recId_Source>0)
                     foreach ($details["t:".DT_TARGET_RESOURCE] as $idx=>$recId_Target) {
-                        $details2 = array("t:".DT_PRIMARY_RESOURCE=>array(0=>$recId_Source),
-                                          "t:".DT_TARGET_RESOURCE =>array(0=>$recId_Target),
-                                          "t:".DT_NAME => array('0'=>'FAIMS Relationship'),
-                                          "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE],
-                                          "t:".$dt_SourceRecordID => $details["t:".$dt_SourceRecordID]
-                                     );
-                        
-//DEBUG print ">>>".print_r($details2, true)."<br>";                                        
-                        
-                        insert_update_Record($recID, $rectype, $details2, $faims_id);    
+                        if($recId_Target>0){
+                            $details2 = array("t:".DT_PRIMARY_RESOURCE=>array(0=>$recId_Source),
+                                              "t:".DT_TARGET_RESOURCE =>array(0=>$recId_Target),
+                                              "t:".DT_NAME => array('0'=>'FAIMS Relationship'),
+                                              "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE],
+                                              "t:".$dt_SourceRecordID => $details["t:".$dt_SourceRecordID]
+                                         );
+                            
+    //DEBUG print ">>>".print_r($details2, true)."<br>";                                        
+                            
+                            insert_update_Record($recID, $rectype, $details2, $faims_id);    
+                        }
                     }
                 }
             }
@@ -1298,7 +1316,8 @@ print "RECID ".$recID." for ".$faims_id."<br>";
             
             $is_source_rec = true;
 
-            echo "Entity id:".$row[0]."  ".$row[1]."  ".$row[2]."<br>";
+            echo "---<br>";
+            echo "Entity id:".$row[0]."  relent_id=".$row[1]."  atype=".$row[2]."<br>";
             $faims_id = $row[0];
             $faims_atype = $row[2];
             $faims_relent_id = $row[1];
@@ -1342,16 +1361,20 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 //find the existing record in Heurist database
                 $recID = getRecordByFaimsId($faims_id);
                 
-//DEBUG 
-print "RECID ".$recID." for ".$faims_id."<br>";
+//DEBUG print "RECID ".(($recID>0)?$recID:"new")." for ".$faims_id."<br>";
                 
             }else{
                 $recID = 0;
             }
             
-//DEBUG print "ADD ".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)."   recid=".getRecordByFaimsId($faims_relent_id)."  faims=".$faims_relent_id."<br>";
+            $rel_recID = getRecordByFaimsId($faims_relent_id);
+            if($rel_recID==null || $rel_recID<1){
+                print '<span style="color:red">'.($is_source_rec?"SOURCE":"TARGET").' Heurist record not found for faims_id='.$faims_relent_id.'</span><br>';
+            }else{
+                print ($is_source_rec?"SOURCE":"TARGET")."   recid=".$rel_recID."  faims=".$faims_relent_id."<br>";
+            }
             
-             array_push($details["t:".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)], getRecordByFaimsId($faims_relent_id) );
+             array_push($details["t:".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)], $rel_recID );
              $details["t:".DT_RELATION_TYPE] = array('0'=> $reltype);
 
         }else if($skip_faimsrec){
@@ -1379,9 +1402,14 @@ print "RECID ".$recID." for ".$faims_id."<br>";
                 continue;
             }
 
-//DEBUG print "ADD2 ".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)."   recid=".getRecordByFaimsId($faims_relent_id)."  faims=".$faims_relent_id."<br>";
+            $rel_recID = getRecordByFaimsId($faims_relent_id);
+            if($rel_recID==null || $rel_recID<1){
+                print '<span style="color:red">'.($is_source_rec?"SOURCE":"TARGET").' Heurist record not found for faims_id='.$faims_relent_id.'</span><br>';
+            }else{
+                print "".($is_source_rec?"SOURCE":"TARGET")."   recid=".$rel_recID."  faims=".$faims_relent_id."<br>";
+            }
 
-            array_push($details["t:".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)], getRecordByFaimsId($faims_relent_id) );
+            array_push($details["t:".($is_source_rec?DT_PRIMARY_RESOURCE:DT_TARGET_RESOURCE)], $rel_recID );
             //$faims_id = null;
         }
 
@@ -1584,7 +1612,7 @@ function insert_update_Record($recID, $rectype, $details, $faims_id)
 
                         if (@$out['error']) {
                             print "<br>Source record# ".$faims_id."&nbsp;&nbsp;&nbsp;";
-                            print "=><div style='color:red'> Error: ".implode("; ",$out["error"])."</div>";
+                            print "=><div style='color:red'> Error: ".implode("; ",$out["error"])."</div>---<br>";
                         }else{
 
                             if($recID){
@@ -1766,8 +1794,59 @@ print  "<div style='color:purple'>Existing Record type ".$row[0]." is renamed to
             }
     }
 }                
-                
 
+//
+// find all modules in specified folder
+//
+function getListOfModules(){
+    $res = "";
+    if(defined('HEURIST_FAIMS_DIR')){
+         $list = recurse_find_modules(HEURIST_FAIMS_DIR); 
+//DEBUG error_log(HEURIST_FAIMS_DIR."  ".print_r($list, true));         
+         foreach($list as $idx=>$module){
+              $res = $res."<option value='".htmlspecialchars($module["path"])."'>".htmlspecialchars($module["name"])."</option>";
+         }
+    }
+    return $res;
+}
+
+/**
+* return array of modules
+*/
+function recurse_find_modules($folder) {
+    
+    $res = array();
+    
+    if(file_exists($folder)){
+        //detect if module.settings exists
+        if(file_exists($folder.'/module.settings') && file_exists($folder.'/db.sqlite3'))
+        {
+            //read JSON from file and get faims module name
+            $module_info = json_decode(file_get_contents($folder.'/module.settings'), true);
+            
+            //this is faism module folder
+            return array("name"=>$module_info["name"], "path"=>$folder.'/db.sqlite3');
+        }
+        
+        //$files1 = scandir($dir);
+        $dh  = opendir($folder);
+        while (false !== ($file = readdir($dh))) {
+            if (( $file != '.' ) && ( $file != '..' )) {
+                if ( is_dir($folder . '/' . $file) ) {
+                    $list = recurse_find_modules($folder. '/' . $file);
+                    if($list && @$list['name']){
+                        array_push( $res, $list );
+                    }else if(count($list)>0){
+                        $res = array_merge($res, $list);
+                    }
+                    
+                }
+            }
+        }
+        closedir($dh);
+    }
+    return $res;
+}
 ?>
   </div>
 </body>

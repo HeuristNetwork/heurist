@@ -126,7 +126,7 @@
 
             mysql__insert("Records", $recheader);
             if (mysql_error()) {
-                errSaveRec("database record insert error - " . mysql_error());
+                errSaveRec("database record insert error - " . mysql_error()."  ".print_r($recheader, true));
                 return $msgInfoSaveRec;
             }
             $recordID = mysql_insert_id();

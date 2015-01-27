@@ -82,7 +82,7 @@ $.widget( "heurist.app_timemap", {
                 
                 if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
                   
-console.log("_doVisualizeSelection");                  
+//console.log("_doVisualizeSelection");                  
                     that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
                 }            
             }
@@ -165,7 +165,7 @@ console.log("_doVisualizeSelection");
                     return;
             }
             
-            this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);
+            this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see js/mapping.js
     }    
     
 
