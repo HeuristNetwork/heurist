@@ -2316,14 +2316,13 @@ if (! top.HEURIST.edit) {
                         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
                 
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
-                        top.HEURIST.util.popupURL(top, url, { width: 600, height: 500 });
+                    
+                        var dim = top.HEURIST.util.innerDimensions(window);
+                        var options = {height:dim.h*0.9, width:700, 'close-on-blur':true};
+                    
+                        top.HEURIST.util.popupURL(top, url, options);
                         return false;
                 }
-                
-                
-                
-//                link_open((top.HEURIST.basePath +"records/view/viewRecord.php?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
-//(top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
             }
         });
 

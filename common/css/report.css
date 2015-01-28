@@ -157,7 +157,8 @@ ul#rep_list.menu > li:hover {
 	color: #000;
 }
 ul#rep_list.menu li ul {
-	margin-left:0
+	margin-left:-110px;
+    margin-top:-3px;
 }
 .grey {
 	background-color:#CFCFCF;

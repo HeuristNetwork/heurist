@@ -93,6 +93,35 @@ if (!top.Relationship) {
 		editTd.onclick = function() {
 			thisRef.editRelatedRecord();
 		};
+        
+        
+        editTd = this.tr.appendChild(this.document.createElement("div"));
+        var ViewRec = editTd.appendChild(this.document.createElement("img"));
+        ViewRec.src = top.HEURIST.basePath +"common/images/magglass_15x14.gif";
+        ViewRec.className = "view-resource";
+        ViewRec.title = "View the record linked via this relation";
+
+        top.HEURIST.registerEvent(ViewRec, "click", function() {
+            
+            var  recID = thisRef.relationshipRec.relatedRec.recID
+            
+            if( recID && !isNaN(Number(recID)) ){
+                
+                var url = top.HEURIST.basePath +"records/view/renderRecordData.php?recID=" + recID  +
+                        (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
+                
+                if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
+                    
+                        var dim = top.HEURIST.util.innerDimensions(window);
+                        var options = {height:dim.h*0.9, width:700, 'close-on-blur':true};
+                    
+                        top.HEURIST.util.popupURL(top, url, options);
+                        return false;
+                }
+            }
+        });
+        
+        
 
 		var optionalTd = this.tr.appendChild(this.document.createElement("div"));
 
@@ -109,6 +138,8 @@ if (!top.Relationship) {
 		this.notesField.parentNode.className = "notes-field";
 		this.notesField.appendChild(this.document.createTextNode(relationshipRec.notes || ""));
 
+        
+        
 	//	this.ellipsesTd2 = this.tr.appendChild(this.document.createElement("td"));
 	//	this.ellipsesTd2.className = "ellipses";
 	//	this.ellipsesTd2.innerHTML = "&nbsp;...";
