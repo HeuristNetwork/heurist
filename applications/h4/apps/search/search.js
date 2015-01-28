@@ -560,14 +560,17 @@ $.widget( "heurist.search", {
 
 
                 if(data){
+                    
+                    var rules = data.rules?data.rules:data;
+                    
                     //create flat rule array
-                    that._doApplyRules(data); //indexes are rest inside this function
+                    that._doApplyRules(rules); //indexes are rest inside this function
 
                     //if rules were applied before - need to remove all records except original and re-render
                     if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
 
                          //keep json (to possitble save as saved searches)
-                         that.query_request.rules = data;
+                         that.query_request.rules = rules;
 
                          //remove results of other rules and re-render the original set of records only
                          var rec_ids_level0 = [];
@@ -592,7 +595,7 @@ $.widget( "heurist.search", {
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
                     } else if(!top.HEURIST.util.isempty(that._rules)){
-                        Hul.showMsgFlash('Rule sets require an initial search result as a starting point.',2000,top.HR('Warning'));
+                        Hul.showMsgFlash('Rule sets require an initial search result as a starting point.', 3000, top.HR('Warning'), data.target);
                     }
                 }
 

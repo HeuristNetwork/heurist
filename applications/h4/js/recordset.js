@@ -457,7 +457,7 @@ function hRecordSet(initdata) {
             if(_records==null){
                 _records = {};
             }
-            var ord = getIds2(_records);
+            var ord = that.getIds2(_records);
             
             return new hRecordSet({
                 queryid: queryid,
@@ -514,8 +514,8 @@ function hRecordSet(initdata) {
             
             var order_new = order, records_new = records, idx, recid;
             
-            for (idx=0;idx<order.length;idx++){
-                recid = order[idx];
+            for (idx=0;idx<order2.length;idx++){
+                recid = order2[idx];
                 //for (recid in records2){
                 if(recid){ //&& !records[recid]){
                     records_new[recid] = records2[recid];

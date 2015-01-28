@@ -235,7 +235,9 @@
                                         }
                                     }
 
-                                    showTipOfTheDay(true);
+                                    if(!(top.HAPI4.sysinfo.db_total_records>0)){
+                                            showTipOfTheDay(false);
+                                    }
 
                                 }else{  // failed to load database structure
 

@@ -54,7 +54,7 @@
         <!-- Timemap -->
         <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
-        <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-1.2.js"></script>
+        <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/timemap.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/param.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>

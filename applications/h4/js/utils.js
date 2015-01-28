@@ -810,7 +810,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
     },
 
-    showMsgFlash: function(message, timeout, title){
+    showMsgFlash: function(message, timeout, title, position_to_element){
 
         if(!$.isFunction(top.HR)){
             alert(message);
@@ -828,14 +828,21 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
         if(!title) title = 'Info';
         
-        $dlg.dialog({
+        var options =  {
             title: top.HR(title),
             resizable: false,
             //height:140,
             width: 'auto',
             modal: false,
             buttons: {}
-        });
+        };
+        
+        
+        if(position_to_element){
+           options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };
+        }
+        
+        $dlg.dialog(options);
         $dlg.dialog("option", "buttons", null);
         
         if (!(timeout>200)) {

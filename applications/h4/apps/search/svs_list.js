@@ -423,7 +423,7 @@ $.widget( "heurist.svs_list", {
                     isfaceted = data.node.data.isfaceted;
                 }
             }
-            that._doSearch2( qname, qsearch, isfaceted );
+            that._doSearch2( qname, qsearch, isfaceted, event.target );
         }
         
     }
@@ -740,7 +740,7 @@ $.widget( "heurist.svs_list", {
     this._doSearch2(qsearch);
     },*/
 
-    _doSearch2: function(qname, qsearch, isfaceted){
+    _doSearch2: function(qname, qsearch, isfaceted, ele){
         
         if ( qsearch ) {
 
@@ -787,7 +787,7 @@ $.widget( "heurist.svs_list", {
                 var request = Hul.parseHeuristQuery(qsearch);
                 
                 if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
-                    $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ request.rules ]); //global app event   - see resultList.js for listener
+                    $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ {rules:request.rules, target:ele} ]); //global app event   - see resultList.js for listener
                 }else{
                     //additional params
                     request.f = this.options.searchdetails;

@@ -47,7 +47,7 @@ $.widget( "heurist.help_tips", {
                 height: 505,
                 width: 705,
                 modal: true,
-                title: top.HR("Tip of the day"),
+                title: top.HR("Welcome to Heurist"), //Tip of the day
                 resizeStop: function( event, ui ) {
                     //that.wcontainer.css('width','100%');
                     //.css({clear:'both'})
@@ -141,7 +141,12 @@ $.widget( "heurist.help_tips", {
 
 });
 
-// Show as dialog
+
+/**
+* Show Tip of the Day/Getting strated dialog
+* 
+* @param verify
+*/
 function showTipOfTheDay(verify){
     
     if(verify){

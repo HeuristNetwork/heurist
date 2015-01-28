@@ -349,10 +349,12 @@
                     "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
                     "help"=>HEURIST_HELP,
-                    "version"=>HEURIST_VERSION,
+                    "version"=>'111111', //HEURIST_VERSION,
                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
-                    "dbowner_email"=>@$dbowner['ugr_eMail'])
+                    "dbowner_email"=>@$dbowner['ugr_eMail'],
+                    "db_total_records"=>$this->get_system('sys_RecordCount'))
             );
+            
             return $res;
         }
 
@@ -666,6 +668,8 @@
                     $this->addError(HEURIST_SYSTEM_FATAL, "Unable to read sysIdentification", $mysqli->error);
                     return null;
                 }
+                
+                $this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
             }
             return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
         }
