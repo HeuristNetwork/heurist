@@ -108,6 +108,10 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
     $mode_dir = @$_REQUEST['mode'];
     if(!$mode_dir) $mode_dir = 1; //by default - file
+    if($mode_dir==2 && !defined('HEURIST_FAIMS_DIR')){
+        $mode_dir = 1;
+        $step = 0;  
+    } 
 
     $upload = @$_FILES["file"];
     $dbname_faims = null;
@@ -239,7 +243,16 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";
         print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
         print "<div><input type='radio' ".($mode_dir==1?"checked='true'":"")." name='mode' value='1'><div class='lbl_form'>Upload FAIMS db or project tar:</div><input type='file' name='file'></div>";
         print "<div><input type='radio' ".($mode_dir==0?"checked='true'":"")." name='mode' value='0'><div class='lbl_form'>Or specify server path to FAIMS database:</div><input name='faims' value='".$dbname_faims."' size='80'></div>";
-        print "<div><input type='radio' ".($mode_dir==2?"checked='true'":"")." name='mode' value='2'><div class='lbl_form'>Or select from the list of modules:</div><select name='faims_module'>".getListOfModules()."</select></div>";
+        if(defined('HEURIST_FAIMS_DIR')){
+            $options = getListOfModules();
+            if(""==$options){
+                print "<div><input type='radio' disabled><div class='lbl_form'>Or select from the list of modules:</div>No module tarballs available in path: ".HEURIST_FAIMS_DIR."</div>";
+            }else{
+                print "<div><input type='radio' ".($mode_dir==2?"checked='true'":"")." name='mode' value='2'><div class='lbl_form'>Or select from the list of modules:</div><select name='faims_module'>".$options."</select></div>";
+            }
+        }else{
+            print "<div>If you need to import existing FAIMS modules from the FAIMS server, ask the sysadmin to configure the path for module tarball files in heuristConfigIni.php</div>";
+        }
         
         print "<div><div class='lbl_form'>Check to verify structure (no data import):</div><input name='showstr' value='1' type='checkbox'></div>";
         print "<div><div class='lbl_form'></div><input type='submit' value='Start' /></div>";
@@ -1811,8 +1824,9 @@ function getListOfModules(){
          $list = recurse_find_modules(HEURIST_FAIMS_DIR); 
 //DEBUG error_log(HEURIST_FAIMS_DIR."  ".print_r($list, true));         
          foreach($list as $idx=>$module){
-              $res = $res."<option value='".htmlspecialchars($module["path"])."'>".htmlspecialchars($module["name"])."</option>";
+             $res = $res."<option value='".htmlspecialchars($module["path"])."'>".htmlspecialchars($module["name"])."</option>";
          }
+        
     }
     return $res;
 }

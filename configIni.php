@@ -97,7 +97,7 @@ $websiteThumbnailPassword = "";
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
 
-//$defaultFaimsModulesPath = '/var/www/faims/modules/';
+$defaultFaimsModulesPath = ""; //'/var/www/faims/modules/';
 
 if (is_file($parentIni)){
 	include_once($parentIni);

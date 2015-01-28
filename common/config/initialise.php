@@ -456,15 +456,14 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
          if(file_exists($defaultFaimsModulesPath) && is_dir($defaultFaimsModulesPath)){
              define('HEURIST_FAIMS_DIR', $defaultFaimsModulesPath);
          }
-         //testDirWriteableAndDefine('HEURIST_FAIMS_DIR', $defaultFaimsModulesPath, "Faims modules folder", false);
     }
+    /* should be explicitely defined
     if (!defined('HEURIST_FAIMS_DIR')) {
          $path = HEURIST_FILESTORE_DIR . 'faims';
          if(file_exists($path) && is_dir($path)){
              define('HEURIST_FAIMS_DIR', $path);
          }
-         //testDirWriteableAndDefine('HEURIST_FAIMS_DIR', HEURIST_FILESTORE_DIR . 'faims', "Faims modules folder");
-    }
+    }*/
     
 //--------------------------------------------------------------------------------------------------------------
 

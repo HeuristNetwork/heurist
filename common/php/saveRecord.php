@@ -474,7 +474,7 @@
                         jsonError("invalid enumeration value \"$val\"");
                         }
                         */
-                        $bdVal = "'" . $val . "'";
+                        $bdVal = "'" . mysql_real_escape_string($val) . "'";
                         break;
 
                     case "resource":
