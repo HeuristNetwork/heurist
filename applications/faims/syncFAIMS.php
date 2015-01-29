@@ -103,6 +103,11 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         ." Please ask your system administrator to install this extension. See <put in appropriate URL to doco> for installation information.</div></body></html>";
         exit();
     }
+    
+    if(!openSQLiteDb(':memory:')){
+        exit();
+    }
+    
 
     $step = @$_REQUEST['step'];
 
@@ -271,45 +276,13 @@ print "<br>".$upload["name"]."   ".$tarfile."<br>";
         print "DB file not found";
         exit();
     }
-
-    $dbfaims = new SQLite3($dbname_faims); //':memory:');
+    
+    $dbfaims = openSQLiteDb($dbname_faims);
     if ( !$dbfaims ) {
         print "<div style='color:red; font-weight:bold;padding:10px'>Cannot open the database</div>";
         exit();
     }
-
-    # reporting some version info
-    $rs = $dbfaims->query('SELECT sqlite_version()');
-    while ($row = $rs->fetchArray())
-    {
-      print "<h3>Server running: SQLite version: $row[0]</h3>&nbsp;";
-    }
-        
-        
-    $use_Spatialite = true;    
-        
-    if($use_Spatialite){              //TEMP
-
-    # loading SpatiaLite as an extension
-    $dbfaims->loadExtension('libspatialite.so');
-
-    # enabling Spatial Metadata
-    # using v.2.4.0 this automatically initializes SPATIAL_REF_SYS
-    # and GEOMETRY_COLUMNS
-    $dbfaims->exec("SELECT InitSpatialMetadata()");
-
-    $rs = $dbfaims->query('SELECT spatialite_version()');
-    if($rs){
-        while ($row = $rs->fetchArray())
-        {
-            print "<h3>Server running: SpatiaLite version: $row[0]</h3>";
-        }
-    }else{
-            print "<div style='color:red; font-weight:bold;padding:10px'>Cannot detect SQLite SpatiaLite version. Please verify installation</div>";
-            exit();
-    }
-
-    }  //use spatialite
+    $dbfaims->close();
 
      print "<br>";
 /* THIS IS ORIGINAL BRIAN QUERY TO RETRIEVE SPATIAL DATA
@@ -1867,6 +1840,48 @@ function recurse_find_modules($folder) {
         closedir($dh);
     }
     return $res;
+}
+
+function openSQLiteDb($dbname_faims){
+    $dbfaims = new SQLite3($dbname_faims); //':memory:');
+    if ( !$dbfaims ) {
+        print "<div style='color:red; font-weight:bold;padding:10px'>Cannot open the database</div>";
+        return false;
+    }
+
+    # reporting some version info
+    $rs = $dbfaims->query('SELECT sqlite_version()');
+    while ($row = $rs->fetchArray())
+    {
+      print "<h3>Server running: SQLite version: $row[0]</h3>&nbsp;";
+    }
+        
+    $use_Spatialite = true;    
+        
+    if($use_Spatialite){              //TEMP
+
+    # loading SpatiaLite as an extension
+    $dbfaims->loadExtension('libspatialite.so');
+
+    # enabling Spatial Metadata
+    # using v.2.4.0 this automatically initializes SPATIAL_REF_SYS
+    # and GEOMETRY_COLUMNS
+    $dbfaims->exec("SELECT InitSpatialMetadata()");
+
+    $rs = $dbfaims->query('SELECT spatialite_version()');
+    if($rs){
+        while ($row = $rs->fetchArray())
+        {
+            print "<h3>Server running: SpatiaLite version: $row[0]</h3>";
+        }
+    }else{
+        print "<div style='color:red; font-weight:bold;padding:10px'>Cannot detect SQLite SpatiaLite version. Please verify installation</div>";
+        return false;
+    }
+
+    }  //use spatialite
+    
+    return $dbfaims;
 }
 ?>
   </div>
