@@ -129,6 +129,8 @@ function hMapping(_map, _timeline, _basePath) {
                 return; 
         }
         
+        TimeMapItem.openInfoWindowBasic = _showPopupInfo;
+        
         // Initialize TimeMap
         tmap = TimeMap.init({
             mapId: mapdiv_id, // Id of gmap div element (required)
@@ -141,7 +143,7 @@ function hMapping(_map, _timeline, _basePath) {
                 //showMapCtrl: true,
                 //ART 201302 useMarkerCluster: (mapdata.count_mapobjects<300),
                 // TODO onlyTimeline: false, //TODO (mapdata.count_mapobjects<1),
-                /*
+                /*                                        
                 mapZoom: 1, //default zoom
                 centerMapOnItems: bounds ? false : true,
                 showMapCtrl: false,
@@ -222,6 +224,22 @@ function hMapping(_map, _timeline, _basePath) {
         _showSelection(false);
         _renderTimelineZoom();
         _zoomTimeLineToAll();
+        
+        //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
+        var timeline = $("#"+timelinediv_id);
+        var tlband0 = timeline.find("#timeline-band-0");
+        
+        var icons = tlband0.find('.timeline-band-layer-inner').find('.timeline-event-icon');
+        
+        var ids = icons.map(function() {
+                return $(this).position().top; //parseInt(, 10);
+                }).get();
+        
+        var highest =  Math.max.apply(Math, ids) + 26;
+        highest = Math.max(timeline.height(), highest);
+        
+        tlband0.css('height', highest+'px');
+        
     }
     
     
@@ -322,6 +340,9 @@ function hMapping(_map, _timeline, _basePath) {
             if(items_to_update.length>0) {
                 var lastRecID = (selection)?selection[selection.length-1]:-1;
                 
+                var tlband0 = $("#"+timelinediv_id).find("#timeline-band-0");
+                var keep_height = tlband0.height();
+                
                 dataset.hide();
                 
                 var newitem;
@@ -339,6 +360,8 @@ function hMapping(_map, _timeline, _basePath) {
                 dataset.show();
                 //_zoomTimeLineToAll(); //
                 //tmap.timeline.layout();
+                
+                tlband0.css('height', keep_height+'px');
             }
            
             //item.timeline.layout();
@@ -358,10 +381,61 @@ function hMapping(_map, _timeline, _basePath) {
         }*/
         
         if(lastSelectedItem){
+            //_showPopupInfo(item);
             TimeMapItem.openInfoWindowBasic.call(lastSelectedItem);
             //lastSelectedItem.openInfoWindow();
         }
     }
+    
+    function _showPopupInfo(){
+        
+            var item = this,
+                html = "<div>!!!</div>"+item.getInfoHtml(),
+                ds = item.dataset,
+                placemark = item.placemark;
+            // scroll timeline if necessary
+            if (!item.onVisibleTimeline()) {
+                ds.timemap.scrollToDate(item.getStart());
+            }
+            // open window
+            if (item.getType() == "marker" && placemark.api) {
+                placemark.setInfoBubble(html);
+                placemark.openBubble();
+                // deselect when window is closed
+                item.closeHandler = placemark.closeInfoBubble.addHandler(function() {
+                    // deselect
+                    ds.timemap.setSelected(undefined);
+                    // kill self
+                    placemark.closeInfoBubble.removeHandler(item.closeHandler);
+                });
+            } else {
+                    /*
+                    var ebt = item.event;
+                    var elmt = this._eventIdToElmt[evt.getID()];
+                    if (elmt) {
+                        var c = SimileAjax.DOM.getPageCoordinates(elmt);
+                        this._showBubble(c.left + elmt.offsetWidth / 2, c.top + elmt.offsetHeight / 2, evt);
+                    }
+
+        Timeline.OriginalEventPainter.prototype._showBubble = function(x, y, evt) {
+            var div = document.createElement("div");
+            var themeBubble = this._params.theme.event.bubble;
+            evt.fillInfoBubble(div, this._params.theme, this._band.getLabeller());
+
+            SimileAjax.WindowManager.cancelPopups();
+            SimileAjax.Graphics.createBubbleForContentAndPoint(div, x, y,
+                themeBubble.width, null, themeBubble.maxHeight);
+        };            */
+                
+                
+                //_showBubble
+                //item.map.openInfoWindow
+                
+                item.map.openBubble(item.getInfoPoint(), html);
+                item.map.tmBubbleItem = item;
+            }
+    }
+    
 
     function _renderTimelineZoom(){
         // Zoomline div styling

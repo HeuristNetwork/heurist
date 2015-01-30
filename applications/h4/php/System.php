@@ -349,7 +349,7 @@
                     "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
                     "help"=>HEURIST_HELP,
-                    "version"=>'111111', //HEURIST_VERSION,
+                    "version"=>HEURIST_VERSION,
                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "db_total_records"=>$this->get_system('sys_RecordCount'))
