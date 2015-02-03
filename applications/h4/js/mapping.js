@@ -129,7 +129,7 @@ function hMapping(_map, _timeline, _basePath) {
                 return; 
         }
         
-        TimeMapItem.openInfoWindowBasic = _showPopupInfo;
+        //art 020215  TimeMapItem.openInfoWindowBasic = _showPopupInfo;
         
         // Initialize TimeMap
         tmap = TimeMap.init({
@@ -217,7 +217,7 @@ function hMapping(_map, _timeline, _basePath) {
         
         var dataset = tmap.datasets.main;
         dataset.each(function(item){
-             item.opts.openInfoWindow = _onItemSelection;
+//art 020215             item.opts.openInfoWindow = _onItemSelection;
         });
         
         //highlight selection
@@ -239,6 +239,9 @@ function hMapping(_map, _timeline, _basePath) {
         highest = Math.max(timeline.height(), highest);
         
         tlband0.css('height', highest+'px');
+        
+        //asign tooltips for all 
+        
         
     }
     
@@ -352,7 +355,7 @@ function hMapping(_map, _timeline, _basePath) {
                         //dataset.items.push(items_to_update[i]);
                         newitem = dataset.loadItem(items_to_update_data[i]);
                         
-                        newitem.opts.openInfoWindow = _onItemSelection;
+                        //art 020215 newitem.opts.openInfoWindow = _onItemSelection;
                         if(lastRecID==newitem.opts.recid){
                             lastSelectedItem = newitem;
                         }
@@ -637,6 +640,67 @@ function hMapping(_map, _timeline, _basePath) {
                 }, 1000);
         }
     }
+    
+    function _printMap() {
+        
+          if(!gmap) return;
+        
+          var map = gmap;          
+
+          tmap.getNativeMap().setOptions({
+                panControl: false,
+                zoomControl: false,
+                mapTypeControl: false,
+                scaleControl: false,     
+                overviewMapControl: false,
+                rotateControl: false
+          });
+         
+          var popUpAndPrint = function() {
+            dataUrl = [];
+         
+            $('#map canvas').filter(function() {
+              dataUrl.push(this.toDataURL("image/png"));
+            })
+         
+            var container = document.getElementById('map'); //map-canvas
+            var clone = $(container).clone();
+         
+            var width = container.clientWidth
+            var height = container.clientHeight
+         
+            $(clone).find('canvas').each(function(i, item) {
+              $(item).replaceWith(
+                $('<img>')
+                  .attr('src', dataUrl[i]))
+                  .css('position', 'absolute')
+                  .css('left', '0')
+                  .css('top', '0')
+                  .css('width', width + 'px')
+                  .css('height', height + 'px');
+            });
+         
+            var printWindow = window.open('', 'PrintMap',
+              'width=' + width + ',height=' + height);
+            printWindow.document.writeln($(clone).html());
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+         
+            tmap.getNativeMap().setOptions({
+                panControl: true,
+                zoomControl: true,
+                mapTypeControl: true,
+                scaleControl: true,     
+                overviewMapControl: true,
+                rotateControl: true
+            });
+          };
+         
+          setTimeout(popUpAndPrint, 500);
+    }    
+    
 
     //public members
     var that = {
@@ -659,8 +723,11 @@ function hMapping(_map, _timeline, _basePath) {
             if(gmap){ //fix google map bug
                 gmap.resizeTo(0,0)
             }
-        }
+        },
 
+        printMap: function(){
+             _printMap();
+        }
     }
 
     _init(_map, _timeline, _basePath);

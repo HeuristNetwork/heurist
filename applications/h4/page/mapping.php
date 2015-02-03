@@ -40,6 +40,10 @@
     <!-- HEAD -->
     <head>
         <title><?=HEURIST_TITLE ?></title>
+
+        <link rel=icon href="../favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <!-- Styles -->
@@ -101,17 +105,22 @@
                         //loads localization
                         top.HR = top.HAPI4.setLocale(prefs['layout_language']); 
                     }
-                    top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                            top.HEURIST4.rectypes = response.data.rectypes;
-                            top.HEURIST4.terms = response.data.terms;
-                            top.HEURIST4.detailtypes = response.data.detailtypes;
-                            
-                            onMapInit();
-                        }else{
-                            top.HEURIST4.util.showMsgErr('Can not obtain database definitions');
-                        }
-                    });
+                    if(!top.HEURIST4.rectypes){
+                        top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                                top.HEURIST4.rectypes = response.data.rectypes;
+                                top.HEURIST4.terms = response.data.terms;
+                                top.HEURIST4.detailtypes = response.data.detailtypes;
+                                
+                                onMapInit();
+                            }else{
+                                top.HEURIST4.util.showMsgErr('Can not obtain database definitions');
+                            }
+                        });
+                    }else{
+                        onMapInit();
+                    }
+                    
                 }else{
                     top.HEURIST4.util.showMsgErr('Can not init HAPI');    
                 }
@@ -145,7 +154,7 @@
                 // Perform database query if possible
                 if( !top.HEURIST4.util.isempty(q) )
                 {
-                    top.HAPI4.RecordMgr.search({q: q, w: "all", f:"map", l:200},
+                    top.HAPI4.RecordMgr.search({q: q, w: "all", f:"map", l:1000},
                         function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
                                 console.log("onMapInit response");
@@ -161,7 +170,48 @@
                         }
                     );                     
                 }
+                
+                
+                //init buttons
+                $("#btnPrint").button({text:false, icons: {
+                            primary: "ui-icon-print"
+                 }})
+                 .click(mapping.printMap);
+
+                $("#btnEmbed").button({text:false, icons: {
+                            primary: "ui-icon-gear"
+                 }})
+                 .click(showEmbedDialog);
+                
             }
+            
+            function showEmbedDialog(){
+                
+                 var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+                 query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
+                 var url = top.HAPI4.basePath+'page/mapping.php' + query;
+
+                 //document.getElementById("linkTimeline").href = url;
+
+                 document.getElementById("code-textbox").value = '<iframe src="' + url +
+                                             '" width="800" height="650" frameborder="0"></iframe>';
+
+                 //var url_kml = top.HAPI4.basePathOld+"export/xml/kml.php?" + query;
+
+                 //document.getElementById("linkKml").href = url_kml;
+                 
+                 var $dlg = $("#embed-dialog");
+                 
+                 $dlg.dialog({
+                    autoOpen: true,
+                    height: 240,
+                    width: 700,
+                    modal: true,
+                    resizable: false,
+                    title: top.HR('Publish Map')
+                 });
+            }
+            
             
         </script>
 
@@ -183,13 +233,17 @@
                     <option value="-1" selected="selected" disabled="disabled">None</option>
                 </select>
                 
+                <button id="btnPrint" style="position: fixed; right: 40">Print</button>
+                <button id="btnEmbed" style="position: fixed; right: 10">Embed</button>
+                
+                
                 <!-- Menu -->
-                <select id="menu" style="position: fixed; right: 10">
+                <!--<select id="menu" style="position: fixed; right: 10">
                     <option value="-1" selected="selected" disabled="disabled">Menu</option>
                     <option>Google Map/Timeline</option>
                     <option>Google Earth</option>
                     <option>Embed Map Code</option>
-                </select>
+                </select>-->
                 
                 <!-- Legend -->
                 <div id="legend" style="background-color: rgba(0, 0, 0, 0.7); color:#eee; padding:8px">
@@ -203,6 +257,11 @@
             <div class="ui-layout-south">
                 <div id="timeline" style="width:100%;height:100%;overflow-y:auto;"></div>
             </div> 
+        </div>
+        <div id="embed-dialog" style="display:none">
+            <p>Embed this Google Map (plus timeline) in your own web page: Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. </p>
+            <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+            <p>Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status. </p>
         </div>
     </body>
 </html>

@@ -47,6 +47,13 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
 
+
+    composeHeuristQuery2: function(params){
+        if(params)
+            return top.HEURIST4.util.composeHeuristQuery(params.q, params.w, params.rules, params.notes);
+        else
+            return '?';
+    },
     
     composeHeuristQuery: function(query, domain, rules, notes){
             var query_to_save = []; 
