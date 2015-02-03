@@ -44,6 +44,15 @@
         <title>Zotero synchronization</title>
         <link rel=stylesheet href="../../common/css/global.css" media="all">
         <link rel=stylesheet href="../../common/css/admin.css" media="all">
+        <script>
+            function __showLoading(){
+                var ele = document.getElementById('divStart2');
+                ele.style.display = 'none';
+                ele = document.getElementById('divLoading');
+                ele.style.display = 'block';
+                return true;
+            }        
+        </script>
     </head>
 
     <body class="popup">
@@ -224,8 +233,11 @@
                 $msg = $msg."Proxy Authentication Required, please ask sysadmin to set it";
             }
             print $msg."</div>";
-        }else if(!items){
+        }else if(!$items){
             print "<div style='color:red'><br />Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
+            if($code==0){
+                print "<div style='color:red'><br />Verify your Heurist proxy settings.</div>";
+            }
         }else{
 
             $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,
@@ -235,8 +247,9 @@
 
             print "<div>Count items in Zotero: $totalitems</div>";
             if($totalitems>0){
-                print "<div><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
-                "&lib_key=".$lib_key_idx."'><button>Start</button></a></div>";
+                print "<div id='divStart2'><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
+                "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button>Start</button></a></div>";
+                print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../common/images/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
             }
 
 
