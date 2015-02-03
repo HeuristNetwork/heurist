@@ -215,12 +215,14 @@
             
                                 // ID
                                 $rt_ID = $row[0];
+                                $title = htmlspecialchars($row[1]);
+                                
                                 echo "<td align='center'>" .$rt_ID. "</td>";
                                 
                                 // Image  
                                 $title = $row[1];
                                 $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                                $img = "<img src='../common/images/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                                $img = "<img src='../common/images/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                                 echo "<td align='center'>$img</td>";
                                 
                                 // Type

@@ -48,6 +48,7 @@
 	if (($_POST["rectype"] == RT_BUG_REPORT) && defined('HEURIST_MAIL_TO_BUG')){
 			$toEmailAddress = HEURIST_MAIL_TO_BUG;
 	}
+    
 	if(!(isset($toEmailAddress) && $toEmailAddress)){
 		print '({"error":"The owner of this instance of Heurist has not defined either the info nor system emails"})';
 		exit();
@@ -74,7 +75,7 @@
 		if(defined('HEURIST_MAIL_TO_BUG')){
 			$toEmailAddress = HEURIST_MAIL_TO_BUG;
 		}
-
+        
 		$bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
 
 		$geekMail->from("bugs@heuristscholar.org", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
@@ -123,6 +124,9 @@
 	$key_file = "type:".DT_BUG_REPORT_FILE;
 	foreach ($_POST as $key => $value)
 	{
+        
+//debug error_log("FILE=".$key." == ".print_r($value, true));
+        
 		if (is_array($value) && $key == $key_file ) {
 			foreach ($value as $subvalue) {
 				if($subvalue){
@@ -151,11 +155,18 @@
 			/*****DEBUG****///DEBUG error_log(">>>> ".HEURIST_FILESTORE_DIR."/".$row[0]);
 
 			if ($row[6]) {
-				$filename = $row[5].$row[6]; // post 18/11/11 proper file path and name
+                // post 18/11/11 proper file path and name    
+                if($row[5]){
+                    $filename = $row[5].$row[6];
+                }else{
+                    $filename = HEURIST_FILESTORE_DIR.$row[6];
+                }
+                
 			} else {
-				$filename = HEURIST_FILESTORE_DIR."/".$row[0]; // pre 18/11/11 - bare numbers as names, just use file ID
+				$filename = HEURIST_FILESTORE_DIR.$row[0]; // pre 18/11/11 - bare numbers as names, just use file ID
 			}
 
+//debug error_log("ATTACH File ".$filename);            
 			$geekMail->attach($filename);
 			array_push($files_arr, array($row[1],$row[3])); //name, ext   $row);
 		}
@@ -246,7 +257,8 @@
 	}
 
 	// converts _POST array into string
-	//$message = json_format($_POST);error_log(">>>>>".print_r($arr, true));
+	//$message = json_format($_POST);
+    //error_log(">>>>>".print_r($arr, true));
 
 	$message =  json_encode($arr);
 
