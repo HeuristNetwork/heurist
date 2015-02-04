@@ -34,7 +34,11 @@
     require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
     require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 
-    define("DT_ZOTERKEY", 94);
+    $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
+    if($dt_SourceRecordID==0){
+        print "Detail type 'source record id' not defined";
+        return;
+    }
 ?>
 
 <html>
@@ -323,7 +327,7 @@
 
                     // 3) try to search record in database by zotero id
                     $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
-                    "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".DT_ZOTERKEY." and d.dtl_Value='".$zotero_itemid."'";
+                    "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".$dt_SourceRecordID." and d.dtl_Value='".$zotero_itemid."'";
                     $res = mysql_query($query);
                     if($res){
                         $row = mysql_fetch_array($res);
@@ -481,6 +485,9 @@
                         }
                     }//for fields in content
 
+                    
+                    echo print_r($details, true);
+                    
 
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid);
                     if($new_recid){
@@ -488,7 +495,7 @@
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
                     }
-
+                    
                 }//entry
 
             }//end loop by items in fetch
@@ -862,7 +869,7 @@
         if( count($details)>0){
 
             if($zotero_itemid){
-                $details["t:".DT_ZOTERKEY] = array("0"=>$zotero_itemid);
+                $details["t:".$dt_SourceRecordID] = array("0"=>$zotero_itemid);
             }
             // 8) save rtecord
             $ref = null;
@@ -918,7 +925,7 @@
                 }
 
             }
-
+            
         }
         return $new_recid;
     }

@@ -627,7 +627,7 @@
             foreach ($badIdInsertQueryValues as $valueSet ) {
                 mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . $valueSet);
                 if (mysql_error()) {
-                    errSaveRec("db error while inserting '" . $valueSet . "' for record ID ".$recordID." error : ".mysql_error());
+                    errSaveRec("db error while inserting(2) '" . $valueSet . "' for record ID ".$recordID." error : ".mysql_error());
                     return array("error" => "record ID = $recordID record type = $recordType ");
                 }
                 $new_bdID = mysql_insert_id();
