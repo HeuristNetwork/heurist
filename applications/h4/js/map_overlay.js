@@ -18,12 +18,12 @@ function addMapOverlay(_map) {
     });
     
     // Load Map Documents & Map Layers
-    var api = "../php/api/map_data.php" + window.location.search;
-    console.log("API call URL: " + api);
+    var api = top.HAPI4.basePath + "php/api/map_data.php" + window.location.search;
+//console.log("API call URL: " + api);
     $.getJSON(api, function(_data) {
         data = _data;
-        console.log("DATA");
-        console.log(data);
+//console.log("DATA");
+//console.log(data);
 
         // Have any map documents been defined?
         if(data.length > 0) {
@@ -43,7 +43,7 @@ function addMapOverlay(_map) {
 function addOptions() {
     // Show options in dropdown
     for(var i = 0; i < data.length; i++) {
-        $("#map-doc-select").append("<option value='"+i+"'>["+data[i].id+"] "+data[i].title+"</option>");
+        $("#map-doc-select").append("<option value='"+data[i].id+"'>["+data[i].id+"] "+data[i].title+"</option>");
     } 
     
     // Option listener
@@ -53,7 +53,16 @@ function addOptions() {
         emptyLegend();  
         
         // Show overlays for the selected option 
-        var index = $(this).prop("value");
+        var index = -1;
+        var map_document_id = Number($(this).val()); //prop("value");
+        for(var i=0;i<data.length;i++){
+            if(map_document_id==data[i].id){
+                index = i;
+                break;
+            }
+        }
+        
+        
         if(index >= 0 && index < data.length) {
             // Show overlay for selected Map Document
             addOverlays(data[index]);  

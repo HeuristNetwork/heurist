@@ -473,21 +473,27 @@ $.widget( "heurist.mainMenu", {
     exportKML: function(isAll){
 
         var q = "";
-        if(false && isAll){
-            if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
-                  q = encodeURIComponent(top.HEURIST4.current_query_request.q);
-            }
+        if(isAll){
+            
+            q = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+            
+                 if(q=='?'){
+                     Hul.showMsgDlg("Define query and perform search");
+                     return;
+                 }
+
+            
         }else{
             
             if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
                 Hul.showMsgDlg("Select at least one record to export");
                 return false;
             }
-            q = "ids:"+this._selectionRecordIDs.join(",");
+            q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
         }
 
         if(q!=''){
-            var url = top.HAPI4.basePathOld + "export/xml/kml.php?w=all&a=1&depth=1&q=" + q + "&db=" + top.HAPI4.database;
+            var url = top.HAPI4.basePathOld + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + top.HAPI4.database;
             window.open(url, '_blank');
         }
         

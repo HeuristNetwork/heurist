@@ -333,7 +333,7 @@
         $documents = array();
         
         // Select all Map Document types
-        $query = $recordQuery." WHERE d.rty_IDInOriginatingDB=".RT_MAP_DOCUMENT;
+        $query = $recordQuery." WHERE rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if ($res) {
@@ -351,8 +351,6 @@
         return $documents;
     }
     
-    
-
     // Initialize a System object that uses the requested database
     $system = new System();
     if( $system->init(@$_REQUEST['db']) ){                               

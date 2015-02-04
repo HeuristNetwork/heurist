@@ -46,6 +46,8 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+        <link rel="stylesheet" type="text/css" href="../ext/fancytree/skin-themeroller/ui.fancytree.css" />
+        <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
         <!-- Styles -->
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../style3.css">
@@ -82,7 +84,7 @@
         <!-- Initializing -->
         <script type="text/javascript">
         
-            var mapping;
+            var mapping, menu_layers, btn_layers;
 
             // Standalone check
             $(document).ready(function() {
@@ -173,6 +175,9 @@
                 
                 
                 //init buttons
+                
+                $("#btnExportKML").button().click(exportKML);
+                
                 $("#btnPrint").button({text:false, icons: {
                             primary: "ui-icon-print"
                  }})
@@ -182,7 +187,57 @@
                             primary: "ui-icon-gear"
                  }})
                  .click(showEmbedDialog);
-                
+
+                $("#btnMapNew").button({text:false, icons: {primary: "icon-globe"}})
+                        .click(mapNew);
+                $("#btnMapEdit").button({text:false, icons: {primary: "ui-icon-pencil"}})
+                        .click(mapEdit);
+
+<?php
+    $items = '';    
+    if(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0){
+        $items = $items.'<li id="menu-layer-'.RT_MAP_LAYER.'"><a href="#">Map layer</a></li>';
+    }
+    if(defined('RT_KML_LAYER') && RT_KML_LAYER>0){
+        $items = $items.'<li id="menu-layer-'.RT_KML_LAYER.'"><a href="#">KML</a></li>';
+    }
+    if(defined('RT_SHP_LAYER') && RT_SHP_LAYER>0){
+        $items = $items.'<li id="menu-layer-'.RT_SHP_LAYER.'"><a href="#">SHP</a></li>';
+    }
+    if(defined('RT_GEOTIFF_LAYER') && RT_GEOTIFF_LAYER>0){
+        $items = $items.'<li id="menu-layer-'.RT_GEOTIFF_LAYER.'"><a href="#">GeoTiff</a></li>';
+    }
+    if(defined('RT_QUERY_LAYER') && RT_QUERY_LAYER>0){
+        $items = $items.'<li id="menu-layer-'.RT_QUERY_LAYER.'"><a href="#">Query layer</a></li>';
+    }
+?>
+                menu_layers = $('<ul><?=$items?></ul>')
+                    .addClass('menu-or-popup')
+                    .css('position','absolute')
+                    .appendTo( $('body') )
+                    .menu({
+                        select: function( event, ui ) {
+                        var mode = ui.item.attr('id');
+                        mode = mode.substr(11);
+                        mapLayer(mode);
+                    }})
+                .hide();
+
+                btn_layers = $("#btnMapLayer").button({text:false, icons: {
+                            primary: "icon-reorder",
+                            secondary: "ui-icon-triangle-1-s"}});
+                            
+                btn_layers.click( function(e) {
+                                $('.menu-or-popup').hide(); //hide other
+                                var $menu_layers = $( menu_layers )
+                                .show()
+                                .position({my: "right top", at: "right bottom", of: btn_layers });
+                                $( document ).one( "click", function() { $menu_layers.hide(); });
+                                return false;
+                                });
+                        
+                 
+                 $("#mapToolbar").buttonset();
             }
             
             function showEmbedDialog(){
@@ -196,8 +251,6 @@
                  document.getElementById("code-textbox").value = '<iframe src="' + url +
                                              '" width="800" height="650" frameborder="0"></iframe>';
 
-                 //var url_kml = top.HAPI4.basePathOld+"export/xml/kml.php?" + query;
-
                  //document.getElementById("linkKml").href = url_kml;
                  
                  var $dlg = $("#embed-dialog");
@@ -210,6 +263,36 @@
                     resizable: false,
                     title: top.HR('Publish Map')
                  });
+            }
+            
+            function exportKML(){
+
+                 var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+                 if(query=='?'){
+                     Hul.showMsgDlg("Define query and perform search");
+                 }else{
+                     query = query + '&a=1&depth=1&db='+top.HAPI4.database;
+                     var url_kml = top.HAPI4.basePathOld+"export/xml/kml.php" + query;
+
+                     var win = window.open(url_kml, "_new");
+                 }
+            }
+            
+            function mapNew(){
+                
+                var rt = <?=RT_MAP_DOCUMENT?>;
+                
+                window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
+                
+            }
+            function mapEdit(){
+                var recID = $("#map-doc-select").val();
+                if(recID>0){
+                    window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                }
+            }
+            function mapLayer(rt){
+                window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
             }
             
             
@@ -229,9 +312,15 @@
             <div class="ui-layout-north" id="toolbar" style="display: block !important; height: 30px important; z-index:999">
                 <!-- Map document selector -->
                 <i>Map document:</i>
-                <select id="map-doc-select">
+                <select id="map-doc-select" class="text ui-widget-content ui-corner-all">
                     <option value="-1" selected="selected" disabled="disabled">None</option>
                 </select>
+                <span id="mapToolbar">
+                <button id="btnMapEdit">Edit current map</button>
+                <button id="btnMapNew">New map document</button>
+                <button id="btnMapLayer">New map layer</button>
+                </span>
+
                 
                 <button id="btnPrint" style="position: fixed; right: 40">Print</button>
                 <button id="btnEmbed" style="position: fixed; right: 10">Embed</button>
@@ -262,6 +351,7 @@
             <p>Embed this Google Map (plus timeline) in your own web page: Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. </p>
             <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
             <p>Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status. </p>
+            <p style="text-align:center"><button id="btnExportKML">Create KML for Google Earth</button></p>
         </div>
     </body>
 </html>
