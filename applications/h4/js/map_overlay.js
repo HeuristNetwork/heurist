@@ -67,6 +67,8 @@ function addOptions() {
             // Show overlay for selected Map Document
             addOverlays(data[index]);  
             
+            $("#legend").show();
+            
             // Listen to checkbox changes
             $("#legend input").change(function(e) {
                 // Hide or display the layer
@@ -76,7 +78,14 @@ function addOptions() {
                 // Update overlay
                 var overlay = overlays[index];
                 overlay.setVisibility(checked);                          
-            });      
+            });
+            
+            $("#btnMapEdit").button( "enable" );
+            $("#btnMapEdit").attr('title',"Edit current map "+data[index].title+" - add or remove map layers, change settings");
+        }else{
+            $("#btnMapEdit").button( "disable" );
+            $("#btnMapEdit").attr('title','');
+            $("#legend").hide();
         }
     });   
 }

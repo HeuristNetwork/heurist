@@ -129,7 +129,8 @@ function hMapping(_map, _timeline, _basePath) {
                 return; 
         }
         
-        //art 020215  TimeMapItem.openInfoWindowBasic = _showPopupInfo;
+        //art 020215  
+        TimeMapItem.openInfoWindowBasic = _showPopupInfo;
         
         // Initialize TimeMap
         tmap = TimeMap.init({
@@ -217,7 +218,8 @@ function hMapping(_map, _timeline, _basePath) {
         
         var dataset = tmap.datasets.main;
         dataset.each(function(item){
-//art 020215             item.opts.openInfoWindow = _onItemSelection;
+//art 020215             
+                item.opts.openInfoWindow = _onItemSelection;
         });
         
         //highlight selection
@@ -355,7 +357,8 @@ function hMapping(_map, _timeline, _basePath) {
                         //dataset.items.push(items_to_update[i]);
                         newitem = dataset.loadItem(items_to_update_data[i]);
                         
-                        //art 020215 newitem.opts.openInfoWindow = _onItemSelection;
+                        //art 020215 
+                        newitem.opts.openInfoWindow = _onItemSelection;
                         if(lastRecID==newitem.opts.recid){
                             lastSelectedItem = newitem;
                         }
@@ -384,8 +387,8 @@ function hMapping(_map, _timeline, _basePath) {
         }*/
         
         if(lastSelectedItem){
-            //_showPopupInfo(item);
-            TimeMapItem.openInfoWindowBasic.call(lastSelectedItem);
+            _showPopupInfo.call(lastSelectedItem);
+            //TimeMapItem.openInfoWindowBasic.call(lastSelectedItem);
             //lastSelectedItem.openInfoWindow();
         }
     }

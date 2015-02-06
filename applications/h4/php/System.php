@@ -151,7 +151,7 @@
                 define($defString, $id);
             } else {
                 //echo "\nRT DEFINING \"" . $defString . "\" AS " . $rtID;
-                define($defString, $rtID);
+                // define($defString, $rtID);
             }
         }
 
@@ -198,7 +198,7 @@
                 define($defString, $id);
             } else {
                 //echo "\nDT DEFINING \"" . $defString . "\" AS " . $dtID;
-                define($defString, $dtID);
+                // define($defString, $dtID);
             }
         }
 

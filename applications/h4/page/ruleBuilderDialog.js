@@ -64,7 +64,7 @@ function onInit(success) //callback function of hAPI initialization
         //$('#btn_apply').button().on('click', 3, applyRules);
         $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
-            autoOpen: true, width:800,
+            autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:800,
             position: { my: "right bottom", at: "right top", of: $('#btn_help') },
             show: {
                 effect: "slide",

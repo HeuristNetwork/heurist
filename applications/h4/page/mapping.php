@@ -46,10 +46,9 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../ext/fancytree/skin-themeroller/ui.fancytree.css" />
         <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
-        <!-- Styles -->
-        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        <!-- Styles
+        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
         <link rel="stylesheet" type="text/css" href="../style3.css">
 
         <!-- jQuery -->
@@ -82,9 +81,17 @@
         <script type="text/javascript" src="../js/hapi.js"></script>
 
         <!-- Initializing -->
+        
+        
+        <style> 
+            .ui-map-document { background-image: url(<?=HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'?>) !important;}
+            .ui-map-layer { background-image: url(<?=HEURIST_ICON_URL.RT_MAP_LAYER.'.png'?>) !important;}
+            .ui-map-datasource { background-image: url(<?=HEURIST_ICON_URL.RT_SHP_LAYER.'.png'?>) !important;}
+        </style>        
+        
         <script type="text/javascript">
         
-            var mapping, menu_layers, btn_layers;
+            var mapping, menu_datasets, btn_datasets;
 
             // Standalone check
             $(document).ready(function() {
@@ -102,11 +109,20 @@
             {
                 if(success) // Successfully initialized system
                 {
+                    var prefs = top.HAPI4.get_prefs();
                     if(!top.HR){
-                        var prefs = top.HAPI4.get_prefs();
                         //loads localization
                         top.HR = top.HAPI4.setLocale(prefs['layout_language']); 
                     }
+                    if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
+                        cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
+                            prefs['layout_theme']+'/jquery-ui.css" />');
+                    }else{
+                        //default BASE theme
+                        cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
+                    }
+                    $("head").append(cssLink);
+                    
                     if(!top.HEURIST4.rectypes){
                         top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -175,43 +191,80 @@
                 
                 
                 //init buttons
+                $("#toolbar").css('background','none');
                 
                 $("#btnExportKML").button().click(exportKML);
                 
                 $("#btnPrint").button({text:false, icons: {
-                            primary: "ui-icon-print"
+                            primary: "icon-print"
                  }})
                  .click(mapping.printMap);
 
                 $("#btnEmbed").button({text:false, icons: {
-                            primary: "ui-icon-gear"
+                            primary: "icon-gear"
                  }})
                  .click(showEmbedDialog);
 
-                $("#btnMapNew").button({text:false, icons: {primary: "icon-globe"}})
-                        .click(mapNew);
+                $("#btnEmbed").button({text:false, icons: {
+                            primary: "icon-gear"
+                 }})
+                 .click(showEmbedDialog);
+                 
+                 $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, function(){
+                        var $helper = $("#helper");
+                        if($helper.dialog( "isOpen" )){
+                            $helper.dialog( "close" );
+                        }else{
+                            $helper.dialog( "open" );
+                        }
+                 });
+                 $( "#helper" ).load(top.HAPI4.basePathOld+'context_help/mapping_overview.html');
+                 $( "#helper" ).dialog({
+                    autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:800,
+                    position: { my: "right top", at: "right bottom", of: $('#btn_help') },
+                    show: {
+                        effect: "slide",
+                        direction : 'right',
+                        duration: 1000
+                    },
+                    hide: {
+                        effect: "slide",
+                        direction : 'right',
+                        duration: 1000
+                    }
+                 });
+                 
+                 
+                 
+<?php
+    if(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){ 
+        
+                $items = '';    
+                if(defined('RT_KML_LAYER') && RT_KML_LAYER>0){
+                    $items = $items.'<li id="menu-layer-'.RT_KML_LAYER.'"><a href="#">KML</a></li>';
+                }
+                if(defined('RT_SHP_LAYER') && RT_SHP_LAYER>0){
+                    $items = $items.'<li id="menu-layer-'.RT_SHP_LAYER.'"><a href="#">SHP</a></li>';
+                }
+                if(defined('RT_GEOTIFF_LAYER') && RT_GEOTIFF_LAYER>0){
+                    $items = $items.'<li id="menu-layer-'.RT_GEOTIFF_LAYER.'"><a href="#">GeoTiff</a></li>';
+                }
+                if(defined('RT_TILED_IMAGE_LAYER') && RT_TILED_IMAGE_LAYER>0){
+                    $items = $items.'<li id="menu-layer-'.RT_TILED_IMAGE_LAYER.'"><a href="#">Tiled image</a></li>';
+                }
+                if(defined('RT_QUERY_LAYER') && RT_QUERY_LAYER>0){
+                    $items = $items.'<li id="menu-layer-'.RT_QUERY_LAYER.'"><a href="#">Query layer</a></li>';
+                }
+        
+?>        
+                $("#btnMapNew").button({ text:false, icons: {primary: 'ui-map-document'}}) 
+                        .click( function(){ addNewRecord(<?=RT_MAP_DOCUMENT?>);} );
                 $("#btnMapEdit").button({text:false, icons: {primary: "ui-icon-pencil"}})
                         .click(mapEdit);
+                $("#btnMapLayer").button({text:false, icons: {primary: "ui-map-layer"}})
+                        .click(function(){ addNewRecord(<?=RT_MAP_LAYER?>);});
 
-<?php
-    $items = '';    
-    if(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0){
-        $items = $items.'<li id="menu-layer-'.RT_MAP_LAYER.'"><a href="#">Map layer</a></li>';
-    }
-    if(defined('RT_KML_LAYER') && RT_KML_LAYER>0){
-        $items = $items.'<li id="menu-layer-'.RT_KML_LAYER.'"><a href="#">KML</a></li>';
-    }
-    if(defined('RT_SHP_LAYER') && RT_SHP_LAYER>0){
-        $items = $items.'<li id="menu-layer-'.RT_SHP_LAYER.'"><a href="#">SHP</a></li>';
-    }
-    if(defined('RT_GEOTIFF_LAYER') && RT_GEOTIFF_LAYER>0){
-        $items = $items.'<li id="menu-layer-'.RT_GEOTIFF_LAYER.'"><a href="#">GeoTiff</a></li>';
-    }
-    if(defined('RT_QUERY_LAYER') && RT_QUERY_LAYER>0){
-        $items = $items.'<li id="menu-layer-'.RT_QUERY_LAYER.'"><a href="#">Query layer</a></li>';
-    }
-?>
-                menu_layers = $('<ul><?=$items?></ul>')
+                menu_datasets = $('<ul><?=$items?></ul>')
                     .addClass('menu-or-popup')
                     .css('position','absolute')
                     .appendTo( $('body') )
@@ -219,25 +272,33 @@
                         select: function( event, ui ) {
                         var mode = ui.item.attr('id');
                         mode = mode.substr(11);
-                        mapLayer(mode);
+                        addNewRecord(mode);
                     }})
                 .hide();
 
-                btn_layers = $("#btnMapLayer").button({text:false, icons: {
+                btn_datasets = $("#btnMapDataSource").button({text:false, icons: {
                             primary: "icon-reorder",
                             secondary: "ui-icon-triangle-1-s"}});
                             
-                btn_layers.click( function(e) {
+                btn_datasets.click( function(e) {
                                 $('.menu-or-popup').hide(); //hide other
-                                var $menu_layers = $( menu_layers )
+                                var $menu_layers = $( menu_datasets )
                                 .show()
-                                .position({my: "right top", at: "right bottom", of: btn_layers });
+                                .position({my: "right top", at: "right bottom", of: btn_datasets });
                                 $( document ).one( "click", function() { $menu_layers.hide(); });
                                 return false;
                                 });
                         
                  
                  $("#mapToolbar").buttonset();
+<?php } else { ?>
+                 $("#mapSelector").hide();    
+                 $("#mapToolbar").hide(); 
+<?php
+     }
+?>                 
+                 
+                 
             }
             
             function showEmbedDialog(){
@@ -257,7 +318,7 @@
                  
                  $dlg.dialog({
                     autoOpen: true,
-                    height: 240,
+                    height: 320,
                     width: 700,
                     modal: true,
                     resizable: false,
@@ -277,21 +338,14 @@
                      var win = window.open(url_kml, "_new");
                  }
             }
-            
-            function mapNew(){
-                
-                var rt = <?=RT_MAP_DOCUMENT?>;
-                
-                window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
-                
-            }
+
             function mapEdit(){
                 var recID = $("#map-doc-select").val();
                 if(recID>0){
                     window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
                 }
             }
-            function mapLayer(rt){
+            function addNewRecord(rt){
                 window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
             }
             
@@ -309,22 +363,25 @@
             </div>
             
             <!-- Toolbar -->
-            <div class="ui-layout-north" id="toolbar" style="display: block !important; height: 30px important; z-index:999">
+            <div class="ui-layout-north" id="toolbar" style="display: block !important; height: 30px important; z-index:999;">
                 <!-- Map document selector -->
+                <span id="mapSelector">
                 <i>Map document:</i>
                 <select id="map-doc-select" class="text ui-widget-content ui-corner-all">
-                    <option value="-1" selected="selected" disabled="disabled">None</option>
+                    <option value="-1" selected="selected">None defined</option>
                 </select>
+                </span>
                 <span id="mapToolbar">
-                <button id="btnMapEdit">Edit current map</button>
+                <button id="btnMapEdit" disabled="disabled">Edit current map</button>
                 <button id="btnMapNew">New map document</button>
-                <button id="btnMapLayer">New map layer</button>
+                <button id="btnMapLayer">New Map Layer</button>
+                <button id="btnMapDataSource">New Data Source</button>
                 </span>
 
                 
-                <button id="btnPrint" style="position: fixed; right: 40">Print</button>
-                <button id="btnEmbed" style="position: fixed; right: 10">Embed</button>
-                
+                <button id="btnPrint" style="position: fixed; right: 70">Print</button>
+                <button id="btnEmbed" style="position: fixed; right: 40">Embed</button>
+                <button id="btn_help" style="position: fixed; right: 10">Help</button>
                 
                 <!-- Menu -->
                 <!--<select id="menu" style="position: fixed; right: 10">
@@ -335,7 +392,7 @@
                 </select>-->
                 
                 <!-- Legend -->
-                <div id="legend" style="background-color: rgba(0, 0, 0, 0.7); color:#eee; padding:8px">
+                <div id="legend" style="background-color: rgba(0, 0, 0, 0.7); color:#eee; padding:8px; display:none;">
                     <span style="font-size: 1.25em">Legend</span>
                     <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
                     <div class="content"></div>
@@ -348,10 +405,14 @@
             </div> 
         </div>
         <div id="embed-dialog" style="display:none">
-            <p>Embed this Google Map (plus timeline) in your own web page: Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. </p>
+            <p>Embed this Google Map (plus timeline) in your own web page:</p>
+            <p style="padding:1em 0 1em 0">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. </p>
             <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
-            <p>Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status. </p>
-            <p style="text-align:center"><button id="btnExportKML">Create KML for Google Earth</button></p>
+            <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status. </p>
+            <p style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>
+        </div>
+        
+        <div id="helper" title="Mapping Overview">
         </div>
     </body>
 </html>
