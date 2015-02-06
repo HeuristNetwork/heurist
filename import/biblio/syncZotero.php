@@ -85,6 +85,8 @@
             if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
                 die("Sorry, library key for Zotero synchronisation is not defined. To set it, go to Admin > Database > Advanced Properties");
             }
+            
+            //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
 
 
             $lib_keys = explode("|", HEURIST_ZOTEROSYNC);
@@ -285,6 +287,8 @@
 
 
         // 1) start loop: fetch items by 100
+        $cnt_updated = 0;
+        $cnt_added = 0;
         $start = 0;
         $fetch = min($_REQUEST['cnt'],100);
         $totalitems = $_REQUEST['cnt'];
@@ -494,7 +498,13 @@
                         if(count($unresolved_records)>0){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
+                        if($recId==$new_recid){
+                            $cnt_updated++;
+                        }else{
+                            $cnt_added++;
+                        }
                     }
+
                     
                 }//entry
 
@@ -504,6 +514,10 @@
 
         }// end of loop
 
+        
+        print "<div>Added: ".$cnt_added."</div>";
+        print "<div>Updated: ".$cnt_updated."</div>";
+        
 
         print "<div>Create/update resource records</div>";
 
@@ -514,6 +528,11 @@
         // $dt_id - field that must contain pointer to resource
         // $resource_rt_id - record type for resouce record
         // $resource_dt_id
+        
+        //DEBUG print "<br>Unresolved: ";
+        //DEBUG print print_r($unresolved_pointers, true);
+        
+        
 
         $ptr_cnt = 0;
         foreach($unresolved_pointers as $rec_id=>$pntdata)
@@ -526,12 +545,17 @@
             foreach($pntdata as $dt_id=>$recdata){  //detail id in main record
 
                 foreach($recdata as $resource_rt_id=>$resource_details){ //recordtype
+                
+                    //DEBUG print "<br>Try : ".print_r($resource_details, true);
 
                     $recource_recid = createResourceRecord($resource_rt_id, $resource_details);
 
                     if(!is_array($recource_recid)){
                         $recource_recid = array("0"=>$recource_recid);
                     }
+                    
+                    //DEBUG print "<br>Found for ".$rec_id." : ".print_r($recource_recid, true);
+                    
                     foreach($recource_recid as $idx=>$res_rec_id){
                         //update main record
                         $inserts = array($rec_id, $dt_id, $res_rec_id, 1);
@@ -544,7 +568,7 @@
             }
 
         }
-        print "<br><br>Total count of resolved pointers:".$ptr_cnt;
+        print "<br><br>Total count of RESOLVED pointers:".$ptr_cnt;
 
         // done - show report log
 
@@ -862,7 +886,7 @@
     */
     function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid){
 
-        global $rep_errors_only;
+        global $rep_errors_only, $dt_SourceRecordID;
 
         $new_recid = null;
 
