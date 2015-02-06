@@ -188,7 +188,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 							}
 
                             print '<id>'.$row[0].'</id>';
-							print '<name>'.$row[2].'</name>';
+							print '<name>'.htmlspecialchars ($row[2]).'</name>';
 							if($row[1]){
   								print '<description><![CDATA[ <a href="'.$row[1].'">link</a>]]></description>'; 										}
 							print $kml;
