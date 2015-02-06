@@ -918,8 +918,9 @@ CREATE TABLE woots (
  INSERT INTO sysIdentification(sys_ID,sys_dbRegisteredID,sys_dbVersion,sys_dbSubVersion,
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
-  sys_UGrpsdatabase,sys_OwnerGroupID)
-  VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1);
+  sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior)
+  VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype');
+  
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   --       This reflects the actual state of the database structure in H3CORECLONE which was pasted in here
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
