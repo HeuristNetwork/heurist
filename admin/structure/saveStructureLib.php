@@ -413,6 +413,7 @@
 
 		$ret = 0;
 		if($mask){
+                $parameters = array("");
 				$val = titlemask_make($mask, $rtyID, 1, null, _ERR_REP_SILENT); //make coded
                 $parameters = addParam($parameters, "s", $val);
 
