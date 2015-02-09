@@ -99,6 +99,9 @@ function import() {
 		$error = true;
 	}
 
+    
+    $startedTransaction = false;
+    
 	if(!$error) {
 		mysql_query("start transaction");
 		$startedTransaction = true;
@@ -168,7 +171,7 @@ function import() {
 		echo "prompt";
 	//general error condition
 	} else {
-		if ($startedTransaction) mysql_query("rollback");
+		if (isset($startedTransaction) && $startedTransaction) mysql_query("rollback");
 		if (mysql_error()) {
 			$statusMsg = "MySQL error: " . mysql_error() . "<br />";
 		} else  {
@@ -212,7 +215,8 @@ function importDetailType($importDty) {
 			makeLogEntry("Using Field-type Group", -1, " 'Imported' as #$importDtyGroupID");
 		}
 	}
-/*****DEBUG****///error_log("import dty $importDtyID 1".($error?"error":""));
+/*****DEBUG****///error_log("import dty $importDtyID 1".($error?"error":"")."   term_id=".@$importDty['dty_JsonTermIDTree']);
+
 
 	if(!$error && @$importDty['dty_JsonTermIDTree'] && $importDty['dty_JsonTermIDTree'] != '') {
 		// term tree exist so need to translate to new ids
@@ -472,6 +476,7 @@ function importRectype($importRty) {
 			if(mysql_error()) {
 				$error = true;
 /*****DEBUG****///error_log("import rty $importRtyID 3bbb  ". mysql_error());
+
 				makeLogEntry("Importing Record-type", $importRtyID, "MySQL error importing record type - ".mysql_error());
 			} else {
 				$importedRecTypeID = mysql_insert_id();
@@ -489,6 +494,7 @@ function importRectype($importRty) {
 				if(mysql_num_rows($resDTY) == 0) {
 					$error = true;
 /*****DEBUG****///error_log("import rty $importRtyID 3cc  dtyID = $dtyID not in source db ");
+
 					makeLogEntry("<b>Error</b> Importing Field-type", $dtyID,
 					" '".$rtsFieldDef['rst_DisplayName']."' for record type #".$rtsFieldDef['rst_RecTypeID']." not found in the source db. Please contact owner of $sourceDBName");
 					return null; // missing detatiltype in importing DB
@@ -649,6 +655,8 @@ function getTopMostParentTerm($termId){
 }
 
 // function that translates all term ids in the passed string to there local/imported value
+// if term is not found it will be imported
+//
 function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntryString) {
 	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID,$importVocabs;
 	if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
@@ -656,9 +664,9 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 	}
 	makeLogEntry("Term Translation", -1, "Translating $contextString terms $formattedStringOfTermIDs for $forEntryString");
 	$retJSonTermIDs = $formattedStringOfTermIDs;
-    
-    if("term tree"==$contextString){ //ARTEM: new way
 
+    if("term tree"==$contextString){ //ARTEM: new way
+    
         //new way    
         if(is_numeric($retJSonTermIDs)){ //this is vocabulary - take all children terms
             $termIDs = getCompleteVocabulary($retJSonTermIDs);
@@ -693,6 +701,7 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 			    $temp = substr($temp,0, strlen($temp)-1);
 		    }
 		    $termIDs = explode(":",$temp);
+            
 	    } else {
     /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
 		    $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
@@ -703,6 +712,7 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 
 
 	// Import terms
+    $isonce = true;
 	foreach ($termIDs as $importTermID) {
 		// importTerm
 		$translatedTermID = importTermID($importTermID);
@@ -710,12 +720,22 @@ function translateTermIDs($formattedStringOfTermIDs, $contextString, $forEntrySt
 		if ($translatedTermID == ""){
 			return "";
 		}
+        
 		//replace termID in string
-		$retJSonTermIDs = preg_replace("/\"".$importTermID."\"/","\"".$translatedTermID."\"",$retJSonTermIDs);
+        if(is_numeric($retJSonTermIDs)){
+            if($retJSonTermIDs==$importTermID && $isonce){
+                $isonce =false;
+                $retJSonTermIDs=$translatedTermID;
+            }
+        }else{
+		    $retJSonTermIDs = preg_replace("/\"".$importTermID."\"/","\"".$translatedTermID."\"",$retJSonTermIDs);
+        }
 	}
+    
+    
 	// TODO: update the ChildCounts
 	makeLogEntry("Term string", '', "Translated $formattedStringOfTermIDs to $retJSonTermIDs.");
-
+    
 	return $retJSonTermIDs;
 }
 
