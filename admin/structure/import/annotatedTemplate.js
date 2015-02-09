@@ -181,9 +181,16 @@ var dv = jQuery('#HeuristRecTypeSource');
 if(event.data=="heurist"){
 
 //document.getElementById('topbar').style.display = 'none';
-jQuery('#header-full').hide();
-jQuery('#topbar').hide();
-jQuery('#footer').hide();
+//hide elements - old way 
+//jQuery('#header-full').hide();
+//jQuery('#topbar').hide();
+//jQuery('#footer').hide();
+
+//new way 
+jQuery('#sidebar').hide();
+jQuery('#main-header').hide();
+jQuery('#main-footer').hide();
+
 
 //create button
 //HeuristRecTypeSource
