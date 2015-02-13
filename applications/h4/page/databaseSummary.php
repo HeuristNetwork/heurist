@@ -222,6 +222,7 @@
             
                                 // ID
                                 $rt_ID = $row["id"];
+                                $rectypeTitle = $row["title"];
                                 echo "<td align='center'>" .$rt_ID. "</td>";
                                 
                                 // Image  

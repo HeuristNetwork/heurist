@@ -76,6 +76,7 @@
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
         <script type="text/javascript" src="../js/mapping.js"></script>
         <script type="text/javascript" src="../js/map_overlay.js"></script>
+        <script type="text/javascript" src="../js/bubble.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
@@ -161,11 +162,14 @@
                 layout_opts.south__size = 200;
                 layout_opts.south__spacing_open = 7;
                 layout_opts.south__spacing_closed = 7;
-                $('#mapping').layout(layout_opts);
 
+                var mylayout = $('#mapping').layout(layout_opts);
+  
+  
+  
                 // Mapping data 
                 var mapdata = [];
-                mapping = new hMapping("map", "timeline", top.HAPI4.basePath);
+                mapping = new hMapping("map", "timeline", top.HAPI4.basePath, mylayout);
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
 
                 //t:26 f:85:3313  f:1:building
@@ -180,7 +184,8 @@
                                 
                                 // Show info on map
                                 var recset = new hRecordSet(response.data);
-                                mapping.load(recset.toTimemap());
+                                var mapdataset = recset.toTimemap();
+                                mapping.load(mapdataset);
 
                             }else{
                                 alert(response.message);
@@ -189,6 +194,15 @@
                     );                     
                 }
                 
+                
+                
+                //init popup for timeline                
+                $( document ).bubble({
+                            items: ".timeline-event-icon"
+                });
+                $( "#timeline" ).mousedown(function(){
+                    $( document ).bubble("closeAll");
+                });
                 
                 //init buttons
                 $("#toolbar").css('background','none');

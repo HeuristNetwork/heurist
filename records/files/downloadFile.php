@@ -127,7 +127,7 @@
 
     $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
     $filename = str_replace('//', '/', $filename);
-    /*****DEBUG****///error_log("filename = ".$filename."  ".file_exists($filename));
+    /*****DEBUG****///error_log("filename = ".$filename."  Exists=".file_exists($filename));
   }
 
   if(isset($filename) && file_exists($filename)){ //local resources

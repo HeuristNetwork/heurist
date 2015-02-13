@@ -141,8 +141,29 @@ $.widget( "heurist.app_timemap", {
                 console.log(this.options.recordset.toTimemap());
                 */
             
+            var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
+            /*if(mapdataset){
+                
+                                var mylayout = $('#mapping').layout();  
+                
+                                if(mapdataset.mapenabled==0){
+                                    
+                                    //$(".ui-layout-north").hide();
+                                    //$(".ui-layout-center").hide();
+                                    //$(".ui-layout-south").css({'width':'100%','height':'100%'});
+                                    mylayout.hide('center');
+                                    
+                                }else{
+                                    
+                                    if(mapdataset.timeenabled==0){
+                                        mylayout.hide('south');
+                                    }else {
+                                        mylayout.show('south', true);   
+                                    }
+                                } 
+            }*/
             
-            mapping.load(this.options.recordset == null? null: this.options.recordset.toTimemap() ,
+            mapping.load( mapdataset,
                             this.options.selection,  //array of record ids
                                 function(selected){
                                         $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 

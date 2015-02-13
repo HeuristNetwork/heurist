@@ -238,6 +238,10 @@ function hRecordSet(initdata) {
 
         var aitems = [];
         var recID, item, shape;
+        var mapenabled = 0,
+            timeenabled = 0;
+        
+        
         for(recID in records){
             if(recID)
             {
@@ -275,11 +279,17 @@ function hRecordSet(initdata) {
                         //,infoHTML: (infoHTML || ''),
                     }
                 };
+                
+                if(startDate||endDate){
+                     timeenabled++;
+                }
+                
 
                 shape = _parseCoordinates(type, wkt, 0);
                 if(shape){
                     item.placemarks.push(shape);
                     item.options.places = [shape];
+                    mapenabled++;
                 }else{
                     item.options.places = [];
                 }
@@ -291,6 +301,8 @@ function hRecordSet(initdata) {
             {
                 id: "main", 
                 type: "basic",
+                timeenabled:timeenabled,
+                mapenabled:mapenabled,
                 options: { items: aitems }
             }
         ];
@@ -317,6 +329,10 @@ function hRecordSet(initdata) {
                 }else if(fldname=="dtl_EndDate"){
                     if(d[11] && d[11][0]){
                         return d[11][0];
+                    }
+                }else if(fldname=="dtl_Description"){
+                    if(d[3] && d[3][0]){
+                        return d[3][0];
                     }
                 }else if(fldname.indexOf("dtl_Geo")==0 && d[28] && d[28][0]){
                     var g = d[28][0].split(' ');
