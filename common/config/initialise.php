@@ -135,7 +135,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
 //error_log("https=".@$_SERVER['HTTPS']."  HTTP_X_FORWARDED_PROTO=".@$_SERVER['HTTP_X_FORWARDED_PROTO']."  HTTP_X_FORWARDED_SSL=".@$_SERVER['HTTP_X_FORWARDED_SSL']);
 //error_log("protocol ".$REQUEST_PROTOCOL);
 
-    
+
     define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
     $serverBaseURL = $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME;
     define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
@@ -219,8 +219,8 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
     $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword)
     or returnErrorMsgPage(1, "Unable to connect to database server with readonly account, please set passwords in configIni.php. MySQL error: " .
         mysql_error());
-        
-        
+
+
     //-------------------------------------------------------------------------- PATHS AND URLS ---------
 
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
@@ -242,7 +242,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
             "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), ".
             "or it is not writeable by PHP (check permissions).</p>");
         }
-        
+
         if(!isset($defaultRootFileUploadURL) || $defaultRootFileUploadURL==null || $defaultRootFileUploadURL==""){
             returnErrorMsgPage(1, "You have to define Root filestore URL (abosulte or relative to server URL)."
                 ."<p>Define variable <b>defaultRootFileUploadURL</b> in your heuristConfigIni</p>");
@@ -258,66 +258,6 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
         returnErrorMsgPage(1, "Root filestore directory is not defined. You have to define variable 'defaultRootFileUploadPath' in your heuristConfigIni.php.");
     }
 
- /* OLD WAY
-    if (!defined('HEURIST_UPLOAD_ROOT')) { //upload root is not defined in config - set it by default   - NOT USED ANYMORE
-
-        //try to detect the real installation path
-        // $installDir    /h3/
-        // $documentRoot    /var/www/html/   or /var/www/
-
-        $install_path = @$_SERVER['DOCUMENT_ROOT'].$installDir;
-
-        if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
-
-        if(is_link($install_path)){
-            $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
-        }else{
-            $install_path = "";
-        }
-
-        if($install_path!=""){ //this is simlink
-            //remove code folder - to get real HEURIST installation
-            if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
-            if(strrpos($install_path,"/")>0){
-                $install_path = substr($install_path,0,strrpos($install_path,"/")+1); //remove last folder
-
-                if(strpos($install_path, $documentRoot)===0){
-                    $install_path = substr($install_path, strlen($documentRoot));
-                }
-            }else{
-                $install_path = "";
-            }
-        }else {  //this is real path (NOT simlink)
-
-            $install_dir = $installDir; //  /html/h3/
-            if($install_dir){
-                if( substr($install_dir, -1, 1) == '/' ) $install_dir = substr($install_dir,0,-1); //remove last slash
-                if($install_dir!=""){
-                    if(strrpos($install_dir,"/")>0){
-                        $install_dir = substr($install_dir,0,strrpos($install_dir,"/")+1);  //remove last folder
-                    }else{
-                        $install_dir = "";
-                    }
-                }
-                //$install_path = $install_dir . $install_path;
-            }
-            $install_path = $install_dir;
-        }
-        if( $install_path && substr($install_path, 0, 1) == '/' ) $install_path = substr($install_path,1); //remove first slash
-
-// print '<br>'.$install_path;
-
-        $dir_Filestore = "HEURIST_FILESTORE/";  // HEURIST/
-        $defaultRootFileUploadPath = $documentRoot .  $install_path . $dir_Filestore;
-        testDirWriteableAndDefine('HEURIST_UPLOAD_ROOT', $defaultRootFileUploadPath, "File store root folder", false);
-        define('HEURIST_UPLOAD_ROOT_URL', HEURIST_SERVER_URL . "/" . $install_path . $dir_Filestore );
-    }
-
-    if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
-        returnErrorMsgPage(1, "Cannot access root filestore directory <b>". $defaultRootFileUploadPath .
-            "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).");
-    }
-*/        
 
     //-------------------------------------------------------------------------- DB SELECTION ---------
 
@@ -391,7 +331,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
     define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
 
     //-------------------------------------------------------------------------- PATHS AND URLS SPECIFIC TO DATABASE ---------
-    
+
     //File store for this particular instance may be redefined in the database
     /* DO NOT use path defined in database
     $path = @$sysValues['sys_UploadDirectory'];
@@ -419,7 +359,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
         returnErrorMsgPage(1, "Cannot access system temp directory <b>". sys_get_temp_dir() .
             "</b><p>Check permissions).");
     }
-    
+
     // Define the site relative path for rectype icons
     testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . "rectype-icons/", "Icons directory");
     define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');

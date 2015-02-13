@@ -2295,7 +2295,7 @@ if (! top.HEURIST.edit) {
         var editImg = newDiv.appendChild(this.document.createElement("img"));
         editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
         editImg.className = "edit-resource";
-        editImg.title = "Edit this record";
+        editImg.title = "Edit this record (opens in a new tab)";
 
         top.HEURIST.registerEvent(editImg, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
@@ -2304,10 +2304,11 @@ if (! top.HEURIST.edit) {
             }
         });
 
+        // TO DO: We really want this record view popping up in a popup window rather than a new tab
         var ViewRec = newDiv.appendChild(this.document.createElement("img"));
         ViewRec.src = top.HEURIST.basePath +"common/images/magglass_15x14.gif";
         ViewRec.className = "view-resource";
-        ViewRec.title = "View the record linked via this pointer field";
+        ViewRec.title = "View the record linked via this pointer field (opens in a new tab)";
 
         top.HEURIST.registerEvent(ViewRec, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
