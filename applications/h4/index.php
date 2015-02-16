@@ -97,15 +97,15 @@
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
-        <script type="text/javascript" src="apps/search_faceted.js"></script>
-        <script type="text/javascript" src="apps/search_faceted_wiz.js"></script>
+        <script type="text/javascript" src="apps/search/search_faceted.js"></script>
+        <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/svs_list.js"></script>
-        <script type="text/javascript" src="apps/search/resultList.js"></script>
+        <script type="text/javascript" src="apps/viewers/resultList.js"></script>
         <!--
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
@@ -119,7 +119,7 @@
         <!-- DEBUG
         -->
 
-        <script type="text/javascript" src="apps/search/resultListMenu.js"></script>
+        <script type="text/javascript" src="apps/viewers/resultListMenu.js"></script>
         <script type="text/javascript" src="apps/rec_actions.js"></script>
         <script type="text/javascript" src="apps/rec_search.js"></script>
         <script type="text/javascript" src="apps/rec_relation.js"></script>

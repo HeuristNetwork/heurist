@@ -97,22 +97,26 @@ $.widget( "heurist.search_faceted", {
 
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);   
+        
+        if(!this.options.ispreview){
+            this.div_title = $("<div style='text-align:center;height:1.8em'></div").appendTo( this.element );
+        }
 
         this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","height":"2.4em","text-align":"center"}).appendTo( this.element );
 
-        this.btn_reset = $( "<button>", { text: top.HR("Reset") })
+        this.btn_reset = $( "<button>", { text: top.HR("Initial state") })
         .appendTo( this.div_toolbar )
         .button();
 
-        this.btn_save = $( "<button>", { text: top.HR("Save") })
+        this.btn_save = $( "<button>", { text: top.HR("Save state") })
         .appendTo( this.div_toolbar )
         .button();
 
         this.btn_close = $( "<button>", { text: top.HR("Close") })
         .appendTo( this.div_toolbar )
-        .button();
+        .button({icons: {secondary: "ui-icon-close"}});
 
-        this.div_toolbar.buttonset();
+        //Ian this.div_toolbar.buttonset();
 
         this._on( this.btn_reset, { click: "doReset" });
         this._on( this.btn_save, { click: "doSaveSearch" });
@@ -120,7 +124,7 @@ $.widget( "heurist.search_faceted", {
 
 
         this.facets_list_container = $( "<div>" )
-        .css({"top":"3.2em","bottom":0,"left":0,"right":4,"position":"absolute"})
+        .css({"top":"3.6em","bottom":0,"left":0,"right":4,"position":"absolute"})
         .appendTo( this.element );
 
         this.facets_list = $( "<div>" )
@@ -151,12 +155,32 @@ $.widget( "heurist.search_faceted", {
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
+        
+         if(this.div_title) this.div_title.html("<b>"+this.options.query_name+"</b>");
+
+         var facets = this.options.params.facets;
+         var hasHistory = false, facet_index, len = facets?facets.length:0;
+         for (facet_index=0;facet_index<len;facet_index++){
+              if(facets[facet_index][0].currentvalue!=null){
+                  hasHistory = true;
+                  break;
+              }
+         }
+        
 
         if(this.options.ispreview){
             this.btn_save.hide(); 
             this.btn_close.hide(); 
         }else{
-            this.btn_save.show(); 
+            
+            if(hasHistory) {
+                this.btn_reset.show()   
+                this.btn_save.show(); 
+            }else{
+                this.btn_reset.hide()   
+                this.btn_save.hide(); 
+            }
+            
             this.btn_close.show(); 
         }
 
@@ -167,6 +191,7 @@ $.widget( "heurist.search_faceted", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
+        if(this.div_title) this.div_title.renove();
         this.cached_counts = null;
         this.btn_close.remove();
         this.btn_save.remove();
@@ -196,7 +221,7 @@ $.widget( "heurist.search_faceted", {
     }
 
     ,doSaveSearch: function(){
-        alert("@todo");
+        //alert("@todo");
     }
 
     ,doClose: function(){

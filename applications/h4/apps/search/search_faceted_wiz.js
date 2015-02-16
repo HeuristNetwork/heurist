@@ -131,11 +131,11 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
 
-        this.element.css({overflow: 'none !important'})
+        this.element.css({overflow: 'none !important'}).addClass('ui-heurist-bg-light');
 
         this.element.dialog({
             autoOpen: false,
-            height: 620,
+            height: 700,
             width: 500,
             modal: true,
             title: top.HR("Define Faceted Search"),
@@ -163,7 +163,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step0 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'block'})
         .appendTo(this.element);
-        $("<div>").append($("<h4>").html(top.HR("Options"))).appendTo(this.step0);
+        //$("<div>").append($("<h4>").html(top.HR("Options"))).appendTo(this.step0);
         $("<div>",{id:'facets_options'}).appendTo(this.step0);
         this.step_panels.push(this.step0);
 
@@ -172,9 +172,9 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step1 = $("<div>")
         .css({'display':'none'})
         .appendTo(this.element);
-        $("<div>").append($("<h4>").html(top.HR("Select rectypes that will be used in search"))).appendTo(this.step1);
+        $("<div>").css({'padding':'1em 0'}).append($("<h4>").html(top.HR("Select record types that will be used in search"))).appendTo(this.step1);
         //.css({overflow: 'none !important', width:'100% !important'})
-        this.step1.rectype_manager({ isdialog:false, isselector:true });
+        this.step1.rectype_manager({ isdialog:false, list_top:'8em', isselector:true });
 
         this.step_panels.push(this.step1);
 
@@ -274,7 +274,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 var that = this;
                 var $dlg = this.step0.find("#facets_options");
                 if($dlg.html()==''){
-                    $dlg.load("apps/svs_edit_faceted.html?t=9", function(){
+                    $dlg.load("apps/search/svs_edit_faceted.html?t=9", function(){
                         that._initStep0_options();
                     });
                 }else{
@@ -282,6 +282,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
 
             }else if(this.step==0 && newstep==1){ //select record types 
+            
+                var edname = this.step0.find("#svs_Name");
+                if(edname.val().trim()==''){
+                        //top.HEURIST4.util.showMsgDlg(top.HR("Define name"));
+                        top.HEURIST4.util.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", edname);
+                        setTimeout(function(){edname.focus();},2200);
+                        return;
+                }
+            
 
                 this.options.params.isadvanced = this.step0.find("#opt_mode_advanced").is(":checked");
                 this.options.params.rectype_as_facets = this.step0.find("#opt_rectype_as_facets").is(":checked");
@@ -338,7 +347,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!this._initStep3_FacetsRanges()){
                     return;
                 }
-
             }else if(this.step==3 && newstep==4){ //preview
 
                 this._initStep4_FacetsPreview();
@@ -346,11 +354,18 @@ $.widget( "heurist.search_faceted_wiz", {
 
             }
 
+            //skip step
             if(this.step==2 && newstep==1 && !this.options.params.isadvanced){
                 newstep = 0;
+            }else if(this.step==4 && newstep==3){
+                newstep=2; 
             }
 
             this._showStep(newstep);
+            
+             if(newstep==3)               //skip step
+                this.navigateWizard(1);
+
         }
 
     }

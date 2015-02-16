@@ -172,7 +172,7 @@ $.widget( "heurist.resultListMenu", {
             
         
         this['menu_'+name] = $('<ul>')
-        .load('apps/search/resultListMenu'+name+'.html', function(){  //'?t='+(new Date().getTime())
+        .load('apps/viewers/resultListMenu'+name+'.html', function(){  //'?t='+(new Date().getTime())
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )

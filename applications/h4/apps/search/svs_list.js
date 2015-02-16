@@ -779,7 +779,7 @@ $.widget( "heurist.svs_list", {
                     }
 
                 }else{
-                    $.getScript(top.HAPI4.basePath+'apps/search_faceted.js', that._doSearch2(qname, qsearch) );
+                    $.getScript(top.HAPI4.basePath+'apps/search/search_faceted.js', that._doSearch2(qname, qsearch) );
                 }
 
             }else{
@@ -843,7 +843,7 @@ $.widget( "heurist.svs_list", {
 
         var that = this;
             
-        var callback = function(request) {    
+        var callback = function(event, request) {    
                 if(Hul.isempty(svsID)){     //new 
                 
                     //update tree after addition - add new search to root
@@ -859,7 +859,7 @@ $.widget( "heurist.svs_list", {
                     var isfaceted = (mode=='faceted');
                     node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted, isrules:that._hasRules(request.svs_Query) }, node.folder?"child":"after" );    
                     
-                    that._saveTreeData();
+                    //temp that._saveTreeData();
                     
                     $("#addlink"+groupID).css('display', 'none');
                     

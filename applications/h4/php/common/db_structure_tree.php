@@ -95,7 +95,7 @@
             if(!@$dbs_rtStructs['typedefs'][$recTypeId]){
                 //this rectype is not loaded yet - load it
                 $rt0 = dbs_GetRectypeStructures($system, $recTypeId, 1);
-                if(rt0){ //merge with $dbs_rtStructs 
+                if($rt0){ //merge with $dbs_rtStructs 
                     $dbs_rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];    
                     $dbs_rtStructs['names'][$recTypeId] = $rt0['names'][$recTypeId];
                 }

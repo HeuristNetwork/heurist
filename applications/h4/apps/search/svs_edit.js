@@ -136,7 +136,7 @@ function hSvsEdit(args) {
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
             showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
-            $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
+            $.getScript(top.HAPI4.basePath+'apps/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
         }
 
     }  
@@ -329,7 +329,7 @@ function hSvsEdit(args) {
 
                                     request.new_svs_ID = svsID;
 
-                                    callback_method.call(that, request);
+                                    callback_method.call(that, null, request);
                                     //@todo that._updateAfterSave(request, 'saved');
 
 

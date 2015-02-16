@@ -23,6 +23,7 @@ $.widget( "heurist.rectype_manager", {
     // default options
     options: {
         isdialog: false, //show in dialog or embedded
+        list_top: '80px',
         isselector: false, //show in checkboxes to select
 
         selection:[], 
@@ -42,7 +43,7 @@ $.widget( "heurist.rectype_manager", {
         if(this.options.isdialog){
 
             this.wcontainer
-            .css({overflow: 'none !important', width:'100% !important'})
+            .css({overflow: 'none !important', width:'100% !important' })
             .appendTo(this.element);
 
             this.element.css({overflow: 'none !important'})                
@@ -89,9 +90,13 @@ $.widget( "heurist.rectype_manager", {
         });
 
         //---------------------------------------- SEARCH
-        this.search_div = $( "<div>").css({ width:'36%', 'display':'inline-block' }).appendTo( this.wcontainer );
+        this.search_div = $( "<div>").css({'display':'inline-block', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer ); // width:'36%', 
 
-        this.input_search = $( "<input>", {width:'100%'} )
+        this.lbl_message = $( "<label>").css({'padding-right':'5px'})
+        .html(top.HR('Filter'))
+        .appendTo( this.search_div );
+        
+        this.input_search = $( "<input>" ) //, {width:'100%'}
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.search_div );
 
@@ -107,7 +112,7 @@ $.widget( "heurist.rectype_manager", {
         });
 
         //---------------------------------------- ORDER
-        this.sort_div = $( "<div>").css({ 'float':'right' }).appendTo( this.wcontainer );
+        this.sort_div = $( "<div>").css({ 'float':'right', height:'2.2em', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer );
 
         this.lbl_message = $( "<label>").css({'padding-right':'5px'})
         .html(top.HR('Sort'))
@@ -130,12 +135,12 @@ $.widget( "heurist.rectype_manager", {
 
 
         //----------------------------------------
-        var css1;
-        if(this.options.isdialog){
+        var css1 =  {'overflow-y':'auto','padding':'0.4em','top':this.options.list_top, 'bottom':0,'position':'absolute','left':0,'right':0};
+        /*if(this.options.isdialog){
             css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};
         }else{
             css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};  
-        }
+        }*/
 
         this.div_content = $( "<div>" )
         .addClass('list')

@@ -2,7 +2,7 @@
 * Query result listing.
 *
 * NO Requires apps/rec_actions.js (must be preloaded)
-* Requires apps/search/resultListMenu.js (must be preloaded)
+* Requires apps/viewers/resultListMenu.js (must be preloaded)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
