@@ -406,7 +406,7 @@
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
-                Hul.popupURL(this,'../viewers/smarty/repMenu.html?template_file='+template_file,null);
+                Hul.popupURL(this, top.HEURIST.basePath + 'viewers/smarty/repMenu.html?template_file='+template_file,null);
 
                 /* OLD WAY
                 var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
@@ -553,7 +553,7 @@
                         s = s + '<li> <a href="#" >Manage (Admins only)</a></li>';
                     }
                     
-                    s = s + '<li><a href="#" onClick="onPublish()" class="separator">Publish report</a></li>';
+                    s = s + '<li><a href="#" onClick="onFile()" class="separator">Publish report</a></li>';
                     
                     s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export</a></li>' +
                     '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';

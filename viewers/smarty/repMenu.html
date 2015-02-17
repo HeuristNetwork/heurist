@@ -42,13 +42,13 @@
  <script>
 
    function build_links() {
-     if (top.HEURIST  && top.HEURIST.search)
+     if (top.HEURIST)
      {
 
 			var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
 
-			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			var template_file = top.HEURIST.parameters.template_file;
+			var params = top.HEURIST.parseParams(location.search);
+			var template_file = params.template_file;
 
 	 		var currentSearchQuery =
 	 				(mode=="selected")
@@ -76,6 +76,17 @@
 	 		}
 	 }
    }
+   
+   function onPublish(){
+       //find showReps 
+       for (var idx in top)
+        if(idx!==undefined && top[idx] && top[idx].showReps){
+                var params = top.HEURIST.parseParams(location.search);
+                top[idx].showReps.onPublish( params.template_file );  
+                break;
+        }
+   } 
+   
  </script>
 </head>
 
@@ -101,5 +112,7 @@ External viewers will not be able to see any records unless they are marked as P
   <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 100px;"
     id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"></textarea>
 
+  <button onClick="onPublish()">Set up publishing schedule</button> 
+    
 </body>
 </html>
