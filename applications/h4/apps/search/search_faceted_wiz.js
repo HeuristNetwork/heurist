@@ -142,6 +142,14 @@ $.widget( "heurist.search_faceted_wiz", {
             resizeStop: function( event, ui ) {
                 that.element.css({overflow: 'none !important','width':'100%'});
             },
+            beforeClose: function( event, ui ) { 
+                            if(event && event.currentTarget){ 
+                                var that_dlg = this;
+                                top.HEURIST4.util.showMsgDlg(top.HR("Cancel? Please confirm"),
+                                        function(){ $( that_dlg ).dialog( "close" ); });  
+                                return false;        
+                            }
+                        },
             buttons: [
                 {text:top.HR('Back'),
                     click: function() {
@@ -151,11 +159,11 @@ $.widget( "heurist.search_faceted_wiz", {
                     click: function() {
                         that.navigateWizard(1);
                 }},
-                {text:top.HR('Close'), click: function() {
+                /*{text:top.HR('Close'), click: function() {
                     var that_dlg = this;
                     top.HEURIST4.util.showMsgDlg(top.HR("Cancel? Please confirm"),
                         function(){ $( that_dlg ).dialog( "close" ); });
-                }}
+                }}*/
             ]
         });
 
@@ -282,15 +290,16 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
 
             }else if(this.step==0 && newstep==1){ //select record types 
-            
-                var edname = this.step0.find("#svs_Name");
-                if(edname.val().trim()==''){
-                        //top.HEURIST4.util.showMsgDlg(top.HR("Define name"));
-                        top.HEURIST4.util.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", edname);
-                        setTimeout(function(){edname.focus();},2200);
+
+                var svs_name = this.step0.find('#svs_Name');
+                var message = this.step0.find('.messages');
+                var bValid = top.HEURIST4.util.checkLength( svs_name, "Name", message, 3, 25 );
+                if(!bValid){
+                        svs_name.focus();
+                        //top.HEURIST4.util.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
+                        //setTimeout(function(){svs_name.focus();},2200);
                         return;
                 }
-            
 
                 this.options.params.isadvanced = this.step0.find("#opt_mode_advanced").is(":checked");
                 this.options.params.rectype_as_facets = this.step0.find("#opt_rectype_as_facets").is(":checked");
@@ -347,11 +356,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!this._initStep3_FacetsRanges()){
                     return;
                 }
-            }else if(this.step==3 && newstep==4){ //preview
-
-                this._initStep4_FacetsPreview();
-                $("#btnNext").button('option', 'label', top.HR('Save'));
-
             }
 
             //skip step
@@ -373,8 +377,16 @@ $.widget( "heurist.search_faceted_wiz", {
     , _showStep :function(newstep){
 
         if(this.step>=0) this.step_panels[this.step].css('display','none');
+        this.step_panels[newstep].css('display','block');
+        
+        if(this.step==3 && newstep==4){ //preview
+
+            this._initStep4_FacetsPreview();
+            $("#btnNext").button('option', 'label', top.HR('Save'));
+
+        }
+            
         this.step = newstep;
-        this.step_panels[this.step].css('display','block');
     }
 
 
