@@ -691,7 +691,8 @@
         .'rec_RecTypeID,'
         .'rec_Title,'
         .'rec_OwnerUGrpID,'
-        .'rec_NonOwnerVisibility ';
+        .'rec_NonOwnerVisibility,'
+        .'bkm_PwdReminder ';
         /*.'rec_URLLastVerified,'
         .'rec_URLErrorMessage,'
         .'bkm_PwdReminder ';*/
@@ -772,7 +773,7 @@
                     array_push($fields, $fld->name);
                 }
                 array_push($fields, 'rec_ThumbnailURL'); //last one
-
+                
                 $rectype_structures  = array();
                 $rectypes = array();
                 $records = array();

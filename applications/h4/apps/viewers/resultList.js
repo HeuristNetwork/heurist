@@ -671,12 +671,34 @@ $.widget( "heurist.resultList", {
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
         }
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
+        var html_pwdrem = '';
+        var pwd = top.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
+        if(pwd){
+            html_pwdrem =  '<span class="ui-icon ui-icon-locked rec_pwdrem" style="display: inline-block;"></span>';
+            pwd = ' pwd="'+pwd+'" ';
+        }else{
+            pwd = '';
+        }
+        
+        var html_owner = '';
+        var owner_id = fld('rec_OwnerUGrpID');
+        if(owner_id && owner_id!='0'){
+            
+            var visibility = fld('rec_NonOwnerVisibility');
+            var clr = (visibility=='hidden')?'red':'green';
+            var hint = ((visibility=='hidden')? 'hidden': (visibility!='public')?'public':'read-only') + ' to others';
+            
+            html_owner =  '<span class="rec_owner" style="color:'+clr+'" title="'+hint+'">'+owner_id+'</span>';
+        }
+        
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
             + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
             + html_thumb
             + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
-            +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+            +     html_owner
+            +     html_pwdrem
             + '</div>'
             + '<div title="'+recTitle+'" class="recordTitle">'
             +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
@@ -722,22 +744,33 @@ $.widget( "heurist.resultList", {
 
         //var $allrecs = this.div_content.find('.recordDiv');
 
-        var $rdiv = $(event.target),
-            that = this;
+        var $target = $(event.target),
+            that = this,
+            $rdiv;
 
-        var isedit = ($rdiv.parents('.rec_edit_link').length>0); //this is edit click
+        var isedit = ($target.parents('.rec_edit_link').length>0); //this is edit click
+        var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is edit click
 
-        if(!$rdiv.hasClass('recordDiv')){
-            $rdiv = $rdiv.parents('.recordDiv');
+        if(!$target.hasClass('recordDiv')){
+            $rdiv = $target.parents('.recordDiv');
+        }else{
+            $rdiv = $target;
         }
-
+        
         var selected_rec_ID = $rdiv.attr('recid');
-        this.div_content.find('.selected_last').removeClass('selected_last');
 
         if(isedit){
             var url = top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
             window.open(url, "_new");
+            return;
+        }else if (ispwdreminder){
+            var pwd = $rdiv.attr('pwd');
+            top.HEURIST4.util.showMsgDlg(pwd, null, "Password reminder", $target);
+            return;
         }
+        
+        
+        this.div_content.find('.selected_last').removeClass('selected_last');
 
         if(this.options.multiselect && event.ctrlKey){
 

@@ -89,6 +89,7 @@ $.widget( "heurist.svs_list", {
         if(this.options.btn_visible_filter) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;
 
+        //main container
         this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':0, 'right':0, 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
         this.helper_top = $( '<div>'+top.HR('right-click entries for actions')+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
@@ -204,6 +205,8 @@ $.widget( "heurist.svs_list", {
     //
     _updateAccordeon: function(){
         
+        this.accordeon.hide();
+        
         var islogged = (top.HAPI4.is_logged());
         if(!islogged){
             //@todo clear accordeon and show login button
@@ -267,11 +270,13 @@ $.widget( "heurist.svs_list", {
         
         this.helper_btm.before(
                 $('<div>')
+                .attr('grpid',  'rules').addClass('acc')
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
         
         this.helper_btm.before(
             $('<div>')
+            .attr('grpid',  'bookmark').addClass('acc')
             .addClass('heurist-bookmark-search')
             .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
             .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
@@ -279,6 +284,7 @@ $.widget( "heurist.svs_list", {
             
         this.helper_btm.before(
             $('<div>')
+            .attr('grpid',  'all').addClass('acc')
             .append( this._defineHeader(top.HR('My Searches'), 'all'))
             .append( this._defineContent('all') ));
             
@@ -290,24 +296,64 @@ $.widget( "heurist.svs_list", {
                 var name = groups[groupID][1];
                 this.helper_btm.before(
                     $('<div>')
+                    .attr('grpid',  groupID).addClass('acc')
                     .append( this._defineHeader(name, groupID))
                     .append( this._defineContent(groupID) ));
             }
         }
+        
+        var keep_status = top.HAPI4.get_prefs('svs_list_status');
+        if(!keep_status) keep_status = {};
+        else keep_status = $.parseJSON(keep_status);
 
-        this.accordeon.children()
-        .accordion({
+        var cdivs = this.accordeon.find('.acc');
+        $.each(cdivs, function(i, cdiv){
+            
+            cdiv = $(cdiv);
+            var groupid = cdiv.attr('grpid');
+            cdiv.accordion({
+            active: ( ( keep_status && keep_status[ groupid ] )?0:false),
             header: "> h3",
             heightStyle: "content",
-            collapsible: true
+            collapsible: true,
+            activate: function(event, ui) {
+                //save status of accordions - expandad/collapsed
+                if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
+                    keep_status[ ui.newHeader.attr('grpid') ] = true;    
+                }else{ //collapsed
+                    keep_status[ ui.oldHeader.attr('grpid') ] = false;    
+                }
+                //save
+                top.HAPI4.SystemMgr.save_prefs({'svs_list_status': JSON.stringify(keep_status)});
+                }
+            });
         });
+        
+        
+        /*this.accordeon.children()
+        .accordion({
+            active: ( ( keep_status && keep_status[ this.attr('grpid') ] )?0:false),
+            header: "> h3",
+            heightStyle: "content",
+            collapsible: true,
+            activate: function(event, ui) {
+                //save status of accordions - expandad/collapsed
+                if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
+                    keep_status[ ui.newHeader.attr('grpid') ] = true;    
+                }else{ //collapsed
+                    keep_status[ ui.oldHeader.attr('grpid') ] = false;    
+                }
+                //save
+                top.HAPI4.save_prefs({'svs_list_status': keep_status});
+            }
+        });*/
         this.accordeon.show();        
         
     },
     
     _defineHeader: function(name, domain){
 
-        var $header = $('<h3>'+name+'</h3>').addClass('tree-accordeon-header');
+        var $header = $('<h3 grpid="'+domain+'">'+name+'</h3>').addClass('tree-accordeon-header');
         /*
         var that = this;
 

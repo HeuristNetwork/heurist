@@ -1362,7 +1362,7 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 
 		if (array_key_exists("o", $parms)) {
 			$offset = intval(@$parms["o"]);
-			unset($args["o"]);
+			unset($parms["o"]);
 		}else if(array_key_exists("offset", $parms)) {
 			$offset = intval(@$parms["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
 		}

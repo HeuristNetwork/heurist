@@ -265,7 +265,8 @@ optgroup {
 
 .bookmarked {
     background-image: url(assets/star-red.png);
-    height:14px;
+    height:16px;
+    width:12px;
 }
 .unbookmarked {
     background-image: url(assets/star-white.png);
@@ -329,6 +330,11 @@ div .selected_last{
 .recordDiv .recordIcons {
     white-space: nowrap;
     width: 35px;
+}
+
+.recordDiv .rec_owner{
+    display: none; 
+    vertical-align: top; 
 }
 
 .recordDiv .recTypeThumb {
@@ -397,6 +403,12 @@ div .selected_last{
     bottom: 1px;
     right:1px;
 }
+
+.thumbs .recordDiv .rec_owner{
+    display: inline-block;
+}
+
+
 
 /* ICONS VIEW */
 .icons .recordDiv {

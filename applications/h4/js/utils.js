@@ -766,7 +766,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     },
 
     // buttons - callback function
-    showMsgDlg: function(message, buttons, title){
+    showMsgDlg: function(message, buttons, title, position_to_element){
 
         if(!$.isFunction(top.HR)){
             alert(message);
@@ -804,8 +804,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             };
 
         }
-
-        $dlg.dialog({
+        
+        var options =  {
             title: top.HR(title),
             resizable: false,
             //height:140,
@@ -813,7 +813,13 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             modal: true,
             closeOnEscape: true,
             buttons: buttons
-        });
+        };
+        
+        if(position_to_element){
+           options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };
+        }
+        
+        $dlg.dialog(options);
 
     },
 
