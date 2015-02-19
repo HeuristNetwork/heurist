@@ -37,6 +37,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
     var gmap = null,   // background gmap - gmap or other
     tmap = null,  // timemap object
+    drawingManager,     //manager to draw the selection rectnagle
+    lastSelectionShape,  
 
     defaultZoom = 2,
     keepMinDate = null,
@@ -186,6 +188,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         //art 020215  
         // NOT USED - since we use _showPopupInfo   
         // TimeMapItem.openInfoWindowBasic = _showPopupInfo;
+      
+        //there is bug in timeline - it looks _history_.html in wrong place
+        SimileAjax.History.enabled = false;
         
         // Initialize TimeMap
         tmap = TimeMap.init({
@@ -268,9 +273,174 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
 
             addMapOverlay(tmap.getNativeMap()); //loading the lsit of map documents see map_overlay.js
+            
+            _initDrawListeners();
+            
         }
             
     }
+    
+    
+    function _initDrawListeners(){
+        
+            var shift_draw = false;
+        
+            //addd drawing manager to draw rectangle selection tool
+            var shapeOptions = {
+                strokeWeight: 1,
+                strokeOpacity: 1,
+                fillOpacity: 0.2,
+                editable: false,
+                clickable: false,
+                strokeColor: '#3399FF',
+                fillColor: '#3399FF'
+            };            
+            
+            drawingManager = new google.maps.drawing.DrawingManager({
+                drawingMode: null,
+                drawingControlOptions: {drawingModes: [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE]},
+                rectangleOptions: shapeOptions,
+                polygonOptions: shapeOptions,
+                map: tmap.getNativeMap()
+            });            
+            
+            google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
+                
+                //clear previous
+                if (lastSelectionShape != undefined) {
+                    lastSelectionShape.setMap(null);
+                }
+
+                // cancel drawing mode
+                if (shift_draw == false) { drawingManager.setDrawingMode(null); }
+
+                lastSelectionShape = e.overlay;
+                lastSelectionShape.type = e.type;
+
+                _selectItemsInShape();
+                
+                /*if (lastSelectionShape.type == google.maps.drawing.OverlayType.RECTANGLE) {
+
+                    lastBounds = lastSelectionShape.getBounds();
+
+                    //$('#bounds').html(lastBounds.toString());
+
+                    //mapdata[0].options.items[0].options.recid
+                    //mapdata[0].options.items[3].placemarks[0].polyline .lat .lon
+                    
+                    
+                    //new google.maps.LatLng(25.774252, -80.190262),
+                    
+                    
+                    // determine if marker1 is inside bounds:
+                    if (lastBounds.contains(m1.getPosition())) {
+                        //$('#inside').html('Yup!');
+                    } else {
+                        //$('#inside').html('Nope...');
+                    }
+
+                } else if (lastSelectionShape.type == google.maps.drawing.OverlayType.POLYGON) {
+
+                    //$('#bounds').html('N/A');
+
+                    // determine if marker is inside the polygon:
+                    // (refer to: https://developers.google.com/maps/documentation/javascript/reference#poly)
+                    if (google.maps.geometry.poly.containsLocation(m1.getPosition(), lastSelectionShape)) {
+                        //$('#inside').html('Yup!');
+                    } else {
+                        //$('#inside').html('Nope...');
+                    }
+
+                }*/
+
+            });
+
+            /*var shift_draw = false;
+
+            $(document).bind('keydown', function(e) {
+            if(e.keyCode==16 && shift_draw == false){
+            map.setOptions({draggable: false, disableDoubleClickZoom: true});
+            shift_draw = true; // enable drawing
+            drawingManager.setDrawingMode(google.maps.drawing.OverlayType.RECTANGLE);
+            }
+
+            });
+
+            $(document).bind('keyup', function(e) {
+            if(e.keyCode==16){
+            map.setOptions({draggable: true, disableDoubleClickZoom: true});
+            shift_draw = false // disable drawing
+            drawingManager.setDrawingMode(null);
+            }
+
+            });*/
+
+            //clear rectangle on any click or drag on the map
+            google.maps.event.addListener(map, 'mousedown', function () {
+                if (lastSelectionShape != undefined) {
+                    lastSelectionShape.setMap(null);
+                }
+            });
+
+            google.maps.event.addListener(map, 'drag', function () {
+                if (lastSelectionShape != undefined) {
+                    lastSelectionShape.setMap(null);
+                }
+            });
+        
+    }
+    
+    function _selectItemsInShape(){
+        
+        selection = [];
+        
+        var isRect = (lastSelectionShape.type == google.maps.drawing.OverlayType.RECTANGLE);
+        var lastBounds, i;
+        if(isRect){
+            lastBounds = lastSelectionShape.getBounds();
+        }
+        
+        var dataset = tmap.datasets.main;  //take main dataset
+            dataset.each(function(item){ //loop trough all items
+                   
+                        if(item.placemark){
+                            var isOK = false;
+                            if(item.placemark.points){ //polygone or polyline
+                                for(i=0; i<item.placemark.points.length; i++){
+                                    var pnt = item.placemark.points[i];
+                                    var pos = new google.maps.LatLng(pnt.lat, pnt.lon);
+                                    if(isRect){
+                                        isOK = lastBounds.contains( pos );
+                                    }else{
+                                        isOK = google.maps.geometry.poly.containsLocation(pos, lastSelectionShape);
+                                    }
+                                    if(isOK) break;
+                                }
+
+                            }else{
+                                var pos = item.getNativePlacemark().getPosition();
+                                if(isRect){
+                                    isOK = lastBounds.contains( pos );
+                                }else{
+                                    isOK = google.maps.geometry.poly.containsLocation(pos, lastSelectionShape);
+                                }
+
+                            }
+                            if(isOK){
+                                selection.push(item.opts.recid);    
+                            }
+
+
+                        }
+            });
+            
+            
+        //reset and highlight selection
+        _showSelection(true);
+        //trigger selection - to highlight on other widgets
+        _onSelectEventListener.call(that, selection);
+    }
+    
 
     function _onDataLoaded(_tmap){
         tmap = _tmap;
@@ -317,7 +487,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         selection = [this.opts.recid];
         _showSelection(true);
-        //trigger selection
+        //trigger selection - to highlight on other widgets
         _onSelectEventListener.call(that, selection);
         //TimeMapItem.openInfoWindowBasic.call(this);        
     }

@@ -258,7 +258,7 @@
                     // Tiled image type
                     $record->imageType = getTermByID($system, $value);
 
-                }else if($type == DT_MAP_IMAGE_LAYER_SCHEMA) {
+                }else if(defined('DT_MAP_IMAGE_LAYER_SCHEMA') && $type == DT_MAP_IMAGE_LAYER_SCHEMA) {
                     // Image tiling schema
                     $record->tilingSchema = getTermByID($system, $value);
                     
@@ -281,19 +281,19 @@
                     }
                     array_push($record->files, getFileURL($system, $fileID));
                     
-                }else if($type == DT_SHAPE_FILE) {
+                }else if(defined('DT_SHAPE_FILE') && $type == DT_SHAPE_FILE) {
                     // Shape file (SHP component)
                     $record->shpFile = getFileURL($system, $fileID);
                     
-                }else if($type == DT_DBF_FILE) {
+                }else if(defined('DT_DBF_FILE') && $type == DT_DBF_FILE) {
                     // DBF file (DBF component)
                     $record->dbfFile = getFileUrl($system, $fileID);
                     
-                }else if($type == DT_SHX_FILE) {
+                }else if(defined('DT_SHX_FILE') && $type == DT_SHX_FILE) {
                     // SHX file (SHX component)
                     $record->shxFile = getFileURL($system, $fileID);
                     
-                }else if($type == DT_ZIP_FILE) {
+                }else if(defined('DT_ZIP_FILE') && $type == DT_ZIP_FILE) {
                     // Zip file
                     $record->zipFile = getFileURL($system, $fileID);
        

@@ -72,7 +72,7 @@
         <script type="text/javascript" src="../ext/shapefile/dbf.js"></script>
 
         <!-- Mapping -->
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
         <script type="text/javascript" src="../js/mapping.js"></script>
         <script type="text/javascript" src="../js/map_overlay.js"></script>
