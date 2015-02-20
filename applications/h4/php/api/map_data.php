@@ -194,21 +194,21 @@
                     
   
                 /* SOURCE */
-                }else if($type == DT_SERVICE_URL) {
+                }else if(defined('DT_SERVICE_URL') && $type == DT_SERVICE_URL) {
                     // Source URL
                     $record->sourceURL = $value;
                     
-                }else if($type == DT_DATA_SOURCE) {
+                }else if(defined('DT_DATA_SOURCE') && $type == DT_DATA_SOURCE) {
                     // Data source
                     $record->dataSource = getDetailedRecord($system, $value);
 
                        
                 /* MAP LAYERS */
-                }else if($type == DT_TOP_MAP_LAYER) { // Recursive
+                }else if(defined('DT_TOP_MAP_LAYER') && $type == DT_TOP_MAP_LAYER) { // Recursive
                     // Top map layer 
                     $record->toplayer = getDetailedRecord($system, $value);
 
-                }else if($type == DT_MAP_LAYER) {
+                }else if(defined('DT_MAP_LAYER') && $type == DT_MAP_LAYER) {
                     // Map layer
                     if(!property_exists($record, "layers")) { // Recursive
                         $record->layers = array();   
@@ -217,44 +217,44 @@
  
                 
                 /* LOCATION */
-                }else  if($type == DT_LONGITUDE_CENTREPOINT) {
+                }else  if(defined('DT_LONGITUDE_CENTREPOINT') && $type == DT_LONGITUDE_CENTREPOINT) {
                     // Longitude centrepoint
                     $record->long = floatval($value);
                     
-                }else if($type == DT_LATITUDE_CENTREPOINT) {
+                }else if(defined('DT_LATITUDE_CENTREPOINT') && $type == DT_LATITUDE_CENTREPOINT) {
                     // Latitude centrepoint
                     $record->lat = floatval($value);
                   
                   
                 /* ZOOM */  
-                }else if($type == DT_MAXIMUM_ZOOM) {
+                }else if(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
                     // Maximum zoom
                     $record->maxZoom = floatval($value);
                      
-                }else if($type == DT_MINIMUM_ZOOM) {
+                }else if(defined('DT_MINIMUM_ZOOM') && $type == DT_MINIMUM_ZOOM) {
                     // Minimum zoom
                     $record->minZoom = floatval($value); 
 
                     
-                }else if($type == DT_OPACITY) {
+                }else if(defined('DT_OPACITY') && $type == DT_OPACITY) {
                     // Opacity
                     $record->opacity = floatval($value);
    
-                }else if($type == DT_MINOR_SPAN) {
+                }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
                     // Initial minor span
                     $record->minorSpan = floatval($value);
 
                     
                 /* IMAGE INFO */
-                } else if($type == DT_THUMBNAIL) {
+                } else if(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {
                     // Uploaded thumbnail 
                     $record->thumbnail = getFileURL($system, $fileID);
                     
-                } else if($type == DT_MIME_TYPE) { 
+                } else if(defined('DT_MIME_TYPE') && $type == DT_MIME_TYPE) { 
                     // Mime type
                     $record->mimeType = getTermByID($system, $value);
                     
-                } else if($type == DT_IMAGE_TYPE) {
+                } else if(defined('DT_IMAGE_TYPE') && $type == DT_IMAGE_TYPE) {
                     // Tiled image type
                     $record->imageType = getTermByID($system, $value);
 
@@ -264,17 +264,17 @@
                     
                     
                 /* SNIPPET */
-                }else if($type == DT_QUERY_STRING) {
+                }else if(defined('DT_QUERY_STRING') && $type == DT_QUERY_STRING) {
                     // Heurist query string
                     $record->query = $value;
                     
-                }else if($type == DT_KML) {
+                }else if(defined('DT_KML') && $type == DT_KML) {
                     // KML snippet
                     $record->kmlSnippet = $value;
 
                     
                 /* FILES */
-                }else if($type == DT_FILE_RESOURCE) {
+                }else if(defined('DT_FILE_RESOURCE') && $type == DT_FILE_RESOURCE) {
                     // File(s)
                     if(!property_exists($record, "files")) {
                         $record->files = array();   

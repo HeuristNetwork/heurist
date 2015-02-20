@@ -199,10 +199,9 @@
             });
 
             top.HEURIST.whenLoaded([recordEvent, "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
-            top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"],createRectypeChanger );
+            top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"], createRectypeChanger );
             window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
-
-
+            
             function editRecordType(){
 
                 window.open("../../admin/adminMenu.php?db="+
@@ -221,6 +220,34 @@
                 { "no-titlebar": false, "no-close": false, width: 330, height: 140 });
 
             }
+            
+            //
+            // show the specific reminder for recordtype 
+            //
+            function onAddNewRecordMessage(){
+                
+                if(!top.HEURIST.magicNumbers) return;
+                
+                if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']=="new_bib"){
+
+                    var smsg = '';
+
+                    if(top.HEURIST.edit.record.rectypeID == top.HEURIST.magicNumbers['RT_MAP_LAYER']){
+                        smsg = "<p>You will need to add the new map layer to the current map document and to any other map documents on which you wish it to appear, by editing each of the map documents in turn</p>";
+                    }
+
+                    if(smsg!=''){
+                        var ele = document.getElementById("editRectype-message-text");
+                        ele.innerHTML = smsg;
+                        ele = document.getElementById("editRectype-message");
+
+                        var w = top.HEURIST.util.popupTinyElement(top, ele,
+                        { "no-titlebar": false, "no-close": false, width: 330, height: 140 });
+                    }
+
+                }                
+            }
+            
 
             function createRectypeChanger() {
                 var rectypeEdit = document.getElementById("rectype-edit");
@@ -265,6 +292,8 @@
                     ".  "+top.document.title;
                 }
 
+                
+                onAddNewRecordMessage();
             }
 
             function changeRectype() {
