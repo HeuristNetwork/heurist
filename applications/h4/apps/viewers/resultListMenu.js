@@ -28,7 +28,7 @@ $.widget( "heurist.resultListMenu", {
     },
     
     _query_request: {}, //keep current query request
-    _selection: null,     //current set of selected records
+    _selection: null,     //current set of selected records (not just ids)
     _collection:null,
     _collectionURL:null,
 
@@ -427,7 +427,7 @@ $.widget( "heurist.resultListMenu", {
             top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
     },
 
-    getSelectionIds: function(msg){
+    getSelectionIds: function(msg, limit){
         
         var recIDs_list = [];
         if (this._selection!=null) {
@@ -437,7 +437,9 @@ $.widget( "heurist.resultListMenu", {
         if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
             Hul.showMsgDlg(msg);
             return null;
-        }else{
+        }else if (limit>0 && recIDs_list.length > limit) {
+            Hul.showMsgDlg("The number of selected records is above the limit in "+limit);   
+        }else{            
             return recIDs_list;
         }
         
@@ -794,7 +796,7 @@ $.widget( "heurist.resultListMenu", {
 
     notificationPopup: function() {
         
-        var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"));
+        var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"), 1000);
         if(Hul.isempty(recIDs_list)) return;
 
         recIDs_list = recIDs_list.join(",");

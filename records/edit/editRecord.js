@@ -635,6 +635,9 @@ if (! top.HEURIST.edit) {
                 link.className += ' changed';
                 link.title = "Content has been modified";
             }
+            
+            $("#changed_marker").show();
+            
 
             $("#close-button").hide();
             $("#save-record-buttons").show();
@@ -663,6 +666,9 @@ if (! top.HEURIST.edit) {
                 $("#close-button").show();
                 $("#save-record-buttons2").hide();
                 $("#close-button2").show();
+                $("#changed_marker").hide();
+            }else{
+                $("#changed_marker").show();
             }
         },
 
@@ -2083,7 +2089,6 @@ if (! top.HEURIST.edit) {
         newDiv.className = "date-div";
         newDiv.expando = true;
         newDiv.style.whiteSpace = "nowrap";
-        this.addInputHelper.call(this, bdValue, newDiv);
 
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
@@ -2094,8 +2099,9 @@ if (! top.HEURIST.edit) {
         textElt.title = "Enter a standard ISO format date (yyyy or yyyy-mm-dd). You may also enter 'today' or 'now', and negative dates for BCE. ";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
-        top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
-
+        //top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
+        this.addInputHelper.call(this, textElt.value, textElt);
+        
         top.HEURIST.edit.makeDateButton(textElt, this.document);
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput
@@ -2133,7 +2139,12 @@ if (! top.HEURIST.edit) {
         textElt.title = "Enter a date or click the icons to the right. Date can be 'now' or 'today', or year only - negative for BCE.";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
+        
         top.HEURIST.registerEvent(textElt, "change", function() {
+            textElt.strTemporal = null;
+            if (windowRef.changed) windowRef.changed();
+        }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
+        top.HEURIST.registerEvent(textElt, "keypress", function() {
             textElt.strTemporal = null;
             if (windowRef.changed) windowRef.changed();
         }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput

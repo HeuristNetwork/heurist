@@ -125,7 +125,7 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
                 ?>
                     <tr>
                      <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.png"></a></td>
-                     <td><a href="<?=HEURIST_SITE_PATH?>records/edit/editRecord.html?recID=<?= $row["rem_RecID"] ?>&db=<?= HEURIST_DBNAME?>#personal"><b><?= $row["rec_Title"] ?></b></a></td>
+                     <td><a href="<?=HEURIST_SITE_PATH?>records/edit/editRecord.html?recID=<?= $row["rem_RecID"] ?>&db=<?= HEURIST_DBNAME?>#personal" target="_blank"><b><?= $row["rec_Title"] ?></b></a></td>
                      <td><b><?= $recipient ?></b></td>
                      <td><b><?= $row["rem_Freq"] ?></b> from <b><?= $row["rem_StartDate"] ?></b></td>
                      <td><?= $row["rem_Message"] ?></td>

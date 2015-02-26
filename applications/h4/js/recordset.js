@@ -419,7 +419,7 @@ function hRecordSet(initdata) {
                         if(aitems.length>limit) break
                     }
             }else{
-                aitems = Object.keys(records);
+                aitems = Object.keys(recs);
                 /*
                 for(recID in recs)
                     if(recID){

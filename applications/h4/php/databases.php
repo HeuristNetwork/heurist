@@ -35,7 +35,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="stylesheet" type="text/css" href="../style3.css">
 
         <script type="text/javascript">
         </script>
@@ -44,7 +44,7 @@
     <body style="padding:44px;">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">
 
-            <div class="logo"></div>
+            <div class="logo" style="background-color:#2e3e50;width:100%"></div>
             <div style="padding: 0.5em;">Please select a database from the list</div>
             <div style="overflow-y:auto;display: inline-block;width:100%;height:80%">
 

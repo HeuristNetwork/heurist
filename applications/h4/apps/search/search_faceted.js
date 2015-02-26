@@ -110,7 +110,7 @@ $.widget( "heurist.search_faceted", {
 
         this.btn_save = $( "<button>", { text: top.HR("Save state") })
         .appendTo( this.div_toolbar )
-        .button();
+        .button().hide(); //@todo
 
         this.btn_close = $( "<button>", { text: top.HR("Close") })
         .appendTo( this.div_toolbar )
@@ -175,7 +175,7 @@ $.widget( "heurist.search_faceted", {
             
             if(hasHistory) {
                 this.btn_reset.show()   
-                this.btn_save.show(); 
+                //this.btn_save.show();  //@todo
             }else{
                 this.btn_reset.hide()   
                 this.btn_save.hide(); 

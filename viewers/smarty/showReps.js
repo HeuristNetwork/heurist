@@ -1322,10 +1322,10 @@ function ShowReps() {
             }
 
             // for loop we also add the variable in the loop
-            if(_inloop){
+            /*if(_inloop){
                 _varname = _nodep.parent_id+"."+_nodep.this_id;
                 _text = _text + _addVariable(_nodep, _varname);
-            }
+            }*/
 
         }
 

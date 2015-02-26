@@ -754,7 +754,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
         
         /**
-        * 
+        *   if needIds is true  it returns array of record ids
         */
         , getSelection: function(selection, needIds){
             
