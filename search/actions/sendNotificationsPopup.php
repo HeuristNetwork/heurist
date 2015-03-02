@@ -97,7 +97,8 @@
 			function reset_person() { document.getElementById('notify_person').selectedIndex = 0; }
 			function reset_email() { document.getElementById('notify_email').value = ''; }
 			function reset_coll_grp() {
-				document.getElementById('notify_coll_grp').selectedIndex = 0;
+                var ele = document.getElementById('notify_coll_grp');
+                if (ele) ele.selectedIndex = 0;
 				document.getElementById('coll_grp_members_link_div').style.display = 'none';
 			}
 			function reset_group() {
@@ -162,6 +163,7 @@
 					onclick="return confirm_notification();">
 			</div>
 
+            <input type="hidden" name="h4" id="h4" value="<?= htmlspecialchars(@$_REQUEST['h4']) ?>">
 			<input type="hidden" name="bib_ids" id="bib_ids" value="<?= htmlspecialchars($_REQUEST['bib_ids']) ?>">
 
 		</form>
@@ -181,7 +183,13 @@
 			return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
 		}
 		$bibIDList = join(',', $bib_ids);
-		$notification_link = HEURIST_BASE_URL . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
+      
+        if(@$_REQUEST['h4']){
+            $notification_link = HEURIST_BASE_URL . 'applications/h4/?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;    
+        }else{
+            $notification_link = HEURIST_BASE_URL . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
+        }
+        
 
 		$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . $bibIDList . ')');
 		$title_list = "Id      Title\n" . "------  ---------\n";
@@ -209,7 +217,7 @@
 
 		$email_text = get_user_name()." would like to draw some records to your attention, with the following note:\n\n"
 		.$msg
-		."Access them and add them (if desired) to your Heurist records at:\n\n"
+		."Access them and add them (if desired) to your Heurist records at: \n\n"
 		.$notification_link
 		."\n\n"
         ."To add records, either click on the unfilled star left of the title\n"

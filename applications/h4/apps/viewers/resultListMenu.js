@@ -800,7 +800,7 @@ $.widget( "heurist.resultListMenu", {
         if(Hul.isempty(recIDs_list)) return;
 
         recIDs_list = recIDs_list.join(",");
-        var url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
+        var url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?h4=1&db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
         
         Hul.showDialog(url, {height:230});
     },

@@ -38,7 +38,7 @@
         header('Content-type: image/png');
         header('Pragma: public');
         header('Content-Length: ' . filesize($filename));
-        ob_clean();
+        @ob_clean();
         flush();        
         readfile($filename);
     }else{
