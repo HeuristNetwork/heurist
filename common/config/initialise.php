@@ -343,7 +343,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
     if (!defined('HEURIST_FILESTORE_DIR')) { //store folder is not defined in DB - set it by default
     */
 
-    testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder");
+    testDirWriteableAndDefine('HEURIST_FILESTORE_DIR', HEURIST_UPLOAD_ROOT . $dbName . '/', "File store folder", false);
 
     if (!defined('HEURIST_FILESTORE_DIR')){ //fatal error - storage folder is not defined
     returnErrorMsgPage(1, "Cannot access filestore directory for this database: <b>". HEURIST_UPLOAD_ROOT . $dbName . '/' .

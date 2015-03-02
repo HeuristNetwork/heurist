@@ -81,7 +81,7 @@
                 $this->dbname_full = $db;
 
             }else if($dbrequired){
-                $this->addError(HEURIST_INVALID_REQUEST, "Database not defined");
+                $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
                 $this->mysqli = null;
                 return false;
             }
@@ -106,7 +106,11 @@
                     define('HEURIST_DBNAME', $this->dbname);
                     define('HEURIST_DBNAME_FULL',$this->dbname_full);
                     //@todo  - test upload and thumb folder exist and writeable
-                    $this->initPathConstants();
+                    if(!$this->initPathConstants()){
+                        $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
+                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).");
+                        return false;
+                    }
                     
                     $this->login_verify(); //load user info from session
                     
@@ -242,6 +246,10 @@
                     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
                     
                     define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+                    if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
+                         return false;
+                    }
+                    
                     define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
                     
                     define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
@@ -254,6 +262,8 @@
                     if(folderCreate($folder, true)){
                         define('HEURIST_SETTING_DIR', $folder);
                     }
+                    
+                    return true;
         }
         
         private function getInstallPath(){

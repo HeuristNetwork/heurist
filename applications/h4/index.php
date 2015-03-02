@@ -38,7 +38,9 @@
         // connrect to given database
         if(! $system->init(@$_REQUEST['db']) ){
             //can not connect to given database
-            header('Location: php/databases.php');
+            $err = $system->getError();
+            $msg = @$err['message'];
+            header('Location: php/databases.php?msg='.rawurlencode($msg));
             //echo "FATAL ERROR!!!! ".print_r($arr, $system->getError());
             exit();
         }

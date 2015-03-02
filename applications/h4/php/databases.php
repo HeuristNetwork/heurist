@@ -22,12 +22,16 @@
     require_once(dirname(__FILE__)."/System.php");
 
     $system = new System();
+    $isSystemInited = $system->init(@$_REQUEST['db'], false);
 
-    if(! $system->init(@$_REQUEST['db'], false) ){  //init with
-        //@todo - redirect to error page
-        print_r($system->getError(),true);
-        exit();
+    if( !$isSystemInited ){  //can not init system (apparently connection to DB is wrong)
+        $err = $system->getError();
+        $error_msg = @$err['message'];
+    }else if (@$_REQUEST['msg']){
+        $error_msg = $_REQUEST['msg'];
     }
+    
+    
 ?>
 <html>
     <head>
@@ -45,6 +49,18 @@
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
+            
+<?php
+    if(isset($error_msg)){
+            echo '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">';
+            echo '<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>';
+            echo $error_msg.'</div>';
+    }
+
+    if($isSystemInited){
+?>
+            
+            
             <div style="padding: 0.5em;">Please select a database from the list</div>
             <div style="overflow-y:auto;display: inline-block;width:100%;height:80%">
 
@@ -63,6 +79,11 @@
                 </ul>
 
             </div>
+            
+<?php
+    }
+?>
+            
 
         </div>
     </body>
