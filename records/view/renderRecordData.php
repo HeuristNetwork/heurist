@@ -558,8 +558,10 @@ function print_private_details($bib) {
 ?>
 </div>
 <?php
+    $prevLbl = null;
 	foreach ($bds as $bd) {
-		print '<div class=detailRow style="width:100%;border:none 1px #00ff00;"><div class=detailType>'.htmlspecialchars($bd['name']).'</div><div class=detail>'.$bd['val'].'</div></div>';
+		print '<div class=detailRow style="width:100%;border:none 1px #00ff00;"><div class=detailType>'.($prevLbl==$bd['name']?"":htmlspecialchars($bd['name'])).'</div><div class=detail>'.$bd['val'].'</div></div>';
+        $prevLbl = $bd['name']; 
 	}
 ?>
 
@@ -698,15 +700,19 @@ global $relRT,$ACCESSABLE_OWNER_IDS;
     </div></div>
 <?php
 	$rectypesStructure = getAllRectypeStructures();
+    
+    $lbl = 'Linked from';
 
 	while ($row = mysql_fetch_assoc($res)) {
 
 		print '<div class=detailRow>';
-		print '<div class=detailType>Linked from</div>';
+		print '<div class=detailType>'.$lbl.'</div>';
 		print '<div class=detail>';
 		print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_SITE_PATH.'common/images/16x16.gif">&nbsp;';
 		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
+        
+        $lbl = '';
 	}
 }
 
