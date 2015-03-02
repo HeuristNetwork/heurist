@@ -83,12 +83,16 @@
 
         <!-- Initializing -->
         
-        
+<?php
+    if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
+?>        
         <style> 
             .ui-map-document { background-image: url(<?=HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'?>) !important;}
             .ui-map-layer { background-image: url(<?=HEURIST_ICON_URL.RT_MAP_LAYER.'.png'?>) !important;}
-            .ui-map-datasource { background-image: url(<?=HEURIST_ICON_URL.RT_SHP_LAYER.'.png'?>) !important;}
         </style>        
+<?php
+    }
+?>        
         
         <script type="text/javascript">
         
@@ -232,9 +236,9 @@
                             $helper.dialog( "open" );
                         }
                  });
-                 $( "#helper" ).load(top.HAPI4.basePathOld+'context_help/mapping_overview.html');
+                 $( "#helper" ).load(top.HAPI4.basePathOld+'context_help/mapping_overview.html #content');
                  $( "#helper" ).dialog({
-                    autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:800,
+                    autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:'90%', height:300,
                     position: { my: "right top", at: "right bottom", of: $('#btn_help') },
                     show: {
                         effect: "slide",
@@ -251,32 +255,24 @@
                  
                  
 <?php
-    if(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){ 
+    if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){ 
         
                 $items = '';    
-                if(defined('RT_KML_LAYER') && RT_KML_LAYER>0){
-                    $items = $items.'<li id="menu-layer-'.RT_KML_LAYER.'"><a href="#">KML</a></li>';
-                }
-                if(defined('RT_SHP_LAYER') && RT_SHP_LAYER>0){
-                    $items = $items.'<li id="menu-layer-'.RT_SHP_LAYER.'"><a href="#">SHP</a></li>';
-                }
-                if(defined('RT_GEOTIFF_LAYER') && RT_GEOTIFF_LAYER>0){
-                    $items = $items.'<li id="menu-layer-'.RT_GEOTIFF_LAYER.'"><a href="#">GeoTiff</a></li>';
-                }
-                if(defined('RT_TILED_IMAGE_LAYER') && RT_TILED_IMAGE_LAYER>0){
-                    $items = $items.'<li id="menu-layer-'.RT_TILED_IMAGE_LAYER.'"><a href="#">Tiled image</a></li>';
-                }
-                if(defined('RT_QUERY_LAYER') && RT_QUERY_LAYER>0){
-                    $items = $items.'<li id="menu-layer-'.RT_QUERY_LAYER.'"><a href="#">Query layer</a></li>';
-                }
-        
+                $items = $items.'<li rtid="'.(defined('RT_KML_LAYER') && RT_KML_LAYER>0?RT_KML_LAYER:0).'"><a href="#">KML</a></li>';
+                $items = $items.'<li rtid="'.(defined('RT_SHP_LAYER') && RT_SHP_LAYER>0?RT_SHP_LAYER:0).'"><a href="#">SHP</a></li>';
+                $items = $items.'<li rtid="'.(defined('RT_GEOTIFF_LAYER') && RT_GEOTIFF_LAYER>0?RT_GEOTIFF_LAYER:0).'"><a href="#">GeoTiff</a></li>';
+                $items = $items.'<li rtid="'.(defined('RT_TILED_IMAGE_LAYER') && RT_TILED_IMAGE_LAYER>0?RT_TILED_IMAGE_LAYER:0).'"><a href="#">Tiled image</a></li>';
+                $items = $items.'<li rtid="'.(defined('RT_QUERY_LAYER') && RT_QUERY_LAYER>0?RT_QUERY_LAYER:0).'"><a href="#">Query layer</a></li>';
 ?>        
-                $("#btnMapNew").button({ text:false, icons: {primary: 'ui-map-document'}}) 
-                        .click( function(){ addNewRecord(<?=RT_MAP_DOCUMENT?>);} );
-                $("#btnMapEdit").button({text:false, icons: {primary: "ui-icon-pencil"}})
+                $("#btnMapNew").button({ text:false, 
+                         icons: {primary: "<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?'ui-map-document':'ui-icon-help')?>" }}) 
+                        .click( function(){ addNewRecord(<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?RT_MAP_DOCUMENT:0)?>);} );
+                $("#btnMapEdit").button({text:false, 
+                        icons: {primary: "ui-icon-pencil"}})
                         .click(mapEdit);
-                $("#btnMapLayer").button({text:false, icons: {primary: "ui-map-layer"}})
-                        .click(function(){ addNewRecord(<?=RT_MAP_LAYER?>);});
+                $("#btnMapLayer").button({text:false, 
+                        icons: {primary: "<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?'ui-map-layer':'ui-icon-help')?>"}})
+                        .click(function(){ addNewRecord(<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?RT_MAP_LAYER:0)?>);});
 
                 menu_datasets = $('<ul><?=$items?></ul>')
                     .addClass('menu-or-popup')
@@ -284,13 +280,13 @@
                     .appendTo( $('body') )
                     .menu({
                         select: function( event, ui ) {
-                        var mode = ui.item.attr('id');
-                        mode = mode.substr(11);
+                        var mode = ui.item.attr('rtid');
                         addNewRecord(mode);
                     }})
                 .hide();
 
-                btn_datasets = $("#btnMapDataSource").button({text:false, icons: {
+                btn_datasets = $("#btnMapDataSource").button({text:false, 
+                        icons: {
                             primary: "icon-reorder",
                             secondary: "ui-icon-triangle-1-s"}});
                             
@@ -360,7 +356,19 @@
                 }
             }
             function addNewRecord(rt){
-                window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
+                if(rt<1){
+                    top.HEURIST4.util.showMsgDlg(
+                        "The required record type has not been defined.<br>"+
+                        "Open the context-specific help document (which explains how to enable mapping, as well as how to do it)?",
+                        function(){
+                            $("#helper").dialog( "open" );
+                        }, "Missing record type"   
+                    );
+                 
+                    
+                }else{
+                    window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
+                }
             }
             
             
@@ -386,12 +394,11 @@
                 </select>
                 </span>
                 <span id="mapToolbar">
-                <button id="btnMapEdit" disabled="disabled">Edit current map</button>
-                <button id="btnMapNew">New map document</button>
-                <button id="btnMapLayer">New Map Layer</button>
-                <button id="btnMapDataSource">New Data Source</button>
+                <button id="btnMapEdit" disabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
+                <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
+                <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
+                <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
                 </span>
-
                 
                 <button id="btnPrint" style="position: fixed; right: 70">Print</button>
                 <button id="btnEmbed" style="position: fixed; right: 40">Embed</button>

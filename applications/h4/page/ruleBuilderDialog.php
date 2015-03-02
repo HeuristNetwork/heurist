@@ -53,7 +53,7 @@
         <script type="text/javascript" src="../js/hapi.js"></script>
 
         <script type="text/javascript" src="../apps/search/ruleBuilder.js"></script>
-        <script type="text/javascript" src="../apps/search/resultList.js"></script>
+        <script type="text/javascript" src="../apps/viewers/resultList.js"></script>
 
         <script type="text/javascript">
             var db =  '<?=$_REQUEST['db']?>';
