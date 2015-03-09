@@ -119,6 +119,11 @@ function receiveMessage(event)
 
 // -----------------------------------------------------------------------------------------------------------------------------
 //          CODE FOR INCLUSION IN WORDPRESS SITE
+//
+// To allow import an annotated template, the page must have the following piece of html code
+// <div id="HeuristRecTypeSource">DB_ID-RECTYPE_ID</div>
+// Where DB_ID is id of database and RECTYPE_ID is record type to be imported.
+//
 // -----------------------------------------------------------------------------------------------------------------------------
 
 
@@ -174,7 +179,6 @@ var message;
 if (false) {
 message = 'Response: ("' + event.origin + '"), but not from HeuristScholar.org';
 } else {
-message = 'RECORD TYPE IMPORT UNDER DEVELOPMENT LATE APRIL 2014. Response: "' + event.data + '" from "' + event.origin + '"';
 
 var dv = jQuery('#HeuristRecTypeSource');
 
@@ -190,6 +194,7 @@ if(event.data=="heurist"){
 jQuery('#sidebar').hide();
 jQuery('#main-header').hide();
 jQuery('#main-footer').hide();
+jQuery('#page-container').css('padding-top','1px);
 
 
 //create button
