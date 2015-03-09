@@ -284,7 +284,7 @@
             }else{
                 //remove ugr_ID
                 $idx = array_search('ugr_ID', $colNames);
-                if($idx>=0){
+                if($idx!==false){
                     unset($colNames[$idx]);
                     unset($values[$idx]);
                 }
