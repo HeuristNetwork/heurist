@@ -50,11 +50,11 @@ var _TAB_RECORDVIEW = 0,
 
 var appnameToTabIDMap = {'record':0,'Record':0,'record view':0,'Record View':0,
 						'map':1,'Map':1,'map view':1,'Map View':1,
-						'report':2,'Report':2,'report view':2,'Report View':2}
-						//'transform':3,'Transform':3,'transform view':3,'Transform View':3
+						'report':2,'Report':2,'report view':2,'Report View':2,
+						'transform':3,'Transform':3,'transform view':3,'Transform View':3}
                         //'diagram':4,'Diagram':4,'diagram view':4,'Diagram View':4} 
 
-var tabIDToAppnameMap = ['record','map','report']; //,'transform','diagram'];
+var tabIDToAppnameMap = ['record','map','report','transform'];//,'diagram'];
 
 var appInterface = {};
 
@@ -4810,7 +4810,8 @@ top.HEURIST.search = {
 		   top.HEURIST.rectypes.names[top.HEURIST.magicNumbers['RT_TOOL']]))
 		{
 			if(!top.HEURIST.util.isnull(_tabView)){
-				//osmakov 2015-01-22  _tabView.removeTab(_tabView.getTab(_TAB_TRANSFORM)); //Bug# 232
+				//osmakov 2015-01-22  
+                _tabView.removeTab(_tabView.getTab(_TAB_TRANSFORM)); //Bug# 232
 			}
 		}
 
