@@ -279,7 +279,7 @@ if(@$_REQUEST['annedit']=='yes'){
 }
 ?>
 <script type="text/javascript">
-	showViewer(document.getElementById('mediaviewer'), "<?=$url?>", <?=$recID?>);
+	showViewer(document.getElementById('mediaviewer'), "<?=$url?>", <?=$recID?>, 'image');
 	onResize();
 </script>
 

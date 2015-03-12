@@ -268,7 +268,7 @@ function clearViewer(container){
 //
 // If _recordID is defined it loads related annotations (see imageAnnotation.js)
 //
-function showViewer(container, url_and_cfg, _recordID){
+function showViewer(container, url_and_cfg, _recordID, sTypeDef){
 
 	   var acfg;
 
@@ -292,6 +292,7 @@ function showViewer(container, url_and_cfg, _recordID){
 	   		sType = oType.type;
 	   		sSource = oType.source;
 	   		extension = oType.extension;
+            if(sType=='unknown') sType = sTypeDef;
 	   }else{
 	   		sSource = acfg[1];
 	   		sType = acfg[2];

@@ -674,7 +674,7 @@
             ulf_MimeExt as ext,
             ulf_ExternalFileReference as remoteURL,
             ulf_Parameters as parameters,
-            concat(ulf_FilePath,ulf_FileName) as fullpath,
+            ulf_FilePath, ulf_FileName,
             ulf_PreferredSource as prefsource
 
             from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension
@@ -707,8 +707,12 @@
                 $res["URL"] = $downloadURL;
             }
             
+            if(@$res['ulf_FilePath'] || @$res['ulf_FileName']){
+                $res['fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
+            }
             //add database media storage folder for relative paths
             $path = @$res['fullpath'];
+
             if( $path && !file_exists($path) ){
                 chdir(HEURIST_FILESTORE_DIR);
                 $path = realpath($path);

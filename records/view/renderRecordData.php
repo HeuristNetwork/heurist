@@ -450,6 +450,9 @@ function print_private_details($bib) {
 					$filedata = $filedata['file'];
 					$remoteSrc = $filedata['remoteSource'];
 
+
+//error_log("playerURL=".@$filedata['playerURL']."   ".$filedata['URL']);
+                    
 					//add to thumbnail list
 					$isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
 					if (is_image($filedata) || $isplayer)
