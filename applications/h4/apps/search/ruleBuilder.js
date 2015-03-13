@@ -621,6 +621,17 @@ $.widget( "heurist.ruleBuilder", {
         return rt_target;
     },
 
+    /*
+       [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype]
+       Source rectype,
+       pointer or relation field id,
+       relation type (term) id,
+       Target rectype,
+       Filter ,
+       linktype  0 links (any), 1 linedfrom, 2 linkedto, 3 relationfrom, 4 relatedto
+       
+    
+    */
     _getCodes: function(){
 
         var rt_source   = this.select_source_rectype.val();

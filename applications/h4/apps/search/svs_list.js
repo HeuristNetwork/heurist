@@ -185,6 +185,9 @@ $.widget( "heurist.svs_list", {
 
     },
     
+    //
+    // save current treeview layout
+    //
     _saveTreeData: function(){
 
             var treeData = {};        
@@ -905,7 +908,7 @@ $.widget( "heurist.svs_list", {
                     var isfaceted = (mode=='faceted');
                     node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted, isrules:that._hasRules(request.svs_Query) }, node.folder?"child":"after" );    
                     
-                    //temp that._saveTreeData();
+                    that._saveTreeData();
                     
                     $("#addlink"+groupID).css('display', 'none');
                     

@@ -70,7 +70,7 @@ search: [t:10 f:1]
 
 
 
-NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
+NOTE - to make search for facet value faster we may try to omit current search in query and search for entire database
             
 */
 

@@ -42,7 +42,7 @@
 
         $response = recordSearchMinMax($system, $_REQUEST);
 
-    }else if(@$_REQUEST['a'] == 'getfacets'){    
+    }else if(@$_REQUEST['a'] == 'getfacets'){ //returns     
 
         $response = recordSearchFacets($system, $_REQUEST);
         

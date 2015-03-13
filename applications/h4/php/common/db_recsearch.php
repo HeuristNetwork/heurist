@@ -103,6 +103,10 @@
     */
     function recordSearchFacets($system, $params){
 
+//
+error_log(">>".print_r($params, true));
+        
+        
         if(@$params['level0'] && @$params['type']){
 
             $mysqli = $system->get_mysqli();
@@ -139,6 +143,7 @@
                     $links[1] = _getRt_Ft($params['level1']);
                     $resource_rt0 = $links[1]["rt"];
                     $resource_field0 = $links[1]["field"];
+                    
                     if(@$params['level2']){
                         $links[2] = _getRt_Ft($params['level2']);
                         $resource_rt1 = $links[2]["rt"];
@@ -562,7 +567,8 @@
             //count query
             $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
 
-            //error_log("COUNT >>>".$query);
+            //
+//error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){
