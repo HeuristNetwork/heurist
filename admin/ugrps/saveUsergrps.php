@@ -288,17 +288,22 @@
                     unset($colNames[$idx]);
                     unset($values[$idx]);
                 }
+                
+                //add password by default
+                if(array_search('ugr_Password', $colNames)===false){
+                    array_push($colNames, 'ugr_Password');
+                    array_push($values, '');
+                }
+                if(array_search('ugr_Name', $colNames)===false){
+                    array_push($colNames, 'ugr_Name');
+                    array_push($values, $values[array_search('ugr_eMail', $colNames)]);
+                }
             }
 
-            //add password by default
-            if(array_search('ugr_Password', $colNames)===false){
-                array_push($colNames, 'ugr_Password');
-                array_push($values, '');
-            }
-            if(array_search('ugr_Name', $colNames)===false){
-                array_push($colNames, 'ugr_Name');
-                array_push($values, $values[array_search('ugr_eMail', $colNames)]);
-            }
+            
+//error_log("colNames=".print_r($colNames,true));            
+//error_log("values=".print_r($values,true));            
+            
             
 			$query = "";
 			$fieldNames = "";
