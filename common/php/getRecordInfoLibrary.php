@@ -140,8 +140,11 @@ function setCachedData($key, $var) {
 
     setLastModified();
 
-    $memcache->set('lastUpdate:' . $key, $lastModified);
-    return $memcache->set($key, $var);
+    try{
+        @$memcache->set('lastUpdate:' . $key, $lastModified);
+        return $memcache->set($key, $var);
+    }catch(Exception $e){
+    }    
 }
 /**
  * resolves a recID to any forwarded value and returns resolved recID with any bmkID for user and indicates

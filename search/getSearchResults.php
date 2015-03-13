@@ -205,7 +205,7 @@
 		global $memcache;
 		$key = DATABASE . ":record:" . $id;
         try{
-		    $record = $memcache->get($key);
+		    $record = @$memcache->get($key);
 		    if ($record) {	// will only update if previously cached
 			    $record = loadBareRecordFromDB($id);
 			    $memcache->set($key, $record);
