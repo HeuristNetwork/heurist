@@ -508,6 +508,8 @@
                                         $details["t:".$key] = array("1"=>$new_md5);
                                     }
 
+                                    $out['error']='test';
+                                    
                                     //add-update Heurist record
                                     $out = saveRecord($recordId, $recordType,
                                         $recordURL,
@@ -697,6 +699,7 @@ XML;
                             }
 
                             //add-update Heurist record
+                            $out['error'] = 'test2';
                             $out = saveRecord(null, //record ID
                                 RT_MEDIA_RECORD, //record type
                                 null,  //record URL
