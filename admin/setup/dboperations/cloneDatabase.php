@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * cloneDatabase.php: Copies an entire databsae verbatim
+    * cloneDatabase.php: Copies an entire database verbatim
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -308,9 +308,10 @@
         
 */        
 
+
         mysql_connection_insert($newname);
         // RESET register db ID
-        $query1 = "update sysIdentification set sys_dbRegisteredID=0 where 1";
+        $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null where 1";
         $res1 = mysql_query($query1);
         if (mysql_error())  { //(mysql_num_rows($res1) == 0)
             print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
