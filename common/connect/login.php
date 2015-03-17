@@ -35,6 +35,7 @@ define('SKIP_VERSIONCHECK2', 1);
 define('SAVE_URI', 'disabled');
 require_once(dirname(__FILE__).'/applyCredentials.php');
 require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../php/dbUtils.php');
 //require_once('applyCredentials.php');
 //require_once('../php/dbMySqlWrappers.php');
 session_start();
@@ -165,6 +166,8 @@ if(!$needRegistration){
 
             mysql_connection_select(USERS_DATABASE);
 
+            checkDatabaseFunctions();
+            
             if (@$last_uri){
                 header('Location: ' . $last_uri);
             }
