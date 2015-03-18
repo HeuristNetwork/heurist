@@ -47,6 +47,9 @@
         $url= str_replace(HEURIST_SERVER_URL,'http://localhost',$url);
     }
       
+      
+//DEBUG error_log(" CURL ".$url);      
+      
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec

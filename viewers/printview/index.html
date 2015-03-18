@@ -570,6 +570,7 @@
                     (xsls[style].activeElement.nodeName == "parsererror" || xsls[style].activeElement.nodeName == "error")) {
                     //the transform is invalid, tell the user
             alert("The tranformation you have chosen is invalid. \n Please contact the owner/creator of the tranform");
+
             //and remove it from the list of choices
             var sElt = document.getElementById("transform_select");
             var optElt = sElt.options[sElt.selectedIndex];
@@ -582,6 +583,8 @@
               }
               sElt.removeChild(optElt);
             }
+            
+            
             //and remove the document
             delete xsls[style];
             curStyle = null;
