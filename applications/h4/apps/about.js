@@ -36,7 +36,7 @@ $.widget( "heurist.about", {
 
         this.div_logo = $( "<div>")
         .addClass('logo')
-        .css('width','150px')
+        .css('width','200px')
         .css('float','left')
         .appendTo( this.element )
         .button();

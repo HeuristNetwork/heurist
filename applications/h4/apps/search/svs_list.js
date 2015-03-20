@@ -28,7 +28,7 @@ $.widget( "heurist.svs_list", {
     options: {
         isapplication:true,  // send and recieve the global events
         searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-        btn_visible_dbstructure: true,
+        btn_visible_dbstructure: false,
         btn_visible_filter: false
     },
 

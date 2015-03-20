@@ -424,7 +424,7 @@ $.widget( "heurist.profile", {
             var $dlg = this.login_dialog;
 
             //load login dialogue
-            $dlg.load("apps/profile_login.html?t="+(new Date().getTime()), function(){
+            $dlg.load(top.HAPI4.basePath + "apps/profile/profile_login.html?t="+(new Date().getTime()), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){

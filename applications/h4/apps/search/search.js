@@ -32,8 +32,6 @@ $.widget( "heurist.search", {
 
         searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
 
-        leftmargin: '300px',
-
         has_paginator: false,
         limit: 1000,
 
@@ -76,40 +74,66 @@ $.widget( "heurist.search", {
     _create: function() {
 
         var that = this;
-        this.element.css('height','100%').addClass('ui-heurist-header1');
+        this.element.css({'height':'100%', 'min-width':'1100px'}).addClass('ui-heurist-header1');
         
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
+        
+        // database summary or login buttons
+        var div_left  = $('<div>')
+                        .css({'height':'2em','width':'200px', 'padding':'1.5em','float':'left'})
+                        .appendTo( this.element );
+        this.btn_login = $( "<button>", {
+                text: top.HR("Login")
+            })
+            .css('width','160px')
+            .addClass('logged-out-only')
+            .addClass('ui-heurist-btn-header1')
+            .appendTo(div_left)
+            .button({icons: {
+                primary: 'ui-icon-key'
+            }})
+            .click( function(){ that._doLogin(); });
+        
+        this.btn_databasesummary = $( "<button>", {
+                text: top.HR("Database Summary")
+            })
+            .css('width','160px')
+            .addClass('logged-in-only')
+            .addClass('ui-heurist-btn-header1')
+            .appendTo(div_left)
+            .button()
+            .click( function(){ that._showDbSummary(); });
+
+
+
+        //'height':'100%',
+        this.div_search   = $('<div>').css({'padding-top':'1.5em', 'min-width':'600px', 'float':'left'}).appendTo( this.element );
+
+        this.div_progress = $('<div>').css({'padding-top':'1.5em', 'min-width':'600px', 'float':'left'}).appendTo( this.element ).hide();
 
         if(this.options.btn_visible_newrecord){
             this.btn_add_record = $( "<button>", {
                 text: top.HR("Add New Record")
             })
-            //.css('float','center')
+            .css('width','160px')
             .addClass('logged-in-only')
             .addClass('ui-heurist-btn-header1')
             .appendTo(
-                  $('<div>')
-                        .css({'height':'2em','padding':'1.5em 6em 0 3em','float':'left'}) //'float':'left' 'width':this.options.leftmargin,
+                  $('<span>')
+                        .css({'padding':'1.5em 6em 0 3em','float':'left'}) //,'display':'inline-block'  'width':this.options.leftmargin,
                         .appendTo( this.element )                    
             )
             .button({icons: {
                 primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
             }})
             .click( function(){ that._addNewRecord(); });
-        }else{
-            this.element.css('padding-left',this.options.leftmargin);
-        }
-
-        //'height':'100%',
-        this.div_search   = $('<div>').css({'padding-top':'1.5em', 'min-width':'500px', 'display':'inline-block'}).appendTo( this.element );
-
-        this.div_progress = $('<div>').css({'padding-top':'1.5em', 'min-width':'500px'}).appendTo( this.element ).hide();
-
+        }        
+        
 
         this.input_search = $( "<input>" )   //this.options.has_paginator?'30%':'50%'} )
-        .css({'margin-right':'0.2em','width':'400px'}) //, 'width':'30%', 'max-width':'500px'})
+        .css({'margin-right':'0.2em','width':'450px'}) //, 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_search );
 
@@ -134,7 +158,7 @@ $.widget( "heurist.search", {
         if(this.options.islinkmode){
 
             //$('<br>').appendTo( this.div_search );
-            this.div_search_links = $('<div>').css({'text-align':'right','width':'400px'}) //, 'width':'30%', 'max-width':'500px' })
+            this.div_search_links = $('<div>').css({'text-align':'right','width':'450px'}) //, 'width':'30%', 'max-width':'500px' })
                     .appendTo( this.div_search );
 
             var link = $('<a>',{
@@ -169,9 +193,9 @@ $.widget( "heurist.search", {
                 href:  top.HAPI4.basePathOld+'context_help/advanced_search.html', target:'_blank'
             }).css('padding-right','1em').appendTo(this.div_search_links);
 
-            link = $('<a>',{
-                text: 'Rule Set', href:'#'
-            }).css('padding-right','1em').appendTo(this.div_search_links);
+            link = $('<a>',{ text: 'Rule Set', href:'#' })
+                    .addClass('logged-in-only')
+                    .css('padding-right','1em').appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
@@ -179,9 +203,9 @@ $.widget( "heurist.search", {
                 }
             }});
 
-            link = $('<a>',{
-                text: 'Save As ', href:'#'
-            }).css('padding-right','1em').appendTo(this.div_search_links);
+            link = $('<a>',{ text: 'Save As ', href:'#' })
+                   .addClass('logged-in-only')
+                   .css('padding-right','1em').appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
@@ -449,17 +473,17 @@ $.widget( "heurist.search", {
     /* private function */
     _refresh: function(){
 
-        if(top.HAPI4.currentUser.ugr_ID>0){
+        if(top.HAPI4.is_logged()){
             $(this.element).find('.logged-in-only').show(); //.css('visibility','visible');
             //$(this.element).find('.logged-in-only').css('visibility','visible');
 
             //$('.logged-out-only').css('visibility','hidden');
-            $(this.element).find('span.logged-out-only').hide();
+            $(this.element).find('.logged-out-only').hide();
         }else{
             $(this.element).find('.logged-in-only').hide();
             ///$(this.element).find('.logged-in-only').css('visibility','hidden');
             //$('.logged-out-only').css('visibility','visible');
-            $(this.element).find('span.logged-out-only').show();
+            $(this.element).find('.logged-out-only').show();
         }
 
         this.btn_search_as_user.button( "option", "label", top.HR(this._getSearchDomainLabel(this.options.search_domain)));
@@ -1124,6 +1148,27 @@ $.widget( "heurist.search", {
 
     }
 
+    , _showDbSummary: function(){
+        
+        var url = top.HAPI4.basePath+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
+        
+        var body = this.document.find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+        
+        Hul.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
+            
+    }
 
+    , _doLogin: function(){
+        
+        if(false && !$.isFunction(doLogin)){
+            //var that = this;
+            $.getScript(top.HAPI4.basePath+'apps/profile/profile_login.js', this._doLogin );
+        }else{
+            doLogin();
+        }
+        
+        
+    }
 
 });

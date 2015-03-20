@@ -1,5 +1,5 @@
 /**
-* Record type manager - list of record types by groups. Requires utils.js
+* Filed type manager - list of field types by groups or by record type structure. Requires utils.js
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -18,20 +18,27 @@
 */
 
 
-$.widget( "heurist.rectype_manager", {
+$.widget( "heurist.fieldtype_manager", {
 
     // default options
     options: {
         isdialog: false, //show in dialog or embedded
         list_top: '80px',
         isselector: false, //show in checkboxes to select
-
+        
         selection:[], 
 
+        forRecordTypes: null, //if record type is defined - do not show grouping
+        allowedFieldTypes: null, 
+        
+        callback: null,  //callback function
+        
         current_GrpID: null,
         // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 1  // order by name
     },
+    
+    entries: [], 
 
     // the constructor
     _create: function() {
@@ -41,6 +48,24 @@ $.widget( "heurist.rectype_manager", {
         this.wcontainer = $("<div>");
 
         if(this.options.isdialog){
+            
+            
+    
+            var onDialogClose = function(){
+                if(this.options.callback){
+                     var fields = [];
+                     for(var i=0;i<entries.length;i++){
+                           if( $.inArray(entries[i][0], this.options.selection) > -1) {
+                                //[entryID, name, usage, is_selected, dttype]
+                                fields.push({id: entries[i][0], title: entries[i][1], type: entries[i][4] });
+                           }
+                     }
+                     this.options.callback.call(this, fields);
+                }
+            }
+    
+            
+            
 
             this.wcontainer
             .css({overflow: 'none !important', width:'100% !important' })
@@ -53,10 +78,11 @@ $.widget( "heurist.rectype_manager", {
                 height: 620,
                 width: 400,
                 modal: true,
-                title: top.HR(this.options.isselector?"Select Record types":"Manage Record types"),
+                title: top.HR(this.options.isselector?"Select Field types":"Manage Field types"),
                 resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':'100%'});
                 },
+                close: onDialogClose, 
                 buttons: [
                     {text:top.HR('Select'),
                         click: function() {
@@ -74,7 +100,7 @@ $.widget( "heurist.rectype_manager", {
         }
 
         //---------------------------------------- HEADER
-        // user group selector
+        // group selector
         this.select_grp = $( "<select>", {width:'96%'} )
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.wcontainer );
@@ -120,7 +146,7 @@ $.widget( "heurist.rectype_manager", {
 
         this.select_order = $( "<select><option value='1'>"+
             top.HR("by name")+"</option><option value='2'>"+
-            //temp top.HR("by usage")+"</option><option value='3'>"+
+            top.HR("by type")+"</option><option value='4'>"+
             top.HR("selected")+"</option></select>", {'width':'80px'} )
 
         .addClass("text ui-widget-content ui-corner-all")
@@ -145,13 +171,16 @@ $.widget( "heurist.rectype_manager", {
         this.div_content = $( "<div>" )
         .addClass('list')
         .css(css1)
-        .html('list of record types')
+        .html('list of field types')
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.wcontainer );
 
         //-----------------------------------------
-
-        this._updateGroups();    
+        if(this.options.forRecordTypes){
+            this._refersh();
+        }else{
+            this._updateGroups();    
+        }
 
     }, //end _create
 
@@ -167,6 +196,14 @@ $.widget( "heurist.rectype_manager", {
 
     /* private function */
     _refresh: function(){
+        
+        //hide group selector if for record types
+        if(this.options.forRecordTypes){
+            this.select_grp.hide();    
+        }else{
+            this.select_grp.show();
+        }
+        
         this._renderItems();
     },
 
@@ -191,7 +228,7 @@ $.widget( "heurist.rectype_manager", {
         var selObj = this.select_grp.get(0);
         top.HEURIST4.util.createRectypeGroupSelect( selObj, top.HR('all groups') );
 
-        this.select_grp.val( top.HEURIST4.rectypes.groups[0].id);
+        this.select_grp.val( top.HEURIST4.detailtypes.groups[0].id);
         this.select_grp.change();
 
     },
@@ -205,21 +242,94 @@ $.widget( "heurist.rectype_manager", {
             this.div_content.empty();  //clear
         }
 
-        var entries = [],
+        entries = [],
         entryID, name, usage, is_selected;
-        var idx_rty_grpid = top.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+        
+        var idx_dty_type = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
+        
+        if(this.options.forRecordTypes){ //show that belong to particular record type only
+        
+            //add default set recTitle and recModified
+            entries.push(['title', 'RecTitle', 0, this.options.selection.indexOf('title'), 'header']);
+            entries.push(['modified', 'Modified', 0, this.options.selection.indexOf('modified'), 'header']);
+            
+            var rectypes = this.options.forRecordTypes;
 
-        for (entryID in  top.HEURIST4.rectypes.names)
-        {
-            if( entryID && (this.options.current_GrpID==0 || this.options.current_GrpID==top.HEURIST4.rectypes.typedefs[entryID].commonFields[idx_rty_grpid]) ){
+            if(rectypes!='all'){
 
-                name = top.HEURIST4.rectypes.names[entryID];
-                usage = 0; //  top.HEURIST4.rectypes.rtUsage[entryID];
-                is_selected =  this.options.selection.indexOf(entryID);
 
-                entries.push([entryID, name, usage, is_selected]);
+                if(!top.HEURIST4.util.isArray(rectypes)){
+                    rectypes = [rectypes];
+                }
+                
+                var fieldtypes_ids = [], fieldtypes_ids2;
+
+                $.arrayIntersect = function(a, b)
+                {
+                    return $.grep(a, function(i)
+                        {
+                            return $.inArray(i, b) > -1;
+                    });
+                };                
+
+                //find common fields
+                for (var i=0; i<rectypes.length; i++){
+                    var rtId = rectypes[i];
+                    if(top.HEURIST4.rectypes.typedefs[rtId]){
+                        fieldtypes_ids2 = [];
+                        for (entryID in  top.HEURIST4.rectypes.typedefs[1].dtFields)
+                            if(entryID){
+                                fieldtypes_ids2.push(entryID);
+                        }
+                        if(fieldtypes_ids.length>0){
+                            fieldtypes_ids = $.arrayIntersect(fieldtypes_ids, fieldtypes_ids2)            
+                        }else{
+                            fieldtypes_ids = fieldtypes_ids2;
+                        }
+                    }
+                }
+                
+
+                //allowedFieldTypes:allowedtypes
+                for (var i=0; i<fieldtypes_ids.length; i++){
+                        
+                        entryID = fieldtypes_ids[i];
+
+                        if(rectypes.length>1){ //take from generallist
+                              name = top.HEURIST4.detailtypes.names[entryID];
+                              dttype = top.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_type];
+                        }else{
+                              var field = top.HEURIST4.rectypes.typedefs[rectypes[0]].dtFields[entryID];
+                              name = field[top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName];
+                              dttype = field[top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type];
+                        }
+
+                        if( top.HEURIST4.util.isempty(allowedFieldTypes) || $.inArray(dttype, allowedFieldTypes) ){
+                            usage = 0; //  top.HEURIST4.detailtypes.rtUsage[entryID];
+                            is_selected =  this.options.selection.indexOf(entryID);
+                            entries.push([entryID, name, usage, is_selected, dttype]);
+                        }
+                                
+                }
+
             }
-        }           
+            
+        }else{    //show by groups
+            
+            var idx_dty_grpid = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
+            for (entryID in  top.HEURIST4.detailtypes.names)
+            {
+                if( entryID && (this.options.current_GrpID==0 || this.options.current_GrpID==top.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_grpid]) ){
+
+                    name = top.HEURIST4.detailtypes.names[entryID];
+                    usage = 0; //  top.HEURIST4.detailtypes.rtUsage[entryID];
+                    is_selected =  this.options.selection.indexOf(entryID);
+                    dttype = top.HEURIST4.detailtypes.typedefs[entryID].commonFields[idx_dty_type];
+
+                    entries.push([entryID, name, usage, is_selected, dttype]);
+                }
+            }           
+        }
 
         var val = this.options.current_order;
         entries.sort(function (a,b){
@@ -240,6 +350,7 @@ $.widget( "heurist.rectype_manager", {
             name = rt[1];
             usage = rt[2];
             is_selected = rt[3];
+            dtype = rt[4];
 
             $itemdiv = $(document.createElement('div'));
 
@@ -250,7 +361,7 @@ $.widget( "heurist.rectype_manager", {
             .appendTo(this.div_content);
 
 
-            if(this.options.isselector){
+            if(this.options.isselector){  //checkbox
                 $('<input>')
                 .attr('type','checkbox')
                 .attr('rtID', entryID )
@@ -271,7 +382,7 @@ $.widget( "heurist.rectype_manager", {
                 .appendTo($itemdiv);
             }
 
-
+            /* no icon for field type
             $iconsdiv = $(document.createElement('div'))
             .addClass('recordIcons')
             .appendTo($itemdiv);
@@ -282,6 +393,7 @@ $.widget( "heurist.rectype_manager", {
             })
             .css('background-image', 'url('+ top.HAPI4.iconBaseURL + entryID + '.png)')
             .appendTo($iconsdiv);
+            */
 
             $('<div>',{
                 title: name
@@ -292,12 +404,19 @@ $.widget( "heurist.rectype_manager", {
             .html( name  )
             .appendTo($itemdiv);
 
-            //count - usage    
+            //field type
             $('<div>')
             .css({'margin':'0.4em', 'height':'1.4em', 'position':'absolute','right':'60px'})
             .css('display','inline-block')
-            .html( usage )
+            .html( dtype )
             .appendTo($itemdiv);
+            
+            //usage 
+            /*$('<div>')
+            .css({'margin':'0.4em', 'height':'1.4em', 'position':'absolute','right':'60px'})
+            .css('display','inline-block')
+            .html( usage )
+            .appendTo($itemdiv);*/
         }           
     },
 
@@ -312,16 +431,19 @@ $.widget( "heurist.rectype_manager", {
 
 });
 
-function showManageRecordTypes(){
+function showManageFieldTypes( recordtypes, fields, allowedtypes, callback ){
 
-    var manage_dlg = $('#heurist-rectype-dialog');
+    var manage_dlg = $('#heurist-fieldtype-dialog');
+    
 
     if(manage_dlg.length<1){
 
-        manage_dlg = $('<div id="heurist-rectype-dialog">')
+        manage_dlg = $('<div id="heurist-fieldtype-dialog">')
         .appendTo( $('body') )
-        .rectype_manager({ isdialog:true });
+        .fieldtype_manager({ isdialog:true, forRecordTypes:recordtypes, allowedFieldTypes:allowedtypes, isselector:true, selection:selection, callback:callback });
+    }else{
+        manage_dlg.fieldtype_manager('option', { forRecordTypes:recordtypes, allowedFieldTypes:allowedtypes, isselector:true, selection:selection, callback:callback });
     }
 
-    manage_dlg.rectype_manager( "show" );
+    manage_dlg.fieldtype_manager( "show" );
 }

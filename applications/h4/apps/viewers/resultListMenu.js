@@ -55,7 +55,7 @@ $.widget( "heurist.resultListMenu", {
 
         
         //-----------------------     listener of global events
-        var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT; 
+        var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT; 
         /*top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
             sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
@@ -109,17 +109,25 @@ $.widget( "heurist.resultListMenu", {
     */
     _refresh: function(){
 
-        if(top.HAPI4.currentUser.ugr_ID>0){
-            $(this.element).find('.logged-in-only').css('visibility','visible');
+        if(top.HAPI4.is_logged()){
+            
+            this.menu_Selected.find('.logged-in-only').show();
+            this.menu_Collected.find('.logged-in-only').show();
+            this.btn_Shared.show();
+            
+            //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
         }else{
-            $(this.element).find('.logged-in-only').css('visibility','hidden');
+            //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
+            this.menu_Selected.find('.logged-in-only').hide();
+            this.menu_Collected.find('.logged-in-only').hide();
+            this.btn_Shared.hide();
         }
     },
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
         
-        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
+        $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT);
         
         // remove generated elements
         if(this.btn_Search){
@@ -130,8 +138,8 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Selected.remove();
         this.btn_Collected.remove();
         this.menu_Collected.remove();
-        this.btn_Layout.reSmove();
-        this.menu_Layout.remove();
+        this.btn_Shared.reSmove();
+        this.menu_Shared.remove();
         this.divMainMenuItems.remove();
     },
     
@@ -172,12 +180,19 @@ $.widget( "heurist.resultListMenu", {
             
         
         this['menu_'+name] = $('<ul>')
-        .load('apps/viewers/resultListMenu'+name+'.html', function(){  //'?t='+(new Date().getTime())
+        .load('apps/viewers/resultListMenu'+name+'.html?t='+(new Date().getTime()), function(){  //'?t='+(new Date().getTime())
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
             //.addClass('ui-menu-divider-heurist')
-            .menu({select: function(event, ui){ event.preventDefault(); that._menuActionHandler(ui.item.attr('id')); return false; }})
+            .menu({select: function(event, ui){ event.preventDefault(); that._menuActionHandler(ui.item.attr('id')); return false; }});
+            
+            if(top.HAPI4.is_logged()){
+                that['menu_'+name].find('.logged-in-only').show();
+            }else{
+                that['menu_'+name].find('.logged-in-only').hide();
+            }
+            
         })
         //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
         .hide();

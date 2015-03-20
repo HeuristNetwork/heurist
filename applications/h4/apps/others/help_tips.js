@@ -44,7 +44,7 @@ $.widget( "heurist.help_tips", {
 
             this.element.dialog({
                 autoOpen: false,
-                height: 505,
+                height: 515,
                 width: 705,
                 modal: true,
                 title: top.HR("Welcome to Heurist"), //Tip of the day

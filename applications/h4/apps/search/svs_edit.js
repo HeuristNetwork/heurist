@@ -172,7 +172,7 @@ function hSvsEdit(args) {
                                     //mode, groupID, svsID, squery, callback
                                     _showDialog('saved', null, null, squery ); //open new dialog
                                 }else{
-                                    ele_rules.val( JSON.stringify(res.rules) ); //assign new tules    
+                                    ele_rules.val( JSON.stringify(res.rules) ); //assign new rules    
                                 }
                             }
                         }

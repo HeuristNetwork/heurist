@@ -121,6 +121,7 @@
         <!-- DEBUG
         -->
 
+        <script type="text/javascript" src="apps/profile/profile_login.js"></script>
         <script type="text/javascript" src="apps/viewers/resultListMenu.js"></script>
         <script type="text/javascript" src="apps/rec_actions.js"></script>
         <script type="text/javascript" src="apps/rec_search.js"></script>
@@ -258,7 +259,7 @@
                 $( "#heurist-about" ).dialog(
                     {
                         autoOpen: false,
-                        height: 350,
+                        height: 400,
                         width: 450,
                         modal: true,
                         resizable: false,
@@ -297,7 +298,7 @@
             &nbsp;
         </div>
 
-        <div id="heurist-about" title="About">
+        <div id="heurist-about" title="About" style="width:300px">
             <div class='logo'></div>
             <h4>Heurist academic knowledge management system</h4>
             <p style="margin-top: 1em;">version     <?=HEURIST_VERSION?></p>
