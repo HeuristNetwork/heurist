@@ -39,6 +39,10 @@
             if($current_User && @$current_User['ugr_Groups'] && count(array_keys($current_User['ugr_Groups']))>0 ){
                 $ugrID = implode(",", array_keys($current_User['ugr_Groups'])).",".$ugrID;
             }
+            if($system->is_admin()){ //returns guest searches for admin
+                $ugrID = $ugrID.",0";
+            }
+            
         }
         if(!$ugrID) {
             $ugrID = 0; //get saved searches for guest

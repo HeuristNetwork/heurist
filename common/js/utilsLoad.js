@@ -35,7 +35,12 @@ if (! document.body) {
 }
 
 if (! top.HEURIST) {
+
     var installDir = top.location.pathname.replace(/(((admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+    if(top.installDirFromH4){
+         installDir = top.installDirFromH4;
+    }
+    
 
     /**
      * main Heurist Namespace

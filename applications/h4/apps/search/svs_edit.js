@@ -41,7 +41,8 @@ function hSvsEdit(args) {
             var selObj = svs_ugrid.get(0);
             Hul.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:top.HR('My Bookmarks')}, 
-                 {key:'all', title:top.HR('All Records')}],
+                 {key:'all', title:top.HR('All Records')},
+                 {key:0, title:top.HR('Searches for guests')}],
                 function(){
                     svs_ugrid.val(Hul.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
             });
@@ -298,7 +299,7 @@ function hSvsEdit(args) {
                         }
                         if(Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val())){   //PURE RULE SET
                             domain = 'rules';
-                            svs_ugrid = top.HAPI4.currentUser.ugr_ID;
+                            svs_ugrid = top.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
                         }
                         
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
@@ -354,7 +355,7 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 400,
+                    height: 450,
                     width: 450,
                     modal: true,
                     resizable: false,

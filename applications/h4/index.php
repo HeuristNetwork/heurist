@@ -188,6 +188,22 @@
                             //top.HAPI4.database+'. HEURIST_TITLE
                             window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
 
+                            // OLD H3 stuff
+                            window.HEURIST.baseURL  = window.HAPI4.basePathOld;
+                            window.HEURIST.basePath = window.HAPI4.basePathOld;
+                            window.HEURIST.loadScript(window.HAPI4.basePathOld+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+                            window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
+                            window.HEURIST.database = {  name: window.HAPI4.database };
+                            
+                            /*$.getScript(window.HAPI4.basePathOld+'common/js/utilsLoad.js', function(){ 
+                                $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){ 
+                                    
+                                });
+                            } );*/
+                            
+                            
+                            
+                            
                             //load database structure (record types, field types, terms) definitions
                             window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -247,6 +263,8 @@
                                     top.HEURIST4.util.redirectToError(response.message);
                                 }
                             });
+                            
+
 
                         }else{  // Failed to initialise system
 
@@ -272,11 +290,6 @@
                 );
 
 
-                // OLD H3 stuff
-                top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                top.HEURIST.baseURL = window.HAPI4.basePathOld;
-                top.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                top.HEURIST.database = {  name: window.HAPI4.database };
 
             });
 
@@ -286,10 +299,11 @@
     <body style="background-color:#c9c9c9">
 
 
-        <!-- These are old H3 stuff - needed to support existing features in popups
-        <script src="../../common/php/loadHAPI.php"></script> -->
-        <script src="../../common/js/utilsLoad.js"></script>
-        <script src="../../common/php/displayPreferences.php"></script>
+        <!-- These are old H3 stuff - needed to support existing features in popups -->
+        <script>top.installDirFromH4="<?=HEURIST_BASE_URL_OLD?>"</script>
+        <script src="<?=HEURIST_BASE_URL_OLD?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL_OLD?>common/php/displayPreferences.php"></script>
+        
         <!--
         <script src="../../common/php/getMagicNumbers.php"></script>
         These are old H3 stuff - needed to support existing features in popups -->

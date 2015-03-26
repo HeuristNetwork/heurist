@@ -435,19 +435,19 @@
 
                                 <li style="padding-right:5px;height:4px;border-top:solid 1px #ccc"></li>
 
-                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                <li style="padding-left:5px;border:none"><a href="#" id=result-style-icons-link
                                     title="Generate HML for selected records in search results (current selection)"
                                     onClick="top.HEURIST.search.exportHML(false,false,false);">
                                     HML - selected</a>
                                 </li>
 
-                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                <li style="padding-left:5px;border:none"><a href="#" id=result-style-icons-link
                                     title="Generate HML for current set of search results and related records displayed in open levels 1, 2, 3 ..."
                                     onClick="top.HEURIST.search.exportHML(true,true,false);" >
                                     HML with related</a>
                                 </li>
 
-                                <li style="padding-left:5px;"><a href="#" id=result-style-icons-link
+                                <li style="padding-left:5px;border:none"><a href="#" id=result-style-icons-link
                                     title="Generate HML for current set of search results (current query) with one record per file, plus manifest"
                                     onClick="top.HEURIST.search.exportHML(true,false,true);" >
                                     HML - file-per-record</a>
@@ -486,10 +486,10 @@
                                         Contact us</a>
                                 </li>
 
-                                <li style="padding-right:5px;height:4px;border-top:solid 1px #ccc"></li>
+                                <!-- li style="padding-right:5px;height:4px;"></li -->
 
-                                <li class="admin-only" style="padding-left:5px;">
-                                    <a  href="#" onclick="{window.open('../applications/h4/?db='+database, '_blank')}"
+                                <li class="admin-only" style="padding-left:5px;border-top:solid 1px #ccc">
+                                    <a  href="#" onclick="{window.open('../../h4/?db='+database, '_blank')}"
                                         title="New Experimental UI">
                                         Experimental</a>
                                 </li>

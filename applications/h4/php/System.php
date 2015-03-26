@@ -240,10 +240,12 @@
             
                     if(!$dbname) $dbname = HEURIST_DBNAME;
 
-                    $install_path = $this->getInstallPath();
+                    $install_path = 'HEURIST/'; //$this->getInstallPath();
                     $dir_Filestore = "HEURIST_FILESTORE/";
                     $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
                     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+             
+//error_log("root=".$documentRoot."   install=".$install_path);
                     
                     define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
                     if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
@@ -271,8 +273,12 @@
             $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
             if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
             
+            //$topDirs = "apps|js|php|page";
             $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
             $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
+            
+//error_log("script ".@$_SERVER["SCRIPT_NAME"]);
+            
             if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
                 $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
             }
@@ -362,7 +368,8 @@
                     "version"=>HEURIST_VERSION,
                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
-                    "db_total_records"=>$this->get_system('sys_RecordCount'))
+                    "db_total_records"=>$this->get_system('sys_RecordCount'),
+                    "basePathOld"=>HEURIST_BASE_URL_OLD)
             );
             
             return $res;

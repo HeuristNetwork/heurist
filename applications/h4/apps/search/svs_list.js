@@ -92,7 +92,9 @@ $.widget( "heurist.svs_list", {
         //main container
         this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':0, 'right':0, 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
-        this.helper_top = $( '<div>'+top.HR('right-click entries for actions')+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
+        this.helper_top = $( '<div>'+top.HR('right-click entries for actions')+'</div>' )
+                .addClass('logged-in-only')
+                .addClass('heurist-helper1').appendTo( this.accordeon );
         if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
         
         this.helper_btm = $( '<div>'
@@ -157,6 +159,10 @@ $.widget( "heurist.svs_list", {
 
     /* private function */
     _refresh: function(){
+        
+        if(!top.HAPI4.is_logged()){
+             top.HAPI4.currentUser.usr_GroupsList = [];
+        }
 
         var that = this;
         if(!top.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
@@ -211,10 +217,7 @@ $.widget( "heurist.svs_list", {
         this.accordeon.hide();
         
         var islogged = (top.HAPI4.is_logged());
-        if(!islogged){
-            //@todo clear accordeon and show login button
-            return;
-        }
+        //if not logged in show only rules and "my searches/all records"
         
         this.treeviews = {};
         
@@ -224,6 +227,10 @@ $.widget( "heurist.svs_list", {
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js                           
             $.getScript(top.HAPI4.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
             return;
+        }else if(!islogged){   
+        
+            top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();         
+            
         }else if(!$.ui.fancytree._extensions["dnd"]){
         //    $.getScript(top.HAPI4.basePath+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
             alert('drag-n-drop extension for tree not loaded')
@@ -277,14 +284,15 @@ $.widget( "heurist.svs_list", {
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
         
-        this.helper_btm.before(
-            $('<div>')
-            .attr('grpid',  'bookmark').addClass('acc')
-            .addClass('heurist-bookmark-search')
-            .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
-            .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
-            .append( this._defineContent('bookmark') ) );
-            
+        if(islogged){   
+            this.helper_btm.before(
+                $('<div>')
+                .attr('grpid',  'bookmark').addClass('acc')
+                .addClass('heurist-bookmark-search')
+                .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
+                .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
+                .append( this._defineContent('bookmark') ) );
+        }
         this.helper_btm.before(
             $('<div>')
             .attr('grpid',  'all').addClass('acc')
@@ -387,6 +395,7 @@ $.widget( "heurist.svs_list", {
     //
     _defineContent: function(groupID){
         //
+        var res;
         var that = this;
         var CLIPBOARD = null;
         
@@ -395,7 +404,8 @@ $.widget( "heurist.svs_list", {
         
         var tree = $("<div>").css('padding-bottom','20px');
         
-        tree.fancytree({
+    var fancytree_options =     
+        {
     checkbox: false,
     //titlesTabbable: false,     // Add all node titles to TAB chain
     source: treeData,
@@ -429,35 +439,7 @@ $.widget( "heurist.svs_list", {
         }
       },    
 
-    extensions: ["edit", "dnd", "filter"],
 
-    dnd: {
-      preventVoidMoves: true,
-      preventRecursiveMoves: true,
-      autoExpandMS: 400,
-      dragStart: function(node, data) {
-        return true;
-      },
-      dragEnter: function(node, data) {
-        // return ["before", "after"];
-        if(node.tree._id == data.otherNode.tree._id){
-            return node.folder ?true :["before", "after"];    
-        }else{
-            return false;
-        }
-        
-        
-      },
-      dragDrop: function(node, data) {
-        data.otherNode.moveTo(node, data.hitMode);
-        that._saveTreeData();
-      }
-    },
-    edit: {
-    },
-    filter: {
-        mode: "hide"
-    },
     click: function(event, data) {
         if(!data.node.folder){
             var qname, qsearch, isfaceted;
@@ -476,7 +458,37 @@ $.widget( "heurist.svs_list", {
         }
         
     }
-  })
+  };
+  
+  if(top.HAPI4.is_logged()){
+
+      fancytree_options['extensions'] = ["edit", "dnd", "filter"];
+      fancytree_options['dnd'] = {
+          preventVoidMoves: true,
+          preventRecursiveMoves: true,
+          autoExpandMS: 400,
+          dragStart: function(node, data) {
+              return true;
+          },
+          dragEnter: function(node, data) {
+              // return ["before", "after"];
+              if(node.tree._id == data.otherNode.tree._id){
+                  return node.folder ?true :["before", "after"];    
+              }else{
+                  return false;
+              }
+
+
+          },
+          dragDrop: function(node, data) {
+              data.otherNode.moveTo(node, data.hitMode);
+              that._saveTreeData();
+          }
+      };
+      fancytree_options['edit'] = {};
+      fancytree_options['filter'] = { mode: "hide" };
+
+  tree.fancytree(fancytree_options)
   //.css({'height':'100%','width':'100%'})
   .on("nodeCommand", function(event, data){
     // Custom event handler that is triggered by keydown-handler and
@@ -660,19 +672,24 @@ $.widget( "heurist.svs_list", {
       }, 100);
     }
   });
-
-      //treedata is empty - add div - to show add links
-       var tree_links = $("<div>", {id:"addlink"+groupID})
-            .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
-            .append( $("<a>",{href:'#', text:'Add new'}).click(function(){
-                    var isfaceted = false;
-                    that.editSavedSearch(isfaceted?'faceted':'saved', groupID);
-                    }) );
   
+          //treedata is empty - add div - to show add links
+          var tree_links = $("<div>", {id:"addlink"+groupID})
+          .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
+          .append( $("<a>",{href:'#', text:'Add new'}).click(function(){
+              var isfaceted = false;
+              that.editSavedSearch(isfaceted?'faceted':'saved', groupID);
+          }) );
+
+          res = $('<div>').append(tree_links).append(tree);
+    }else{
+          //not logged in
+          tree.fancytree(fancytree_options);
+          res = $('<div>').append(tree);
+    }
+      
        this.treeviews[groupID] = tree.fancytree("getTree");
 
-       var res = $('<div>').append(tree_links).append(tree);
-  
        return res;
 
     },
@@ -680,21 +697,37 @@ $.widget( "heurist.svs_list", {
     
     _define_DefaultTreeData: function(){
 
-        var treeData = {
-            rules:{title: top.HR('Rule Sets'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'rules') },
-            bookmark:{title: top.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'bookmark') },
-            all:{title: top.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'all') }
-        };
-        
-        var groups = top.HAPI4.currentUser.usr_GroupsList;
-
-        for (var groupID in groups)
-        {
-            if(groupID){
-                var name = groups[groupID][1];
-                treeData[groupID] = {title: name, folder: true, expanded: false, children: this._define_SVSlist(groupID) };
+        var treeData;
+        if(top.HAPI4.is_logged()){
+            treeData = {
+                rules:{ title: top.HR('Rule Sets'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'rules') },
+                all: { title: top.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'all') },
+                bookmark:{ title: top.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(top.HAPI4.currentUser.ugr_ID, 'bookmark') }
+            };
+            if(top.HAPI4.is_admin()){
+                treeData['guests'] = { title: top.HR('Searches for guests'), folder: true, expanded: false, children: this._define_SVSlist(0) };
             }
+        }else{
+            treeData = {
+                //rules:{ title: top.HR('Rule Sets'), folder: true, expanded: true, children: this._define_SVSlist(0, 'rules') },
+                all: { title: top.HR('Searches'), folder: true, expanded: true, children: this._define_SVSlist(0, 'all') }
+            };
         }
+        
+        if(top.HAPI4.is_logged()){
+        
+            var groups = top.HAPI4.currentUser.usr_GroupsList;
+
+            for (var groupID in groups)
+            {
+                if(groupID){
+                    var name = groups[groupID][1];
+                    treeData[groupID] = {title: name, folder: true, expanded: false, children: this._define_SVSlist(groupID) };
+                }
+            }
+        
+        }
+        
         return treeData;
         
     },

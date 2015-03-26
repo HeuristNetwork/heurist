@@ -27,7 +27,7 @@
 </li>
 
 <li class="admin-only logged-in-only"  style="padding-left:5px;" id="reportBug">
-    <a href="../../export/email/formEmailRecordPopup.html?rectype=bugreport" name="auto-popup" 
+    <a href="export/email/formEmailRecordPopup.html?rectype=bugreport" name="auto-popup" class="h3link" 
        onClick="{return false;}"
        title="Click to send a bug report or feature request to the Heurist development team" >
     Bug report</a>
@@ -43,7 +43,7 @@
 
 <li class="admin-only" style="padding-left:5px;">
     <a  href="#"
-        onclick="{window.open('../../search/search.html?db='+window.HAPI4.database, '_blank'); return false;}"
+        onclick="{window.open(top.HAPI4.basePathOld+'search/search.html?db='+window.HAPI4.database, '_blank'); return false;}"
         title="Old UI">
         Heurist 3</a>
 </li>

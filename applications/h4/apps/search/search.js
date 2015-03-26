@@ -1129,7 +1129,7 @@ $.widget( "heurist.search", {
 
         var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
-        Hul.showDialog(url, { height:450, width:700,
+        Hul.showDialog(url, { height:550, width:700,
                     callback:function(responce) {
 /*
                 var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";

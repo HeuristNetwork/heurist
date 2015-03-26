@@ -17,6 +17,8 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    require_once (dirname(__FILE__).'/../php/consts.php');
+    
 ?>
 
 <html>
@@ -25,7 +27,7 @@
         <title>Spring Diagram</title>
 
         <!-- Css -->
-        <link rel="stylesheet" type="text/css" href="../../../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_OLD?>common/css/global.css">
         <!-- link rel="stylesheet" type="text/css" href="../../../common/css/global.css" -->
         <style>
             body, html {

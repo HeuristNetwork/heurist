@@ -29,7 +29,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     _database = null, //same as public property  @toremove      s
     _region = 'en',
     _regional = null, //localization resources
-    _guestUser = {ugr_ID:0, ugr_FullName:'Guest'};
+    _guestUser = {ugr_ID:0, ugr_FullName:'Guest' };
 
 
 
@@ -51,13 +51,13 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         // 
-        var installDir = top.location.pathname.replace(/(((\?|admin|common|js|php|page)\/.*)|(index.*))/, "");
+        var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page)\/.*)|(index.*))/, "");
         that.basePath = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL = that.basePath + 'php/common/rt_icon.php?db='+_database+'&id=';
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
         that.database = _database;
 
-        //path to old interface
+        //path to old interface - it will be get from server sysinfo
         installDir = top.location.pathname.replace(/(((\?|admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
         that.basePathOld = top.location.protocol + '//'+top.location.host  + installDir;
 
@@ -82,6 +82,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(success){
                     that.setCurrentUser(response.data.currentUser);
                     that.sysinfo = response.data.sysinfo;
+                    that.basePathOld = that.sysinfo['basePathOld'];
                 }else{
                     top.HEURIST4.util.showMsgErr(response.message);
                 }

@@ -368,6 +368,11 @@ $.widget( "heurist.mainMenu", {
             var href = ele.attr('href');
             if(!top.HEURIST4.util.isempty(href)){
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + top.HAPI4.database;
+                
+                if(ele.hasClass('h3link')){
+                    href = window.HAPI4.basePathOld + href;
+                }
+                
                 ele.attr('href', href);
                 that._on(ele, {
                     click: that._onPopupLink
@@ -418,7 +423,7 @@ $.widget( "heurist.mainMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
         
-        Hul.showDialog(url, { height:450, width:700, 
+        Hul.showDialog(url, { height:550, width:700, 
                     callback:function(responce) {
 /*                        
                 var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
@@ -688,7 +693,7 @@ $.widget( "heurist.mainMenu", {
 
             $dlg.dialog({
                 autoOpen: true,
-                height: 600,
+                height: 650,
                 width: 800,
                 modal: true,
                 resizable: false,
