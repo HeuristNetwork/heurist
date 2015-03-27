@@ -90,19 +90,26 @@ $.widget( "heurist.svs_list", {
         if(hasHeader) toppos = toppos + 2;
 
         //main container
-        this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':0, 'right':0, 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
+        this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':'1em', 'right':'0.5em', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
-        this.helper_top = $( '<div>'+top.HR('right-click entries for actions')+'</div>' )
+        this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
                 .addClass('logged-in-only')
                 .addClass('heurist-helper1').appendTo( this.accordeon );
         if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
         
-        this.helper_btm = $( '<div>'
-+'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
+        
+        var t1 = '<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
 +'This is a faceted search. It allows the user to drill-down into the database on a set of pre-selected database fields.</p>'
 +'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
 +'This is a search with addition of a Rule Set. The initial search is expanded to a larger set of records by following a set of rules specifying which pointers and relationships to follow.'
-        +'</p></div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
+        +'</p>';
+        
+        t1 = '<p style="pading-top:0.5em"><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
++'&nbsp;Faceted search</p>'
++'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
++'&nbsp;Search with rules</p>';        
+        
+        this.helper_btm = $( '<div>'+t1+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
         if(top.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
 
         
@@ -402,7 +409,7 @@ $.widget( "heurist.svs_list", {
         var treeData = top.HAPI4.currentUser.ugr_SvsTreeData[groupID] && top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children
                              ?top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
         
-        var tree = $("<div>").css('padding-bottom','20px');
+        var tree = $("<div>").css('padding-bottom','0em');
         
     var fancytree_options =     
         {

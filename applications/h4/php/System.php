@@ -18,7 +18,7 @@
     */
 
 
-    require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
+    require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
     require_once (dirname(__FILE__).'/common/utils_db.php');
     require_once (dirname(__FILE__).'/common/db_users.php');

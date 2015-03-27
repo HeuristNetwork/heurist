@@ -58,7 +58,7 @@ $.widget( "heurist.mainMenu", {
         });
 
         //'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'
-        this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'padding-top':'14px', 'text-align':'center' }).appendTo(this.element);
+        this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'padding-top':'2em', 'text-align':'center' }).appendTo(this.element);
 
         $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
                         'background-position': 'left center',

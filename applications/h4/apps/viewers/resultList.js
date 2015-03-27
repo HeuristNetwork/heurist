@@ -51,6 +51,12 @@ $.widget( "heurist.resultList", {
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
+        if(hasHeader){
+            var header = $(".header"+that.element.attr('id'));
+            header.css({'padding-left':'0.7em','background':'none','border':'none'}).html('<h3>'+header.text()+'</h3>');
+            header.parent().css({'background':'none','border':'none'});
+            header.parent().parent().css({'background':'none','border':'none'});
+        }
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
@@ -190,7 +196,7 @@ $.widget( "heurist.resultList", {
                         var $header = $(".header"+that.element.attr('id'));
                         if($header.length>0){
                             var new_title = top.HR(data.qname || 'Search result');
-                            $header.html(new_title);
+                            $header.html('<h3>'+new_title+'</h3>');
                             $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
                         }
 

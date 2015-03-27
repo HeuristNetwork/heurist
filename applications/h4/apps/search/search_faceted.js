@@ -124,7 +124,7 @@ $.widget( "heurist.search_faceted", {
 
 
         this.facets_list_container = $( "<div>" )
-        .css({"top":"3.6em","bottom":0,"left":0,"right":4,"position":"absolute"})
+        .css({"top":"3.6em","bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"})
         .appendTo( this.element );
 
         this.facets_list = $( "<div>" )
