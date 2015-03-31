@@ -512,7 +512,7 @@ $.widget( "heurist.ruleBuilder", {
                         //this.label_3.show();
                         this.select_reltype.show();
                         this.select_reltype.prop('disabled', false);
-                        top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any record (entity) type', false);
+                        top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false);
                     }
                     //reduced list of constraints
                     top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);

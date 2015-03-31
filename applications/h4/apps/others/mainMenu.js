@@ -70,7 +70,8 @@ $.widget( "heurist.mainMenu", {
         // MAIN MENU-----------------------------------------------------
         
         this.divMainMenu = $( "<div>")
-                        .css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
+                        //.css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
+                        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
                         .addClass('logged-in-only')
                         .appendTo(this.element);
         
@@ -168,6 +169,11 @@ $.widget( "heurist.mainMenu", {
             that._refresh();
         });
             
+        
+        setTimeout(function(){
+            var ishelp_on = top.HAPI4.get_prefs('help_on');               
+            that._toggleHelp(ishelp_on);
+        },2000);
         
         this._refresh();
 
@@ -407,8 +413,9 @@ $.widget( "heurist.mainMenu", {
               
                 var ishelp_on = (top.HAPI4.get_prefs('help_on')=='1')?'0':'1';
                 top.HAPI4.currentUser['ugr_Preferences']['help_on'] = ishelp_on;
-              
+                
                 this._toggleHelp(ishelp_on); p=true;
+                
           }else if(action == "menu-help-tipofday"){ 
                 showTipOfTheDay(false); p=true;
           }
@@ -417,6 +424,7 @@ $.widget( "heurist.mainMenu", {
             event.preventDefault();
           }
     },
+    
     
     _addNewRecord: function(){
         
@@ -711,14 +719,20 @@ $.widget( "heurist.mainMenu", {
     }
     
     , _toggleHelp: function(ishelp_on){
+
+       ishelp_on = (ishelp_on=='1');
         
-        if(ishelp_on=='1'){
+        if(ishelp_on){
             $('.heurist-helper1').css('display','block');
             $('.heurist-helper2').css('visibility','visible');
         }else{
             $('.heurist-helper1').css('display','none');
             $('.heurist-helper2').css('visibility','hiddden');
         }
+        
+       var a1 = $("#menu-help-inline").find('a');
+       a1.attr('title', (ishelp_on?'Hide':'Show')+' inline help');
+       a1.html('Inline help - turn '+(ishelp_on?'Off':'On'));
         
     }
 

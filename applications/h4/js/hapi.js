@@ -705,7 +705,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
                 //preferences by default
-                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'heurist', 'search_limit':1000};
+                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'heurist', 'search_limit':1000, 'help_on':'0'};
             }
             if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];    
