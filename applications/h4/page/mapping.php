@@ -204,12 +204,28 @@
                 $( document ).bubble({
                             items: ".timeline-event-icon"
                 });
+                
+                $( window ).resize(function() {
+                            var w = $(this).width();
+                            if (w < 400) {
+                                $("#map-doc-select").hide();
+                                $("#map-doc-select-lbl").hide();
+                            }else{
+                                $("#map-doc-select").show();
+                                if (w < 490) {
+                                    $("#map-doc-select-lbl").hide();
+                                }else{
+                                    $("#map-doc-select-lbl").show();
+                                }
+                            }
+                    });
+                    
                 $( "#timeline" ).mousedown(function(){
                     $( document ).bubble("closeAll");
                 });
                 
                 //init buttons
-                $("#toolbar").css('background','none');
+                $("#mapToolbarDiv").css('background','none');
                 
                 $("#btnExportKML").button().click(exportKML);
                 
@@ -307,7 +323,7 @@
 <?php
      }
 ?>                 
-                 
+             
                  
             }
             
@@ -385,10 +401,10 @@
             </div>
             
             <!-- Toolbar -->
-            <div class="ui-layout-north" id="toolbar" style="display: block !important; height: 30px important; z-index:999;">
+            <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px important; z-index:999;">
                 <!-- Map document selector -->
                 <span id="mapSelector">
-                <i>Map document:</i>
+                <label id="map-doc-select-lbl"><i>Map document:</i></label>
                 <select id="map-doc-select" class="text ui-widget-content ui-corner-all">
                     <option value="-1" selected="selected">None defined</option>
                 </select>
@@ -400,16 +416,18 @@
                 <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
                 </span>
                 
-                <button id="btnPrint" style="position: fixed; right: 70">Print</button>
-                <button id="btnEmbed" style="position: fixed; right: 40">Embed</button>
-                <button id="btn_help" style="position: fixed; right: 10">Help</button>
+                <div style="position: absolute; right: 0px; top:0px" class="ui-buttonset">
+                <button id="btnPrint">Print</button>
+                <button id="btnEmbed">Embed</button>
+                <button id="btn_help">Help</button>
+                </div>
                 
                 <!-- Menu -->
                 <!--<select id="menu" style="position: fixed; right: 10">
                     <option value="-1" selected="selected" disabled="disabled">Menu</option>
                     <option>Google Map/Timeline</option>
                     <option>Google Earth</option>
-                    <option>Embed Map Code</option>
+                    <option>Embed Map Code</option>         style="position: fixed; right: 40"
                 </select>-->
                 
                 <!-- Legend -->

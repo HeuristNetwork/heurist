@@ -118,7 +118,7 @@ $.widget( "heurist.resultList", {
 
 
         this.mode_selector = $( "<div>" )
-        .css({'float':'right', 'padding-right': '2em'})  //'padding-top': '0.5em',
+        .css({'position':'absolute','right':'0px'})  //'padding-top': '0.5em',
         .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
             +'<label for="list_layout_list">'+top.HR('list')+'</label>'
             +'<input type="radio" id="list_layout_icons" name="list_lo" value="icons"/>'
@@ -141,11 +141,10 @@ $.widget( "heurist.resultList", {
 
         //----------------------
 
-        this.span_info = $("<label>").appendTo(
-            $( "<div>").css({'float':'right','min-width':'10em','padding':'5px 2em 0 0px'}).appendTo( this.div_toolbar ));
+        this.span_info = $("<label>").css('font-style','italic').appendTo(
+            $( "<div>").css({'position':'absolute','right':'80px','min-width':'10em','padding':'6px 2em 0 0px'}).appendTo( this.div_toolbar ));
 
         //-----------------------
-
 
         if(this.options.showmenu){
             this.div_actions = $('<div>')
@@ -156,7 +155,7 @@ $.widget( "heurist.resultList", {
 
 
         //-----------------------     listener of global events
-        this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
+        this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + " " + top.HAPI4.Event.ON_LAYOUT_RESIZE;
         if(this.options.isapplication){
             this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
                         + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
@@ -166,7 +165,16 @@ $.widget( "heurist.resultList", {
 
         $(this.document).on(this._events, function(e, data) {
 
-            if(e.type == top.HAPI4.Event.LOGIN){
+            if(e.type == top.HAPI4.Event.ON_LAYOUT_RESIZE){
+
+                var w = that.element.width();
+                if (w < 390) {
+                    that.span_info.hide();    
+                }else{
+                    that.span_info.show();    
+                }
+                
+            }else if(e.type == top.HAPI4.Event.LOGIN){
 
                 that._refresh();
 

@@ -96,7 +96,15 @@ function initLayoutCardinal(){
         applyDefaultStyles: true,
         maskContents:        true,
         togglerContent_open:    '<div class="ui-icon"></div>',
-        togglerContent_closed:  '<div class="ui-icon"></div>'};
+        togglerContent_closed:  '<div class="ui-icon"></div>',
+        tips: {
+            Close:                "Click to minimise panel",
+            Resize:               "Drag to resize panel"    
+        },
+        onresize_end: function(){ 
+            $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event  
+        }
+    };
 
     // 1) create panes (see ext/layout)
     var $pane = $(document.createElement('div'));

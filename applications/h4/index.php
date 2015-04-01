@@ -68,6 +68,10 @@
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
+<!-- does not work properly        
+        <script type="text/javascript" src="ext/js/jquery.resize.js"></script>
+-->
+        
 <!--
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
         <script type="text/javascript" src="ext/gridster/utils.js"></script>
@@ -76,8 +80,10 @@
         <script type="text/javascript" src="ext/gridster/jquery.draggable.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.gridster.js"></script>
 -->
+<!-- for gridster layout - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
         <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
+-->        
 
 
 

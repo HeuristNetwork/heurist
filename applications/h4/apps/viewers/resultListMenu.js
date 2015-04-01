@@ -53,6 +53,8 @@ $.widget( "heurist.resultListMenu", {
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
+        this.divMainMenuItems.find('li').css('padding-right','3px'); //reduce gap
+        
         
         //-----------------------     listener of global events
         var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT; 

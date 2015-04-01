@@ -92,26 +92,6 @@ $.widget( "heurist.svs_list", {
         //main container
         this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':'1em', 'right':'0.5em', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
-        this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
-                .addClass('logged-in-only')
-                .addClass('heurist-helper1').appendTo( this.accordeon );
-        if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
-        
-        
-        var t1 = '<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
-+'This is a faceted search. It allows the user to drill-down into the database on a set of pre-selected database fields.</p>'
-+'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
-+'This is a search with addition of a Rule Set. The initial search is expanded to a larger set of records by following a set of rules specifying which pointers and relationships to follow.'
-        +'</p>';
-        
-        t1 = '<p style="pading-top:0.5em"><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
-+'&nbsp;Faceted search</p>'
-+'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
-+'&nbsp;Search with rules</p>';        
-        
-        this.helper_btm = $( '<div>'+t1+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
-        if(top.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
-
         
         this.edit_dialog = null;
             
@@ -147,6 +127,8 @@ $.widget( "heurist.svs_list", {
 
         //global listener
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
+            that.accordeon.empty();
+            that.helper_top = null;
             that._refresh();
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
@@ -169,6 +151,32 @@ $.widget( "heurist.svs_list", {
         
         if(!top.HAPI4.is_logged()){
              top.HAPI4.currentUser.usr_GroupsList = [];
+        }else if (!this.helper_top) {
+
+            this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
+            .addClass('logged-in-only')
+            .addClass('heurist-helper1').appendTo( this.accordeon );
+            if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
+
+
+            //old
+            /* var t1 = '<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
+            +'This is a faceted search. It allows the user to drill-down into the database on a set of pre-selected database fields.</p>'
+            +'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
+            +'This is a search with addition of a Rule Set. The initial search is expanded to a larger set of records by following a set of rules specifying which pointers and relationships to follow.'
+            +'</p>'; */
+
+            //new
+            var t1 = '<div style="padding-top:0.5em" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
+            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);vertical-align:middle">'
+            +'&nbsp;Faceted search</div>'
+            +'<div title="Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)">'
+            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
+            +'&nbsp;Search with rules</div>';        
+
+            this.helper_btm = $( '<div>'+t1+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
+            if(top.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+
         }
 
         var that = this;
@@ -285,13 +293,13 @@ $.widget( "heurist.svs_list", {
             return;
         }        
         
-        this.helper_btm.before(
+        if(islogged){   
+            this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'rules').addClass('acc')
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
-        
-        if(islogged){   
+
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'bookmark').addClass('acc')
@@ -299,25 +307,33 @@ $.widget( "heurist.svs_list", {
                 .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
                 .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
                 .append( this._defineContent('bookmark') ) );
-        }
-        this.helper_btm.before(
-            $('<div>')
-            .attr('grpid',  'all').addClass('acc')
-            .append( this._defineHeader(top.HR('My Searches'), 'all'))
-            .append( this._defineContent('all') ));
-            
-        var groups = top.HAPI4.currentUser.usr_GroupsList;
 
-        for (var groupID in groups)
-        {
-            if(groupID){
-                var name = groups[groupID][1];
-                this.helper_btm.before(
-                    $('<div>')
-                    .attr('grpid',  groupID).addClass('acc')
-                    .append( this._defineHeader(name, groupID))
-                    .append( this._defineContent(groupID) ));
+            this.helper_btm.before(
+                $('<div>')
+                .attr('grpid',  'all').addClass('acc')
+                .append( this._defineHeader(top.HR('My Searches'), 'all'))
+                .append( this._defineContent('all') ));
+
+            var groups = top.HAPI4.currentUser.usr_GroupsList;
+
+            for (var groupID in groups)
+            {
+                if(groupID){
+                    var name = groups[groupID][1];
+                    this.helper_btm.before(
+                        $('<div>')
+                        .attr('grpid',  groupID).addClass('acc')
+                        .append( this._defineHeader(name, groupID))
+                        .append( this._defineContent(groupID) ));
+                }
             }
+        }else{
+                ($('<div>')
+                .attr('grpid',  'all').addClass('acc')
+                .append( this._defineHeader(top.HR('Predefined Searches'), 'all'))
+                .append( this._defineContent('all') )).appendTo( this.accordeon );
+                        
+               
         }
         
         var keep_status = top.HAPI4.get_prefs('svs_list_status');
@@ -432,7 +448,10 @@ $.widget( "heurist.svs_list", {
           if(s==''){
                 $span.find("> span.fancytree-title").text(node.title);
           }else{
-                $span.find("> span.fancytree-title").html(node.title + s);
+                $span.find("> span.fancytree-title").html(node.title + s)
+                    .attr('title', node.data.isrules
+                    ?'Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)'
+                    :'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields'  );
           }
           
           //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
