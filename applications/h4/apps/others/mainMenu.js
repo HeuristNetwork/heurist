@@ -276,7 +276,7 @@ $.widget( "heurist.mainMenu", {
         }else if(name=='Database_lo'){
             link = $('<a>',{
                 text: 'Open database',
-                href: top.HAPI4.basePathOld + 'common/connect/getListOfDatabases.php?popup=1&db=' + top.HAPI4.database,
+                href: top.HAPI4.basePathOld + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' + top.HAPI4.database,
                 target: '_blank'
             });
             

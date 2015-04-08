@@ -42,7 +42,7 @@
     function mysql_connection($dbHost, $dbUsername, $dbPassword, $dbname){
 
         
-        if(nulll==$dbHost || $dbHost==""){
+        if(null==$dbHost || $dbHost==""){
             return array(HEURIST_SYSTEM_FATAL, "Database server is not defined. Check your configuration file");
         }
         

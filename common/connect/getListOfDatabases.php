@@ -51,10 +51,18 @@
 </head>
 
 <body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">
-
-<?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Open Database</h2></div>") ?>
-<div id='page-inner'>
 <?php
+if(@$_REQUEST['popup']=="1"){
+    print "<div style='padding:5px'>";
+}else{
+    print "<div class='banner'><h2>Open Database</h2></div>";
+    print "<div id='page-inner'>";
+}
+if(@$_REQUEST['v']=="4"){
+    $url = "../../../h4/";
+}else{
+    $url = HEURIST_BASE_URL;
+}
 
 	$email = null;
 	$role = null;
@@ -93,13 +101,13 @@
 	}
 
 
-    print "<br /><div>Click on the database name to open in a new tab. ".
+    print "<br /><div>Click on the database name to open in a new tab. <br />".
         "Databases are filtered by default to show only those to which you have access</div>";
 	print "<ul class='dbList'>";
 
 	$list = mysql__getdatabases(false, $email, $role);
 	foreach ($list as $name) {
-            print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
+            print("<li><a href=".$url."?db=$name target=_blank>$name</a></li>");
 	}
 	print "</ul>";
 ?>
