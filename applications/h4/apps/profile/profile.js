@@ -76,7 +76,7 @@ $.widget( "heurist.profile", {
             '<li id="menu-options-import-faims"><a href="#">FAIMS</a></li>'+
             '</ul>'+
             '</li>'+
-            (top.HAPI4.sys_registration_allowed?'<li id="menu-options-register" class="logged-out-only"><a href="#">'+top.HR('Register')+'</a></li>':'')+
+            ((top.HAPI4.sysinfo.registration_allowed==1)?'<li id="menu-options-register" class="logged-out-only"><a href="#">'+top.HR('Register')+'</a></li>':'')+
             '<li id="menu-options-help"><a href="#">'+top.HR('Help')+'</a></li>'+
             '<li id="menu-options-bug" class="logged-in-only"><a href="#">'+top.HR('Report bug')+'</a></li>'+
             '<li id="menu-options-about"><a href="#">'+top.HR('About')+'</a></li>'+

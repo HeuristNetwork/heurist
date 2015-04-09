@@ -84,10 +84,11 @@ $.widget( "heurist.search", {
         var div_left  = $('<div>')
                         .css({'height':'2em','width':'200px', 'padding':'1.5em','float':'left'})
                         .appendTo( this.element );
+                        
         this.btn_login = $( "<button>", {
                 text: top.HR("Login")
             })
-            .css('width','160px')
+            .css('width',(top.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
             .addClass('logged-out-only')
             .addClass('ui-heurist-btn-header1')
             .appendTo(div_left)
@@ -95,6 +96,20 @@ $.widget( "heurist.search", {
                 primary: 'ui-icon-key'
             }})
             .click( function(){ that._doLogin(); });
+
+        if(top.HAPI4.sysinfo.registration_allowed==1){
+            
+        this.btn_register = $( "<button>", {
+                text: top.HR("Register")
+            })
+            .css('width','80px')
+            .addClass('logged-out-only')
+            .addClass('ui-heurist-btn-header1')
+            .appendTo(div_left)
+            .button()
+            .click( function(){ that._doRegister(); });
+        }
+
         
         this.btn_databasesummary = $( "<button>", {
                 text: top.HR("Database Summary")
@@ -1168,6 +1183,28 @@ $.widget( "heurist.search", {
             doLogin();
         }
         
+        
+    }
+    
+    , _doRegister: function(){
+        
+        if($.isFunction($('body').profile_edit)){
+
+            if(!this.div_profile_edit || this.div_profile_edit.is(':empty') ){
+                this.div_profile_edit = $('<div>').appendTo( this.element );
+            }
+            this.div_profile_edit.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
+
+        }else{
+            var that = this;
+            $.getScript(top.HAPI4.basePath+'apps/profile/profile_edit.js', function() {
+                if($.isFunction($('body').profile_edit)){
+                    that._doRegister();
+                }else{
+                    top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
+                }        
+            });          
+        }
         
     }
 

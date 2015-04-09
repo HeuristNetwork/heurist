@@ -37,7 +37,7 @@ $.widget( "heurist.profile_edit", {
         // prevent double click to select text
         this.element.disableSelection();
 
-        this.edit_form = $( "<div>" )
+        this.edit_form = $( "<div>" ).addClass('ui-heurist-bg-light')
         .appendTo( this.element );
 
         this.reg_message = $( "<div>" )
@@ -58,7 +58,7 @@ $.widget( "heurist.profile_edit", {
 
             var that = this;
 
-            this.edit_form.load("apps/profile_edit.html?t="+(new Date().getTime()), 
+            this.edit_form.load("apps/profile/profile_edit.html?t="+(new Date().getTime()), 
                 function(){
 
                     //find all labels and apply localization
@@ -83,7 +83,7 @@ $.widget( "heurist.profile_edit", {
                         that.edit_form.dialog({
                             autoOpen: false,
                             height: 580,
-                            width: 640,
+                            width: 740,
                             modal: true,
                             resizable: true,
                             title: '',
@@ -284,6 +284,7 @@ $.widget( "heurist.profile_edit", {
             });
 
             that.options.edit_data['ugr_Type'] = 'user';
+            that.options.edit_data['ugr_IsModelUser'] = (that.options.edit_data['ugr_IsModelUser']=='y')?1:0;
 
             var that = this;
             top.HAPI4.SystemMgr.user_save( that.options.edit_data,
@@ -293,7 +294,7 @@ $.widget( "heurist.profile_edit", {
                         if(that.options.isdialog){
                             that.edit_form.dialog("close");
                             if(that.options.isregistration){
-                                top.HEURIST4.util.showMsgDlgUrl("apps/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                top.HEURIST4.util.showMsgDlgUrl("apps/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
                             }else{
                                 top.HEURIST4.util.showMsgDlg("User information has been saved successfully");
                             }
