@@ -46,7 +46,16 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         //return typeof n === 'number' && isFinite(n);
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
-
+    
+    em: function(input) {
+        var emSize = parseFloat($("body").css("font-size"));
+        return (emSize * input);
+    },
+    
+    px: function(input) {
+        var emSize = parseFloat($("body").css("font-size"));
+        return (input / emSize);
+    },
 
     composeHeuristQuery2: function(params){
         if(params)

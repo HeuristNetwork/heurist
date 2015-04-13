@@ -147,10 +147,38 @@ $.widget( "heurist.search", {
         }        
         
 
-        this.input_search = $( "<input>" )   //this.options.has_paginator?'30%':'50%'} )
-        .css({'margin-right':'0.2em','width':'450px'}) //, 'width':'30%', 'max-width':'500px'})
+        this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )                  
+        .css({'margin-right':'0.2em', 'max-width':'450px', 'width':'450px', 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'}) 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_search );
+        
+        var menu_h = top.HEURIST4.util.em(0.7); 
+        
+        this.input_search.data('x', this.input_search.outerWidth());
+        this.input_search.data('y', this.input_search.outerHeight());
+        this.input_search.mouseup(function () {
+            
+                var $this = $(this);
+                if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
+                        //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
+                       if($this.outerHeight()<23){
+                            that.div_search.css('padding-top','1.5em');    
+                       }else{
+                            if($this.outerHeight()> that.element.height()-menu_h-8){                    //, 'max-height': (this.element.height()-12)+':px'
+                                $this.height(that.element.height()-menu_h-10);
+                                pt = '2px';
+                            }else{
+                                //parseFloat(that.div_search.css('padding-top'))
+                                pt =  (that.element.height() - $this.height())/2 - menu_h;
+                            }
+                            that.div_search.css('padding-top', pt ); 
+                       }
+                }
+                // set new height/width
+                $this.data('x', $this.outerWidth());
+                $this.data('y', $this.outerHeight());
+        })
+        
 
         this.div_search_as_guest = $('<span>')
         .css('display', 'inline-black')
@@ -168,6 +196,7 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user = $('<span>')
         .addClass('logged-in-only')
+        .css({'position':'absolute'})
         .appendTo( this.div_search );
 
         if(this.options.islinkmode){

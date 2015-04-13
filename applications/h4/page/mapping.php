@@ -282,13 +282,15 @@
 ?>        
                 $("#btnMapNew").button({ text:false, 
                          icons: {primary: "<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?'ui-map-document':'ui-icon-help')?>" }}) 
-                        .click( function(){ addNewRecord(<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?RT_MAP_DOCUMENT:0)?>);} );
+                        .click( function(){ addNewRecord(<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?RT_MAP_DOCUMENT:0)?>);} )
+                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:0px" />');
                 $("#btnMapEdit").button({text:false, 
                         icons: {primary: "ui-icon-pencil"}})
                         .click(mapEdit);
                 $("#btnMapLayer").button({text:false, 
                         icons: {primary: "<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?'ui-map-layer':'ui-icon-help')?>"}})
-                        .click(function(){ addNewRecord(<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?RT_MAP_LAYER:0)?>);});
+                        .click(function(){ addNewRecord(<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?RT_MAP_LAYER:0)?>);})
+                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:0px" />');
 
                 menu_datasets = $('<ul><?=$items?></ul>')
                     .addClass('menu-or-popup')

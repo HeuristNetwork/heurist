@@ -298,7 +298,10 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             
             drawingManager = new google.maps.drawing.DrawingManager({
                 drawingMode: null,
-                drawingControlOptions: {drawingModes: [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE]},
+                drawingControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_BOTTOM,    
+                    drawingModes: [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE]
+                },
                 rectangleOptions: shapeOptions,
                 polygonOptions: shapeOptions,
                 map: tmap.getNativeMap()
@@ -387,6 +390,32 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     lastSelectionShape.setMap(null);
                 }
             });
+            
+            //define custom tooltips
+            
+            $(tmap.getNativeMap().getDiv()).one('mouseover','img[src="https://maps.gstatic.com/mapfiles/drawing.png"]',function(e){
+
+                $(e.delegateTarget).find('img[src="https://maps.gstatic.com/mapfiles/drawing.png"]').each(function(){
+                  $(this).closest('div[title]').attr('title',function(){
+                     switch(this.title){
+                      case 'Stop drawing':
+                        return 'Drag the map or select / get information about an object on the map';
+                          break;
+                      case 'Draw a rectangle':
+                        return 'Select objects within a rectangle. Hold down Ctrl to add to current selection';
+                          break;
+                      case 'Draw a shape':
+                        return 'Select objects within a polygon - double click to finish the polygon';
+                          break;
+                      default:return this.title;  
+                     } 
+
+                  });
+                });
+              });            
+            
+            
+            
         
     }
     
