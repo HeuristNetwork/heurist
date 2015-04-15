@@ -81,6 +81,13 @@
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
 
+        
+        <style>
+            #helper p, #helper h2, #helper h4{
+                padding:10px;
+            }
+        </style>
+        
         <!-- Initializing -->
         
 <?php
@@ -253,8 +260,9 @@
                         }
                  });
                  $( "#helper" ).load(top.HAPI4.basePathOld+'context_help/mapping_overview.html #content');
+                 //$( "#helper" ).find('p').css('padding','10px');
                  $( "#helper" ).dialog({
-                    autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:'90%', height:300,
+                    autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:'90%', height:570,
                     position: { my: "right top", at: "right bottom", of: $('#btn_help') },
                     show: {
                         effect: "slide",
@@ -272,26 +280,65 @@
                  
 <?php
     if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){ 
+
+              function checkRt($rt){
+                    global $rtDefines;
+                    if(defined($rt) && constant($rt)>0){
+                        return constant($rt);
+                    }else{
+                        if(@$rtDefines[$rt]){
+                            
+                            switch ($rt) {
+                                case "RT_TILED_IMAGE_LAYER":
+                                    $msg = "Map image file (tiled)";
+                                    break;
+                                case "RT_KML_LAYER":
+                                    $msg = "KML";
+                                    break;
+                                case "RT_SHP_LAYER":
+                                    $msg = "Shapefile";
+                                    break;
+                                case "RT_GEOTIFF_LAYER":
+                                    $msg = "Map image file (non-tiled)";
+                                    break;
+                                case "RT_QUERY_LAYER":
+                                    $msg = "Mappable query";
+                                    break;
+                                case "RT_MAP_DOCUMENT":
+                                    $msg = "Map Document";
+                                    break;
+                                case "RT_MAP_LAYER":
+                                    $msg = "Heurist Map Layer";
+                                    break;
+                            }                             
+                            
+                            return "(".$msg.", Concept ".$rtDefines[$rt][0]."-".$rtDefines[$rt][1].")";
+                        }else{
+                            return "";
+                        }
+                    }
+              }
+     
         
                 $items = '';    
-                $items = $items.'<li rtid="'.(defined('RT_KML_LAYER') && RT_KML_LAYER>0?RT_KML_LAYER:0).'"><a href="#">KML</a></li>';
-                $items = $items.'<li rtid="'.(defined('RT_SHP_LAYER') && RT_SHP_LAYER>0?RT_SHP_LAYER:0).'"><a href="#">SHP</a></li>';
-                $items = $items.'<li rtid="'.(defined('RT_GEOTIFF_LAYER') && RT_GEOTIFF_LAYER>0?RT_GEOTIFF_LAYER:0).'"><a href="#">GeoTiff</a></li>';
-                $items = $items.'<li rtid="'.(defined('RT_TILED_IMAGE_LAYER') && RT_TILED_IMAGE_LAYER>0?RT_TILED_IMAGE_LAYER:0).'"><a href="#">Tiled image</a></li>';
-                $items = $items.'<li rtid="'.(defined('RT_QUERY_LAYER') && RT_QUERY_LAYER>0?RT_QUERY_LAYER:0).'"><a href="#">Query layer</a></li>';
+                $items = $items.'<li rtid="'.checkRt('RT_KML_LAYER').'"><a href="#">KML</a></li>';
+                $items = $items.'<li rtid="'.checkRt('RT_SHP_LAYER').'"><a href="#">SHP</a></li>';
+                $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_LAYER').'"><a href="#">GeoTiff</a></li>';
+                $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_LAYER').'"><a href="#">Tiled image</a></li>';
+                $items = $items.'<li rtid="'.checkRt('RT_QUERY_LAYER').'"><a href="#">Query layer</a></li>';
 ?>        
                 $("#btnMapNew").button({ text:false, 
                          icons: {primary: "<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?'ui-map-document':'ui-icon-help')?>" }}) 
-                        .click( function(){ addNewRecord(<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?RT_MAP_DOCUMENT:0)?>);} )
-                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:0px" />');
+                        .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
+                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
                 $("#btnMapEdit").button({text:false, 
                         icons: {primary: "ui-icon-pencil"}})
                         .click(mapEdit);
                 $("#btnMapLayer").button({text:false, 
                         icons: {primary: "<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?'ui-map-layer':'ui-icon-help')?>"}})
-                        .click(function(){ addNewRecord(<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?RT_MAP_LAYER:0)?>);})
-                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:0px" />');
-
+                        .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
+                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
+                        
                 menu_datasets = $('<ul><?=$items?></ul>')
                     .addClass('menu-or-popup')
                     .css('position','absolute')
@@ -374,18 +421,21 @@
                 }
             }
             function addNewRecord(rt){
-                if(rt<1){
+
+                
+                if(parseInt(rt)>0){
+                    window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
+                }else{
                     top.HEURIST4.util.showMsgDlg(
-                        "The required record type has not been defined.<br>"+
-                        "Open the context-specific help document (which explains how to enable mapping, as well as how to do it)?",
-                        function(){
-                            $("#helper").dialog( "open" );
-                        }, "Missing record type"   
+                        "The required record type "+rt+" has not been defined.<br><br>"+
+                        "Please download from the H3ReferenceSet database using Database > Import Structure.",
+                        {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = top.HEURIST4.util.getMsgDlg(); $dlg.dialog( "close" ) }, 
+                         'Close':function() { var $dlg = top.HEURIST4.util.getMsgDlg(); $dlg.dialog( "close" ) }
+                        }  
+                        , "Missing record type"   
                     );
                  
                     
-                }else{
-                    window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
                 }
             }
             
@@ -414,8 +464,8 @@
                 <span id="mapToolbar">
                 <button id="btnMapEdit" disabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
                 <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
-                <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
                 <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
+                <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
                 </span>
                 
                 <div style="position: absolute; right: 0px; top:0px" class="ui-buttonset">

@@ -152,7 +152,7 @@ $.widget( "heurist.search", {
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_search );
         
-        var menu_h = top.HEURIST4.util.em(0.7); 
+        var menu_h = top.HEURIST4.util.em(1); 
         
         this.input_search.data('x', this.input_search.outerWidth());
         this.input_search.data('y', this.input_search.outerHeight());
@@ -202,17 +202,17 @@ $.widget( "heurist.search", {
         if(this.options.islinkmode){
 
             //$('<br>').appendTo( this.div_search );
-            this.div_search_links = $('<div>').css({'text-align':'right','width':'450px'}) //, 'width':'30%', 'max-width':'500px' })
+            this.div_search_links = $('<div>').css({'text-align':'right','width':'450px','padding-top':'0.3em'}) //, 'width':'30%', 'max-width':'500px' })
                     .appendTo( this.div_search );
 
             var link = $('<a>',{
                 text: 'Quick', href:'#'
-            }).css('padding-right','1em').appendTo(this.div_search_links);
+            }).appendTo(this.div_search_links);
             this._on( link, {  click: this.showSearchAssistant });
 
             link = $('<a>',{
                 text: 'Advanced', href:'#'
-            }).css('padding-right','1em').appendTo(this.div_search_links);
+            }).appendTo(this.div_search_links);
             this._on( link, {  click: function(){
 
                 //call H3 search builder
@@ -235,11 +235,11 @@ $.widget( "heurist.search", {
             $('<a>',{
                 text: 'Syntax',
                 href:  top.HAPI4.basePathOld+'context_help/advanced_search.html', target:'_blank'
-            }).css('padding-right','1em').appendTo(this.div_search_links);
+            }).appendTo(this.div_search_links);
 
             link = $('<a>',{ text: 'Rule Set', href:'#' })
                     .addClass('logged-in-only')
-                    .css('padding-right','1em').appendTo(this.div_search_links);
+                    .appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
@@ -249,7 +249,7 @@ $.widget( "heurist.search", {
 
             link = $('<a>',{ text: 'Save As ', href:'#' })
                    .addClass('logged-in-only')
-                   .css('padding-right','1em').appendTo(this.div_search_links);
+                   .appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
@@ -258,7 +258,7 @@ $.widget( "heurist.search", {
             }});
 
             this.div_search_links.find('a').css({ 'text-decoration':'none', 'font-size':'0.9em',
-                'color':  this.div_search_links.find('.ui-widget-content').css('color') });
+                'padding-right':'1em' ,'color':this.btn_databasesummary.css('color')}); // 'color':  this.div_search_links.find('.ui-widget-content').css('color') });
 
         }else{
 

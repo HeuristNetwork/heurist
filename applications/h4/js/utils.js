@@ -767,7 +767,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
-            $dlg = top.HEURIST4.util.getMsgDlg();
+            var $dlg = top.HEURIST4.util.getMsgDlg();
             $dlg.load(url, function(){
                 top.HEURIST4.util.showMsgDlg(null, buttons, title);    
             });
@@ -782,7 +782,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             return;
         }
 
-        $dlg = top.HEURIST4.util.getMsgDlg();
+        var $dlg = top.HEURIST4.util.getMsgDlg();
 
         if(message!=null){
             $dlg.empty();
