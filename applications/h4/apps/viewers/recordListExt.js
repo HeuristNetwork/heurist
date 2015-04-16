@@ -50,7 +50,7 @@ $.widget( "heurist.recordListExt", {
 
         //-----------------------     listener of global events
         this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + ' ' 
-            + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+            + top.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
 
         $(this.document).on(this._events, function(e, data) {
 
@@ -62,16 +62,18 @@ $.widget( "heurist.recordListExt", {
             {
                 that.option("recordset", null);
 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){     //@todo with incremental
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){     //@todo with incremental    ON_REC_SEARCHRESULT
 
                 that.option("recordset", data); //hRecordSet
                 that.loadanimation(false);
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                if(data) that._query_request = data;  //keep current query request 
-                that.option("recordset", null);
-                that.loadanimation(true);
+                if(data){
+                    that._query_request = jQuery.extend(true, {}, data);  //keep current query request 
+                    that.option("recordset", null);
+                    that.loadanimation(true);
+                }
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 

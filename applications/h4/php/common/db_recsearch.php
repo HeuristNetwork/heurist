@@ -4,6 +4,8 @@
     * Library to search records
     * 
     * recordSearchMinMax - Find minimal and maximal values for given detail type and record type
+    * recordSearchFacets
+    * recordSearchRealted
     * recordSearch
     * 
     * @package     Heurist academic knowledge management system
@@ -706,7 +708,7 @@ error_log(">>".print_r($params, true));
         if(@$params['tq']){        
             // if params has "TQ" parameter this is search for linked/related records
             // tsort, tlimit and toffset are parameters for top(parent) query
-            // besides to simplify query, instead of these 4 parameters we may have "TIDS" - comma separated list of parent IDS
+            // besides to simplify query, instead of these 4 parameters we may have "topids" - comma separated list of parent IDS
             
             //1. define query parts for top/parent query
             $params_top = $params;
@@ -746,13 +748,36 @@ error_log(">>".print_r($params, true));
             $query_top['offset'] =  '';
             
             $params['parentquery'] = $query_top;
-        }
+            
+        }/*else if( @$params['rules'] ){ //special case - server side operation
+        
+             // rules =  t:10 linkedfrom:4-16 (t:4 links:5 ( ) )  UNITE [anothe rule ...]
+             // OR rules = t:4 links:5|t:10 linkedfrom:4-16,   
+        
+            //create flat rule array
+            $rules = _createFlatRule( $params['rules'] );
+            
+            //find result for main query 
+            unset($params['rules']);
+            unset($params['limit']);
+            unset($params['offset']);
+            
+            $params['nochunk'] = 1; 
+            
+            $resultSet = recordSearch($system, $params, $need_structure, $need_details);
+            
+            foreach($rule as $rules){
+                
+                
+                
+            }                
+        }*/
         
         $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
         
 //error_log("query ".print_r($aquery, true));        
+        $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
         
-        $chunk_size = 1001;
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
         //DEGUG 

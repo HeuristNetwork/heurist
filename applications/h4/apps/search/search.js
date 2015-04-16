@@ -572,7 +572,7 @@ $.widget( "heurist.search", {
 
             if(data!=null && top.HEURIST4.util.isempty(data.topids)){ //topids not defined - this is not rules request
 
-                 top.HEURIST4.current_query_request = data;  //the only place where this values is assigned
+                 top.HEURIST4.current_query_request = jQuery.extend(true, {}, data); //the only place where this values is assigned
                  that.query_request = data; //keep for search in current result
 
                  if(data.source!=that.element.attr('id') ){
@@ -619,7 +619,7 @@ $.widget( "heurist.search", {
                     }
 
                     that._renderProgress();
-                    if(!that._doSearchIncrement()){//load next chunk
+                    if(!that._doSearchIncrement()){//load next chunk or start search rules
                         that._searchCompleted();
                     }
                 }
@@ -952,7 +952,7 @@ $.widget( "heurist.search", {
             var total_count_of_curr_request = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.count_total():0;
 
             if(new_offset< total_count_of_curr_request){ //search for next chunk of data within current request
-                    this.query_request.increment = true;
+                    this.query_request.increment = true;  //it shows that this is not initial search request
                     this.query_request.o = new_offset;
                     this.query_request.source = this.element.attr('id');
                     top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
@@ -1007,7 +1007,7 @@ $.widget( "heurist.search", {
                      //create request
                      this.query_request.q = current_rule.query;
                      this.query_request.topids = current_parent_ids[this._res_index].join(','); //list of record ids of parent resultset
-                     this.query_request.increment = true;
+                     this.query_request.increment = true; //it shows that this is not initial search request
                      this.query_request.o = 0;
                      this.query_request.source = this.element.attr('id');
                      top.HAPI4.RecordMgr.search(this.query_request, $(this.document));

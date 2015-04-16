@@ -411,7 +411,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 
                 if(!$.isFunction(callback)){
                     var document = callback;
-                    if(!top.HEURIST4.util.isnull(document)){
+                    if(!top.HEURIST4.util.isnull(document) && !request.increment){
                         document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
                     } 
                     callback = function(response)
