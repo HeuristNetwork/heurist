@@ -92,10 +92,12 @@
         
 <?php
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
+        //HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'
+        //HEURIST_ICON_URL.RT_MAP_LAYER.'.png'
 ?>        
         <style> 
-            .ui-map-document { background-image: url(<?=HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'?>) !important;}
-            .ui-map-layer { background-image: url(<?=HEURIST_ICON_URL.RT_MAP_LAYER.'.png'?>) !important;}
+            .ui-map-document { background-image: url('../assets/267.png') !important;}
+            .ui-map-layer { background-image: url('../assets/268.png') !important;}
         </style>        
 <?php
     }
