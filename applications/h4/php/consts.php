@@ -26,7 +26,7 @@
     define('HEURIST_MIN_DBVERSION', "1.1.0");
     define('HEURIST_HELP', "http://heuristscholar.org/help");
 
-    if (!$serverName) {
+    if (!@$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
     }
     

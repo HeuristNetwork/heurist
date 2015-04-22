@@ -111,6 +111,7 @@
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
     require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
     require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
+    //require_once (dirname(__FILE__) . '/../../applications/h4/php/common/db_recsearch.php');
 
     set_time_limit(0); //no limit    
     
@@ -1372,8 +1373,15 @@
     if (@$_REQUEST['pathfilename']) {
         $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
     }
-
-    $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
+    
+    if(false && @$_REQUEST['rules']){ //search with h4 search engine
+        $_REQUEST['idonly'] = 1;
+        $_REQUEST['vo'] = 'h3';
+        //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
+    }else{
+        $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
+    }
+    
     $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
     /*if(@$_REQUEST['offset']){

@@ -4,7 +4,7 @@
     *  Database utilities :   mysql_ - prefix for function
     * 
     *  mysql_connection - establish connection
-    *  mysql__getdatabases - get list of databases
+    *  mysql__getdatabases4 - get list of databases
     *  mysql__select_assoc 
     *  mysql__select_value
     *  mysql__select_array
@@ -76,7 +76,7 @@
     * @param    mixed $email - current user email
     * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
     */
-    function mysql__getdatabases($mysqli, $with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
+    function mysql__getdatabases4($mysqli, $with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
     {
         $query = "show databases";
         $res = $mysqli->query($query);

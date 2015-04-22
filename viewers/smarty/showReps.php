@@ -112,6 +112,7 @@ function executeSmartyTemplate($params){
 
 	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
 /*****DEBUG****///error_log(print_r($params,true));
+/*****DEBUG****///error_log(print_r($qresult,true));
 
 	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){

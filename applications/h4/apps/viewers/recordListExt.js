@@ -174,6 +174,10 @@ $.widget( "heurist.recordListExt", {
                 if(!top.HEURIST4.util.isempty(this._query_request.q)){
                     query_string_main = query_string + '&q=' + encodeURIComponent(this._query_request.q);
                 }
+                if(!top.HEURIST4.util.isempty(this._query_request.rules)){
+                    //@todo simplify rules array - rempove redundant info
+                    query_string_main = query_string + '&rules=' + encodeURIComponent(this._query_request.rules);
+                }
             }else{
                 query_string = query_string + '&w=all';
                 query_string_main = query_string;

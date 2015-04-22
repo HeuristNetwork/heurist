@@ -66,7 +66,7 @@
 
                 <ul class="db-list">
                     <?php
-                        $list =  mysql__getdatabases($system->get_mysqli());
+                        $list =  mysql__getdatabases4($system->get_mysqli());
 
                         /* DEBUG for($i=0;$i<100;$i++) {
                         array_push($list, "database".$i);

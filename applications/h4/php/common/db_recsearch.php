@@ -24,7 +24,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-
+    //require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/db_users.php');
     require_once (dirname(__FILE__).'/db_files.php');
     require_once (dirname(__FILE__).'/compose_sql.php');
@@ -676,8 +676,23 @@ error_log(">>".print_r($params, true));
     * @param mixed $need_structure
     * @param mixed $need_details
     */
-    function recordSearch($system, $params, $need_structure, $need_details)
+    function recordSearch($system, $params, $need_structure, $need_details, $publicOnly=false)
     {
+        $is_ids_only = (@$params['idonly']==1);
+        $return_h3_format = (@$params['vo']=='h3' && $is_ids_only);
+        
+        if(null==$system){
+            $system = new System();
+            if( ! $system->init(@$_REQUEST['db']) ){
+                $response = $system->getError();
+                if($return_h3_format){
+                    $response['error'] = $response['message'];
+                }
+                return $response; 
+            }
+        }
+        
+        
         $mysqli = $system->get_mysqli();
         $currentUser = $system->getCurrentUser();
         
@@ -690,20 +705,27 @@ error_log(">>".print_r($params, true));
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
         }
 
+        if($is_ids_only){
 
-        $select_clause = 'select SQL_CALC_FOUND_ROWS '   //this function does not pay attention on LIMIT - it returns total number of rows
-        .'bkm_ID,'
-        .'bkm_UGrpID,'
-        .'rec_ID,'
-        .'rec_URL,'
-        .'rec_RecTypeID,'
-        .'rec_Title,'
-        .'rec_OwnerUGrpID,'
-        .'rec_NonOwnerVisibility,'
-        .'bkm_PwdReminder ';
-        /*.'rec_URLLastVerified,'
-        .'rec_URLErrorMessage,'
-        .'bkm_PwdReminder ';*/
+            $select_clause = 'select SQL_CALC_FOUND_ROWS rec_ID ';
+            
+        }else{
+        
+            $select_clause = 'select SQL_CALC_FOUND_ROWS '   //this function does not pay attention on LIMIT - it returns total number of rows
+            .'bkm_ID,'
+            .'bkm_UGrpID,'
+            .'rec_ID,'
+            .'rec_URL,'
+            .'rec_RecTypeID,'
+            .'rec_Title,'
+            .'rec_OwnerUGrpID,'
+            .'rec_NonOwnerVisibility,'
+            .'bkm_PwdReminder ';
+            /*.'rec_URLLastVerified,'
+            .'rec_URLErrorMessage,'
+            .'bkm_PwdReminder ';*/
+            
+        }
         
         if(@$params['tq']){        
             // if params has "TQ" parameter this is search for linked/related records
@@ -717,7 +739,7 @@ error_log(">>".print_r($params, true));
             $params_top['l'] = @$params['tl']; //limit
             $params_top['o'] = @$params['to']; //offset
 
-            $query_top = get_sql_query_clauses($mysqli, $params_top, $currentUser);
+            $query_top = get_sql_query_clauses($mysqli, $params_top, $currentUser, $publicOnly);
             
             //2. define current query - set one of paremters as a reference to the parent query
             
@@ -749,31 +771,94 @@ error_log(">>".print_r($params, true));
             
             $params['parentquery'] = $query_top;
             
-        }/*else if( @$params['rules'] ){ //special case - server side operation
+        }else if( @$params['rules'] ){ //special case - server side operation
         
-             // rules =  t:10 linkedfrom:4-16 (t:4 links:5 ( ) )  UNITE [anothe rule ...]
-             // OR rules = t:4 links:5|t:10 linkedfrom:4-16,   
+             // rules - JSON array the same as stored in saved searches table  
         
+            //this is json
+            $rules_tree = json_decode($params['rules'], true);
+
+error_log("RULES:".$params['rules']);
+//error_log(print_r($rules_tree, true));
+            
+            $flat_rules = array();
+            $flat_rules[0] = array("results"=>array());
+            
             //create flat rule array
-            $rules = _createFlatRule( $params['rules'] );
+            $rules = _createFlatRule( $flat_rules, $rules_tree, 0 );
+            
+//debug error_log(print_r($flat_rules, true));
             
             //find result for main query 
             unset($params['rules']);
-            unset($params['limit']);
-            unset($params['offset']);
+            if(@$params['limit']) unset($params['limit']);
+            if(@$params['offset']) unset($params['offset']);
+            if(@$params['vo']) unset($params['vo']);
             
-            $params['nochunk'] = 1; 
+            $params['nochunk'] = 1; //return all records 
             
-            $resultSet = recordSearch($system, $params, $need_structure, $need_details);
+            //find main query
+            $fin_result = recordSearch($system, $params, $need_structure, $need_details, $publicOnly);
+            $flat_rules[0]['result'] = array_keys($fin_result['data']['records']); //get ids
             
-            foreach($rule as $rules){
+            foreach($flat_rules as $idx => $rule){
+                if($idx==0) continue;
                 
+                $is_last = $rule['islast'];
                 
+                //create request
+                $params['q'] = $rule['query'];
+                $parent_ids = $rule['parent']['results']; //list of record ids of parent resultset
+                $rule['results'] = array(); //reset
                 
-            }                
-        }*/
+                //split by 1000 - search based on parent ids (max 1000)
+                $k = 0;
+                while ($k < count($parent_ids)) {
+                
+                    $need_details2 = $need_details && $is_last;
+                    $params['topids'] = array_slice($parent_ids, $k, 1000);
+                    $response = recordSearch($system, $params, false, $need_details2, $publicOnly);
+                    
+                    if($response['status'] == HEURIST_OK){
+                            if($is_last){
+                                //merge with final results
+                                $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
+                                
+                                if(!$is_ids_only){
+                                    $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
+                                    foreach( array_keys($response['data']['records']) as $rt){
+                                        if(!array_key_exists($rt, $fin_result['data']['rectypes'])){
+                                            $fin_result['data']['rectypes'][$rt] = 1;
+                                        }
+                                    }
+                                }
+                                
+                            }else{
+                                $rule['results'] = array_merge($rule['results'],  array_keys($response['data']['records']));
+                            }
+                        
+                    }else{
+                        //@todo terminate execution and return error
+                        
+                    }
+                    
+                    $k = $k + 1000;
+                }//while
+                
+            } //for rules
+            
+            $fin_result['data']['count'] = count($fin_result['data']['records']);
+            
+            if($return_h3_format){
+                        $fin_result = array("resultCount" => $fin_result['data']['count'], 
+                                          "recordCount" => $fin_result['data']['count'], 
+                                          "recIDs" => implode(",", $fin_result['data']['records']) );
+            }
+            
+            return $fin_result;               
+        }//end rules
         
-        $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+        $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
         
 //error_log("query ".print_r($aquery, true));        
         $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
@@ -796,103 +881,143 @@ error_log(">>".print_r($params, true));
                 $total_count_rows = $fres->fetch_row();
                 $total_count_rows = $total_count_rows[0];
                 $fres->close();
-
-                // read all field names
-                $_flds =  $res->fetch_fields();
-                $fields = array();
-                foreach($_flds as $fld){
-                    array_push($fields, $fld->name);
-                }
-                array_push($fields, 'rec_ThumbnailURL'); //last one
                 
-                $rectype_structures  = array();
-                $rectypes = array();
-                $records = array();
-                $order = array();
+                if($is_ids_only){
                     
-                    // load all records
+                    $records = array();
+                    
                     while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //1000 maxim allowed chunk
-                        array_push( $row, fileGetThumbnailURL($system, $row[2]) );
-                        $records[$row[2]] = $row;
-                        array_push($order, $row[2]);
-                        if(!array_key_exists($row[4], $rectypes)){
-                            $rectypes[$row[4]] = 1;
-                        }
+                        array_push($records, $row[0]);
                     }
                     $res->close();
                     
+                    if(@$params['vo']=='h3'){ //output version
+                        $response = array("resultCount" => $total_count_rows, 
+                                          "recordCount" => count($records), 
+                                          "recIDs" => implode(",", $records) );
+                    }else{
                     
-                    $rectypes = array_keys($rectypes);
-                    //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
+                        $response = array("status"=>HEURIST_OK,
+                            "data"=> array(
+                                "queryid"=>@$params['id'],  //query unqiue id
+                                "count"=>$total_count_rows,
+                                "offset"=>get_offset($params),
+                                "recids"=>$records));
 
-                    if($need_details && count($records)>0){
-                        
-                        //search for specific details
-                        // @todo - we may use getAllRecordDetails
-                        $res_det = $mysqli->query(
-                            "select dtl_RecID,
-                            dtl_DetailTypeID,
-                            dtl_Value,
-                            astext(dtl_Geo),
-                            dtl_UploadedFileID,
-                            recUploadedFiles.ulf_ObfuscatedFileID,
-                            recUploadedFiles.ulf_Parameters
-                            from recDetails 
-                            left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
-                            where dtl_RecID in (" . join(",", array_keys($records)) . ")");
-                        if (!$res_det){
-                            $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
-                            return $response;
-                        }else{
-                            while ($row = $res_det->fetch_row()) {
-                                $recID = array_shift($row);
-                                if( !array_key_exists("d", $records[$recID]) ){
-                                    $records[$recID]["d"] = array();
-                                }
-                                $dtyID = $row[0];
-                                if( !array_key_exists($dtyID, $records[$recID]["d"]) ){
-                                    $records[$recID]["d"][$dtyID] = array();
-                                }
-
-                                if($row[2]){
-                                    $val = $row[1]." ".$row[2]; //for geo
-                                }else if($row[3]){
-                                    $val = array($row[4], $row[5]); //obfuscted value for fileid
-                                }else { 
-                                    $val = $row[1];
-                                }
-                                array_push($records[$recID]["d"][$dtyID], $val);
-                            }
-                            $res_det->close();
-
-                        }
                     }
-                    if($need_structure && count($rectypes)>0){ //rarely used
-                          //description of recordtype and used detail types
-                          $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1); //no groups
-                    }
-
-                    //"query"=>$query,
-                    $response = array("status"=>HEURIST_OK,
-                        "data"=> array(
-                            //"query"=>$query,
-                            "queryid"=>@$params['id'],  //query unqiue id
-                            "count"=>$total_count_rows,
-                            "offset"=>get_offset($params),
-                            "fields"=>$fields,
-                            "records"=>$records,
-                            "order"=>$order,
-                            "rectypes"=>$rectypes,
-                            "structures"=>$rectype_structures));
-
                             
-                
-            
+                }else{
+                    
+
+                    // read all field names
+                    $_flds =  $res->fetch_fields();
+                    $fields = array();
+                    foreach($_flds as $fld){
+                        array_push($fields, $fld->name);
+                    }
+                    array_push($fields, 'rec_ThumbnailURL'); //last one
+                    
+                    $rectype_structures  = array();
+                    $rectypes = array();
+                    $records = array();
+                    $order = array();
+                        
+                        // load all records
+                        while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //1000 maxim allowed chunk
+                            array_push( $row, fileGetThumbnailURL($system, $row[2]) );
+                            $records[$row[2]] = $row;
+                            array_push($order, $row[2]);
+                            if(!array_key_exists($row[4], $rectypes)){
+                                $rectypes[$row[4]] = 1;
+                            }
+                        }
+                        $res->close();
+                        
+                        
+                        $rectypes = array_keys($rectypes);
+                        //$rectypes = array_unique($rectypes);  it does not suit - since it returns array with original keys and on client side it is treaten as object
+
+                        if($need_details && count($records)>0){
+                            
+                            //search for specific details
+                            // @todo - we may use getAllRecordDetails
+                            $res_det = $mysqli->query(
+                                "select dtl_RecID,
+                                dtl_DetailTypeID,
+                                dtl_Value,
+                                astext(dtl_Geo),
+                                dtl_UploadedFileID,
+                                recUploadedFiles.ulf_ObfuscatedFileID,
+                                recUploadedFiles.ulf_Parameters
+                                from recDetails 
+                                left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
+                                where dtl_RecID in (" . join(",", array_keys($records)) . ")");
+                            if (!$res_det){
+                                $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+                                return $response;
+                            }else{
+                                while ($row = $res_det->fetch_row()) {
+                                    $recID = array_shift($row);
+                                    if( !array_key_exists("d", $records[$recID]) ){
+                                        $records[$recID]["d"] = array();
+                                    }
+                                    $dtyID = $row[0];
+                                    if( !array_key_exists($dtyID, $records[$recID]["d"]) ){
+                                        $records[$recID]["d"][$dtyID] = array();
+                                    }
+
+                                    if($row[2]){
+                                        $val = $row[1]." ".$row[2]; //for geo
+                                    }else if($row[3]){
+                                        $val = array($row[4], $row[5]); //obfuscted value for fileid
+                                    }else { 
+                                        $val = $row[1];
+                                    }
+                                    array_push($records[$recID]["d"][$dtyID], $val);
+                                }
+                                $res_det->close();
+
+                            }
+                        }
+                        if($need_structure && count($rectypes)>0){ //rarely used
+                              //description of recordtype and used detail types
+                              $rectype_structures = dbs_GetRectypeStructures($system, $rectypes, 1); //no groups
+                        }
+
+                        //"query"=>$query,
+                        $response = array("status"=>HEURIST_OK,
+                            "data"=> array(
+                                //"query"=>$query,
+                                "queryid"=>@$params['id'],  //query unqiue id
+                                "count"=>$total_count_rows,
+                                "offset"=>get_offset($params),
+                                "fields"=>$fields,
+                                "records"=>$records,
+                                "order"=>$order,
+                                "rectypes"=>$rectypes,
+                                "structures"=>$rectype_structures));
+                                
+                }//$is_ids_only          
             }
 
         }
+        
+//debug error_log("response=".print_r($response,true));        
 
         return $response;
 
+    }
+    
+    function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
+
+            foreach ($r_tree as $rule) {   
+                $e_rule = array('query'=>$rule['query'], 
+                                'results'=>array(), 
+                                'parent'=>$parent_index, 
+                                'islast'=>(count($rule['levels'])==0) );
+                array_push($flat_rules, $e_rule );
+                _createFlatRule($flat_rules, $rule['levels'], count($flat_rules)-1);
+            }
+        
     }
 ?>

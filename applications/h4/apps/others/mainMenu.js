@@ -460,6 +460,9 @@ $.widget( "heurist.mainMenu", {
             
             if(!top.HEURIST4.util.isnull(top.HEURIST4.current_query_request)){
                   q = encodeURIComponent(top.HEURIST4.current_query_request.q);
+                  if(!top.HEURIST4.util.isempty(top.HEURIST4.current_query_request.rules)){
+                    q = q + '&rules=' + encodeURIComponent(top.HEURIST4.current_query_request.rules);
+                  }
             }
             
         }else{
