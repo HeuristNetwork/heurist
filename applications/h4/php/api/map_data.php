@@ -332,21 +332,22 @@
         global $detailQuery;
         $documents = array();
         
-        // Select all Map Document types
-        $query = $recordQuery." WHERE rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
-        $mysqli = $system->get_mysqli();
-        $res = $mysqli->query($query);
-        if ($res) {
-            // Loop through all rows
-            while($row = $res->fetch_assoc()) {
-                // Document object containing the row values
-                $document = getRecord($row);
-                $document = getRecordDetails($system, $document);
-                //print_r($document);
-                array_push($documents, $document);
+        if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
+            // Select all Map Document types
+            $query = $recordQuery." WHERE rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
+            $mysqli = $system->get_mysqli();
+            $res = $mysqli->query($query);
+            if ($res) {
+                // Loop through all rows
+                while($row = $res->fetch_assoc()) {
+                    // Document object containing the row values
+                    $document = getRecord($row);
+                    $document = getRecordDetails($system, $document);
+                    //print_r($document);
+                    array_push($documents, $document);
+                }
             }
         }
-        
         //print_r($documents);
         return $documents;
     }

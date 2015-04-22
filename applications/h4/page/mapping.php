@@ -86,7 +86,9 @@
             #helper p, #helper h2, #helper h4{
                 padding:10px;
             }
-        </style>
+            .ui-map-document { background-image: url('../assets/267.png') !important;}
+            .ui-map-layer { background-image: url('../assets/268.png') !important;}
+        </style>        
         
         <!-- Initializing -->
         
@@ -94,12 +96,6 @@
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         //HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'
         //HEURIST_ICON_URL.RT_MAP_LAYER.'.png'
-?>        
-        <style> 
-            .ui-map-document { background-image: url('../assets/267.png') !important;}
-            .ui-map-layer { background-image: url('../assets/268.png') !important;}
-        </style>        
-<?php
     }
 ?>        
         
@@ -168,7 +164,7 @@
                 };
   
                 // Setting layout
-                layout_opts.center__minHeight = 300;
+                layout_opts.center__minHeight = 100;
                 layout_opts.center__minWidth = 200;
                 layout_opts.north__size = 30;
                 layout_opts.north__spacing_open = 0;
@@ -330,14 +326,14 @@
                 $items = $items.'<li rtid="'.checkRt('RT_QUERY_LAYER').'"><a href="#">Query layer</a></li>';
 ?>        
                 $("#btnMapNew").button({ text:false, 
-                         icons: {primary: "<?=(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0?'ui-map-document':'ui-icon-help')?>" }}) 
+                         icons: {primary: "ui-map-document" }}) 
                         .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
                         .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
                 $("#btnMapEdit").button({text:false, 
                         icons: {primary: "ui-icon-pencil"}})
                         .click(mapEdit);
                 $("#btnMapLayer").button({text:false, 
-                        icons: {primary: "<?=(defined('RT_MAP_LAYER') && RT_MAP_LAYER>0?'ui-map-layer':'ui-icon-help')?>"}})
+                        icons: {primary: "ui-map-layer"}})
                         .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
                         .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
                         
