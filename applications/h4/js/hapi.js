@@ -435,6 +435,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //request.chunk = true;
 
                 if(top.HEURIST4.util.isnull(request.chunk)){
+                    request.rules = null; //reset rules parameter - since we search incrementally from client side
                     _callserver('record_search', request, callback);    //standard search 
                 }else{
                     /*

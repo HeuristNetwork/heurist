@@ -1374,10 +1374,18 @@
         $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
     }
     
-    if(false && @$_REQUEST['rules']){ //search with h4 search engine
-        $_REQUEST['idonly'] = 1;
-        $_REQUEST['vo'] = 'h3';
+    if(@$_REQUEST['rules']){ //search with h4 search engine
+
+        //$_REQUEST['idonly'] = 1;
+        //$_REQUEST['vo'] = 'h3';
         //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
+        $url = HEURIST_BASE_URL."applications/h4/php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";
+        if($PUBONLY){
+            $url = $url."&publiconly=1";
+        }
+        $result = loadRemoteURLContent($url);
+        $result = json_decode($result, true);
+        
     }else{
         $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
     }

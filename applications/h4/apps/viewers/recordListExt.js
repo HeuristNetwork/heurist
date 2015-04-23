@@ -62,7 +62,7 @@ $.widget( "heurist.recordListExt", {
             {
                 that.option("recordset", null);
 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){     //@todo with incremental    ON_REC_SEARCHRESULT
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){     //@todo???? with incremental    ON_REC_SEARCHRESULT
 
                 that.option("recordset", data); //hRecordSet
                 that.loadanimation(false);
@@ -77,7 +77,7 @@ $.widget( "heurist.recordListExt", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
-                if(data && data.source!=that.element.attr('id')) { 
+                if(data && data.source!=that.element.attr('id') && that.options.is_single_selection) { 
                    
                    data = data.selection;
                    that.option("selection", top.HAPI4.getSelection(data, true) );    
@@ -162,7 +162,7 @@ $.widget( "heurist.recordListExt", {
             this.dosframe.attr('src', this.options.url);
              
         }else{ //content has been loaded already
-        
+
             var query_string = 'db=' + top.HAPI4.database,
                 query_string_all = null,
                 query_string_sel = null,
@@ -171,12 +171,14 @@ $.widget( "heurist.recordListExt", {
             if(!top.HEURIST4.util.isnull(this._query_request)){
                 query_string = query_string + '&w='+this._query_request.w;
                 
+                query_string_main = query_string;
+                
                 if(!top.HEURIST4.util.isempty(this._query_request.q)){
-                    query_string_main = query_string + '&q=' + encodeURIComponent(this._query_request.q);
+                    query_string_main = query_string_main + '&q=' + encodeURIComponent(this._query_request.q);
                 }
                 if(!top.HEURIST4.util.isempty(this._query_request.rules)){
                     //@todo simplify rules array - rempove redundant info
-                    query_string_main = query_string + '&rules=' + encodeURIComponent(this._query_request.rules);
+                    query_string_main = query_string_main + '&rules=' + encodeURIComponent(this._query_request.rules);
                 }
             }else{
                 query_string = query_string + '&w=all';
@@ -191,23 +193,26 @@ $.widget( "heurist.recordListExt", {
                   }
             }
             if (this.options.recordset!=null) {
+                /* art2304
                   var recIDs_list = this.options.recordset.getIds();
                   if(!top.HEURIST4.util.isempty(recIDs_list.length)){
                         query_string_all = query_string + '&q=ids:'+recIDs_list.join(',');
                   }
+                 */ 
                   top.HEURIST.totalQueryResultRecordCount = this.options.recordset.length();
             }else{                         
-                  top.HEURIST.otalQueryResultRecordCount = 0;
+                  top.HEURIST.totalQueryResultRecordCount = 0;
             }
             
+            /* art2304
             if(query_string_main.toLowerCase().indexOf('sortby')>=0){  //keep order for smarty output
                 top.HEURIST.currentQuery_all_ = query_string_main;
             }else{
                 top.HEURIST.currentQuery_all_ = top.HEURIST.currentQuery_all
-            }
+            }*/
             
             
-            top.HEURIST.currentQuery_all  = query_string_all;
+            top.HEURIST.currentQuery_all  = query_string_main; //query_string_all;
             top.HEURIST.currentQuery_sel  = query_string_sel;
             top.HEURIST.currentQuery_main = query_string_main;
             
@@ -229,6 +234,7 @@ $.widget( "heurist.recordListExt", {
             }
             
         }
+        
     },
 
     // events bound via _on are removed automatically

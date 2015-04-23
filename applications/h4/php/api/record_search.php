@@ -66,13 +66,14 @@
             }        
         }
         if($isok){
-        //temorary!!!
+        //end temorary!!!
 
             //DEGUG        $currentUser = array('ugr_ID'=>2);
             $need_structure = (@$_REQUEST['f']=='structure');
-            $need_details = (@$_REQUEST['f']=='map' || $need_structure);
+            $need_details   = (@$_REQUEST['f']=='map' || $need_structure);
+            $publicOnly     = (@$_REQUEST['publiconly']==1);
 
-            $response = recordSearch($system, $_REQUEST, $need_structure, $need_details);    
+            $response = recordSearch($system, $_REQUEST, $need_structure, $need_details, $publicOnly);    
         
         }
     }

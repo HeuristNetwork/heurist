@@ -778,16 +778,15 @@ error_log(">>".print_r($params, true));
             //this is json
             $rules_tree = json_decode($params['rules'], true);
 
-error_log("RULES:".$params['rules']);
+//error_log("RULES:".$params['rules']);
 //error_log(print_r($rules_tree, true));
             
             $flat_rules = array();
-            $flat_rules[0] = array("results"=>array());
+            $flat_rules[0] = array();
             
             //create flat rule array
             $rules = _createFlatRule( $flat_rules, $rules_tree, 0 );
             
-//debug error_log(print_r($flat_rules, true));
             
             //find result for main query 
             unset($params['rules']);
@@ -799,53 +798,61 @@ error_log("RULES:".$params['rules']);
             
             //find main query
             $fin_result = recordSearch($system, $params, $need_structure, $need_details, $publicOnly);
-            $flat_rules[0]['result'] = array_keys($fin_result['data']['records']); //get ids
+            $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] :array_keys($fin_result['data']['records']); //get ids
+
+//debug error_log(print_r($flat_rules, true));
             
             foreach($flat_rules as $idx => $rule){
                 if($idx==0) continue;
                 
-                $is_last = $rule['islast'];
+                $is_last = ($rule['islast']==1);
                 
                 //create request
                 $params['q'] = $rule['query'];
-                $parent_ids = $rule['parent']['results']; //list of record ids of parent resultset
+                $parent_ids = $flat_rules[$rule['parent']]['results']; //list of record ids of parent resultset
                 $rule['results'] = array(); //reset
+
+//error_log("parent ".$rule['parent']." ids=".print_r($flat_rules[$rule['parent']]['results'], true));
                 
                 //split by 1000 - search based on parent ids (max 1000)
                 $k = 0;
                 while ($k < count($parent_ids)) {
                 
                     $need_details2 = $need_details && $is_last;
-                    $params['topids'] = array_slice($parent_ids, $k, 1000);
+                    $params['topids'] = implode(",", array_slice($parent_ids, $k, 1000));
                     $response = recordSearch($system, $params, false, $need_details2, $publicOnly);
+
+//error_log("topids ".$params['topids']."   ".print_r($response, true));
                     
                     if($response['status'] == HEURIST_OK){
-                            if($is_last){
-                                //merge with final results
-                                $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
-                                
-                                if(!$is_ids_only){
-                                    $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
-                                    foreach( array_keys($response['data']['records']) as $rt){
-                                        if(!array_key_exists($rt, $fin_result['data']['rectypes'])){
-                                            $fin_result['data']['rectypes'][$rt] = 1;
-                                        }
+                            //merge with final results
+                            $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
+                            
+                            if(!$is_ids_only){
+                                $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
+                                foreach( array_keys($response['data']['records']) as $rt){
+                                    if(!array_key_exists($rt, $fin_result['data']['rectypes'])){
+                                        $fin_result['data']['rectypes'][$rt] = 1;
                                     }
                                 }
+                            }
                                 
-                            }else{
-                                $rule['results'] = array_merge($rule['results'],  array_keys($response['data']['records']));
+                            if(!$is_last){
+                                $flat_rules[$idx]['results'] = array_merge($flat_rules[$idx]['results'],  $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
+//error_log("added ".print_r($rule['results'], true));                                
                             }
                         
                     }else{
                         //@todo terminate execution and return error
-                        
+                        error_log("ERROR ".print_r($response, true));
                     }
                     
                     $k = $k + 1000;
-                }//while
+                }//while chunks
                 
             } //for rules
+//error_log("RES = ".print_r($flat_rules, true));                
+                
             
             $fin_result['data']['count'] = count($fin_result['data']['records']);
             
@@ -902,7 +909,7 @@ error_log("RULES:".$params['rules']);
                                 "queryid"=>@$params['id'],  //query unqiue id
                                 "count"=>$total_count_rows,
                                 "offset"=>get_offset($params),
-                                "recids"=>$records));
+                                "records"=>$records));
 
                     }
                             

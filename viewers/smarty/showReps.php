@@ -110,11 +110,31 @@ function executeSmartyTemplate($params){
 		$params["limit"] = $limit; //force limit
 	}
 
-	$qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
+//debug error_log(print_r($params, true));
+    
+    if(@$params['rules']){ //search with h4 search engine
+    
+        $url = "";
+        foreach($params as $key=>$value){
+            $url = $url.$key."=".urlencode($value)."&";    
+        }
+    
+
+        $url = HEURIST_BASE_URL."applications/h4/php/api/record_search.php?".$url."&idonly=1&vo=h3";
+//debug error_log($url);        
+        $result = loadRemoteURLContent($url);
+        $qresult = json_decode($result, true);
+
+//debug error_log(print_r($qresult, true));
+        
+    }else{
+	    $qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
+    }
+    
 /*****DEBUG****///error_log(print_r($params,true));
 /*****DEBUG****///error_log(print_r($qresult,true));
 
-	if(!array_key_exists('records',$qresult) ||  $qresult['resultCount']==0 ){
+	if(  ( !array_key_exists('recIDs',$qresult) && !array_key_exists('records',$qresult) ) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
 			$error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
 		}else{
@@ -163,17 +183,36 @@ function executeSmartyTemplate($params){
     }
     //end pre-parsing of template
 
-	//convert to array that will assigned to smarty variable
-	$records =  $qresult["records"];
-	$results = array();
-	$k = 0;
-	foreach ($records as $rec){
+    //convert to array that will assigned to smarty variable
+    if(array_key_exists('recIDs',$qresult)){
 
-		$res1 = getRecordForSmarty($rec, 0, $k);
-        $res1["recOrder"]  = $k;
-		$k++;
-		array_push($results, $res1);
-    }   
+        $records =  explode(",", $qresult["recIDs"]);
+        $results = array();
+        $k = 0;
+        foreach ($records as $recordID){
+
+            $rec = loadRecord($recordID, false, true); //from search/getSearchResults.php
+            
+            $res1 = getRecordForSmarty($rec, 0, $k);
+            $res1["recOrder"]  = $k;
+            $k++;
+            array_push($results, $res1);
+        }  
+        
+    
+    }else{
+
+	    $records =  $qresult["records"];
+	    $results = array();
+	    $k = 0;
+	    foreach ($records as $rec){
+
+		    $res1 = getRecordForSmarty($rec, 0, $k);
+            $res1["recOrder"]  = $k;
+		    $k++;
+		    array_push($results, $res1);
+        }  
+    } 
 	//activate default template - generic list of records
 
 	$smarty->assign('results', $results);
