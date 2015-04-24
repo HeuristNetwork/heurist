@@ -32,6 +32,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 include_once('../../external/geoPHP/geoPHP.inc');
 
 mysql_connection_select(DATABASE);
@@ -117,21 +118,47 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
 
 		if($islist){
+            
+            if(true || @$_REQUEST['rules']){ //search with h4 search engine
+            
+                //$_REQUEST['idonly'] = 1;
+                //$_REQUEST['vo'] = 'h3';
+                //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
+                $url = HEURIST_BASE_URL."applications/h4/php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";
+                $reclist = loadRemoteURLContent($url);
+                $reclist = json_decode($reclist, true);
+                
+                if (array_key_exists('error', $reclist)) {
+                    error_log("Error: ".$reclist['error']);
+                    return;
+                }
+                
+                $reccount = $reclist['resultCount'];
+                $reclist = explode(",", $reclist['recIDs']);
+                
+                $reclist = array_slice($reclist,0,1000);
 
-			if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
-				$search_type = BOOKMARK;	// my bookmarks
-			else
-				$search_type = BOTH;	// all records
+                $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", $reclist).") ".$ourwhere;
+                $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $reclist).") ".$ourwhere2;
 
-			$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
-			if (!$limit || $limit<1){
-					$limit = 1000; //default limit in dispPreferences
-			}
+                
+            }else{
 
-			$squery = prepareQuery(null, $squery, $search_type, $detTable, $ourwhere, null, $limit);
-			if($isSearchKml){
-				$squery2 = prepareQuery(null, $squery2, $search_type, $detTable2, $ourwhere2, null, $limit);
-			}
+			    if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
+				    $search_type = BOOKMARK;	// my bookmarks
+			    else
+				    $search_type = BOTH;	// all records
+
+			    $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+			    if (!$limit || $limit<1){
+					    $limit = 1000; //default limit in dispPreferences
+			    }
+
+			    $squery = prepareQuery(null, $squery, $search_type, $detTable, $ourwhere, null, $limit);
+			    if($isSearchKml){
+				    $squery2 = prepareQuery(null, $squery2, $search_type, $detTable2, $ourwhere2, null, $limit);
+			    }
+            }
 
 
 		}else{
@@ -140,19 +167,25 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 		}
 
 /*****DEBUG****///error_log("1.>>>>".$squery);
+        $wkt_reccount=0;
+        $kml_reccount=0;
 
-		$res = mysql_query($squery);
-		$wkt_reccount = mysql_num_rows($res);
+        if($squery){
 
-/*****DEBUG****///error_log("2.>>>>".$wkt_reccount);
+		    $res = mysql_query($squery);
+		    $wkt_reccount = mysql_num_rows($res);
 
-/*****DEBUG****///error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
-		if($isSearchKml){
-			$res2 = mysql_query($squery2);
-			$kml_reccount = mysql_num_rows($res2);
-		}else{
-			$kml_reccount = 0;
-		}
+    /*****DEBUG****///error_log("2.>>>>".$wkt_reccount);
+
+    /*****DEBUG****///error_log(">>>>".$isSearchKml."2.>>>>".$squery2);
+		    if($isSearchKml){
+			    $res2 = mysql_query($squery2);
+			    $kml_reccount = mysql_num_rows($res2);
+		    }else{
+			    $kml_reccount = 0;
+		    }
+            
+        }
 
 		if ($wkt_reccount>0 || $kml_reccount>0)
 		{

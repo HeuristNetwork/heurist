@@ -33,6 +33,8 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+
 include_once('../../external/geoPHP/geoPHP.inc');
 
 mysql_connection_select(DATABASE);
@@ -95,35 +97,77 @@ if($isAtom){
 <?php
 }
 
-								//   0       1         2		3				4				5			6														7
-		$squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, rec_Added, ".
-		"b.dtl_Value, c.dtl_Value ";
-		$joinTable = " left join recDetails b on (b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
+                                //   0       1         2        3                4                5            6                                                        7
+        $squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, rec_Added, ".
+        "b.dtl_Value, c.dtl_Value ";
+        $joinTable = " left join recDetails b on (b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
 ") left join recDetails c on (c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_CREATOR')?DT_CREATOR:"0").") ";
 
 
-		if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
-			$search_type = BOOKMARK;	// my bookmarks
-		else
-			$search_type = BOTH;	// all records
 
-		$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
-		if (!$limit || $limit<1){
-				$limit = 1000; //default limit in dispPreferences
-		}
+    if(true || @$_REQUEST['rules']){ //search with h4 search engine
+    
+        $h4way = true;
 
-		$squery = prepareQuery(null, $squery, $search_type, $joinTable, "", null, $limit);
+        //$_REQUEST['idonly'] = 1;
+        //$_REQUEST['vo'] = 'h3';
+        //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
+        $url = HEURIST_BASE_URL."applications/h4/php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";
+        $reclist = loadRemoteURLContent($url);
+        $reclist = json_decode($reclist, true);
+        
+        if (array_key_exists('error', $reclist)) {
+            print "Error: ".$reclist['error'];
+            return;
+        }
+        
+        $reccount = $reclist['resultCount'];
+        $reclist = explode(",", $reclist['recIDs']);
+        
+        
+/*****DEBUG****///error_log("2.>>>>".$reccount."  ".print_r($reclist, true));        
+        
+    }else{
+        
+        $h4way = false;
+        
+        if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
+            $search_type = BOOKMARK;    // my bookmarks
+        else
+            $search_type = BOTH;    // all records
 
-/*****DEBUG****///error_log("1.>>>>".$squery);
+        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+        if (!$limit || $limit<1){
+                $limit = 1000; //default limit in dispPreferences
+        }
 
-		$res = mysql_query($squery);
-		$reccount = mysql_num_rows($res);
-		$uniq_id = 1;
+        $squery_res = prepareQuery(null, $squery, $search_type, $joinTable, "", null, $limit);
+
+/*****DEBUG****///error_log("1.>>>>".$squery_res);
+
+        $reclist = mysql_query($squery_res);
+        $reccount = mysql_num_rows($reclist);
+    }
+
+        $uniq_id = 1;
+        $idx = 0;
 
 		if ($reccount>0)
 		{
 
-				while ($row = mysql_fetch_row($res)) {
+				while (($h4way && $idx<$reccount) || (!$h4way && ($row = mysql_fetch_row($reclist)))) {
+                    
+                    if($h4way){
+                        $recID = $reclist[$idx];
+                        $idx++;
+                        $squery_res = $squery." from Records ".$joinTable." where rec_ID=".$recID;
+                        $res = mysql_query($squery_res);
+                        if($res){
+                            $row = mysql_fetch_row($res);
+                            if(!$row) continue;
+                        }
+                    }
+                    
 
 	//find rectitle for creator
 	if($row[8]){

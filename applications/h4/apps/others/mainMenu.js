@@ -534,7 +534,7 @@ $.widget( "heurist.mainMenu", {
         var q = "";
         if(isAll){
             
-            q = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+                 q = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
             
                  if(q=='?'){
                      Hul.showMsgDlg("Define query and perform search");
@@ -572,7 +572,13 @@ $.widget( "heurist.mainMenu", {
                     }else{
                         mode = '&feed='+mode;  
                     } 
-                    var url = top.HAPI4.basePathOld + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + top.HAPI4.database + mode;
+                    var rules = '';
+                    if(!top.HEURIST4.util.isempty(top.HEURIST4.current_query_request.rules)){
+                        rules = '&rules=' + encodeURIComponent(top.HEURIST4.current_query_request.rules);
+                    }
+                    
+                    
+                    var url = top.HAPI4.basePathOld + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + top.HAPI4.database + mode + rules;
                     window.open(url, '_blank');
             }
         }
