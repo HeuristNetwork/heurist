@@ -921,8 +921,9 @@
                 }
                 else {
                     // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
-                    if (preg_match('!^\d{4}$!', $this->value)) {
-                        $date = date('Y', $timestamp);
+                    $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
+                    if (@$matches[0]) {
+                        $date = $matches[0];
                     }
                     else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
                         $date = date('Y-m', $timestamp);
