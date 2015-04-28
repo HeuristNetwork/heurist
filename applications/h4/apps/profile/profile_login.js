@@ -33,7 +33,7 @@ function doLogin(){
             var $dlg = login_dialog;
 
             //load login dialogue
-            $dlg.load(top.HAPI4.basePath + "apps/profile/profile_login.html?t="+(new Date().getTime()), function(){
+            $dlg.load(top.HAPI4.basePath + "apps/profile/profile_login.html", function(){  //?t="+(new Date().getTime())
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
@@ -123,7 +123,7 @@ function doLogin(){
                     resizable: false,
                     title: top.HR('Login'),
                     buttons: [
-                        {text:top.HR('Login'), click: __doLogin, id:'btn_login2'},
+                        {text:'<b>'+top.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'},
                         {text:top.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
                         }}
@@ -134,7 +134,7 @@ function doLogin(){
                     open: function() {
                         isreset = false;
                         $dlg.dialog("option","title",top.HR('Login'));
-                        $("#btn_login2").button("option","label",top.HR('Login'));
+                        $("#btn_login2").button("option","label",'<b>'+top.HR('Login')+'</b>');
                         //$dlg.find("#btn_login2").button("option","label",top.HR('Login'));
                         $dlg.find("#fld_reset").hide();
                         $dlg.find("#fld_login").show();

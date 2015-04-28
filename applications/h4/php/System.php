@@ -555,7 +555,7 @@
                     'ugr_Preferences' => $_SESSION[$this->dbname_full]['ugr_Preferences']);
 
                 if (@$_SESSION[$this->dbname_full]['keepalive']) {
-                    //update cookie - to keep it alive
+                    //update cookie - to keep it alive for next 30 days
                     setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
                 }
        
@@ -602,10 +602,10 @@
                         if($session_type == 'public'){
                             $time = 0;
                         }else if($session_type == 'shared'){
-                            $time = time() + 24*60*60;
+                            $time = time() + 24*60*60;     //day
                         }else if ($session_type == 'remember') {
-                            $time = time() + 7*24*60*60;
-                            $_SESSION[$this->dbname_full]['keepalive'] = true;
+                            $time = time() + 90*24*60*60;  //90 days
+                            $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
                         }
                         $cres = setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_SERVER_NAME);
                         if(!$cres){
