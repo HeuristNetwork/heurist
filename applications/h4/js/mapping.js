@@ -696,20 +696,15 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 
 
                 var html_thumb = '';
-                if(fld('rec_ThumbnailURL')){
-                    html_thumb = fld('rec_ThumbnailURL'); //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
+                if(fld('rec_ThumbnailURL')){                             //class="timeline-event-bubble-image" 
+                    html_thumb = '<img src="'+fld('rec_ThumbnailURL')+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }else{
-                    html_thumb =  top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png';
+                    html_thumb =  ''; //top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png';
                 }
                 
-
-            html =
-'<div style="width:190px;height:130px;overflow:auto;"><img src="'+html_thumb+'" class="timeline-event-bubble-image">'+  // 
-'<div style="font-weight:bold">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
-'<div class="popup_body">'+ description +'</div>'+
-((startDate)?'<div class="timeline-event-bubble-time">'+startDate+'</div>':'')+
-((endDate)?'<div class="timeline-event-bubble-time">'+endDate+'</div>':'')+
-              '<div style="width:100%">'
+           var show_bubble_on_map = (item.getType() == "marker" && placemark.api);
+                
+            var ed_html =  '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'  // style="width:100%"
             +   '<div style="display:inline-block;">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
@@ -718,8 +713,26 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             +   '</div>'            
-            + '</div>'            
-+ '</div>';
+            + '</div>';
+                
+            html =
+ed_html +             
+'<div style="min-width:190px;height:130px;overflow-y:auto;">'+  // border:solid red 1px; 
+'<div style="font-weight:bold;width:100%">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
+'<div class="popup_body">'+ html_thumb + description +'</div>'+
+((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+startDate+'</div>':'')+
+((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+endDate+'</div>':'')+
+    
+'</div>';
+                
+                /*
+.truncate {
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+*/                
                 
             }
                 
@@ -728,8 +741,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             if (!item.onVisibleTimeline()) {
                 ds.timemap.scrollToDate(item.getStart());
             }
-            // open window
-            if (item.getType() == "marker" && placemark.api) {
+            // open window on MAP
+            if (show_bubble_on_map) 
+            {
                 placemark.setInfoBubble(html);
                 placemark.openBubble();
                 // deselect when window is closed
@@ -740,6 +754,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     placemark.closeInfoBubble.removeHandler(item.closeHandler);
                 });
             } else {
+            // open window on TIMELINE 
                 if(item.event){    //reference to timeline event
                     
                     var painter = item.timeline.getBand(0).getEventPainter();
