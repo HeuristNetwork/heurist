@@ -427,8 +427,8 @@ function DetailTypeEditor() {
                     "close-on-blur": false,
                     "no-resize": true,
                     "no-close": true,
-                    height: 280,
-                    width: 650,
+                    height: 340,
+                    width: 700,
                     callback: function(context) {
                         if(context!="") {
 
