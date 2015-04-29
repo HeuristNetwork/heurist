@@ -3704,7 +3704,7 @@ if (! top.HEURIST.edit) {
                 urlSpan.appendChild(editImg);
                 urlSpan.appendChild(this.document.createTextNode("edit"));
                 var viewRec = urlSpan.appendChild(this.document.createElement("img"));
-                viewRec.src = top.HEURIST.basePath+"common/images/magglass_15x14.gif.png";
+                viewRec.src = top.HEURIST.basePath+"common/images/magglass_15x14.gif";
                 urlSpan.appendChild(viewRec);
                 urlSpan.appendChild(this.document.createTextNode("view"));
 

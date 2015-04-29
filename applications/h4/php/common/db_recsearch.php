@@ -153,14 +153,17 @@ error_log(">>".print_r($params, true));
                     }
                 }
 
+                
+//DEBUG error_log(">>>>lvl1 rt=".$resource_rt0."  ft=".$resource_field0);                
+                
                 $select_field = "";
                 $where_clause2 = "";
 
                 if($resource_rt0==null){ //only level 0 -------------------------------------
 
-                    if($fieldid=='recTitle'){
+                    if($fieldid=='recTitle' || $fieldid=='title'){
                         $select_field = "TOPBIBLIO.rec_Title";
-                    }else if($fieldid=='recModified'){
+                    }else if($fieldid=='recModified' || $fieldid=='modified'){
                         $select_field = "TOPBIBLIO.rec_Modified";
                     }else{
                         $select_field = "TOPDET.dtl_Value";
@@ -176,6 +179,14 @@ error_log(">>".print_r($params, true));
                         $linkdt0 = "";
                         $linkdt0_where = "";
 
+                        $is_realmarker = ($resource_field0=="relmarker"); //todo remove this option
+                        if($is_realmarker){
+                             $codes = explode(":", $params["code"]);
+                             $resource_field0 = $codes[count($codes)-1];
+                        }else{
+                             $is_realmarker = ($fieldid=="relmarker");
+                        }
+                                                    
                         if($resource_field0=='title'){
                             $select_field = "linked0.rec_Title";
                         }else if($resource_field0=='modified'){
@@ -186,7 +197,7 @@ error_log(">>".print_r($params, true));
                             $linkdt0_where = " and linkeddt0.dtl_Value is not null";
                         }
 
-                        if($fieldid=="relmarker"){
+                        if($is_realmarker){
 
                             $where_clause2 = ", recRelationshipsCache rel0 "
                             ." LEFT JOIN Records linked0 ON (linked0.rec_RecTypeID in (".$resource_rt0.")) "
@@ -194,7 +205,14 @@ error_log(">>".print_r($params, true));
                             ." WHERE ((rel0.rrc_TargetRecID=TOPBIBLIO.rec_ID and rel0.rrc_SourceRecID=linked0.rec_ID) "
                             ."     or (rel0.rrc_SourceRecID=TOPBIBLIO.rec_ID and rel0.rrc_TargetRecID=linked0.rec_ID)) ".$linkdt0_where;
 
-                        }else{
+                            
+                            $where_clause2  = ", recLinks rel0 "
+                            ." LEFT JOIN Records linked0 ON (linked0.rec_RecTypeID in (".$resource_rt0.")) "
+                            .$linkdt0
+                            ." WHERE (rel0.rl_TargetID=TOPBIBLIO.rec_ID and rel0.rl_SourceID=linked0.rec_ID) "
+                            .$linkdt0_where;
+                            
+                        }else{  //pointer
                             $where_clause2 = ", recDetails TOPDET "
                             ." LEFT JOIN Records linked0 ON (TOPDET.dtl_Value=linked0.rec_ID and linked0.rec_RecTypeID in (".$resource_rt0.")) "
                             .$linkdt0
@@ -211,14 +229,20 @@ error_log(">>".print_r($params, true));
                         }else if($resource_field1=='modified'){
                             $select_field = "linked1.rec_Modified";
                         }else{
+                            $is_realmarker = ($resource_field1=="relmarker");
+                            if($is_realmarker){
+                                $codes = explode(":", $params["code"]);
+                                $resource_field1 = $codes[count($codes)-1];
+                            }
+                            
                             $select_field = "linkeddt1.dtl_Value";
                             $linkdt1 = " LEFT JOIN recDetails linkeddt1 ON (linkeddt1.dtl_RecID=linked1.rec_ID and linkeddt1.dtl_DetailTypeID=".$resource_field1.")";
                             $linkdt1_where = " and linkeddt1.dtl_Value is not null";
                         }
 
-                        if($fieldid=="relmarker"){   //CASE1 relation - relation
+                        if($is_realmarker){   
 
-                            if($resource_field0=='relmarker'){
+                            if($resource_field0=='relmarker'){ //CASE1 relation - relation
                                 $where_clause2 = ", recRelationshipsCache rel0, recRelationshipsCache rel1 "
                                 ." LEFT JOIN Records linked0 ON (linked0.rec_RecTypeID in (".$resource_rt0.")) "
                                 ." LEFT JOIN Records linked1 ON (linked1.rec_RecTypeID in (".$resource_rt1.")) "
@@ -248,7 +272,7 @@ error_log(">>".print_r($params, true));
                                 ." LEFT JOIN Records linked0 ON (TOPDET.dtl_Value=linked0.rec_ID and linked0.rec_RecTypeID in (".$resource_rt0.")) "
                                 ." LEFT JOIN Records linked1 ON (linked1.rec_RecTypeID in (".$resource_rt1.")) "
                                 .$linkdt1
-                                ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid." and "
+                                ." WHERE TOPDET.dtl_RecID=TOPBIBLIO.rec_ID and TOPDET.dtl_DetailTypeID=".$fieldid
                                 ."    and ((rel1.rrc_TargetRecID=linked0.rec_ID and rel1.rrc_SourceRecID=linked1.rec_ID)"
                                 ."     or (rel1.rrc_SourceRecID=linked0.rec_ID and rel1.rrc_TargetRecID=linked1.rec_ID)) " . $linkdt1_where;
 
@@ -376,7 +400,8 @@ error_log(">>".print_r($params, true));
                     }
 
 
-                }else if($dt_type=="integer" || $dt_type=="float"){
+                }
+                else if($dt_type=="integer" || $dt_type=="float"){
 
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
@@ -570,7 +595,8 @@ error_log(">>".print_r($params, true));
             $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
 
             //
-//error_log("COUNT >>>".$query);
+//
+error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){

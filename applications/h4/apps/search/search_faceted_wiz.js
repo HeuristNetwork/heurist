@@ -700,7 +700,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 fieldnode = parent.parent
                 if(fieldnode.isRoot()){
                     var q = node.key;
-                    if(q=="recTitle") q = "title"
+                    if(node.data.type=="relmarker") q = "relmarker"
+                    else if(q=="recTitle") q = "title"
                     else if(q=="recModified") q = "modified";
 
                     if(isOneRoot){
@@ -708,23 +709,27 @@ $.widget( "heurist.search_faceted_wiz", {
                         // q = "t:"+parent.key+" "+q; 
                     }
                     
-                    q = "t:"+that.options.params.rectypes.join(",")+" "+q; 
+                    q_full = "t:"+that.options.params.rectypes.join(",")+" "+q; 
                     
                     //final exit when we access root
-                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q, fieldid:node.key }];  
+                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q_full, fieldid:q }];  
                 }
             }else{
                 fieldnode = parent;
             }
 
             var q = node.key;
-            if(q=="recTitle") q = "title"
-            else if(q=="recModified") q = "modified"
-                else if(fieldnode.data.type=="relmarker") q = "f:relmarker";
+            //if(false && fieldnode.data.type=="relmarker") q = "f:relmarker"  //ARTEM 0429
+            if(node.data.type=="relmarker") q = "relmarker"
+            else if(q=="recTitle") q = "title"
+            else if(q=="recModified") q = "modified";
+            
             if(fieldnode.data.rt_ids){ //constrained
-                q = "t:"+fieldnode.data.rt_ids+" "+q; 
+                q_full = "t:"+fieldnode.data.rt_ids+" "+q; 
+            }else{
+                q_full = q;
             }
-            res.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:q, fieldid:node.key });    
+            res.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:q_full, fieldid:q });    
 
             var res2 = __get_queries(fieldnode);
             for(var i=0; i<res2.length; i++){

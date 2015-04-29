@@ -279,6 +279,7 @@ $.widget( "heurist.search_faceted", {
         listdiv.empty();
 
         var facets = this.options.params.facets;
+        var facets_new = this.options.params.facets_new;
 
         if(top.HEURIST4.util.isArrayNotEmpty(facets)){
 
@@ -391,6 +392,8 @@ $.widget( "heurist.search_faceted", {
                                     prms.level2 = facets[facet_index][len-3].query;
                                 }
                             }
+                            
+                            prms.code = facets_new[facet_index].code;
 
                             facet_requests.push(prms);
                         }else{
@@ -484,11 +487,13 @@ $.widget( "heurist.search_faceted", {
                                 prms.level2 = facets[facet_index][len-3].query;
                             }
                         }
-                        if(type=="rectype"){
+                        if(type=="rectype"){  //rectype as facet
                             prms.level0 = "rectype";
                         }else{
                             prms.dt = facets[facet_index][len-1].fieldid;
                         }
+                        
+                        prms.code = facets_new[facet_index].code;
 
                         facet_requests.push(prms);
                     }
