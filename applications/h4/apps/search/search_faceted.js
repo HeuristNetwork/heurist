@@ -263,8 +263,8 @@ $.widget( "heurist.search_faceted", {
             }
         }
 
-        if(this.options.params.rectypes.length==1 || 
-            (this.options.params.rectype_as_facets && top.HEURIST4.util.isnull(facets[0][0].currentvalue))) {
+        if(full_query!='' && (this.options.params.rectypes.length==1 || 
+            (this.options.params.rectype_as_facets && top.HEURIST4.util.isnull(facets[0][0].currentvalue)))) {
             //if(full_query=='' && len>0){
             full_query = "t:"+this.options.params.rectypes.join(",")+' '+full_query; //facets[0][facets[0].length-1].query.split(' ')[0];
         }
@@ -714,9 +714,19 @@ $.widget( "heurist.search_faceted", {
 
             //this.options.searchdetails
             var request = {q: qsearch, w: domain, f: "map", source:this.element.attr('id'), qname:qname};
-            //get hapi and perform search
-            top.HAPI4.RecordMgr.search(request, $(this.document));
+            
+            if(qsearch!=''){
+                //get hapi and perform search
+                top.HAPI4.RecordMgr.search(request, $(this.document));
+            }else{ 
+                // in case no facets selected - fake start and stop
+                request.message = 'Please select a facet on the left to display applicable records';
+                $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
+                //$(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ new hRecordSet() ]); //global app event
+            }                                                                                         
 
+            
+            
         }
 
     }

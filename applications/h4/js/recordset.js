@@ -43,6 +43,8 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
 
+        if(response){
+        
         queryid = response.queryid;
         total_count = Number(response.count);
         offset = Number(response.offset);
@@ -52,6 +54,8 @@ function hRecordSet(initdata) {
         structures = response.structures;
         order = response.order;
         //@todo - merging
+        
+        }
     }
 
     /**

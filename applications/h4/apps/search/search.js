@@ -181,7 +181,7 @@ $.widget( "heurist.search", {
         
 
         this.div_search_as_guest = $('<span>')
-        .css('display', 'inline-black')
+        //.css('display', 'inline-block')
         .addClass('logged-out-only')
         .appendTo( this.div_search );
 
@@ -196,7 +196,7 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user = $('<span>')
         .addClass('logged-in-only')
-        .css({'position':'absolute'})
+        //.css({'position':'absolute'})
         .appendTo( this.div_search );
 
         if(this.options.islinkmode){
@@ -223,7 +223,7 @@ $.widget( "heurist.search", {
                 }
                 var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                Hul.showDialog(url, { callback:
+                Hul.showDialog(url, { width:740, height:540, callback:
                     function(res){
                         if(!Hul.isempty(res)) {
                                 that.input_search.val(res);
@@ -518,15 +518,14 @@ $.widget( "heurist.search", {
     _refresh: function(){
 
         if(top.HAPI4.is_logged()){
-            $(this.element).find('.logged-in-only').show(); //.css('visibility','visible');
+            $(this.element).find('.logged-in-only').show();
             //$(this.element).find('.logged-in-only').css('visibility','visible');
-
-            //$('.logged-out-only').css('visibility','hidden');
+            //$(this.element).find('.logged-out-only').css('visibility','hidden');
             $(this.element).find('.logged-out-only').hide();
         }else{
             $(this.element).find('.logged-in-only').hide();
-            ///$(this.element).find('.logged-in-only').css('visibility','hidden');
-            //$('.logged-out-only').css('visibility','visible');
+            //$(this.element).find('.logged-in-only').css('visibility','hidden');
+            //$(this.element).find('.logged-out-only').css('visibility','visible');
             $(this.element).find('.logged-out-only').show();
         }
 
@@ -582,14 +581,25 @@ $.widget( "heurist.search", {
                     that._refresh();
                  }
 
-                 if(top.HAPI4.currentRecordset==null){
+                 if(top.HAPI4.currentRecordset==null && data.q!=''){
                     that._onSearchStart();
                  }
             }
 
+        /*}else if(e.type == top.HAPI4.Event.ON_REC_SEARCHTERMINATE){ //search is terminated with message 
+        
+                 top.HEURIST4.current_query_request = null; //the only place where this values is assigned
+                 that.query_request = null; //keep for search in current result
+                 top.HAPI4.currentRecordset = null;
+                 that.input_search.val('');
+                 that.options.search_domain = 'a';
+                 that._refresh();
+         */   
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
-                if(that.query_request!=null &&  data.queryid()==that.query_request.id) {
+            if(data){
+                    
+                    if(that.query_request!=null && data.queryid()==that.query_request.id) {
 
                     //save increment into current rules.results
                     var records_ids = data.getIds();
@@ -623,8 +633,10 @@ $.widget( "heurist.search", {
                         that._searchCompleted();
                     }
                 }
+                
+            }
 
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
+        }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
 
 
                 if(data){

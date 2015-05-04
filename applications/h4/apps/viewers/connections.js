@@ -77,7 +77,13 @@ $.widget( "heurist.connections", {
 
                 that.option("recordset", null);
                 that.option("selection", null);
-                that.loadanimation(true);
+                if(data && data.q!=''){
+                    that.loadanimation(true);
+                }else{
+                    that.recordset_changed = true;
+                    that._refresh();
+                }
+                
                 //???? that._refresh();
               
             // Record selection  

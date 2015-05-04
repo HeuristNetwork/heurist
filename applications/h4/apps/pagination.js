@@ -130,20 +130,19 @@ $.widget( "heurist.pagination", {
 
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
 
-                if(data){
-                    that.count_total = data.count_total();
-                }else{
-                    that.count_total = 0;
-                }
-                that._refresh();
+                that._reset(data?data.count_total():0);
+                
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 //hide all on start search   
                 that.count_total = 0; //hRecordSet
-                if(data) that.query_request = data;
+                if(data) {
+                    that.query_request = data;   
+                }
                 if(data==null || data.orig != "paginator"){
                     that.current_page = 0; //reset
                 }
+                that._reset(0);
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){
                 that._refresh();    
@@ -154,6 +153,11 @@ $.widget( "heurist.pagination", {
         this._refresh();
 
     }, //end _create
+    
+    _reset: function(count){
+         this.count_total = count;
+         this._refresh();
+    },
 
     /* private function */
     _refresh: function(){
