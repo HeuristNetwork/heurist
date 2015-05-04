@@ -159,8 +159,10 @@ $.widget( "heurist.mainMenu", {
                         }
                     }
                 }else{
-                   if(data) data = data.selection;
-                   _selectionRecordIDs = top.HAPI4.getSelection(data, true);
+                   if(data){
+                        data = data.selection?data.selection:data;  
+                   } 
+                   that._selectionRecordIDs = top.HAPI4.getSelection(data, true);
                     
                 }
             });        
@@ -397,7 +399,7 @@ $.widget( "heurist.mainMenu", {
                 this._editPreferences(); p=true;
           }else if(action == "menu-export-hml-0"){ 
                 this.exportHML(true,false,false); p=true;
-          }else if(action == "menu-export-hml-1"){ 
+          }else if(action == "menu-export-hml-1"){ //selected
                 this.exportHML(false,false,false); p=true;
           }else if(action == "menu-export-hml-2"){ 
                 this.exportHML(true,true,false); p=true;
@@ -465,7 +467,7 @@ $.widget( "heurist.mainMenu", {
                   }
             }
             
-        }else{
+        }else{    //selected only
             
             if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
                 Hul.showMsgDlg("Select at least one record to export");
