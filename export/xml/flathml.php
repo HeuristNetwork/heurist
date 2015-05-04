@@ -1374,7 +1374,7 @@
         $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
     }
     
-    if(@$_REQUEST['rules']){ //search with h4 search engine
+    if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
         //$_REQUEST['idonly'] = 1;
         //$_REQUEST['vo'] = 'h3';
@@ -1385,6 +1385,8 @@
         }
         $result = loadRemoteURLContent($url);
         $result = json_decode($result, true);
+       
+//DEBUG error_log(print_r($result, true));
         
     }else{
         $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only

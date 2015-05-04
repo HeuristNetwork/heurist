@@ -126,7 +126,7 @@
 
         /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
         if (! $params) $params = array();//$_REQUEST;
-        define('stype', @$params['stype']);
+        if(!defined('stype') && @$params['stype'])  define('stype', @$params['stype']);
 
         // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
         $wg_ids = array(); //may be better use $system->get_user_group_ids() ???
