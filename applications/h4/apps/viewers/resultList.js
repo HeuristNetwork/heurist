@@ -197,8 +197,7 @@ $.widget( "heurist.resultList", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
                 that.loadanimation(false);
-
-                if(that._query_request!=null &&  data.queryid()==that._query_request.id) {
+                if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
                     that._renderRecordsIncrementally(data); //hRecordSet
                 }
 
@@ -224,9 +223,13 @@ $.widget( "heurist.resultList", {
                         }
 
                         that._clearAllRecordDivs();
-                        that.loadanimation(true);
-
-                        that._renderProgress();
+                        
+                        if(data.q!=''){
+                            that.loadanimation(true);
+                            that._renderProgress();
+                        }else{
+                            that._renderMessage('<div style="padding-top:2em;font-weight:bold;">'+top.HR(data.message)+'</div>');                            
+                        }
 
                     }
                     that._query_request = data;  //keep current query request
@@ -515,16 +518,19 @@ $.widget( "heurist.resultList", {
                         
                     }
                 });
+                
+                if(!top.HAPI4.is_logged()){
+                    $(this.div_content).find('.logged-in-only').css('visibility','hidden');    
+                }
+                
 
             }else if(this._count_of_divs<1) {
 
-                var $emptyres = $('<div>')
-                .html(top.HR('No records match the search')+
+                var $emptyres = this._renderMessage(top.HR('No records match the search')+
                     '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
                         ?'Note: some records may only be visible to members of particular workgroups'
                         :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
-                )
-                .appendTo(this.div_content);
+                );
 
                 if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
                     var domain = this._query_request.w
@@ -542,7 +548,15 @@ $.widget( "heurist.resultList", {
         }
 
     },
-
+    
+    _renderMessage: function(msg){
+        
+                var $emptyres = $('<div>')
+                .html(msg)
+                .appendTo(this.div_content);
+                
+                return $emptyres;
+    },
 
     /**
     * create div for given record

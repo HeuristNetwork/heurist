@@ -238,12 +238,20 @@ function print_header_line($bib) {
 	$webIcon = @mysql_fetch_row(mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347"));  //MAGIC NUMBER
 	$webIcon = @$webIcon[0];
 //
+
+    if(is_logged_in()){
 ?>
 
 <div id=recID>Record ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
 	onClick="return sane_link_opener(this);"
 	target=_new href="../edit/editRecord.html?db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
 </div>
+
+<?php
+    }else{
+        print "<div id=recID>Record ID:".htmlspecialchars($rec_id)."</div>";
+    }
+?>
 
 <div class=HeaderRow style="margin-bottom:<?=((@$url)?'20px;':'0px;min-height:0px;')?>"><h2 style="text-transform:none; line-height:16px"><?= $bib['rec_Title'] ?></h2>
 	<div id=footer>

@@ -299,7 +299,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             drawingManager = new google.maps.drawing.DrawingManager({
                 drawingMode: null,
                 drawingControlOptions: {
-                    position: google.maps.ControlPosition.LEFT_BOTTOM,    
+                    position: google.maps.ControlPosition.TOP_RIGHT, //LEFT_BOTTOM,    
                     drawingModes: [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE]
                 },
                 rectangleOptions: shapeOptions,
@@ -709,10 +709,13 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
             +   '</div>'
-            +   '<div title="Click to edit record" style="float:right;height:16px;width:16px;" class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+            +  ((top.HAPI4.currentUser.ugr_ID>0)?
+                '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBooble" >'
+              /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBooble" '
+            + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
             //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-            +   '</div>'            
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
+            +   '</div>':'')            
             + '</div>';
                 
             html =
@@ -746,6 +749,7 @@ ed_html +
             {
                 placemark.setInfoBubble(html);
                 placemark.openBubble();
+                
                 // deselect when window is closed
                 item.closeHandler = placemark.closeInfoBubble.addHandler(function() {
                     // deselect
@@ -780,6 +784,19 @@ ed_html +
                     // item.map.tmBubbleItem = item;
                 }
             }
+            
+            if(top.HAPI4.currentUser.ugr_ID>0){
+                $("#btnEditRecordFromBooble")
+                    .button({icons: {
+                        primary: "ui-icon-pencil"
+                        }, text:false})
+                     .click(function( event ) {
+                event.preventDefault();
+                //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+                window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                    });
+            }
+
     }
     
 
