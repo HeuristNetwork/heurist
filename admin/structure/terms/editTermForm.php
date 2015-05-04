@@ -42,6 +42,7 @@
     $term_desc = @$_REQUEST['description'];
     $term_code = @$_REQUEST['code'];
     $return_res = @$_REQUEST['return_res']?$_REQUEST['return_res']:"";
+    $need_close = false;
 
     $local_message = "";
 
@@ -140,7 +141,7 @@
             setTimeout(function(){
                 <?php
                  if($need_close){
-                     echo 'window.close(context_return_res);';
+                      echo 'window.close(context_return_res);';
                  }else{
                       echo 'document.getElementById("trmName").focus();';
                  }
@@ -148,13 +149,18 @@
             },500);
             
             function submitAndClose(){
-                document.getElementById('close_on_save').value = 1;
-                document.forms[0].submit();
+                if(top.HEURIST.util.isempty(document.getElementById("trmName").value)){
+                    window.close(context_return_res);
+                }else{
+                    document.getElementById('close_on_save').value = 1;
+                    document.forms[0].submit();
+                }
             }
         </script>
 
         <div>
-            <form name="main" action="editTermForm.php" method="post" onsubmit="{document.getElementById('btnPanel').style.display = 'none'}">
+            <form name="main" action="editTermForm.php" method="post" 
+                onsubmit="{document.getElementById('btnPanel').style.display = 'none'}">
 
                 <input name="process" value="action" type="hidden" />
                 <input name="domain" value="<?=$_REQUEST['domain']?>" type="hidden" />
