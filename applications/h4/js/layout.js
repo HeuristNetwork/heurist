@@ -566,6 +566,10 @@ function appAddContent($app_container, app, options){
         }else if(app.widgetname=='search'){
 
                widget = $content.search( options );
+               
+        }else if(app.widgetname=='dh_search'){
+
+               widget = $content.dh_search( options );
         }else    
                 {
                     //this is normal way of widget initialization   

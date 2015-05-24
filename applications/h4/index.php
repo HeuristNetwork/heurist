@@ -114,6 +114,9 @@
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/svs_list.js"></script>
         <script type="text/javascript" src="apps/viewers/resultList.js"></script>
+        
+        <script type="text/javascript" src="apps/digital_harlem/dh_search.js"></script>
+        
         <!--
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>

@@ -494,7 +494,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 this.options.params.rectypes = rectypeIds;
                 var treediv = $(this.step2).find('#field_treeview');
 
-                window.HAPI4.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join() , mode:4, fieldtypes:this.options.params.fieldtypes.join() }, function(response){
+                window.HAPI4.SystemMgr.get_defs({rectypes: this.options.params.rectypes.join(), 
+                        mode:4, 
+                        fieldtypes:this.options.params.fieldtypes.join() }, 
+                function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
@@ -526,7 +529,8 @@ $.widget( "heurist.search_faceted_wiz", {
                                }
 
                                if(field.children && field.children.length>0){
-                                   __set_queries(parentquery_new?parentquery_new:parentquery, recordtype_new?recordtype_new:recordtype, field.children);
+                                   __set_queries(parentquery_new?parentquery_new:parentquery, 
+                                                 recordtype_new?recordtype_new:recordtype, field.children);
                                    //__set_queries(parentquery, recordtype_new?recordtype_new:recordtype, field.children);
                                }else{
 

@@ -28,6 +28,7 @@
     require_once (dirname(__FILE__).'/db_users.php');
     require_once (dirname(__FILE__).'/db_files.php');
     require_once (dirname(__FILE__).'/compose_sql.php');
+    require_once (dirname(__FILE__).'/compose_sql_new.php');
     require_once (dirname(__FILE__).'/db_structure.php');
 
     /**
@@ -595,8 +596,7 @@ error_log(">>".print_r($params, true));
             $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
 
             //
-//
-error_log("COUNT >>>".$query);
+//error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -691,7 +691,6 @@ error_log("COUNT >>>".$query);
         return $response;                     
         
     }
-    
     
 
     /**
@@ -890,16 +889,28 @@ error_log("COUNT >>>".$query);
             
             return $fin_result;               
         }//end rules
-        
-        $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+
+        if(@$params['qa']){
+            $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   
+        }else{
+            $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+        }
         
 //error_log("query ".print_r($aquery, true));        
+
         $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
         
         $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
         //DEGUG 
-//error_log("AAA ".$query);
+        if(@$params['qa']){
+            //print $query;
+            error_log($query);
+            //exit();
+        }else{
+            //error_log("AAA ".$query);            
+        }
+
 
         $res = $mysqli->query($query);
         if (!$res){

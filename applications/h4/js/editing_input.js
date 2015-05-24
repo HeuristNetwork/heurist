@@ -22,6 +22,7 @@ $.widget( "heurist.editing_input", {
 
     // default options
     options: {
+        varid:null,
         recID: null,
         rectypeID: null,
         dtID: null,
@@ -96,7 +97,7 @@ $.widget( "heurist.editing_input", {
         .addClass('header '+required)
         .css('width','150px')
         .css('vertical-align', (detailType=="blocktext")?'top':'')
-        .html('<label for="input0_'+this.options.dtID+'">'+this.f('rst_DisplayName')+'</label>')
+        .html('<label for="input'+(this.options.varid?this.options.varid:'0_'+this.options.dtID)+'">'+this.f('rst_DisplayName')+'</label>')
         .appendTo( this.element );
 
 
@@ -163,7 +164,7 @@ $.widget( "heurist.editing_input", {
     * add input according field type
     * 
     * @param value
-    * @param idx
+    * @param idx - index for repetative values
     */
     _addInput: function(value, idx) {
 
@@ -174,7 +175,7 @@ $.widget( "heurist.editing_input", {
         var that = this;
         var detailType = this.f('dty_Type');
         var $input = null;
-        var inputid = 'input'+idx+'_'+this.options.dtID;
+        var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         value = value ?value:'';
 
         //@todo      var defaultValue = (top.HEURIST4.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");

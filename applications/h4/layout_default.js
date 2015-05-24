@@ -68,7 +68,13 @@ var widgets = [
     {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},
     {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
     
-    {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'}
+    {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},
+    
+    // DIGITAL HARLEM APPS
+    {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'apps/digital_harlem/dh_search.js'},
+    {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'apps/digital_harlem/dh_maps.js'},
+    {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'apps/digital_harlem/dh_results.js'},
+    {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'apps/digital_harlem/dh_legend.js'}
     
 ];
 
@@ -136,6 +142,26 @@ var layouts = [
                         ]}]
         }
     },
+    {id:'L06', name:'Digital Harlem', theme:'heurist', type:'cardinal', 
+        west:{size:300, resizable:true, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
+        center:{minsize:300, dropable:false, 
+            tabs:[{dockable:true, dragable:false, resizable:false,
+                apps:[
+                    {appid:'h3_resultList', hasheader:true, name: 'Search result' },
+                    {appid:'ha51', hasheader:true, dockable:false, dragable:false }
+                    ]
+               }]},  //mapping 
+        east:{size:300, minsize:300, dropable:false,
+            tabs:[{dockable:false, dragable:false, resizable:false,
+                apps:[                                      
+                    {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
+                    {appid:'dh_results', name:'Layers'}, // current open layers
+                    {appid:'dh_legend', name:'Legened'}
+                ]
+            }]
+        }
+    },
+    
 /*    {id:'L02', name:'connections', theme:'smoothness',
     north:{size:40, resizable:false,
             apps:[
