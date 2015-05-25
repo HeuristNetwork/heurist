@@ -190,6 +190,20 @@ div.input-div > #btn_input_clear {
     display: none;
 }
 
+/* fieldset for search*/
+.fieldset_search > div, .input-row{
+    display:block;
+}
+.fieldset_search > div > .header{
+    display:block;
+    text-align:left;
+}
+
+.fieldset_search > div > div  > div > input.text, .fieldset_search > div > div >  div > select.text {
+    max-width: 200px;
+}
+
+
 /* margin-bottom:2px; */
 input.text, select.text {
     padding-bottom: 0.2em;

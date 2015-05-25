@@ -67,6 +67,7 @@ var widgets = [
 
     {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},
     {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
+    {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'apps/viewers/staticPage.js'},
     
     {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},
     
@@ -143,7 +144,7 @@ var layouts = [
         }
     },
     {id:'L06', name:'Digital Harlem', theme:'heurist', type:'cardinal', 
-        west:{size:300, resizable:true, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
+        west:{size:270, resizable:true, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false, 
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -156,7 +157,7 @@ var layouts = [
                 apps:[                                      
                     {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
                     {appid:'dh_results', name:'Layers'}, // current open layers
-                    {appid:'dh_legend', name:'Legened'}
+                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'applications/h4/apps/digital_harlem/dh_legend.html'}}
                 ]
             }]
         }
