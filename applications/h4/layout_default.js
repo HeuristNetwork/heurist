@@ -144,7 +144,14 @@ var layouts = [
         }
     },
     {id:'L06', name:'Digital Harlem', theme:'heurist', type:'cardinal', 
-        west:{size:270, resizable:true, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
+        north:{size:140, resizable:false, overflow:'hidden',
+            apps:[
+                {appid:'h4_static', hasheader:false, 
+                    options:{url: 'applications/h4/apps/digital_harlem/dh_header.php?db=[dbname]'}
+                    //css:{width:'100%',height:'100%'}},
+                    ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
+        ]},
+        west:{size:270, resizable:false, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false, 
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
@@ -160,7 +167,13 @@ var layouts = [
                     {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'applications/h4/apps/digital_harlem/dh_legend.html'}}
                 ]
             }]
-        }
+        },
+        south:{size:40, resizable:false, overflow:'hidden',
+            apps:[
+                {appid:'h4_static', hasheader:false, 
+                    options:{url: 'applications/h4/apps/digital_harlem/dh_footer.html'}
+                    ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
+        ]},
     },
     
 /*    {id:'L02', name:'connections', theme:'smoothness',

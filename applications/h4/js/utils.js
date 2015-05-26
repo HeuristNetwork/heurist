@@ -764,6 +764,15 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return $dlg.removeClass('ui-heurist-border');
     },
 
+    getPopupDlg: function(){
+        var $dlg = $( "#dialog-popup" );
+        if($dlg.length==0){
+            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').appendTo('body');
+            $dlg.removeClass('ui-heurist-border');
+        }
+        return $dlg;
+    },
+    
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
@@ -773,6 +782,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             });
         }
     },
+    
 
     // buttons - callback function
     showMsgDlg: function(message, buttons, title, position_to_element){
@@ -783,10 +793,17 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
 
         var $dlg = top.HEURIST4.util.getMsgDlg();
+        var isPopup = true; //bigger and resizable
 
         if(message!=null){
             $dlg.empty();
-            $dlg.append('<span>'+top.HR(message)+'</span>');
+            if(message.indexOf('#')===0){
+                $dlg = top.HEURIST4.util.getPopupDlg();
+                $dlg.html($(message).html());
+                isPopup = true;
+            }else{
+                $dlg.append('<span>'+top.HR(message)+'</span>');    
+            }
         }
 
         if(!title) title = 'Info';
@@ -823,6 +840,11 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             closeOnEscape: true,
             buttons: buttons
         };
+        if(isPopup){
+            options.height = 515;
+            options.width = 705;
+            options.resizable = true;
+        }
         
         if(position_to_element){
            options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };

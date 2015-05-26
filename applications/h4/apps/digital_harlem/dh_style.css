@@ -1,0 +1,142 @@
+#header       {
+        height: 100px;
+        background-color: #000000;
+        background: url(assets/banner_dh_east.jpg) no-repeat center right #000000;
+}
+
+.intro {
+    margin: 0px;
+    padding: 12px 10px 0px 185px;
+    height: 28px;
+    float: right;
+}
+.home {
+    padding: 12px;
+    height: 28px;
+}
+
+.intro p, .home p {
+    margin: 0px;
+    padding: 0px;
+    font-size: 11px;
+    color: #ffffff;
+    cursor: default;
+}
+
+.intro p a, .intro p a:visited {
+    margin: 0px;
+    padding: 0px 0px 1px 0px;
+    color: #ffffff;
+    text-decoration: none;
+    border-bottom: 1px solid #aaaaaa;
+}
+
+.intro p b, .home p b {
+    margin: 0px;
+    padding: 0px 4px 0px 4px;
+    color: #999999;
+    font-weight: normal;
+    background-color: #ffffff;
+    border-right: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+    cursor: default;
+}
+
+
+.spacer {
+    margin: -2px 0px 0px 0px;
+    padding: 0px;
+    font-size: 0px;
+    height: 0px;
+    clear: both;
+}
+
+#header_title {
+        height: 100px;
+        width: 357px;
+        position:absolute;
+        background: url(assets/banner_dh_west.jpg) no-repeat #000000;
+}
+
+#searchbar  {
+        height: 40px;
+        background-color: #111111;
+        text-align: right;
+        border-top: 1px dotted #BFBFBF;
+        border-bottom: 1px dotted #BFBFBF;
+        overflow:hidden;
+}
+
+#searchbar .input {
+    padding: 2px 4px 2px 4px;
+    margin: 6px 7px 1px 0px;
+    width: 206px;
+    height: 25px;
+    border: 3px solid #555555;
+    background-color: #dbdbdb;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #666666;
+}
+
+html>body #searchbar .input {margin: 8px 7px 1px 0px;}
+
+#searchbar .input:hover {
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+
+a {
+      outline: none;
+      text-decoration: none;
+      color: #2C547A;
+      font-weight: bold;
+      cursor: pointer;
+}
+
+a:hover {
+      text-decoration: underline;
+}
+
+
+
+.menubutton {
+        padding: 0px;
+        float:left;
+        height: 25px;
+        width: 75px;
+        margin-top: 7px;
+        margin-left: 10px;
+        text-align: center;
+        background-color: #2C547A;
+        background-position: left;
+        background-repeat: no-repeat;
+        overflow: hidden;
+}
+
+
+
+a.menuitem {
+      display: block;;
+      padding: 7px;
+      background-image: url(assets/menubutton_bg.jpg);
+      color: #ffffff;
+      font-family: Verdana;
+      font-weight: bold;
+      font-size: 10px;
+}
+
+#searchbar a:hover {
+    background-image: url(assets/menubutton_bg_rollover.jpg);
+    text-decoration: none;
+}
+
+
+
+.ui-widget-header{
+    background: #E77A27 !important;
+    color: white;
+}
+.ui-widget-content{
+    background: white !important;
+}

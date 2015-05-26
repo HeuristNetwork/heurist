@@ -27,6 +27,8 @@ $.widget( "heurist.staticPage", {
         title: '',
         url:null
     },
+    
+    _loaded_url:null,
 
     // the constructor
     _create: function() {
@@ -34,12 +36,12 @@ $.widget( "heurist.staticPage", {
         var that = this;
         
         this.div_content = $('<div>')
-                   .css({
-                        position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-                        'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
+                   /*.css({
+                        position:'absolute', top:(this.options.title==''?0:'2.5em'), bottom:0, left:0, right:0,
+                        'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})*/
                    .appendTo( this.element );
                    
-        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
+        //this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
 
         
         this.element.on("myOnShowEvent", function(event){
@@ -47,6 +49,8 @@ $.widget( "heurist.staticPage", {
                 that._refresh();
             }
         });
+        
+        this._refresh();
         
 
     }, //end _create
@@ -83,10 +87,13 @@ $.widget( "heurist.staticPage", {
         //refesh if element is visible only - otherwise it costs much resources        
         if(!this.element.is(':visible') || top.HEURIST4.util.isempty(this.options.url)) return;
         
-        if(this.dosframe.attr('src')!==this.options.url){
+        //if(this.dosframe.attr('src')!==this.options.url){
+        if(this._loaded_url!==this.options.url){
             this.options.url = top.HAPI4.basePathOld +  this.options.url.replace("[dbname]",  top.HAPI4.database);
-            this.dosframe.attr('src', this.options.url);
-            this.loadanimation(false);
+            this._loaded_url=this.options.url;
+            var that=this;
+            $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
+            //this.dosframe.attr('src', this.options.url);
         }
         
     },
@@ -96,12 +103,11 @@ $.widget( "heurist.staticPage", {
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
-        $(this.document).off(this._events);
 
         var that = this;
 
         // remove generated elements
-        this.dosframe.remove();
+        //this.dosframe.remove();
         this.div_content.remove();
     },
     

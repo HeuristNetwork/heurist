@@ -25,6 +25,9 @@ $.widget( "heurist.dh_search", {
         // callbacks
     },
     
+    _query_request:null,
+    _resultset:null,
+    
     _searches:[
 /*      [
     {"var":"1","id":"1","rtid":"4",  "code":"4:1","title":"Name of organisation","type":"freetext","levels":[],"search":[]},
@@ -82,7 +85,7 @@ $.widget( "heurist.dh_search", {
         //this._focusable($element);
         
         this.tab_control = $(document.createElement('div'))
-            .css({position:'absolute', top:'0.2em', bottom:'3.6em', width:'100%'})
+            .css({width:'100%'})  //position:'absolute', top:'0.2em', bottom:'3.6em', 
             .appendTo(this.element);
         this.tab_header  = $(document.createElement('ul')).appendTo(this.tab_control);
         
@@ -94,7 +97,58 @@ $.widget( "heurist.dh_search", {
         
         this.tab_control.tabs();   
         
+        this.res_div = $('<div>')
+        .css('padding','0.4em')
+        //.css({position:'absolute', height:'1.2em', bottom:'2.4em'})
+        .appendTo(this.element).hide();
+        
+        this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
+        
+        this.res_name = $('<input>').appendTo(this.res_div);
+               
+        this.res_btn = $('<button>', {text:top.HR('Map')+' >'})
+        .button().on("click", function(event){  } )
+        .appendTo(this.res_div);
+        
+        this._events = top.HAPI4.Event.ON_REC_SEARCH_FINISH
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
+        
+        //event listener
+        $(this.document).on(this._events, 
+        function(e, data) {
+            
+            if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){     //@todo???? with incremental    ON_REC_SEARCHRESULT
 
+                that.loadanimation(false);
+                if(that._query_request && that._query_request.qa!=''){
+                    that._resultset = data; //hRecordSet
+                    that.res_div.show();
+                    
+                    if(that._resultset.count_total()>0){
+                        that.res_lbl.html('Found '+that._resultset.count_total()+' matches....<br>Provide a layer name<br>');
+                        that.res_name.show();
+                        that.res_btn.show();
+                    }else{
+                        that.res_lbl.html('Found no matches....');
+                        that.res_name.hide();
+                        that.res_btn.hide();
+                    }
+                }
+
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+                /*
+                that.res_div.hide();
+                if(data){
+                    that._query_request = jQuery.extend(true, {}, data);  //keep current query request 
+                    that._resultset = null;
+                    if(data.qa!='')
+                        that.loadanimation(true);
+                }
+                */
+            }    
+                        
+        });
 
         this._refresh();
 
@@ -124,6 +178,10 @@ $.widget( "heurist.dh_search", {
         // remove generated elements
         this.tab_header.remove();
         this.tab_control.remove();
+        this.res_div.control.remove();
+        
+        $(this.document).off(this._events);
+        
     },
     
     
@@ -204,27 +262,40 @@ $.widget( "heurist.dh_search", {
                         __fillQuery(query);
                         
                         
-                        var request = {qa: query, w: 'a', f: 'map', source:this.element.attr('id') };
+                        var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id') };
 
                         top.HAPI4.currentRecordset = null;
                         //perform search
-                        top.HAPI4.RecordMgr.search(request, $(this.document));                        
+                        top.HAPI4.RecordMgr.search(request, $(this.document));     
                         
-                       //this._doSearch();     
+                        this.res_div.hide();
+                        this._query_request = jQuery.extend(true, {}, request);  //keep current query request 
+                        this._resultset = null;
+                        this.loadanimation(true);
+                                           
                         
                     }});
         
         $('<button>', {text:top.HR('Reset')})
         .button().on("click", function(event){  } )
         .appendTo(btn_div);
-               
-
+        
                 //
        
     },
     
-    _doSearch: function(){
+    _onSearchResult: function(){
         
-    }
+    },
 
+    loadanimation: function(show){
+        if(show){
+            //this.tab_control.hide();
+            this.element.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+        }else{
+            this.element.css('background','none');
+            //this.tab_control.show();
+        }
+    }
+    
 });

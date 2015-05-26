@@ -229,6 +229,9 @@
                                             layoutid = "L01";
                                         }
                                     }
+                                    if(layoutid=='L06'){ //digital harlem - @todo move style to layout
+                                        $("head").append($('<link rel="stylesheet" type="text/css" href="apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));                                    
+                                    }
 
                                     appInitAll(layoutid, "#layout_panes");
 
