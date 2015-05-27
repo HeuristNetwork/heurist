@@ -45,7 +45,7 @@ $.widget( "heurist.dh_search", {
     {"var":"4","id":"92","rtid":"10","code":"14:109:10:92","title":"Occupation","type":"enum","levels":[],"search":[]},
     {"var":"5","id":"98","rtid":"10","code":"14:109:10:98","title":"Race","type":"enum","levels":[],"search":[]},
     {"var":"6","id":"20","rtid":"10","code":"14:109:10:20","title":"Gender","type":"enum","levels":[],"search":[]},
-    {"var":"7","id":"1","rtid":"10", "code":"14:109:10:1","title":"Surname","type":"freetext","levels":[],"search":[]},
+    {"var":"7","id":"18","rtid":"10","code":"14:109:10:18","title":"Surname","type":"freetext","levels":[],"search":[]},
 
     {"var":"8","id":"1","rtid":"11", "code":"14:99:12:73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
     {"var":"9","id":"89","rtid":"16","code":"14:99:12:90:16:89","title":"Location type","type":"enum","levels":[],"search":[]},
@@ -53,7 +53,7 @@ $.widget( "heurist.dh_search", {
     
     {"qa":[{"t":14},{"f:74":"X0"}, 
               {"related_to:100":[{"t":"15"},{"f:80":"X1"}]},  
-              {"related_to:109":[{"t":"10"},{"f:97":"X2"},{"f:92":"X3"},{"f:98":"X4"},{"f:20":"X5"},{"f:1":"X6"}]},
+              {"relatedfrom:109":[{"t":"10"},{"f:97":"X2"},{"f:92":"X3"},{"f:98":"X4"},{"f:20":"X5"},{"f:18":"X6"}]},   //persons involved
               
               {"related_to:99":[{"t":"12"},{"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}
            ]}
