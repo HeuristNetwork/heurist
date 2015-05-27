@@ -50,8 +50,8 @@ $.widget( "heurist.staticPage", {
             }
         });
         
-        this._refresh();
-        
+        that._refresh();
+        //$(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
 
     }, //end _create
 
@@ -90,8 +90,8 @@ $.widget( "heurist.staticPage", {
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
             this.options.url = top.HAPI4.basePathOld +  this.options.url.replace("[dbname]",  top.HAPI4.database);
-            this._loaded_url=this.options.url;
-            var that=this;
+            this._loaded_url = this.options.url;
+            //var that=this;
             $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
             //this.dosframe.attr('src', this.options.url);
         }
@@ -103,8 +103,7 @@ $.widget( "heurist.staticPage", {
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
-
-        var that = this;
+        //$(this.document).off(top.HAPI4.Event.ON_SYSTEM_INITED);
 
         // remove generated elements
         //this.dosframe.remove();
@@ -113,11 +112,9 @@ $.widget( "heurist.staticPage", {
     
     loadanimation: function(show){
         if(show){
-            //this.dosframe.hide();
             this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
-            //this.dosframe.show();
         }
     },
 

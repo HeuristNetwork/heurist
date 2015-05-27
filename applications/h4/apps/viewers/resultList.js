@@ -52,12 +52,12 @@ $.widget( "heurist.resultList", {
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
-        if(hasHeader){
+        /*if(hasHeader){
             var header = $(".header"+that.element.attr('id'));
             header.css({'padding-left':'0.7em','background':'none','border':'none'}).html('<h3>'+header.text()+'</h3>');
             header.parent().css({'background':'none','border':'none'});
             header.parent().parent().css({'background':'none','border':'none'});
-        }
+        } */
         this.innerHeader = null;
         if(this.options.innerHeader){
             this.innerHeader =  $( "<div>" ).css('padding','0.7em').appendTo( this.element );

@@ -106,8 +106,7 @@
     */
     function recordSearchFacets($system, $params){
 
-//
-error_log(">>".print_r($params, true));
+// error_log(">>".print_r($params, true));
         
         
         if(@$params['level0'] && @$params['type']){

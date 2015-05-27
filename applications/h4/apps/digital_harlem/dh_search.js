@@ -25,7 +25,6 @@ $.widget( "heurist.dh_search", {
         // callbacks
     },
     
-    _query_request:null,
     _resultset:null,
     
     _searches:[
@@ -55,23 +54,27 @@ $.widget( "heurist.dh_search", {
               {"related_to:100":[{"t":"15"},{"f:80":"X1"}]},  
               {"relatedfrom:109":[{"t":"10"},{"f:97":"X2"},{"f:92":"X3"},{"f:98":"X4"},{"f:20":"X5"},{"f:18":"X6"}]},   //persons involved
               
-              {"related_to:99":[{"t":"12"},{"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}
+              {"related_to:99":[{"t":"12"},{"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}  //address->street(11)  and linkedfrom role(16) role of place
            ]}
       ], 
       [
-    {"var":"1","id":"18","rtid":"10", "code":"10:18","title":"First Name","type":"freetext","levels":[],"search":[]},
+    {"var":"1","id":"1","rtid":"10",  "code":"10:1","title":"First Name","type":"freetext","levels":[],"search":[]},
     {"var":"2","id":"96","rtid":"10", "code":"10:96","title":"Second Name(s)","type":"freetext","levels":[],"search":[]},
-    {"var":"3","id":"1","rtid":"10", "code":"10:1","title":"Surname","type":"freetext","levels":[],"search":[]},
+    {"var":"3","id":"18","rtid":"10", "code":"10:18","title":"Surname","type":"freetext","levels":[],"search":[]},
 
     {"var":"4","id":"20","rtid":"10","code":"10:20","title":"Gender","type":"enum","levels":[],"search":[]},
     {"var":"5","id":"97","rtid":"10","code":"10:97","title":"Birthplace of Participant(s)","type":"enum","levels":[],"search":[]},
     {"var":"6","id":"92","rtid":"10","code":"10:92","title":"Occupation","type":"enum","levels":[],"search":[]},
     {"var":"7","id":"98","rtid":"10","code":"10:98","title":"Race","type":"enum","levels":[],"search":[]},
     
-    {"qa":[{"t":10},{"f:18":"X0"},{"f:96":"X1"},{"f:1":"X2"},{"f:20":"X3"},{"f:97":"X4"},{"f:92":"X5"},{"f:98":"X6"}  ]}
+    {"qa":[{"t":10},{"f:1":"X0"},{"f:96":"X1"},{"f:18":"X2"},{"f:20":"X3"},{"f:97":"X4"},{"f:92":"X5"},{"f:98":"X6"}  ]}
       ],
       []
     ],
+    
+    //CHURCHES    {"t":"12"},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"}]} 
+    
+    
 
     // the widget's constructor
     _create: function() {
@@ -84,9 +87,11 @@ $.widget( "heurist.dh_search", {
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);
         
+        this.tab_content = $(document.createElement('div')).css({width:'100%',height:'100%','overflow-y':'auto'}).appendTo(this.element);
+        
         this.tab_control = $(document.createElement('div'))
             .css({width:'100%'})  //position:'absolute', top:'0.2em', bottom:'3.6em', 
-            .appendTo(this.element);
+            .appendTo(this.tab_content);
         this.tab_header  = $(document.createElement('ul')).appendTo(this.tab_control);
         
         //add tabs
@@ -100,7 +105,7 @@ $.widget( "heurist.dh_search", {
         this.res_div = $('<div>')
         .css('padding','0.4em')
         //.css({position:'absolute', height:'1.2em', bottom:'2.4em'})
-        .appendTo(this.element).hide();
+        .appendTo(this.tab_content).hide();
         
         this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
         
@@ -109,46 +114,6 @@ $.widget( "heurist.dh_search", {
         this.res_btn = $('<button>', {text:top.HR('Map')+' >'})
         .button().on("click", function(event){  } )
         .appendTo(this.res_div);
-        
-        this._events = top.HAPI4.Event.ON_REC_SEARCH_FINISH
-            + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
-            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
-        
-        //event listener
-        $(this.document).on(this._events, 
-        function(e, data) {
-            
-            if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){     //@todo???? with incremental    ON_REC_SEARCHRESULT
-
-                that.loadanimation(false);
-                if(that._query_request && that._query_request.qa!=''){
-                    that._resultset = data; //hRecordSet
-                    that.res_div.show();
-                    
-                    if(that._resultset.count_total()>0){
-                        that.res_lbl.html('Found '+that._resultset.count_total()+' matches....<br>Provide a layer name<br>');
-                        that.res_name.show();
-                        that.res_btn.show();
-                    }else{
-                        that.res_lbl.html('Found no matches....');
-                        that.res_name.hide();
-                        that.res_btn.hide();
-                    }
-                }
-
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
-                /*
-                that.res_div.hide();
-                if(data){
-                    that._query_request = jQuery.extend(true, {}, data);  //keep current query request 
-                    that._resultset = null;
-                    if(data.qa!='')
-                        that.loadanimation(true);
-                }
-                */
-            }    
-                        
-        });
 
         this._refresh();
 
@@ -179,8 +144,9 @@ $.widget( "heurist.dh_search", {
         this.tab_header.remove();
         this.tab_control.remove();
         this.res_div.control.remove();
+        this.tab_content.remove();  
         
-        $(this.document).off(this._events);
+        //$(this.document).off(this._events);
         
     },
     
@@ -262,14 +228,37 @@ $.widget( "heurist.dh_search", {
                         __fillQuery(query);
                         
                         
+                        var that = this;
                         var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id') };
 
-                        top.HAPI4.currentRecordset = null;
                         //perform search
-                        top.HAPI4.RecordMgr.search(request, $(this.document));     
+                        top.HAPI4.RecordMgr.search(request, 
+                                function(response) {
+
+                                        that.loadanimation(false);
+                                    
+                                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                                            that._resultset = new hRecordSet(response.data);
+                                        }else{
+                                            top.HEURIST4.util.showMsgErr(response.message);
+                                            return;
+                                        }
+                                    
+                                        that.res_div.show();
+                                            
+                                        if(that._resultset.count_total()>0){
+                                            that.res_lbl.html('Found '+that._resultset.count_total()+' matches....<br>Provide a layer name<br>');
+                                            that.res_name.show();
+                                            that.res_btn.show();
+                                        }else{
+                                            that.res_lbl.html('Found no matches....');
+                                            that.res_name.hide();
+                                            that.res_btn.hide();
+                                        }
+                                }
+                        );     
                         
                         this.res_div.hide();
-                        this._query_request = jQuery.extend(true, {}, request);  //keep current query request 
                         this._resultset = null;
                         this.loadanimation(true);
                                            

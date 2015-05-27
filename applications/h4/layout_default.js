@@ -104,7 +104,7 @@ var layouts = [
                 {appid:'ha10', hasheader:false, css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result 
+        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result 
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[                                      
@@ -155,8 +155,8 @@ var layouts = [
         center:{minsize:300, dropable:false, 
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
-                    {appid:'h3_resultList', hasheader:true, name: 'Search result' },
-                    {appid:'ha51', hasheader:true, dockable:false, dragable:false }
+                    {appid:'ha51', hasheader:true, dockable:false, dragable:false, options:{maponly:true} },
+                    {appid:'h3_resultList', hasheader:true, name: 'Search result' }
                     ]
                }]},  //mapping 
         east:{size:300, minsize:300, dropable:false,

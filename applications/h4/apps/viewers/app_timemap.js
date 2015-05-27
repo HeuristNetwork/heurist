@@ -23,7 +23,8 @@ $.widget( "heurist.app_timemap", {
     // default options
     options: {
         recordset: null,
-        selection: null //list of record ids
+        selection: null, //list of record ids
+        maponly:false
     },
     
     _events: null,
@@ -120,7 +121,12 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){
                 this._initmap()
             }else {
-                (this.mapframe).attr('src', top.HAPI4.basePath + '/page/mapping.php?db='+top.HAPI4.database);
+                var url = top.HAPI4.basePath + '/page/mapping.php?db='+top.HAPI4.database;
+                if(this.options.maponly){
+                    url = url + '&maponly=1';
+                }
+                
+                (this.mapframe).attr('src', url);
             }
         }
 

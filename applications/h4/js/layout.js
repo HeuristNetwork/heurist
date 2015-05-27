@@ -571,6 +571,9 @@ function appAddContent($app_container, app, options){
 
                widget = $content.dh_search( options );
                
+        }else if(app.widgetname=='dh_maps'){
+
+               widget = $content.dh_maps( options );
         }else    
                 {
                     //this is normal way of widget initialization   

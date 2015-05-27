@@ -642,7 +642,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             //ON_REC_SEARCHTERMINATE: "ON_REC_SEARCHTERMINATE",
             ON_REC_PAGESET: "ON_REC_PAGESET",
             ON_REC_SELECT: "ON_REC_SELECT",
-            ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE"
+            ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
+            ON_SYSTEM_INITED: "ON_SYSTEM_INITED"
         },
 
         /**

@@ -116,6 +116,7 @@
         <script type="text/javascript" src="apps/viewers/resultList.js"></script>
         
         <script type="text/javascript" src="apps/digital_harlem/dh_search.js"></script>
+        <script type="text/javascript" src="apps/digital_harlem/dh_maps.js"></script>
         
         <!--
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
@@ -269,6 +270,8 @@
                                     if(!(top.HAPI4.sysinfo.db_total_records>0)){
                                             showTipOfTheDay(false);
                                     }
+                                    
+                                    $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);                                    
 
                                 }else{  // failed to load database structure
 

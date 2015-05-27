@@ -172,6 +172,14 @@
                 layout_opts.south__spacing_open = 7;
                 layout_opts.south__spacing_closed = 7;
 
+<?php if(@$_REQUEST['maponly']){ ?>
+                layout_opts.north__size = 0;
+                layout_opts.south__size = 0;
+                layout_opts.south__spacing_open = 0;
+                layout_opts.south__spacing_closed = 0;
+<?php } ?>
+                
+                
                 var mylayout = $('#mapping').layout(layout_opts);
   
   
@@ -274,10 +282,8 @@
                     }
                  });
                  
-                 
-                 
 <?php
-    if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){ 
+        if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){ 
 
               function checkRt($rt){
                     global $rtDefines;
