@@ -30,6 +30,9 @@
     $_REQUEST['q'] = 'manly';
     */
 
+//error_log("recSearch ".print_r($_REQUEST, true));
+        
+    
     $response = array();
 
     $system = new System();

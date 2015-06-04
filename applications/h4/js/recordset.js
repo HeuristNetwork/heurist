@@ -238,13 +238,16 @@ function hRecordSet(initdata) {
     /**
     * Converts recordSet to OS Timemap dataset
     */
-    function _toTimemap(){
+    function _toTimemap(dataset_name){
 
         var aitems = [];
         var recID, item, shape;
         var mapenabled = 0,
             timeenabled = 0;
-        
+            
+        dataset_name = dataset_name || "main";
+         
+        var tot = 0;
         
         for(recID in records){
             if(recID)
@@ -299,14 +302,16 @@ function hRecordSet(initdata) {
                 }
 
                 aitems.push(item);
+                
+                tot++;
         }}
 
         var dataset = [
             {
-                id: "main", 
+                id: dataset_name, 
                 type: "basic",
-                timeenabled:timeenabled,
-                mapenabled:mapenabled,
+                timeenabled: timeenabled,
+                mapenabled: mapenabled,
                 options: { items: aitems }
             }
         ];
@@ -667,8 +672,8 @@ function hRecordSet(initdata) {
         /**
         * Converts recordSet to OS Timemap dataset
         */
-        toTimemap: function(){
-            return _toTimemap();
+        toTimemap: function(dataset_name){
+            return _toTimemap(dataset_name);
         }
 
     }

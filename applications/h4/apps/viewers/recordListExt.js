@@ -71,7 +71,7 @@ $.widget( "heurist.recordListExt", {
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 if(data){
-                    that._query_request = jQuery.extend(true, {}, data);  //keep current query request 
+                    that._query_request = jQuery.extend(true, {}, data);  //keep current query request (clone)
                     that.option("recordset", null);
                     if(data.q!='')
                         that.loadanimation(true);

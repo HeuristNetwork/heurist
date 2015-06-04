@@ -792,7 +792,7 @@ $.widget( "heurist.resultList", {
             $rdiv;
 
         var isedit = ($target.parents('.rec_edit_link').length>0); //this is edit click
-        var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is edit click
+        var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
 
         if(!$target.hasClass('recordDiv')){
             $rdiv = $target.parents('.recordDiv');

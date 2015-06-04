@@ -716,6 +716,9 @@
             }
         }
         
+//
+error_log("KEYS ".print_r(array_keys($params),true));
+        
         
         $mysqli = $system->get_mysqli();
         $currentUser = $system->getCurrentUser();
@@ -725,17 +728,18 @@
             $params['w'] = 'all'; //does not allow to search bookmarks if not logged in
         }
 
+        /* ART 05-June-2015
         if(@$params['q'] && !is_string($params['q'])){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
-        }
+        }*/
 
         if($is_ids_only){
 
-            $select_clause = 'select SQL_CALC_FOUND_ROWS rec_ID ';
+            $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT rec_ID ';
             
         }else{
         
-            $select_clause = 'select SQL_CALC_FOUND_ROWS '   //this function does not pay attention on LIMIT - it returns total number of rows
+            $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT '   //this function does not pay attention on LIMIT - it returns total number of rows
             .'bkm_ID,'
             .'bkm_UGrpID,'
             .'rec_ID,'
@@ -798,12 +802,14 @@
         }else if( @$params['rules'] ){ //special case - server side operation
         
              // rules - JSON array the same as stored in saved searches table  
-        
+  
+error_log("RULES:".$params['rules']);        
             //this is json
             $rules_tree = json_decode($params['rules'], true);
 
-//error_log("RULES:".$params['rules']);
-//error_log(print_r($rules_tree, true));
+//
+//
+error_log(print_r($rules_tree, true));
             
             $flat_rules = array();
             $flat_rules[0] = array();
@@ -889,13 +895,29 @@
             return $fin_result;               
         }//end rules
 
+        if(@$params['q']){
+//error_log("query ".is_array(@$params['q'])."   q=".print_r($params['q'], true));
+                
+                if(is_array(@$params['q'])){
+                    $query_json = $params['q'];
+                }else{
+                    $query_json = json_decode(@$params['q'], true);
+                }
+
+                if(is_array($query_json) && count($query_json)>0){
+//error_log("!!! 1"); 
+                   $params['qa'] = $query_json;    
+                }
+        }
+       
+        
         if(@$params['qa']){
             $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   
         }else{
             $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
         }
         
-//error_log("query ".print_r($aquery, true));        
+// error_log("query ".print_r($aquery, true));        
 
         $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
         
@@ -945,6 +967,7 @@
                                 "queryid"=>@$params['id'],  //query unqiue id
                                 "count"=>$total_count_rows,
                                 "offset"=>get_offset($params),
+                                "reccount"=>count($records),
                                 "records"=>$records));
 
                     }
@@ -1034,6 +1057,7 @@
                                 "queryid"=>@$params['id'],  //query unqiue id
                                 "count"=>$total_count_rows,
                                 "offset"=>get_offset($params),
+                                "reccount"=>count($records),
                                 "fields"=>$fields,
                                 "records"=>$records,
                                 "order"=>$order,

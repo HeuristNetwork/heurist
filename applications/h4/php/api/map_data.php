@@ -1,5 +1,7 @@
 <?php
 
+//ARTEM:   @todo JJ makes a lot duplication - many methods already exist
+
     /**
     * Retrieves map data for a certain database.
     * 

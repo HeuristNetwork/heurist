@@ -1,3 +1,6 @@
+//ARTEM:   @todo JJ calls server side directly - need to fix - use hapi!!!!!
+// move all these methods into hMapping class or create new one
+
 HeuristOverlay.prototype = new google.maps.OverlayView();
 var map;
 var data;
@@ -7,7 +10,7 @@ var overlays = {};
 * Adds a map overlay to the given map.
 * Performs an API call which contains data, which will be drawed upon selection
 */
-function addMapOverlay(_map) {
+function loadMapDocuments(_map) {
     map = _map;
     map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('legend'));
 
@@ -18,7 +21,7 @@ function addMapOverlay(_map) {
     });
     
     // Load Map Documents & Map Layers
-    var api = top.HAPI4.basePath + "php/api/map_data.php" + window.location.search;
+    var api = top.HAPI4.basePath + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
 //console.log("API call URL: " + api);
     $.getJSON(api, function(_data) {
         data = _data;
@@ -27,7 +30,7 @@ function addMapOverlay(_map) {
 
         // Have any map documents been defined?
         if(data.length > 0) {
-            addOptions();
+            fillMapDocumentsDropDown();
         }
     }).fail(function( jqxhr, textStatus, error ) {
         var msg = "Map Document API call failed: " + textStatus + ", " + error;
@@ -38,9 +41,9 @@ function addMapOverlay(_map) {
 
 /**
 * Adds options to the dropdown
-* 
+*  assign listener for dropdown
 */
-function addOptions() {
+function fillMapDocumentsDropDown() {
     // Show options in dropdown
     for(var i = 0; i < data.length; i++) {
         $("#map-doc-select").append("<option value='"+data[i].id+"'>["+data[i].id+"] "+data[i].title+"</option>");
@@ -65,7 +68,7 @@ function addOptions() {
         
         if(index >= 0 && index < data.length) {
             // Show overlay for selected Map Document
-            addOverlays(data[index]);  
+            loadMapDocument(data[index]);  
             
             $("#legend").show();
             
@@ -98,6 +101,9 @@ function removeOverlays() {
         if (overlays.hasOwnProperty(property) && overlays[property] !== undefined) {
             try {
                 overlays[property].setVisibility(false);   
+                if(overlays[property]['removeOverlay']){
+                    overlays[property].removeOverlay();
+                }
             } catch(err) {
                 console.log(err);
             }  
@@ -114,11 +120,17 @@ function emptyLegend() {
     $("#legend .content").empty();
 }
 
+function _loadMapDocumentById(recId) {
+        var mapdocs = $("#map-doc-select");
+        mapdocs.val(recId).change();
+}
+
+
 /**
 * Adds overlays for a Map Document
 * @param doc A map document
 */
-function addOverlays(doc) {
+function loadMapDocument(doc) {
     // Bounds
     var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
     var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
@@ -235,7 +247,12 @@ function addTiledMapImageLayer(source, bounds, index) {
             }else{
                 map.overlayMapTypes.setAt(index, null);   
             }
-        }  
+        };
+        
+        overlay.removeOverlay = function(){
+            map.overlayMapTypes.setAt(index, null);
+        };
+          
      }
 
     overlays[index] = overlay; 
@@ -385,8 +402,22 @@ function addQueryLayer(source, index) {
     if(source.query !== undefined) {
         console.log("Query: " + source.query);
         
+        var query = null;
+        try{
+            var query = JSON.parse(source.query);
+            if(!(query && query['qa'])){
+                query = null;
+            }
+        }catch(err){
+        }
+        if(query==null){
+            query = {q: source.query, w: "all", f:"map", l:2000};
+        }else{
+            query['f'] = 'map';
+        }
+        
         // Retrieve records for this query
-        top.HAPI4.RecordMgr.search({q: source.query, w: "all", f:"map", l:200},
+        top.HAPI4.RecordMgr.search(query,
             function(response){
                 console.log("QUERY RESPONSE:");
                 console.log(response);
@@ -394,8 +425,25 @@ function addQueryLayer(source, index) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     // Show info on map
                     var recset = new hRecordSet(response.data);
-                    console.log(recset);
-                    //mapping.load(recset.toTimemap());
+                    var mapdata = recset.toTimemap("dyn"+source.id);
+                    
+                    //mapping.load(mapdata);
+                    if (mapping.addDataset(mapdata)){
+        
+                       var overlay = {                
+                        setVisibility: function(checked) {
+                            mapping.showDataset(mapdata[0].id, checked);
+                        },                          
+                        removeOverlay: function(){
+                            mapping.deleteDataset(mapdata[0].id);
+                        }
+                       };
+                        overlays[index] = overlay;
+                        
+                           
+                    }
+                    //console.log(recset);
+                    //mapping.load();
 
                 }else{
                     alert(response.message);
@@ -416,11 +464,11 @@ function addQueryLayer(source, index) {
 
 
 /** Data types */
-var map_image_file_tiled = 11;
+var map_image_file_tiled = 17; //11;
 var map_image_file_untiled = 1018;
-var kml_file = 1014;
+var kml_file = 21; //1014;
 var shape_file = 1017;
-var mappable_query = 1021;
+var mappable_query = 24; //1021;
 
 /**
 * HeuristOverlay constructor

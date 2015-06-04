@@ -18,7 +18,7 @@
     */
 
 
-    require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
+    require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
     require_once (dirname(__FILE__).'/common/utils_db.php');
     require_once (dirname(__FILE__).'/common/db_users.php');
@@ -238,6 +238,7 @@
         
         public function initPathConstants($dbname=null){
             
+            global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
                     if(!$dbname) $dbname = HEURIST_DBNAME;
 
                     $install_path = 'HEURIST/'; //$this->getInstallPath();
@@ -246,6 +247,28 @@
                     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
              
 //error_log("root=".$documentRoot."   install=".$install_path);
+            if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+                
+                    if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
+                        $defaultRootFileUploadPath.= "/"; // append trailing /
+                    }
+                    if ( !strpos($defaultRootFileUploadPath,":/") && $defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) {
+                        //check for leading /
+                        $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
+                    }
+                    
+                    define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
+                    if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
+                         return false;
+                    }
+                    
+                    define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
+                    
+                    define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . '/filethumbs/');
+                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/filethumbs/');
+                    
+                       
+            }else{     
                     
                     define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
                     if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
@@ -256,7 +279,8 @@
                     
                     define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
                     define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/filethumbs/');
-
+            }
+            
                     define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
                     define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
         
@@ -344,7 +368,7 @@
             $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
             return $this->errors;
         }
-
+        
         /**
         * Returns all info for current user and some sys config parameters
         */

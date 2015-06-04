@@ -102,12 +102,16 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         }*/
     }
     
+    function _isEmptyDataset(_mapdata){
+        return (!top.HEURIST4.util.isArrayNotEmpty(_mapdata) ||  (_mapdata[0].mapenabled==0 && _mapdata[0].timeenabled==0));
+    }
     
     function _updateLayout(){
         
-        if(!mapdata || mapdata.length==0 || mapdata[0].mapenabled==0 && mapdata[0].timeenabled==0){ //empty
+        if(_isEmptyDataset(mapdata)){ //empty
                return false;
-        }else if(mapdata[0].mapenabled==0){
+        }else if(false && mapdata[0].mapenabled==0){ 
+            //always show the map - since map content can be loaded by selection of map document
 
             $(".ui-layout-north").hide();
             $(".ui-layout-center").hide();
@@ -144,7 +148,70 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
     }
     
+    /**
+    * Load timemap datasets 
+    * @see hRecordSet.toTimemap()
+    * 
+    * @param _mapdata
+    */
+    function _addDataset(_mapdata){
+        
+        if(top.HEURIST4.util.isArrayNotEmpty(_mapdata)){
+        
+            var dataset_name = _mapdata[0].id;
+            var dataset = tmap.datasets[dataset_name];
+            
+            if(_isEmptyDataset(_mapdata)){ //show/hde panels
+            
+                if(dataset)
+                    tmap.deleteDataset(dataset_name);
+            
+            }else{
+            
+                if(!dataset){ //already exists with such name
+                   dataset = tmap.createDataset(dataset_name);
+                }
+                    
+                dataset.clear();
+                dataset.loadItems(_mapdata[0].options.items);
+                dataset.show();
+                
+                dataset.each(function(item){
+                    item.opts.openInfoWindow = _onItemSelection;
+                });
+                
+                tmap.showDatasets();
+                /*setTimeout(function(){
+                        tmap.showDataset(dataset_name);
+                },1000);*/
+                
+                return true;
+            
+            }
+        }
+        return false;
+    }
 
+    function _deleteDataset(dataset_name){
+            var dataset = tmap.datasets[dataset_name];
+            if(dataset)
+                 tmap.deleteDataset(dataset_name);
+    }
+    
+    
+    function _showDataset(dataset_name, is_show){
+        var dataset = tmap.datasets[dataset_name];
+        if(dataset){
+            if(is_show){
+                tmap.showDataset(dataset_name);
+            }else{
+                tmap.hideDataset(dataset_name);
+            }
+            
+        }
+        
+    }
+    
     /**
     * Load timemap datasets 
     * @see hRecordSet.toTimemap()
@@ -155,7 +222,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
         $( document ).bubble('closeAll');        
         
-        _onSelectEventListener = __onSelectEventListener;
+        if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
         mapdata = _mapdata || [];
         selection = _selection || [];
         
@@ -175,7 +242,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 var dataset = tmap.datasets.main;
                 dataset.clear();
                 if(_updateLayout()){
-                    dataset.loadItems(mapdata[0].options.items);
+                    dataset.loadItems(_mapdata[0].options.items);
                     dataset.show();
                 }
                 _onDataLoaded(tmap);
@@ -192,11 +259,19 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         //there is bug in timeline - it looks _history_.html in wrong place
         SimileAjax.History.enabled = false;
         
+        // add fake/empty datasets for further use in mapdocument (it is not possible to add datasets dynamically)
+        if(!_mapdata){
+            _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
+        }
+        
+        //_mapdata.push({id: "dyn1", type: "basic", options: { items: [] }});
+        
+        
         // Initialize TimeMap
         tmap = TimeMap.init({
             mapId: mapdiv_id, // Id of gmap div element (required)
             timelineId: timelinediv_id, // Id of timeline div element (required)
-            datasets: mapdata, //.timemap || mapdata,
+            datasets: _mapdata, 
             
             options: {
                 mapZoom: defaultZoom,
@@ -249,7 +324,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             }, tmap);
 
         
-        if(hasItems && (mapdata[0].mapenabled>0)){
+        if(true){ //}(hasItems && (_mapdata[0].mapenabled>0)){
             
             // Add controls if the map is not initialized yet
             var mapOptions = {
@@ -272,7 +347,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
             gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
 
-            addMapOverlay(tmap.getNativeMap()); //loading the lsit of map documents see map_overlay.js
+            loadMapDocuments(tmap.getNativeMap()); //loading the list of map documents see map_overlay.js
             
             _initDrawListeners();
             
@@ -1073,9 +1148,28 @@ ed_html +
             _load(_mapdata, _selection, _onSelectEventListener);
         },
         
+        addDataset: function(_mapdata){
+            return _addDataset(_mapdata);
+        },
+        
+        deleteDataset: function(dataset_name){
+            _deleteDataset(dataset_name);
+        },
+        
+        showDataset: function(dataset_name, is_show){
+            _showDataset(dataset_name, is_show);
+        },
+        
         showSelection: function(_selection){
              selection = _selection || [];
              _showSelection( true );
+        },
+        
+        loadMapDocumentById: function(recId){
+            //_loadMapDocumentById(recId);
+            var mapdocs = $("#map-doc-select");
+            mapdocs.val(recId).change();
+            
         },
 
         onWinResize: function(){

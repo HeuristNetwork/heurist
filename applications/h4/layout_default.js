@@ -155,7 +155,7 @@ var layouts = [
         center:{minsize:300, dropable:false, 
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
-                    {appid:'ha51', hasheader:true, dockable:false, dragable:false, options:{maponly:true} },
+                    {appid:'ha51', hasheader:true, dockable:false, dragable:false, options:{maponly:false} },
                     {appid:'h3_resultList', hasheader:true, name: 'Search result' }
                     ]
                }]},  //mapping 

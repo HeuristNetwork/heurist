@@ -180,7 +180,28 @@ $.widget( "heurist.dh_maps", {
         }
     },
 
+    /**
+    * loads the selected map document
+    */
     _recordDivOnClick: function(event){
+        
+        var $target = $(event.target),
+            $rdiv;
+
+        if(!$target.hasClass('recordDiv')){
+            $rdiv = $target.parents('.recordDiv');
+        }else{
+            $rdiv = $target;
+        }
+        
+        var recId = $rdiv.attr('recid');
+        
+        //hack $('#map-doc-select').click();
+        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+        if(app && app.widget){
+            $(app.widget).app_timemap('loadMapDocumentById', recId);
+        }
+        
     }    
 
 });

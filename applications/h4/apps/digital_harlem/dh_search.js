@@ -35,7 +35,7 @@ $.widget( "heurist.dh_search", {
     {"var":"4","id":"19","rtid":"10","code":"4:16:10:19","title":"Honorific","type":"enum","levels":[],"search":[]},
     {"qa":[{"t":4},{"f:1":"X0"},{"f:22":"X1"}, {"linked_to:16":[{"t":"10"},{"f:1":"X2"},{"f:19":"X3"}  ] } ] }
       ], */
-      [
+      [   //EVENTS
     {"var":"1","id":"74","rtid":"14", "code":"14:74","title":"Type of Event","type":"enum","levels":[],"search":[]},
     
     {"var":"2","id":"80","rtid":"15", "code":"14:100:15:80","title":"Charge / Conviction","type":"enum","levels":[],"search":[]},
@@ -57,7 +57,7 @@ $.widget( "heurist.dh_search", {
               {"related_to:99":[{"t":"12"},{"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}  //address->street(11)  and linkedfrom role(16) role of place
            ]}
       ], 
-      [
+      [   //PEOPLE
     {"var":"1","id":"1","rtid":"10",  "code":"10:1","title":"First Name","type":"freetext","levels":[],"search":[]},
     {"var":"2","id":"96","rtid":"10", "code":"10:96","title":"Second Name(s)","type":"freetext","levels":[],"search":[]},
     {"var":"3","id":"18","rtid":"10", "code":"10:18","title":"Surname","type":"freetext","levels":[],"search":[]},
@@ -69,7 +69,18 @@ $.widget( "heurist.dh_search", {
     
     {"qa":[{"t":10},{"f:1":"X0"},{"f:96":"X1"},{"f:18":"X2"},{"f:20":"X3"},{"f:97":"X4"},{"f:92":"X5"},{"f:98":"X6"}  ]}
       ],
-      []
+      [    //ADDRESS
+    {"var":"1","id":"1","rtid":"12","code":"12:1","title":"Street Number","type":"freetext","levels":[],"search":[]},
+    {"var":"2","id":"1","rtid":"11", "code":"12:73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
+    {"var":"3","id":"1","rtid":"16","code":"12:90:16:1","title":"Location Name","type":"freetext","levels":[],"search":[]},
+    {"var":"4","id":"3","rtid":"12","code":"12:3","title":"Keywords in Comments","type":"freetext","levels":[],"search":[]},
+    {"var":"5","id":"89","rtid":"16","code":"12:90:16:89","title":"Location type","type":"enum","levels":[],"search":[]},
+
+    {"qa":[{"t":12},{"f:1":"X0"},
+            {"linked_to:73":[{"t":"11"},{"f:1":"X1"}]},
+            {"linkedfrom:90":[{"t":"16"},{"f:1":"X2"},{"f:89":"X4"} ]},
+            {"f:3":"X3"}]}
+      ]
     ],
     
     //CHURCHES    {"t":"12"},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"}]} 
@@ -280,11 +291,40 @@ $.widget( "heurist.dh_search", {
     loadanimation: function(show){
         if(show){
             //this.tab_control.hide();
-            this.element.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+            this.res_div.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
-            this.element.css('background','none');
+            this.res_div.css('background','none');
             //this.tab_control.show();
         }
+    },
+    
+    _onAddLayer: function(){
+        
+      // create query and add (later add) layer with "map query" datasource to current map document (startup?)
+        
+        
+        
+        
+      //find addresses and relationship records
+      //  10 (person) -> 12 (address)
+      //  10 -> 14 -> 12
+        
+        
+      //address: title, comment
+      //event:  title,type,address,date
+      //person  
+
+      //churches
+      var query = {"qa":[{"t":12},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"} ]}], w:"all", f:"map"};
+      // {"t":"12","linkedfrom:90":{"t":"16","f:89":"4042"}}
+      
+      //numbers arrests  @todo - specify dates
+      query = {qa:[{"t":14},{"f:74":"4339"}], rules:[{"query":"t:12 relatedfrom:14","levels":[]}]};
+      //  {"t":"14","f:74":"4339"}
+      
+      //fuller long
+      //  {"t":"10","f:1":"Fuller","f:18":"Long"}
+      
     }
     
 });

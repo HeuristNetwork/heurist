@@ -223,7 +223,18 @@ $.widget( "heurist.app_timemap", {
             this.framecontent.css('background','none');
             //this.dosframe.show();
         }
-    },
+    }
+    
+    /**
+    * public method 
+    */
+    
+    , loadMapDocumentById: function(recId){
+            var mapping = this.mapframe[0].contentWindow.mapping;
+            if(mapping){
+                mapping.loadMapDocumentById(recId);  //see js/mapping.js
+            }
+    }
     
 
 });
