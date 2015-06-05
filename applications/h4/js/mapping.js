@@ -1165,13 +1165,18 @@ ed_html +
              _showSelection( true );
         },
         
+        addQueryLayer: function(params){
+            addQueryLayer(params, -1);    //see map_overlay.js
+        },
+
         loadMapDocumentById: function(recId){
             //_loadMapDocumentById(recId);
             var mapdocs = $("#map-doc-select");
             mapdocs.val(recId).change();
             
         },
-
+        
+        
         onWinResize: function(){
             _onWinResize();
             if(gmap){ //fix google map bug

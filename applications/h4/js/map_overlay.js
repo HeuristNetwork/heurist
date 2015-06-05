@@ -1,10 +1,12 @@
 //ARTEM:   @todo JJ calls server side directly - need to fix - use hapi!!!!!
 // move all these methods into hMapping class or create new one
+// rename legend to map_legend
 
 HeuristOverlay.prototype = new google.maps.OverlayView();
 var map;
 var data;
 var overlays = {};
+var overlays_not_in_doc = {};
 
 /**
 * Adds a map overlay to the given map.
@@ -53,7 +55,7 @@ function fillMapDocumentsDropDown() {
     $("#map-doc-select").change(function(e) {
         // Clean old data
         removeOverlays();
-        emptyLegend();  
+        _emptyLegend();  
         
         // Show overlays for the selected option 
         var index = -1;
@@ -72,16 +74,7 @@ function fillMapDocumentsDropDown() {
             
             $("#legend").show();
             
-            // Listen to checkbox changes
-            $("#legend input").change(function(e) {
-                // Hide or display the layer
-                var index = $(this).prop("value");
-                var checked = $(this).prop("checked");
-   
-                // Update overlay
-                var overlay = overlays[index];
-                overlay.setVisibility(checked);                          
-            });
+            _initLegend();
             
             $("#btnMapEdit").button( "enable" );
             $("#btnMapEdit").attr('title',"Edit current map "+data[index].title+" - add or remove map layers, change settings");
@@ -116,8 +109,28 @@ function removeOverlays() {
 /**
 * Empties the legend
 */
-function emptyLegend() {
+function _emptyLegend() {
     $("#legend .content").empty();
+    
+    //add list of layers that are not in map document
+    for(var idx in overlays_not_in_doc) {
+        if (overlays_not_in_doc.hasOwnProperty(idx) && overlays_not_in_doc[idx] !== undefined) {
+            $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+idx+"' checked>"+overlays_not_in_doc[idx].title+"</label>");
+        }
+    }
+}
+
+function _initLegend() {
+            // Listen to checkbox changes
+            $("#legend input").change(function(e) {
+                // Hide or display the layer
+                var index = $(this).prop("value");
+                var checked = $(this).prop("checked");
+   
+                // Update overlay
+                var overlay = (index>=0) ?overlays[index] :overlays_not_in_doc[index];
+                overlay.setVisibility(checked);                          
+            });
 }
 
 function _loadMapDocumentById(recId) {
@@ -169,7 +182,7 @@ function addMapDocumentOverlay(bounds, doc) {
 function addLayerOverlay(bounds, layer, index) {
     console.log("addLayerOverlay");
     console.log(layer);
-     
+
     // Determine way of displaying   
     if(layer !== undefined && layer.dataSource !== undefined) {
         var source = layer.dataSource;
@@ -177,6 +190,7 @@ function addLayerOverlay(bounds, layer, index) {
         
         // Append to legend  
         $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>["+layer.id+"] "+layer.title+"</label>");
+        
 
         /** MAP IMAGE FILE (TILED) */
         if(source.rectypeID == map_image_file_tiled) {
@@ -404,23 +418,27 @@ function addQueryLayer(source, index) {
         
         var query = null;
         try{
-            var query = JSON.parse(source.query);
+            var query = top.HEURIST4.util.isObject(source.query) ?source.query :JSON.parse(source.query);
             if(!(query && query['qa'])){
                 query = null;
+            }else{
+                //query = {q: JSON.stringify(query['qa']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};    
             }
         }catch(err){
         }
         if(query==null){
-            query = {q: source.query, w: "all", f:"map", l:2000};
+            query = {q: source.query, w: "all", f:"map", l:3000};
         }else{
-            query['f'] = 'map';
+            query['rules_onserver'] = 1; 
+            query['f'] = "map"; 
+            query['l'] = 3000;
         }
         
         // Retrieve records for this query
         top.HAPI4.RecordMgr.search(query,
             function(response){
-                console.log("QUERY RESPONSE:");
-                console.log(response);
+                //console.log("QUERY RESPONSE:");
+                //console.log(response);
                 
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     // Show info on map
@@ -430,7 +448,9 @@ function addQueryLayer(source, index) {
                     //mapping.load(mapdata);
                     if (mapping.addDataset(mapdata)){
         
-                       var overlay = {                
+                       var overlay = {
+                        id: source.id,
+                        title: source['title'],                
                         setVisibility: function(checked) {
                             mapping.showDataset(mapdata[0].id, checked);
                         },                          
@@ -438,9 +458,13 @@ function addQueryLayer(source, index) {
                             mapping.deleteDataset(mapdata[0].id);
                         }
                        };
-                        overlays[index] = overlay;
-                        
-                           
+                       if(index>=0){
+                            overlays[index] = overlay;
+                       }else{
+                            overlays_not_in_doc[index] = overlay;
+                            $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"+overlay.title+"</label>");
+                            _initLegend();
+                       }
                     }
                     //console.log(recset);
                     //mapping.load();

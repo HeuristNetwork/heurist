@@ -767,7 +767,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     getPopupDlg: function(){
         var $dlg = $( "#dialog-popup" );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').appendTo('body');
+            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
             $dlg.removeClass('ui-heurist-border');
         }
         return $dlg;
@@ -793,15 +793,16 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
 
         var $dlg = top.HEURIST4.util.getMsgDlg();
-        var isPopup = true; //bigger and resizable
+        var isPopup = false; //bigger and resizable
 
         if(message!=null){
             $dlg.empty();
-            if(message.indexOf('#')===0){
+            if(message.indexOf('#')===0 && $(message).length>0){
                 $dlg = top.HEURIST4.util.getPopupDlg();
                 $dlg.html($(message).html());
                 isPopup = true;
             }else{
+                isPopup = false;
                 $dlg.append('<span>'+top.HR(message)+'</span>');    
             }
         }

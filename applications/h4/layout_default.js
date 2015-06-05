@@ -153,17 +153,15 @@ var layouts = [
         ]},
         west:{size:270, resizable:false, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false, 
-            tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
-                    {appid:'ha51', hasheader:true, dockable:false, dragable:false, options:{maponly:false} },
-                    {appid:'h3_resultList', hasheader:true, name: 'Search result' }
+                    {appid:'ha51', hasheader:false, dockable:false, dragable:false, options:{maponly:true} }
+                    //,{appid:'h3_resultList', hasheader:true, name: 'Search result' }
                     ]
-               }]},  //mapping 
+               },  //mapping 
         east:{size:300, minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[                                      
                     {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
-                    {appid:'dh_results', name:'Layers'}, // current open layers
                     {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'applications/h4/apps/digital_harlem/dh_legend.html'}}
                 ]
             }]

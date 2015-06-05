@@ -18,7 +18,8 @@
     */
 
 
-    require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
+    //require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
+    require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
     require_once (dirname(__FILE__).'/common/utils_db.php');
     require_once (dirname(__FILE__).'/common/db_users.php');
@@ -249,6 +250,7 @@
 //error_log("root=".$documentRoot."   install=".$install_path);
             if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
                 
+                
                     if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                         $defaultRootFileUploadPath.= "/"; // append trailing /
                     }
@@ -258,6 +260,7 @@
                     }
                     
                     define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
+                    
                     if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                          return false;
                     }
@@ -265,7 +268,7 @@
                     define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
                     
                     define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . '/filethumbs/');
-                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/filethumbs/');
+                    define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . '/filethumbs/');
                     
                        
             }else{     

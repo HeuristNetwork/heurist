@@ -36,12 +36,17 @@ $.widget( "heurist.app_timemap", {
 
         var that = this;
 
-        this.element.hide();
+        //???? this.element.hide();
         
         this.framecontent = $('<div>').addClass('frame_container')
                             //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
                             //     'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
                             .appendTo( this.element );
+         
+        if($(".header"+that.element.attr('id')).length===0){                   
+            this.framecontent.css('top',0);                    
+        }
+                            
                    
         this.mapframe = $( "<iframe>" )
                         .attr('id', 'map-frame')
@@ -51,7 +56,8 @@ $.widget( "heurist.app_timemap", {
         this._events = top.HAPI4.Event.LOGOUT 
                             + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH 
                             + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART 
-                            + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+                            + ' ' + top.HAPI4.Event.ON_REC_SELECT 
+                            + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
 
         $(this.document).on(this._events, function(e, data) {
 
@@ -91,6 +97,10 @@ $.widget( "heurist.app_timemap", {
 //console.log("_doVisualizeSelection");                  
                     that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
                 }            
+            }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
+                
+                that._refresh();
+                
             }
                 
 
@@ -233,6 +243,17 @@ $.widget( "heurist.app_timemap", {
             var mapping = this.mapframe[0].contentWindow.mapping;
             if(mapping){
                 mapping.loadMapDocumentById(recId);  //see js/mapping.js
+            }
+    }
+    
+    /**
+    * Add dataset on map  
+    * params = {id:$.uniqueId(), title:'Title for Legend', query: '{qa:"", rules:""}'}
+    */
+    , addQueryLayer: function(params){
+            var mapping = this.mapframe[0].contentWindow.mapping;
+            if(mapping){
+                mapping.addQueryLayer(params);  //see js/mapping.js
             }
     }
     

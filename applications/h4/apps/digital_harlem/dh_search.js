@@ -27,6 +27,10 @@ $.widget( "heurist.dh_search", {
     
     _resultset:null,
     
+    _currentquery: null,
+    
+    _currenttype: -1,
+    
     _searches:[
 /*      [
     {"var":"1","id":"1","rtid":"4",  "code":"4:1","title":"Name of organisation","type":"freetext","levels":[],"search":[]},
@@ -123,7 +127,7 @@ $.widget( "heurist.dh_search", {
         this.res_name = $('<input>').appendTo(this.res_div);
                
         this.res_btn = $('<button>', {text:top.HR('Map')+' >'})
-        .button().on("click", function(event){  } )
+        .button().on("click", function(event){ that._onAddLayer(); } )
         .appendTo(this.res_div);
 
         this._refresh();
@@ -213,6 +217,8 @@ $.widget( "heurist.dh_search", {
         this._on( btn_submit, {
                     click: function(){
                         
+                        var isform_empty = true;
+                        
                         function __fillQuery(q){
                             $(q).each(function(idx, predicate){
                                 
@@ -225,6 +231,7 @@ $.widget( "heurist.dh_search", {
                                             var vals = $(_inputs[val]).editing_input('getValues');
                                             if(vals && vals.length>0 && !top.HEURIST4.util.isempty(vals[0])){
                                                 predicate[key] = vals[0];
+                                                isform_empty = false;
                                             }else{
                                                 predicate[key] = '';
                                             }
@@ -232,12 +239,19 @@ $.widget( "heurist.dh_search", {
                                     }
                                 });                            
                                 
+                                //@todo - remove entire branch if none of variables are defined
+                                
+                                
                             });
                         }
                           
-                        var query = JSON.parse(JSON.stringify(query_orig)); 
+                        var query = JSON.parse(JSON.stringify(query_orig)); //clone 
                         __fillQuery(query);
                         
+                        if(isform_empty){
+                            top.HEURIST4.util.showMsgErr('Define at least one search criterion');
+                            return;
+                        }
                         
                         var that = this;
                         var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id') };
@@ -249,6 +263,8 @@ $.widget( "heurist.dh_search", {
                                         that.loadanimation(false);
                                     
                                         if(response.status == top.HAPI4.ResponseStatus.OK){
+                                            that._currentquery = query;
+                                            that._currenttype  = content_id;
                                             that._resultset = new hRecordSet(response.data);
                                         }else{
                                             top.HEURIST4.util.showMsgErr(response.message);
@@ -259,6 +275,7 @@ $.widget( "heurist.dh_search", {
                                             
                                         if(that._resultset.count_total()>0){
                                             that.res_lbl.html('Found '+that._resultset.count_total()+' matches....<br>Provide a layer name<br>');
+                                            that.res_name.val('');
                                             that.res_name.show();
                                             that.res_btn.show();
                                         }else{
@@ -271,6 +288,7 @@ $.widget( "heurist.dh_search", {
                         
                         this.res_div.hide();
                         this._resultset = null;
+                        this._currentquery = null;
                         this.loadanimation(true);
                                            
                         
@@ -298,32 +316,29 @@ $.widget( "heurist.dh_search", {
         }
     },
     
+    // add kayer to current map document
     _onAddLayer: function(){
+       
+        if(top.HEURIST4.util.isempty(this.res_name.val() )){
+           top.HEURIST4.util.showMsgErr('Define name of layer');
+           return;
+        }
         
-      // create query and add (later add) layer with "map query" datasource to current map document (startup?)
+        var rules = ''; 
         
+        if(this._currenttype==1){
+            //find person->events->addresses and person->addresses
+            rules = [{"query":"t:14 related_to:10","levels":[{"query":"t:12 relatedfrom:14"}]},{"query":"t:12 relatedfrom:10"}];
+        }else if(this._currenttype==0){ //events->addresses
+            rules = [{"query":"t:12 relatedfrom:14"}];
+        }
         
+        var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
         
-        
-      //find addresses and relationship records
-      //  10 (person) -> 12 (address)
-      //  10 -> 14 -> 12
-        
-        
-      //address: title, comment
-      //event:  title,type,address,date
-      //person  
-
-      //churches
-      var query = {"qa":[{"t":12},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"} ]}], w:"all", f:"map"};
-      // {"t":"12","linkedfrom:90":{"t":"16","f:89":"4042"}}
-      
-      //numbers arrests  @todo - specify dates
-      query = {qa:[{"t":14},{"f:74":"4339"}], rules:[{"query":"t:12 relatedfrom:14","levels":[]}]};
-      //  {"t":"14","f:74":"4339"}
-      
-      //fuller long
-      //  {"t":"10","f:1":"Fuller","f:18":"Long"}
+        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+        if(app && app.widget){
+            $(app.widget).app_timemap('addQueryLayer', params);
+        }
       
     }
     

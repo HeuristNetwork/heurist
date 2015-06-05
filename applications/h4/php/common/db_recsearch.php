@@ -717,7 +717,9 @@
         }
         
 //
-error_log("KEYS ".print_r(array_keys($params),true));
+//error_log("KEYS ".print_r(array_keys($params),true));
+//error_log("RULES:".@$params['rules']);        
+
         
         
         $mysqli = $system->get_mysqli();
@@ -801,15 +803,16 @@ error_log("KEYS ".print_r(array_keys($params),true));
             
         }else if( @$params['rules'] ){ //special case - server side operation
         
-             // rules - JSON array the same as stored in saved searches table  
+            // rules - JSON array the same as stored in saved searches table  
   
-error_log("RULES:".$params['rules']);        
-            //this is json
-            $rules_tree = json_decode($params['rules'], true);
+            if(is_array(@$params['rules'])){
+                $rules_tree = $params['rules'];
+            }else{
+                $rules_tree = json_decode($params['rules'], true);
+            }
 
 //
-//
-error_log(print_r($rules_tree, true));
+//error_log("RULES: ".print_r($rules_tree, true));
             
             $flat_rules = array();
             $flat_rules[0] = array();
@@ -830,6 +833,8 @@ error_log(print_r($rules_tree, true));
             $fin_result = recordSearch($system, $params, $need_structure, $need_details, $publicOnly);
             $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] :array_keys($fin_result['data']['records']); //get ids
 
+            if(@$params['qa']) unset($params['qa']);
+            
 //debug error_log(print_r($flat_rules, true));
             
             foreach($flat_rules as $idx => $rule){
@@ -1077,13 +1082,15 @@ error_log(print_r($rules_tree, true));
     
     function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
 
-            foreach ($r_tree as $rule) {   
-                $e_rule = array('query'=>$rule['query'], 
-                                'results'=>array(), 
-                                'parent'=>$parent_index, 
-                                'islast'=>(count($rule['levels'])==0) );
-                array_push($flat_rules, $e_rule );
-                _createFlatRule($flat_rules, $rule['levels'], count($flat_rules)-1);
+            if($r_tree){
+                foreach ($r_tree as $rule) {   
+                    $e_rule = array('query'=>$rule['query'], 
+                                    'results'=>array(), 
+                                    'parent'=>$parent_index, 
+                                    'islast'=>(!@$rule['levels'] || count($rule['levels'])==0) );
+                    array_push($flat_rules, $e_rule );
+                    _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
+                }
             }
         
     }
