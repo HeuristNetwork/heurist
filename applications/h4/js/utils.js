@@ -258,7 +258,22 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     * 
     */
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
+        return createTermSelectExt2(selObj, 
+            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList, 
+             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});    
+    },
 
+    createTermSelectExt2: function(selObj, options) {
+        
+        var datatype =  options.datatype,
+            termIDTree =  options.termIDTree,
+            headerTermIDsList =  options.headerTermIDsList,
+            defaultTermID =  options.defaultTermID,
+            topOptions =  options.topOptions,
+            needArray  =  options.needArray,
+            supressTermCode = options.supressTermCode;
+        
+        
         if(needArray){
 
         }else{
@@ -308,7 +323,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 if(localLookup[termID]){
                     termName = localLookup[termID][terms.fieldNamesToIndex['trm_Label']];
                     termCode = localLookup[termID][terms.fieldNamesToIndex['trm_Code']];
-                    if(top.HEURIST4.util.isempty(termCode)){
+                    if(supressTermCode || top.HEURIST4.util.isempty(termCode)){
                         termCode = '';
                     }else{
                         termCode = " ("+termCode+")";
@@ -785,7 +800,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     
 
     // buttons - callback function
-    showMsgDlg: function(message, buttons, title, position_to_element){
+    showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
 
         if(!$.isFunction(top.HR)){
             alert(message);
@@ -797,10 +812,19 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
         if(message!=null){
             $dlg.empty();
-            if(message.indexOf('#')===0 && $(message).length>0){
+            
+            isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
+            
+            if(isPopupDlg){
+
                 $dlg = top.HEURIST4.util.getPopupDlg();
-                $dlg.html($(message).html());
+                if(message.indexOf('#')===0 && $(message).length>0){
+                    $dlg.html($(message).html());    
+                }else{
+                    $dlg.html(message);    
+                }
                 isPopup = true;
+                
             }else{
                 isPopup = false;
                 $dlg.append('<span>'+top.HR(message)+'</span>');    

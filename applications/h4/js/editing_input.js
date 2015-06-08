@@ -29,6 +29,9 @@ $.widget( "heurist.editing_input", {
         rectypes: null,
         values: null,
         readonly: false,
+        title: '',  //label (overwrite Display label from record structure)
+        showclear_button: true,
+        detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
     },
 
     // the constructor
@@ -41,7 +44,7 @@ $.widget( "heurist.editing_input", {
 
         var that = this;
 
-        var detailType = this.f('dty_Type');
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         /*
         if(detailType=="separator"){
         this.element.css('display','block');
@@ -97,7 +100,8 @@ $.widget( "heurist.editing_input", {
         .addClass('header '+required)
         .css('width','150px')
         .css('vertical-align', (detailType=="blocktext")?'top':'')
-        .html('<label for="input'+(this.options.varid?this.options.varid:'0_'+this.options.dtID)+'">'+this.f('rst_DisplayName')+'</label>')
+        .html('<label for="input'+(this.options.varid?this.options.varid:'0_'+this.options.dtID)+'">'
+            + (top.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
         .appendTo( this.element );
 
 
@@ -173,7 +177,7 @@ $.widget( "heurist.editing_input", {
         }
 
         var that = this;
-        var detailType = this.f('dty_Type');
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         var $input = null;
         var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         value = value ?value:'';
@@ -321,6 +325,9 @@ $.widget( "heurist.editing_input", {
 
         //clear button
         //var $btn_clear = $( "<div>")
+        if(this.options.showclear_button)
+        {
+        
         var $btn_clear = $('<button>',{
             id: 'btn_input_clear',
             title: 'Clear entered value'
@@ -337,6 +344,8 @@ $.widget( "heurist.editing_input", {
                 $input.val('');
             }
         });
+        
+        }
 
     },
 
@@ -344,13 +353,14 @@ $.widget( "heurist.editing_input", {
 
         $input.empty();
 
-        var detailType = this.f('dty_Type');
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
 
         var allTerms = this.f('rst_FilteredJsonTermIDTree');
         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
-        top.HEURIST4.util.createTermSelectExt($input.get(0), detailType, allTerms, headerTerms, value, true);
-
+        top.HEURIST4.util.createTermSelectExt2($input.get(0), 
+            {datatype:detailType, termIDTree:allTerms, headerTermIDsList:headerTerms, 
+             defaultTermID:value, topOptions:true, supressTermCode:true});
     },
 
     setValue: function(idx, value, display_value){
@@ -359,7 +369,7 @@ $.widget( "heurist.editing_input", {
 
     getValues: function(){
 
-        var detailType = this.f('dty_Type');
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         var idx;
         var ress = [];
         for (idx in this.inputs) {
@@ -376,7 +386,7 @@ $.widget( "heurist.editing_input", {
 
     _addLabel: function(value, idx) {
 
-        var detailType = this.f('dty_Type');
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         var disp_value ='';
 
         if($.isArray(value)){

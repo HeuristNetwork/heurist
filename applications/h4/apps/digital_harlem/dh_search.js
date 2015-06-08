@@ -118,13 +118,13 @@ $.widget( "heurist.dh_search", {
         this.tab_control.tabs();   
         
         this.res_div = $('<div>')
-        .css('padding','0.4em')
+        .css('padding','1em')
         //.css({position:'absolute', height:'1.2em', bottom:'2.4em'})
         .appendTo(this.tab_content).hide();
         
         this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
         
-        this.res_name = $('<input>').appendTo(this.res_div);
+        this.res_name = $('<input>').css('padding','0.4em').appendTo(this.res_div);
                
         this.res_btn = $('<button>', {text:top.HR('Map')+' >'})
         .button().on("click", function(event){ that._onAddLayer(); } )
@@ -191,7 +191,9 @@ $.widget( "heurist.dh_search", {
                         rectypes: top.HEURIST4.rectypes,
                         values: '',
                         readonly: false,
-                        title: field['title']
+                        title: field['title'],
+                        showclear_button: false,
+                        detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                 });
 
                 inpt.appendTo($fieldset);
@@ -205,6 +207,7 @@ $.widget( "heurist.dh_search", {
         // control buttons - save and cancel         
         var btn_div = $('<div>')
         //.css({position:'absolute', height:'1.2em', bottom:'2.4em'})
+        .css({'width':'212px', 'text-align':'right'})
         .appendTo($container);
 
         var btn_submit = $('<button>', {text:top.HR('Submit')})

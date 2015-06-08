@@ -24,7 +24,8 @@ $.widget( "heurist.app_timemap", {
     options: {
         recordset: null,
         selection: null, //list of record ids
-        maponly:false
+        layout:null, //['header','map','timeline']
+        startup:0         //map document loaded on map init
     },
     
     _events: null,
@@ -132,8 +133,11 @@ $.widget( "heurist.app_timemap", {
                 this._initmap()
             }else {
                 var url = top.HAPI4.basePath + '/page/mapping.php?db='+top.HAPI4.database;
-                if(this.options.maponly){
-                    url = url + '&maponly=1';
+                if(this.options.layout){
+                    if( this.options.layout.indexOf('timeline')<0 )
+                            url = url + '&notimeline=1';
+                    if( this.options.layout.indexOf('header')<0 )
+                            url = url + '&noheader=1';
                 }
                 
                 (this.mapframe).attr('src', url);
@@ -186,6 +190,7 @@ $.widget( "heurist.app_timemap", {
             
             mapping.load( mapdataset,
                             this.options.selection,  //array of record ids
+                            this.options.startup,    //map document on load
                                 function(selected){
                                         $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
                                         { selection:selected, source:that.element.attr('id') } );

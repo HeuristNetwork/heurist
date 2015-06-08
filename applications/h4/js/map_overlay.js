@@ -12,7 +12,7 @@ var overlays_not_in_doc = {};
 * Adds a map overlay to the given map.
 * Performs an API call which contains data, which will be drawed upon selection
 */
-function loadMapDocuments(_map) {
+function loadMapDocuments(_map, _startup_mapdocument) {
     map = _map;
     map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('legend'));
 
@@ -33,6 +33,9 @@ function loadMapDocuments(_map) {
         // Have any map documents been defined?
         if(data.length > 0) {
             fillMapDocumentsDropDown();
+        }
+        if(_startup_mapdocument > 0){
+            _loadMapDocumentById(_startup_mapdocument);
         }
     }).fail(function( jqxhr, textStatus, error ) {
         var msg = "Map Document API call failed: " + textStatus + ", " + error;
@@ -144,6 +147,12 @@ function _loadMapDocumentById(recId) {
 * @param doc A map document
 */
 function loadMapDocument(doc) {
+    
+    //show info popup
+    if(!top.HEURIST4.util.isempty( doc['description']) ){
+        top.HEURIST4.util.showMsgDlg(doc['description'], null,doc['title'], null, true);    
+    }
+    
     // Bounds
     var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
     var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);

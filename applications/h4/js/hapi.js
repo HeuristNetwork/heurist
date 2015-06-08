@@ -766,7 +766,11 @@ function hAPI(_db, _oninit) { //, _currentUser
         , getSelection: function(selection, needIds){
             
                 if (selection == "all") {
-                    selection = needIds ?this.currentRecordset.getIds() :this.currentRecordset;
+                    if(this.currentRecordset){
+                        selection = needIds ?this.currentRecordset.getIds() :this.currentRecordset;
+                    }else{
+                        return null;
+                    }
                 }
                 if( selection ) {
                     if( (typeof selection.isA == "function") && selection.isA("hRecordSet") ){
@@ -774,7 +778,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                             return (needIds) ?selection.getIds():selection; //array of record ids   
                         }
                     }else{
-                            return (needIds) ?selection :that.currentRecordset.getSubSetByIds(selection);
+                            return (needIds) ?selection  
+                                        :((that.currentRecordset)?that.currentRecordset.getSubSetByIds(selection):null);
                     }
                 }
                 return null;

@@ -152,12 +152,14 @@ var layouts = [
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
         ]},
         west:{size:270, resizable:false, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
-        center:{minsize:300, dropable:false, 
+        center:{minsize:300, dropable:false,
+            tabs:[{dockable:false, dragable:false, resizable:false, 
                 apps:[
-                    {appid:'ha51', hasheader:false, dockable:false, dragable:false, options:{maponly:true} }
-                    //,{appid:'h3_resultList', hasheader:true, name: 'Search result' }
+                     {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping 
+                    ,{appid:'h3_resultList', hasheader:true, name: 'Search result' }
                     ]
-               },  //mapping 
+            }]
+        },  
         east:{size:300, minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[                                      

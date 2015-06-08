@@ -168,15 +168,18 @@
                 layout_opts.center__minWidth = 200;
                 layout_opts.north__size = 30;
                 layout_opts.north__spacing_open = 0;
-                layout_opts.south__size = 200;
+                var th = Math.floor($('#mapping').height*0.2);
+                layout_opts.south__size = th>200?200:th;
                 layout_opts.south__spacing_open = 7;
                 layout_opts.south__spacing_closed = 7;
 
-<?php if(@$_REQUEST['maponly']){ ?>
-                layout_opts.north__size = 0;
+<?php if(@$_REQUEST['notimeline']){ ?>
                 layout_opts.south__size = 0;
                 layout_opts.south__spacing_open = 0;
                 layout_opts.south__spacing_closed = 0;
+<?php } 
+      if(@$_REQUEST['noheader']){ ?>
+                layout_opts.north__size = 0;
 <?php } ?>
                 
                 

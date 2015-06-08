@@ -262,7 +262,14 @@ function hRecordSet(initdata) {
                 endDate     = _getFieldValue(record, 'dtl_EndDate'),
                 description = _getFieldValue(record, 'dtl_Description'),
                 type        = _getFieldValue(record, 'dtl_GeoType'),
-                wkt         = _getFieldValue(record, 'dtl_Geo');
+                wkt         = _getFieldValue(record, 'dtl_Geo'),
+                recThumb    = _getFieldValue(record, 'rec_ThumbnailURL');
+                
+                var html_thumb = '';
+                if(recThumb){                             //class="timeline-event-bubble-image" 
+                    html_thumb = '<img src="'+recThumb+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; 
+                    //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
+                }
 
                 item = {
                     title: recName,
@@ -275,14 +282,19 @@ function hRecordSet(initdata) {
                         //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
                         //link: record.url,  //for timeline popup
                         recid: recID,
+                        bkmid: _getFieldValue(record, 'bkm_ID'),
                         rectype: recTypeID,
                         title: recName,
-                        //thumb: record.thumb_url,
+                        
                         eventIconImage: recTypeID + 'm.png',
                         icon: top.HAPI4.iconBaseURL + recTypeID + 'm.png',
                         
                         start: (startDate || ''),
-                        end: (endDate && endDate!=startDate)?endDate:''
+                        end: (endDate && endDate!=startDate)?endDate:'',
+                        
+                        URL:   _getFieldValue(record, 'rec_URL'),
+                        thumb: html_thumb
+                        
                         //,infoHTML: (infoHTML || ''),
                     }
                 };

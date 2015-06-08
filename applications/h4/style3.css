@@ -197,10 +197,12 @@ div.input-div > #btn_input_clear {
 .fieldset_search > div > .header{
     display:block;
     text-align:left;
+    width: 200px;
 }
 
 .fieldset_search > div > div  > div > input.text, .fieldset_search > div > div >  div > select.text {
     max-width: 200px;
+    min-width: 200px;
 }
 
 
