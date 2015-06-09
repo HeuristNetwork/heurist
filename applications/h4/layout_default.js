@@ -156,7 +156,7 @@ var layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false, 
                 apps:[
                      {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping 
-                    ,{appid:'h3_resultList', hasheader:true, name: 'Search result' }
+                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List2'} }
                     ]
             }]
         },  
@@ -164,7 +164,7 @@ var layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[                                      
                     {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
-                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'applications/h4/apps/digital_harlem/dh_legend.html'}}
+                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'applications/h4/apps/digital_harlem/dh_legend.php?db=[dbname]'}}
                 ]
             }]
         },

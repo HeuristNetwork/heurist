@@ -140,3 +140,26 @@ a.menuitem {
 .ui-widget-content{
     background: white !important;
 }
+
+.legend_text{
+    font-size:0.7em;
+}
+#legendtable{
+    /*width:100%;
+    height:100%;*/
+    position:absolute;
+    top:2.6em;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:1em;
+    overflow-y:auto;
+}
+
+#legendtable > table{
+    width:100%;
+}
+
+#legendtable td{
+    border-bottom: 1px dotted #BFBFBF;
+}

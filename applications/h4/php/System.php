@@ -284,15 +284,19 @@
                     define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/filethumbs/');
             }
             
-                    define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
-                    define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
-        
-                    $folder = HEURIST_FILESTORE_DIR . 'settings/';
-                    if(folderCreate($folder, true)){
-                        define('HEURIST_SETTING_DIR', $folder);
-                    }
-                    
-                    return true;
+            define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
+            define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
+
+            define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
+            define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
+
+
+            $folder = HEURIST_FILESTORE_DIR . 'settings/';
+            if(folderCreate($folder, true)){
+                define('HEURIST_SETTING_DIR', $folder);
+            }
+            
+            return true;
         }
         
         private function getInstallPath(){
