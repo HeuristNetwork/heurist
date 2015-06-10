@@ -156,7 +156,7 @@ var layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false, 
                 apps:[
                      {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping 
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List2'} }
+                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List'} }
                     ]
             }]
         },  

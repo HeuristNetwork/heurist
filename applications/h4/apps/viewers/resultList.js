@@ -30,7 +30,8 @@ $.widget( "heurist.resultList", {
         isapplication: true,
         showcounter: true,
         showmenu: true,
-        innerHeader: false
+        innerHeader: false,
+        title: null
         //searchsource: null,
     },
 
@@ -212,7 +213,7 @@ $.widget( "heurist.resultList", {
 
                     if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                         //new search from outside
-                        var new_title = top.HR(data.qname || 'Search Result');
+                        var new_title = top.HR(data.qname || that.options.title || 'Search Result');
                         var $header = $(".header"+that.element.attr('id'));
                         if($header.length>0){
                             $header.html('<h3>'+new_title+'</h3>');

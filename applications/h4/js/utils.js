@@ -258,7 +258,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     * 
     */
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
-        return createTermSelectExt2(selObj, 
+        return top.HEURIST4.util.createTermSelectExt2(selObj, 
             {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList, 
              defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});    
     },

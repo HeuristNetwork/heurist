@@ -834,13 +834,15 @@
             $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] :array_keys($fin_result['data']['records']); //get ids
 
             if(@$params['qa']) unset($params['qa']);
-            
-//debug error_log(print_r($flat_rules, true));
+                                                    
+//debug error_log("rules=".print_r($flat_rules, true));
+
+            $is_get_all_records = (@$params['allrecs']==1); //get all related and relationship records
             
             foreach($flat_rules as $idx => $rule){
                 if($idx==0) continue;
                 
-                $is_last = ($rule['islast']==1);
+                $is_last = (@$rule['islast']==1);
                 
                 //create request
                 $params['q'] = $rule['query'];
@@ -857,7 +859,7 @@
                     $params['topids'] = implode(",", array_slice($parent_ids, $k, 1000));
                     $response = recordSearch($system, $params, false, $need_details2, $publicOnly);
 
-//error_log("topids ".$params['topids']."   ".print_r($response, true));
+//error_log("topids ".$params['topids']."  params=".print_r($params, true));
                     
                     if($response['status'] == HEURIST_OK){
                             //merge with final results
@@ -872,10 +874,11 @@
                                 }
                             }
                                 
-                            if(!$is_last){
+                            if(!$is_last){ //add top ids
                                 $flat_rules[$idx]['results'] = array_merge($flat_rules[$idx]['results'],  $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
-//error_log("added ".print_r($rule['results'], true));                                
                             }
+                            
+//error_log("added ".print_r(($fin_result['data']['records']), true));                                
                         
                     }else{
                         //@todo terminate execution and return error
@@ -896,6 +899,9 @@
                                           "recordCount" => $fin_result['data']['count'], 
                                           "recIDs" => implode(",", $fin_result['data']['records']) );
             }
+            
+//error_log("RES = ".print_r($fin_result, true));                            
+//error_log("RES ".print_r(($fin_result['data']['records']), true));                                
             
             return $fin_result;               
         }//end rules
@@ -931,10 +937,10 @@
         //DEGUG 
         if(@$params['qa']){
             //print $query;
-            error_log($query);
+//error_log($query);
             //exit();
         }else{
-            //error_log("AAA ".$query);            
+//error_log("AAA ".$query);            
         }
 
 
@@ -1087,7 +1093,7 @@
                     $e_rule = array('query'=>$rule['query'], 
                                     'results'=>array(), 
                                     'parent'=>$parent_index, 
-                                    'islast'=>(!@$rule['levels'] || count($rule['levels'])==0) );
+                                    'islast'=>(!@$rule['levels'] || count($rule['levels'])==0)?1:0 );
                     array_push($flat_rules, $e_rule );
                     _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
                 }

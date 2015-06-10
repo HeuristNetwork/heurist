@@ -1828,6 +1828,7 @@
             $select = 'exists (select rel.rrc_SourceRecID  ';
 */
 
+
             //NEW  ---------------------------
             $add_from  = 'recLinks rl ';
             $add_where = (($source_rty_ID) ?'rd.rec_RecTypeID='.$source_rty_ID.' and ':'') 

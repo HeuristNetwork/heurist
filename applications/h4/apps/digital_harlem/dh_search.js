@@ -331,7 +331,7 @@ $.widget( "heurist.dh_search", {
         
         if(this._currenttype==1){
             //find person->events->addresses and person->addresses
-            rules = [{"query":"t:14 related_to:10","levels":[{"query":"t:12 relatedfrom:14"}]},{"query":"t:12 relatedfrom:10"}];
+            rules = [{"query":"t:14 relatedfrom:10","levels":[{"query":"t:12 relatedfrom:14"}]},{"query":"t:12 relatedfrom:10"}];
         }else if(this._currenttype==0){ //events->addresses
             rules = [{"query":"t:12 relatedfrom:14"}];
         }

@@ -439,6 +439,7 @@ function addQueryLayer(source, index) {
             query = {q: source.query, w: "all", f:"map", l:3000};
         }else{
             query['rules_onserver'] = 1; 
+            //query['allrecs'] = 1;  //return all related records including relationship records
             query['f'] = "map"; 
             query['l'] = 3000;
         }
