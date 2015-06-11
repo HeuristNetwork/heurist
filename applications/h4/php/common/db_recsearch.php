@@ -757,7 +757,15 @@
             
         }
         
-        if(@$params['tq']){        
+        if($currentUser && @$currentUser['ugr_ID']>0){
+            $currUserID = $currentUser['ugr_ID'];
+        }else{
+            $currUserID = 0;
+            $params['w'] = 'all';
+        }
+        
+        
+        if(@$params['tq']){    //NOT USED TO REMOVE    
             // if params has "TQ" parameter this is search for linked/related records
             // tsort, tlimit and toffset are parameters for top(parent) query
             // besides to simplify query, instead of these 4 parameters we may have "topids" - comma separated list of parent IDS
@@ -778,16 +786,10 @@
 //error_log("parent query ".print_r($query_top, true));
         
         }else if( @$params['topids'] ){ //if topids are defined we use them as starting point for following rule query
+            
+            //@todo - implement it in different way - substitute topids to query json as predicate ids:
          
             $query_top = array();
-            
-            //@todo - move all this stuff into get_sql_query_clauses???
-            if($currentUser && @$currentUser['ugr_ID']>0){
-                $currUserID = $currentUser['ugr_ID'];
-            }else{
-                $currUserID = 0;
-                $params['w'] = 'all';
-            }
             
             if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'], 'bookmark') == 0) {
                 $query_top['from'] = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
@@ -837,7 +839,7 @@
                                                     
 //debug error_log("rules=".print_r($flat_rules, true));
 
-            $is_get_all_records = (@$params['allrecs']==1); //get all related and relationship records
+            $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
             
             foreach($flat_rules as $idx => $rule){
                 if($idx==0) continue;
@@ -855,7 +857,7 @@
                 $k = 0;
                 while ($k < count($parent_ids)) {
                 
-                    $need_details2 = $need_details && $is_last;
+                    $need_details2 = $need_details && ($is_get_relation_records || $is_last);
                     $params['topids'] = implode(",", array_slice($parent_ids, $k, 1000));
                     $response = recordSearch($system, $params, false, $need_details2, $publicOnly);
 
@@ -868,16 +870,58 @@
                             if(!$is_ids_only){
                                 $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
                                 foreach( array_keys($response['data']['records']) as $rt){
-                                    if(!array_key_exists($rt, $fin_result['data']['rectypes'])){
-                                        $fin_result['data']['rectypes'][$rt] = 1;
+                                    if(!array_key_exists(@$rt['4'], $fin_result['data']['rectypes'])){
+                                        $fin_result['data']['rectypes'][$rt['4']] = 1;
                                     }
                                 }
                             }
-                                
-                            if(!$is_last){ //add top ids
+                            
+                            if(!$is_last){ //add top ids for next level
                                 $flat_rules[$idx]['results'] = array_merge($flat_rules[$idx]['results'],  $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
                             }
                             
+                            if($is_get_relation_records && (strpos($params['q'],"related_to")>0 || strpos($params['q'],"relatedfrom")>0) ){ //find relation records (recType=1)
+                            
+                                //create query to search related records
+                                if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'], 'bookmark') == 0) {
+                                        $from = 'FROM usrBookmarks TOPBKMK LEFT JOIN Records TOPBIBLIO ON bkm_recID=rec_ID ';
+                                }else{
+                                        $from = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$currUserID.' ';
+                                }
+                                
+                                if(strpos($params['q'],"related_to")>0){
+                                         $fld2 = "rl_SourceID";
+                                         $fld1 = "rl_TargetID";
+                                }else{
+                                         $fld1 = "rl_SourceID";
+                                         $fld2 = "rl_TargetID";
+                                }
+                            
+                                $where = "WHERE (TOPBIBLIO.rec_ID in (select rl_RelationID from recLinks where (rl_RelationID is not null) and $fld1 in ("
+                                            .$params['topids'].") and $fld2 in ("
+                                            .implode(",", $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records'])).")))";
+                            
+                                $params2 = $params;
+                                unset($params2['topids']);
+                                unset($params2['q']);
+                                
+                                $params2['sql'] = $select_clause.$from.$where;
+                                
+//error_log("SQL REL= ".$params2['sql']);                                                                
+                            
+                                $response = recordSearch($system, $params2, false, $need_details, $publicOnly);
+                                if($response['status'] == HEURIST_OK){
+                                    //merge with final results
+                                    $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
+                                    
+                                    if(!$is_ids_only){
+                                        $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
+                                        $fin_result['data']['rectypes'][1] = 1;
+                                    }
+                                }
+                            }
+                            
+                                
 //error_log("added ".print_r(($fin_result['data']['records']), true));                                
                         
                     }else{
@@ -904,35 +948,42 @@
 //error_log("RES ".print_r(($fin_result['data']['records']), true));                                
             
             return $fin_result;               
-        }//end rules
+        }//END RULES
 
-        if(@$params['q']){
-//error_log("query ".is_array(@$params['q'])."   q=".print_r($params['q'], true));
-                
-                if(is_array(@$params['q'])){
-                    $query_json = $params['q'];
-                }else{
-                    $query_json = json_decode(@$params['q'], true);
-                }
-
-                if(is_array($query_json) && count($query_json)>0){
-//error_log("!!! 1"); 
-                   $params['qa'] = $query_json;    
-                }
-        }
-       
+        $chunk_size = PHP_INT_MAX;
         
-        if(@$params['qa']){
-            $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   
+        if(@$params['sql']){
+             $query = $params['sql'];
         }else{
-            $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
-        }
         
-// error_log("query ".print_r($aquery, true));        
+            if(@$params['q']){
+//error_log("query ".is_array(@$params['q'])."   q=".print_r($params['q'], true));
+                    
+                    if(is_array(@$params['q'])){
+                        $query_json = $params['q'];
+                    }else{
+                        $query_json = json_decode(@$params['q'], true);
+                    }
 
-        $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
+                    if(is_array($query_json) && count($query_json)>0){
+//error_log("!!! 1"); 
+                       $params['qa'] = $query_json;    
+                    }
+            }
+           
+            
+            if(@$params['qa']){
+                $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   
+            }else{
+                $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+            }
+            
+// error_log("query ".print_r($aquery, true));        
+            $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
+
+            $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
         
-        $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
+        }
 
         //DEGUG 
         if(@$params['qa']){

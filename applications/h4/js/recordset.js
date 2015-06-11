@@ -331,8 +331,101 @@ function hRecordSet(initdata) {
         return dataset;
     }//end _toTimemap
 
+    
+    //@todo - obtain codes from server side
+    var RT_ADDRESS = 12,
+        RT_EVENT = 14,
+        RT_PERSON = 10,
+        RT_RELATION = 1;
+        DT_TARGET_RESOURCE = 5,
+        DT_RELATION_TYPE = 6,
+        DT_PRIMARY_RESOURCE = 7;
+    
+    //
+    // special preparation for Digital Harlem
+    //
+    // need to 
+    //  1) find relation type and assign icon
+    //  2) form description
+/*
+person -> address  
+Fuller Long*  (10:title)
+Resident      (1:6)
+At this address: 48 W 132nd St  (12:1)
+Lives with his mother, Nettie, and sisters Esther* (one year older) and Marie* (two years younger). His father, Fuller snr*, rejoins household April-June 1929, August 1929-March 1931 (1:4)
+Date: 1925-01-02 to 1931-09-25    (1:10, 1:11)
+
+
+person -> event -> address  
+
+Fuller Long* 
+Offender in the event: Fuller Long* has sexual intercourse with Ruby Hawkins*, aged 15 years, in which the crime scene was here at this address, 224 W 140th St.
+
+Ruby Hawkins*'s home
+
+Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
+
+
+    
+    
+*/        
+    function _preprocessForDigitalHarlem(){
+/*        
+        //find address records
+        
+        //find relation records
+        
+        //determine what is main records type - event or person
+        
+        //create full description
+        
+        
+        
+        var recID;
+        for(recID in records){
+            if(recID)
+            {
+                var record = records[recID];
+                var recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
+                if(recTypeID == RT_ADDRESS){
+                       //find relation records
+                    
+                      record['d']
+                }
+            }
+        }
+*/        
+    }
+
+    function _getRelationRecords(recID){
+        var recID, relations = [];
+        
+        for(recID in records){
+            if(recID)
+            {
+                var record = records[recID];
+                var recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
+                    recTarget, recSource; 
+                    
+                if(recTypeID == RT_RELATION){
+                    
+                    recTarget = _getFieldValue(record, DT_TARGET_RESOURCE);
+                    recSource = _getFieldValue(record, DT_PRIMARY_RESOURCE);
+                
+                    if(recTarget==recID){
+                          relations.push(recSource);
+                    }else if(recSource==recID){
+                          relations.push(recTarget);
+                    }
+                }
+            }
+        }
+    
+    }
+    
     /**
     * Returns field value by fieldname
+    * @todo - obtain codes from server side
     */
     function _getFieldValue(record, fldname){
 
@@ -340,7 +433,9 @@ function hRecordSet(initdata) {
             var d = record['d'];
             if(d){
                 if(!isNaN(Number(fldname))){ //dt code
-                    return d[fldname];
+                    if(d[fldname] && d[fldname][0]){
+                        return d[fldname][0];
+                    }
                 }else if(fldname=="dtl_StartDate"){
                     if(d[10] && d[10][0]){
                         return d[10][0];
@@ -348,13 +443,12 @@ function hRecordSet(initdata) {
                         return d[9][0];
                     }
                 }else if(fldname=="dtl_EndDate"){
-                    if(d[11] && d[11][0]){
-                        return d[11][0];
-                    }
+                    return _getFieldValue(record, 11);
+                    //if(d[11] && d[11][0]){ return d[11][0]; }
                 }else if(fldname=="dtl_Description"){
-                    if(d[3] && d[3][0]){
-                        return d[3][0];
-                    }
+                    return _getFieldValue(record, 3);
+                    //if(d[3] && d[3][0]){return d[3][0];}
+                    
                 }else if(fldname.indexOf("dtl_Geo")==0 && d[28] && d[28][0]){
                     var g = d[28][0].split(' ');
 

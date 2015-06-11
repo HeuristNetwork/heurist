@@ -436,13 +436,13 @@ function addQueryLayer(source, index) {
         }catch(err){
         }
         if(query==null){
-            query = {q: source.query, w: "all", f:"map", l:3000};
-        }else{
-            query['rules_onserver'] = 1; 
-            //query['allrecs'] = 1;  //return all related records including relationship records
-            query['f'] = "map"; 
-            query['l'] = 3000;
+            query = {q: source.query, w: "all"};
         }
+        query['rules_onserver'] = 1; 
+        query['getrelrecs'] = 1;  //return all related records including relationship records
+        query['f'] = "map"; 
+        query['l'] = 3000;
+        
         
         // Retrieve records for this query
         top.HAPI4.RecordMgr.search(query,
@@ -453,6 +453,11 @@ function addQueryLayer(source, index) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     // Show info on map
                     var recset = new hRecordSet(response.data);
+                    
+                    //preprocess for Digital Harlem 
+                    // recset.preprocessForDigitalHarlem();
+                    
+                    //convert to map datasource
                     var mapdata = recset.toTimemap("dyn"+source.id);
                     
                     //mapping.load(mapdata);

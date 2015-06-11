@@ -67,7 +67,7 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
 
     if(substr($rectype_id,-5,5) == "m.png") {
         $rectype_id = substr($rectype_id, 0, -5);
-        $bg_color = array(200,200,200);
+        $bg_color = array(200,200,200);   //gray
         $filename2 = HEURIST_ICON_DIR . $rectype_id . "m.png";
     }else if(substr($rectype_id,-5,5) == "s.png") {
         $rectype_id = substr($rectype_id, 0, -5);
@@ -110,7 +110,7 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
         
 //error_log("ke");        
         imagepng($img);        
-        //imagepng($img, $filename2);        
+        //imagepng($img, $filename2);   //save to file     
         
         //readfile($filename2);
     

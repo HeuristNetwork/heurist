@@ -591,7 +591,7 @@ class HPredicate {
         $this->field_type = "link";
         $p = $this->qlevel;
         
-        if($this->query){
+        if($this->query){ 
             $this->query->makeSQL();
             if($this->query->where_clause && trim($this->query->where_clause)!=""){
 //error_log(">>>>".$this->query->where_clause."<<<<");
