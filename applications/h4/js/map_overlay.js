@@ -455,7 +455,7 @@ function addQueryLayer(source, index) {
                     var recset = new hRecordSet(response.data);
                     
                     //preprocess for Digital Harlem 
-                    // recset.preprocessForDigitalHarlem();
+                    recset.preprocessForDigitalHarlem();
                     
                     //convert to map datasource
                     var mapdata = recset.toTimemap("dyn"+source.id);

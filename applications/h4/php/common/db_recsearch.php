@@ -864,10 +864,13 @@
 //error_log("topids ".$params['topids']."  params=".print_r($params, true));
                     
                     if($response['status'] == HEURIST_OK){
+
                             //merge with final results
-                            $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
-                            
-                            if(!$is_ids_only){
+                            if($is_ids_only){
+                                $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);    
+                            }else{                                          
+                                $fin_result['data']['records'] = _mergeRecordSets($fin_result['data']['records'], $response['data']['records']);    
+                                
                                 $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
                                 foreach( array_keys($response['data']['records']) as $rt){
                                     if(!array_key_exists(@$rt['4'], $fin_result['data']['rectypes'])){
@@ -912,9 +915,10 @@
                                 $response = recordSearch($system, $params2, false, $need_details, $publicOnly);
                                 if($response['status'] == HEURIST_OK){
                                     //merge with final results
-                                    $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
-                                    
-                                    if(!$is_ids_only){
+                                    if($is_ids_only){
+                                        $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);    
+                                    }else{
+                                        $fin_result['data']['records'] = _mergeRecordSets($fin_result['data']['records'], $response['data']['records']);    
                                         $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
                                         $fin_result['data']['rectypes'][1] = 1;
                                     }
@@ -1043,7 +1047,8 @@
                     foreach($_flds as $fld){
                         array_push($fields, $fld->name);
                     }
-                    array_push($fields, 'rec_ThumbnailURL'); //last one
+                    array_push($fields, 'rec_ThumbnailURL');
+                    //array_push($fields, 'rec_Icon'); //last one -icon ID
                     
                     $rectype_structures  = array();
                     $rectypes = array();
@@ -1053,6 +1058,7 @@
                         // load all records
                         while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //1000 maxim allowed chunk
                             array_push( $row, fileGetThumbnailURL($system, $row[2]) );
+                            //array_push( $row, $row[4] ); //by default icon if record type ID
                             $records[$row[2]] = $row;
                             array_push($order, $row[2]);
                             if(!array_key_exists($row[4], $rectypes)){
@@ -1135,6 +1141,20 @@
 
         return $response;
 
+    }
+    
+    
+    function _mergeRecordSets($rec1, $rec2){
+        
+        $res = $rec1;
+        
+        foreach ($rec2 as $recID => $record) {   
+            if(!@$rec1[$recID]){
+                 $res[$recID] = $record;
+            }
+        }
+        
+        return $res;
     }
     
     function _createFlatRule(&$flat_rules, $r_tree, $parent_index){

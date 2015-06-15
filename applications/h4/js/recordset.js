@@ -32,7 +32,7 @@ function hRecordSet(initdata) {
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
-    records = null,      //list of records objects {recId:[], ....}
+    records = null,      //list of records objects {idx:[], ....}
     order = [], //array of record IDs in specified order
     
     rectypes = [],      // unique list of record types
@@ -241,7 +241,7 @@ function hRecordSet(initdata) {
     function _toTimemap(dataset_name){
 
         var aitems = [];
-        var recID, item, shape;
+        var item, shape, idx;
         var mapenabled = 0,
             timeenabled = 0;
             
@@ -249,12 +249,13 @@ function hRecordSet(initdata) {
          
         var tot = 0;
         
-        for(recID in records){
-            if(recID)
+        for(idx in records){
+            if(idx)
             {
-                var record = records[recID];
+                var record = records[idx];
 
                 var
+                recID       = _getFieldValue(record, 'rec_ID'),
                 recName     = _getFieldValue(record, 'rec_Title'),
                 recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
 
@@ -263,7 +264,10 @@ function hRecordSet(initdata) {
                 description = _getFieldValue(record, 'dtl_Description'),
                 type        = _getFieldValue(record, 'dtl_GeoType'),
                 wkt         = _getFieldValue(record, 'dtl_Geo'),
-                recThumb    = _getFieldValue(record, 'rec_ThumbnailURL');
+                recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
+                
+                iconId      = _getFieldValue(record, 'rec_Icon');
+                if(!iconId) iconId = recTypeID; //by default 
                 
                 var html_thumb = '';
                 if(recThumb){                             //class="timeline-event-bubble-image" 
@@ -284,16 +288,19 @@ function hRecordSet(initdata) {
                         recid: recID,
                         bkmid: _getFieldValue(record, 'bkm_ID'),
                         rectype: recTypeID,
+                        iconId: iconId,
                         title: recName,
                         
-                        eventIconImage: recTypeID + 'm.png',
-                        icon: top.HAPI4.iconBaseURL + recTypeID + 'm.png',
+                        eventIconImage: iconId + 'm.png',
+                        icon: top.HAPI4.iconBaseURL + iconId + 'm.png',
                         
                         start: (startDate || ''),
                         end: (endDate && endDate!=startDate)?endDate:'',
                         
                         URL:   _getFieldValue(record, 'rec_URL'),
-                        thumb: html_thumb
+                        thumb: html_thumb,
+                        
+                        info: _getFieldValue(record, 'rec_Info')
                         
                         //,infoHTML: (infoHTML || ''),
                     }
@@ -339,14 +346,19 @@ function hRecordSet(initdata) {
         RT_RELATION = 1;
         DT_TARGET_RESOURCE = 5,
         DT_RELATION_TYPE = 6,
-        DT_PRIMARY_RESOURCE = 7;
+        DT_PRIMARY_RESOURCE = 7,
+        DT_DESCRIPTION = 4,
+        DT_DATE = 9,
+        DT_STARTDATE = 10,
+        DT_ENDDATE = 11;
     
     //
     // special preparation for Digital Harlem
     //
-    // need to 
-    //  1) find relation type and assign icon
-    //  2) form description
+    // need to change address records
+    //  1) find relation master type (event or person)
+    //  2) compose description
+    //  3) change icon
 /*
 person -> address  
 Fuller Long*  (10:title)
@@ -370,56 +382,118 @@ Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
     
 */        
     function _preprocessForDigitalHarlem(){
-/*        
-        //find address records
         
-        //find relation records
-        
-        //determine what is main records type - event or person
-        
-        //create full description
+        //NOTE: address may relates to the same person several times (residency in separate periods of time) 
+        // this version (as well as old DH) does not support it - it shows the last relation only!
         
         
+        //1. find address records
+        var idx, i, relrec, related;
         
-        var recID;
-        for(recID in records){
-            if(recID)
+        for(idx in records){
+            if(idx)
             {
-                var record = records[recID];
-                var recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
+                var record = records[idx];
+                
+                var recID = _getFieldValue(record, 'rec_ID');
+                var recTypeID   = _getFieldValue(record, 'rec_RecTypeID');
                 if(recTypeID == RT_ADDRESS){
-                       //find relation records
                     
-                      record['d']
+                    var shtml = '';
+                    
+                    //2. find relation records
+                    var rels = _getRelationRecords(recID, null);
+                    for(i=0; i<rels.length; i++){
+                        //3. if event try to find related persons
+                        if(rels[i]['relrt'] == RT_EVENT){
+                            var rels2 = _getRelationRecords(recID, RT_PERSON);
+                            if(rels2.length<1){
+                                //3a. this is event->address 
+                                
+                            }else{
+                                //3b. this is person->event->address
+                                
+                                
+                            }
+                            
+                        }else if(rels[i]['relrt'] == RT_PERSON){
+                                //3c. this is person->address
+                                
+                                relrec = records[rels[i]['relation']];
+                                related = records[rels[i]['related']];
+                            
+                                _setFieldValue(record, DT_STARTDATE, _getFieldValue(relrec, 'dtl_StartDate'));
+                                _setFieldValue(record, DT_ENDDATE, _getFieldValue(relrec, DT_ENDDATE));          
+                                //_setFieldValue(record, DT_DESCRIPTION, _getFieldValue(relrec, DT_DESCRIPTION));       
+                                _setFieldValue(record, 'rec_Icon', 'term'+_getFieldValue(relrec, DT_RELATION_TYPE) );
+                                
+                                shtml = '<div style="text-align:left"><b>'+_getFieldValue(related, 'rec_Title')+'</b><br/>'
+                                        + '<b>'+_getFieldValue(relrec, DT_RELATION_TYPE)+'</b><br/>'                                  
+                                        + 'At this address ' + _getFieldValue(record, 'rec_Title')+'<br/>'
+                                        + _getFieldValue(relrec, DT_DESCRIPTION) +'<br/>'
+                                        + 'Date:' + _getFieldValue(relrec, 'dtl_StartDate') 
+                                        + ' to '  + _getFieldValue(relrec, DT_ENDDATE) +'<br/>'
+                                        + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
+                                        + '</div>'
+                                _setFieldValue(record, 'rec_Info', shtml);
+                        }
+                    }
+                    
+                    
                 }
             }
         }
-*/        
     }
 
-    function _getRelationRecords(recID){
-        var recID, relations = [];
+    function _getRelationRecords(forRecID, forRecTypeID){
+        var idx, relations = [];
         
-        for(recID in records){
-            if(recID)
+        for(idx in records){
+            if(idx)
             {
-                var record = records[recID];
+                var record = records[idx];
+                var recID = _getFieldValue(record, 'rec_ID');
                 var recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
-                    recTarget, recSource; 
+                    recTarget, recSource, relRecTypeID; 
                     
                 if(recTypeID == RT_RELATION){
                     
                     recTarget = _getFieldValue(record, DT_TARGET_RESOURCE);
                     recSource = _getFieldValue(record, DT_PRIMARY_RESOURCE);
                 
-                    if(recTarget==recID){
-                          relations.push(recSource);
-                    }else if(recSource==recID){
-                          relations.push(recTarget);
+                    if(recTarget==forRecID){
+                        
+                          if(records[recSource]){
+                        
+                              relRecTypeID = _getFieldValue(records[recSource], 'rec_RecTypeID');
+                              
+                              if(forRecTypeID && forRecTypeID != relRecTypeID) {
+                                  continue;
+                              }
+                            
+                              relations.push({relation:recID, related:recSource, relrt:relRecTypeID});
+                          
+                          }
+                          
+                    }else if(recSource==forRecID){
+                        
+                          if(records[recTarget]){
+                        
+                              relRecTypeID = _getFieldValue(records[recTarget], 'rec_RecTypeID');
+                            
+                              if(forRecTypeID && forRecTypeID != relRecTypeID) {
+                                  continue;
+                              }
+                            
+                              relations.push({relation:recID, related:recTarget, relrt:relRecTypeID});
+                          
+                          }
                     }
                 }
             }
         }
+        
+        return relations;
     
     }
     
@@ -467,10 +541,29 @@ Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
         if(idx>-1){
             return record[idx];
         }else{
-            return null;
+            return record[fldname]?record[fldname]:null; //return null;
         }
     }
+    
+    function _setFieldValue(record, fldname, newvalue){
 
+        if(!isNaN(Number(fldname))){  //@todo - search detail by its code
+            var d = record['d'];
+            if(!d){
+                record['d'] = {};
+            }
+            record['d'][fldname] = [newvalue];
+        }else {
+
+            var idx = $.inArray(fldname, fields);
+            if(idx>-1){
+                record[idx] = newvalue;
+            }else{
+                record[fldname] = newvalue;
+            }
+        }
+    }
+    
     //public members
     var that = {
 
@@ -774,6 +867,11 @@ Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
         }
 
         },*/
+        
+        
+        preprocessForDigitalHarlem: function(){
+          _preprocessForDigitalHarlem();  
+        },
 
         /**
         * Converts recordSet to OS Timemap dataset

@@ -688,7 +688,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                             items_to_update.push(item);
                             
                             //was itemdata  
-                            itemdata.options.eventIconImage = item.opts.rectype + 's.png';   //it will have selected record (blue bg)
+                            itemdata.options.eventIconImage = item.opts.iconId + 's.png';   //it will have selected record (blue bg)
                             itemdata.options.icon = top.HAPI4.iconBaseURL + itemdata.options.eventIconImage;
                             itemdata.options.color = "#FF0000";
                             itemdata.options.lineColor = "#FF0000";
@@ -700,7 +700,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                         }else{ //clear selection
                             //item.opts.theme
                             //item.changeTheme(customTheme, true); - dont work
-                            var usual_icon = item.opts.rectype + 'm.png'; //it will have usual gray bg
+                            var usual_icon = item.opts.iconId + 'm.png'; //it will have usual gray bg
                             if(usual_icon != itemdata.options.eventIconImage){
 
                                 items_to_update.push(item);
@@ -842,6 +842,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     html_thumb =  ''; //top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png';
                 } */
                 
+            show_bubble_on_map = (item.getType() == "marker" && placemark.api);
+            var ed_html =  '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">';
+                
                 var recID       = item.opts.recid,
                     rectypeID   = item.opts.rectype,
                     bkm_ID      = item.opts.bkmid,
@@ -852,10 +855,14 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     recURL      = item.opts.URL,
                     html_thumb  = item.opts.thumb || '';
 
+            
+            if(item.opts.info){
                 
-            show_bubble_on_map = (item.getType() == "marker" && placemark.api);
+                html =  ed_html + item.opts.info + '</div>';
                 
-            var ed_html =  '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'  // style="width:100%"
+            }else{
+                
+                ed_html =  //'<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'  // style="width:100%"
             +   '<div style="display:inline-block;">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
@@ -876,8 +883,9 @@ ed_html +
 '<div class="popup_body">'+ html_thumb + description +'</div>'+
 ((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+startDate+'</div>':'')+
 ((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+endDate+'</div>':'')+
-    
 '</div>';
+
+            }
                 
                 /*
 .truncate {

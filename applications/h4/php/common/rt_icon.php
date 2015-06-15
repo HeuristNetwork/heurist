@@ -30,6 +30,8 @@
     if(substr($rectype_id,-4,4) != ".png") $rectype_id = $rectype_id . ".png";
     
     $filename = HEURIST_ICON_DIR . $rectype_id;
+    
+    //
 
 //print $filename;    
     
@@ -65,19 +67,26 @@ function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, 
 //    
 function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
 
+    if(substr($rectype_id,0,4)=='term'){
+        $rectype_id = substr($rectype_id, 4);
+        $path = HEURIST_TERM_ICON_DIR;
+    }else{
+        $path = HEURIST_ICON_DIR; 
+    }
+
     if(substr($rectype_id,-5,5) == "m.png") {
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(200,200,200);   //gray
-        $filename2 = HEURIST_ICON_DIR . $rectype_id . "m.png";
+        $filename2 = $path . $rectype_id . "m.png";
     }else if(substr($rectype_id,-5,5) == "s.png") {
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(190,228,248);  //#bee4f8
-        $filename2 = HEURIST_ICON_DIR . $rectype_id . "s.png";
+        $filename2 = $path . $rectype_id . "s.png";
     }else{
         return;
     }
     
-    $filename = HEURIST_ICON_DIR . $rectype_id . ".png";
+    $filename = $path . $rectype_id . ".png";
     
     
 //error_log($filename);
