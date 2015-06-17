@@ -1,0 +1,96 @@
+<?php
+/* T1000 Database template system
+   (c) 2005 Archaeological Computing Laboratory, University of Sydney
+   T1000 Developed by Tom Murtagh, Template system Ian Johnson 22 Aug 2005 */
+
+/* INSTRUCTIONS: Change database, table and field names below
+                 For multi-table system please see full documentation */
+
+define('RESULTS_PER_PAGE', 50);
+define('UPLOAD_PATH','');
+
+/* Define the tables and joins/lookups needed 
+   An appropriate database and table may be created by running t1000_database_create.sql
+
+   mysql -u root -p < database_create.sql  */
+
+$MAINTABLES['BOOKMARK'] = 'bookmarks_safe';	// view of the usrBookmarks table with the password column omitted
+	$PKEY['BOOKMARK'] = 'bkm_ID';
+	$INIDATE_FIELD['BOOKMARK'] = 'bkm_Added';
+      $MODDATE_FIELD['BOOKMARK'] = 'bkm_Modified';
+     $JOINS['BOOKMARK'] = array('BIBLIO-ID' => 'bkm_recID');
+
+
+$MAINTABLES['BIBLIO'] = 'Records';
+	$PKEY['BIBLIO'] = 'rec_ID';
+	$INIDATE_FIELD['BIBLIO'] = 'rec_Added';
+      $MODDATE_FIELD['BIBLIO'] = 'rec_Modified';
+
+$MAINTABLES['LINKED_BIBLIO'] = 'Records';
+	$PKEY['LINKED_BIBLIO'] = 'rec_ID';
+	$INIDATE_FIELD['LINKED_BIBLIO'] = 'rec_Added';
+      $MODDATE_FIELD['LINKED_BIBLIO'] = 'rec_Modified';
+                $JOINS['LINKED_BIBLIO'] = array('rectype-ID' => 'rec_RecTypeID');
+
+if (function_exists('get_user_id')) {
+      $LOOKUPS['LINKED_BIBLIO'] = array( 'usrBookmarks' => 'rec_ID=bkm_recID and bkm_UGrpID='.get_user_id() );
+}
+
+/*
+$MAINTABLES['RATING_CONTENT'] = 'ratings_content';
+	$PKEY['RATING_CONTENT'] = 'rc_id';
+$MAINTABLES['RATING_QUALITY'] = 'ratings_quality';
+	$PKEY['RATING_QUALITY'] = 'rq_id';
+$MAINTABLES['RATING_INTEREST'] = 'ratings_interest';
+	$PKEY['RATING_INTEREST'] = 'ri_id';
+*/
+
+$MAINTABLES['KEYWORD'] = 'usrTags';
+	$PKEY['KEYWORD'] = 'tag_ID';
+
+$MAINTABLES['rectype'] = 'defRecTypes';
+	$PKEY['rectype'] = 'rty_ID';
+
+$MAINTABLES['USER'] = USERS_DATABASE.'.'.USERS_TABLE;
+	$PKEY['USER'] = USERS_ID_FIELD;
+
+
+/* Define lookups for fields which should be coded values (many-to-one with main table)
+   Syntax: lookup-table-name => main-table-join-field = lookup-table-join-field', ... */
+
+/* SAW Removed 8/11/2010 no longer used
+	$LOOKUPS['BOOKMARK'] = 
+		array (
+			'ratings_content' => 'pers_content_rating=rc_id',
+			'ratings_quality' => 'pers_quality_rating=rq_id',
+			'ratings_interest' => 'pers_interest_rating=ri_id');
+*/
+
+$MAINTABLES["BOOKMARKS_TO_KEYWORDS"] = 'usrRecTagLinks';
+	$PKEY["BOOKMARKS_TO_KEYWORDS"] = 'rtl_ID';
+        $LINK_KEYS["BOOKMARKS_TO_KEYWORDS"] = array(	"BOOKMARK-ID" => "kwl_pers_id",
+							"KEYWORD-ID"  => "rtl_TagID");
+
+
+$SEARCHES["BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join Records on bkm_recID=rec_ID WHERE (
+		(bkm_UGrpID = [logged-in-user-id]) and
+		[word-match:bkmk_title:bkmk_title] and 
+		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
+		if ([bkmk_advanced_search] and [bkmk_rectype]!='', rec_RecTypeID = [bkmk_rectype], 1)
+                and not rec_FlagTemporary
+		)
+		";	/* may be over-written by search.php */
+
+$SEARCHES["augmented_BOOKMARK_search"] = "SELECT distinct bkm_ID FROM usrBookmarks left join Records on bkm_recID=rec_ID left join usrRecTagLinks on rtl_RecID=bkm_RecID WHERE (
+		(bkm_UGrpID = [logged-in-user-id]) and
+		[word-match:bkmk_title:bkmk_title] and 
+		if ([bkmk_advanced_search] and [bkmk_url]!='', bkmk_url like [%bkmk_url%], 1) and
+		if ([bkmk_advanced_search] and [bkmk_rectype]!='', rec_RecTypeID = [bkmk_rectype], 1)
+                and not rec_FlagTemporary
+		)
+		";	/* may be appended-to by search.php */
+
+
+
+
+?>
