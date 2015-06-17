@@ -111,8 +111,8 @@ var layouts = [
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'ha51'}, // H4 map V2
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
-                    {appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}}  //H4 connections
-                    //{appid:'h3_recordListExt', name:'Related', options:{ url:'applications/h4/page/relatedRecords.php?db=[dbname]' }} // H4 related records
+                    {appid:'h4_connections',   options:{title:'Connections', url: 'page/springDiagram.php?db=[dbname]'}}  //H4 connections
+                    //{appid:'h3_recordListExt', name:'Related', options:{ url:'page/relatedRecords.php?db=[dbname]' }} // H4 related records
                 ]
             }]
         }
@@ -125,7 +125,7 @@ var layouts = [
         
         pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result 
         pane2:{col:12, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},  
-        pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'} }]},
+        pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'page/springDiagram.php?db=[dbname]'} }]},
         pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },  
         pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},  
 
@@ -139,7 +139,7 @@ var layouts = [
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'ha51'}, // H4 map V2
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
-                    {appid:'h4_connections',   options:{title:'Connections', url: 'applications/h4/page/springDiagram.php?db=[dbname]'}}  //H4 connections
+                    {appid:'h4_connections',   options:{title:'Connections', url: 'page/springDiagram.php?db=[dbname]'}}  //H4 connections
                         ]}]
         }
     },
@@ -147,7 +147,7 @@ var layouts = [
         north:{size:140, resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_static', hasheader:false, 
-                    options:{url: 'applications/h4/apps/digital_harlem/dh_header.php?db=[dbname]'}
+                    options:{url: 'apps/digital_harlem/dh_header.php?db=[dbname]'}
                     //css:{width:'100%',height:'100%'}},
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
         ]},
@@ -164,14 +164,14 @@ var layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[                                      
                     {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
-                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'applications/h4/apps/digital_harlem/dh_legend.php?db=[dbname]'}}
+                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'apps/digital_harlem/dh_legend.php?db=[dbname]'}}
                 ]
             }]
         },
         south:{size:40, resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_static', hasheader:false, 
-                    options:{url: 'applications/h4/apps/digital_harlem/dh_footer.html'}
+                    options:{url: 'apps/digital_harlem/dh_footer.html'}
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
         ]},
     },

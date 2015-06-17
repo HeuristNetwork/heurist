@@ -427,12 +427,15 @@ Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
                                 //_setFieldValue(record, DT_DESCRIPTION, _getFieldValue(relrec, DT_DESCRIPTION));       
                                 _setFieldValue(record, 'rec_Icon', 'term'+_getFieldValue(relrec, DT_RELATION_TYPE) );
                                 
-                                shtml = '<div style="text-align:left"><b>'+_getFieldValue(related, 'rec_Title')+'</b><br/>'
-                                        + '<b>'+_getFieldValue(relrec, DT_RELATION_TYPE)+'</b><br/>'                                  
-                                        + 'At this address ' + _getFieldValue(record, 'rec_Title')+'<br/>'
-                                        + _getFieldValue(relrec, DT_DESCRIPTION) +'<br/>'
+                                var desc = _getFieldValue(relrec, DT_DESCRIPTION);
+                                desc = (top.HEURIST4.util.isempty(desc))?'':desc+'<br/><br/>';
+                                
+                                shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(related, 'rec_Title')+'</b></p>'
+                                        + '<b>'+top.HEURIST4.terms.termsByDomainLookup.relation[_getFieldValue(relrec, DT_RELATION_TYPE)]+'</b><br/><br/>'                                  
+                                        + 'At this address ' + _getFieldValue(record, 'rec_Title')+'<br/><br/>'
+                                        + desc
                                         + 'Date:' + _getFieldValue(relrec, 'dtl_StartDate') 
-                                        + ' to '  + _getFieldValue(relrec, DT_ENDDATE) +'<br/>'
+                                        + ' to '  + _getFieldValue(relrec, DT_ENDDATE) +'<br/><br/>'
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'
                                 _setFieldValue(record, 'rec_Info', shtml);

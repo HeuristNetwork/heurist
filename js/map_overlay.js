@@ -118,7 +118,10 @@ function _emptyLegend() {
     //add list of layers that are not in map document
     for(var idx in overlays_not_in_doc) {
         if (overlays_not_in_doc.hasOwnProperty(idx) && overlays_not_in_doc[idx] !== undefined) {
-            $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+idx+"' checked>"+overlays_not_in_doc[idx].title+"</label>");
+            $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"
+                    +idx
+                    +"' "+(overlays_not_in_doc[idx].visible?"checked>":">")
+                    +overlays_not_in_doc[idx].title+"</label>");
         }
     }
 }
@@ -131,7 +134,7 @@ function _initLegend() {
                 var checked = $(this).prop("checked");
    
                 // Update overlay
-                var overlay = (index>=0) ?overlays[index] :overlays_not_in_doc[index];
+                var overlay = (index.indexOf('A')<0) ?overlays[index] :overlays_not_in_doc[index];
                 overlay.setVisibility(checked);                          
             });
 }
@@ -265,6 +268,7 @@ function addTiledMapImageLayer(source, bounds, index) {
         // Set visibility
         overlay.setVisibility = function(checked) {
             console.log("Setting visibility to: " + checked);
+            this.visible = checked;
             if(checked) {
                 map.overlayMapTypes.setAt(index, tileType);    
             }else{
@@ -296,6 +300,7 @@ function addUntiledMapImageLayer(source, bounds, index) {
 
         // Set visibility
         overlay.setVisibility = function(checked) {
+            this.visible = checked;
             if(checked) {
                 overlay.setMap(map);   
             }else{
@@ -346,6 +351,7 @@ function addKMLLayer(source, index) {
     
     // Set visiblity method
     kmlLayer.setVisibility = function(checked) {
+        this.visible = checked;
         if(checked) {
             kmlLayer.setMap(map); 
         }else{
@@ -402,6 +408,7 @@ function addGeoJsonToMap(data, index) {
     
     // Set visiblity method
     data.setVisibility = function(checked) {
+        this.visible = checked;
         if(checked) {
             features = map.data.addGeoJson(data.geojson);     
         }else{
@@ -455,7 +462,9 @@ function addQueryLayer(source, index) {
                     var recset = new hRecordSet(response.data);
                     
                     //preprocess for Digital Harlem 
-                    recset.preprocessForDigitalHarlem();
+                    if(top.HAPI4.sysinfo['layout']=='L06'){
+                            recset.preprocessForDigitalHarlem();
+                    }
                     
                     //convert to map datasource
                     var mapdata = recset.toTimemap("dyn"+source.id);
@@ -467,6 +476,7 @@ function addQueryLayer(source, index) {
                         id: source.id,
                         title: source['title'],                
                         setVisibility: function(checked) {
+                            this.visible = checked;
                             mapping.showDataset(mapdata[0].id, checked);
                         },                          
                         removeOverlay: function(){
@@ -476,6 +486,7 @@ function addQueryLayer(source, index) {
                        if(index>=0){
                             overlays[index] = overlay;
                        }else{
+                            index = 'A'+Math.floor((Math.random() * 10000) + 1);
                             overlays_not_in_doc[index] = overlay;
                             $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"+overlay.title+"</label>");
                             _initLegend();

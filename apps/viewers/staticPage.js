@@ -89,7 +89,7 @@ $.widget( "heurist.staticPage", {
         
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
-            this.options.url = top.HAPI4.basePathOld +  this.options.url.replace("[dbname]",  top.HAPI4.database);
+            this.options.url = top.HAPI4.basePath +  this.options.url.replace("[dbname]",  top.HAPI4.database);
             this._loaded_url = this.options.url;
             //var that=this;
             $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
