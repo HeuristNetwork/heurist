@@ -238,7 +238,7 @@ function hRecordSet(initdata) {
     /**
     * Converts recordSet to OS Timemap dataset
     */
-    function _toTimemap(dataset_name){
+    function _toTimemap(dataset_name, filter_rt){
 
         var aitems = [];
         var item, shape, idx;
@@ -253,11 +253,13 @@ function hRecordSet(initdata) {
             if(idx)
             {
                 var record = records[idx];
+                var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
+                
+                if(filter_rt && recTypeID!=filter_rt) continue;
 
                 var
                 recID       = _getFieldValue(record, 'rec_ID'),
                 recName     = _getFieldValue(record, 'rec_Title'),
-                recTypeID   = _getFieldValue(record, 'rec_RecTypeID'),
 
                 startDate   = _getFieldValue(record, 'dtl_StartDate'),
                 endDate     = _getFieldValue(record, 'dtl_EndDate'),
@@ -347,10 +349,18 @@ function hRecordSet(initdata) {
         DT_TARGET_RESOURCE = 5,
         DT_RELATION_TYPE = 6,
         DT_PRIMARY_RESOURCE = 7,
+        DT_TITLE = 1,
+        DT_NOTES = 3,
         DT_DESCRIPTION = 4,
         DT_DATE = 9,
         DT_STARTDATE = 10,
-        DT_ENDDATE = 11;
+        DT_ENDDATE = 11,
+        DT_GEO = 28,
+        DT_EVENT_TYPE = 74,
+        DT_EVENT_TIME = 75, 
+        DT_EVENT_TIME_END = 76;
+        
+    var DH_RECORDTYPE = 13;
     
     //
     // special preparation for Digital Harlem
@@ -359,36 +369,36 @@ function hRecordSet(initdata) {
     //  1) find relation master type (event or person)
     //  2) compose description
     //  3) change icon
-/*
-person -> address  
-Fuller Long*  (10:title)
-Resident      (1:6)
-At this address: 48 W 132nd St  (12:1)
-Lives with his mother, Nettie, and sisters Esther* (one year older) and Marie* (two years younger). His father, Fuller snr*, rejoins household April-June 1929, August 1929-March 1931 (1:4)
-Date: 1925-01-02 to 1931-09-25    (1:10, 1:11)
-
-
-person -> event -> address  
-
-Fuller Long* 
-Offender in the event: Fuller Long* has sexual intercourse with Ruby Hawkins*, aged 15 years, in which the crime scene was here at this address, 224 W 140th St.
-
-Ruby Hawkins*'s home
-
-Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
-
-
-    
-    
-*/        
     function _preprocessForDigitalHarlem(){
         
         //NOTE: address may relates to the same person several times (residency in separate periods of time) 
         // this version (as well as old DH) does not support it - it shows the last relation only!
         
         
+        function __addpart(pref, val){
+              if(top.HEURIST4.util.isempty(val)){
+                  return '';
+              }else{
+                  return pref+val;
+              }
+        }
+        function __addterm(pref, val, domain){
+            
+            if(top.HEURIST4.util.isempty(domain)){
+                domain = 'enum';
+            }
+            if(!top.HEURIST4.util.isempty(val)){
+                val = top.HEURIST4.terms.termsByDomainLookup[domain][val];
+                if(top.HEURIST4.util.isArrayNotEmpty(val)){
+                    val = val[0];
+                }
+            }
+            return __addpart(pref, val);
+        }
+        
+        
         //1. find address records
-        var idx, i, relrec, related;
+        var idx, i, j, relrec, related;
         
         for(idx in records){
             if(idx)
@@ -396,49 +406,154 @@ Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
                 var record = records[idx];
                 
                 var recID = _getFieldValue(record, 'rec_ID');
-                var recTypeID   = _getFieldValue(record, 'rec_RecTypeID');
+                var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
                 if(recTypeID == RT_ADDRESS){
                     
                     var shtml = '';
                     
                     //2. find relation records
                     var rels = _getRelationRecords(recID, null);
+                    
+                    if(rels.length<1){
+                        //this is just address
+                        _setFieldValue(record, 'rec_Icon', 'term4326' );
+                        shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(record, 'rec_Title')+'</b></p>'
+                                        + __addpart('<b>Cooment:</b><br/>', _getFieldValue(record, DT_NOTES) )
+                                        + '<br/><br/>'                                  
+                                        + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
+                                        + '</div>'
+                        _setFieldValue(record, 'rec_Info', shtml);
+                        _setFieldValue(record, 'rec_RecTypeID', DH_RECORDTYPE);
+                        continue;
+                    }
+                    
+                    
                     for(i=0; i<rels.length; i++){
                         //3. if event try to find related persons
                         if(rels[i]['relrt'] == RT_EVENT){
                             var rels2 = _getRelationRecords(recID, RT_PERSON);
                             if(rels2.length<1){
                                 //3a. this is event->address 
+
+                                var rel_event = records[rels[i]['related']];
+                                var relrec = records[rels[i]['relation']];
+                                var uniqid = rels[i]['relation']+' '+rels[i]['related']+' ';
+                            
+                                _setFieldValue(relrec, 'rec_RecTypeID', DH_RECORDTYPE);
+                                _setFieldValue(relrec, DT_STARTDATE, _getFieldValue(rel_event, 'dtl_StartDate'));
+                                _setFieldValue(relrec, DT_ENDDATE, _getFieldValue(rel_event, DT_ENDDATE));          
+                                _setFieldValue(relrec, 'rec_Icon', 'term'+_getFieldValue(rel_event, DT_EVENT_TYPE) );
+                                _setFieldValue(relrec, DT_GEO, _getFieldValue(record, DT_GEO));          
+                                
+                                var event_desc = _getFieldValue(rel_event, DT_DESCRIPTION);
+                                event_desc = (top.HEURIST4.util.isempty(desc))?'':desc+'<br/><br/>';
+                                
+                                var evt_datetime = __addpart('', _getFieldValue(rel_event, 'dtl_StartDate'))+
+                                                   __addterm(' <b> Time: </b> ', _getFieldValue(rel_event, DT_EVENT_TIME) )+
+                                                   __addpart(' to ', _getFieldValue(rel_event, DT_ENDDATE))+
+                                                   __addterm(' <b> Time: </b> ', _getFieldValue(rel_event, DT_EVENT_TIME_END) );
+                                
+                                evt_datetime = (top.HEURIST4.util.isempty(evt_datetime))?'':'<b>Date: </b>' + evt_datetime;
+                                
+                                var evt_title = _getFieldValue(rel_event, DT_TITLE);
+
+                                shtml = '<div style="text-align:left"><p><b>'+evt_title+'</b></p>'
+                                        + '<b>'+ __addterm('', _getFieldValue(rel_event, DT_EVENT_TYPE) )+'</b><br/><br/>'                                  
+                                        + 'Location of the event here at ' + _getFieldValue(record, 'rec_Title')+'<br/><br/>'
+                                        + event_desc
+                                        + evt_datetime +'<br/><br/>' + uniqid
+                                        + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
+                                        + '</div>'
+                                _setFieldValue(relrec, 'rec_Info', shtml);
+                                _setFieldValue(relrec, 'rec_Title', uniqid+evt_title );
                                 
                             }else{
-                                //3b. this is person->event->address
+                                //3b. this is address->event->person
+                             
+                                var rel_event = records[rels[i]['related']];    //event
+                                var relrec = records[rels[i]['relation']];   //event->address
+                                
+                                var evt_address_reltype =_getFieldValue(relrec, DT_RELATION_TYPE);
+                                if(evt_address_reltype==4536){
+                                    evt_address_reltype = ' in which the crime scene was here at this address '
+                                }else{
+                                    evt_address_reltype = __addterm(' which ', evt_address_reltype, 'relation' );    
+                                }
+                                
+                                var evt_address_desc = __addpart('', _getFieldValue(relrec, DT_DESCRIPTION));
+
+                                for(j=0; j<rels2.length; j++){
+                                
+                                relrec = records[rels2[j]['relation']];   //event->person
+                                rel_person = records[rels2[j]['related']];   //person
+                                var uniqid = rels2[j]['relation']+' '+rels2[j]['related']+' ';
+                            
+                                _setFieldValue(relrec, 'rec_RecTypeID', DH_RECORDTYPE);
+                                _setFieldValue(relrec, DT_STARTDATE, _getFieldValue(rel_event, 'dtl_StartDate'));
+                                _setFieldValue(relrec, DT_ENDDATE, _getFieldValue(rel_event, DT_ENDDATE));          
+                                //_setFieldValue(relrec, DT_DESCRIPTION, _getFieldValue(relrec, DT_DESCRIPTION));       
+                                _setFieldValue(relrec, 'rec_Icon', 'term'+_getFieldValue(rel_event, DT_EVENT_TYPE) );
+                                _setFieldValue(relrec, DT_GEO, _getFieldValue(record, DT_GEO));          
+                                
+                                var desc = _getFieldValue(relrec, DT_DESCRIPTION);
+                                desc = (top.HEURIST4.util.isempty(desc))?'':desc+'<br/><br/>';
+                                
+                                var evt_datetime = __addpart('', _getFieldValue(rel_event, 'dtl_StartDate'))+
+                                                   __addterm(' <b> Time: </b> ', _getFieldValue(rel_event, DT_EVENT_TIME) )+
+                                                   __addpart(' to ', _getFieldValue(rel_event, DT_ENDDATE))+
+                                                   __addterm(' <b> Time: </b> ', _getFieldValue(rel_event, DT_EVENT_TIME_END) );
                                 
                                 
+                                
+                                
+                                shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(rel_person, 'rec_Title')+'</b></p>'
+                                        + '<b>'+ __addterm('', _getFieldValue(relrec, DT_RELATION_TYPE), 'relation' )+'</b>'
+                                        + ' in the event: <b>'+_getFieldValue(rel_event, DT_TITLE)+'</b>'
+                                        + evt_address_reltype
+                                        + _getFieldValue(record, 'rec_Title') + '<br/>' 
+                                        + evt_address_desc  + '<br/><br/>' 
+                                        + evt_datetime +'<br/><br/>'  + uniqid                                 
+                                        + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
+                                        + '</div>'
+                                _setFieldValue(relrec, 'rec_Info', shtml);
+                                _setFieldValue(relrec, 'rec_Title', 'pea'+uniqid + _getFieldValue(relrec, 'rec_Title'));
+                                
+                                }//for  rel_person
                             }
                             
                         }else if(rels[i]['relrt'] == RT_PERSON){
                                 //3c. this is person->address
                                 
-                                relrec = records[rels[i]['relation']];
-                                related = records[rels[i]['related']];
+                                var relrec = records[rels[i]['relation']];
+                                var rel_person = records[rels[i]['related']];
+                                var uniqid = rels[i]['relation']+' '+rels[i]['related']+' ';
                             
-                                _setFieldValue(record, DT_STARTDATE, _getFieldValue(relrec, 'dtl_StartDate'));
-                                _setFieldValue(record, DT_ENDDATE, _getFieldValue(relrec, DT_ENDDATE));          
-                                //_setFieldValue(record, DT_DESCRIPTION, _getFieldValue(relrec, DT_DESCRIPTION));       
-                                _setFieldValue(record, 'rec_Icon', 'term'+_getFieldValue(relrec, DT_RELATION_TYPE) );
+                                _setFieldValue(relrec, 'rec_RecTypeID', DH_RECORDTYPE);
+                                _setFieldValue(relrec, DT_STARTDATE, _getFieldValue(relrec, 'dtl_StartDate'));
+                                _setFieldValue(relrec, DT_ENDDATE, _getFieldValue(relrec, DT_ENDDATE));          
+                                //_setFieldValue(relrec, DT_DESCRIPTION, _getFieldValue(relrec, DT_DESCRIPTION));       
+                                _setFieldValue(relrec, 'rec_Icon', 'term'+_getFieldValue(relrec, DT_RELATION_TYPE) );
+                                _setFieldValue(relrec, DT_ENDDATE, _getFieldValue(relrec, DT_ENDDATE));          
+                                _setFieldValue(relrec, DT_GEO, _getFieldValue(record, DT_GEO));          
                                 
                                 var desc = _getFieldValue(relrec, DT_DESCRIPTION);
                                 desc = (top.HEURIST4.util.isempty(desc))?'':desc+'<br/><br/>';
                                 
-                                shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(related, 'rec_Title')+'</b></p>'
-                                        + '<b>'+top.HEURIST4.terms.termsByDomainLookup.relation[_getFieldValue(relrec, DT_RELATION_TYPE)]+'</b><br/><br/>'                                  
+                                var evt_datetime = __addpart('', _getFieldValue(relrec, 'dtl_StartDate'))+
+                                                   __addpart(' to ', _getFieldValue(relrec, DT_ENDDATE));
+                                
+                                evt_datetime = (top.HEURIST4.util.isempty(evt_datetime))?'':('<b>Date: </b>' + evt_datetime +'<br/><br/>');
+                                
+                                
+                                shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(rel_person, 'rec_Title')+'</b></p>'
+                                        + '<b>'+ __addterm('', _getFieldValue(relrec, DT_RELATION_TYPE), 'relation' ) +'</b><br/><br/>'                                  
                                         + 'At this address ' + _getFieldValue(record, 'rec_Title')+'<br/><br/>'
                                         + desc
-                                        + 'Date:' + _getFieldValue(relrec, 'dtl_StartDate') 
-                                        + ' to '  + _getFieldValue(relrec, DT_ENDDATE) +'<br/><br/>'
+                                        + evt_datetime            + uniqid
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'
-                                _setFieldValue(record, 'rec_Info', shtml);
+                                _setFieldValue(relrec, 'rec_Info', shtml);
+                                _setFieldValue(relrec, 'rec_Title', 'pa'+uniqid + _getFieldValue(relrec, 'rec_Title'));
                         }
                     }
                     
@@ -879,8 +994,8 @@ Date: 1928-01-18 Time: 00:00:00Unknown to 00:00:00
         /**
         * Converts recordSet to OS Timemap dataset
         */
-        toTimemap: function(dataset_name){
-            return _toTimemap(dataset_name);
+        toTimemap: function(dataset_name, filter_rt){
+            return _toTimemap(dataset_name, filter_rt);
         }
 
     }

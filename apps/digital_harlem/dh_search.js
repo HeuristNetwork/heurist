@@ -55,10 +55,10 @@ $.widget( "heurist.dh_search", {
     
     
     {"qa":[{"t":14},{"f:74":"X0"}, 
-              {"related_to:100":[{"t":"15"},{"f:80":"X1"}]},  
+              {"related_to:100":[{"t":"15"},{"f:80":"X1"}]},   //charge/conviction
               {"relatedfrom:109":[{"t":"10"},{"f:97":"X2"},{"f:92":"X3"},{"f:98":"X4"},{"f:20":"X5"},{"f:18":"X6"}]},   //persons involved
               
-              {"related_to:99":[{"t":"12"},{"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}  //address->street(11)  and linkedfrom role(16) role of place
+              {"related_to:99":[{"t":"12"}, {"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}  //address->street(11)  and linkedfrom role(16) role of place
            ]}
       ], 
       [   //PEOPLE
@@ -89,6 +89,33 @@ $.widget( "heurist.dh_search", {
     
     //CHURCHES    {"t":"12"},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"}]} 
     
+   
+/*
+samples of faceted queries for some variables  
+
+use code parameter for variable to build invert query    
+
+1) for zero level just select f:74 from the same query
+
+2) for 1st level  a) find relation type b) invert it
+
+select f:80 where  {qa:[ {"t":"15"}, {"relatedfrom:100":[{ids:....   .... }]} ] }
+
+select f:89  {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:99":[ {ids:....   .... }]} ] }
+
+select f:80 where rt=14 
+*/      
+   _createFacetQueries: function(content_id){
+       
+       
+       $.each(this._searches[content_id], function(idx, field){
+       
+           if(field['var']){
+               
+           }
+       });
+       
+   },
     
 
     // the widget's constructor

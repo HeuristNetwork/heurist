@@ -460,14 +460,16 @@ function addQueryLayer(source, index) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     // Show info on map
                     var recset = new hRecordSet(response.data);
+                    var mapdata;
                     
                     //preprocess for Digital Harlem 
                     if(top.HAPI4.sysinfo['layout']=='L06'){
-                            recset.preprocessForDigitalHarlem();
+                        recset.preprocessForDigitalHarlem();
+                        mapdata = recset.toTimemap("dyn"+source.id, 13); //@todo  address RT is hardcoded!!!!
+                    }else{
+                        //convert to map datasource
+                        var mapdata = recset.toTimemap("dyn"+source.id);
                     }
-                    
-                    //convert to map datasource
-                    var mapdata = recset.toTimemap("dyn"+source.id);
                     
                     //mapping.load(mapdata);
                     if (mapping.addDataset(mapdata)){
