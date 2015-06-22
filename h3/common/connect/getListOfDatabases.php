@@ -59,7 +59,7 @@ if(@$_REQUEST['popup']=="1"){
     print "<div id='page-inner'>";
 }
 if(@$_REQUEST['v']=="4"){
-    $url = "../../../h4/";
+    $url = "../../../";
 }else{
     $url = HEURIST_BASE_URL;
 }
@@ -83,7 +83,9 @@ if(@$_REQUEST['v']=="4"){
 		if(array_key_exists('role',$_REQUEST)){
 			$role = $_REQUEST['role'];
 		}else{
-			$role = 'user'; // by default
+            if(@$_REQUEST['v']!="4"){
+			    $role = 'user'; // by default
+            }
 		}
 	}
 
@@ -93,7 +95,7 @@ if(@$_REQUEST['v']=="4"){
 			$role = null;
 		}
 
-		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&popup=".@$_REQUEST['popup']."&role=\"+this.value;}'>";
+		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&popup=".@$_REQUEST['popup']."&v=".@$_REQUEST['v']."&role=\"+this.value;}'>";
 		print "<option ".
 					(($role==null)?'selected':'')." value='0'>All</option><option ".
 					(($role=='user')?'selected':'')." value='user'>User</option><option ".

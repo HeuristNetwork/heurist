@@ -782,7 +782,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     getPopupDlg: function(){
         var $dlg = $( "#dialog-popup" );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').css({'min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px'
             $dlg.removeClass('ui-heurist-border');
         }
         return $dlg;
@@ -869,6 +869,10 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             options.height = 515;
             options.width = 705;
             options.resizable = true;
+            options.resizeStop = function( event, ui ) {
+                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height() 
+                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
+                };
         }
         
         if(position_to_element){

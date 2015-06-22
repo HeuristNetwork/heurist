@@ -19,10 +19,11 @@
 */
 -->
 
-function doLogin(){
+//isforsed - if true - it is not possible to get out from login other than switch database
+function doLogin(isforsed){
 
     
-    var login_dialog = $('#heurist-login-dialog');
+        var login_dialog = $('#heurist-login-dialog');
     
 
         if(login_dialog.length<1)  // login_dialog.is(':empty') )
@@ -114,6 +115,14 @@ function doLogin(){
                     $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
                 });
 
+                var arr_buttons = [{text:'<b>'+top.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'}];
+                if(isforsed && top.HAPI4.sysinfo.registration_allowed==1){
+                    arr_buttons.push({text:top.HR('Register'), click: doRegister, id:'btn_register'});
+                }
+                arr_buttons.push({text:top.HR(isforsed?'Change database':'Cancel'), click: function() {
+                            $( this ).dialog( "close" );
+                        }});
+                
                 // login dialog definition
                 $dlg.dialog({
                     autoOpen: false,
@@ -122,14 +131,13 @@ function doLogin(){
                     modal: true,
                     resizable: false,
                     title: top.HR('Login'),
-                    buttons: [
-                        {text:'<b>'+top.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'},
-                        {text:top.HR('Cancel'), click: function() {
-                            $( this ).dialog( "close" );
-                        }}
-                    ],
+                    buttons: arr_buttons,
                     close: function() {
                         allFields.val( "" ).removeClass( "ui-state-error" );
+                        if( isforsed && !top.HAPI4.is_logged() ){
+                            //redirect to select database
+                            window.location  = window.HAPI4.basePath + "php/databases.php";
+                        }
                     },
                     open: function() {
                         isreset = false;
@@ -148,4 +156,26 @@ function doLogin(){
             //show dialogue
             login_dialog.dialog("open");
         }
+}
+
+function doRegister(){
+        
+        if($.isFunction($('body').profile_edit)){
+
+            var profile_edit_dialog = $('#heurist-profile-dialog');
+            if(profile_edit_dialog.length<1){
+                profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );               
+            }
+            profile_edit_dialog.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
+
+        }else{
+            $.getScript(top.HAPI4.basePath+'apps/profile/profile_edit.js', function() {
+                if($.isFunction($('body').profile_edit)){
+                    doRegister();
+                }else{
+                    top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
+                }        
+            });          
+        }
+        
 }

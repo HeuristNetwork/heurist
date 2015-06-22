@@ -163,3 +163,62 @@ a.menuitem {
 #legendtable td{
     border-bottom: 1px dotted #BFBFBF;
 }
+
+/*
+
+------------------------------------------------------------------------
+
+SPECIAL FOR GMAP POPUP INFOWINDOW
+
+------------------------------------------------------------------------
+*/
+div.infowindow{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  color: #666666;
+}
+
+div.infowindow h3 {
+      color: #666666;
+      font-weight: bold;
+      margin:0px;
+      padding: 0px;
+      margin-bottom: 5px;
+      font-size: 13px;
+}
+
+div.infowindow p {
+      margin-top:3px;
+      margin-bottom:1em;
+      display: block;
+      -webkit-margin-before: 1em;
+      -webkit-margin-after: 1em;
+      -webkit-margin-start: 0px;
+      -webkit-margin-end: 0px;
+}
+
+div.infowindow ul  {
+    padding:0px;
+    margin:0px;
+}
+
+div.infowindow li {
+    list-style: none ;
+        background-image: url(assets/arrow.gif) ;
+        background-repeat: no-repeat;
+        background-position: 0px 3px;
+        padding-left: 12px;
+}
+
+
+div.infowindow a {
+      outline: none;
+      text-decoration: none;
+      color: #2C547A;
+      font-weight: bold;
+      cursor: pointer;
+}
+
+div.infowindow a:hover {
+      text-decoration: underline;
+}

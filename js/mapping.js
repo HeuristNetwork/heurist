@@ -863,6 +863,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             }else{
                 
                 ed_html =  //'<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'  // style="width:100%"
+                ed_html
             +   '<div style="display:inline-block;">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
