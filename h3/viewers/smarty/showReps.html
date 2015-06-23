@@ -37,7 +37,7 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title></title>
-
+        
         <!-- yui layout -->
 
         <!--<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
@@ -73,7 +73,7 @@
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../applications/h4/ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
@@ -86,7 +86,6 @@
         <script src="../../external/js/codemirror-3.20/mode/htmlmixed/htmlmixed.js"></script>
         <script src="../../external/js/codemirror-3.20/mode/smarty/smarty.js"></script>
         <script src="../../external/js/codemirror-3.20/mode/smartymixed/smartymixed.js"></script>
-
 
         <style type="text/css">
             /* hide header in top layout */
@@ -538,7 +537,9 @@
 
                 window.showReps.onResize(this.innerWidth);
                 //setupMCE();
+            }
 
+            function loadUserInfoHandler(){
                 //$('.linkadmin').css('display', 'block  !important');
                 //$('.linkadmin').css('display', 'none  !important');
                 //$('#lnkDel').css('display', 'none  !important');
@@ -601,6 +602,11 @@
             }
             
             YAHOO.util.Event.addListener(window, "load", loadHandler );
+            
+            var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            $.getScript( top.HEURIST.basePath+"common/php/loadUserInfo.php?db="+_db, loadUserInfoHandler);
+            //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );
+            //top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");
 
 
             $(function () {

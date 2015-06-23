@@ -120,7 +120,7 @@ function executeSmartyTemplate($params){
         }
     
 
-        $url = HEURIST_BASE_URL."applications/h4/php/api/record_search.php?".$url."&idonly=1&vo=h3";
+        $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$url."&idonly=1&vo=h3";
 //debug error_log($url);        
         $result = loadRemoteURLContent($url);
         $qresult = json_decode($result, true);
