@@ -204,10 +204,13 @@
             
             function editRecordType(){
 
+                /* OLD WAY
                 window.open("../../admin/adminMenu.php?db="+
                 top.HEURIST.database.name+
                 "&mode=rectype&rtID="+
                 top.HEURIST.edit.record.rectypeID, "_blank");
+                
+                
 
                 var smsg = "<p>Changes made to the record type will not become active until you reload the edit form (hit page reload in your browser).</p>"+
                 "<br/>Please SAVE the record first in order not to lose data";
@@ -218,7 +221,40 @@
 
                 var w = top.HEURIST.util.popupTinyElement(top, ele,
                 { "no-titlebar": false, "no-close": false, width: 330, height: 140 });
+                
+                */
+                
+                if(top.HEURIST.edit.is_something_chnaged()){
+                        var message = "You have unsaved changes in this record.\nClick OK to save changes and modify structure.";
+                        if (confirm(message)) {
+                            top.HEURIST.edit.save_record(editRecordType);
+                        }
+                        return;
+                }
+                
+                
+                var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+
+                            top.HEURIST.database.name+
+                            "&rty_ID="+top.HEURIST.edit.record.rectypeID;
+                //this.location.replace(URL);
+                var win = this.window;
 
+                var dim = top.HEURIST.util.innerDimensions(win);
+                
+                top.HEURIST.util.popupURL(top, URL, {
+                        "close-on-blur": false,
+                        "no-resize": false,
+                        height: dim.h*0.9,
+                        width: 860,
+                        "no-close": true,
+                        closeCallback: function(){ alert('kiki'); },
+                        callback: function(context) {
+                                if(!top.HEURIST.util.isnull(context) && context && win.location) {
+                                    //reload this page
+                                    win.location.reload();
+                                }
+                        }
+                });
             }
             
             //

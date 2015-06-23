@@ -56,7 +56,8 @@ function EditRecStructure() {
 	myDTDrags = {},
     _fieldMenu = null,
     db,
-    warningPopupID = null;
+    warningPopupID = null,
+    _structureWasUpdated = false;
 
 
 	/**
@@ -1493,8 +1494,12 @@ function EditRecStructure() {
 				if(!Hul.isnull(context)){
 					top.HEURIST.rectypes = context.rectypes;
 					top.HEURIST.detailTypes = context.detailTypes;
+                    _structureWasUpdated = true;
 				}
 				_isServerOperationInProgress = false;
+                if(needClose){
+                    window.close(_structureWasUpdated);
+                }
 			};
 //DEBUG alert(str);
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -1503,9 +1508,6 @@ function EditRecStructure() {
 			_isServerOperationInProgress = true;
 			Hul.getJsonData(baseurl, callback, params);
 
-			if(needClose){
-				window.close();
-			}
 		}
 	}
 
@@ -1947,7 +1949,7 @@ function EditRecStructure() {
 		closeWin:function(){
 			if(_checkForRequired()){
 
-                _checkForTitleMask(function(){ window.close(null); });
+                _checkForTitleMask(function(){ window.close(_structureWasUpdated); });
 
 			}else{
 				alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
