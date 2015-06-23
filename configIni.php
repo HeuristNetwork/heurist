@@ -91,10 +91,14 @@ $websiteThumbnailPassword = "";
 // $websiteThumbnailYsize = 300;
 
 
+//H4 specific
+$heurist3url = "http://heurist.sydney.edu.au/h4-ao/h3/";
+$version4 = "4.0.0";
+
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the ConfigIni.php in the installation need not be configured. This allows unconfigured ConfigIni.php files to exist
 // in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
-$parentIni = dirname(__FILE__)."/../../heuristConfigIni.php";
+$parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
 
 $defaultFaimsModulesPath = ""; //'/var/www/faims/modules/';

@@ -110,8 +110,14 @@
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
                     <div class='input-header-cell'><b>Database Description</b></div><div class='input-cell'>
                         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-                        <input type="text" maxlength="1000" size="80" name="dbDescription">
-                        <input type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" >
+                        <div style="display:inline-block">
+                        <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription" 
+onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit').disabled = (len<40); document.getElementById('cntChars').innerHTML = len;}"></textarea>
+                        </div>    
+                        <div  style="display:inline-block">
+                            <label id="cntChars" style="text-align:left"></label><br/>    
+                            <input id="btnSubmit" type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" disabled="disabled" >
+                        </div>    
                         <div>Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)</div>
                         <div  style="margin-top: 15px; margin-bottom: 20px;">
                             <br/>Note: After registering the database, you will be asked to log in to a Heurist database (H3MasterIndex).

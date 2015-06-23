@@ -676,8 +676,12 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     overflow:hidden !important;
 }
 
-.heurist-helper1, .heurist-helper2{ /*display and visibility*/
+.heurist-helper2{ /*display and visibility*/
     font-size: 0.8em;
+}
+
+.heurist-helper1{
+    font-style:italic;
 }
 
 

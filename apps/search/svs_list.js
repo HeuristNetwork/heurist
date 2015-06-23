@@ -44,15 +44,26 @@ $.widget( "heurist.svs_list", {
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
         this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
-
+        this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.6em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
+                    .appendTo( this.search_tree );
+        
+        this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
+            .addClass('logged-in-only')
+            .addClass('heurist-helper1')
+            .appendTo( $( "<div>" ).css('height','1.3em').appendTo(this.div_header) )
+            //.appendTo( this.accordeon );
+            if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
+        
+        
         if(this.options.btn_visible_dbstructure){
             
-            this.btn_db_dtructure = $( "<button>", {
+            this.btn_db_dtructure = $( "<h3>", {
                 text: top.HR("Database Summary")
             })
             .addClass('logged-in-only')
-            .appendTo( $( "<div>" ).css({'height':'4em', 'width':'100%', 'padding':'0.5em 3em'}).appendTo( this.search_tree ) )
-            .button() //({icons: {primary: "ui-icon-circle-plus"}})
+            .css({'cursor':'pointer', 'padding-top':'0.5em'})
+            .appendTo( this.div_header )
+            //.button() //({icons: {primary: "ui-icon-circle-plus"}})
             .click( function(){ that._showDbSummary(); });
         }
         
@@ -85,7 +96,7 @@ $.widget( "heurist.svs_list", {
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
         
         var toppos = 0;
-        if(this.options.btn_visible_dbstructure) toppos = toppos + 4;
+        if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
         if(this.options.btn_visible_filter) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;
 
@@ -151,14 +162,7 @@ $.widget( "heurist.svs_list", {
         
         if(!top.HAPI4.is_logged()){
              top.HAPI4.currentUser.usr_GroupsList = [];
-        }else if (!this.helper_top) {
-
-            this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
-            .addClass('logged-in-only')
-            //IAN request 2015-06-23 .addClass('heurist-helper1')
-            .appendTo( this.accordeon );
-            //IAN request 2015-06-23 if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
-
+        }else if (!this.helper_btm) {
 
             //old
             /* var t1 = '<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'

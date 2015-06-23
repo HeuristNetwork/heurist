@@ -230,7 +230,7 @@
                         if($res){
                             echo ("<br/><p> $table . Added ".$mysqli->affected_rows);
                         }else{
-                            echo ("<br/><p>Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                            echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
                             $res = false;
                             break;
                         }
@@ -243,7 +243,7 @@
                 }else{
                     $res = false;
                     if($verbose) {
-                        echo ("<br/><p>Error: Can not get list of table in database ".$db_target);
+                        echo ("<br/><p class=\"error\">Error: Can not get list of table in database ".$db_target);
                     }
                 }
 

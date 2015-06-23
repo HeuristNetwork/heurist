@@ -52,7 +52,7 @@
         <script src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
         <script src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
         <!-- Optional Animation Support
-        <script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script> -->
+        <script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script> -->                                         
         <!-- Optional Resize Support -->
         <script src="../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
         <!-- Source file for the Layout Manager -->
@@ -71,9 +71,15 @@
         <!-- for yui simply dialog -->
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
+        <!--
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        -->
+        <link rel="stylesheet" type="text/css" href="../../../ext/font-awesome/css/font-awesome.min.css" />
+        
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
@@ -119,6 +125,28 @@
             .insert-intree{
                 display:none;
             }
+            
+            /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon 
+                 Remove the jQuery UI Icon 
+                 Remove the jQuery UI Text Indent 
+                 Bump it up - jQuery UI is -8px  
+                  
+                 Bump it - jQuery UI is -8px
+                 Allow use of icon-large to be properly aligned       
+            */     
+            .ui-icon[class*=" icon-"] {
+                background: none repeat scroll 0 0 transparent;
+                text-indent: 0;
+                margin-top: -0.5em;
+            }
+
+            .ui-button-icon-only .ui-icon[class*=" icon-"] {
+                /*margin-left: -7px;*/
+            }
+            .ui-icon.icon-large {
+                margin-top: -0.75em;
+            }
+            
 
         </style>
         <script type="text/javascript">
@@ -264,11 +292,14 @@
 
                     <span id="recordCount"></span>
                 </div>
-                <div id="btnRepPrint" onclick="onPrint()" class="button" 
-                    style=" position: absolute; right: 44px; top:5px; height: 17px !important;">Print</div>
+                <button id="btnRepPrint2" style="position: absolute; right: 40px; top:2px;">Print</button>
                 
+                <!-- <div id="btnRepPrint2" onclick="onPrint()"  class="button"
+                    style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
+                                                                   -->
                 <ul id="rep_list" class="horizontal menu" style="float:right">
-                    <li style="width:22px;"><span id="btnRepMenu" class="button"></span> <!--  class="button" -->
+                    <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
+                       <!-- <span id="btnRepMenu2" class="button"></span> -->
                         <ul id="toolMenuItems" style="zdisplay:block;">
                         </ul>
                     </li>
@@ -537,6 +568,18 @@
 
                 window.showReps.onResize(this.innerWidth);
                 //setupMCE();
+                
+                $("#btnRepPrint2").button({text:false, icons: {
+                            primary: "icon-print"
+                 }})
+                 .click(onPrint);
+
+                $("#btnRepMenu2").button({text:false, icons: {
+                            primary: "icon-gear"
+                 }});                
+                
+
+                
             }
 
             function loadUserInfoHandler(){
@@ -557,8 +600,8 @@
                     
                     s = s + '<li><a href="#" onClick="onFile()" class="separator">Publish report</a></li>';
                     
-                    s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export</a></li>' +
-                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
+                    s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export Template</a></li>' +
+                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import Template</a></li>';
                     
                     if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
                         s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
@@ -590,9 +633,8 @@
                 */
                 
                 //$('#btnRepPrint').button( {icon:'ui-icon-print'} );
-                //$('#btnRepMenu').button( {icon:'ui-icon-gear'} );
+                //$('#btnRepMenu2').button( {icon:'ui-icon-gear'} );
                 
-
                 var elem = document.getElementById('toolMenuItems');
                 elem.innerHTML = s;
             }

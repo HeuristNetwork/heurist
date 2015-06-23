@@ -133,10 +133,11 @@ H2 span {
 
 #rep_list {
 	position: absolute;
-	right:2px;
-	top:0px;
+	right:10px;
+	top:-3px;
 	text-align: right;
 }
+/*
 ul#rep_list.menu li span {
 	background-color: white !important;
 
@@ -147,10 +148,11 @@ ul#rep_list.menu li span {
 	display: inline-block;
 	height: 17px !important;
     width: 22px;
+}*/
 	/*padding: 0 26px 0 0;
 	text-align: left;
 	width: 44px;*/
-}
+
 ul#rep_list.menu > li:hover {
 	background-color: rgba(0, 0, 0, 0);
 	border-color: transparent;

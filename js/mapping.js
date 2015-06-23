@@ -918,7 +918,7 @@ ed_html +
                     placemark.closeInfoBubble.removeHandler(item.closeHandler);
                 });
             } else {
-            // open window on TIMELINE 
+                // open window on TIMELINE - replacement native Timeline bubble with our own implementation
                 if(item.event){    //reference to timeline event
                     
                     var painter = item.timeline.getBand(0).getEventPainter();

@@ -227,7 +227,7 @@
                     if( db_clone(DATABASE, $newname) ){
                         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
                     }else{
-                        //db_drop($newname);
+                        db_drop($newname);
                         return false;
                     }
                     
@@ -255,7 +255,7 @@
                     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
                         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
                     }else{
-                        //db_drop($newname);
+                        db_drop($newname);
                         return false;
                     }
 
@@ -263,7 +263,7 @@
                     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addProceduresTriggers.sql")){
                         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
                     }else{
-                        //db_drop($newname);
+                        db_drop($newname);
                         return false;
                     }
         

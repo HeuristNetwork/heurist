@@ -155,8 +155,21 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
         $installDir = '';
     }
 
-    define('HEURIST_SITE_PATH', $installDir == '' ? '/' : $installDir . '/'); // eg. /h3/
+    define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // eg. /h3/
     define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
+    
+    
+    //get H4 base URL
+    $installDir = preg_replace("/\/(h3)\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
+    if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
+        $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);
+    }
+    if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
+        $installDir = '';
+    }
+    $installDir =  ($installDir == '' ? '/' : $installDir) . '/';
+    define('HEURIST_BASE_URL_V4', HEURIST_SERVER_URL . $installDir);
+    
 
     $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';

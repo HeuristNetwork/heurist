@@ -312,6 +312,7 @@
                         return false;
                     }
 
+                    
                     if(!createDatabaseEmpty($newDBName)){
                         $isCreateNew = true;
                         return false;
@@ -395,11 +396,18 @@
                     echo "<p><strong>Admin username:</strong> ".$name."<br />";
                     echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-                    echo "<p>Click here to log in to your new database: <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><a href=\"".
-                    HEURIST_BASE_URL."?db=".$newDBName."\" title=\"\" target=\"_new\">".
-                    HEURIST_BASE_URL."?db=".$newDBName.
+                    echo "<p>Click here to log in to your new database: <p style=\"padding-left:6em\"><b><a href=\"".
+                    HEURIST_BASE_URL_V4."?db=".$newDBName."\" title=\"\" target=\"_new\">".
+                    HEURIST_BASE_URL_V4."?db=".$newDBName.
                     "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
 
+                    echo "<br><br><p style=\"padding-left:6em\"><i>After logging in to your new database, we suggest you import some<br>"
+                    ."additional entity types form one of the curated Heurist databases,<br>"
+                    ."of from other databases listed in the central database catalogue,<br>"
+                    ."using Database &gt; Import Structure or Database &gt; Annotated Templates<i></p>";
+                    
+                    
+                    
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
 
