@@ -155,8 +155,9 @@ $.widget( "heurist.svs_list", {
 
             this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
             .addClass('logged-in-only')
-            .addClass('heurist-helper1').appendTo( this.accordeon );
-            if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
+            //IAN request 2015-06-23 .addClass('heurist-helper1')
+            .appendTo( this.accordeon );
+            //IAN request 2015-06-23 if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
 
 
             //old
@@ -174,8 +175,10 @@ $.widget( "heurist.svs_list", {
             +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
             +'&nbsp;Search with rules</div>';        
 
-            this.helper_btm = $( '<div>'+t1+'</div>' ).addClass('heurist-helper1').appendTo( this.accordeon );
-            if(top.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+            this.helper_btm = $( '<div>'+t1+'</div>' )
+            //IAN request 2015-06-23 .addClass('heurist-helper1')
+            .appendTo( this.accordeon );
+            //IAN request 2015-06-23 if(top.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
 
         }
 
