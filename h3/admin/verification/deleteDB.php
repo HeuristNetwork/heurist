@@ -1,6 +1,6 @@
 <?php                                                
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../configIni.php');
+    require_once(dirname(__FILE__).'/../../../configIni.php');
     require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
     
     /** Db check */

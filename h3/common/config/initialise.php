@@ -106,7 +106,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
 
     */
 
-    require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
+    require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 
     $talkToSysAdmin="Please advise your system administrator or email info - a t - heuristscholar.org for assistance.";

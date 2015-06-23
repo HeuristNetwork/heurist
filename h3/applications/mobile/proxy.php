@@ -1,5 +1,5 @@
 <?php
-    require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
+    require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
     if (@$httpProxy != '') {
         define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
         if (@$httpProxyAuth != '') {
