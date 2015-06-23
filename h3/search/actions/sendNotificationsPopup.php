@@ -185,7 +185,7 @@
 		$bibIDList = join(',', $bib_ids);
       
         if(@$_REQUEST['h4']){
-            $notification_link = HEURIST_BASE_URL . 'applications/h4/?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;    
+            $notification_link = HEURIST_BASE_URL . '../../../?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;    //call h4
         }else{
             $notification_link = HEURIST_BASE_URL . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
         }

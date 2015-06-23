@@ -111,7 +111,6 @@
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
     require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
     require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
-    //require_once (dirname(__FILE__) . '/../../applications/h4/php/common/db_recsearch.php');
 
     set_time_limit(0); //no limit    
     
@@ -1379,7 +1378,7 @@
         //$_REQUEST['idonly'] = 1;
         //$_REQUEST['vo'] = 'h3';
         //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-        $url = HEURIST_BASE_URL."applications/h4/php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";
+        $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";    //call h4
         if($PUBONLY){
             $url = $url."&publiconly=1";
         }

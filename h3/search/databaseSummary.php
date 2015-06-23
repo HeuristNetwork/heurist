@@ -121,8 +121,8 @@
         <link rel="stylesheet" type="text/css" href="../external/colpick/colpick.css">
         
         <!-- Visualize plugin --> 
-        <script type="text/javascript" src="../applications/h4/page/visualize/visualize.js"></script>
-        <link rel="stylesheet" type="text/css" href="../applications/h4/page/visualize/visualize.css">
+        <script type="text/javascript" src="../../page/visualize/visualize.js"></script> <!-- use h4 -->
+        <link rel="stylesheet" type="text/css" href="../../page/visualize/visualize.css">
         
         <!-- On Row Click -->
         <script>
@@ -251,7 +251,7 @@
 
                 <!-- D3 visualisation -->
                 <td id="visualisation-column" style="display:none">
-                    <?php include "../applications/h4/page/visualize/visualize.html"; ?>
+                    <?php include "../../page/visualize/visualize.html"; ?>
                 </td>
             </tr>
         </table>
@@ -265,7 +265,7 @@
                 $("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL
-                var url = "../applications/h4/php/api/rectype_relations.php" + window.location.search; // H4 API call
+                var url = "../../php/api/rectype_relations.php" + window.location.search; // call h4 API
                 console.log("Loading data from: " + url);
                 d3.json(url, function(error, json) {
                     // Error check
