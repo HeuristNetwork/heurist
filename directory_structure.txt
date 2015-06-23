@@ -15,6 +15,10 @@ Heurist directory:    /var/www/html/HEURIST  (may be installed in any web locati
 
 ---------------------------------------------------------------------------------------------------------
 
+VERSION 4 (June  2015)
+
+Heurist version 3 (h3) is now a subdirectory of version 4
+
 SUMMARY:
 
     /var/www/html                           Optional: place simlinks in web root to shorten URL paths
