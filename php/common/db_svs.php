@@ -23,6 +23,7 @@
     
 
     require_once (dirname(__FILE__).'/../System.php');
+    //require_once (dirname(__FILE__).'/db_users.php');
 
     /**
     * Get all saved searches for given user
@@ -156,10 +157,31 @@
         
         if(defined('HEURIST_SETTING_DIR')){
             
-            $ugrID = $system->get_user_id();
-            $filename = HEURIST_SETTING_DIR . $ugrID . '_svstree.json';
+            //save separately - by groups
+            if(true){
+                $groups = json_decode($data, true);
+                
+                foreach($groups as $id=>$treedata){
+                    if($id=="bookmark"){
+                        $id = $system->get_user_id()."bookmark";
+                    }else if($id=="all"){
+                        $id = $system->get_user_id()."all";
+                    }
+                    $filename = HEURIST_SETTING_DIR . $id . '_svstree.json';
+                    $res = file_put_contents ( $filename, json_encode($treedata) );
+                    if(!$res){
+                        return $res;
+                    }
+                }
             
-            $res = file_put_contents ( $filename, $data );
+                return true;
+            
+            }else{
+                //save everything into one file - OLD WAY
+                $ugrID = $system->get_user_id();
+                $filename = HEURIST_SETTING_DIR . $ugrID . '_svstree.json';
+                $res = file_put_contents ( $filename, $data );
+            }
             return $res;
         }else{
             $system->addError(HEURIST_SYSTEM_FATAL, "Settings folder is not accessible");
@@ -167,15 +189,53 @@
         }
     }
     
-    function svsGetTreeData($ugrID){
-        //load saved search tree data
+    function __get_svs_treeview_file($id, $domain=""){
         
-        if(defined('HEURIST_SETTING_DIR')){
-            $filename = HEURIST_SETTING_DIR . $ugrID . '_svstree.json';
+            $filename = HEURIST_SETTING_DIR . $id . $domain . '_svstree.json';                
             if(file_exists($filename)){
-                return file_get_contents ($filename);
+                return '"'.(($domain!="")?$domain: $id.$domain).'":'.file_get_contents ($filename);
             }else{
-                return false;
+                return null; //'"'.$group_id.'":{}';
+            }
+    }
+    
+    function svsGetTreeData($system){
+        
+        $ugrID = $system->get_user_id();
+        //load saved search tree data
+        if(defined('HEURIST_SETTING_DIR')){
+            
+            //load separately - by groups
+            if(true){
+                $res = array();
+                //load rules
+                array_push($res, __get_svs_treeview_file("rules"));
+                
+                //get list of all groups for this user
+                //user_getWorkgroups($system)
+                $groups = $system->get_user_group_ids();
+                foreach($groups as $group_id){
+                    if($group_id==$ugrID){
+                        $content = __get_svs_treeview_file($group_id, "bookmark");
+                        if($content) array_push($res, $content);
+                        $content = __get_svs_treeview_file($group_id, "all");
+                        if($content) array_push($res, $content);
+                    }else{
+                        $content = __get_svs_treeview_file($group_id);    
+                        if($content) array_push($res, $content);
+                    }
+                }
+                
+                return '{'.implode(',', $res).'}';
+        
+            }else{
+            
+                $filename = HEURIST_SETTING_DIR . $ugrID . '_svstree.json';
+                if(file_exists($filename)){
+                    return file_get_contents ($filename);
+                }else{
+                    return false;
+                }
             }
         }else{
             return false;

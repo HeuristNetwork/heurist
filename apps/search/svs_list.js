@@ -264,9 +264,7 @@ $.widget( "heurist.svs_list", {
                 
                 if(response.status = top.HAPI4.ResponseStatus.OK){
                     try {
-                        top.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
-                        
-                        //remove nodes that refers to missed search
+                        //1. remove nodes that refers to missed search
                         function __cleandata(data){
                             
                             if(data.children){
@@ -286,7 +284,10 @@ $.widget( "heurist.svs_list", {
                             }
                         }                        
                         
+                        top.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
+                        
                         top.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(top.HAPI4.currentUser.ugr_SvsTreeData);
+                        
                     }
                     catch (err) {
                     }  
@@ -294,6 +295,12 @@ $.widget( "heurist.svs_list", {
                 
                 if(!top.HAPI4.currentUser.ugr_SvsTreeData) //treeview was not saved - define tree data by default
                         top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
+                else{
+                    that._validate_TreeData();
+                }        
+                        
+                //add missed entries        
+                        
                         
                 that._updateAccordeon();        
             } );
@@ -786,7 +793,63 @@ $.widget( "heurist.svs_list", {
        return res;
 
     },
-    
+
+    //add missed groups and saved searches to treeview
+    _validate_TreeData: function(){
+        
+        var treeData = this._define_DefaultTreeData();
+        
+        //form files
+        var treeDataF = top.HAPI4.currentUser.ugr_SvsTreeData;
+        if(!treeDataF) treeDataF = {};
+        
+                
+        for (var groupID in treeData){
+            if(!treeDataF[groupID]){
+                //direct copy
+                treeDataF[groupID] = treeData[groupID];
+            }else{
+                if(!treeDataF[groupID]['children']){
+                    treeDataF[groupID]['children'] = [];
+                }
+                
+                
+                function __findInTeeDataF(nodes, key){
+                    
+                    var res = false;
+                    
+                                for (var idx in nodes){
+                                  if(idx>=0){
+                                       var node = nodes[idx];
+                                       if(node['key'] == key){
+                                           return true;
+                                       }else if(node['children']){
+                                           res = __findInTeeDataF( node.children, key );
+                                           if(res) return res;
+                                       }                                       
+                                  }
+                                }
+                                
+                    return res; 
+                    
+                }
+                
+                //add missed saved searches
+                var svs = treeData[groupID].children;
+                var i;
+                for(i=0; i<svs.length; i++){
+                    //find in treeview from file
+                    if(svs[i]['key']){
+                        if(!__findInTeeDataF( treeDataF[groupID]['children'], svs[i]['key'])){ //if not found - add
+                            treeDataF[groupID]['children'].push(svs[i]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        top.HAPI4.currentUser.ugr_SvsTreeData = treeDataF;
+    },
     
     _define_DefaultTreeData: function(){
 

@@ -127,7 +127,7 @@
                 
             } else if ($action=="svs_gettree" ) { //save saved searches tree status
 
-                $res = svsGetTreeData($system->get_user_id());
+                $res = svsGetTreeData($system);
                 
             } else {
 
