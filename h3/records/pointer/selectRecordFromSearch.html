@@ -63,8 +63,8 @@
                                     onChange="top.HEURIST.util.setDisplayPreference('record-search-string', this.value);"
                                     style="padding: 1px 18px 1px 2px; margin: 6px; width: 100%;"></div>
                                 <div id="help-div" class="help prompt"
-                                    style="width: 300px; margin-left: 20px; font-size: smaller;">
-                                    Select below or search on title here.
+                                    style="padding-left: 10px; font-size: smaller;">
+                                    Select below or search on record title here.
                                     [enter] or <img src="../../common/images/magglass_12x11.gif"
                                         onClick="document.forms[0].submit()" style="vertical-align: middle;"> to search</div>
                             </div>
@@ -79,9 +79,9 @@
                             <input type=submit value=Find style="display: none; font-weight: bold; padding: 0 1ex; margin-right: 1ex;" >
                             -->
                         </td>
-                        <td style="width: 120px;" title="Restrict search to this record type">
+                        <td style="width: 140px;" title="Restrict search to this record type">
                             in <select id="t" name="t" style="width: 90%;"
-                            onChange="document.forms[0].submit('record-search-type')"></select>
+                            onChange="onSelectRecordtype(true)"></select>
                         </td>
                         <td style="width: 80px; padding: 10 5px;">
                             <div class="radio" style="white-space:nowrap;">
@@ -108,10 +108,11 @@
                         <td colspan="5" rowspan="1" style="padding-top: 0px; padding-left: 30px;">
                             <b>or</b> &nbsp;&nbsp;&nbsp;
                             <a href="#" style="border: 3px; border-style: outset; border-color: black;"
+                            id="btn_CreateNewRecord"
                             title="Create and edit a new record, which will become the target of the pointer field"
                             onClick=" return addRecord();">
-                            &nbsp;&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>
-                            &nbsp;&nbsp;<b>Create a new record</b></a>
+                            <img src="../../common/images/add-record-small.png" style="border: 1px;"/>
+                            <b>Create a new record</b></a>
                             &nbsp;&nbsp;<i>Record becomes target of current pointer field</i>
                         </td>
                     </tr>
@@ -164,12 +165,21 @@
             if (recTypeName) {
                 document.title = "Select / create: " + recTypeName;
             }
+            
+            function onSelectRecordtype(is_submit){
+                if(is_submit) document.forms[0].submit('record-search-type');    
+                var rt_name = top.HEURIST.rectypes.names[document.getElementById('t').value];
+                if(!rt_name) rt_name = 'a new record';
+                document.getElementById('btn_CreateNewRecord').innerHTML = 
+                    '&nbsp;<img src="../../common/images/add-record-small.png" style="border: 1px;"/>'
+                    +'&nbsp;<b>Create new '+rt_name+'</b>';
+            }
 
             /*
             *
             */
             function addRecord(){
-
+                
                 var recTypeId = document.getElementById('t').value;
 
                 var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(recTypeId);
@@ -430,7 +440,9 @@
                     }
                     document.getElementById(searchScope).checked = true;
                 }
-                document.forms[0].submit();
+                
+                onSelectRecordtype(true);
+                //document.forms[0].submit();
 
                 /*				var intervalID = setInterval(function() {
                 try {

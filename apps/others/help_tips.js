@@ -134,6 +134,7 @@ $.widget( "heurist.help_tips", {
     show: function(){
         if(this.options.isdialog){
             this.element.dialog("open");
+            this.element.parent().addClass('ui-dialog-heurist');
         }else{
             //fill selected value this.element
         }

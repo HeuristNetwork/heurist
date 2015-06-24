@@ -61,7 +61,7 @@ $.widget( "heurist.resultList", {
         } */
         this.innerHeader = null;
         if(this.options.innerHeader){
-            this.innerHeader =  $( "<div>" ).css('padding','0.7em').appendTo( this.element );
+            this.innerHeader =  $( "<div>" ).css('padding','1.4em 0 0 0.7em').appendTo( this.element );
             this.innerHeader.html('<h3>'+top.HR('Search Result')+'</h3>');
             hasHeader = true;
             //set background to none

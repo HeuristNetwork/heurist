@@ -44,12 +44,12 @@ $.widget( "heurist.svs_list", {
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
         this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
-        this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.6em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
+        this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.5em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
+                    //.removeClass('ui-widget-content')
                     .appendTo( this.search_tree );
         
         this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
-            .addClass('logged-in-only')
-            .addClass('heurist-helper1')
+            .addClass('logged-in-only heurist-helper1')
             .appendTo( $( "<div>" ).css('height','1.3em').appendTo(this.div_header) )
             //.appendTo( this.accordeon );
             if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
@@ -57,11 +57,12 @@ $.widget( "heurist.svs_list", {
         
         if(this.options.btn_visible_dbstructure){
             
-            this.btn_db_dtructure = $( "<h3>", {
-                text: top.HR("Database Summary")
-            })
-            .addClass('logged-in-only')
-            .css({'cursor':'pointer', 'padding-top':'0.5em'})
+            /*this.btn_db_dtructure = $( "<a>", {href:"#", html:top.HR("Database Summary")} )       //
+            .css({'text-decoration':'none'})*/
+            
+            this.btn_db_dtructure = $( "<h3>" , { text: top.HR("Database Summary") } ) 
+            .addClass('logged-in-only graylink')
+            .css({'cursor':'pointer', 'padding-top':'0.5em' })
             .appendTo( this.div_header )
             //.button() //({icons: {primary: "ui-icon-circle-plus"}})
             .click( function(){ that._showDbSummary(); });

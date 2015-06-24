@@ -228,7 +228,7 @@
                         $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
 
                         if($res){
-                            echo ("<br/><p> $table . Added ".$mysqli->affected_rows);
+                            echo ($table . " Added ".$mysqli->affected_rows . ". ");
                         }else{
                             echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
                             $res = false;
@@ -243,7 +243,7 @@
                 }else{
                     $res = false;
                     if($verbose) {
-                        echo ("<br/><p class=\"error\">Error: Can not get list of table in database ".$db_target);
+                        echo ("<br/><p class=\"error\">Error: Can not get list of table in database ".$db_target."</p>");
                     }
                 }
 

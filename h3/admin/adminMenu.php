@@ -152,7 +152,7 @@
         <div id="sidebar">
 
             <div class="banner" style="padding-left:20px;padding-top:4px;border-bottom:1px solid #696969;">
-                <button id="link_admin" onclick="{location.href='../index.php?db=<?=HEURIST_DBNAME?>';}"
+                <button id="link_admin" onclick="{location.href='../../?db=<?=HEURIST_DBNAME?>';}"
                     title="Click to return to the default search page (User View)" class="button"><b>go to USER VIEW</b></button>
             </div>
 

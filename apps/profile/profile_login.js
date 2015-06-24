@@ -151,10 +151,13 @@ function doLogin(isforsed){
                 });
 
                 $dlg.dialog("open");
+                $dlg.parent().addClass('ui-dialog-heurist');
+
             });//load html
         }else{
             //show dialogue
             login_dialog.dialog("open");
+            login_dialog.parent().addClass('ui-dialog-heurist');
         }
 }
 

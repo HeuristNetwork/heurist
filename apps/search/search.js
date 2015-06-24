@@ -83,37 +83,47 @@ $.widget( "heurist.search", {
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
         
+        var sz_search = '600px',
+            sz_input = '450px',
+            sz_seach_padding = '0';
+        
+        var div_left_visible = (!this.options.isloginforced || this.options.btn_visible_dbstructure);
+        
+        if(div_left_visible)
+        {
+        
         // database summary or login buttons
         var div_left  = $('<div>')
-                        .css({'height':'2em','width':'200px', 'padding':'1.5em','float':'left'})
+                        .css({'height':'2em','width':'200px', 'padding':'1.8em','float':'left'})
                         .appendTo( this.element );
+                 
+        if(!this.options.isloginforced){                 
                         
-        this.btn_login = $( "<button>", {
-                text: top.HR("Login")
-            })
-            .css('width',(top.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
-            .addClass('logged-out-only')
-            .addClass('ui-heurist-btn-header1')
-            .appendTo(div_left)
-            .button({icons: {
-                primary: 'ui-icon-key'
-            }})
-            .click( function(){ that._doLogin(); });
+            this.btn_login = $( "<button>", {
+                    text: top.HR("Login")
+                })
+                .css('width',(top.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
+                .addClass('logged-out-only')
+                .addClass('ui-heurist-btn-header1')
+                .appendTo(div_left)
+                .button({icons: {
+                    primary: 'ui-icon-key'
+                }})
+                .click( function(){ that._doLogin(); });
 
-        if(top.HAPI4.sysinfo.registration_allowed==1){
-            
-        this.btn_register = $( "<button>", {
-                text: top.HR("Register")
-            })
-            .css('width','80px')
-            .addClass('logged-out-only')
-            .addClass('ui-heurist-btn-header1')
-            .appendTo(div_left)
-            .button()
-            .click( function(){ that._doRegister(); });
+            if(top.HAPI4.sysinfo.registration_allowed==1){
+                
+            this.btn_register = $( "<button>", {
+                    text: top.HR("Register")
+                })
+                .css('width','80px')
+                .addClass('logged-out-only')
+                .addClass('ui-heurist-btn-header1')
+                .appendTo(div_left)
+                .button()
+                .click( function(){ that._doRegister(); });
+            }
         }
-
-        
         if(this.options.btn_visible_dbstructure){
             this.btn_databasesummary = $( "<button>", {
                 text: top.HR("Database Summary")
@@ -125,13 +135,20 @@ $.widget( "heurist.search", {
             .button()
             .click( function(){ that._showDbSummary(); });
         }
-
+        
+        }else{
+            sz_search = '700px';
+            sz_input = '550px';
+            sz_seach_padding = '50px';
+        }
+        
+        
 
 
         //'height':'100%',
-        this.div_search   = $('<div>').css({'padding-top':'1.5em', 'min-width':'600px', 'float':'left'}).appendTo( this.element );
+        this.div_search   = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_seach_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element );
 
-        this.div_progress = $('<div>').css({'padding-top':'1.5em', 'min-width':'600px', 'float':'left'}).appendTo( this.element ).hide();
+        this.div_progress = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_seach_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element ).hide();
 
         if(this.options.btn_visible_newrecord){
             this.btn_add_record = $( "<button>", {
@@ -142,7 +159,7 @@ $.widget( "heurist.search", {
             .addClass('ui-heurist-btn-header1')
             .appendTo(
                   $('<span>')
-                        .css({'padding':'1.5em 6em 0 3em','float':'left'}) //,'display':'inline-block'  'width':this.options.leftmargin,
+                        .css({'padding':'1.8em 6em 0 3em','float':'left'}) //,'display':'inline-block'  'width':this.options.leftmargin,
                         .appendTo( this.element )                    
             )
             .button({icons: {
@@ -153,7 +170,7 @@ $.widget( "heurist.search", {
         
 
         this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )                  
-        .css({'margin-right':'0.2em', 'max-width':'450px', 'width':'450px', 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'}) 
+        .css({'margin-right':'0.2em', 'max-width':sz_input, 'width':sz_input, 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'}) 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.div_search );
         
@@ -166,8 +183,9 @@ $.widget( "heurist.search", {
                 var $this = $(this);
                 if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
                         //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
-                       if($this.outerHeight()<23){
-                            that.div_search.css('padding-top','1.5em');    
+                       if($this.outerHeight()<25){
+                            that.div_search.css('padding-top','1.8em');    
+                            $this.height(23);
                        }else{
                             if($this.outerHeight()> that.element.height()-menu_h-8){                    //, 'max-height': (this.element.height()-12)+':px'
                                 $this.height(that.element.height()-menu_h-10);
@@ -184,7 +202,9 @@ $.widget( "heurist.search", {
                 $this.data('y', $this.outerHeight());
         })
         
-
+        //
+        // search buttons
+        //
         this.div_search_as_guest = $('<div>')
         .css('display', 'inline-block')
         .addClass('logged-out-only')
@@ -206,11 +226,72 @@ $.widget( "heurist.search", {
         .css({'vertical-align':'top'})
         //.css({'position':'absolute'})
         .appendTo( this.div_search );
+        
+        this.btn_search_as_user = $( "<button>", {
+            text: top.HR("search")
+        })
+        .css('width', '10em')
+        .appendTo( this.div_search_as_user )
+        .addClass('ui-heurist-btn-header1')
+        .button({icons: {
+            secondary: "ui-icon-search"
+        }});
 
-        if(this.options.islinkmode){
+        this.btn_search_domain = $( "<button>", {
+            text: top.HR("search option")
+        })
+        .appendTo( this.div_search_as_user )
+        .addClass('ui-heurist-btn-header1')
+        .button({icons: {
+            primary: "ui-icon-triangle-1-s"
+            }, text:false});
+
+        this.div_search_as_user.buttonset();
+
+        var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
+        var smenu = "";
+        $.each(dset, function(index, value){
+            var lbl = that._getSearchDomainLabel(value);
+            if(lbl){
+                smenu = smenu + '<li id="search-domain-'+value+'"><a href="#">'+top.HR(lbl)+'</a></li>'
+            }
+        });
+
+        this.menu_search_domain = $('<ul>'+smenu+'</ul>')   //<a href="#">
+        .zIndex(9999)
+        .css('position','absolute')
+        .appendTo( this.document.find('body') )
+        .menu({
+            select: function( event, ui ) {
+                var mode =  ui.item.attr('id').substr(14);  //(ui.item.attr('id')=="search-domain-b")?"b":"a";
+                that.option("search_domain", mode);
+                that._refresh();
+        }})
+        .hide();
+
+        this._on( this.btn_search_domain, {
+            click: function() {
+                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                var menu = $( this.menu_search_domain )
+                .css('width', this.div_search_as_user.width())
+                .show()
+                .position({my: "right top", at: "right bottom", of: this.btn_search_domain });
+                $( document ).one( "click", function() { menu.hide(); });
+                return false;
+            }
+        });
+        
+        //set input search textarea same height as button
+        this.input_search.height( this.btn_search_as_guest.height() - 2 );
+        
+        
+        //
+        // links below input
+        //
+        if(this.options.islinkmode){ 
 
             //$('<br>').appendTo( this.div_search );
-            this.div_search_links = $('<div>').css({'text-align':'right','width':'450px','padding-top':'0.3em'}) //, 'width':'30%', 'max-width':'500px' })
+            this.div_search_links = $('<div>').css({'text-align':'right','width':sz_input,'padding-top':'0.3em'}) //, 'width':'30%', 'max-width':'500px' })
                     .appendTo( this.div_search );
 
             var link = $('<a>',{
@@ -265,8 +346,9 @@ $.widget( "heurist.search", {
                 }
             }});
 
+            //set color of links as tet in button
             this.div_search_links.find('a').css({ 'text-decoration':'none', 'font-size':'0.9em',
-                'padding-right':'1em' ,'color':this.btn_login.css('color')}); // 'color':  this.div_search_links.find('.ui-widget-content').css('color') });
+                'padding-right':'1em' ,'color':this.btn_search_as_user.css('color')}); // 'color':  this.div_search_links.find('.ui-widget-content').css('color') });
 
         }else{
 
@@ -284,59 +366,6 @@ $.widget( "heurist.search", {
             this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
         }
 
-        this.btn_search_as_user = $( "<button>", {
-            text: top.HR("search")
-        })
-        .css('width', '10em')
-        .appendTo( this.div_search_as_user )
-        .addClass('ui-heurist-btn-header1')
-        .button({icons: {
-            secondary: "ui-icon-search"
-        }});
-
-        this.btn_search_domain = $( "<button>", {
-            text: top.HR("search option")
-        })
-        .appendTo( this.div_search_as_user )
-        .addClass('ui-heurist-btn-header1')
-        .button({icons: {
-            primary: "ui-icon-triangle-1-s"
-            }, text:false});
-
-        this.div_search_as_user.buttonset();
-
-        var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
-        var smenu = "";
-        $.each(dset, function(index, value){
-            var lbl = that._getSearchDomainLabel(value);
-            if(lbl){
-                smenu = smenu + '<li id="search-domain-'+value+'"><a href="#">'+top.HR(lbl)+'</a></li>'
-            }
-        });
-
-        this.menu_search_domain = $('<ul>'+smenu+'</ul>')   //<a href="#">
-        .zIndex(9999)
-        .css('position','absolute')
-        .appendTo( this.document.find('body') )
-        .menu({
-            select: function( event, ui ) {
-                var mode =  ui.item.attr('id').substr(14);  //(ui.item.attr('id')=="search-domain-b")?"b":"a";
-                that.option("search_domain", mode);
-                that._refresh();
-        }})
-        .hide();
-
-        this._on( this.btn_search_domain, {
-            click: function() {
-                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
-                var menu = $( this.menu_search_domain )
-                .css('width', this.div_search_as_user.width())
-                .show()
-                .position({my: "right top", at: "right bottom", of: this.btn_search_domain });
-                $( document ).one( "click", function() { menu.hide(); });
-                return false;
-            }
-        });
 
         this.search_assistant = null;
 
@@ -768,7 +797,8 @@ $.widget( "heurist.search", {
 
                     var popup = $( this.search_assistant )
                     .show()
-                    .position({my: "right top+3", at: "right bottom", of: this.input_search });
+                    //.position({my: "right top+3", at: "right bottom", of: this.input_search });
+                    .position({my: "left top+3", at: "left bottom", of: this.input_search });
                     //.position({my: "right top", at: "right bottom", of: this.btn_search_assistant });
 
                     function _hidethispopup(event) {

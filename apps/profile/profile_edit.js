@@ -205,6 +205,8 @@ $.widget( "heurist.profile_edit", {
                 Number(this.options.ugr_ID)>0 ? top.HR('Edit profile')+': '+this.options.edit_data['ugr_FirstName'] + ' ' + this.options.edit_data['ugr_LastName'] //this.options.edit_data['ugr_FullName'] 
                 : top.HR('Registration')  );
             this.edit_form.dialog("open");
+            this.edit_form.parent().addClass('ui-dialog-heurist');
+
         }
     },
 

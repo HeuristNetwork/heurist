@@ -166,6 +166,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }}*/
             ]
         });
+        this.element.parent().addClass('ui-dialog-heurist');
 
         //option
         this.step0 = $("<div>")

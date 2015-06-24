@@ -372,6 +372,7 @@ function hSvsEdit(args) {
                 });
 
                 $dlg.dialog("open");
+                $dlg.parent().addClass('ui-dialog-heurist');
 
             });
         }else{

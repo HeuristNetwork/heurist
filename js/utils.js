@@ -880,7 +880,11 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
         
         $dlg.dialog(options);
-
+        
+        //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
+        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
+        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
+        //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
     },
 
     showMsgFlash: function(message, timeout, title, position_to_element){

@@ -432,7 +432,7 @@
 
 
         <br />&nbsp;<br />
-        <a id="show-adv-link" href="#" style="font-weight: bold; margin-left:40px; ">
+        <a id="show-adv-link" href="#" style="font-weight: bold; margin-left:10px; ">
             more ... (hyperlink addition, tags)</a>
         <div id=advanced-section style="display: none;">
             <div class="input-row separator">
@@ -451,7 +451,7 @@
                 <div class="input-header-cell">
                     Hyperlink this URL in your web page or a desktop shortcut
                     to provide one-click addition of Heurist records with these characteristics:</div>
-                <div class="input-cell"><textarea id=add-link-input style="height:90px"></textarea>
+                <div class="input-cell"><textarea id=add-link-input style="height:90px" cols="60"></textarea>
                     <div class="prompt">
                         <a id=broken-kwd-link target=_blank style="display: none;">
                             Click here to search for records added by non workgroup members using the above link</a>
