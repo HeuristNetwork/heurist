@@ -4,13 +4,13 @@
 
 -- ---------------------------------------------------------------------------------------------
 
--- The rest of this file is a MySQLDump dump of a basic H3CoreDefinitions database
+-- The rest of this file is a MySQLDump dump of a basic Heurist_Core_Definitions database
 -- which is used as a starting point for new users. Login and email addresss needs to be set as part of
 -- the configuration as this will be needed by the system administrator to approve new users
 
 -- *** IMPORTANT *** You MUST use -R or --routines so that stored fuinctions are added to the database
 
---  mysqldump -u... -p.... -R hdb_H3Sandpit > hdb_H3Sandpit.sql
+--  mysqldump -u... -p.... -R hdb_Heurist_Core_Definitions > hdb_Heurist_Core_Definitions.sql
 
 --  IMPORTANT: MAKE SURE THE DATABASE IS CONFIGURED TO ALLOW REGISTRATION IN sysIdentification
 --             Remove any unwanted users (sysUGrps) and unwanted user-group connections

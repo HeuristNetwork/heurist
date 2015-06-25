@@ -291,11 +291,11 @@
                                 </a>
                         </li>
                         <?php
+                            menuEntry('','Structure (SQL)','describe/getDBStructureAsSQL.php?db='.HEURIST_DBNAME.'&amp;pretty=1',
+                                'Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)');
                             menuEntry('','Define mime types','structure/mimetypes/manageMimetypes.php?db='.HEURIST_DBNAME,
                                 'Define the relationship between file extension and mime type for uploaded and externally referenced files');
-                            menuEntry('---','Structure (deprecated)','describe/getDBStructureAsSQL.php?db='.HEURIST_DBNAME.'&amp;pretty=1',
-                                'Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)');
-                            menuEntry('','XForms (deprecated)','describe/getDBStructureAsXForms.php?db='.HEURIST_DBNAME,
+                            menuEntry('---','XForms (deprecated)','describe/getDBStructureAsXForms.php?db='.HEURIST_DBNAME,
                                 'Save selected record types as XForms definitions - this function is not maintained');
                         ?>
                     </ul>

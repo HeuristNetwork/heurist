@@ -1,34 +1,24 @@
 <?php
 
-/*
-* Copyright (C) 2005-2013 University of Sydney
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* http://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
 * buildCrosswalks.php, Gets definitions from a specified installation of Heurist and writes them
     * either to a new DB, or temp DB
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
-* @version     3.1.0
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
 */
 
 	// crosswalk_builder.php  - gets definitions from a specified installation of Heurist
@@ -39,6 +29,7 @@
 	// and added selection of definitions to be imported and crosswalk builder, plus instructions and pseudocode.
 	// 4 Aug 2011, changed to import table structures from blankDBStructure.sql and to
 	// include crosswalking during creation of a new database
+    // Added usrSavedStructures 24 Jun 2015
 
 	// Notes and directions:
 
@@ -63,11 +54,6 @@
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
 
-	/* ARTEM
-	if (!is_logged_in()) {
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-		return;
-	}*/
 
 	// ------Administrative stuff ------------------------------------------------------------------------------------
 
@@ -106,12 +92,9 @@
 
 	} // existing database
 
-	/*****DEBUG****///error_log(" tempdbname = $tempDBName  is new = $isNewDB  dbname = $dbname");
 	// * IMPORTANT *
-	//   If database format is changed, update version info, include files, sql fiels for new dbs etc.
-	// see comprehensive lsit in admin/descriibe/getDBStructureAsSQL.php
-
-
+	//   If database format is changed, update version info, include files, sql files for new dbs etc.
+	// see comprehensive list in admin/describe/getDBStructureAsSQL.php
 
 
 	// -----Check not locked by admin -------------------------------
@@ -122,9 +105,9 @@
 	// working on this at the same time. But need to provide a means of removing lock in case the
 	// connection is lost, eg. heartbeat on subsequent pages or a specific 'remove admin lock' link (easier)
 
-	// Check if someone else is already modifying database definitions, if so: stop.
-    
-    if($isNewDB){    
+	// Check if someone else is already modifying database definitions, if so: stop
+
+    if($isNewDB){
         $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFAIMS)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
     }
 
@@ -153,32 +136,22 @@
 			}
 		} // detect lock and shuffle out
 
-		// Mark database definitons as being modified by adminstrator
+		// Mark database definitions as being modified by administrator
 		mysql_connection_insert(DATABASE);
 		$query = "insert into sysLocks (lck_UGrpID, lck_Action) VALUES (".(function_exists('get_user_id') ? get_user_id(): 0).", 'buildcrosswalks')";
 		$res = mysql_query($query); // create sysLock
-		// Create the Heurist structure for the temp database, using a tripped version of the new database template
-        
+
+
+		// Create the Heurist structure for the temp database, using a shortened version of the new database template
+
         db_drop($tempDBName, false);
-        
+
         if(!db_create($tempDBName) ||
            !db_script($tempDBName, dirname(__FILE__)."/../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql") ){
             unlockDatabase();
             exit();
         }
-        
-        /*  OLD WAY
-        mysql_query("DROP DATABASE IF EXISTS`" . $tempDBName . "`");    // database might exist from previous use
-		mysql_query("CREATE DATABASE `" . $tempDBName . "`"); // TODO: should check database is created
-		$cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-		" -D$tempDBName < ../../setup/dbcreate/blankDBStructureDefinitionsOnly.sql"; // subset of, and must be kept in sync with, blankDBStructure.sql
-        
-		$output2 = exec($cmdline . ' 2>&1', $output, $res2);
-		if($res2 != 0) {
-			unlockDatabase();
-			die("MySQL exec code $res2 : Unable to create table structure for new database $tempDBName (failure in executing blankDBStructureDefinitionsOnly.sql)");
-		}
-        */
+
 	}
 
 	mysql_connection_insert($tempDBName); // Use temp database
@@ -186,8 +159,7 @@
 
 	// ------Find and set the source database-----------------------------------------------------------------------
 
-	// Query heuristscholar.org Index database to find the URL of the installation you want to use as source
-	// The query should be based on DOAP metadata and keywords which Steven is due to set up in the Index database
+	// Query heurist.sydney.edu.au Index database to find the URL of the installation you want to use as source
 
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
@@ -205,18 +177,18 @@
 			// TODO: THIS SHOULD NOT HAPPEN, would be better to issue a warning and exit
 			// TODO: check that this points at the correct reference database
 			/*
-            $source_db_id = '2'; //MAGIC NUMBER - ID of H3CoreDefinitions db in Heurist_System_Index database
-			$source_db_name = 'H3CoreDefinitions';
+            $source_db_id = '2'; //MAGIC NUMBER - ID of Heurist_Core_Definitions db in Heurist_System_Index database
+			$source_db_name = 'Heurist_Core_Definitions';
 			$source_db_prefix = 'hdb_';
-			$source_url = "http://heuristscholar.org/h3/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
-			// parameters were ?prefix=hdb_&db=H3CoreDefinitions";
+			$source_url = "http://heurist.sydney.edu.au/h4/h3/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+			// parameters were ?prefix=hdb_&db=Heurist_Core_Definitions";
             */
-            
+
             unlockDatabase();
             die("Request for database structure to import does not specify a database - please advise the Heurist team through a bug report");
-            
+
 		} else {
-            // Set upquery to the exhcange format feed from the selected  database
+            // Setup query to the exchange format feed from the selected database
 			$source_db_id = $_REQUEST["dbID"];
 			$source_db_name = $_REQUEST["dbName"];
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
@@ -228,9 +200,6 @@
             $source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 
         }
-
-//DEBUG        error_log("source url ".print_r($source_url,true));
-//DEBUG        error_log("source url NEW ".print_r($source_url_new,true));
 
 		$data = loadRemoteURLContent($source_url_new); // try new  path
 		if (!$data || substr($data, 0, 6) == "unable") { // new path didn't work
@@ -248,7 +217,7 @@
                     "<br /><a href=$source_url_new target=_blank>$source_url_new</a> <p>$msg");
             }
 		}
-        
+
 	} // getting data from source database for import of definitions to an existing database
 
 
@@ -268,13 +237,15 @@
 	if ($isExistingDB)
 	{
 
-		preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
+		preg_match("/Database Version:\s*(\d+)\.(\d+)(?:\.(\d+))*/",$data,$sourceDBVersion);
+        // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
 
 		preg_match("/Vsn:\s*(\d+)\.(\d+)(?:\.(\d+))*/","Vsn: ".HEURIST_DBVERSION,$thisDBVersion); // $sourceDBVersion[0] = version string, 1, 2, 3 = ,major, minor, sub versions
-/*****DEBUG****///error_log("source ".print_r($sourceDBVersion,true));
-/*****DEBUG****///error_log("this  ".print_r($thisDBVersion,true));
-	// we ignore following test if creating a new database, because the current database version is irrelevant, the definition files determine the version created
-	// Note 13/9/11: HEURIST_DBVERSION seems to reflect the default database or ? the first opened database rather than the current open database
+
+	// we ignore following test if creating a new database, because the current database version is irrelevant,
+    // the definition files determine the version created.
+	// Note 13/9/11: HEURIST_DBVERSION seems to reflect the default database or ? the first opened database
+    // rather than the current open database
 		if (!($sourceDBVersion[1] == $thisDBVersion[1] && $sourceDBVersion[2] == $thisDBVersion[2])) {
 			echo "<p><strong>The source database $source_db_name ($sourceDBVersion[0]) is a different major/minor version from the current ".DATABASE." database (Vsn ".HEURIST_DBVERSION.
 			")</strong><p>One or other database will need updating to the same major/minor version #";
@@ -290,7 +261,8 @@
 		if(!$tableNumber) {
 			$tableNumber = 1;
 		}
-		// TODO: this is a horrible approach to splitting out the data. Should be rewritten. Works, so for the moment if it ain't broke ...
+		// TODO: this is a horrible approach to splitting out the data. Should be rewritten.
+        // Works, so for the moment, "if it ain't broke, don't fix it ..."
 		if(sizeof($splittedData) > $tableNumber) { // what the hell does this do? fortunately it is always true!
 			$splittedData2 = explode($endToken, $splittedData[$tableNumber]);
 			$i = 1;
@@ -321,7 +293,7 @@
 
 	$recTypeGroups = getNextDataSet($splittedData);
 	$detailTypeGroups = getNextDataSet($splittedData);
-	$ontologies = getNextDataSet($splittedData);
+    $ontologies = getNextDataSet($splittedData);
 	$terms = getNextDataSet($splittedData);
 	$recTypes = getNextDataSet($splittedData);
 	$detailTypes = getNextDataSet($splittedData);
@@ -329,6 +301,8 @@
 	$relationshipConstraints = getNextDataSet($splittedData);
 	$fileExtToMimetype = getNextDataSet($splittedData);
 	$translations = getNextDataSet($splittedData);
+    $savedSearches = getNextDataSet($splittedData);
+
 	// we are not extracting defCalcFunctions, defCrosswalk, defLanguage, defURLPrefixes, users, groups and tags
 	// add later if needed
 
@@ -336,7 +310,7 @@
 	$query = "SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'";
 	mysql_query($query);
 	processRecTypeGroups($recTypeGroups);
-	processDetailTypeGroups($detailTypeGroups);
+    processDetailTypeGroups($detailTypeGroups);
 	processOntologies($ontologies);
 	processTerms($terms);
 	processRecTypes($recTypes);
@@ -345,6 +319,7 @@
 	processRelationshipConstraints($relationshipConstraints);
 	processFileExtToMimetype($fileExtToMimetype);
 	processTranslations($translations);
+    processSavedSearches($savedSearches);
 	$query = "SET SESSION sql_mode=''";
 	mysql_query($query);
 
@@ -355,17 +330,16 @@
 	// These insert statements updated by Ian ~12/8/11
 
 	// NOTE: It is ESSENTIAL that the insert statements here correspond in fields and in order with the
-	//       tables being written out by getDBStructureAsSQL
-	//       Some tables not processed (defCalcFunctions, defCrosswalk, defLanguages, sysIdentification and UGrps and tags)
+	//       tables being written out by getDBStructureAsSQL. Some tables are not processed: (defCalcFunctions,
+    //       defCrosswalk, defLanguages, sysIdentification and UGrps and tags)
 
-    
+
 	function processRecTypes($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
 			include "../../structure/crosswalk/defRecTypesFields.inc";
-            // Note re paths: it seems the relative path is ../../structure/crosswalk/ because it is relative to the calling script (createNewDB.php)
-            // this can be problematic if buildCrosswalks is called from different levels in the tree
-			//  debugStop($dataSet);
+            // Note re paths: it seems the relative path is ../../structure/crosswalk/ because it is relative to the calling
+            // script (createNewDB.php). This can be problematic if buildCrosswalks is called from different levels in the tree
 			$query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -496,6 +470,19 @@
 		} // END Imported first set of data to temp table: defDetailTypeGroups
 	} // processDetailTypeGroups
 
+    function processSavedSearches($dataSet) {
+        global $errorCreatingTables;
+        if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
+            include "../../structure/crosswalk/usrSavedSearches.inc";
+            $query = "INSERT INTO `usrSavedSearches` ($flds) VALUES " . $dataSet;
+            mysql_query($query);
+            if(mysql_error()) {
+                echo "SAVEDSEARCHES Error inserting data: " . mysql_error() . "<br /><br />" . $dataSet . "<br />";
+                $errorCreatingTables = TRUE;
+            }
+        } // END Imported first set of data to temp table: usrSavedSearches
+    } // processSavedSearches
+
 	function processTranslations($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
@@ -519,10 +506,10 @@
 	}
 
 
-	// Done inserting data into all tables in temp database (or actual database if new database).
+	// Done inserting data into all tables in temp database (or actual database if new database)
 
-	// If this spits out errors with unkonwn columns, look to see if createDefinitionsTablesOnly.sql has been brought
-	// up to date with the structure of populateBlankDB.sql
+	// If this spits out errors with unknown columns, look to see if createDefinitionsTablesOnly.sql
+    // has been brought up to date with the structure of blankDBStructure.sql
 
 	if($errorCreatingTables) { // An error occurred while trying to create one (or more) of the tables, or inserting data into them
 		if($isNewDB) {

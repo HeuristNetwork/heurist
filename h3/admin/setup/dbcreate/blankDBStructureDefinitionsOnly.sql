@@ -366,3 +366,22 @@ CREATE TABLE defURLPrefixes (
   UNIQUE KEY urp_Prefix (urp_Prefix)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table 'usrSavedSearches'
+--
+
+CREATE TABLE usrSavedSearches (
+  svs_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Saved search ID, used in publishing, primary key',
+  svs_Name varchar(30) NOT NULL COMMENT 'The display name for this saved search',
+  svs_Added date NOT NULL default '0000-00-00' COMMENT 'Date and time saves search added',
+  svs_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time saves search last modified',
+  svs_Query text NOT NULL COMMENT 'The text of the saved search - added to search URL',
+  svs_UGrpID smallint(5) unsigned NOT NULL COMMENT 'The creator/owner or workgroup for the saved search',
+  svs_ExclusiveXSL varchar(250) default '' COMMENT 'Name of XSL to which to lock this publish format, blank = any XSL OK',
+  PRIMARY KEY  (svs_ID),
+  KEY svs_UGrpID (svs_UGrpID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
+
+

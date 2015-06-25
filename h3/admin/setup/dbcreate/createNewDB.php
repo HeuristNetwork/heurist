@@ -1,53 +1,53 @@
 <?php
 
-    /**
-    *
-    * createNewDB.php: Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.2
-    */
+/**
+* createNewDB.php: Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
-    /**
-    * Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
-    * a series of files with checks on each stage and cleanup code. New database creation functions
-    * Oct 2014 by Artem Osmakov to replace command line execution to allow operation on dual tier systems
-    */
+/**
+* Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
+* a series of files with checks on each stage and cleanup code. New database creation functions
+* Oct 2014 by Artem Osmakov to replace command line execution to allow operation on dual tier systems
+*/
 
-    define('NO_DB_ALLOWED',1);
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+define('NO_DB_ALLOWED',1);
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 
-    // must be logged in anyway to define the master user for the database
-    if (!is_logged_in()) {
-        $spec_case = "";
-        if(HEURIST_DBNAME=='H3Sandpit'){
-            //special case - do no show database name
-            $spec_case = "&register=1";
-        }
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.$spec_case.'&last_uri='.urlencode(HEURIST_CURRENT_URL) );
-        return;
+// must be logged in anyway to define the master user for the database
+if (!is_logged_in()) {
+    $spec_case = "";
+    if(HEURIST_DBNAME=='H3Sandpit'){
+        //special case - do no show database name
+        $spec_case = "&register=1";
     }
+    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.$spec_case.
+        '&last_uri='.urlencode(HEURIST_CURRENT_URL) );
+    return;
+}
 
-    // clean up string for use in SQL query
-    function prepareDbName(){
-        $db_name = substr(get_user_username(),0,5);
-        $db_name = preg_replace("/[^A-Za-z0-9_\$]/", "", $db_name);
-        return $db_name;
-    }
+// clean up string for use in SQL query
+function prepareDbName(){
+    $db_name = substr(get_user_username(),0,5);
+    $db_name = preg_replace("/[^A-Za-z0-9_\$]/", "", $db_name);
+    return $db_name;
+}
 
 ?>
 <html>
@@ -174,12 +174,12 @@
         <?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
 
         <div id="page-inner" style="overflow:auto">
-        <div id="loading" style="display:none">
-            <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
-            <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
-        </div>
+            <div id="loading" style="display:none">
+                <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
+                <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
+            </div>
 
-        <?php
+            <?php
             $newDBName = "";
             // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new database)
             // or by querying an existing Heurist database using getDBStructureAsSQL (for crosswalk)
@@ -205,64 +205,68 @@
 
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
-                makeDatabase(); // this does all the work <<<*************************************************
+                // *****************************************
+
+                makeDatabase(); // this does all the work
+
+                // *****************************************
 
                 echo_flush( '<script type="text/javascript">hideProgress();</script>' );
             }
 
             if($isCreateNew){
-            ?>
+                ?>
 
-            <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
-                <h3>Enter the password set by your system administrator for new database creation:</h3>
-                <input type="password" maxlength="64" size="25" id="pwd">
-                <input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
-            </div>
+                <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
+                    <h3>Enter the password set by your system administrator for new database creation:</h3>
+                    <input type="password" maxlength="64" size="25" id="pwd">
+                    <input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
+                </div>
 
 
-            <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
-                <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>"
-                    method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
+                <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
+                    <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>"
+                        method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
 
-                    <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px; padding-top: 10px;">
-                        <input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1"
-                            class="labelBold">Standard database</label>
-                        <div style="padding-left: 38px;padding-bottom:10px">
-                            Gives an uncluttered database with essential record & field types. Recommended for general use
+                        <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px; padding-top: 10px;">
+                            <input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1"
+                                class="labelBold">Standard database</label>
+                            <div style="padding-left: 38px;padding-bottom:10px">
+                                Gives an uncluttered database with essential record & field types. Recommended for general use
+                            </div>
+                            <input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">HuNI Core schema</label>
+                            <div style="padding-left: 38px;">The <a href="http://huni.net.au" target=_blank>
+                                    Humanities Networked Infrastructure (HuNI)</a>
+                                core entities and field definitions, facilitating harvesting into the HuNI aggregate
+                            </div>
+                            <input type="radio" name="dbtype" value="2" id="rb3" disabled="true"/><label for="rb3" class="labelBold">
+                                FAIMS Core schema (not yet available)</label>
+                            <div style="padding-left: 38px;">The <a href="http://fedarch.org" target=_blank>
+                                    Federated Archaeological Information Management System (FAIMS)</a>
+                                core entities and field definitions, providing a minimalist framework for archaeological fieldwork databases</div>
+
+                            <p><ul>
+                                <li>After the database is created, we suggest visiting Browse Templates and Import Structure menu entries to
+                                    download pre-configured templates or individual record types and fields.</li>
+                                <li>New databases are created on the current server.</li>
+                                <li>You will become the owner and administrator of the new database.</li>
+                            </ul><p>
                         </div>
-                        <input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">HuNI Core schema</label>
-                        <div style="padding-left: 38px;">The <a href="http://huni.net.au" target=_blank>
-                                Humanities Networked Infrastructure (HuNI)</a>
-                            core entities and field definitions, facilitating harvesting into the HuNI aggregate
+
+                        <h3>Enter a name for the new database:</h3>
+                        <div style="margin-left: 40px;">
+                            <!-- user name used as prefix -->
+                            <b><?= HEURIST_DB_PREFIX ?>
+                                <input type="text" maxlength="20" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
+                                    style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
+                            <input type="text" maxlength="64" size="25" name="dbname"  onkeypress="{onKeyPress(event);}">
+                            <input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
+                            <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
+                            databases so that they are easily identified and appear together in the list of databases.<p></p>
                         </div>
-                        <input type="radio" name="dbtype" value="2" id="rb3" disabled="true"/><label for="rb3" class="labelBold">
-                            FAIMS Core schema (not yet available)</label>
-                        <div style="padding-left: 38px;">The <a href="http://fedarch.org" target=_blank>
-                                Federated Archaeological Information Management System (FAIMS)</a>
-                            core entities and field definitions, providing a minimalist framework for archaeological fieldwork databases</div>
-
-                        <p><ul>
-                            <li>After the database is created, we suggest visiting Browse Templates and Import Structure menu entries to
-                                download pre-configured templates or individual record types and fields.</li>
-                            <li>New database creation may take up to 20 seconds. New databases are created on the current server.</li>
-                            <li>You will become the owner and administrator of the new database.</li>
-                        </ul><p>
-                    </div>
-
-                    <h3>Enter a name for the new database:</h3>
-                    <div style="margin-left: 40px;">
-                        <!-- user name used as prefix -->
-                        <b><?= HEURIST_DB_PREFIX ?>
-                            <input type="text" maxlength="20" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
-                                style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
-                        <input type="text" maxlength="64" size="25" name="dbname"  onkeypress="{onKeyPress(event);}">
-                        <input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
-                        <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix <br>
-                        for personal databases so that all your personal databases appear together in the list of databases.<p></p>
-                    </div>
-                </form>
-            </div> <!-- createDBForm -->
-            <?php
+                    </form>
+                </div> <!-- createDBForm -->
+                <?php
             }
 
 
@@ -312,7 +316,7 @@
                         return false;
                     }
 
-                    
+
                     if(!createDatabaseEmpty($newDBName)){
                         $isCreateNew = true;
                         return false;
@@ -321,6 +325,7 @@
 
                     // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
                     // yes, this is badly structured, but it works - if it ain't broke ...
+
                     $isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
 
                     require_once('../../structure/import/buildCrosswalks.php');
@@ -390,8 +395,7 @@
                         ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                     // TODO: error check, although this is unlikely to fail
 
-                    echo "<hr>";
-                    echo "<h2>New database '$newDBName' created successfully</h2>";
+                    echo "<h2>Congratulations, your new database '$newDBName' has been created</h2>";
 
                     echo "<p><strong>Admin username:</strong> ".$name."<br />";
                     echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
@@ -401,13 +405,11 @@
                     HEURIST_BASE_URL_V4."?db=".$newDBName.
                     "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
 
-                    echo "<br><br><p style=\"padding-left:6em\"><i>After logging in to your new database, we suggest you import some<br>"
-                    ."additional entity types form one of the curated Heurist databases,<br>"
-                    ."of from other databases listed in the central database catalogue,<br>"
-                    ."using Database &gt; Import Structure or Database &gt; Annotated Templates<i></p>";
-                    
-                    
-                    
+                    echo "<p style=\"padding-left:6em\">".
+                    "After logging in to your new database, we suggest you import some additional entity types from one of the<br />".
+                    "curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />".
+                    "using Database &gt; Import Structure or Database &gt; Annotated Templates</p>";
+
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
 
@@ -415,7 +417,8 @@
                 } // isset
 
             } //makedatabase
-        ?>
+            ?>
+        </div>
     </body>
 </html>
 

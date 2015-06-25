@@ -117,13 +117,13 @@ $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 $2 cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 $2 cp -r /var/www/html/HEURIST/h3/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 $2 cp -r /var/www/html/HEURIST/h3/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 cp -r /var/www/html/HEURIST/h3/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
 
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/settings
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
 
 # set up override configIni files

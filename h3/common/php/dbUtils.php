@@ -277,11 +277,11 @@
         if(!file_exists($directory)) {
             mkdir($directory, 0777, true);
         }
-        
+
         // Create file
-        $filename = $directory."/hdb_".$db."_".time().".sql";  
+        $filename = $directory."/hdb_".$db."_".time().".sql";
         $file = fopen($filename, "a+");
-              
+
         $mysqli = server_connect();
         if($mysqli && $mysqli->select_db("hdb_".$db)){
             // SQL settings
@@ -296,25 +296,25 @@
                          /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n
                          /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n";
             fwrite($file, $settings);
-            
+
             // Dump all tables of the database
-            $tables = $mysqli->query("SHOW TABLES"); 
+            $tables = $mysqli->query("SHOW TABLES");
             if($tables){
-                // Start to dump all tables 
+                // Start to dump all tables
                 while ($table = $tables->fetch_row()) {
                     $table = $table[0];
-                    
+
                     // Select everything in the table
                     $result = $mysqli->query('SELECT * FROM '.$table);
                     $num_fields = mysqli_field_count($mysqli);
-                    
+
                     // Drop table sql
                     $output = '\n\nDROP TABLE IF EXISTS `'.$table.'`;';
-                    
+
                     // Create table sql
                     $row2 = mysqli_fetch_row($mysqli->query('SHOW CREATE TABLE '.$table));
                     $output.= $row2[1].";\n\n";
-                    
+
                     // Insert values sql
                     $output .= '/*!40000 ALTER TABLE '.$table.' DISABLE KEYS */;';
                     for ($i = 0; $i < $num_fields; $i++) {
@@ -323,14 +323,14 @@
                             for($j=0; $j<$num_fields; $j++) {
                                 $row[$j] = addslashes($row[$j]);
                                 $row[$j] = ereg_replace("\n","\\n",$row[$j]);
-                                
-                                if (isset($row[$j])) { 
+
+                                if (isset($row[$j])) {
                                     $output.= '"'.$row[$j].'"' ;
-                                } else { 
+                                } else {
                                     $output.= '""';
                                 }
-                                
-                                if ($j<($num_fields-1)) { 
+
+                                if ($j<($num_fields-1)) {
                                     $output.= ',';
                                 }
                             }
@@ -338,7 +338,7 @@
                         }
                     }
                     $output .= '/*!40000 ALTER TABLE '.$table.' ENABLE KEYS */;';
-                    
+
                      // Write table sql to file
                     $output.="\n\n\n";
                     fwrite($file, $output);
@@ -351,12 +351,12 @@
         }else{
             if($verbose) echo "Failed to connect to database hdb_".$db;
             return false;
-        }     
-        
+        }
+
         // Close file
         fclose($file);
         chmod($filename, 0777);
-        
+
         // Echo output
         if($verbose) {
             $size = filesize($filename) / pow(1024,2);
@@ -369,7 +369,7 @@
 
     /**
     * Zips everything in a directory
-    * 
+    *
     * @param mixed $source       Source folder
     * @param mixed $destination  Destination file
     */
@@ -401,7 +401,7 @@
                 $file = realpath($file);
                 if (is_dir($file) === true) { // Directory
                     $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
-                } 
+                }
                 else if (is_file($file) === true) { // File
                     $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                 }
@@ -414,19 +414,19 @@
         $numFiles = $zip->numFiles;
         $zip->close();
         $size = filesize($destination) / pow(1024, 2);
-        
+
         if($verbose) {
             echo "<br/>Successfully dumped data from ".$source." to ".$destination;
             echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
         }
         return true;
     }
-   
-    
+
+
     /**
     * "Deletes" a database: makes a .sql dump of the database content
     * and zips all files related to this db.
-    * 
+    *
     * @param mixed $db Database name WITHOUT hdb extension
     */
     function db_delete($db, $verbose=true) {
@@ -434,17 +434,17 @@
             // Create DELETED_DATABASES directory if needed
             $folder = HEURIST_UPLOAD_ROOT."DELETED_DATABASES/";
             if(!file_exists($folder)) {
-                mkdir($folder, 0777, true);   
+                mkdir($folder, 0777, true);
             }
-            
+
             // Zip $source to $file
             $source = HEURIST_UPLOAD_ROOT.$db;
-            $destination = $folder.$db."_".time().".zip"; 
+            $destination = $folder.$db."_".time().".zip";
             if(zip($source, $destination)) {
                 // Delete $source folder
                 deleteFolder($source);
                 if($verbose) echo "<br/>Folder ".$source." has been deleted";
-                
+
                 // Delete from MySQL
                 $mysqli = server_connect();
                 $mysqli->query("DROP DATABASE hdb_".$db);
@@ -453,7 +453,7 @@
                 return true;
             }else{
                 if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
-            } 
+            }
         }else{
             if($verbose) echo "<br/>Failed to dump database ".$db." to a .sql file";
         }
@@ -508,31 +508,29 @@
             add_index_html($uploadPath."/rectype_icons/thumb");
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
-            //echo ("This may be because the directory already exists or the parent folder is not writable<br>");
-            //echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
-            //echo ("If upload directory was created OK, this is probably due to incorrect file permissions on new folders<br>");
+            $warnings = 1;
+        }
+        if(recurse_copy( dirname(__FILE__)."/../../admin/setup/settings", $uploadPath."/settings" )){
+            add_index_html($uploadPath."/settings"); // index file to block directory browsing
+        }else{
+            echo ("<h3>Warning:</h3> Unable to create/copy settings folder to $uploadPath<br>");
             $warnings = 1;
         }
         if(recurse_copy( dirname(__FILE__)."/../../admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
             add_index_html($uploadPath."/smarty-templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
-            //echo ("This may be because the directory already exists or the parent folder is not writable<br>");
-            //echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
             $warnings = 1;
         }
         if(recurse_copy( dirname(__FILE__)."/../../admin/setup/xsl-templates", $uploadPath."/xsl-templates" )){
             add_index_html($uploadPath."/xsl-templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
-            //echo ("This may be because the directory already exists or the parent folder is not writable<br>");
-            //echo ("Please check/create directory by hand. Consult Heurist helpdesk if needed<br>");
             $warnings = 1;
         }
 
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing
-        $warnings =+ createFolder($newDBName, "settings","used to store import mappings and the like");
         $warnings =+ createFolder($newDBName, "scratch","used to store temporary files");
         $warnings =+ createFolder($newDBName, "hml-output","used to write published records as hml files");
         $warnings =+ createFolder($newDBName, "html-output","used to write published records as generic html files");
@@ -542,7 +540,7 @@
 
         if ($warnings > 0) {
             echo "<h2>Please take note of warnings above</h2>";
-            echo "You must create the folders indicated or uploads, icons, templates, publishing, term images etc. will not work<br>";
+            echo "You must create the folders indicated or else navigation tree, uploads, icons, templates, publishing, term images etc. will not work<br>";
             echo "If upload folder is created but icons and template folders are not, look at file permissions on new folder creation";
         }
 
@@ -584,24 +582,24 @@
 
     /**
     * Deletes a folder and all its files recursively
-    * 
+    *
     * @param mixed $dir Directory to remove
     */
-    function deleteFolder($dir) { 
-        if (is_dir($dir)) { 
-            $objects = scandir($dir); 
-            foreach ($objects as $object) { 
-                if ($object != "." && $object != "..") { 
+    function deleteFolder($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
                     if (filetype($dir."/".$object) == "dir") {
-                        rmdir($dir."/".$object);    
+                        rmdir($dir."/".$object);
                     } else {
-                        unlink($dir."/".$object);  
-                    }  
-                } 
-            } 
-            reset($objects); 
-            rmdir($dir); 
-         } 
+                        unlink($dir."/".$object);
+                    }
+                }
+            }
+            reset($objects);
+            rmdir($dir);
+         }
     }
 
 
@@ -662,36 +660,36 @@
         flush();
     }
 
-    
+
 /**
 * Check that db function exists
-*     
+*
 * @param mixed $mysqli
 * @param mixed $name
 */
 function isFuncionExists($mysqli, $name){
     $res = false;
     try{
-        
+
          // search function
          $row2 = mysqli_fetch_row($mysqli->query('SHOW CREATE FUNCTION '.$name));
          if($row2){
              $res = true;
          }
-        
+
     } catch (Exception $e) {
     }
     return $res;
-}    
-    
-    
+}
+
+
 /**
 * This function is called on login
 * Validate the presence of db functions. If one of functions does not exist - run admin/setup/dbcreate/addFunctions.sql
-* 
+*
 */
 function checkDatabaseFunctions(){
-    
+
         $res = false;
 
         $mysqli = server_connect();
@@ -703,24 +701,24 @@ function checkDatabaseFunctions(){
                     echo ("<br/><p>Warning: Could not open database ".$db_name);
                 }
             }else{
-    
-                if(isFuncionExists($mysqli, 'NEW_LEVENSHTEIN') && isFuncionExists($mysqli, 'NEW_LIPOSUCTION') 
-                    && isFuncionExists($mysqli, 'hhash') && isFuncionExists($mysqli, 'simple_hash') 
-                    //&& isFuncionExists('set_all_hhash') 
+
+                if(isFuncionExists($mysqli, 'NEW_LEVENSHTEIN') && isFuncionExists($mysqli, 'NEW_LIPOSUCTION')
+                    && isFuncionExists($mysqli, 'hhash') && isFuncionExists($mysqli, 'simple_hash')
+                    //&& isFuncionExists('set_all_hhash')
                     && isFuncionExists($mysqli, 'getTemporalDateString')){
 
                     $res = true;
-                    
+
                 }else if(db_script(DATABASE, dirname(__FILE__)."/../../admin/setup/dbcreate/addProceduresTriggers.sql")){
                     $res = true;
                 }
             }
-                $mysqli->close();            
+                $mysqli->close();
         }
-    
+
         return $res;
-}    
-    
-    
+}
+
+
 
 ?>

@@ -55,7 +55,7 @@
     $memcachedHost - host for the memcached server
     $memcachedPort - port for the memcached server
     $defaultRootFileUploadPath - root location for uploaded files/record type icons/templates etc.
-    $defaultFaimsModulesPath 
+    $defaultFaimsModulesPath
     $siteRelativeIconUploadBasePath - Document root relative pathname of a directory where Heurist can store uploaded icons
     $sysAdminEmail - email address of system administrator
     $infoEmail - redirect info@ emails to this address
@@ -157,8 +157,8 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
 
     define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // eg. /h3/
     define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h3/
-    
-    
+
+
     //get H4 base URL
     $installDir = preg_replace("/\/(h3)\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
     if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
@@ -169,7 +169,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
     }
     $installDir =  ($installDir == '' ? '/' : $installDir) . '/';
     define('HEURIST_BASE_URL_V4', HEURIST_SERVER_URL . $installDir);
-    
+
 
     $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
@@ -238,7 +238,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
 
     // upload path eg. /var/www/html/HEURIST/HEURIST_FILESTORE/
     if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
-        
+
         if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
             $defaultRootFileUploadPath.= "/"; // append trailing /
 
@@ -380,6 +380,8 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
     testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . "filethumbs/", "Thumbnails directory");
     define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
 
+    testDirWriteableAndDefine('HEURIST_SETTINGS_DIR', HEURIST_FILESTORE_DIR . "settings/", "Settings directory");
+
     testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . "smarty-templates/", "Smarty Templates directory");
 
     testDirWriteableAndDefine('HEURIST_XSL_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . "xsl-templates/", "XSL templates directory");
@@ -417,7 +419,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
              define('HEURIST_FAIMS_DIR', $path);
          }
     }*/
-    
+
 //--------------------------------------------------------------------------------------------------------------
 
     // ID of Heurist System User Group which has special privileges - deprecated, although more generally
