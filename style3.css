@@ -6,7 +6,8 @@
     padding: 0;
 }
 body {
-    font-family: Verdana,Arial,sans-serif;
+    font-family: Helvetica,Arial,sans-serif;
+    /*font-family: Verdana,Arial,sans-serif;*/
     font-size: 0.7em;
     /*padding:10px;*/
 }
@@ -482,7 +483,7 @@ div .selected_last{
     border-bottom: 1px solid #CCCCCC;
     border-collapse: collapse;
     border-radius: 0 0 0 0;
-    border-top: 1px solid #FFFFFF;
+    /*border-top: 1px solid #FFFFFF;*/
     display: block; /* !important; */
     /*height: 2.6em;*/
     left: 0;
@@ -675,6 +676,13 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .fancytree-container{
     overflow:hidden !important;
 }
+.fancytree-title{
+   margin:0 !important;
+   padding: 0 !important;   
+}
+.fancytree-edit-input{
+   min-width: 12em !important;
+}
 
 .heurist-helper2{ /*display and visibility*/
     font-size: 0.8em;
@@ -683,12 +691,12 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .heurist-helper1{
     font-style:italic;
 }
-
-.graylink{
-    color:#555555;
+.svs-acordeon{
+    border-bottom: #8ea9b9 1px solid;  
+    font-size: 0.97em;  
 }
-.graylink:hover{
-    color:#212121;
+.svs-acordeon > h3 > .ui-accordion-header-icon{
+    top:40% !important;
 }
 
 /*

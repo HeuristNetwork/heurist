@@ -73,9 +73,10 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
-        .css({'left':0,'right':'0.3em','overflow-y':'auto','padding':'0.5em',
+        .css({'left':0,'right':'0.3em','overflow-y':'auto','padding':'0em',
             'position':'absolute',
-            'top':hasHeader?'4.8em':'2em','bottom':'15px'})   //@todo - proper relative layout
+            'border-top': '1px solid #cccccc',
+            'top':hasHeader?'5.5em':'2.5em','bottom':'15px'})   //@todo - proper relative layout
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 

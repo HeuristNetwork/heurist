@@ -55,19 +55,6 @@ $.widget( "heurist.svs_list", {
             if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
         
         
-        if(this.options.btn_visible_dbstructure){
-            
-            /*this.btn_db_dtructure = $( "<a>", {href:"#", html:top.HR("Database Summary")} )       //
-            .css({'text-decoration':'none'})*/
-            
-            this.btn_db_dtructure = $( "<h3>" , { text: top.HR("Database Summary") } ) 
-            .addClass('logged-in-only graylink')
-            .css({'cursor':'pointer', 'padding-top':'0.5em' })
-            .appendTo( this.div_header )
-            //.button() //({icons: {primary: "ui-icon-circle-plus"}})
-            .click( function(){ that._showDbSummary(); });
-        }
-        
         if(this.options.btn_visible_filter){
         
             this.filter = $( "<div>" ).css({'height':'2em', 'width':'100%'}).appendTo( this.search_tree );
@@ -96,8 +83,8 @@ $.widget( "heurist.svs_list", {
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
         
-        var toppos = 0;
-        if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
+        var toppos = 1;
+        //if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
         if(this.options.btn_visible_filter) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;
 
@@ -173,7 +160,7 @@ $.widget( "heurist.svs_list", {
             +'</p>'; */
 
             //new
-            var t1 = '<div style="padding-top:0.5em;border-top: 1px solid;margin-top: 2em;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
+            var t1 = '<div style="padding-top:0.5em;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
             +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);vertical-align:middle">'
             +'&nbsp;Faceted search</div>'
             +'<div title="Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)">'
@@ -238,6 +225,7 @@ $.widget( "heurist.svs_list", {
     _updateAccordeon: function(){
         
         this.accordeon.hide();
+
         
         var islogged = (top.HAPI4.is_logged());
         //if not logged in show only rules and "my searches/all records"
@@ -308,16 +296,29 @@ $.widget( "heurist.svs_list", {
             return;
         }        
         
+        
+        //add db summary as a first entry
+        if(this.options.btn_visible_dbstructure){
+                                           //8ea9b9 
+            this.helper_btm.before( 
+              $('<div>')
+                .attr('grpid',  'dbs').addClass('svs-acordeon')
+                .append( this._defineHeader(top.HR('Database Summary'), 'dbs').click( function(){ that._showDbSummary(); })
+                ) );
+        
+            //
+        }        
+                
         if(islogged){   
             this.helper_btm.before(
                 $('<div>')
-                .attr('grpid',  'rules').addClass('acc')
+                .attr('grpid',  'rules').addClass('svs-acordeon')
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
 
             this.helper_btm.before(
                 $('<div>')
-                .attr('grpid',  'bookmark').addClass('acc')
+                .attr('grpid',  'bookmark').addClass('svs-acordeon')
                 .addClass('heurist-bookmark-search')
                 .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
                 .append( this._defineHeader(top.HR('My Bookmarks'), 'bookmark'))
@@ -325,7 +326,7 @@ $.widget( "heurist.svs_list", {
 
             this.helper_btm.before(
                 $('<div>')
-                .attr('grpid',  'all').addClass('acc')
+                .attr('grpid',  'all').addClass('svs-acordeon')
                 .append( this._defineHeader(top.HR('My Searches'), 'all'))
                 .append( this._defineContent('all') ));
 
@@ -337,14 +338,14 @@ $.widget( "heurist.svs_list", {
                     var name = groups[groupID][1];
                     this.helper_btm.before(
                         $('<div>')
-                        .attr('grpid',  groupID).addClass('acc')
+                        .attr('grpid',  groupID).addClass('svs-acordeon')
                         .append( this._defineHeader(name, groupID))
                         .append( this._defineContent(groupID) ));
                 }
             }
         }else{
                 ($('<div>')
-                .attr('grpid',  'all').addClass('acc')
+                .attr('grpid',  'all').addClass('svs-acordeon')
                 .append( this._defineHeader(top.HR('Predefined Searches'), 'all'))
                 .append( this._defineContent('all') )).appendTo( this.accordeon );
                         
@@ -355,7 +356,7 @@ $.widget( "heurist.svs_list", {
         if(!keep_status) keep_status = {};
         else keep_status = $.parseJSON(keep_status);
 
-        var cdivs = this.accordeon.find('.acc');
+        var cdivs = this.accordeon.find('.svs-acordeon');
         $.each(cdivs, function(i, cdiv){
             
             cdiv = $(cdiv);
@@ -400,6 +401,39 @@ $.widget( "heurist.svs_list", {
         
     },
     
+    _getAddContextMenu: function(groupID){  
+               var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }];
+               if(groupID!='rules'){
+                    arr_menu.push({title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" });  
+               }
+               arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
+               
+               var that = this;
+
+               var context_opts = {
+                    menu: arr_menu,
+                    select: function(event, ui) {
+                         if(ui.cmd=="addFolder"){
+                             
+                            setTimeout(function(){ 
+                                var tree = that.treeviews[groupID];
+                                var node = tree.rootNode;  
+                                node.folder = true;  
+                                
+                                node.editCreateNode( "child", {title:"", folder:true}); //New folder
+                                that._saveTreeData();
+                                $("#addlink"+groupID).css('display', 'none');
+                            }, 300);
+                            //tree.trigger("nodeCommand", {cmd: ui.cmd}); 
+                         }else{
+                            var isfaceted = (ui.cmd=="addSearch2");
+                            that.editSavedSearch(isfaceted?'faceted':'saved', groupID);
+                         }
+                    }
+                    };
+               return context_opts;
+    }, 
+      
     _defineHeader: function(name, domain){
 
         var $header = $('<h3 grpid="'+domain+'">'+name+'</h3>').addClass('tree-accordeon-header');
@@ -424,6 +458,12 @@ $.widget( "heurist.svs_list", {
             .appendTo($header);
         }
         */
+        
+        if('dbs'!=domain){
+            var context_opts = this._getAddContextMenu(domain);
+            $header.contextmenu(context_opts);
+        }
+        
         return $header
     },    
 
@@ -441,75 +481,77 @@ $.widget( "heurist.svs_list", {
                              ?top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
         
         var tree = $("<div>").css('padding-bottom','0em');
+            
+        var fancytree_options =     
+            {
+        checkbox: false,
+        //titlesTabbable: false,     // Add all node titles to TAB chain
+        source: treeData,
+        quicksearch: true,
         
-    var fancytree_options =     
-        {
-    checkbox: false,
-    //titlesTabbable: false,     // Add all node titles to TAB chain
-    source: treeData,
-    quicksearch: true,
-    
-    renderNode: function(event, data) {
-        // Optionally tweak data.node.span
-        var node = data.node;
-        if(true || node.data.cstrender){
-          var $span = $(node.span);
-          var s = '', s1='';
-          if(node.folder){
-              //
-                s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block"></span>';
-                $span.find("> span.fancytree-title").html(s1 + '<span style="vertical-align:top">'+node.title+'</span>');
-                
-                //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
-                //s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
-          }else{ 
-              if(node.data.isrules){
-                    s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">';
-              }else if(node.data.isfaceted){
-                    s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
+        renderNode: function(event, data) {
+            // Optionally tweak data.node.span
+            var node = data.node;
+            if(true || node.data.cstrender){
+              var $span = $(node.span);
+              var s = '', s1='';
+              if(node.folder){
+                  //
+                    s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block;"></span>';
+                    $span.find("> span.fancytree-title").html(s1 + 
+                    '<div style="display:inline-block;vertical-align:top;padding:2 0 0 3;font-weight:normal !important">'+node.title+'</div>');
+                    //vertical-align:top;
+                    
+                    //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
+                    //s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
+              }else{ 
+                  if(node.data.isrules){
+                        s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">';
+                  }else if(node.data.isfaceted){
+                        s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
+                  }
+                  if(s==''){
+                        $span.find("> span.fancytree-title").text(node.title);
+                  }else{
+                        $span.find("> span.fancytree-title").html(node.title + s)
+                            .attr('title', node.data.isrules
+                            ?'Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)'
+                            :'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields'  );
+                  }
               }
-              if(s==''){
-                    $span.find("> span.fancytree-title").text(node.title);
-              }else{
-                    $span.find("> span.fancytree-title").html(node.title + s)
-                        .attr('title', node.data.isrules
-                        ?'Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)'
-                        :'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields'  );
-              }
-          }
-          
-          //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
-          
-          //.css({fontStyle: "italic"});
-          /*
-          $span.find("> span.fancytree-icon").css({
-//                      border: "1px solid green",
-            backgroundImage: "url(skin-custom/customDoc2.gif)",
-            backgroundPosition: "0 0"
-          });*/
-        }
-      },    
-
-
-    click: function(event, data) {
-        if(!data.node.folder){
-            var qname, qsearch, isfaceted;
-            if(data.node.data && data.node.data.url){
-                    isfaceted= data.node.data.isfaceted;
-                    qsearch = data.node.data.url;
-                    qname   = data.node.title;
-            }else{
-                if (data.node.key && top.HAPI4.currentUser.usr_SavedSearch && top.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
-                    qsearch = top.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
-                    qname   = top.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
-                    isfaceted = data.node.data.isfaceted;
-                }
+              
+              //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
+              
+              //.css({fontStyle: "italic"});
+              /*
+              $span.find("> span.fancytree-icon").css({
+    //                      border: "1px solid green",
+                backgroundImage: "url(skin-custom/customDoc2.gif)",
+                backgroundPosition: "0 0"
+              });*/
             }
-            that._doSearch2( qname, qsearch, isfaceted, event.target );
-        }
-        
-    }
-  };
+          },    
+
+
+            click: function(event, data) {
+                if(!data.node.folder){
+                    var qname, qsearch, isfaceted;
+                    if(data.node.data && data.node.data.url){
+                            isfaceted= data.node.data.isfaceted;
+                            qsearch = data.node.data.url;
+                            qname   = data.node.title;
+                    }else{
+                        if (data.node.key && top.HAPI4.currentUser.usr_SavedSearch && top.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
+                            qsearch = top.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
+                            qname   = top.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
+                            isfaceted = data.node.data.isfaceted;
+                        }
+                    }
+                    that._doSearch2( qname, qsearch, isfaceted, event.target );
+                }
+                
+            }
+          };
   
   if(top.HAPI4.is_logged()){
 
@@ -536,218 +578,218 @@ $.widget( "heurist.svs_list", {
               that._saveTreeData();
           }
       };
-      fancytree_options['edit'] = {};
+      fancytree_options['edit'] = {
+          save:function(event, data){
+              if(''!=data.input.val())
+                    that._saveTreeData(); 
+          }
+      };
       fancytree_options['filter'] = { mode: "hide" };
 
-  tree.fancytree(fancytree_options)
-  //.css({'height':'100%','width':'100%'})
-  .on("nodeCommand", function(event, data){
-    // Custom event handler that is triggered by keydown-handler and
-    // context menu:
-    var refNode, moveMode,
-      tree = $(this).fancytree("getTree"),
-      node = tree.getActiveNode();
+      tree.fancytree(fancytree_options)
+      //.css({'height':'100%','width':'100%'})
+      .on("nodeCommand", function(event, data){
+        // Custom event handler that is triggered by keydown-handler and
+        // context menu:
+        var refNode, moveMode,
+          tree = $(this).fancytree("getTree"),
+          node = tree.getActiveNode();
 
-    switch( data.cmd ) {
-    case "moveUp":
-      node.moveTo(node.getPrevSibling(), "before");
-      node.setActive();
-      break;
-    case "moveDown":
-      node.moveTo(node.getNextSibling(), "after");
-      node.setActive();
-      break;
-    case "indent":
-      refNode = node.getPrevSibling();
-      node.moveTo(refNode, "child");
-      refNode.setExpanded();
-      node.setActive();
-      break;
-    case "outdent":
-      node.moveTo(node.getParent(), "after");
-      node.setActive();
-      break;
-    case "rename":   //EDIT
-    
-        if(!node.folder && node.key>0){
-            that.editSavedSearch(node.data.isfaceted?'faceted':'saved', groupID, node.key, null, node);
-        }else{
-            node.editStart();   
-        }
-      
-      break;
-    case "remove":
-              
-          function __removeNode(){
-                node.remove(); 
-                that._saveTreeData(); 
-                if(that.treeviews[groupID].count()<1){
-                    $("#addlink"+groupID).css('display', 'block');
-                }
-          }
-    
-        if(node.folder){
-            if(node.countChildren()>0){
-                Hul.showMsgDlg('Can not delete non-empty folder. Delete dependent entries first.',null,top.HR('Warning'));
+        switch( data.cmd ) {
+        case "moveUp":
+          node.moveTo(node.getPrevSibling(), "before");
+          node.setActive();
+          break;
+        case "moveDown":
+          node.moveTo(node.getNextSibling(), "after");
+          node.setActive();
+          break;
+        case "indent":
+          refNode = node.getPrevSibling();
+          node.moveTo(refNode, "child");
+          refNode.setExpanded();
+          node.setActive();
+          break;
+        case "outdent":
+          node.moveTo(node.getParent(), "after");
+          node.setActive();
+          break;
+        case "rename":   //EDIT
+        
+            if(!node.folder && node.key>0){
+                that.editSavedSearch(node.data.isfaceted?'faceted':'saved', groupID, node.key, null, node);
             }else{
-                __removeNode();
+                node.editStart();   
             }
-        }else{
-              //saved search may have several entries - try to find
-              
-              //loop all nodes
-              var cnt = 0;
-              that.treeviews[groupID].visit(function(node2){
-                  if(node2.key==node.key){
-                      cnt++;
-                      if(cnt>1) return false;
-                  }
-              });
-            
-              if(cnt==1){
-                that._deleteSavedSearch(node.key, node.title, __removeNode);
-              }else{
-                __removeNode();    
+          
+          break;
+        case "remove":
+                  
+              function __removeNode(){
+                    node.remove(); 
+                    that._saveTreeData(); 
+                    if(that.treeviews[groupID].count()<1){
+                        $("#addlink"+groupID).css('display', 'block');
+                    }
               }
+        
+            if(node.folder){
+                if(node.countChildren()>0){
+                    Hul.showMsgDlg('Can not delete non-empty folder. Delete dependent entries first.',null,top.HR('Warning'));
+                }else{
+                    __removeNode();
+                }
+            }else{
+                  //saved search may have several entries - try to find
+                  
+                  //loop all nodes
+                  var cnt = 0;
+                  that.treeviews[groupID].visit(function(node2){
+                      if(node2.key==node.key){
+                          cnt++;
+                          if(cnt>1) return false;
+                      }
+                  });
+                
+                  if(cnt==1){
+                    that._deleteSavedSearch(node.key, node.title, __removeNode);
+                  }else{
+                    __removeNode();    
+                  }
+            }
+          break;
+        case "addFolder":  //always create sibling folder
+          /*if(!node.folder){
+            node = tree.rootNode;    
+          }*/
+          //node = node.parent;    
+          node.editCreateNode( node.folder?"child":"after", {title:"", folder:true}); //New folder
+          
+          break;
+
+        case "addSearch":  //add new saved search
+        case "addSearch2": //add new faceted search
+        
+           var isfaceted = (data.cmd == "addSearch2");
+
+           that.editSavedSearch(isfaceted?'faceted':'saved', groupID, null, null, node);
+          
+          break;
+          
+        case "addChild":
+          node.editCreateNode("child", "New folder");
+          // refNode = node.addChildren({
+          //   title: "New node",
+          //   isNew: true
+          // });
+          // node.setExpanded();
+          // refNode.editStart();
+          break;
+        case "addSibling":
+          node.editCreateNode("after", "New node");
+          // refNode = node.getParent().addChildren({
+          //   title: "New node",
+          //   isNew: true
+          // }, node.getNextSibling());
+          // refNode.editStart();
+          break;
+        case "cut":
+          CLIPBOARD = {mode: data.cmd, data: node};
+          break;
+        case "copy":
+          CLIPBOARD = {
+            mode: data.cmd,
+            data: node.toDict(function(n){
+              delete n.key;
+            })
+          };
+          break;
+        case "clear":
+          CLIPBOARD = null;
+          break;
+        case "paste":
+          if( CLIPBOARD.mode === "cut" ) {
+            // refNode = node.getPrevSibling();
+            CLIPBOARD.data.moveTo(node, "child");
+            CLIPBOARD.data.setActive();
+          } else if( CLIPBOARD.mode === "copy" ) {
+            node.addChildren(CLIPBOARD.data).setActive();
+          }
+          that._saveTreeData();
+          break;
+        default:
+          alert("Unhandled command: " + data.cmd);
+          return;
         }
-      break;
-    case "addFolder":  //always create sibling folder
-      /*if(!node.folder){
-        node = tree.rootNode;    
-      }*/
-      //node = node.parent;    
-      node.editCreateNode( node.folder?"child":"after", {title:"", folder:true}); //New folder
-      that._saveTreeData();
-      break;
 
-    case "addSearch":  //add new saved search
-    case "addSearch2": //add new faceted search
-    
-       var isfaceted = (data.cmd == "addSearch2");
+      }).on("keydown", function(e){
+        var c = String.fromCharCode(e.which),
+          cmd = null;
 
-       that.editSavedSearch(isfaceted?'faceted':'saved', groupID, null, null, node);
+        if( c === "N" && e.ctrlKey && e.shiftKey) {     //add new folder
+          cmd = "addFolder";
+        } else if( c === "C" && e.ctrlKey ) {
+          cmd = "copy";
+        } else if( c === "V" && e.ctrlKey ) {
+          cmd = "paste";
+        } else if( c === "X" && e.ctrlKey ) {
+          cmd = "cut";
+        } else if( c === "N" && e.ctrlKey ) {
+          cmd = "addSearch";
+        } else if( e.which === $.ui.keyCode.DELETE ) {
+          cmd = "remove";
+        } else if( e.which === $.ui.keyCode.F2 ) {
+          cmd = "rename";
+        } else if( e.which === $.ui.keyCode.UP && e.ctrlKey ) {
+          cmd = "moveUp";
+        } else if( e.which === $.ui.keyCode.DOWN && e.ctrlKey ) {
+          cmd = "moveDown";
+        } else if( e.which === $.ui.keyCode.RIGHT && e.ctrlKey ) {
+          cmd = "indent";
+        } else if( e.which === $.ui.keyCode.LEFT && e.ctrlKey ) {
+          cmd = "outdent";
+        }
+        if( cmd ){
+          $(this).trigger("nodeCommand", {cmd: cmd});
+          return false;
+        }
+      });    
       
-      break;
-      
-    case "addChild":
-      node.editCreateNode("child", "New folder");
-      // refNode = node.addChildren({
-      //   title: "New node",
-      //   isNew: true
-      // });
-      // node.setExpanded();
-      // refNode.editStart();
-      break;
-    case "addSibling":
-      node.editCreateNode("after", "New node");
-      // refNode = node.getParent().addChildren({
-      //   title: "New node",
-      //   isNew: true
-      // }, node.getNextSibling());
-      // refNode.editStart();
-      break;
-    case "cut":
-      CLIPBOARD = {mode: data.cmd, data: node};
-      break;
-    case "copy":
-      CLIPBOARD = {
-        mode: data.cmd,
-        data: node.toDict(function(n){
-          delete n.key;
-        })
-      };
-      break;
-    case "clear":
-      CLIPBOARD = null;
-      break;
-    case "paste":
-      if( CLIPBOARD.mode === "cut" ) {
-        // refNode = node.getPrevSibling();
-        CLIPBOARD.data.moveTo(node, "child");
-        CLIPBOARD.data.setActive();
-      } else if( CLIPBOARD.mode === "copy" ) {
-        node.addChildren(CLIPBOARD.data).setActive();
-      }
-      that._saveTreeData();
-      break;
-    default:
-      alert("Unhandled command: " + data.cmd);
-      return;
-    }
-
-  }).on("keydown", function(e){
-    var c = String.fromCharCode(e.which),
-      cmd = null;
-
-    if( c === "N" && e.ctrlKey && e.shiftKey) {     //add new folder
-      cmd = "addFolder";
-    } else if( c === "C" && e.ctrlKey ) {
-      cmd = "copy";
-    } else if( c === "V" && e.ctrlKey ) {
-      cmd = "paste";
-    } else if( c === "X" && e.ctrlKey ) {
-      cmd = "cut";
-    } else if( c === "N" && e.ctrlKey ) {
-      cmd = "addSearch";
-    } else if( e.which === $.ui.keyCode.DELETE ) {
-      cmd = "remove";
-    } else if( e.which === $.ui.keyCode.F2 ) {
-      cmd = "rename";
-    } else if( e.which === $.ui.keyCode.UP && e.ctrlKey ) {
-      cmd = "moveUp";
-    } else if( e.which === $.ui.keyCode.DOWN && e.ctrlKey ) {
-      cmd = "moveDown";
-    } else if( e.which === $.ui.keyCode.RIGHT && e.ctrlKey ) {
-      cmd = "indent";
-    } else if( e.which === $.ui.keyCode.LEFT && e.ctrlKey ) {
-      cmd = "outdent";
-    }
-    if( cmd ){
-      $(this).trigger("nodeCommand", {cmd: cmd});
-      return false;
-    }
-  });    
-  
-  /*
-   * Context menu (https://github.com/mar10/jquery-ui-contextmenu)
-   */
-  var that = this;
-  tree.contextmenu({
-    delegate: "span.fancytree-node",
-    menu: [
-      {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
-      {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" },
-      {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
-      {title: "----"},
-      {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
-      {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" },  // <kbd>[Del]</kbd>
-      {title: "----"},
-      {title: "Cut", cmd: "cut", uiIcon: "ui-icon-scissors"}, // <kbd>Ctrl+X</kbd>
-      {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},  // <kbd>Ctrl-C</kbd>
-      {title: "Paste as child", cmd: "paste", uiIcon: "ui-icon-clipboard", disabled: true } //<kbd>Ctrl+V</kbd>
-      ],
-    beforeOpen: function(event, ui) {
-      var node = $.ui.fancytree.getNode(ui.target);
-      tree.contextmenu("enableEntry", "paste", !!CLIPBOARD);
-      node.setActive();
-    },
-    select: function(event, ui) {
+      /*
+       * Context menu (https://github.com/mar10/jquery-ui-contextmenu)
+       */
       var that = this;
-      // delay the event, so the menu can close and the click event does
-      // not interfere with the edit control
-      setTimeout(function(){
-        $(that).trigger("nodeCommand", {cmd: ui.cmd});
-      }, 100);
-    }
-  });
+      tree.contextmenu({
+        delegate: "span.fancytree-node",
+        menu: [
+          {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
+          {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" },
+          {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
+          {title: "----"},
+          {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
+          {title: "Delete", cmd: "remove", uiIcon: "ui-icon-trash" },  // <kbd>[Del]</kbd>
+          {title: "----"},
+          {title: "Cut", cmd: "cut", uiIcon: "ui-icon-scissors"}, // <kbd>Ctrl+X</kbd>
+          {title: "Copy", cmd: "copy", uiIcon: "ui-icon-copy"},  // <kbd>Ctrl-C</kbd>
+          {title: "Paste as child", cmd: "paste", uiIcon: "ui-icon-clipboard", disabled: true } //<kbd>Ctrl+V</kbd>
+          ],
+        beforeOpen: function(event, ui) {
+          var node = $.ui.fancytree.getNode(ui.target);
+          tree.contextmenu("enableEntry", "paste", !!CLIPBOARD);
+          node.setActive();
+        },
+        select: function(event, ui) {
+          var that = this;
+          // delay the event, so the menu can close and the click event does
+          // not interfere with the edit control
+          setTimeout(function(){
+            $(that).trigger("nodeCommand", {cmd: ui.cmd});
+          }, 100);
+        }
+      });
 
-           var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }];
-           if(groupID!='rules'){
-                arr_menu.push({title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" });  
-           }
-           arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
-
-
+          var context_opts = this._getAddContextMenu(groupID);
+  
   
           //treedata is empty - add div - to show add links
           var tree_links = $("<div>", {id:"addlink"+groupID})
@@ -757,27 +799,7 @@ $.widget( "heurist.svs_list", {
               .click(function(event){
                   $(this).contextmenu('open', $(this));
               }) 
-              .contextmenu({
-                menu: arr_menu,
-                select: function(event, ui) {
-                     if(ui.cmd=="addFolder"){
-                         
-                        setTimeout(function(){ 
-                            var tree = that.treeviews[groupID];
-                            var node = tree.rootNode;  
-                            node.folder = true;  
-                            
-                            node.editCreateNode( "child", {title:"", folder:true}); //New folder
-                            that._saveTreeData();
-                            $("#addlink"+groupID).css('display', 'none');
-                        }, 300);
-                        //tree.trigger("nodeCommand", {cmd: ui.cmd}); 
-                     }else{
-                        var isfaceted = (ui.cmd=="addSearch2");
-                        that.editSavedSearch(isfaceted?'faceted':'saved', groupID);
-                     }
-                }
-                })
+              .contextmenu(context_opts)
           );
               
 

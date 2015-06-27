@@ -171,7 +171,7 @@ $.widget( "heurist.resultListMenu", {
             
         var link = $('<a>',{
             text: top.HR(name), href:'#'
-        }).css('font-weight','bold');
+        });//IJ 2015-06-26 .css('font-weight','bold');
         
         if(name=='Collected'){
             this.menu_Collected_link = link;
