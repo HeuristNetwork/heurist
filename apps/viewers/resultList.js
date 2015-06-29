@@ -230,7 +230,7 @@ $.widget( "heurist.resultList", {
                             that.loadanimation(true);
                             that._renderProgress();
                         }else{
-                            that._renderMessage('<div style="padding-top:2em;font-weight:bold;">'+top.HR(data.message)+'</div>');                            
+                            that._renderMessage('<div style="font-style:italic;">'+top.HR(data.message)+'</div>');                            
                         }
 
                     }
@@ -554,6 +554,7 @@ $.widget( "heurist.resultList", {
     _renderMessage: function(msg){
         
                 var $emptyres = $('<div>')
+                .css('padding','1em')
                 .html(msg)
                 .appendTo(this.div_content);
                 
