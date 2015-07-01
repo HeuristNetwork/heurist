@@ -42,16 +42,16 @@ $.widget( "heurist.dh_search", {
       [   //EVENTS
     {"var":"1","id":"74","rtid":"14", "code":"14:74","title":"Type of Event","type":"enum","levels":[],"search":[]},
     
-    {"var":"2","id":"80","rtid":"15", "code":"14:100:15:80","title":"Charge / Conviction","type":"enum","levels":[],"search":[]},
+    {"var":"2","id":"80","rtid":"15", "code":"14:rt100:15:80","title":"Charge / Conviction","type":"enum","levels":[],"search":[]},
     
-    {"var":"3","id":"97","rtid":"10","code":"14:109:10:97","title":"Birthplace of Participant(s)","type":"enum","levels":[],"search":[]},
-    {"var":"4","id":"92","rtid":"10","code":"14:109:10:92","title":"Occupation","type":"enum","levels":[],"search":[]},
-    {"var":"5","id":"98","rtid":"10","code":"14:109:10:98","title":"Race","type":"enum","levels":[],"search":[]},
-    {"var":"6","id":"20","rtid":"10","code":"14:109:10:20","title":"Gender","type":"enum","levels":[],"search":[]},
-    {"var":"7","id":"18","rtid":"10","code":"14:109:10:18","title":"Surname","type":"freetext","levels":[],"search":[]},
+    {"var":"3","id":"97","rtid":"10","code":"14:rf109:10:97","title":"Birthplace of Participant(s)","type":"enum","levels":[],"search":[]},
+    {"var":"4","id":"92","rtid":"10","code":"14:rf109:10:92","title":"Occupation","type":"enum","levels":[],"search":[]},
+    {"var":"5","id":"98","rtid":"10","code":"14:rf109:10:98","title":"Race","type":"enum","levels":[],"search":[]},
+    {"var":"6","id":"20","rtid":"10","code":"14:rf109:10:20","title":"Gender","type":"enum","levels":[],"search":[]},
+    {"var":"7","id":"18","rtid":"10","code":"14:rf109:10:18","title":"Surname","type":"freetext","isfacet":true,"levels":[],"search":[]},
 
-    {"var":"8","id":"1","rtid":"11", "code":"14:99:12:73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
-    {"var":"9","id":"89","rtid":"16","code":"14:99:12:90:16:89","title":"Location type","type":"enum","levels":[],"search":[]},
+    {"var":"8","id":"1","rtid":"11", "code":"14:rt99:12:lt73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
+    {"var":"9","id":"89","rtid":"16","code":"14:rt99:12:lf90:16:89","title":"Location type","type":"enum","isfacet":true,"levels":[],"search":[]},
     
     
     {"qa":[{"t":14},{"f:74":"X0"}, 
@@ -75,10 +75,10 @@ $.widget( "heurist.dh_search", {
       ],
       [    //ADDRESS
     {"var":"1","id":"1","rtid":"12","code":"12:1","title":"Street Number","type":"freetext","levels":[],"search":[]},
-    {"var":"2","id":"1","rtid":"11", "code":"12:73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
-    {"var":"3","id":"1","rtid":"16","code":"12:90:16:1","title":"Location Name","type":"freetext","levels":[],"search":[]},
+    {"var":"2","id":"1","rtid":"11", "code":"12:lt73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
+    {"var":"3","id":"1","rtid":"16","code":"12:lf90:16:1","title":"Location Name","type":"freetext","levels":[],"search":[]},
     {"var":"4","id":"3","rtid":"12","code":"12:3","title":"Keywords in Comments","type":"freetext","levels":[],"search":[]},
-    {"var":"5","id":"89","rtid":"16","code":"12:90:16:89","title":"Location type","type":"enum","levels":[],"search":[]},
+    {"var":"5","id":"89","rtid":"16","code":"12:lf90:16:89","title":"Location type","type":"enum","levels":[],"search":[]},
 
     {"qa":[{"t":12},{"f:1":"X0"},
             {"linked_to:73":[{"t":"11"},{"f:1":"X1"}]},
@@ -99,18 +99,53 @@ use code parameter for variable to build invert query
 
 2) for 1st level  a) find relation type b) invert it
 
-select f:80 where  {qa:[ {"t":"15"}, {"relatedfrom:100":[{ids:....   .... }]} ] }
+code 12:lf90:16:89
 
-select f:89  {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:99":[ {ids:....   .... }]} ] }
+select f:89 where  {qa:[ {"t":"16"}, {"linked_to:90":[{ids:....   .... }]} ] }
 
-select f:80 where rt=14 
+3) two levels
+
+"code":"14:rt99:12:lf90:16:89"           
+
+select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:99":[ {ids:....   .... }]} ] }
+
 */      
    _createFacetQueries: function(content_id){
        
        
-       $.each(this._searches[content_id], function(idx, field){
+       $.each(this._searches[content_id], function(index, field){
        
-           if(field['var']){
+           if(field['var'] && field['code'] && field['isfacet']){
+               //create new query and add new parameter
+               var code = field['code'];
+               code = code.split(':');
+               
+               function __crt( idx ){
+                   var qp = null;
+                   if(idx>0){
+                       
+                        var pref = '';
+                        qp = {};
+                        
+                        qp['t'] = code[idx];
+                        var fld = code[idx-1]; //link field
+                        if(fld.indexOf('lf')==0){
+                            pref = 'linked_to';    
+                        }else if(fld.indexOf('lt')==0){
+                            pref = 'linkedfrom';    
+                        }else if(fld.indexOf('rf')==0){
+                            pref = 'related_to';    
+                        }else if(fld.indexOf('rt')==0){
+                            pref = 'relatedfrom';    
+                        }
+                        qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
+                   }else{
+                       qp = {'ids':'XYZ'};
+                   }
+                   return qp;
+               }
+               
+               field['facet'] = __crt( code.length-2 );
                
            }
        });
@@ -194,6 +229,8 @@ select f:80 where rt=14
     
     
     _addSearchForm: function( content_id, name ) {
+        
+       this._createFacetQueries( content_id );
        
        //var $d = $(document.createElement('div')).appendTo(this.element);
        this.tab_header.append('<li><a href="#dh_search_'+content_id+'">'+ top.HR(name) +'</a></li>');
@@ -274,6 +311,16 @@ select f:80 where rt=14
                                 
                             });
                         }
+
+                        //add to request faceted queries
+                        var facets = [];
+                        $.each(this._searches[content_id], function(index, field){
+                            if(field['isfacet'] && field['code']){
+                                //create new query and add new parameter
+                                facets.push(['code']);
+                            }
+                        });
+
                           
                         var query = JSON.parse(JSON.stringify(query_orig)); //clone 
                         __fillQuery(query);
@@ -284,8 +331,8 @@ select f:80 where rt=14
                         }
                         
                         var that = this;
-                        var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id') };
-
+                        var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id'), facets: facets };
+                        
                         //perform search
                         top.HAPI4.RecordMgr.search(request, 
                                 function(response) {

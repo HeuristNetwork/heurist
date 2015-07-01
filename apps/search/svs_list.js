@@ -160,7 +160,7 @@ $.widget( "heurist.svs_list", {
             +'</p>'; */
 
             //new
-            var t1 = '<div style="padding-top:2.5em;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
+            var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
             +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);vertical-align:middle">'
             +'&nbsp;Faceted search</div>'
             +'<div title="Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)">'

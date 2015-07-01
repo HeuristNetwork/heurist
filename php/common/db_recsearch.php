@@ -30,6 +30,7 @@
     require_once (dirname(__FILE__).'/compose_sql.php');
     require_once (dirname(__FILE__).'/compose_sql_new.php');
     require_once (dirname(__FILE__).'/db_structure.php');
+    require_once (dirname(__FILE__).'/db_searchfacets.php');
 
     /**
     * Find minimal and maximal values for given detail type and record type
@@ -1133,6 +1134,15 @@
                                 "structures"=>$rectype_structures));
                                 
                 }//$is_ids_only          
+                
+                //serch facets
+                if(@$params['facets']){
+                    $facets = recordSearchFacets_New($system, $params); //see db_searchfacets.php
+                    if($facets){
+                        $response['facets'] = $facets;
+                    }
+                }
+                
             }
 
         }
