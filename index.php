@@ -9,7 +9,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -68,10 +68,10 @@
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
-<!-- does not work properly        
+<!-- does not work properly
         <script type="text/javascript" src="ext/js/jquery.resize.js"></script>
 -->
-        
+
 <!--
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
         <script type="text/javascript" src="ext/gridster/utils.js"></script>
@@ -83,7 +83,7 @@
 <!-- for gridster layout - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
         <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
--->        
+-->
 
 
 
@@ -114,10 +114,10 @@
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/svs_list.js"></script>
         <script type="text/javascript" src="apps/viewers/resultList.js"></script>
-        
+
         <script type="text/javascript" src="apps/digital_harlem/dh_search.js"></script>
         <script type="text/javascript" src="apps/digital_harlem/dh_maps.js"></script>
-        
+
         <!--
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
@@ -204,16 +204,16 @@
                             window.HEURIST.loadScript(window.HAPI4.basePathOld+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                             window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                             window.HEURIST.database = {  name: window.HAPI4.database };
-                            
-                            /*$.getScript(window.HAPI4.basePathOld+'common/js/utilsLoad.js', function(){ 
-                                $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){ 
-                                    
+
+                            /*$.getScript(window.HAPI4.basePathOld+'common/js/utilsLoad.js', function(){
+                                $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){
+
                                 });
                             } );*/
-                            
-                            
-                            
-                            
+
+
+
+
                             //load database structure (record types, field types, terms) definitions
                             window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -231,9 +231,9 @@
                                         }
                                     }
                                     top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
-                                    
+
                                     if(layoutid=='L06'){ //digital harlem - @todo move style to layout
-                                        $("head").append($('<link rel="stylesheet" type="text/css" href="apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));                                    
+                                        $("head").append($('<link rel="stylesheet" type="text/css" href="apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
                                     }
 
                                     appInitAll(layoutid, "#layout_panes");
@@ -272,15 +272,15 @@
                                     if(!(top.HAPI4.sysinfo.db_total_records>0)){
                                             showTipOfTheDay(false);
                                     }
-                                    
-                                    $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);                                    
+
+                                    $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
 
                                 }else{  // failed to load database structure
 
                                     top.HEURIST4.util.redirectToError(response.message);
                                 }
                             });
-                            
+
 
 
                         }else{  // Failed to initialise system
@@ -320,7 +320,7 @@
         <script>top.installDirFromH4="<?=HEURIST_BASE_URL_OLD?>"</script>
         <script src="<?=HEURIST_BASE_URL_OLD?>common/js/utilsLoad.js"></script>
         <script src="<?=HEURIST_BASE_URL_OLD?>common/php/displayPreferences.php"></script>
-        
+
         <!--
         <script src="../../common/php/getMagicNumbers.php"></script>
         These are old H3 stuff - needed to support existing features in popups -->
@@ -337,7 +337,7 @@
                 author: Dr Ian Johnson<br/>
                 programmers: Artem Osmakov, Tom Murtagh, Kim Jackson, Stephen White and others...</p>
 
-            <p style="margin-top: 1em;">Copyright (C) 2005-2015 <a href="http://sydney.edu.au/arts/eresearch/" target="_blank">University of Sydney</a></p>
+            <p style="margin-top: 1em;">Copyright (C) 2005-2015 <a href="http://sydney.edu.au/arts/" target="_blank">University of Sydney</a></p>
 
             <p style="font-size: x-small;margin-top: 1em;">
                 Licensed under the GNU General Public License Version 3.0 (the "License"); you may not use this file except
