@@ -6,12 +6,11 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @copyright   (C) 2005-2015 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Tom Murtagh, Kim Jackson, Stephen White
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
+* @version     4
 */
 
 /*
@@ -28,7 +27,7 @@
 
 if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
 
-// ------ VALUES YOU SHOULD SET ------------------------------------------------------------------------------------------------
+// ------ VALUES YOU SHOULD SET -------------------------------------------------------------------------------------------
 
 if (!@$dbHost) {
 	$dbHost= ""; //optional, blank = localhost
