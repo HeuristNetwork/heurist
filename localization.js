@@ -1,10 +1,10 @@
-/** 
+/**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2014 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0      
+* @version     4.0
 */
 
 /*
@@ -62,7 +62,7 @@ regional['ru'] = {
     'Embed / link': 'Код ссылки',
     'Export': 'Экспорт',
     'Import': 'Импорт',
-    
+
 
     'Username': 'Имя пользователя',
     'Password': 'Пароль',
@@ -97,7 +97,7 @@ regional['ru'] = {
     'search option': 'варианты поиска',
     'search assistant': 'помощник',
     'Any record type': 'Любой тип записи',
-    'Any field type': 'Любое тип поля', 
+    'Any field type': 'Любое тип поля',
     'Record type': 'Тип записи',
     'Field': 'Поле',
     'Contains': 'Содержит',
@@ -150,7 +150,7 @@ regional['ru'] = {
 
     'Profile': 'Профиль',
     'Admin': 'Админ',
-    
+
     'Preferences' : 'Настройки',
     'Layout configuration file': 'Файл конфигурации интерфейса',
     'Language':'Язык',
@@ -172,7 +172,7 @@ regional['ru'] = {
 
     'Database Summary': 'Сводка базы данных',
     'Rule Sets': 'Зависимости',
-    
+
 
     'Delete? Please confirm': 'Удалить? Подвтердите',
 
@@ -198,8 +198,168 @@ regional['de'] = {
 };
 
 regional['fr'] = {
-    language: 'France',
-    'Databases': 'Bases de données'
+    language: 'French',
+    'Databases': 'Bases de données',
+    'Design database': 'Structurer la base',
+    'Import data': 'Importer données',
+    'Files in situ': 'Fichiers in situ',
+    'Report bug': 'Signaler un bug',
+    'Help': 'Aide',
+    'About': 'Au sujet de ...',
+    'Confirmation':'Confirmation',
+    'Info':'Informations',
+
+    'Register': 'S\'inscrire',
+    'Registration': 'Inscription',
+    'Login': 'Login',
+    'Please log in': 'Veuillez log in',
+    'Please contact to register':'Veuillez nous contacter pour s\'inscrire',
+    'Log out' : 'Logout',
+    'Cancel': 'Annuler',
+    'Save': 'Sauvegarder',
+    'Close': 'Fermer',
+    'Assign': 'Assigner',
+    'Add': 'Ajouter',
+    'Delete': 'Supprimer',
+    'Create': 'Créer',
+    'Manage': 'Gérer',
+    'Sort': 'Trier',
+    'Search': 'Réchercher',
+    'Search result': 'Resultats de récherche',
+    'Merge': 'Fusionner',
+    'Rate': 'Evaluer',
+    'Relate to': 'Relier avec',
+    'Access': 'Acces',
+    'Notify': 'Notification',
+    'Embed / link': 'Intégrer',
+    'Export': 'Exporter',
+    'Import': 'Importer',
+
+
+    'Username': 'Nom d\'utilisateur',
+    'Password': 'Mot de passe',
+    'Remember me': 'Se souvenir de moi',
+    'Forgotten your password?': 'Mot de passe oublié?',
+    'Click here to reset it': 'Cliquer ici pour le changer',
+    'Enter your username OR email address below and a new password will be emailed to you.':'Entrer votre nom d\'utilisateur ci-dessous et un nouveau mot de passe sera envoyé par mel',
+    'Reset password': 'Changer mot de passe',
+    'Email to':'Envoyer mel à',
+    'User information has been saved successfully':'Informations sur l\'utilisateur ont étés sauvegardées',
+
+    'Database': 'Base de données',
+    'Select database': 'Selectioner un base de données',
+    'My User Info' : 'Mes informations d\'utilisateur',
+    'My Groups' : 'Мes groupes de travail',
+    'Manage Tags' : 'Gérer marquers',
+    'Tags' : 'Marquers',
+    'Manage Files': 'Gérer fichiers',
+    'Manage Reminders' : 'Gérer notifications',
+    'Set Ratings' : 'Changer évaluations',
+    'No Rating': 'Sans évaluation',
+
+    'Name': 'Nom',
+    'Description': 'Déscriptif',
+    'Size': 'Taille',
+    'Type': 'Type',
+
+    'search': 'Rechercher',
+    'all records': 'Toutes les enregistrements',
+    'my bookmarks': 'Mes marques-pages',
+    'in current': 'actuelles',
+    'search option': 'Option de récherche',
+    'search assistant': 'assistant de récherche',
+    'Any record type': 'N\'importe quel type d\'enregistrement ',
+    'Any field type': 'N\'importe quel type de champs',
+    'Record type': 'Type d\'enregistrement',
+    'Field': 'Champs',
+    'Contains': 'Contient',
+    'Is': 'Est',
+    'Sort By': 'Trier par',
+    'Sort Ascending': 'Trier ordre croissant',
+    'fields':'champs',
+
+    'add': 'ajouter',
+    'Add New Record' : 'Ajouter Nouvelle Enregistrement',
+    'tags': 'marquers',
+    'share': 'partager',
+    'more': 'davantage',
+    'edit': 'éditer',
+    'options': 'options',
+
+    'by name': 'par nom',
+    'by usage': 'par fréquence d\'utilisation',
+    'by date': 'par date',
+    'by size': 'par taille',
+    'by type': 'par type d\'enregistrement',
+    'marked': 'marqué',
+
+    'list':'liste',
+    'icons':'icones',
+    'thumbs':'onglets',
+
+    'first':'premier',
+    'previous':'précédent',
+    'next':'prochaine',
+    'last':'dernier',
+    'records per request':'enregistrements par requête',
+
+    'Manage tags': 'Gérer marquers',
+    'Create new tag': 'Créer nouvelle marquer',
+    'Add Tag': 'Ajouter marquer',
+    'Edit Tag': 'Editer marquer',
+    'Define new tag that replaces old ones': 'Définir nouvelle marquer qui remplace l\'ancienne',
+    'Length of tag must be more than 2.': 'Longueur de marquer doit être au dela de deux charactères',
+    'Assign selected tags': 'Assigner marquers selectionées',
+    'Personal Tags':'Marquers personnelles',
+    'Delete selected tags': 'Supprimer marquers selectionées',
+
+    // * TO DO *  complete translation into French
+
+    'Manage files': 'Управление файлами',
+    'Upload/register new file': 'Загрузить или зарегистрировать файл',
+    'Add File': 'Добавить файл',
+    'Edit File': 'Редактировать файл',
+    'Personal Files':'Личные файлы',
+    'Delete selected files': 'Удалить отмеченные файлы',
+
+    'Profile': 'Профиль',
+    'Admin': 'Админ',
+
+    'Preferences' : 'Настройки',
+    'Layout configuration file': 'Файл конфигурации интерфейса',
+    'Language':'Язык',
+    'Theme':'Тема/стили',
+    'Open edit in new window':'Редактировать в новом окне',
+    'When exiting record edit, prompt for tags if no tags have been set':'Перед сохранением предлагать определить ярлыки',
+    'Reload page to apply new settings?':'Перезагрузить страницу чтобы увидеть изменения?',
+
+    'Click to save current search':'Сохранить поиск как ссылку',
+    'My Bookmarks': 'Мои закладки',
+    'My Searches': 'Мои запросы',
+    'Predefined searches': 'Рекомендуемые запросы',
+    'Recent changes': 'Свежие записи',
+    'All (date order)': 'Все (сорт по дате)',
+    'Edit saved search': 'Редактировать поиск',
+    'Delete saved search': 'Удалить сохраненный поиск',
+    'Manage Saved Searches': 'Управление сохр.поисками',
+    'Create new saved search': 'Создать поиск',
+
+    'Database Summary': 'Сводка базы данных',
+    'Rule Sets': 'Зависимости',
+
+
+    'Delete? Please confirm': 'Удалить? Подвтердите',
+
+    'select record': 'выберите запись',
+
+    'Leave blank for no change': 'Оставьте пустым чтобы не менять пароль',
+    'Passwords are different': 'Пароли различны',
+    'Wrong email format': 'Неправильный формат адреса почты',
+    'Wrong user name format': 'Недопустимы формат для имени пользовтеля',
+    'Wrong password format': 'Недопустимый формат для пароля',
+    'Missed required fields': 'Не опрделены обязательные поля',
+    'length must be between': 'длина должна быть между',
+    'required field': 'обязательное поле'
 };
 
 regional['nl'] = {
@@ -213,7 +373,7 @@ regional['nl'] = {
     'About': 'Over',
     'Confirmation':'Bevestiging',
     'Info':'Informatie',
-    
+
     'Register': 'Registreer',
     'Registration': 'Registratie',
     'Login': 'Login',
@@ -239,7 +399,7 @@ regional['nl'] = {
     'Embed / link': 'Embed link',
     'Export': 'Exporteer',
     'Import': 'Importeer',
-    
+
     'Username': 'Gebruikersnaam',
     'Password': 'Wachtwoord',
     'Remember me': 'Onthoud me',
@@ -272,7 +432,7 @@ regional['nl'] = {
     'search option': 'zoek optie',
     'search assistant': 'zoek hulpje',
     'Any record type': 'Alle gegeven types',
-    'Any field type': 'Alle veld types', 
+    'Any field type': 'Alle veld types',
     'Record type': 'Gegeven type',
     'Field': 'Veld',
     'Contains': 'Bevat',
@@ -354,6 +514,6 @@ regional['nl'] = {
     'Missed required fields': 'Verplichte velden zijn niet ingevuld',
     'length must be between': 'lengte moet tussen',
     'required field': 'verplicht veld'
-    
+
 
 };
