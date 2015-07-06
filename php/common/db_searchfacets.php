@@ -19,10 +19,61 @@
     */
 
     
-function recordSearchFacets_New($system, $params){
+/*
+ param facets    
+ [{code:  , type:   , step: } ]
+
+ code - list of rt and ft to biuld facet query
+ type - field type @todo get it dynamically
+ step - facet depth level
+
+ 1. loop for facets
+ 2. create search query
+ 3. create select that depends on field type and step
+ 4. execute query
+ 5. gather results
+ 
+*/    
+function recordSearchFacets_New($system, $params, $ids, $currentUser, $publicOnly){
+    
+    $facets = $params['facets'];
+    
+//1. loop for facets
+    foreach ($facets as $facet) {
+        
+//2. create search query
+
+        //if $ids is not defined - substitute parameter with parent query
+        $query_struct = _getFacetQuery($facet['code'], $params['qa']);
+        
+        
+        $mysqli = $system->get_mysqli();
+        
+        $params2 = array('qa'=>$query_struct, 'w'=>@$params['w']);
+        
+        $aquery = get_sql_query_clauses_NEW($mysqli, $params2, $currentUser, $publicOnly);   
+        
+        
+// 3. create select that depends on field type and step
+        
+        $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$group_clause;
+
+// 4. execute query
+
+
+// 5. gather results
+
+        
+        
+    }//for facets
     
     
     return null;
+}
+  
+function _getFacetQuery( $code, $qparent) {
+    return null;
+    
 }
   
 ?>

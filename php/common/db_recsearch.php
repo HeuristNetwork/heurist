@@ -1136,12 +1136,13 @@
                 }//$is_ids_only          
                 
                 //serch facets
+                /*temp - todo
                 if(@$params['facets']){
-                    $facets = recordSearchFacets_New($system, $params); //see db_searchfacets.php
+                    $facets = recordSearchFacets_New($system, $params, null, $currentUser, $publicOnly); //see db_searchfacets.php
                     if($facets){
                         $response['facets'] = $facets;
                     }
-                }
+                }*/
                 
             }
 

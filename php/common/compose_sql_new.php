@@ -87,7 +87,11 @@
   */
 $mysqli = null;
   
-  
+// $params need for 
+// qa - query array
+// w - domain all or bookmarked
+// limit and offset
+// 
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null, $publicOnly=false){
 
     global $mysqli;

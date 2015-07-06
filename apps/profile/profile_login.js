@@ -119,9 +119,10 @@ function doLogin(isforsed){
                 if(isforsed && top.HAPI4.sysinfo.registration_allowed==1){
                     arr_buttons.push({text:top.HR('Register'), click: doRegister, id:'btn_register'});
                 }
-                arr_buttons.push({text:top.HR(isforsed?'Change database':'Cancel'), click: function() {
+                arr_buttons.push({text:top.HR('Cancel'), click: function() {    //isforsed?'Change database':
                             $( this ).dialog( "close" );
                         }});
+                
                 
                 // login dialog definition
                 $dlg.dialog({
@@ -149,9 +150,15 @@ function doLogin(isforsed){
                         $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
                     }
                 });
-
+                
                 $dlg.dialog("open");
                 $dlg.parent().addClass('ui-dialog-heurist');
+
+                /*if(isforsed){
+                     var left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
+                     var btn_db = $( "<button>" ).appendTo( left_pane )
+                        .button( {title: top.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
+                }*/
 
             });//load html
         }else{

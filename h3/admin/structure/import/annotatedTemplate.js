@@ -72,9 +72,9 @@ function receiveMessage(event)
     } else {
         //message = 'I got "' + event.data + '" from "' + event.origin + '"';
 
-        if(event.data.indexOf('heurist:add:RecTypeSource=')===0){
+        if(event.data.indexOf('heurist:add:')===0){  //RecTypeSource=
 
-            var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
+            var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
             var url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&id="+rectype;
 
@@ -89,10 +89,10 @@ function receiveMessage(event)
                         }
                     }
             });
-        }else if(event.data.indexOf('heurist:check:RecTypeSource=')===0){
+        }else if(event.data.indexOf('heurist:check:')===0){ //RecTypeSource=
             
             
-            var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
+            var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
             var _url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
 

@@ -635,7 +635,7 @@
                         }else if($session_type == 'shared'){
                             $time = time() + 24*60*60;     //day
                         }else if ($session_type == 'remember') {
-                            $time = time() + 90*24*60*60;  //90 days
+                            $time = time() + 30*24*60*60;  //30 days
                             $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
                         }
                         $cres = setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_SERVER_NAME);
