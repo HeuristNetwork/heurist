@@ -231,7 +231,7 @@
                     dataArray = [];
                     for(dbID in registeredDBs) {
                         db = registeredDBs[dbID];
-                        dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'search/search.html?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<img src="../../../common/images/b_database.png" class="button"/>']);
+                        dataArray.push([db[0][0],db[0][2],db[0][3],'<a href=\"'+db[0][1]+'?db='+db[0][2]+'\" target=\"_blank\">'+db[0][1]+'</a>','<img src="../../../common/images/b_database.png" class="button"/>']);
                     }
 
                     var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{

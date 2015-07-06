@@ -206,11 +206,11 @@
 
                     print '<hr>';
 
-                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.
                     '&w=all&q=ids:'.join(',', array_keys($updates)).'">Click to view updated records</a><br/>&nbsp;<br/>';
                 }
                 if(count($blanks)>0){
-                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.
                         '&w=all&q=ids:'.join(',', $blanks).
                     '">Click to view records for which the data would create a blank title</a>'.
                     '<br/>This is generally due to faulty title mask (verify with Check Title Masks)<br/>'.

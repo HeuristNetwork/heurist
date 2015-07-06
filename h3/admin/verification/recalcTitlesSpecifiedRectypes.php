@@ -193,12 +193,12 @@
 
                 print '<hr><br/>';
 
-                print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'
+                print '<a target=_blank href="'.HEURIST_BASE_URL_V4.'?w=all&q=ids:'
                 .implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.'">Click to view updated records</a><br/>&nbsp;<br/>';
             }
 
             if(count($blanks)>0){
-                print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
+                print '<a target=_blank href="'.HEURIST_BASE_URL_V4.'?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
                 '">Click to view records for which the data would create a blank title</a>'.
                 '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)'.
                 '<br/>or faulty data in individual records. These titles have not been changed.';

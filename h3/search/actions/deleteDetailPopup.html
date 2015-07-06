@@ -269,17 +269,17 @@ function cbRemove(results){
     if (results.count.processed > 0) {
       html += "<li><strong> Records processed ..... "+results.count.processed+"</strong>"+
               "...<a target=_new title=\" View Delete results "+ "\""+  //-tagged results.deleted.tagResults +
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.deleted.queryString)+"\">view processed records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.deleted.queryString)+"\">view processed records</a></li>";
     }
     if (results.count.noMatch > 0) {
       html += "<li> Records with no matching value .... "+results.count.noMatch+
               "...<a target=_new title=\" View no match results -tagged "+ results.nonMatching.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.nonMatching.queryString)+"\">view non-matching value records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.nonMatching.queryString)+"\">view non-matching value records</a></li>";
     }
     if (results.count.error > 0) {
       html += "<li> Records for which value could not be deleted ... "+results.count.error+
               "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view non-deletion records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+ results.errors.queryString)+"\">view non-deletion records</a></li>";
       if (results.errors.byRecID) {
         html += "<ul>";
         for ( i in results.errors.byRecID) {

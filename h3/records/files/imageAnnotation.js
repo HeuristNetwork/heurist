@@ -206,7 +206,7 @@ function ImageAnnotation(imageviewer, _recID) {
 
 					if(url.indexOf('http')!=0){
 						if(_markers[k][6]>0){
-							url = "../../search/search.html?q=ids:"+_markers[k][6]+"&db="+_db;
+							url = top.HEURIST.baseURL_V4+"?q=ids:"+_markers[k][6]+"&db="+_db;
 						}else{
 							return;
 						}

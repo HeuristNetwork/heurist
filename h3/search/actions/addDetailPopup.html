@@ -262,22 +262,22 @@ function cbSave(results){
     if (results.count.processed > 0) {
       html += "<li><strong> Records processed ....... "+results.count.processed+"</strong>"+
               "...<a target=_new title=\" View added results -tagged "+ results.added.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.added.queryString)+"\">view processed records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.added.queryString)+"\">view processed records</a></li>";
     }
     if (results.count.notDefined > 0) {
       html += "<li> Records with undefined field ... "+results.count.notDefined+
               "...<a target=_new title=\" View not defined results -tagged "+ results.notDefined.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.notDefined.queryString)+"\">view undefiend field records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.notDefined.queryString)+"\">view undefiend field records</a></li>";
     }
     if (results.count.limitted > 0) {
       html += "<li> Records exceeding field repeat limit ..... "+results.count.limitted+
               "...<a target=_new title=\" View max limit results -tagged "+ results.limitted.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+results.limitted.queryString)+"\">view repeat limit exceeded records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+results.limitted.queryString)+"\">view repeat limit exceeded records</a></li>";
     }
     if (results.count.error > 0) {
       html += "<li> Records with insert errors .... "+results.count.error+
               "...<a target=_new title=\" View error results -tagged "+ results.errors.tagResults +"\""+
-              " href=\""+encodeURI(hBase+ "search/search.html?db="+database+"&q="+ results.errors.queryString)+"\">view insert error records</a></li>";
+              " href=\""+encodeURI(hBase+ "?db="+database+"&q="+ results.errors.queryString)+"\">view insert error records</a></li>";
       if (results.errors.byRecID) {
         html += "<ul>";
         for ( i in results.errors.byRecID) {

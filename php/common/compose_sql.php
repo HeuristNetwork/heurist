@@ -151,12 +151,25 @@
             $search_domain = null;
         }
 
+        
+        // 3. SPECIAL CASE for _BROKEN_
+        
+        $needbroken = false;
+        if (@$params['q'] && preg_match('/\\b_BROKEN_\\b/', $params['q'])) {
+            $params['q'] = preg_replace('/\\b_BROKEN_\\b/', '', $params['q']);
+            $needbroken = true;
+        }
 
         // 4. QUERY MAY BE SIMPLE or full expressiveness ----------------------------------------------------------------------
 
         $query = parse_query($search_domain, @$params['q'], @$params['s'], @$params['parentquery'], $currUserID);
 
         $where_clause = $query->where_clause;
+
+        // 4a. SPECIAL CASE for _BROKEN_
+        if($needbroken){
+            $where_clause = '(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '. ($where_clause? ' and '.$where_clause :'');
+        }
 
         // 5. DEFINE USERGROUP RESTRICTIONS ---------------------------------------------------------------------------------
 
@@ -198,6 +211,8 @@
 
         $offset = get_offset($params);
 
+        
+///error_log("WHERE ".$where_clause);        
         // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
         return array("from"=>$query->from_clause, "where"=>$where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
 
@@ -1043,7 +1058,7 @@
             else {
                 return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
                 . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
-                . ' and usr.ugr_Name = "' . $mysqli->real_escape_string($this->value) . '"))';
+                . ' and usr.ugr_Name = "' . $mysqli->real_escape_string($this->value) . '")';
             }
         }
     }

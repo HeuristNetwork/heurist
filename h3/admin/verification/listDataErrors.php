@@ -37,6 +37,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
     
         <script type=text/javascript>
+        
             function open_selected(sname) {
                 var cbs = document.getElementsByName(sname);
                 if (!cbs  ||  ! cbs instanceof Array)
@@ -48,7 +49,7 @@
                 }
                 //var link = document.getElementById('selected_link');
                 //if (link) return false;
-                window.open('../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
+                window.open('<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
                 return false;
             }
         </script>
@@ -150,7 +151,7 @@
                 <div>
                     <h3>Records with record pointers to non-existent records</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected('recCB');">(show selected as search)</a>
                     </span>
@@ -196,7 +197,7 @@
                     {
                     ?>
                     <h3>Records with record pointers to the wrong record type</h3>
-                    <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
+                    <span><a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($bibs)) ?>'>
                         (show results as search)</a></span>
                     <table>
                         <?php
@@ -276,7 +277,7 @@
                 <div>
                     <h3>Records with non-existent term values</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected('recCB1');">(show selected as search)</a>
                     </span>
@@ -353,7 +354,7 @@
                     {
                     ?>
                     <h3>Records with terms not in the list of terms specified for the field</h3>
-                    <span><a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                    <span><a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                         (show results as search)</a></span>
 
                     <table>
@@ -422,7 +423,7 @@
                 <div>
                     <h3>Single value fields with multiple values</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link2 onClick="return open_selected('recCB2');">(show selected as search)</a>
                     </span>
@@ -496,7 +497,7 @@
                 <div>
                     <h3>Records with missing or empty required values</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link3 onClick="return open_selected('recCB3');">(show selected as search)</a>
                     </span>
@@ -573,7 +574,7 @@
                     ?>
                     <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
                     <span>
-                        <a target=_new href='../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                        <a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link4 onClick="return open_selected('recCB4');">(show selected as search)</a>
                     </span>

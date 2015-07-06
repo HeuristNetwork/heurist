@@ -255,7 +255,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 			}
 		}
 
-		var showRecsURL = top.HEURIST.baseURL + "search/search.html?w=all&amp;q=ids:" + recIDs.join(",") + "&amp;db=" + top.HEURIST.database.name;
+		var showRecsURL = top.HEURIST.baseURL_V4 + "?w=all&amp;q=ids:" + recIDs.join(",") + "&amp;db=" + top.HEURIST.database.name;
 
 		function compareNumbers(a, b) {
 			return a - b
@@ -290,7 +290,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 
 		function getHTMLforIcon(Records,recType){
 			var recNum = Records.length;
-			var showRecsTypeURL = top.HEURIST.baseURL + "search/search.html?w=all&amp;q=ids:" + recIDsByType[recType].join(",") + "&amp;db=" + top.HEURIST.database.name;
+			var showRecsTypeURL = top.HEURIST.baseURL_V4 + "?w=all&amp;q=ids:" + recIDsByType[recType].join(",") + "&amp;db=" + top.HEURIST.database.name;
 			var html = "<a href=\""+showRecsTypeURL+"\" target=\"_blank\"><div class=\"icon\" style=\"background-image:url("+getURLforRecords(Records,recType) +")\" onmouseover=\"this.firstChild.style.display='block'\" onmouseout=\"this.firstChild.style.display='none'\">";
 			// create info div
 			html += "<div class=\"recInfo\" style=\"display:none\">";

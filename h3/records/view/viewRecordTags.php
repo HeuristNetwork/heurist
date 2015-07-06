@@ -113,7 +113,7 @@ if ($tags) {
 	$kwd_list = '';
 	foreach ($tags as $tag => $count) {
 		$kwd_list .= ' <tr>';
-		$kwd_list .= '  <td style="vertical-align: top;white-space:nowrap;"><a target=_top href="'.HEURIST_SITE_PATH.'search/search.html?w=all&q=tag:%22'.urlencode($tag).'%22&db='.HEURIST_DBNAME.'" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
+		$kwd_list .= '  <td style="vertical-align: top;white-space:nowrap;"><a target=_top href="'.HEURIST_BASE_URL_V4.'?w=all&q=tag:%22'.urlencode($tag).'%22&db='.HEURIST_DBNAME.'" onclick="opener.location.href = this.href; window.close();" title="Search for references with the tag \''.$tag.'\'">'
 											. (in_array($tag, $my_kwds) ? '<b>'.htmlspecialchars($tag).'</b>' : htmlspecialchars($tag))
 											. "</a>&nbsp;</td>\n";
 

@@ -366,11 +366,11 @@
                             menuEntry('','Fix invalid characters','verification/cleanInvalidChars.php?db='.HEURIST_DBNAME,
                                 'Attempt to clean up invalid characters in the wysiwyg text fields');
                         ?>
-                        <li><a href="../search/search.html??w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                        <li><a href="<?=HEURIST_BASE_URL_V4?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                             title="Find bookmarked records which you have not tagged">
                             Bookmarks without tags</a>
                         </li>
-                        <li><a href="../search/search.html?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                        <li><a href="<?=HEURIST_BASE_URL_V4?>?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                             title="Show records with URLs which point to a non-existant or otherwise faulty address">
                             Verify URLs</a>
                         </li>

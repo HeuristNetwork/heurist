@@ -489,7 +489,7 @@
 	
 	        //give them a pointer to the search page for the database
 			$email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at".
-				HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
+				HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
 
 
 			if($tmp_password!=null){

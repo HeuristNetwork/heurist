@@ -129,7 +129,7 @@
             function onrowclick(rt_ID, innewtab){
                 var query = "?w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
-                    window.open("search.html?"+query, "_blank");
+                    window.open("<?=HEURIST_BASE_URL_V4?>?"+query, "_blank");
                     return false;
                 }else{
                     top.HEURIST.search.executeQuery(query);

@@ -179,7 +179,7 @@ function handle_notification() {
 	if (! count($bib_ids))
 		return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
 
-	$notification_link = HEURIST_BASE_URL . 'search/search.html?w=all&q=ids:' . join(',', $bib_ids);
+	$notification_link = HEURIST_BASE_URL_V4 . '?w=all&q=ids:' . join(',', $bib_ids);
 
 	$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . join(',', $bib_ids) . ')');
 	$title_list = "Id      Title\n" . "------  ---------\n";

@@ -66,8 +66,8 @@ if($isAtom){
 	</author>
 	<entry>
 		<title>HEURIST home</title>
-		<link href="<?=htmlspecialchars(HEURIST_BASE_URL)?>search/search.html?<?=htmlspecialchars($_SERVER['QUERY_STRING'])?>"/>
-		<id><?=htmlspecialchars(HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME)?></id>
+		<link href="<?=htmlspecialchars(HEURIST_BASE_URL_V4)?>?<?=htmlspecialchars($_SERVER['QUERY_STRING'])?>"/>
+		<id><?=htmlspecialchars(HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME)?></id>
 		<published><?=date("r")?></published>
 		<summary>HEURIST home page (search)</summary>
 	</entry>
@@ -91,8 +91,8 @@ if($isAtom){
 	<title>HEURIST home</title>
 	<description>HEURIST home page (search)</description>
 	<pubDate><?=date("r")?></pubDate>
-	<link><?=htmlspecialchars(HEURIST_BASE_URL."search/search.html?".$_SERVER['QUERY_STRING'])?></link>
-	<guid isPermaLink="false"><?=htmlspecialchars(HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME)?></guid>
+	<link><?=htmlspecialchars(HEURIST_BASE_URL_V4."?".$_SERVER['QUERY_STRING'])?></link>
+	<guid isPermaLink="false"><?=htmlspecialchars(HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME)?></guid>
 </item>
 <?php
 }
@@ -188,7 +188,7 @@ if($isAtom){
 
 	$url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
 	$uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-	//HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
+	//HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
 	//$uid = $uniq_id;
 	$uniq_id++;
 

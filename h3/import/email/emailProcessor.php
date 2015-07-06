@@ -562,7 +562,7 @@
 
 					if(($emails_processed-$emails_failed)>0){
 						echo '<div>You may look at the added records:
-						<a href="../../search/search.html?db='.HEURIST_DBNAME.'&q=ids:'.$emails_processed_ids.'" target="_blank">
+						<a href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.'&q=ids:'.$emails_processed_ids.'" target="_blank">
 						<img src="../../common/images/external_link_16x16.gif"/>HERE</a></div>';
 					}
 

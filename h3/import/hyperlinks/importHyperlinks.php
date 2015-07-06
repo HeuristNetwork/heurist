@@ -338,6 +338,7 @@ if (@$urls) {
 <script src="<?=HEURIST_SITE_PATH?>common/js/utilsUI.js"></script>
 <script type="text/javascript">
 	top.HEURIST.baseURL="<?=HEURIST_SITE_PATH?>";
+    top.HEURIST.baseURL_V4="<?=HEURIST_BASE_URL_V4?>";
 </script>
 <script src="importHyperlinks.js"></script>
 <script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php"></script>

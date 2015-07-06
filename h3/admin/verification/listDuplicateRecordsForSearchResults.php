@@ -288,7 +288,7 @@
 						print $rectype . ' &nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<input type="button" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<a onClick=top.HEURIST.search.popupLink("'.HEURIST_BASE_URL.'admin/verification/combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])).'","small")>merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-						print '<a title="View in new search window" target="_new" href="'.HEURIST_BASE_URL.'search/search.html?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'"><img src="'.HEURIST_BASE_URL.'common/images/jump.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;';
+						print '<a title="View in new search window" target="_new" href="'.HEURIST_BASE_URL_V4.'?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'"><img src="'.HEURIST_BASE_URL.'common/images/jump.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '</div>';
 						print '<ul>';
 						foreach ($bibs[$key] as $rec_id => $vals) {

@@ -217,7 +217,7 @@
 
                             print '<a target="fix" href="combineDuplicateRecords.php?db='.HEURIST_DBNAME.
                             '&bib_ids=' . join(',', array_keys($bibs[$key])) . '">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-                            print '<a target="_new" href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+                            print '<a target="_new" href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.
                             '&w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">view as search</a>';
 
                             print '&nbsp;&nbsp;&nbsp;&nbsp;<a href="#"  onclick="setAsNonDuplication()">ignore in future</a>';

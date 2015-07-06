@@ -61,7 +61,7 @@
                 var link = document.getElementById('selected_link');
                 if (!link)
                     return false;
-                link.href = '../../search/search.html?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
+                link.href = '<?=HEURIST_BASE_URL_V4?>?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
                 return true;
             }
 

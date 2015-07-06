@@ -91,7 +91,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	            $s = $n != 1 ? "s" : "";
 	            $state = $date ? "state as of $date" : "previous version";
 	            print "<p>$n record$s rolled back to $state</p>";
-	            print '<p><a href="'.HEURIST_BASE_URL.'search/search.html?q=ids:' . $ids . '">View updated records</a></p>';
+	            print '<p><a href="'.HEURIST_BASE_URL_V4.'?q=ids:' . $ids . '">View updated records</a></p>';
             } else {
 	            $rollbacks = getRecordRollbacks(split(",", $ids), $date);
 	            showRollbacks($rollbacks);

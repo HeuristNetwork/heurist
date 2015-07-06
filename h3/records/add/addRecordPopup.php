@@ -148,7 +148,7 @@
                 //setup link to search for records add to a workgroup with tag by a non-member
                 if ($("#tag").val()) {
                     $("#broken-kwd-link").show()[0].href =
-                    "../../search/search.html?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
+                    "<?=HEURIST_BASE_URL_V4?>?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
                     " -tag:\"" + $("#tag").val() + "\"";
                 }
             }

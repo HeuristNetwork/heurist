@@ -122,7 +122,7 @@ mysql_connection_select(DATABASE);
 		                print '<ul>';
 		                $res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['ugr_ID'].' group by tag_ID, rtl_TagID order by tag_Text');
 		                while ($tag = mysql_fetch_assoc($res)) {
-			                $searchlink = HEURIST_BASE_URL.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
+			                $searchlink = HEURIST_BASE_URL_V4.'?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
 			                if ($tag['tgi_count'] == 0) $used = '';
 			                else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
                 ?>

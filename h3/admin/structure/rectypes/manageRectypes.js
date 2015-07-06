@@ -496,7 +496,7 @@ function RectypeManager() {
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
                     if(elLink.hash === "#search") {
-                        window.open(top.HEURIST.baseURL+'search/search.html?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
+                        window.open(top.HEURIST.baseURL_V4+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
                     }else if(elLink.hash === "#edit_rectype") {
                         _onAddEditRecordType(rectypeID, 0);
                         // TO REMOVE editRectypeWindow(rectypeID);

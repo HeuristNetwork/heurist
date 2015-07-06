@@ -82,7 +82,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	if ($i == 50)
 		$tags .= "</span>\n".'<span id="top100" style="display: none;">'."\n";
 	$i++;
-	$tags .= '<a target="_top" href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
+	$tags .= '<a target="_top" href="'.HEURIST_BASE_URL_V4.'?w=all&q=tag:%22'.urlencode($row['tag_Text']).'%22+user:'.$_REQUEST['Id'].'" title="Search for '.$ugr_FullName.'\'s references with the tag \''.$row['tag_Text'].'\'" style="white-space:nowrap;">'.$row['tag_Text'].' ('.$row['bkmks'].")</a>&nbsp&nbsp\n";
 }
 $tags .= "</span>\n";
 ?>

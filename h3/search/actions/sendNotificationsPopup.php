@@ -184,12 +184,7 @@
 		}
 		$bibIDList = join(',', $bib_ids);
       
-        if(@$_REQUEST['h4']){
-            $notification_link = HEURIST_BASE_URL . '../../../?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;    //call h4
-        }else{
-            $notification_link = HEURIST_BASE_URL . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
-        }
-        
+        $notification_link = HEURIST_BASE_URL_V4 . '?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
 
 		$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . $bibIDList . ')');
 		$title_list = "Id      Title\n" . "------  ---------\n";

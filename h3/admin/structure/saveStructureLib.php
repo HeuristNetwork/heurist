@@ -1485,7 +1485,7 @@
                         }
                         $ret['error'] = $ret['error']."<br><br>"
                         ."<a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."search/search.html?db=".HEURIST_DBNAME."&q=ids:".implode(",",$ret['recIDs'])."\",\"_blank\")'>Click here</a> to retrieve these records";
+                        .HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$ret['recIDs'])."\",\"_blank\")'>Click here</a> to retrieve these records";
                     }
                 }
         }

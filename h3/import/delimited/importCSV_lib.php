@@ -2566,7 +2566,7 @@ print "result ".print_r($details, true)."<br><br>";
             }
 
             print '</select>&nbsp;';
-            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+            print '<a href="#" onclick="{window.open(\''.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.
             '&q=ids:'.implode(",", array_keys($disamb)).'\', \'_blank\');}">view records</a></td></tr>';
         }
 
