@@ -202,15 +202,12 @@
             top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"], createRectypeChanger );
             window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
             
-            function editRecordType(){
+            function editRecordType_inNewWindow(){
 
-                /* OLD WAY
                 window.open("../../admin/adminMenu.php?db="+
                 top.HEURIST.database.name+
                 "&mode=rectype&rtID="+
                 top.HEURIST.edit.record.rectypeID, "_blank");
-                
-                
 
                 var smsg = "<p>Changes made to the record type will not become active until you reload the edit form (hit page reload in your browser).</p>"+
                 "<br/>Please SAVE the record first in order not to lose data";
@@ -221,9 +218,10 @@
 
                 var w = top.HEURIST.util.popupTinyElement(top, ele,
                 { "no-titlebar": false, "no-close": false, width: 330, height: 140 });
+
+            }
                 
-                */
-                
+            function editRecordType(){
                 if(top.HEURIST.edit.is_something_chnaged()){
                         var message = "You have unsaved changes in this record.\nClick OK to save changes and modify structure.";
                         if (confirm(message)) {
@@ -319,7 +317,10 @@
 
                 if(top.HEURIST.is_admin()){
                     var edt = document.getElementById("admin_editrectype");
-                    edt.innerHTML = "<a href='#' onclick='{editRecordType(); return false;}' style='font-size:1.3em;'>Modify record structure<img src='../../common/images/edit-pencil.png'></a>";
+                    edt.innerHTML = "<a href='#' onclick='{editRecordType(); return false;}' style='font-size:1.3em;padding:0;'>Modify record structure<img src='../../common/images/edit-pencil.png'></a>"+
+                    "<a href='#' class='externalLink' onclick='{editRecordType_inNewWindow(); return false;}' style='font-size:1.3em;padding:0 3px;'></a>";
+                    
+                    ;
                 }
                 if(top.HEURIST.edit.record && top.HEURIST.edit.record.isTemporary){
                     top.document.title = "Add ["+top.HEURIST.edit.record.rectype + ", "+ top.HEURIST.edit.record.rectypeID + "] "+top.document.title;
@@ -546,7 +547,7 @@
                     <input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
                     <label for=input-visibility>show optional fields</label>
                 </div>
-                <div id="admin_editrectype" style="float:right;width:200px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
+                <div id="admin_editrectype" style="float:right;width:230px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
                 <span id="changed_marker" style="display:none;float:right;width:16px;height:16px;margin-top:4px;margin-right:4px;background-image: url('../../common/images/save-disk.gif')"></span>
             </div>
             <!-- main panel -->
