@@ -54,6 +54,7 @@ $strictImport = @$_GET["strict"] && $_GET["strict"] == 1 ? true:false;
 $currentDate = date("d-m");
 $error = false;
 $importLog = array();
+$importedRecTypes = array();
 
 //import field id -> target id - IMPORTANT for proper titlemask conversion
 $fields_correspondence = array();
@@ -88,7 +89,8 @@ function crosswalk() {
 */}
 
 function import() {
-	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRtyID;
+	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRtyID, $importedRecTypes;
+    $importedRecTypes = array();
 	$error = false;
 	$importLog = array();
 	if( !$tempDBName || $tempDBName === "" || !$targetDBName || $targetDBName === "" ||
@@ -136,9 +138,12 @@ function import() {
 			if(mysql_num_rows($resRtyExist) > 0 ) {
 				$localRtyID = mysql_fetch_array($resRtyExist,MYSQL_NUM);
 				$localRtyID = $localRtyID[0];
-				makeLogEntry("Record type", $importRtyID, " exists in $targetDBName as ID = $localRtyID");
+				makeLogEntry("Record type", $importRtyID, " ALREADY EXISTS in $targetDBName as ID = $localRtyID");
 			}else{
 				$localRtyID = importRectype($importRty);
+                if($localRtyID){
+                     array_push($importedRecTypes, $importRty["rty_ID"]);
+                }
 			}
 		}
 	}
@@ -164,6 +169,7 @@ function import() {
 		}
 		echo "Successfully imported record type '".$importRty["rty_Name"]."' from ".$sourceDBName."<br />";
 		echo "<br />";
+        echo "IMPORTED:".implode(",", $importedRecTypes);
 		return $localRtyID;
 	// duplicate record found
 	} else if (substr(mysql_error(), 0, 9) == "Duplicate") {
@@ -276,7 +282,7 @@ function importDetailType($importDty) {
 
 // function that translates all rectype ids in the passed string to there local/imported value
 function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
-	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRefdRectypes, $strictImport;
+	global $error, $importLog, $tempDBName, $sourceDBName, $targetDBName, $sourceDBID, $importRefdRectypes, $strictImport, $importedRecTypes;
 	if (!$strRtyIDs) {
 		return "";
 	}
@@ -318,6 +324,9 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 /*****DEBUG****///error_log("translateRtyIDS import rtyID - ".$importRty['rty_ID']);
 				if ($importRefdRectypes) {
 					$localRtyID = importRectype($importRty);
+                    if($localRtyID){
+                        array_push($importedRecTypes, $importRty["rty_ID"]);
+                    }
 					$msg = "as #$localRtyID";
 				}else{
 					$msg = "Referenced ID ($localRtyID) not found. Not importing - 'no Recursion' is set!";

@@ -289,7 +289,7 @@
 
                             if (req) {
 
-                                var fvals = req.split("|");
+                                var fvals = req.split("|");   //filter values
 
                                 var sByGroup  = fvals[0];
                                 var showIdentical = (fvals[1]==="1");
@@ -544,7 +544,7 @@
 
     <body class="popup yui-skin-sam" onbeforeunload="dropTempDB(false)">
         <div id=popup-saved style="display: none">
-            <b>Import succesful</b>
+            <b>Import successful</b>
         </div>
 
         <div class="banner">
@@ -638,6 +638,31 @@
                 var strictImport = false;
                 var noRecursion = false;
                 var importVocabs = true;
+                
+                if (!Array.prototype.indexOf)
+                    {
+                    Array.prototype.indexOf = function(elt /*, from*/)
+                    {
+                        var len = this.length;
+
+                        var from = Number(arguments[1]) || 0;
+                        from = (from < 0)
+                        ? Math.ceil(from)
+                        : Math.floor(from);
+                        if (from < 0)
+                            from += len;
+
+                        for (; from < len; from++)
+                        {
+                            if (from in this &&
+                                this[from] === elt)
+                                return from;
+                        }
+                        return -1;
+                    };
+                }
+                
+                
                 // Start an asynchronous call, sending the recordtypeID and action
                 function processAction(rtyID, action, rectypeName) {
                     // Lock import, and set import icon to loading icon
@@ -664,6 +689,8 @@
                     else { // code for IE6, IE5
                         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
                     }
+                    
+                    //Juan made stupid response as string!!! @todo - change to JSON
                     xmlhttp.onreadystatechange=function() {
                         // executed on change of ready state:
                         // 0=not init, 1=server connection, 2=request received, 3=processing request, 4= done
@@ -698,6 +725,15 @@
                                 document.getElementById("shortLog").innerHTML = "Show short log";
                             } else {
                                 document.getElementById("importIcon"+rtyID).src = "../../../common/images/import_icon.png";
+                                
+                                                                
+                                var k = response.indexOf('IMPORTED:');
+                                var rt_ids = [];
+                                if(k>0){
+                                    rt_ids = response.substr(k+9).split(',');
+                                    response = response.substr(0,k);
+                                }
+
 
                                 detailedImportLog = '<p style="color:green">'+ logHeader+response+"</p>" + detailedImportLog;
                                 result += logHeader;
@@ -727,7 +763,20 @@
                                     document.getElementById("log").innerHTML = shortImportLog;
                                 }
 
-                                myDataTable.deleteRow(importedRowID, -1);
+                                //myDataTable.deleteRow(importedRowID, -1); //wrong way - need to refresh filter
+                                var oRecord = myDataTable.getRecord(importedRowID);
+                                //matches
+                                var rt_id = oRecord.getData("rtyID");
+                                //find
+                                var k, cnt = 0;
+                                for (k=0;k<tableData.length;k++){
+                                    if(tableData[k][1]==rt_id || rt_ids.indexOf(tableData[k][1])>=0){
+                                        tableData[k][3] = -1;
+                                        cnt++;
+                                        if(cnt==rt_ids.length) break;
+                                    }
+                                }
+                                _updateFilter();
                             }
                         }
                     } // end readystate callback
@@ -810,7 +859,7 @@
                         dropped = true;
 
                         top.HEURIST.util.popupURL(top,
-                            "../admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
+                            "<?=HEURIST_BASE_URL?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
                                 "close-on-blur": true,
                                 "no-resize": true,
                                 //"no-close": true,
@@ -821,7 +870,7 @@
                                 callback: function(context) {
 
                                     if(redirect) {
-                                        window.location = "<?=HEURIST_BASE_URL?>/admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+                                        window.location = "<?=HEURIST_BASE_URL?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
                                     }
                                 }
                         });
