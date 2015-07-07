@@ -1,10 +1,10 @@
 <?php
 
     /**
-    * List of system constants 
+    * List of system constants
     *
     * (@todo ?? include this file into System.php )
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
@@ -22,14 +22,14 @@
     */
 
 
-    define('HEURIST_VERSION', $version4);
+    define('HEURIST_VERSION', $version);
     define('HEURIST_MIN_DBVERSION', "1.1.0");
     define('HEURIST_HELP', "http://heuristscholar.org/help");
 
     if (!@$serverName) {
         $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
     }
-    
+
     $isSecure = false;
     if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
         $isSecure = true;
@@ -38,7 +38,7 @@
         $isSecure = true;
     }
     $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
-    
+
 
     $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
@@ -56,7 +56,7 @@
     }else{
         $installDir = $installDir.'/';
     }
-    
+
     define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
     define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. heuristscholar.org
     define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html        @todo - read simlink
@@ -127,9 +127,9 @@
     "rty_LocallyModified"=>"i"
     );
     */
-    
+
     //---------------------------------
-    
+
     /** RECORD TYPE DEFINITIONS */
     $rtDefines = array(
         // Standard core record types (H3CoreDefinitions: DB = 2)
@@ -172,7 +172,7 @@
         'RT_QUERY_LAYER' => array(3, 1021)
 
         );
- 
+
     /** DETAIL TYPE DEFINITIONS */
     $dtDefines = array('DT_NAME' => array(2, 1),
         'DT_SHORT_NAME' => array(2, 2),
@@ -261,12 +261,12 @@
         'DT_SHAPE_FILE' => array(3, 1069),
         'DT_DBF_FILE' => array(3, 1070),
         'DT_SHX_FILE' => array(3, 1071)
-        
+
 
     ); //TODO: add email magic numbers
 
     //---------------------------------
 
-   
+
 
 ?>

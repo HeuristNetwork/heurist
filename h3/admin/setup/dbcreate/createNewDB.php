@@ -24,6 +24,7 @@
 * Extensively modified 4/8/11 by Ian Johnson to reduce complexity and load new database in
 * a series of files with checks on each stage and cleanup code. New database creation functions
 * Oct 2014 by Artem Osmakov to replace command line execution to allow operation on dual tier systems
+* 7 July 2015: modifications to allow use of registered databases as templates for new database
 */
 
 define('NO_DB_ALLOWED',1);
@@ -175,14 +176,14 @@ function prepareDbName(){
 
         <div id="page-inner" style="overflow:auto">
             <div id="loading" style="display:none">
-                <img src="../../../common/images/mini-loading.gif" width="16" height="16" />
+                <img alt="loading ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
             </div>
 
             <?php
             $newDBName = "";
-            // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new database)
-            // or by querying an existing Heurist database using getDBStructureAsSQL (for crosswalk)
+            // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new basic database)
+            // or by querying an existing Heurist database using getDBStructureAsSQL (for crosswalk or use of database as template)
             $isNewDB = false;
 
             global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
@@ -192,10 +193,9 @@ function prepareDbName(){
 
             if(isset($_POST['dbname'])) {
                 $isCreateNew = false;
-                $isHuNI = ($_POST['dbtype']=='1');
-                $isFAIMS = ($_POST['dbtype']=='2');
+                $isTemplateDB = ($_POST['dbtype']=='1');
 
-                /* TODO: verify that database name is unique
+                /* TODO: verify that database name is unique - currently rather ugly error trap
                 $list = mysql__getdatabases();
                 $dbname = $_POST['uname']."_".$_POST['dbname'];
                 if(array_key_exists($dbname, $list)){
@@ -217,6 +217,9 @@ function prepareDbName(){
             if($isCreateNew){
                 ?>
 
+                <h2>Creating new database on server</h2>
+                <br />
+
                 <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
                     <h3>Enter the password set by your system administrator for new database creation:</h3>
                     <input type="password" maxlength="64" size="25" id="pwd">
@@ -224,42 +227,53 @@ function prepareDbName(){
                 </div>
 
 
-                <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:20px;">
+                <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:5px;">
                     <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>"
                         method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
 
-                        <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px; padding-top: 10px;">
-                            <input type="radio" name="dbtype" value="0" id="rb1" checked="true" /><label for="rb1"
-                                class="labelBold">Standard database</label>
+                        <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
+                            <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
+                                class="labelBold">Standard starter database</label>
                             <div style="padding-left: 38px;padding-bottom:10px">
-                                Gives an uncluttered database with essential record & field types. Recommended for general use
+                                Gives an uncluttered database with essential record types, fields,
+                                terms and relationships, including bibliographic and spatial entities.<br />
+                                Recommended for most new databases unless you wish to copy a particular template (next option).
                             </div>
-                            <input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2" class="labelBold">HuNI Core schema</label>
-                            <div style="padding-left: 38px;">The <a href="http://huni.net.au" target=_blank>
-                                    Humanities Networked Infrastructure (HuNI)</a>
-                                core entities and field definitions, facilitating harvesting into the HuNI aggregate
-                            </div>
-                            <input type="radio" name="dbtype" value="2" id="rb3" disabled="true"/><label for="rb3" class="labelBold">
-                                FAIMS Core schema (not yet available)</label>
-                            <div style="padding-left: 38px;">The <a href="http://fedarch.org" target=_blank>
-                                    Federated Archaeological Information Management System (FAIMS)</a>
-                                core entities and field definitions, providing a minimalist framework for archaeological fieldwork databases</div>
 
-                            <p><ul>
-                                <li>After the database is created, we suggest visiting Browse Templates and Import Structure menu entries to
-                                    download pre-configured templates or individual record types and fields.</li>
-                                <li>New databases are created on the current server.</li>
-                                <li>You will become the owner and administrator of the new database.</li>
-                            </ul><p>
+                            <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
+
+                            <input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2"
+                                class="labelBold">Use a registered database as template</label>
+                            <div style="padding-left: 38px;">
+                                Use a database registered with the Heurist Network as a template.
+                                Copies record types, fields, terms and relationships from the database selected.<br />
+                                Databases with an ID &lt; 1000 are curated by the Heurist team and include templates
+                                for the HuNI and FAIMS infrastructure projects,
+                                <br />as well as community servers maintained by other research groups.
+                            </div>
+
+                            <div  style="padding-left: 38px;margin-top: 30px;">DATABASE TEMPLATES NOT YET IMPLEMENTED</div>
+                            <!-- TO DO: NEED TO DISPLAY A DROPDOWN LIST OF DATABASES HERE, OR A BROWSE LIST WITH FILTER -->
+
+
+                             <div style="padding-left: 38px; margin-top: 30px; margin-bottom: 20px;">
+                                <div><b>Suggested next steps</b></div>
+                                <div>
+                                <br />After the database is created, we suggest visiting Database &gt; Import Structure and Database &gt; Annotated Templates to download
+                                <br />pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
+                                <br />New databases are created on the current server. You will become the owner and administrator of the new database.
+                                </div>
+                            </div>
                         </div>
 
-                        <h3>Enter a name for the new database:</h3>
-                        <div style="margin-left: 40px;">
+                        <h3 style="margin-left: 38px">Enter a name for the new database</h3>
+                        <div style="margin-left: 60px; margin-top: 10px;">
                             <!-- user name used as prefix -->
+                            <i>no spaces or punctuation other than underscore)</i><br />&nbsp;<br />
                             <b><?= HEURIST_DB_PREFIX ?>
-                                <input type="text" maxlength="20" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
+                                <input type="text" maxlength="30" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
                                     style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
-                            <input type="text" maxlength="64" size="25" name="dbname"  onkeypress="{onKeyPress(event);}">
+                            <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
                             <input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
                             <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
                             databases so that they are easily identified and appear together in the list of databases.<p></p>
@@ -277,7 +291,7 @@ function prepareDbName(){
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
 
-                global $newDBName, $isNewDB, $done, $isCreateNew, $isHuNI, $isFAIMS, $errorCreatingTables;
+                global $newDBName, $isNewDB, $done, $isCreateNew, $isTemplateDB, $errorCreatingTables;
 
                 $error = false;
                 $warning=false;
@@ -333,9 +347,9 @@ function prepareDbName(){
                     // errorCreatingTables is set to true by buildCrosswalks if an error occurred
                     if($errorCreatingTables) {
                         echo ("<p class='error'>Error importing core definitions from ".
-                            ($isHuNI?"coreDefinitionsHuNI.txt":(($isFAIMS)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt")).
+                            ($isTemplatDB?"template database":"coreDefinitions.txt").
                             " for database $newname<br>");
-                        echo ("Please check whether this file is valid; consult Heurist support if needed</p>");
+                        echo ("Please check whether this file or database is valid; consult Heurist support if needed</p>");
                         cleanupNewDB($newname);
                         return false;
                     }

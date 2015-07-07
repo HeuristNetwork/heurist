@@ -108,7 +108,7 @@
 	// Check if someone else is already modifying database definitions, if so: stop
 
     if($isNewDB){
-        $definitions_filename = ($isHuNI?"coreDefinitionsHuNI.txt":(($isFAIMS)?"coreDefinitionsFAIMS.txt":"coreDefinitions.txt"));
+        $definitions_filename = ($isTemplateDB?"TO DO - GET STRUCTURE FROM TEMPLATE DATABASE":"coreDefinitions.txt");
     }
 
 	if($isNewDB && !file_exists("../../setup/dbcreate/".$definitions_filename)){
