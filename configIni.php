@@ -58,7 +58,7 @@
 
 // *** DO NOT CHANGE VERSION NUMBER ***
 
-$version = "3.5.0"; // sets current program version number, determined by Heurist development lead
+$version = "4.0.1"; // sets current program version number, determined by Heurist development lead
                     // 3.2.0 alpha 8th July 2014, beta 21st July 2014
                     // 3.3.0 beta 11th Nov 2014
                     // 3.3.0 27th Nov 2014 / 3.4.0-beta
@@ -92,8 +92,7 @@ $websiteThumbnailPassword = "";
 
 
 //H4 specific
-$heurist3url = "http://heurist.sydney.edu.au/h4-ao/h3/";
-$version4 = "4.0.0";
+$heurist3url = "h3/";
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the ConfigIni.php in the installation need not be configured. This allows unconfigured ConfigIni.php files to exist

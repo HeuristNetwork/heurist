@@ -1,61 +1,61 @@
 <?php
 
-    /**
-    * adminMenu.php : framework for adminstrative interface (designer view)
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.2
-    */
+/**
+* adminMenu.php : framework for adminstrative interface (designer view)
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    define('ROOTINIT', 1);
-    require_once (dirname(__FILE__) . '/../common/connect/applyCredentials.php');
+define('ROOTINIT', 1);
+require_once (dirname(__FILE__) . '/../common/connect/applyCredentials.php');
 
-    // TODO: something fishy: above path appears wrong, although phpEd navigates from this to the applyCredentials file
-    // However /common/etc. and ../common/etc. - both of which are correct paths and work with phpEd - cause the admin menu to hang.
+// TODO: something fishy: above path appears wrong, although phpEd navigates from this to the applyCredentials file
+// However /common/etc. and ../common/etc. - both of which are correct paths and work with phpEd - cause the admin menu to hang.
 
-    if (!is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
-        //HEURIST_BASE_URL.'admin/adminMenu.php?db='.HEURIST_DBNAME);
-        return;
-    }
+if (!is_logged_in()) {
+    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
+    //HEURIST_BASE_URL.'admin/adminMenu.php?db='.HEURIST_DBNAME);
+    return;
+}
 
-    // Introductory orientation for designer view
+// Introductory orientation for designer view
 
-    $url = "../common/html/msgWelcomeAdmin.html";
+$url = "../common/html/msgWelcomeAdmin.html";
 
-    // Direct access to admin menu (designer view) functions
-    if (array_key_exists('mode', $_REQUEST)) {
-        $mode = $_REQUEST['mode'];
+// Direct access to admin menu (designer view) functions
+if (array_key_exists('mode', $_REQUEST)) {
+    $mode = $_REQUEST['mode'];
 
-        if ($mode == "users") {  // Manage Users, used to confirm registrations
-            $url = "ugrps/manageUsers.php?db=" . HEURIST_DBNAME;
-            if (array_key_exists('recID', $_REQUEST)) {
-                $recID = $_REQUEST['recID'];
-                $url = $url . "&recID=" . $recID;
-            }
-
-        } else if ($mode == "rectype") { // record structure edit, called from record edit mode
-            $url = "structure/rectypes/manageRectypes.php?db=" . HEURIST_DBNAME;
-            if (array_key_exists('rtID', $_REQUEST)) {
-                $rtID = $_REQUEST['rtID'];
-                $url = $url . "&rtID=" . $rtID;
-            }
+    if ($mode == "users") {  // Manage Users, used to confirm registrations
+        $url = "ugrps/manageUsers.php?db=" . HEURIST_DBNAME;
+        if (array_key_exists('recID', $_REQUEST)) {
+            $recID = $_REQUEST['recID'];
+            $url = $url . "&recID=" . $recID;
         }
-    } // end direct access to admin menu (designer view) functions
+
+    } else if ($mode == "rectype") { // record structure edit, called from record edit mode
+        $url = "structure/rectypes/manageRectypes.php?db=" . HEURIST_DBNAME;
+        if (array_key_exists('rtID', $_REQUEST)) {
+            $rtID = $_REQUEST['rtID'];
+            $url = $url . "&rtID=" . $rtID;
+        }
+    }
+} // end direct access to admin menu (designer view) functions
 ?>
 
 <html>
@@ -115,14 +115,14 @@
             window.history.pushState("object or string", "Title", location.pathname+'?db=<?=HEURIST_DBNAME?>');
         </script>
 
-        <a id=home-link href="../index.php?db=<?=HEURIST_DBNAME?>">
-            <div id=logo title="Click the logo at top left of any Heurist page to return to your default search (User View)"></div>
+        <a id=home-link href="../../?db=<?=HEURIST_DBNAME?>">
+            <div id=logo title="Click the logo at top left of any Heurist page to return to your default search page"></div>
         </a>
 
         <div id=version></div>
 
         <!-- database name = link back to default search (Uaeer View) -->
-        <a id="dbSearch-link" href="../index.php?db=<?=HEURIST_DBNAME?>">
+        <a id="dbSearch-link" href="../../?db=<?=HEURIST_DBNAME?>">
             <div id="dbname" ><?=HEURIST_DBNAME?> <span>Designer View</span></div>
         </a>
 
@@ -142,145 +142,106 @@
         <!-- sidebar - lefthand side -->
 
         <?php
-            function menuEntry($separator,$action,$actionFile,$actionLabel) {
-                if ($separator == '---') {print '<li class="seperator">';} else {print '<li>';};
-                print '<a href="#" onClick="loadContent(' . "'$actionFile'";
-                print ')" title="' . $actionLabel . '">' . $action . '</a></li>';
-            } // menuEntry
+        function menuEntry($separator,$action,$actionFile,$actionLabel) {
+            if ($separator == '---') {print '<li class="seperator">';} else {print '<li>';};
+            print '<a href="#" onClick="loadContent(' . "'$actionFile'";
+            print ')" title="' . $actionLabel . '">' . $action . '</a></li>';
+        } // menuEntry
         ?>
 
         <div id="sidebar">
 
             <div class="banner" style="padding-left:20px;padding-top:4px;border-bottom:1px solid #696969;">
                 <button id="link_admin" onclick="{location.href='../../?db=<?=HEURIST_DBNAME?>';}"
-                    title="Click to return to the default search page (User View)" class="button"><b>go to USER VIEW</b></button>
+                    title="Click to return to the default search page" class="button"><b>go to main page</b></button>
             </div>
 
             <div id="sidebar-inner" style="padding-top: 25px;">
 
                 <!-- <div id="accordion">-->
 
-
-                <!-- Removed functions which are now on home/search page 5/12/14 to convert Designer View to DB Administration
-                <h3><a href="#">ESSENTIALS: </a>
-                    <span class="description">Shortcut to the main functions needed to create and design a database</span>
-                </h3>
-                <div class="adminSection">
-                    <ul>
-                -->
-                        <?php
-                        /*
-                            menuEntry('---','Open database','../common/connect/getListOfDatabases.php',
-                                'List the databases on the current server to which you have access '.
-                                '(you are identified by the email address attached to your current user login)');
-
-                            menuEntry('','New database','setup/dbcreate/createNewDB.php',
-                                'Create a new database on the current server - essential structure elements are populated automatically');
-                            menuEntry('','Record types and fields','structure/rectypes/manageRectypes.php?db='.HEURIST_DBNAME,
-                                'Add new or modify existing record types, including general characteristics '.
-                                'and the data fields and rules which compose a record');
-
-                            menuEntry('','Browse templates (Beta)','structure/import/annotatedTemplate.php?db='.HEURIST_DBNAME,
-                                'Browse documented record type templates on HeuristNetwork.org '.
-                                'and selectively import them into the current database');
-
-                            menuEntry('','Import structure','structure/import/selectDBForImport.php?db='.HEURIST_DBNAME,
-                                'Selectively import structural elements (record types, fields, terms and connected record types) '.
-                                'from other Heurist databases into the current database');
-
-                            menuEntry('','Manage workgroups','ugrps/manageGroups.php?db='.HEURIST_DBNAME,
-                                'Create new work groups and users and/or assign users to workgroups '.
-                                'and set their roles (admin, member) relative to each workgroup');
-                                WAS: onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}"
-                            */
-
-                        ?>
-                <!--
-                    </ul>
-                </div>
-                -->
-
                 <h3><a href="#">DATABASE: </a>
-                    <span class="description">Clone, delete and set properties of the currrent database</span>
+                    <span class="description">Clone, clear, delete, register and set properties of the currrent database</span>
                 </h3>
                 <div class="adminSection">
                     <ul>
                         <?php
-                            menuEntry('---','Open database','../common/connect/getListOfDatabases.php',
-                                'List the databases on the current server to which you have access '.
-                                '(you are identified by the email address attached to your current user login)');
+                        menuEntry('---','Open database','../common/connect/getListOfDatabases.php',
+                            'List the databases on the current server to which you have access '.
+                            '(you are identified by the email address attached to your current user login)');
 
-                            menuEntry('','New database','setup/dbcreate/createNewDB.php',
-                                'Create a new database on the current server - essential structure elements are populated automatically');
-                            menuEntry('---','Clone database','setup/dboperations/cloneDatabase.php?db='.HEURIST_DBNAME,
-                                'Clones an identical database from the currrent database with all data, users, attached files, templates etc.');
+                        menuEntry('','New database','setup/dbcreate/createNewDB.php',
+                            'Create a new database on the current server - essential structure elements are populated automatically');
+                        menuEntry('---','Clone database','setup/dboperations/cloneDatabase.php?db='.HEURIST_DBNAME,
+                            'Clones an identical database from the currrent database with all data, users, attached files, templates etc.');
 
-                            if (is_admin()) {
-                                menuEntry('','Delete entire database','setup/dboperations/deleteCurrentDB.php?db='.HEURIST_DBNAME,
-                                    'Delete the current database completely - cannot be undone, although data is copied '.
-                                    'to a backup which could be reloaded by a sysadmin');
+                        if (is_admin()) {
+                            menuEntry('','Delete entire database','setup/dboperations/deleteCurrentDB.php?db='.HEURIST_DBNAME,
+                                'Delete the current database completely - cannot be undone, although data is copied '.
+                                'to a backup which could be reloaded by a sysadmin');
 
-                                menuEntry('','Delete all records','setup/dboperations/clearCurrentDB.php?db='.HEURIST_DBNAME,
-                                    'Clear all data (records, values, attached files) from the current database. '.
-                                    'Database atructure - record types, fields, terms, constraints - is unaffected');
+                            menuEntry('','Delete all records','setup/dboperations/clearCurrentDB.php?db='.HEURIST_DBNAME,
+                                'Clear all data (records, values, attached files) from the current database. '.
+                                'Database atructure - record types, fields, terms, constraints - is unaffected');
 
-                                menuEntry('---','Registration','setup/dbproperties/registerDB.php?db='.HEURIST_DBNAME,
-                                    'Register this database with the Heurist Master Index at HeuristScholar.org - '.
-                                    'this makes the structure (but not data) available for import by other databases');
+                            menuEntry('---','Registration','setup/dbproperties/registerDB.php?db='.HEURIST_DBNAME,
+                                'Register this database with the Heurist Master Index at HeuristScholar.org - '.
+                                'this makes the structure (but not data) available for import by other databases');
 
-                                menuEntry('','Properties','setup/dbproperties/editSysIdentification.php?db='.HEURIST_DBNAME,
-                                    'Edit the internal metadata describing the database and set some global behaviours. '.
-                                    'Recommended to provide a self-documenting database');
+                            menuEntry('','Properties','setup/dbproperties/editSysIdentification.php?db='.HEURIST_DBNAME,
+                                'Edit the internal metadata describing the database and set some global behaviours. '.
+                                'Recommended to provide a self-documenting database');
 
-                                menuEntry('','Advanced properties','setup/dbproperties/editSysIdentificationAdvanced.php?db='.HEURIST_DBNAME,
-                                    'Edit advanced behaviours, including special file paths and parameters '.
-                                    'for harvesting email from external servers');
+                            menuEntry('','Advanced properties','setup/dbproperties/editSysIdentificationAdvanced.php?db='.HEURIST_DBNAME,
+                                'Edit advanced behaviours, including special file paths and parameters '.
+                                'for harvesting email from external servers');
 
-                                // June 2014: TODO: need to fix the triggers on record creation and editing for this function to work.
-                                // Warning in fucntion
-                               /*
-                                menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
-                                    'Selectively roll back the data in the database to a specific date and time)');
-                               */
-                            }
+                            // June 2014: TODO: need to fix the triggers on record creation and editing for this function to work.
+                            // Warning in fucntion
+                            /*
+                            menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
+                            'Selectively roll back the data in the database to a specific date and time)');
+                            */
+                        }
                         ?>
                     </ul>
                 </div>
-
 
                 <h3><a href="#">STRUCTURE: </a>
-                    <span class="description">Administrative functions related to database registration and structure</span>
+                    <span class="description">Functions to modify and extend the database structure</span>
                 </h3>
                 <div class="adminSection">
                     <ul>
                         <?php
-                            menuEntry('---','Record types and fields','structure/rectypes/manageRectypes.php?db='.HEURIST_DBNAME,
-                                'Add new or modify existing record types, including general characteristics '.
-                                'and the data fields and rules which compose a record');
+                        menuEntry('---','Manage structure','structure/rectypes/manageRectypes.php?db='.HEURIST_DBNAME,
+                            'Add new or modify existing record types, including general characteristics '.
+                            'and the data fields and rules which compose a record');
 
-                            menuEntry('','Annotated templates','structure/import/annotatedTemplate.php?db='.HEURIST_DBNAME,
-                                'Browse documented record type templates on the Heurist Network site '.
-                                'and selectively import them into the current database');
+                        menuEntry('','Acquire from databases','structure/import/selectDBForImport.php?db='.HEURIST_DBNAME,
+                            'Selectively import structural elements (record types, fields, terms and connected record types) '.
+                            'from other Heurist databases into the current database');
 
-                            menuEntry('','Import structure','structure/import/selectDBForImport.php?db='.HEURIST_DBNAME,
-                                'Selectively import structural elements (record types, fields, terms and connected record types) '.
-                                'from other Heurist databases into the current database');
+                        menuEntry('','Acquire from templates','structure/import/annotatedTemplate.php?db='.HEURIST_DBNAME,
+                            'Browse documented record type templates on the Heurist Network site '.
+                            'and selectively import them into the current database');
 
-                            menuEntry('','Manage field types','structure/fields/manageDetailTypes.php?db='.HEURIST_DBNAME,
-                                'Browse and edit the base field definitions referenced by record types (often shared by multiple record types)');
-                            menuEntry('','Manage terms','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
-                                'Browse and edit the terms used for relationship types and for other enumerated (term list) fields');
+                        menuEntry('','Base field types','structure/fields/manageDetailTypes.php?db='.HEURIST_DBNAME,
+                            'Browse and edit the base field definitions referenced by record types (often shared by multiple record types)');
 
-                            menuEntry('','Relationship constraints','structure/rectypes/editRectypeConstraints.php?db='.HEURIST_DBNAME,
-                                'Define overal constraints on the record types which can be related, including allowable '.
-                                'relationship types between specific record types');
+                        menuEntry('','Terms / relation types','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
+                            'Browse and edit the terms used for relationship types and for other enumerated (term list) fields');
 
-                            menuEntry('---','Simple fields schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=simple',
-                                'Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts');
-                            menuEntry('','Relationships schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=relations',
-                                'Display/print a listing of the record types and their pointer and relationship fields, including usage counts');
-                            menuEntry('','Combined schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=all',
-                                'Display/print a listing of the record types and all fields, including usage counts');
+                        /* This has not been reliably tested and is better left out. IJ 7/7/15
+                        menuEntry('','Relationship constraints','structure/rectypes/editRectypeConstraints.php?db='.HEURIST_DBNAME,
+                            'Define overal constraints on the record types which can be related, including allowable '.
+                            'relationship types between specific record types');
+                        */
+                        menuEntry('---','Simple fields schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=simple',
+                            'Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts');
+                        menuEntry('','Relationships schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=relations',
+                            'Display/print a listing of the record types and their pointer and relationship fields, including usage counts');
+                        menuEntry('','Combined schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=all',
+                            'Display/print a listing of the record types and all fields, including usage counts');
                         ?>
                         <li>
                             <a href="describe/getDBStructureAsXML.php?db=<?=HEURIST_DBNAME?>"
@@ -291,12 +252,12 @@
                                 </a>
                         </li>
                         <?php
-                            menuEntry('','Structure (SQL)','describe/getDBStructureAsSQL.php?db='.HEURIST_DBNAME.'&amp;pretty=1',
-                                'Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)');
-                            menuEntry('','Define mime types','structure/mimetypes/manageMimetypes.php?db='.HEURIST_DBNAME,
-                                'Define the relationship between file extension and mime type for uploaded and externally referenced files');
-                            menuEntry('---','XForms (deprecated)','describe/getDBStructureAsXForms.php?db='.HEURIST_DBNAME,
-                                'Save selected record types as XForms definitions - this function is not maintained');
+                        menuEntry('','Structure (SQL)','describe/getDBStructureAsSQL.php?db='.HEURIST_DBNAME.'&amp;pretty=1',
+                            'Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)');
+                        menuEntry('','Define mime types','structure/mimetypes/manageMimetypes.php?db='.HEURIST_DBNAME,
+                            'Define the relationship between file extension and mime type for uploaded and externally referenced files');
+                        menuEntry('---','XForms (deprecated)','describe/getDBStructureAsXForms.php?db='.HEURIST_DBNAME,
+                            'Save selected record types as XForms definitions - this function is not maintained, please use FAIMS export instead');
                         ?>
                     </ul>
                 </div>
@@ -308,63 +269,63 @@
                 <div class="adminSection">
                     <ul>
                         <?php
-                            menuEntry('','Manage workgroups','ugrps/manageGroups.php?db='.HEURIST_DBNAME,
-                                'Create new work groups and users and/or assign users to workgroups '.
-                                'and set their roles (admin, member) relative to each workgroup');
-                            /* WAS: onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}" */
+                        menuEntry('','Manage workgroups','ugrps/manageGroups.php?db='.HEURIST_DBNAME,
+                            'Create new work groups and users and/or assign users to workgroups '.
+                            'and set their roles (admin, member) relative to each workgroup');
+                        /* WAS: onClick="{loadContent('ugrps/manageGroups.php?db=<?=HEURIST_DBNAME?>');return false;}" */
 
-                            menuEntry('','Workgroup tags','ugrps/editGroupTags.php?db='.HEURIST_DBNAME,
-                                'Add and remove workgroup tags (tags belong to workgroups rather than individual users). '.
-                                'Workgroup tags can only be added / modified through this function');
+                        menuEntry('','Workgroup tags','ugrps/editGroupTags.php?db='.HEURIST_DBNAME,
+                            'Add and remove workgroup tags (tags belong to workgroups rather than individual users). '.
+                            'Workgroup tags can only be added / modified through this function');
 
-                            menuEntry('','Quit workgroup temporarily','ugrps/quitGroupForSession.php?db='.HEURIST_DBNAME,
-                                'Quit a workgroup for this session to allow testing of non-group-members view of the database');
+                        menuEntry('','Quit workgroup temporarily','ugrps/quitGroupForSession.php?db='.HEURIST_DBNAME,
+                            'Quit a workgroup for this session to allow testing of non-group-members view of the database');
 
-                            menuEntry('---','Manage users','ugrps/manageUsers.php?db='.HEURIST_DBNAME.'',
-                                'Add and edit database users, including authorization of new users. Use Manage Workgroups '.
-                                'to allocate users to workgroups and define roles within workgroups');
+                        menuEntry('---','Manage users','ugrps/manageUsers.php?db='.HEURIST_DBNAME.'',
+                            'Add and edit database users, including authorization of new users. Use Manage Workgroups '.
+                            'to allocate users to workgroups and define roles within workgroups');
 
-                            menuEntry('','Import user','ugrps/getUserFromDB.php?db='.HEURIST_DBNAME,
-                                'Import users one at a time from another database on the system, including user name, password '.
-                                'and email address - users are NOT assigned to workgroups');
+                        menuEntry('','Import user','ugrps/getUserFromDB.php?db='.HEURIST_DBNAME,
+                            'Import users one at a time from another database on the system, including user name, password '.
+                            'and email address - users are NOT assigned to workgroups');
                         ?>
                     </ul>
                 </div>
 
 
                 <h3><a href="#">UTILITIES: </a>
-                    <span class="description">Verify and fix database integrity, specialised tools</span>
+                    <span class="description">Verify and fix database integrity, and specialised tools</span>
                 </h3>
                 <div class="adminSection">
                     <ul>
                         <?php
-                            // TITLE MASKS
-                            menuEntry('','Verify title masks','verification/checkRectypeTitleMask.php?check=1&amp;db='.HEURIST_DBNAME,
-                                'Check correctness of each Record Type\'s title mask with respect to field definitions');
+                        // TITLE MASKS
+                        menuEntry('','Verify title masks','verification/checkRectypeTitleMask.php?check=1&amp;db='.HEURIST_DBNAME,
+                            'Check correctness of each Record Type\'s title mask with respect to field definitions');
 
-                            menuEntry('','Rebuild record titles','verification/recalcTitlesAllRecords.php?db='.HEURIST_DBNAME,
-                                'Rebuilds the constructed record titles listed in search results, for all records');
-                            // We also have function for specific records and rectypes
+                        menuEntry('','Rebuild record titles','verification/recalcTitlesAllRecords.php?db='.HEURIST_DBNAME,
+                            'Rebuilds the constructed record titles listed in search results, for all records');
+                        // We also have function for specific records and rectypes
 
-                            menuEntry('','Find duplicate records','verification/listDuplicateRecords.php?fuzziness=10&amp;db='.HEURIST_DBNAME,
-                                'Fuzzy search to identify records which might contain duplicate data');
-                            menuEntry('','',''.HEURIST_DBNAME.'',
-                                '');
-                            // DATA QUALITY
-                            menuEntry('---','Verify data consistency','verification/listDataErrors.php?db='.HEURIST_DBNAME,
-                                'Find records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
+                        menuEntry('','Find duplicate records','verification/listDuplicateRecords.php?fuzziness=10&amp;db='.HEURIST_DBNAME,
+                            'Fuzzy search to identify records which might contain duplicate data');
+                        menuEntry('','',''.HEURIST_DBNAME.'',
+                            '');
+                        // DATA QUALITY
+                        menuEntry('---','Verify data consistency','verification/listDataErrors.php?db='.HEURIST_DBNAME,
+                            'Find records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
 
-                            menuEntry('','Verify field definitions','verification/listFieldTypeDefinitionErrors.php?db='.HEURIST_DBNAME,
-                                'Find field types with invalid terms or pointer record types');
+                        menuEntry('','Verify field definitions','verification/listFieldTypeDefinitionErrors.php?db='.HEURIST_DBNAME,
+                            'Find field types with invalid terms or pointer record types');
 
-                            menuEntry('','Verify wysiwyg texts','verification/checkXHTML.php?db='.HEURIST_DBNAME.'',
-                                'Check the wysiwyg text fields in records/blog entries for structural errors');
+                        menuEntry('','Verify wysiwyg texts','verification/checkXHTML.php?db='.HEURIST_DBNAME.'',
+                            'Check the wysiwyg text fields in records/blog entries for structural errors');
 
-                            menuEntry('','Verify characters in texts','verification/checkInvalidChars.php?db='.HEURIST_DBNAME,
-                                'Check the wysiwyg text fields in records/blog entries for invalid characters');
+                        menuEntry('','Verify characters in texts','verification/checkInvalidChars.php?db='.HEURIST_DBNAME,
+                            'Check the wysiwyg text fields in records/blog entries for invalid characters');
 
-                            menuEntry('','Fix invalid characters','verification/cleanInvalidChars.php?db='.HEURIST_DBNAME,
-                                'Attempt to clean up invalid characters in the wysiwyg text fields');
+                        menuEntry('','Fix invalid characters','verification/cleanInvalidChars.php?db='.HEURIST_DBNAME,
+                            'Attempt to clean up invalid characters in the wysiwyg text fields');
                         ?>
                         <li><a href="<?=HEURIST_BASE_URL_V4?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                             title="Find bookmarked records which you have not tagged">
@@ -375,24 +336,24 @@
                             Verify URLs</a>
                         </li>
                         <?php
-                            // INSTALLATION AND STATS
-                            menuEntry('---','Verify installation','verification/verifyInstallation.php?db='.HEURIST_DBNAME.'',
-                                'Verifies that all required JS libraries, other components and directories are in expected locations');
+                        // INSTALLATION AND STATS
+                        menuEntry('---','Verify installation','verification/verifyInstallation.php?db='.HEURIST_DBNAME.'',
+                            'Verifies that all required JS libraries, other components and directories are in expected locations');
 
-                            /* Removd b/c Lucene installation generated high risk warnings on security check
-                            menuEntry('','Rebuild Lucene<br />(work in progress)','verification/rebuildLuceneIndices.php?db='.HEURIST_DBNAME,
-                                'Rebuilds the Lucence indices used by Elastic Search, for all record types');
-                            */
+                        /* Removd b/c Lucene installation generated high risk warnings on security check
+                        menuEntry('','Rebuild Lucene<br />(work in progress)','verification/rebuildLuceneIndices.php?db='.HEURIST_DBNAME,
+                        'Rebuilds the Lucence indices used by Elastic Search, for all record types');
+                        */
 
-                            menuEntry('','Clear database locks','verification/removeDatabaseLocks.php?db='.HEURIST_DBNAME,
-                                'Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions');
-                            menuEntry('','Database usage statistics (slow)','verification/dbStatistics.php?db='.HEURIST_DBNAME,
-                                'Size and usage statistics for all Heurist databases on this server');
+                        menuEntry('','Clear database locks','verification/removeDatabaseLocks.php?db='.HEURIST_DBNAME,
+                            'Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions');
+                        menuEntry('','Database usage statistics (slow)','verification/dbStatistics.php?db='.HEURIST_DBNAME,
+                            'Size and usage statistics for all Heurist databases on this server');
 
-                            menuEntry('','Inter-database transfer','../import/direct/getRecordsFromDB.php?db='.HEURIST_DBNAME,
-                                'Import records directly from one database to another, mapping record types, fields types and terms');
-                            menuEntry('','Schedule Smarty reports','../export/publish/manageReports.html?db='.HEURIST_DBNAME,
-                                'Add new / modify existing scheduled Smarty reports');
+                        menuEntry('','Inter-database transfer','../import/direct/getRecordsFromDB.php?db='.HEURIST_DBNAME,
+                            'Import records directly from one database to another, mapping record types, fields types and terms');
+                        menuEntry('','Schedule Smarty reports','../export/publish/manageReports.html?db='.HEURIST_DBNAME,
+                            'Add new / modify existing scheduled Smarty reports');
                         ?>
                     </ul>
                 </div>
@@ -404,29 +365,29 @@
                 <div class="adminSection">
                     <ul>
                         <?php
-                            // FAIMS
-                            menuEntry('---','About FAIMS','../applications/faims/about.html?db='.HEURIST_DBNAME,
-                                'Information about the FAIMS (Federated Archaeological Information Management System) project');
-                            menuEntry('','Create module definition','../applications/faims/exportFAIMS.php?db='.HEURIST_DBNAME,
-                                'Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported');
-                            /* todo: not yet implemented
-                            menuEntry('','Export module + data','../applications/faims/exportFAIMSwithdata.php?db='.HEURIST_DBNAME.'',
-                            'Export a FAIMS format tarball (module including data) from the current Heurist database');
-                            */
-                            menuEntry('','Import module + data','../applications/faims/syncFAIMS.php?db='.HEURIST_DBNAME,
-                                'Import structure and data into the current Heurist database from a FAIMS module tarball '.
-                                'or direct from FAIMS server database');
-                            /* TEMPORARILY REMOVED. TODO: SOMETHING IS WRONG 3/7/2014 WITH THE EXPORT FUNCTION,
-                            IT OPENS UP THE EXPORT MODULE FORM AND WON'T CLOSE THE RECORD TYPE SELECTION POPUP
-                            menuEntry('','Export to tDAR repository','../applications/faims/exportTDar.php?db='.HEURIST_DBNAME.'',
-                            'Export the current database as tables, files and metadata directly into a specified tDAR repository');
-                            */
-                            // HuNI
-                            menuEntry('---','About HuNI','../applications/huni/about.html?db='.HEURIST_DBNAME,
-                                'Information about the HuNI (Humanities Networked Infrastructure) project');
+                        // FAIMS
+                        menuEntry('---','About FAIMS','../applications/faims/about.html?db='.HEURIST_DBNAME,
+                            'Information about the FAIMS (Federated Archaeological Information Management System) project');
+                        menuEntry('','Create module definition','../applications/faims/exportFAIMS.php?db='.HEURIST_DBNAME,
+                            'Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported');
+                        /* todo: not yet implemented
+                        menuEntry('','Export module + data','../applications/faims/exportFAIMSwithdata.php?db='.HEURIST_DBNAME.'',
+                        'Export a FAIMS format tarball (module including data) from the current Heurist database');
+                        */
+                        menuEntry('','Import module + data','../applications/faims/syncFAIMS.php?db='.HEURIST_DBNAME,
+                            'Import structure and data into the current Heurist database from a FAIMS module tarball '.
+                            'or direct from FAIMS server database');
+                        /* TEMPORARILY REMOVED. TODO: SOMETHING IS WRONG 3/7/2014 WITH THE EXPORT FUNCTION,
+                        IT OPENS UP THE EXPORT MODULE FORM AND WON'T CLOSE THE RECORD TYPE SELECTION POPUP
+                        menuEntry('','Export to tDAR repository','../applications/faims/exportTDar.php?db='.HEURIST_DBNAME.'',
+                        'Export the current database as tables, files and metadata directly into a specified tDAR repository');
+                        */
+                        // HuNI
+                        menuEntry('---','About HuNI','../applications/huni/about.html?db='.HEURIST_DBNAME,
+                            'Information about the HuNI (Humanities Networked Infrastructure) project');
 
-                            menuEntry('','Export HML','../export/xml/flathml.php?w=all&q=sortby:rt&a=1&depth=0&file=1&db='.HEURIST_DBNAME,
-                                'Export data from the current Heurist database to a HuNI-harvestable XML file');
+                        menuEntry('','Export HML','../export/xml/flathml.php?w=all&q=sortby:rt&a=1&depth=0&file=1&db='.HEURIST_DBNAME,
+                            'Export data from the current Heurist database to a HuNI-harvestable XML file');
                         ?>
 
                         <!-- TODO: Need to make this work here and remove from export menu on the search page
