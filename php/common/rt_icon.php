@@ -27,25 +27,33 @@
     
     $system->initPathConstants($db);
     
-    $path = HEURIST_ICON_DIR; 
-    
-    if(substr($rectype_id,-5,5) == "m.png") {
+    //$path = HEURIST_ICON_DIR; 
+    /*if(substr($rectype_id,-5,5) == "m.png") {
         if(substr($rectype_id,0,4)=='term'){
             $rectype_id = substr($rectype_id, 4);
             $path = HEURIST_TERM_ICON_DIR;
         }
         $rectype_id = substr($rectype_id,0,-5) . ".png";   
     }
-    else if(substr($rectype_id,-4,4) != ".png") $rectype_id = $rectype_id . ".png";
+    else */
+    if(substr($rectype_id,-4,4) != ".png") $rectype_id = $rectype_id . ".png";
     
     
-    $filename = $path . $rectype_id;
+    $filename = HEURIST_ICON_DIR . $rectype_id;
+  
+//error_log($filename);
     
     //
 
 //print $filename;    
     
     if(file_exists($filename)){
+        download_file($filename);
+    }else{
+        create_rt_icon_with_bg( $rectype_id );
+    }
+ 
+function download_file($filename){
         ob_start();    
         header('Content-type: image/png');
         header('Pragma: public');
@@ -53,10 +61,7 @@
         @ob_clean();
         flush();        
         readfile($filename);
-    }else{
-        create_rt_icon_with_bg( $rectype_id );
-    }
-    
+}    
 
 function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct){ 
     // creating a cut resource 
@@ -110,9 +115,9 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
 
     if(substr($rectype_id,-5,5) == "m.png") {
         $rectype_id = substr($rectype_id, 0, -5);
-        $bg_color = array(190,228,248);  //array(200,200,200);   //gray
+        $bg_color = array(200,200,200);   //gray
         $filename2 = $path . $rectype_id . "m.png";
-        $alpha = 40; //0-127
+        $alpha = 127; //0-127
     }else if(substr($rectype_id,-5,5) == "s.png") {
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(190,228,248);  //#bee4f8
@@ -125,17 +130,24 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
     $filename = $path . $rectype_id . ".png";
     
     
-//error_log($filename);
+//error_log("load ".file_exists($filename)."  ".$filename);
 //error_log($filename2);
+    if(!file_exists($filename)){
+        $filename = HEURIST_ICON_DIR . "3.png";
+    }
     
     if(file_exists($filename)){
+        
+        /*if($alpha==127){
+            download_file($filename);
+        }*/
        
         $img = imagecreatetruecolor(25, 25);      //truecolor
         //imagealphablending($img, false);
         //imagesavealpha($img, false);
         
         // fill the background color
-        $bg = imagecolorallocate($img, 255, 127, 0);
+        $bg = imagecolorallocate($img, 200, 200, 200);
         // make the background transparent
         imagecolortransparent($img, $bg);
         
@@ -150,10 +162,11 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
         // load icon
         $img_icon = @imagecreatefrompng($filename);
         
-        //imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
-
+        /*if($alpha==127){
+            imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
+        }*/
         // merge icon
-        imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 120);  //mix background to dark
+        imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
         
         
         /*$bg = imagecolorallocate($img_icon, 255, 255, 255);

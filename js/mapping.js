@@ -107,6 +107,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         return (!top.HEURIST4.util.isArrayNotEmpty(_mapdata) ||  (_mapdata[0].mapenabled==0 && _mapdata[0].timeenabled==0));
     }
     
+    /**
+    * show/hide timeline
+    */
     function _updateLayout(){
         
         var ismap = false, istime = false;
@@ -121,7 +124,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             }
         });
         
-        
+        /*
         if(!(ismap || istime)) { //empty
                return false;
         }else if(!ismap){ 
@@ -138,13 +141,14 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             //mylayout.changeOption('center','minSize',0);
             //$(".ui-layout-resizer-south").css('height',0);
             //mylayout.sizePane('south','100%');
-
-        }else{
+        }*/
+        
 
             //mylayout.changeOption('center','minSize',300);
             //$(".ui-layout-resizer-south").css('height',7);
             
-            var th = Math.floor($('#mapping').height*0.2);
+            var th = $('#mapping').height(); 
+            th = Math.floor(th*0.2);
             th = th>200?200:th;
 
             $(".ui-layout-north").show();
@@ -157,9 +161,11 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             }else {
                 mylayout.show('south', true);   
                 mylayout.sizePane('south', th);
+                
             }
             
-        } 
+            _updateTimeline();
+         
         
         return true;
         
@@ -180,7 +186,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             var dataset_name = _mapdata[0].id;
             var dataset = tmap.datasets[dataset_name];
             
-            if(_isEmptyDataset(_mapdata)){ //show/hde panels
+            if(_isEmptyDataset(_mapdata)){ //show/hide panels
             
                 if(dataset)
                     tmap.deleteDataset(dataset_name);
@@ -192,25 +198,19 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 }
                     
                 dataset.clear();
-                
+
                 dataset.mapenabled = _mapdata[0].mapenabled;
                 dataset.timeenabled = _mapdata[0].timeenabled;
-                
                 dataset.loadItems(_mapdata[0].options.items);
-                
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;
                 });
                 
                 dataset.hide();
                 dataset.show();
+                
                 //tmap.showDatasets();
                 _updateLayout();
-                
-                //@todo check for time enabled
-                _renderTimelineZoom();
-                _zoomTimeLineToAll();
-                
                 
                 res = true;
             }
@@ -240,6 +240,28 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
     }
     
+    function _updateTimeline(){
+                _renderTimelineZoom();
+                
+                //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
+                var timeline = $("#"+timelinediv_id);
+                var tlband0 = timeline.find("#timeline-band-0");
+                
+                var icons = tlband0.find('.timeline-band-layer-inner').find('.timeline-event-icon');
+                
+                var ids = icons.map(function() {
+                        return $(this).position().top; //parseInt(, 10);
+                        }).get();
+                
+                var highest =  Math.max.apply(Math, ids) + 26;
+                highest = Math.max(timeline.height(), highest);
+                
+                tlband0.css('height', highest+'px');
+                
+                
+                setTimeout(_zoomTimeLineToAll, 500);
+    }
+    
     /**
     * Load timemap datasets 
     * @see hRecordSet.toTimemap()
@@ -248,6 +270,61 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     */
     function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener){
 
+            function __onDataLoaded(_tmap, _notfirst){
+                tmap = _tmap;
+                
+                var dataset = tmap.datasets.main;
+                dataset.each(function(item){
+        //art 020215             
+                        item.opts.openInfoWindow = _onItemSelection;
+                });
+                
+                if(!_isEmptyDataset(_mapdata)){
+                    dataset.mapenabled = _mapdata[0].mapenabled;
+                    dataset.timeenabled = _mapdata[0].timeenabled;
+                }else{
+                    dataset.mapenabled = 0;
+                    dataset.timeenabled = 0;
+                }
+                
+                _updateLayout();
+                
+                //highlight selection
+                _showSelection(false);
+                
+                //asign tooltips for all 
+                
+                if(!_notfirst){
+                    //first map initialization
+                    
+                    // Add controls if the map is not initialized yet
+                    var mapOptions = {
+                        panControl: true,
+                        zoomControl: true,
+                        mapTypeControl: true,
+                        scaleControl: true,     
+                        overviewMapControl: true,
+                        rotateControl: true,
+                        scrollwheel: true,
+                        mapTypeControlOptions: {
+                            mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
+                        }
+                    };
+
+                    if(!gmap){ 
+                        //tmap.map.addControls(mapOptions);
+                    }
+                    tmap.getNativeMap().setOptions(mapOptions);
+
+                    gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
+
+                    loadMapDocuments(tmap.getNativeMap(), _startup_mapdocument); //loading the list of map documents see map_overlay.js
+                    
+                    _initDrawListeners();
+                }
+                
+            }// __onDataLoaded       
+        
         $( document ).bubble('closeAll');        
         
         //asign 2 global for mapping - on select listener and startup map document
@@ -274,14 +351,12 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 dataset.clear();
                 
                 if(!_isEmptyDataset(_mapdata)){
-                    dataset.mapenabled = _mapdata[0].mapenabled;
-                    dataset.timeenabled = _mapdata[0].timeenabled;
                     dataset.loadItems(_mapdata[0].options.items);
                     dataset.hide();
                     dataset.show();
                 }
                 
-                _onDataLoaded(tmap, true);
+                __onDataLoaded(tmap, true);
                 return; 
         }
         
@@ -356,7 +431,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     width: "100%"
                 }
             ],
-            dataLoadedFunction: _onDataLoaded
+            dataLoadedFunction: __onDataLoaded
             }, tmap);
 
         
@@ -555,69 +630,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         //trigger selection - to highlight on other widgets
         _onSelectEventListener.call(that, selection);
     }
-    
+  
 
-    function _onDataLoaded(_tmap, _notfirst){
-        tmap = _tmap;
-        
-        var dataset = tmap.datasets.main;
-        dataset.each(function(item){
-//art 020215             
-                item.opts.openInfoWindow = _onItemSelection;
-        });
-        
-        //highlight selection
-        _showSelection(false);
-        _renderTimelineZoom();
-        _zoomTimeLineToAll();
-        
-        //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
-        var timeline = $("#"+timelinediv_id);
-        var tlband0 = timeline.find("#timeline-band-0");
-        
-        var icons = tlband0.find('.timeline-band-layer-inner').find('.timeline-event-icon');
-        
-        var ids = icons.map(function() {
-                return $(this).position().top; //parseInt(, 10);
-                }).get();
-        
-        var highest =  Math.max.apply(Math, ids) + 26;
-        highest = Math.max(timeline.height(), highest);
-        
-        tlband0.css('height', highest+'px');
-        
-        //asign tooltips for all 
-        
-        if(!_notfirst){
-            //first map initialization
-            
-            // Add controls if the map is not initialized yet
-            var mapOptions = {
-                panControl: true,
-                zoomControl: true,
-                mapTypeControl: true,
-                scaleControl: true,     
-                overviewMapControl: true,
-                rotateControl: true,
-                scrollwheel: true,
-                mapTypeControlOptions: {
-                    mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
-                }
-            };
-
-            if(!gmap){ 
-                //tmap.map.addControls(mapOptions);
-            }
-            tmap.getNativeMap().setOptions(mapOptions);
-
-            gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
-
-            loadMapDocuments(tmap.getNativeMap(), _startup_mapdocument); //loading the list of map documents see map_overlay.js
-            
-            _initDrawListeners();
-        }
-        
-    }
 
     //    
     // Add clicked marker to array of selected
@@ -959,7 +973,6 @@ ed_html +
 
     }
     
-
     function _renderTimelineZoom(){
         // Zoomline div styling
         var $div = $("#timeline-zoom");
