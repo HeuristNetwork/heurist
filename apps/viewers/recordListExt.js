@@ -41,8 +41,8 @@ $.widget( "heurist.recordListExt", {
         
         this.div_content = $('<div>')
                    .css({
-                        position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-                        'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
+                        position:'absolute', top:'2.5em', bottom:0, left:0, right:0})
+                        //'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
                    .appendTo( this.element );
                    
         this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );

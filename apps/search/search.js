@@ -1082,7 +1082,10 @@ $.widget( "heurist.search", {
          //this.div_search.show();
 
          if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
-             $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
+            $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
+         else{
+            $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
+         }
     }
 
 
