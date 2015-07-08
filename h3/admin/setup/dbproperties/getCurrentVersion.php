@@ -31,7 +31,7 @@
     require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
     $is_check = @$_REQUEST["check"];
-    
+
 
 // REFERENCE SERVER
 // Code to run on the reference server to return the current program and database versions
@@ -43,13 +43,13 @@
         exit();
     }
 
-    
+
 // LOCAL COPY CHECK
 // Code to run on a copy which is checking itself against the reference server
 
 /**
 * Returns the date of last check and version if it is less than 7 days, otherwise it returns null
-* 
+*
 * $date_and_version = 2013-12-16|3.1.6
 *
 * @param mixed $date_and_version
@@ -67,7 +67,7 @@ function getLastCheckedVersion($date_and_version){
                 if(strtotime($date_last_check)){
 
                     $days =intval((time()-strtotime($date_last_check))/(3600*24)); //days since last check
-                    
+
                     if($version_last_check=="unknown"){  //in case previous check fails - check next 24 hr
                         if(intval($days)<1){
                             return $date_and_version;
@@ -85,7 +85,7 @@ function getLastCheckedVersion($date_and_version){
 
 /**
 * verify that version has correct format  like 3.2.x
-* 
+*
 * @param mixed $version
 */
 function checkVersionValid($version){
@@ -115,7 +115,7 @@ function checkVersionOnMainServer($version_in_session)
 
         //check data of last check and last warning email
         $fname = HEURIST_UPLOAD_ROOT."lastAdviceSent.ini";
-        if ($version_last_check==null && file_exists($fname)){      //version in session is outdated 
+        if ($version_last_check==null && file_exists($fname)){      //version in session is outdated
             //last check and version
             $version_in_session = file_get_contents($fname);
             $version_last_check = getLastCheckedVersion($version_in_session);   //get last version from file
@@ -126,9 +126,9 @@ function checkVersionOnMainServer($version_in_session)
         }
 
         //send request to main server at HEURIST_INDEX_BASE_URL
-        // H3MasterIndex is the refernece standard for current database version
+        // Heurist_Master_Index is the refernece standard for current database version
         // TODO: Maybe this should be changed to H3Sandpit?
-        $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=H3MasterIndex&check=1";
+        $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
 
         $rawdata = loadRemoteURLContentWithRange($url, null, true, 5);
 
@@ -136,7 +136,7 @@ function checkVersionOnMainServer($version_in_session)
             //parse result
             if(checkVersionValid($rawdata))
             {
-   
+
                 // $rawdata contains program version | database version
                 $current_version = explode("|", $rawdata);
 
@@ -153,8 +153,8 @@ function checkVersionOnMainServer($version_in_session)
 
                     // TODO: HEURIST_VERSION is not rendering the local version in the email below, yet HEURIST_SERVER_NAME works
                     // and it seems to have set the $variables and to detect local version OK ???
- 
-                    error_log("Heurist Version = ".HEURIST_VERSION); // DEBUG                 
+
+                    error_log("Heurist Version = ".HEURIST_VERSION); // DEBUG
                     $email_title = null;
                     if($major_local<$major){
                         $email_title = "Major new version of Heurist Vsn ".$current_version[0]." available for "
@@ -188,14 +188,14 @@ function checkVersionOnMainServer($version_in_session)
                 }
             }
         }
-  
+
         //can not access server or it returns invalid data - check next 24 hr
         $version_in_session = date("Y-m-d")."|unknown";
         if(!saveAsFile($version_in_session, $fname)){
                     error_log("Can't write file ".$fname);
         }
         return $version_in_session;
-            
-        
+
+
 }
 ?>

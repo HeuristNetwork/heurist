@@ -30,19 +30,19 @@
     require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 
-    mysql_connection_insert("hdb_H3MasterIndex");
-    
+    mysql_connection_insert("hdb_Heurist_Master_Index");
+
     header("Content-type: text/javascript");
 
     $rec = array();
     $database_id = @$_REQUEST["id"];
     if($database_id){
-        
+
         $res = mysql_query("select rec_Title, rec_URL from Records where rec_RecTypeID=22 and rec_ID=".$database_id);
         if ($res){
             $rec = mysql_fetch_assoc($res);
         }
     }
-    
+
     print json_format($rec, true);
 ?>

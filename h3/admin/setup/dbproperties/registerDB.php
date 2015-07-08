@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * registerDB.php - Registers the current database with HeuristScholar.org/db=H3MasterIndex , stores
+    * registerDB.php - Registers the current database with HeuristScholar.org/db=Heurist_Master_Index , stores
     * metadata in the index database, sets registration code in sysIdentification table.
     *
     * @package     Heurist academic knowledge management system
@@ -111,16 +111,16 @@
                     <div class='input-header-cell'><b>Database Description</b></div><div class='input-cell'>
                         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                         <div style="display:inline-block">
-                        <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription" 
+                        <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription"
 onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit').disabled = (len<40); document.getElementById('cntChars').innerHTML = len;}"></textarea>
-                        </div>    
+                        </div>
                         <div  style="display:inline-block">
-                            <label id="cntChars" style="text-align:left"></label><br/>    
+                            <label id="cntChars" style="text-align:left"></label><br/>
                             <input id="btnSubmit" type="submit" name="submit" value="Register" style="font-weight: bold;" onClick="hideRegistrationForm()" disabled="disabled" >
-                        </div>    
+                        </div>
                         <div>Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)</div>
                         <div  style="margin-top: 15px; margin-bottom: 20px;">
-                            <br/>Note: After registering the database, you will be asked to log in to a Heurist database (H3MasterIndex).
+                            <br/>Note: After registering the database, you will be asked to log in to a Heurist database (Heurist_Master_Index).
                             <br/>You should log into this database using your email address and the same login as your current database
                             <br/>(or the first database you registered, if different). This will allow you to edit the collection metadata
                             <br/>describing your database.
@@ -158,7 +158,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                 // Check if database has already been registered
 
                 if (isset($dbID) && ($dbID != 0))
-                { // already registered, display info and link to H3MasterIndex edit
+                { // already registered, display info and link to Heurist_Master_Index edit
                     echo '<script type="text/javascript">';
                     echo 'document.getElementById("registerDBForm").style.display = "none";';
                     echo '</script>';
@@ -167,7 +167,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     "<div class='input-cell'><b>ID:</b> " . $dbID . " </div></div>";
                     echo "<div class='input-row'><div class='input-header-cell'>Description:</div>".
                     "<div class='input-cell'>". $dbDescription . "</div></div>";
-                    $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
+                    $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=Heurist_Master_Index";
                     echo "<div class='input-row'><div class='input-header-cell'><b>Please edit the collection metadata ".
                     "describing this database:</b></div><div class='input-cell'>".
                     "<a href=$url target=_blank style='color:red;'>Click here to edit</a> (login as person who registered this database - ".
@@ -229,7 +229,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
 
                     // TODO: New URL should be active July 2014 when H3 on HeuristScholar.org updated to 3.1.8
                     $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" .
-                    "?db=H3MasterIndex&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
+                    "?db=Heurist_Master_Index&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                     "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                     "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 
@@ -274,7 +274,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                             "<div class='input-cell'>" . $dbID . "</div></div>";
                             echo "<div class='input-row'><div class='input-header-cell'></div>".
                             "<div class='input-cell'>Basic description: " . $dbDescription . "</div></div>";
-                            $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=H3MasterIndex";
+                            $url = HEURIST_INDEX_BASE_URL."records/edit/editRecord.html?recID=".$dbID."&db=Heurist_Master_Index";
                             echo "<div class='input-row'><div class='input-header-cell'>Collection metadata:</div>".
                             "<div class='input-cell'><a href=$url target=_blank>Click here to edit</a> " .
                             "(login - if asked - as yourself) </div></div>";

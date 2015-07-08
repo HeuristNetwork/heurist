@@ -33,16 +33,16 @@
 
 	// TO DO: WE NEED SOME MECHANISM TO AVOID DENIAL OF SERVICE ATTACK WHICH REPEATEDLY REQUESTS REGISTRATIONS
 
-	// TODO: We may need to hobble/delete some of the functionality on H3MasterIndex to avoid people
+	// TODO: We may need to hobble/delete some of the functionality on Heurist_Master_Index to avoid people
 	// creating unwanted records or importing random crap into it
-    
+
 	$dbID = 0;
 	$error = "";
 	require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
 	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
-	mysql_connection_insert("hdb_H3MasterIndex"); // hard-coded master index for the Heurist constellation
+	mysql_connection_insert("hdb_Heurist_Master_Index"); // hard-coded master index for the Heurist constellation
                                                   // database is located at HeuristScholar.org and accessed via .../h3 version
 
 	$indexdb_user_id = 0; // Flags problem if not reset
@@ -119,7 +119,7 @@
 		}
 
     // TODO: It seems like the user ID is not being set properly, at least that seems to be indicated by the fact that the mailout comes with indexdb_user_id=0
-        
+
 	} else {// error trying to find usergroup in UGrps table
 		$error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
 		$returnData = $dbID . "," . $error;
@@ -174,7 +174,7 @@
 
             $dbowner_Email = get_dbowner_email();
             $email_title = 'Database registration: '.$dbTitle.' ['.$indexdb_user_id.']';
-            
+
             sendEmail($dbowner_Email, $email_title, $email_text, null);
 			//END email -----------------------------------
 
