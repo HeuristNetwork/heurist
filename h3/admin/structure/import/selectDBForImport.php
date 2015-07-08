@@ -113,7 +113,8 @@
 
                 //DEBUG error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
 
-                $data = loadRemoteURLContent($reg_url, true); //without proxy
+                //get json array of registered databases
+                $data = loadRemoteURLContent($reg_url, true); //without proxy 
 
                 if($data){
                     $data = json_decode($data);
@@ -145,7 +146,7 @@
 
                     foreach($data as $registeredDB) {
 
-                        if($ownDBID != $registeredDB->rec_ID) {
+                        if($ownDBID != $registeredDB->rec_ID) { //skip current db
 
                             if(array_key_exists('version',$registeredDB) &&	($registeredDB->version==null || $registeredDB->version<HEURIST_DBVERSION))
                             {

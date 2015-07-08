@@ -108,15 +108,15 @@
 	// Check if someone else is already modifying database definitions, if so: stop
 
     if($isNewDB){
-        $definitions_filename = ($isTemplateDB?"TO DO - GET STRUCTURE FROM TEMPLATE DATABASE":"coreDefinitions.txt");
-    }
-
-	if($isNewDB && !file_exists("../../setup/dbcreate/".$definitions_filename)){
+        $definitions_filename = $templateFileName;
+    
+        if(!file_exists($definitions_filename)){
                 //($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
-		$errorCreatingTables = true;
-		$isCreateNew = true;
-		echo ($definitions_filename." not found</br>");
-		return false;
+		        $errorCreatingTables = true;
+		        $isCreateNew = true;
+		        echo ($definitions_filename." not found</br>");
+		        return false;
+        }
 	}
 
 	if ($isExistingDB) {
@@ -163,7 +163,7 @@
 
 	if($isNewDB) { // minimal definitions from coreDefinitions.txt - format same as getDBStructureAsSQL returns
 
-		$file = fopen("../../setup/dbcreate/".$definitions_filename, "r");
+		$file = fopen($definitions_filename, "r");
         $output = "";
 		while(!feof($file)) {
 			$output = $output . fgets($file, 4096);

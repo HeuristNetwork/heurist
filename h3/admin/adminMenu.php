@@ -170,7 +170,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                             'List the databases on the current server to which you have access '.
                             '(you are identified by the email address attached to your current user login)');
 
-                        menuEntry('','New database','setup/dbcreate/createNewDB.php',
+                        menuEntry('','New database','setup/dbcreate/createNewDB.php?db='.HEURIST_DBNAME,
                             'Create a new database on the current server - essential structure elements are populated automatically');
                         menuEntry('---','Clone database','setup/dboperations/cloneDatabase.php?db='.HEURIST_DBNAME,
                             'Clones an identical database from the currrent database with all data, users, attached files, templates etc.');

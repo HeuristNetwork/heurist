@@ -30,6 +30,7 @@
 define('NO_DB_ALLOWED',1);
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
 // must be logged in anyway to define the master user for the database
 if (!is_logged_in()) {
@@ -49,7 +50,6 @@ function prepareDbName(){
     $db_name = preg_replace("/[^A-Za-z0-9_\$]/", "", $db_name);
     return $db_name;
 }
-
 ?>
 <html>
     <head>
@@ -59,12 +59,15 @@ function prepareDbName(){
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
 
+        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
 
         <style>
             .detailType {width:180px !important}
         </style>
 
         <script>
+            var registeredDBs = null;
 
             function hideProgress(){
                 var ele = document.getElementById("loading");
@@ -127,44 +130,95 @@ function prepareDbName(){
 
 
             function onBeforeSubmit(){
-                <?php if(!is_logged_in()) { ?>
-                    function __checkMandatory(field, label) {
-                        if(document.getElementById(field).value==="") {
-                            alert(label+" is mandatory field");
-                            document.getElementById(field).focus();
-                            return true;
-                        }else{
-                            return false;
+
+                var ele = document.getElementById("url_template");
+                if(document.getElementById("rb2").checked){
+                    
+                    ele.value = '';
+                    
+                    var bd_reg_idx = document.forms[0].elements['dbreg'].value;
+                    if(!bd_reg_idx){
+                        alert('Select database you wish use as a template');
+                        return false;
+                    }else{
+                        var reginfo = registeredDBs[bd_reg_idx];
+
+                        //@todo - IMPORTANT! it works for old registration only. for new ones "/h3" should to be addded
+                        
+                        regurl = reginfo[1];
+                        if(regurl=='http://heurist.sydney.edu.au/h3/'){
+                            regurl = 'http://heurist.sydney.edu.au/h4-ao/h3/';
                         }
+                        
+                        //url + script + db
+                        ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?db='+reginfo[2];
                     }
-
-
-                    // check mandatory fields
-                    if(
-                        __checkMandatory("ugr_FirstName","First name") ||
-                        __checkMandatory("ugr_LastName","Last name") ||
-                        __checkMandatory("ugr_eMail","Email") ||
-                        //__checkMandatory("ugr_Organisation","Institution/company") ||
-                        //__checkMandatory("ugr_Interests","Research Interests") ||
-                        __checkMandatory("ugr_Name","Login") ||
-                        __checkMandatory("ugr_Password","Password")
-                    ){
-                        return false;
-                    }
-
-
-                    if(document.getElementById("ugr_Password").value!==document.getElementById("ugr_Password2").value){
-                        alert("Passwords are different");
-                        document.getElementById("ugr_Password2").focus();
-                        return false;
-                    }
-                    <?php } ?>
-
-                var ele = document.getElementById("createDBForm");
+                    
+                }else{
+                    ele.value = '';
+                }
+                
+                ele = document.getElementById("createDBForm");
                 if(ele) ele.style.display = "none";
-
+                
+                //return false;
+                
                 showProgress(true);
                 return true;
+            }
+            
+            var is_db_got = false;
+            function getRegisteredDatabases(){
+                
+                //only once
+                if(is_db_got) return;
+                is_db_got = true;
+                
+                // request for server side
+                var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+                var params = "db=<?=HEURIST_DBNAME?>";   // &named=1&excluded=dbid
+                top.HEURIST.util.getJsonData(baseurl, 
+                    // fillRegisteredDatabasesTable
+                    function(responce){
+                        
+                        registeredDBs = responce;
+                        var ddiv = document.getElementById('registered_dbs'); 
+                        var s = '', regurl;
+                        
+                        if(!top.HEURIST.util.isnull(responce)){
+                            
+                            for(var idx in responce){
+                                if(idx){
+                                    
+                                    //regurl = responce[idx][0]
+                                    
+                                    s = s + '<div style="display:table-row">'
+                                    +'<div style="width:50px;display:table-cell"><input type="radio" name="dbreg" value="'+idx+'" id="rbdb'+idx+'"/></div>'
+                                    +'<div style="width:50px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][0]+'</label></div>'      
+                                    +'<div style="width:300px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][2]+'</label></div>'      
+                                    +'<div style="width:900px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][1]+'</label></div></div>';      
+                                }
+                            }
+                            
+                            /*
+                            var ddiv = $("#registered_dbs")
+                            ddiv.empty();
+                            for(var idx in responce){
+                                if(idx){
+                                    ddiv.append(
+                                         $("<div>"+responce[idx][0]+"  "+responce[idx][2]+"</div>")
+                                    );
+                                }
+                            }
+                            */
+                        
+                        }
+                        if(s==''){
+                            s = '<p class="error">Cannot access Heurist database index<p>';
+                        }
+                        ddiv.innerHTML = s;
+                    },
+                params);
             }
 
         </script>
@@ -194,7 +248,7 @@ function prepareDbName(){
             if(isset($_POST['dbname'])) {
                 $isCreateNew = false;
                 $isTemplateDB = ($_POST['dbtype']=='1');
-
+                
                 /* TODO: verify that database name is unique - currently rather ugly error trap
                 $list = mysql__getdatabases();
                 $dbname = $_POST['uname']."_".$_POST['dbname'];
@@ -211,11 +265,13 @@ function prepareDbName(){
 
                 // *****************************************
 
-                echo_flush( '<script type="text/javascript">hideProgress();</script>' );
+                //echo_flush( '<script type="text/javascript">hideProgress();</script>' );
             }
+            
+            print '<script type="text/javascript">hideProgress();</script>';
 
             if($isCreateNew){
-                ?>
+?>
 
                 <h2>Creating new database on server</h2>
                 <br />
@@ -231,6 +287,8 @@ function prepareDbName(){
                     <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>"
                         method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
 
+                        <input type="hidden" id="url_template" name="url_template">
+                        
                         <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
                             <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
                                 class="labelBold">Standard starter database</label>
@@ -242,8 +300,8 @@ function prepareDbName(){
 
                             <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
 
-                            <input type="radio" name="dbtype" value="1" id="rb2" /><label for="rb2"
-                                class="labelBold">Use a registered database as template</label>
+                            <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
+                                class="labelBold" >Use a registered database as template</label>
                             <div style="padding-left: 38px;">
                                 Use a database registered with the Heurist Network as a template.
                                 Copies record types, fields, terms and relationships from the database selected.<br />
@@ -252,9 +310,10 @@ function prepareDbName(){
                                 <br />as well as community servers maintained by other research groups.
                             </div>
 
-                            <div  style="padding-left: 38px;margin-top: 30px;">DATABASE TEMPLATES NOT YET IMPLEMENTED</div>
+                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;padding-left: 38px;margin-top: 30px; background-color:lightgray">DATABASE TEMPLATES NOT YET IMPLEMENTED
+                            
+                            </div>
                             <!-- TO DO: NEED TO DISPLAY A DROPDOWN LIST OF DATABASES HERE, OR A BROWSE LIST WITH FILTER -->
-
 
                              <div style="padding-left: 38px; margin-top: 30px; margin-bottom: 20px;">
                                 <div><b>Suggested next steps</b></div>
@@ -280,13 +339,21 @@ function prepareDbName(){
                         </div>
                     </form>
                 </div> <!-- createDBForm -->
-                <?php
+<?php
             }
-
 
             function arraytolower($item)
             {
                 return strtolower($item);
+            }
+            
+            function cleanupNewDB($dbname){
+                db_drop($dbname);
+            }
+            
+            //@todo
+            function validateDefinitions($data){
+                return true;
             }
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
@@ -330,13 +397,63 @@ function prepareDbName(){
                         return false;
                     }
 
+                    //get path registered db template and download coreDefinitions.txt
+                    $reg_url = @$_REQUEST['url_template'];
+                    
+                    print $reg_url."</br>";
+                    
+                    $templateFileName = "NOT DEFINED";
+                    if($reg_url){
+                            
+                            $isTemplateDB = true;
+                        
+                            $data = loadRemoteURLContent($reg_url, true); //without proxy 
+                            if(!($data && validateDefinitions($data))){
+                                if(defined("HEURIST_HTTP_PROXY")){
+                                    $data = loadRemoteURLContent($reg_url, false); //with proxy
+                                    if(!($data && validateDefinitions($data))){
+                                        $data = null;
+                                    }
+                                }else{
+                                    $data = null;
+                                }
+                            }
+                            if(!$data){
+                                echo ("<p class='error'>Error importing core definitions from template database "
+                                        ." for database $newname<br>");
+                                echo ("Please check whether this database is valid; consult Heurist support if needed</p>");
+                                return false;
+                            }
+                     
+                        //save data into file       
+                        if(defined('HEURIST_SETTING_DIR')){
+                              
+                              $templateFileName = HEURIST_SETTING_DIR . get_user_id() . '_dbtemplate.txt';
+                              $res = file_put_contents ( $templateFileName, $data );
+                              if(!$res){
+                                echo ("<p class='error'>Error: cannot save definitions from template database into local file.");
+                                echo ("Please varify that folder ".HEURIST_SETTING_DIR." is writeable</p>");
+                                return false;
+                             }
+                        
+                        }
+                    }else if($isTemplateDB){
+                                echo ("<p class='error'> Wrong parameters: Template database is not defined.</p>");
+                                return false;
+                    }else{
+                        $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";    
+                    }
+                    
+                    if(!file_exists($templateFileName)){
+                                echo ("<p class='error'>Error: definitions file ".$templateFileName."not found</p>");
+                                return false;
+                    }
 
                     if(!createDatabaseEmpty($newDBName)){
                         $isCreateNew = true;
                         return false;
                     }
-
-
+                    
                     // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
                     // yes, this is badly structured, but it works - if it ain't broke ...
 
@@ -347,7 +464,7 @@ function prepareDbName(){
                     // errorCreatingTables is set to true by buildCrosswalks if an error occurred
                     if($errorCreatingTables) {
                         echo ("<p class='error'>Error importing core definitions from ".
-                            ($isTemplatDB?"template database":"coreDefinitions.txt").
+                            ($isTemplateDB?"template database":"coreDefinitions.txt").
                             " for database $newname<br>");
                         echo ("Please check whether this file or database is valid; consult Heurist support if needed</p>");
                         cleanupNewDB($newname);
@@ -431,9 +548,7 @@ function prepareDbName(){
                 } // isset
 
             } //makedatabase
-            ?>
+?>
         </div>
     </body>
 </html>
-
-

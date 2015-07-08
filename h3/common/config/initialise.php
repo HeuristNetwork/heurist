@@ -380,7 +380,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
     testDirWriteableAndDefine('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . "filethumbs/", "Thumbnails directory");
     define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
 
-    testDirWriteableAndDefine('HEURIST_SETTINGS_DIR', HEURIST_FILESTORE_DIR . "settings/", "Settings directory");
+    testDirWriteableAndDefine('HEURIST_SETTING_DIR', HEURIST_FILESTORE_DIR . "settings/", "Settings directory");
 
     testDirWriteableAndDefine('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . "smarty-templates/", "Smarty Templates directory");
 
