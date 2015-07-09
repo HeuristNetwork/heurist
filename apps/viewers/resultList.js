@@ -73,7 +73,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
-        .css({'left':0,'right':'0.3em','overflow-y':'auto','padding':'0em',
+        .css({'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
             'position':'absolute',
             'border-top': '1px solid #cccccc',
             'top':hasHeader?'5.5em':'2.5em','bottom':'15px'})   //@todo - proper relative layout
@@ -130,9 +130,10 @@ $.widget( "heurist.resultList", {
             }
         });*/
 
+        var right_padding = top.HEURIST4.util.getScrollBarWidth()+1;
 
         this.mode_selector = $( "<div>" )
-        .css({'position':'absolute','right':'0px'})  //'padding-top': '0.5em',
+        .css({'position':'absolute','right':right_padding+'px'})  //'padding-top': '0.5em',
         .html('<input type="radio" id="list_layout_list" name="list_lo" checked="checked" value="list"/>'
             +'<label for="list_layout_list">'+top.HR('list')+'</label>'
             +'<input type="radio" id="list_layout_icons" name="list_lo" value="icons"/>'
@@ -150,8 +151,6 @@ $.widget( "heurist.resultList", {
         $('#list_layout_list').button({icons: {primary: "icon-list"}, text:false});
         $('#list_layout_icons').button({icons: {primary: "icon-th"}, text:false});
         $('#list_layout_thumbs').button({icons: {primary: "icon-th-large"}, text:false});
-
-
 
         //----------------------
 

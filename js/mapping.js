@@ -43,7 +43,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     defaultZoom = 2,
     keepMinDate = null,
     keepMaxDate = null,
-    keepMinNaxDate = true,
+    keepMinMaxDate = true,
+    keppTimelineIconBottomPos = 0,
     
     _onSelectEventListener,
     _startup_mapdocument,
@@ -164,7 +165,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 
             }
             
-            _updateTimeline();
+            setTimeout(_updateTimeline, 1000);
+    
+// _updateTimeline();
          
         
         return true;
@@ -238,28 +241,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             
         }
         
-    }
-    
-    function _updateTimeline(){
-                _renderTimelineZoom();
-                
-                //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
-                var timeline = $("#"+timelinediv_id);
-                var tlband0 = timeline.find("#timeline-band-0");
-                
-                var icons = tlband0.find('.timeline-band-layer-inner').find('.timeline-event-icon');
-                
-                var ids = icons.map(function() {
-                        return $(this).position().top; //parseInt(, 10);
-                        }).get();
-                
-                var highest =  Math.max.apply(Math, ids) + 26;
-                highest = Math.max(timeline.height(), highest);
-                
-                tlband0.css('height', highest+'px');
-                
-                
-                setTimeout(_zoomTimeLineToAll, 500);
     }
     
     /**
@@ -1073,7 +1054,7 @@ ed_html +
 
         //save last known interval to restore it on case of window resize
         function __keepTimelineInterval(){
-            if(keepMinNaxDate){
+            if(keepMinMaxDate){
                 var band = tmap.timeline.getBand(0);
                 keepMinDate = band.getMinVisibleDate();
                 keepMaxDate = band.getMaxVisibleDate();// getCenterVisibleDate()
@@ -1152,8 +1133,45 @@ ed_html +
         }
         tmap.timeline.getBand(0).setCenterVisibleDate(d);
         tmap.timeline.layout();
+        
+        //fix bug with height of band
+        _timeLineFixHeightBug();
     }
 
+    function _updateTimeline(){
+          _renderTimelineZoom();
+          keppTimelineIconBottomPos = -1;
+          _zoomTimeLineToAll();
+    }
+
+    function _timeLineFixHeightBug(){
+                
+                //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
+                var timeline = $("#"+timelinediv_id);
+                var tlband0 = timeline.find("#timeline-band-0");
+                var highest = 0;
+                
+                if(keppTimelineIconBottomPos>=0){
+                    highest = keppTimelineIconBottomPos;
+                }else{
+                    var icons = tlband0.find('.timeline-band-layer-inner').find('.timeline-event-icon');
+                
+                    //find the most bottom icon
+                    var ids = icons.map(function() {
+                        return $(this).position().top; //parseInt(, 10);
+                        }).get();
+                
+                    highest =  Math.max.apply(Math, ids) + 26;
+                }
+                
+                highest = Math.max(timeline.height(), highest);
+                tlband0.css('height', highest+'px');
+                
+    }
+    
+    
+    
+    
 
     /**
     *  Keeps timeline zoom 
@@ -1161,7 +1179,7 @@ ed_html +
     function _onWinResize(){
 
         if(tmap && keepMinDate && keepMinDate){
-            keepMinNaxDate = false;
+            keepMinMaxDate = false;
             setTimeout(function (){
 
                 var band = tmap.timeline.getBand(0);
@@ -1169,7 +1187,7 @@ ed_html +
                 band.setMaxVisibleDate(keepMaxDate);
                 tmap.timeline.layout();
 
-                keepMinNaxDate = true;
+                keepMinMaxDate = true;
                 }, 1000);
         }
     }

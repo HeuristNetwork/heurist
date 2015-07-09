@@ -62,7 +62,7 @@
     define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html        @todo - read simlink
     define('HEURIST_SERVER_URL', $serverBaseURL);
     define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); //. 'applications/h4/'); // eg. http://heuristscholar.org/h3/
-    define('HEURIST_BASE_URL_OLD',  $heurist3url);//$serverBaseURL . $installDir ); // access to old app
+    define('HEURIST_BASE_URL_OLD',  ((strpos($heurist3url, "http://")===0)?$heurist3url:HEURIST_BASE_URL.$heurist3url) );//$serverBaseURL . $installDir ); // access to old app
 
 
     if ($dbHost) {
