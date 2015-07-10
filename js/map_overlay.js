@@ -1,4 +1,5 @@
 //ARTEM:   @todo JJ calls server side directly - need to fix - use hapi!!!!!
+//
 // move all these methods into hMapping class or create new one
 // rename legend to map_legend
 
@@ -50,12 +51,17 @@ function loadMapDocuments(_map, _startup_mapdocument) {
 */
 function fillMapDocumentsDropDown() {
     // Show options in dropdown
+    
+    var ele = $("#map-doc-select");
+    
+    ele.append("<option value='-1'>"+(data.length>0?'select...':'none available')+"</option>");
+    
     for(var i = 0; i < data.length; i++) {
-        $("#map-doc-select").append("<option value='"+data[i].id+"'>["+data[i].id+"] "+data[i].title+"</option>");
+        ele.append("<option value='"+data[i].id+"'>"+data[i].title+"</option>"); //["+data[i].id+"]
     } 
     
     // Option listener
-    $("#map-doc-select").change(function(e) {
+    ele.change(function(e) {
         // Clean old data
         removeOverlays();
         _emptyLegend();  
@@ -118,10 +124,11 @@ function _emptyLegend() {
     //add list of layers that are not in map document
     for(var idx in overlays_not_in_doc) {
         if (overlays_not_in_doc.hasOwnProperty(idx) && overlays_not_in_doc[idx] !== undefined) {
-            $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"
+            $("#legend .content").append("<div style='display:block;padding:2px'><input type='checkbox' style='margin-right:5px' value='"
                     +idx
                     +"' "+(overlays_not_in_doc[idx].visible?"checked>":">")
-                    +overlays_not_in_doc[idx].title+"</label>");
+          +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
+                    +overlays_not_in_doc[idx].title+"</div>");
         }
     }
 }
@@ -200,10 +207,11 @@ function addLayerOverlay(bounds, layer, index) {
         var source = layer.dataSource;
         console.log(source);
         
-        // Append to legend  
-        $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>["+layer.id+"] "+layer.title+"</label>");
+        // Append to legend   ["+layer.id+"]
+        $("#legend .content").append("<label style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked> "
+          +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" align="top" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + source.rectypeID+'.png&quot;);">&nbsp;'
+          +layer.title+"</label>");
         
-
         /** MAP IMAGE FILE (TILED) */
         if(source.rectypeID == map_image_file_tiled) {
             console.log("MAP IMAGE FILE (tiled)");
@@ -490,7 +498,10 @@ function addQueryLayer(source, index) {
                        }else{
                             index = 'A'+Math.floor((Math.random() * 10000) + 1);
                             overlays_not_in_doc[index] = overlay;
-                            $("#legend .content").append("<label style='display:block;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"+overlay.title+"</label>");
+
+                            $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"
+          +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
+                            +overlay.title+"</div>");
                             _initLegend();
                        }
                     }
@@ -515,7 +526,9 @@ function addQueryLayer(source, index) {
 
 
 
-/** Data types */
+/** Data types
+ *  @TODO - get it from magic number constants defined on server side
+ */
 var map_image_file_tiled = 17; //11;
 var map_image_file_untiled = 1018;
 var kml_file = 21; //1014;

@@ -162,15 +162,13 @@ fieldset > div > input.text, fieldset > div > select.text{
 fieldset > div > .header, 
 fieldset > div > .header_narrow{
     display:table-cell;
-    width:150px;
-    min-width:150px;
     text-align:right;
     padding-top:0.4em;
     padding-right:1em;
 }
-fieldset > div > .header_narrow{
-    width:50px;
-    min-width:50px;
+fieldset > div > .header{
+    width:150px;
+    min-width:150px;
 }
 div.prompt{
     font-size:0.8em;

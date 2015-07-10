@@ -640,8 +640,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     function _showSelection( isreset ){
 
         var lastSelectedItem = null;
-        var items_to_update = [];
-        var items_to_update_data = [];
+        var items_to_update = [];       //current item to be deleted
+        var items_to_update_data = [];  // items to be added (replacement for previous)
         //var dataset = tmap.datasets.main;  //take main dataset
         
         if ( isreset || (selection && selection.length>0) ){
@@ -875,7 +875,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             html =
 ed_html +             
 '<div style="min-width:190px;height:130px;overflow-y:auto;">'+  // border:solid red 1px; 
-'<div style="font-weight:bold;width:100%">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
+'<div style="font-weight:bold;width:100%;padding-bottom:4px;">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
 '<div class="popup_body">'+ html_thumb + description +'</div>'+
 ((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+startDate+'</div>':'')+
 ((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+endDate+'</div>':'')+
@@ -1187,6 +1187,9 @@ ed_html +
                 band.setMaxVisibleDate(keepMaxDate);
                 tmap.timeline.layout();
 
+                //fix bug with height of band
+                _timeLineFixHeightBug();
+                
                 keepMinMaxDate = true;
                 }, 1000);
         }
