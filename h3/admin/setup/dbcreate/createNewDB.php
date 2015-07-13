@@ -351,9 +351,32 @@ function prepareDbName(){
                 db_drop($dbname);
             }
             
-            //@todo
-            function validateDefinitions($data){
-                return true;
+            //return false if valid otherwise error string
+            function isDefinitionsInvalid($data){
+                
+                if(!$data){
+                    return "coreDefinition data is empty";
+                }
+                
+                //check the number of start and end quotes
+                if(substr_count ( $data , ">>StartData>>" )!=substr_count ( $data , ">>EndData>>" )){
+                    return "Error: core Definition data is invalid: The number of open and close tags must be equal";
+                }
+                
+                //verify that start is always before end
+                $offset = 0;
+                while (true) {
+                    $pos1 = strpos(">>StartData>>", $data, $offset);
+                    $pos2 = strpos(">>EndData>>", $data, $offset+10);
+                    if($pos1===false){
+                        break;
+                    }
+                    if($pos2>$pos1){
+                        return  "Error: core Definition data is invalid: Missed open tag";
+                    }
+                    $offset = $pos2;
+                }
+                return false;
             }
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
@@ -408,20 +431,24 @@ function prepareDbName(){
                             $isTemplateDB = true;
                         
                             $data = loadRemoteURLContent($reg_url, true); //without proxy 
-                            if(!($data && validateDefinitions($data))){
+                            $resval = isDefinitionsInvalid($data);
+                            
+                            if($resval){
                                 if(defined("HEURIST_HTTP_PROXY")){
                                     $data = loadRemoteURLContent($reg_url, false); //with proxy
-                                    if(!($data && validateDefinitions($data))){
+                                    $resval = isDefinitionsInvalid($data);
+                                    if($resval){
                                         $data = null;
                                     }
                                 }else{
                                     $data = null;
                                 }
                             }
-                            if(!$data){
+                            if($resval){
                                 echo ("<p class='error'>Error importing core definitions from template database "
                                         ." for database $newname<br>");
-                                echo ("Please check whether this database is valid; consult Heurist support if needed</p>");
+                                echo ( $resval );
+                                echo ("<br>Please check whether this database is valid; consult Heurist support if needed</p>");
                                 return false;
                             }
                      
