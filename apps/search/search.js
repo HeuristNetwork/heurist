@@ -795,15 +795,19 @@ $.widget( "heurist.search", {
 
                 if(this.search_assistant){ //inited already
 
-                    var popup = $( this.search_assistant )
-                    .show()
-                    //.position({my: "right top+3", at: "right bottom", of: this.input_search });
-                    .position({my: "left top+3", at: "left bottom", of: this.input_search });
-                    //.position({my: "right top", at: "right bottom", of: this.btn_search_assistant });
+                    var popup = $( this.search_assistant );
+                    var inpt = $(this.input_search).offset();
+                    popup.css({'left': inpt.left, 'top':inpt.top+$(this.input_search).height()+3 });
+                    //popup.position({my: "left top+3", at: "left bottom", of: this.input_search })
+                    
+                    popup.show( "blind", {}, 500 );
+                    
 
                     function _hidethispopup(event) {
                         if($(event.target).closest(popup).length==0 && $(event.target).attr('id')!='menu-search-quick-link'){
-                            popup.hide();
+                            popup
+                                 //.position({my: "left top+3", at: "left bottom", of: this.input_search })
+                                 .hide( "blind", {}, 500 );
                         }else{
                             $( document ).one( "click", _hidethispopup);
                             //return false;
@@ -826,11 +830,29 @@ $.widget( "heurist.search", {
         .css('position','absolute')
         .appendTo( this.document.find('body') )
         .hide();
-
+        
         var that = this;
+        
         //load template
         $dlg.load("apps/search/search_quick.html?t="+(new Date().getTime()), function(){
 
+            
+            var search_quick_close = $( "<button>", {
+                text: top.HR("close")
+            })
+            .appendTo( $dlg )
+            .addClass('ui-heurist-btn-header1')
+            .zIndex(9999)
+            .css({'position':'absolute', 'right':4, top:4, width:18, height:18})
+            .button({icons: {
+                primary: "ui-icon-triangle-1-n"
+                }, text:false});        
+            that._on( search_quick_close, {
+                    click: function(event){
+                        $dlg.hide( "blind", {}, 500 );
+                    }
+                });               
+            
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                 $(this).html(top.HR($(this).html()));
