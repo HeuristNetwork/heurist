@@ -770,24 +770,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
         top.HEURIST4.util.showMsgDlg(msg, null, "Error");
     },
-
-    getMsgDlg: function(){
-        var $dlg = $( "#dialog-common-messages" );
-        if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
-        }
-        return $dlg.removeClass('ui-heurist-border');
-    },
-
-    getPopupDlg: function(){
-        var $dlg = $( "#dialog-popup" );
-        if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').css({'min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px'
-            $dlg.removeClass('ui-heurist-border');
-        }
-        return $dlg;
-    },
     
+    //load content to dialog and show it
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
@@ -798,7 +782,38 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
     },
     
+    showMsgWorkInProgress: function( message ){
+        
+        if(top.HEURIST4.util.isempty(message)){
+            message = "this feature";
+        }
+        
+        message = "Beta version: we are still working on "
+              + message 
+              + "<br/><br/>Please email Heurist support (support _at_ HeuristNetwork.org)"
+              + "<br/>if you need this feature and we will provide workarounds and/or fast-track your needs.";
+            
+        top.HEURIST4.util.showMsgDlg(message, null, "Work in Progress");
+    },
+    
+    getMsgDlg: function(){
+        var $dlg = $( "#dialog-common-messages" );
+        if($dlg.length==0){
+            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+        }
+        return $dlg.removeClass('ui-heurist-border');
+    },
 
+    //similar to  dialog-common-messages - but without width limit
+    getPopupDlg: function(){
+        var $dlg = $( "#dialog-popup" );
+        if($dlg.length==0){
+            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').css({'min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px'
+            $dlg.removeClass('ui-heurist-border');
+        }
+        return $dlg;
+    },
+    
     // buttons - callback function
     showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
 
