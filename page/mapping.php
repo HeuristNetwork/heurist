@@ -224,6 +224,9 @@
                 $( document ).bubble({
                             items: ".timeline-event-icon"
                 });
+                $( document ).bubble({
+                            items: ".vis-item"
+                });
 
                 $( window ).resize(function() {
                             var w = $(this).width();

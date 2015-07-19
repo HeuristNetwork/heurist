@@ -247,6 +247,30 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
     }
     
+    function _getUnixTs(item, field, ds){
+
+        var item_id = 0;
+        if(item && item['id']){
+            item_id = item['id'];
+        }else{
+            item_id = item;
+        }
+        if(item_id){
+            
+            if(!ds) ds = vis_timeline.itemsData;
+
+            var type = {};
+            type[field] = 'Moment';
+            var val = ds.get(item_id,{fields: [field], type: type });            
+            
+            if(val!=null && val[field] && val[field]._isAMomentObject){
+                //return val[field].toDate().getTime(); //unix
+                return val[field].unix()*1000;
+            }
+        }
+        return NaN;
+    }
+    
     //called once on first timeline load
     function _initVisTimelineToolbar(){
         
@@ -266,41 +290,27 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     //console.log('set2: '+(new Date(range.start.valueOf() - interval * percentage))+' '+(new Date(range.end.valueOf()   + interval * percentage)));        
         }  
         
-        function __getUnixTs(item, field, ds){
-            if(item){
-                
-                if(!ds) ds = vis_timeline.itemsData;
-
-                var type = {};
-                type[field] = 'Moment';
-                var val = ds.get(item['id'],{fields: [field], type: type });            
-                
-                if(val!=null && val[field] && val[field]._isAMomentObject){
-                    //return val[field].toDate().getTime(); //unix
-                    return val[field].unix()*1000;
-                }
-            }
-            return NaN;
-        }
-        
         function __timelineGetEnd(ds){
 
             if(!ds) ds = vis_timeline.itemsData;
             
             var item1 = ds.max('end');
             var item2 = ds.max('start');
-            var end1 = __getUnixTs(item1, 'end', ds);
-            var end2 = __getUnixTs(item2, 'start', ds);
+            var end1 = _getUnixTs(item1, 'end', ds);
+            var end2 = _getUnixTs(item2, 'start', ds);
                 
             return isNaN(end1)?end2:Math.max(end1, end2);
         }
         
         function __timelineZoomAll(ds){
             
+            vis_timeline.fit(); //short way
+            return;
+            
             if(!ds) ds = vis_timeline.itemsData;
             
             //moment = timeline.itemsData.get(item['id'],{fields: ['start'], type: { start: 'Moment' }});        
-            var start = __getUnixTs(ds.min('start'), 'start', ds);
+            var start = _getUnixTs(ds.min('start'), 'start', ds);
             var end = __timelineGetEnd(ds);
             
             var interval = (end - start);
@@ -322,6 +332,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             
             var sels = vis_timeline.getSelection();
             if(sels && sels['length']>0){
+                   vis_timeline.focus(sels); //short way
+                   return;
+                
                    var ds = new vis.DataSet(vis_timeline.itemsData.get(sels));
                    __timelineZoomAll(ds);
             }
@@ -330,7 +343,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         function __timelineMoveTo(dest){
 
-            var start = __getUnixTs(vis_timeline.itemsData.min('start'), 'start');
+            var start = _getUnixTs(vis_timeline.itemsData.min('start'), 'start');
             var end = __timelineGetEnd();
             
             var time = (dest=='end') ?end:start;
@@ -993,7 +1006,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     function _showPopupInfo(){
         
         
-            //close others
+            //close others bubbles
             $( document ).bubble( "closeAll" );
                     
         
@@ -1090,11 +1103,24 @@ ed_html +
                 
             }
                 
-                
+            var marker = null;
+            
             // scroll timeline if necessary
             if (!item.onVisibleTimeline()) {
                 ds.timemap.scrollToDate(item.getStart());
             }
+            if(vis_timeline){
+                var stime = _getUnixTs(item.opts.recid, 'start');
+                var range = vis_timeline.getWindow();
+                if(stime<range.start || stime>range.end){
+                        vis_timeline.moveTo(stime);
+                }
+                var ele = $("#"+timelinediv_id);
+                var marker = ele.find("[data-id="+item.opts.recid +"]");
+                //horizontal scroll
+                ele.scrollTop( marker.position().top );
+            }
+            
             // open window on MAP
             if (show_bubble_on_map) 
             {
@@ -1110,12 +1136,14 @@ ed_html +
                 });
             } else {
                 // open window on TIMELINE - replacement native Timeline bubble with our own implementation
-                /*if(vis_timeline){
+                if(vis_timeline && marker){
                     
+                    $( document ).bubble( "option", "content", html );
                     
+                    //marker.scrollIntoView();
+                    setTimeout(function(){ $( marker ).click();}, 500);
                     
-                }*/
-                if(item.event){    //reference to Simile timeline event
+                }else if(item.event){    //reference to Simile timeline event
                     
                     var painter = item.timeline.getBand(0).getEventPainter();
                     var marker = painter._eventIdToElmt[item.event.getID()]; //find marker div by internal ID
@@ -1124,13 +1152,14 @@ ed_html +
                     
                     
                     
-                    //change content
+                    //change content 
                     $( document ).bubble( "option", "content", html );
                     
                     /*$( document ).bubble({
                             items: ".timeline-event-icon",
                             content:html
                     });*/
+                    //show
                     $( marker ).click();
                     
                 }else{
