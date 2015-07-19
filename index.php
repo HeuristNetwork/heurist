@@ -101,6 +101,8 @@
         <script type="text/javascript" src="js/layout.js"></script>
         <script type="text/javascript" src="apps/others/help_tips.js"></script>
 
+        <script type="text/javascript" src="h3/common/js/temporalObjectLibrary.js"></script>
+        
         <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>

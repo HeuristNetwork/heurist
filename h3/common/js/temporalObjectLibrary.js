@@ -712,7 +712,7 @@ var TDate = function (strDate) {
         getTimezoneOffset: function () {
             return "" + _tzOffset ;
         },
-        
+
         toString : function (format) {
             var frmPart = function (s,fillLength) {
                 if (!s) {
@@ -721,6 +721,7 @@ var TDate = function (strDate) {
                 var neg = s<0;
                 if (neg) {
                     s = s.replace(/\-/,"");
+                    //if(fillLength==4) fillLength==6; //special case - required 5 digits for visjs timeline
                 }
                 while (s.toString().length < fillLength) {
                     s = "0" + s;
@@ -735,7 +736,7 @@ var TDate = function (strDate) {
                 format = "yyyy-MM-dd HH:mm:ssz";  // set default format to universally searchable format
             }
 
-            return  format.replace(/[\s\-\/]?dd?d?d?|[\s\-\/]?MM?M?M?|yy?y?y?|[\sT]?hh?|[\sT]?HH?|[\s\.,:]?mm?|[\s\.,:]?ss?s?|\s?tt?|\s?zz?z?/g, function (format) {
+            return  format.replace(/[\s\-\/]?dd?d?d?|[\s\-\/]?MM?M?M?|yy?y?y?y?y?|[\sT]?hh?|[\sT]?HH?|[\s\.,:]?mm?|[\s\.,:]?ss?s?|\s?tt?|\s?zz?z?/g, function (format) {
                     switch (format) {
                         case " hh":
                         case "Thh":
@@ -784,6 +785,7 @@ var TDate = function (strDate) {
                             return _milliseconds ? format[0] + _milliseconds : "";
                         case "sss":
                             return _milliseconds ? (_milliSep ? _milliSep : ".") + _milliseconds : "";
+                        case "yyyyyy":
                         case "yyyy":
                         case "yyy":
                         case "yy":
@@ -1712,8 +1714,9 @@ var TDuration = function (strDuration) {
     //init and binding code
     _init();
     return that;
-}
+}   //end of TDuration
 
+// is given string is in temporal format
 function isTemporal(str) {
 
     var res = false;

@@ -49,7 +49,7 @@
         <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
         <!-- Styles
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
-        <link rel="stylesheet" type="text/css" href="../style3.css">
+        <link rel="stylesheet" type="text/css" href="../style3.css" />
 
         <!-- jQuery -->
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -59,12 +59,16 @@
         <!-- Timemap -->
         <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
-        <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script>
-        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/timemap.js"></script>
+        <!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
+        
+        <script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
+        <link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
+        
+        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/timemap2.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/param.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/kml.js"></script>
-        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/manipulation.js"></script>
+        <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/manipulation2.js"></script>
 
         <!-- Shape file converting -->
         <script type="text/javascript" src="../ext/shapefile/stream.js"></script>
@@ -216,7 +220,7 @@
 
 
 
-                //init popup for timeline
+                //init popup for timeline  ART14072015
                 $( document ).bubble({
                             items: ".timeline-event-icon"
                 });
@@ -500,6 +504,7 @@
             <!-- Timeline -->
             <div class="ui-layout-south">
                 <div id="timeline" style="width:100%;height:100%;overflow-y:auto;"></div>
+                <div id="timeline_toolbar" style="position:absolute;top:1;left:1;height:20px;"></div>
             </div>
         </div>
         <div id="embed-dialog" style="display:none">

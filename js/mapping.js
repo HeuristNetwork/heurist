@@ -30,6 +30,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
     var mapdiv_id = null,
     timelinediv_id = null,
+    
     basePath = '',
     //mapdata = [],
     selection = [], //array of selected record ids
@@ -37,6 +38,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
     var gmap = null,   // background gmap - gmap or other
     tmap = null,  // timemap object
+    vis_timeline = null, // timeline object
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,  
 
@@ -212,6 +214,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 dataset.hide();
                 dataset.show();
                 
+                _loadVisTimeline(_mapdata[0]);
+                
                 //tmap.showDatasets();
                 _updateLayout();
                 
@@ -243,6 +247,194 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
     }
     
+    //called once on first timeline load
+    function _initVisTimelineToolbar(){
+        
+        /**
+         * Zoom the timeline a given percentage in or out
+         * @param {Number} percentage   For example 0.1 (zoom out) or -0.1 (zoom in)
+         */
+        function __timelineZoom (percentage) {
+            var range = vis_timeline.getWindow();
+            var interval = range.end - range.start;
+           
+            vis_timeline.setWindow({
+                start: range.start.valueOf() - interval * percentage,
+                end:   range.end.valueOf()   + interval * percentage
+            });
+
+    //console.log('set2: '+(new Date(range.start.valueOf() - interval * percentage))+' '+(new Date(range.end.valueOf()   + interval * percentage)));        
+        }  
+        
+        function __getUnixTs(item, field, ds){
+            if(item){
+                
+                if(!ds) ds = vis_timeline.itemsData;
+
+                var type = {};
+                type[field] = 'Moment';
+                var val = ds.get(item['id'],{fields: [field], type: type });            
+                
+                if(val!=null && val[field] && val[field]._isAMomentObject){
+                    //return val[field].toDate().getTime(); //unix
+                    return val[field].unix()*1000;
+                }
+            }
+            return NaN;
+        }
+        
+        function __timelineGetEnd(ds){
+
+            if(!ds) ds = vis_timeline.itemsData;
+            
+            var item1 = ds.max('end');
+            var item2 = ds.max('start');
+            var end1 = __getUnixTs(item1, 'end', ds);
+            var end2 = __getUnixTs(item2, 'start', ds);
+                
+            return isNaN(end1)?end2:Math.max(end1, end2);
+        }
+        
+        function __timelineZoomAll(ds){
+            
+            if(!ds) ds = vis_timeline.itemsData;
+            
+            //moment = timeline.itemsData.get(item['id'],{fields: ['start'], type: { start: 'Moment' }});        
+            var start = __getUnixTs(ds.min('start'), 'start', ds);
+            var end = __timelineGetEnd(ds);
+            
+            var interval = (end - start);
+            
+            if(isNaN(end) || end-start<1000){
+                interval = 1000*60*60*24; //one day            
+                end = start;
+            }else{
+                interval = interval*0.2;
+            }
+            
+            vis_timeline.setWindow({
+                start: start - interval,
+                end: end + interval
+            });        
+        }
+
+        function __timelineZoomSelection(){
+            
+            var sels = vis_timeline.getSelection();
+            if(sels && sels['length']>0){
+                   var ds = new vis.DataSet(vis_timeline.itemsData.get(sels));
+                   __timelineZoomAll(ds);
+            }
+            
+        }
+        
+        function __timelineMoveTo(dest){
+
+            var start = __getUnixTs(vis_timeline.itemsData.min('start'), 'start');
+            var end = __timelineGetEnd();
+            
+            var time = (dest=='end') ?end:start;
+            
+            var range = vis_timeline.getWindow();
+            var interval = range.end - range.start;
+            
+            var delta = interval*0.05;
+
+            if(isNaN(end) || end-start<1000){//single date
+
+                interval = interval/2;
+                
+                vis_timeline.setWindow({
+                    start: start - interval,
+                    end:   start + interval
+                });
+                
+            }else if(dest=='end'){
+                vis_timeline.setWindow({
+                    start: time + delta - interval,
+                    end:   time + delta
+                });
+            }else{
+                vis_timeline.setWindow({
+                    start: time - delta,
+                    end:   time - delta + interval
+                });
+            }
+        }
+        
+        var toolbar = $("#timeline_toolbar").css('font-size','0.8em');
+
+        $("<button>").button({icons: {
+            primary: "ui-icon-circle-plus"
+            },text:false, label:top.HR("Zoom In")})
+            .click(function(){ __timelineZoom(-0.25); })
+            .appendTo(toolbar);
+        $("<button>").button({icons: {
+            primary: "ui-icon-circle-minus"
+            },text:false, label:top.HR("Zoom Out")})
+            .click(function(){ __timelineZoom(0.5); })
+            .appendTo(toolbar);
+        $("<button>").button({icons: {
+            primary: "ui-icon-arrowthick-2-e-w"
+            },text:false, label:top.HR("Zoom to All")})
+            .click(function(){ __timelineZoomAll(); })
+            .appendTo(toolbar);
+        $("<button>").button({icons: {
+            primary: "ui-icon-arrowthickstop-1-s"
+            },text:false, label:top.HR("Zoom to selection")})
+            .click(function(){ __timelineZoomSelection(); })
+            .appendTo(toolbar);
+        $("<button>").button({icons: {
+            primary: "ui-icon-arrowthickstop-1-w"
+            },text:false, label:top.HR("Move to Start")})
+            .click(function(){ __timelineMoveTo("start"); })
+            .appendTo(toolbar);
+        $("<button>").button({icons: {
+            primary: "ui-icon-arrowthickstop-1-e"
+            },text:false, label:top.HR("Move to End")})
+            .click(function(){ __timelineMoveTo("end"); })
+            .appendTo(toolbar);
+
+        
+        
+    }
+    
+    //init visjs timeline
+    function _loadVisTimeline( mapdata ){
+                
+        var items = new vis.DataSet( mapdata.timeline.items ); //options.items );
+        
+        if(vis_timeline==null){
+            var ele = document.getElementById(timelinediv_id);
+            // Configuration for the Timeline
+            var options = {dataAttributes: ['id'], 
+                           orientation:'both', //scal on top and bottom
+                           selectable:true, multiselect:true, 
+                           zoomMax:31536000000*500000};
+                        //31536000000 - year
+            // Create a Timeline
+            vis_timeline = new vis.Timeline(ele, items, options);        
+            //on select listener
+            vis_timeline.on('select', function(params   ){
+                selection = params.items;
+                _showSelection(true); //show selction on map
+                _onSelectEventListener.call(that, selection); //trigger global selection event
+            });
+            
+            //init timeline toolbar
+            _initVisTimelineToolbar();
+            
+        }else{
+            vis_timeline.setItems(items);
+            vis_timeline.redraw();
+        }
+        
+        //if(mapdata.timeenabled>0)
+        //    vis_timeline.setVisibleChartRange(mapdata.timeline.start, mapdata.timeline.end);
+        
+    }
+    
+    
     /**
     * Load timemap datasets 
     * @see hRecordSet.toTimemap()
@@ -267,11 +459,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     dataset.mapenabled = 0;
                     dataset.timeenabled = 0;
                 }
-                
-                _updateLayout();
-                
-                //highlight selection
-                _showSelection(false);
                 
                 //asign tooltips for all 
                 
@@ -302,11 +489,19 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     loadMapDocuments(tmap.getNativeMap(), _startup_mapdocument); //loading the list of map documents see map_overlay.js
                     
                     _initDrawListeners();
+                    
+                    tmap.datasets.main.hide();
+                    tmap.datasets.main.show();
                 }
+                
+                _updateLayout();
+                
+                //highlight selection
+                _showSelection(false);
                 
             }// __onDataLoaded       
         
-        $( document ).bubble('closeAll');        
+        $( document ).bubble('closeAll');  //close all popups      
         
         //asign 2 global for mapping - on select listener and startup map document
         if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
@@ -315,13 +510,15 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         //mapdata = _mapdata || [];
         selection = _selection || [];
         
-        var tl_theme = Timeline.ClassicTheme.create();
-        tl_theme.autoWidth = true;
-        tl_theme.mouseWheel = "default";//"zoom";
-        /*TODO tl_theme.event.bubble.bodyStyler = function(elem){
-        $(elem).addClass("popup_body");
-        };*/
-        tl_theme.event.track.offset = 1.4;
+        if(window["Timeline"]){
+            var tl_theme = Timeline.ClassicTheme.create();
+            tl_theme.autoWidth = true;
+            tl_theme.mouseWheel = "default";//"zoom";
+            /*TODO tl_theme.event.bubble.bodyStyler = function(elem){
+            $(elem).addClass("popup_body");
+            };*/
+            tl_theme.event.track.offset = 1.4;
+        }
 
         //timemap is already inited - _mapdata (search result) is loaded to main dataset
         if(tmap && tmap.datasets && tmap.datasets.main){ 
@@ -337,6 +534,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     dataset.show();
                 }
                 
+                _loadVisTimeline(_mapdata[0]);
+                
                 __onDataLoaded(tmap, true);
                 return; 
         }
@@ -349,7 +548,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         // TimeMapItem.openInfoWindowBasic = _showPopupInfo;
       
         //there is bug in timeline - it looks _history_.html in wrong place
-        SimileAjax.History.enabled = false;
+        if(window["Timeline"]){
+            SimileAjax.History.enabled = false;
+        }
         
         // add fake/empty datasets for further use in mapdocument (it is not possible to add datasets dynamically)
         if(!_mapdata){
@@ -362,7 +563,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         // Initialize TimeMap
         tmap = TimeMap.init({
             mapId: mapdiv_id, // Id of gmap div element (required)
-            timelineId: timelinediv_id, // Id of timeline div element (required)
+            timelineId: null, //timelinediv_id, // Id of timeline div element (required)
             datasets: _mapdata, 
             
             options: {
@@ -384,21 +585,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 openInfoWindow: RelBrowser.Mapping.openInfoWindowHandler,
                 */
                 eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
-            },
-
-            bandInfo: [
-                /*{
-                theme: tl_theme2,
-                showEventText: false,
-                intervalUnit: M.timeZoomSteps[M.initTimeZoomIndex-1].unit,
-                intervalPixels: M.timeZoomSteps[M.initTimeZoomIndex-1].pixelsPerInterval,
-                zoomIndex: M.initTimeZoomIndex-1,
-                zoomSteps: M.timeZoomSteps,
-                trackHeight:    0.2,
-                trackGap:       0.1,
-                width: "30px",
-                layout:'overview'
-                },*/
+            }
+            /* ART 14072015
+            , bandInfo: [
                 {
                     theme: tl_theme,
                     align: "Top",
@@ -411,10 +600,12 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     trackGap:    0.2,
                     width: "100%"
                 }
-            ],
-            dataLoadedFunction: __onDataLoaded
+            ]*/
+            , dataLoadedFunction: __onDataLoaded
             }, tmap);
 
+            
+        _loadVisTimeline(_mapdata[0]);
         
         if(true){ //}(hasItems && (_mapdata[0].mapenabled>0)){
             
@@ -625,8 +816,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         selection = [this.opts.recid];
         _showSelection(true);
-        //trigger selection - to highlight on other widgets
-        _onSelectEventListener.call(that, selection);
+        //trigger global selection event - to highlight on other widgets
+        _onSelectEventListener.call(that, selection);  
         //TimeMapItem.openInfoWindowBasic.call(this);        
     }
     
@@ -724,7 +915,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 var lastRecID = (selection)?selection[selection.length-1]:-1;
                 
                 var tlband0 = $("#"+timelinediv_id).find("#timeline-band-0");
-                var keep_height = tlband0.height();
+                var keep_height = (tlband0.length>0)?tlband0.height():0;
                 
                 //dataset.hide();
                 
@@ -764,11 +955,16 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 
                 //_zoomTimeLineToAll(); //
                 //tmap.timeline.layout();
-                
-                tlband0.css('height', keep_height+'px');
+                if(tlband0.length>0)
+                    tlband0.css('height', keep_height+'px');
             }
            
             //item.timeline.layout();
+            
+            //select items on timeline
+            if(vis_timeline)
+                vis_timeline.setSelection( selection );
+            
         }
         
         /*var lastRecID = (selection)?selection[selection.length-1]:-1;
@@ -914,7 +1110,12 @@ ed_html +
                 });
             } else {
                 // open window on TIMELINE - replacement native Timeline bubble with our own implementation
-                if(item.event){    //reference to timeline event
+                /*if(vis_timeline){
+                    
+                    
+                    
+                }*/
+                if(item.event){    //reference to Simile timeline event
                     
                     var painter = item.timeline.getBand(0).getEventPainter();
                     var marker = painter._eventIdToElmt[item.event.getID()]; //find marker div by internal ID
@@ -955,6 +1156,9 @@ ed_html +
     }
     
     function _renderTimelineZoom(){
+        
+        return; //ART 14072015
+        
         // Zoomline div styling
         var $div = $("#timeline-zoom");
         if ($div.length > 0) { return; } //already defined
@@ -1069,6 +1273,9 @@ ed_html +
     *
     */
     function _zoomTimeLineToAll(){
+        
+        return; //ART 14072015
+        
         //$("#timeline").css("height", "99%");
         
         // Time mid point
@@ -1145,6 +1352,7 @@ ed_html +
     }
 
     function _timeLineFixHeightBug(){
+        return; //ART 14072015
                 
                 //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
                 var timeline = $("#"+timelinediv_id);
@@ -1178,7 +1386,7 @@ ed_html +
     */
     function _onWinResize(){
 
-        if(tmap && keepMinDate && keepMinDate){
+        if(tmap && keepMinDate && keepMinDate && tmap.timeline){
             keepMinMaxDate = false;
             setTimeout(function (){
 

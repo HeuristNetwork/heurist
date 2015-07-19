@@ -533,7 +533,7 @@ function print_private_details($bib) {
                                                  " Y ".round($minY,7).", ".round($maxY,7);
 
                      $geoimage = "<img class='geo-image' src='".HEURIST_SITE_PATH."common/images/geo.gif' onmouseout='{mapViewer.hide();}' "
-                            +"onmouseover='{mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}'>&nbsp;";
+                            ."onmouseover='{mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}'>&nbsp;";
 
                      $bd['val'] = $geoimage.$bd['val'];
 

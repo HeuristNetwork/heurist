@@ -133,6 +133,9 @@ function _emptyLegend() {
     }
 }
 
+//
+// assign listeners for checkboxes
+//
 function _initLegend() {
             // Listen to checkbox changes
             $("#legend input").change(function(e) {
@@ -142,7 +145,9 @@ function _initLegend() {
    
                 // Update overlay
                 var overlay = (index.indexOf('A')<0) ?overlays[index] :overlays_not_in_doc[index];
-                overlay.setVisibility(checked);                          
+                if(overlay){
+                    overlay.setVisibility(checked);                          
+                }
             });
 }
 
@@ -434,6 +439,7 @@ function addGeoJsonToMap(data, index) {
 /**
 * Adds a query layer to the map
 * @param source Source object
+* if index < 0 it does not belong to current map document
 */
 function addQueryLayer(source, index) {
      // Query
@@ -518,12 +524,13 @@ function addQueryLayer(source, index) {
     }
 }
 
+/**
+* Reflects current query in legend
+* dataset name is "main"
+*/
+function addCurrentQueryLayer(source, index) {
 
-
-
-
-
-
+}
 
 
 /** Data types

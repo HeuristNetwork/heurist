@@ -298,7 +298,7 @@ $.widget( "heurist.svs_list", {
         
         
         //add db summary as a first entry
-        if(this.options.btn_visible_dbstructure){
+        if(this.options.btn_visible_dbstructure && this.helper_btm){
                                            //8ea9b9 
             this.helper_btm.before( 
               $('<div>')

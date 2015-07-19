@@ -1,6 +1,8 @@
 /**
 * Storage of records and its definitions (fields and structure)
 * 
+* requires temporalOBjectLibrary.js to validate and convert date for timeline
+* 
 * @see recordSearch in db_recsearch.php
 * @param initdata
 * @returns {Object}
@@ -240,8 +242,10 @@ function hRecordSet(initdata) {
     */
     function _toTimemap(dataset_name, filter_rt){
 
-        var aitems = [];
-        var item, shape, idx;
+        var aitems = [], titems = [];
+        var item, titem, shape, idx, 
+            min_date = Number.MAX_VALUE, 
+            max_date = Number.MIN_VALUE;
         var mapenabled = 0,
             timeenabled = 0;
             
@@ -308,8 +312,26 @@ function hRecordSet(initdata) {
                     }
                 };
                 
-                if(startDate||endDate){
-                     timeenabled++;
+                //need to verify date and convert from                        
+                 var dres = _parseDates(startDate, endDate);
+                 if(dres){
+                        
+                        titem = {
+                            id: recID,
+                            group: dataset_name,
+                            content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png" />',
+                            title: recName,
+                            start: dres[0],
+                        }
+                        if(dres[1] && dres[0]!=dres[1]){
+                            titem['end'] = dres[1];
+                        }
+                        
+                    
+                         timeenabled++;
+                         titems.push(titem);
+                         
+                    //}
                 }
                 
 
@@ -333,13 +355,79 @@ function hRecordSet(initdata) {
                 type: "basic",
                 timeenabled: timeenabled,
                 mapenabled: mapenabled,
-                options: { items: aitems }
+                options: { items: aitems },
+                timeline:{ items:titems } //, start: min_date  ,end: max_date  }
             }
         ];
 
         return dataset;
     }//end _toTimemap
 
+   // @todo change temporal to moment for conversion
+   function _parseDates(start, end){
+         if(window['Temporal'] && start){   
+                //Temporal.isValidFormat(start)){
+                
+                            // for VISJS timeline
+                            function __forVis(dt){
+                                if(dt){
+                                    var res = dt.toString("yyyy-MM-ddTHH:mm:ssz");
+                                    /*if(res.indexOf("-",1)<0){
+                                        res = res+"-01-01";
+                                        if(res.indexOf("-")==0){
+                                            //res = res 
+                                        }
+                                    }*/
+                                    return res;
+                                }else{
+                                    return "";
+                                }
+                                
+                            }    
+                
+                
+                            try{
+                                var temporal;
+                                if(start && start.search(/VER=/)){
+                                    temporal = new Temporal(start);
+                                    if(temporal){
+                                        var dt = temporal.getTDate('PDB');  //probable begin
+                                        if(!dt) dt = temporal.getTDate('TPQ');
+                                        
+                                        if(dt){ //this is range - find end date
+                                            var dt2 = temporal.getTDate('PDE'); //probable end
+                                            if(!dt2) dt2 = temporal.getTDate('TAQ');
+                                            end = __forVis(dt2);
+                                        }else{
+                                            dt = temporal.getTDate('DAT');
+                                        }
+                                        
+                                        if(dt){
+                                            start = __forVis(dt);
+                                        }else{
+                                            return null;
+                                        }
+                                    }
+                                }
+                                if(start!="" && end && end.search(/VER=/)){
+                                    temporal = new Temporal(end);
+                                    if(temporal){
+                                        var dt = temporal.getTDate('PDE'); //probable end
+                                        if(!dt) dt = temporal.getTDate('TAQ');
+                                        if(!dt) dt = temporal.getTDate('DAT');
+                                        end = __forVis(dt);
+                                    }
+                                }
+                            }catch(e){
+                                return null;
+                            }
+                            return [start, end];
+         }
+         return null;
+   }
+   
+   
+    
     
     //@todo - obtain codes from server side
     var RT_ADDRESS = 12,
