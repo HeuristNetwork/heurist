@@ -374,6 +374,13 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 });
             }
         }
+        function __timelineShowLabels(){
+            if($("#btn_timeline_labels").is(':checked')){
+                $(".vis-item-content").find("span").show();
+            }else{
+                $(".vis-item-content").find("span").hide();
+            }
+        }
         
         var toolbar = $("#timeline_toolbar").css('font-size','0.8em');
 
@@ -407,7 +414,13 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             },text:false, label:top.HR("Move to End")})
             .click(function(){ __timelineMoveTo("end"); })
             .appendTo(toolbar);
-
+        $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
+        $("<label for='btn_timeline_labels'>Show labels2</label>").appendTo(toolbar);
+        $("#btn_timeline_labels").button({icons: {
+            primary: "ui-icon-tag"
+            },text:false, label:top.HR("Show labels")})
+            .click(function(){ __timelineShowLabels(); })
+            .appendTo(toolbar);
         
         
     }
@@ -415,6 +428,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     //init visjs timeline
     function _loadVisTimeline( mapdata ){
                 
+        if(mapdata && mapdata.timeline){
+        
         var items = new vis.DataSet( mapdata.timeline.items ); //options.items );
         
         if(vis_timeline==null){
@@ -423,13 +438,20 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             var options = {dataAttributes: ['id'], 
                            orientation:'both', //scal on top and bottom
                            selectable:true, multiselect:true, 
-                           zoomMax:31536000000*500000};
+                           zoomMax:31536000000*500000,
+                           margin:1};
                         //31536000000 - year
             // Create a Timeline
             vis_timeline = new vis.Timeline(ele, items, options);        
             //on select listener
-            vis_timeline.on('select', function(params   ){
+            vis_timeline.on('select', function(params){
+                $( document ).bubble( "option", "content", "" );
+                
                 selection = params.items;
+                var e = params.event;
+                e.cancelBubble = true;
+                if (e.stopPropagation) e.stopPropagation();
+                e.preventDefault();
                 _showSelection(true); //show selction on map
                 _onSelectEventListener.call(that, selection); //trigger global selection event
             });
@@ -444,7 +466,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         //if(mapdata.timeenabled>0)
         //    vis_timeline.setVisibleChartRange(mapdata.timeline.start, mapdata.timeline.end);
-        
+        }
     }
     
     
@@ -1046,7 +1068,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     html_thumb =  ''; //top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png';
                 } */
                 
-            show_bubble_on_map = (item.getType() == "marker" && placemark.api);
+            show_bubble_on_map = (item.getType() != "" && placemark.api!=null);
             var ed_html =  '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">';
                 
                 var recID       = item.opts.recid,
@@ -1086,8 +1108,8 @@ ed_html +
 '<div style="min-width:190px;height:130px;overflow-y:auto;">'+  // border:solid red 1px; 
 '<div style="font-weight:bold;width:100%;padding-bottom:4px;">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
 '<div class="popup_body">'+ html_thumb + description +'</div>'+
-((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+startDate+'</div>':'')+
-((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+endDate+'</div>':'')+
+((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+temporalToHumanReadableString(startDate)+'</div>':'')+
+((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+temporalToHumanReadableString(endDate)+'</div>':'')+
 '</div>';
 
             }
@@ -1106,34 +1128,40 @@ ed_html +
             var marker = null;
             
             // scroll timeline if necessary
-            if (!item.onVisibleTimeline()) {
+            if (!item.onVisibleTimeline()) {    //old
                 ds.timemap.scrollToDate(item.getStart());
             }
-            if(vis_timeline){
+            if(vis_timeline && item.opts.start){
                 var stime = _getUnixTs(item.opts.recid, 'start');
                 var range = vis_timeline.getWindow();
                 if(stime<range.start || stime>range.end){
                         vis_timeline.moveTo(stime);
                 }
                 var ele = $("#"+timelinediv_id);
-                var marker = ele.find("[data-id="+item.opts.recid +"]");
+                marker = ele.find("[data-id="+item.opts.recid +"]");
                 //horizontal scroll
-                ele.scrollTop( marker.position().top );
+                if(marker) ele.scrollTop( marker.position().top );
             }
             
             // open window on MAP
             if (show_bubble_on_map) 
             {
-                placemark.setInfoBubble(html);
-                placemark.openBubble();
                 
-                // deselect when window is closed
-                item.closeHandler = placemark.closeInfoBubble.addHandler(function() {
-                    // deselect
-                    ds.timemap.setSelected(undefined);
-                    // kill self
-                    placemark.closeInfoBubble.removeHandler(item.closeHandler);
-                });
+                if (item.getType() == "marker") {
+                    placemark.setInfoBubble(html);
+                    placemark.openBubble();
+                    // deselect when window is closed
+                    item.closeHandler = placemark.closeInfoBubble.addHandler(function() {
+                        // deselect
+                        ds.timemap.setSelected(undefined);
+                        // kill self
+                        placemark.closeInfoBubble.removeHandler(item.closeHandler);
+                    });
+                } else {
+                    item.map.openBubble(item.getInfoPoint(), html);
+                    item.map.tmBubbleItem = item;
+                }
+                
             } else {
                 // open window on TIMELINE - replacement native Timeline bubble with our own implementation
                 if(vis_timeline && marker){

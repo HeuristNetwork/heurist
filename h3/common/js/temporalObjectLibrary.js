@@ -721,7 +721,7 @@ var TDate = function (strDate) {
                 var neg = s<0;
                 if (neg) {
                     s = s.replace(/\-/,"");
-                    //if(fillLength==4) fillLength==6; //special case - required 5 digits for visjs timeline
+                    //if(fillLength==4) fillLength=6; //special case - required 5 digits for visjs timeline
                 }
                 while (s.toString().length < fillLength) {
                     s = "0" + s;

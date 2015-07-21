@@ -45,7 +45,7 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
     
     _open: function( event, target, content ) {
 
-     if(!event) return; //==undefined   
+     if(!event || content=="") return; //==undefined   
         
      var w = 220, h = 152;   
         

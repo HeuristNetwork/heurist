@@ -60,7 +60,8 @@
         <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
         <!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
-        
+
+        <script type="text/javascript" src="../h3/common/js/temporalObjectLibrary.js"></script>
         <script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
         <link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
         
@@ -92,6 +93,34 @@
             }
             .ui-map-document { background-image: url('../assets/267.png') !important;}
             .ui-map-layer { background-image: url('../assets/268.png') !important;}
+
+            .vis-item{
+                background-color:lightgray;
+            }
+            .vis-item-overflow{
+                position:absolute;    
+            }
+            .vis-item-overflow .vis-item{
+                left:0px;
+                top:0px;
+                height:100%;
+                 border:none;
+            }
+            .vis-item-overflow .vis-item-content{
+                position:relative;
+                left: 4px;
+            }
+            .vis-item-overflow .vis-selected{
+                z-index:2;
+                background-color:#bee4f8 !important;
+                border:none;
+            }
+            .vis-item.vis-selected{
+                background-color:#bee4f8 !important;
+            }
+            .vis-time-axis.vis-foreground{
+                background-color:#DDDDDD;
+            }
         </style>
 
         <!-- Initializing -->

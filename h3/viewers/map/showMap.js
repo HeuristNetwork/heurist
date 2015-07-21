@@ -273,7 +273,7 @@ function ShowMap() {
 								if(record.start && record.start.search(/VER=/)){
 									temporal = new Temporal(record.start);
 									if(temporal){
-										var dt = temporal.getTDate('PDB');
+										var dt = temporal.getTDate('PDB');  //probable begin
 										if(!dt) dt = temporal.getTDate('TPQ');
 										if(!dt) dt = temporal.getTDate('DAT');
 										record.start = (dt)?dt.toString("yyyy-MM-ddTHH:mm:ssz"):"";
@@ -283,7 +283,7 @@ function ShowMap() {
 								if(record.end && record.end.search(/VER=/)){
 									temporal = new Temporal(record.end);
 									if(temporal){
-										var dt = temporal.getTDate('PDE');
+										var dt = temporal.getTDate('PDE'); //probable end
 										if(!dt) dt = temporal.getTDate('TAQ');
 										if(!dt) dt = temporal.getTDate('DAT');
 										record.end = (dt)?dt.toString("yyyy-MM-ddTHH:mm:ssz"):"";

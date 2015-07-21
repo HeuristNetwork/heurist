@@ -54,6 +54,7 @@ function fillMapDocumentsDropDown() {
     
     var ele = $("#map-doc-select");
     
+    ele.empty();
     ele.append("<option value='-1'>"+(data.length>0?'select...':'none available')+"</option>");
     
     for(var i = 0; i < data.length; i++) {

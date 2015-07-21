@@ -319,13 +319,16 @@ function hRecordSet(initdata) {
                         titem = {
                             id: recID,
                             group: dataset_name,
-                            content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png" />',
+                            content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
                             title: recName,
                             start: dres[0],
                         }
                         if(dres[1] && dres[0]!=dres[1]){
                             titem['end'] = dres[1];
+                        }else{
+                            titem['type'] = 'point';
                         }
+                        
                         
                     
                          timeenabled++;
