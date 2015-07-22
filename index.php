@@ -110,7 +110,6 @@
         <script type="text/javascript" src="apps/search/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
-        <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
@@ -121,10 +120,11 @@
         <script type="text/javascript" src="apps/digital_harlem/dh_maps.js"></script>
 
         <!--
+        <script type="text/javascript" src="apps/profile/profile.js"></script>
+        <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
          script type="text/javascript" src="apps/search.js"></script>
-        <script type="text/javascript" src="apps/profile.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
         <script type="text/javascript" src="apps/profile_edit.js"></script>
         <script type="text/javascript" src="apps/pagination.js"></script>

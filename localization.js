@@ -22,7 +22,9 @@ regional['en'] = {
     'Design database': 'Design database',
     'Import data': 'Import data',
     'Please log in':'Please Log in or Register to use all features Heurist in full scale',
-    'Please contact to register':'Please contact database owner to register and use all features Heurist in full scale'
+    'Please contact to register':'Please contact database owner to register and use all features Heurist in full scale',
+    'My Searches':'My Searches (private)',
+    'My Bookmarks':'My Bookmarks (private)'
 };
 
 regional['ru'] = {

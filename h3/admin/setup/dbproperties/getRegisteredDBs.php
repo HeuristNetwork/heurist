@@ -41,9 +41,9 @@
 
     if($_REQUEST['db']!="H3MasterIndex"){ //this is request from outside - redirect to master index
         
-                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
+                $reg_url =  HEURIST_INDEX_BASE_URL . "h3/admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
 
-                $reg_url =  "http://heurist.sydney.edu.au/h4-ao/h3/admin/setup/dbproperties/getRegisteredDBs.php?t=11";
+                //$reg_url =  "http://heurist.sydney.edu.au/h4-ao/h3/admin/setup/dbproperties/getRegisteredDBs.php?t=11"; 
                 
                 //get json array of registered databases
                 $data = loadRemoteURLContent($reg_url, true); //without proxy 

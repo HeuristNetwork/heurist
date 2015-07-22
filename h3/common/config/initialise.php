@@ -104,6 +104,7 @@ HEURIST_SCRATCHSPACE_DIR
 
 HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise redefined in ini fuile
 
+HEURIST_INDEX_BASE_URL - url for index database
     */
 
     require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file

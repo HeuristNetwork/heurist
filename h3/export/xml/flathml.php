@@ -89,6 +89,12 @@
 
     }
 
+    require_once (dirname(__FILE__) . '/../../common/config/initialise.php');
+    require_once (dirname(__FILE__) . '/../../search/getSearchResults.php');
+    require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
+    require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
+    require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
+    
     if(@$_REQUEST['file']){ // output manifest + files ??
         $intofile = true;
     }else{
@@ -105,12 +111,6 @@
         echo "<?xml version='1.0' encoding='UTF-8'?>\n";
     }
 
-    require_once (dirname(__FILE__) . '/../../common/config/initialise.php');
-    require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
-    require_once (dirname(__FILE__) . '/../../search/getSearchResults.php');
-    require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
-    require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
-    require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
 
     set_time_limit(0); //no limit    
     
@@ -1378,7 +1378,7 @@
         //$_REQUEST['idonly'] = 1;
         //$_REQUEST['vo'] = 'h3';
         //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-        $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";    //call h4
+        $url = HEURIST_BASE_URL_V4."php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";    //call h4
         if($PUBONLY){
             $url = $url."&publiconly=1";
         }

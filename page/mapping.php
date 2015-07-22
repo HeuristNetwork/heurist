@@ -121,6 +121,12 @@
             .vis-time-axis.vis-foreground{
                 background-color:#DDDDDD;
             }
+            .vis-item-content{
+                width: 10em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         </style>
 
         <!-- Initializing -->

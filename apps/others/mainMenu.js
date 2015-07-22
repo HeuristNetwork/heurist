@@ -658,7 +658,7 @@ $.widget( "heurist.mainMenu", {
 
                 //save H3 preferences
                 if(top.HEURIST && top.HEURIST.util){
-                    //top.HEURIST.util.setDisplayPreference(h3pref,h3pref_val);
+                    top.HEURIST.util.setDisplayPreference(h3pref,h3pref_val);
                 }
 
                 //save preferences in session

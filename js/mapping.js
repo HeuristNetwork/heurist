@@ -36,8 +36,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     selection = [], //array of selected record ids
     mylayout;
 
-    var gmap = null,   // background gmap - gmap or other
-    tmap = null,  // timemap object
+    var tmap = null,  // timemap object
     vis_timeline = null, // timeline object
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,  
@@ -414,6 +413,70 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             },text:false, label:top.HR("Move to End")})
             .click(function(){ __timelineMoveTo("end"); })
             .appendTo(toolbar);
+            
+            
+            
+        var menu_label_settings = $('<ul><li id="tlm0"><a href="#"><span/>Full label</a></li>'
+                        +'<li id="tlm1"><a href="#"><span class="ui-icon ui-icon-check"/>Truncate to bar</a></li>'
+                        +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
+                        +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li></ul>') 
+        .zIndex(9999)
+        .addClass('menu-or-popup')
+        .css({'position':   'absolute', 'padding':'2px'})
+        .appendTo( $('body') )
+        .menu({
+            select: function( event, ui ) {
+                
+                var contents = $(".vis-item-content");
+                
+                menu_label_settings.find('span').removeClass('ui-icon ui-icon-check');
+                ui.item.find('span').addClass('ui-icon ui-icon-check');
+                
+                var mode =  Number(ui.item.attr('id').substr(3));
+                
+                if(mode==0){
+                    contents.css({'width':'30em'});                    
+                }else if(mode==2){
+                    contents.css({'width':'10em'});                    
+                }
+                
+                vis_timeline.setOptions({'label_in_bar':(mode==1)}); //, 'label_width': ((mode==0)?'0':'10em') });
+                vis_timeline.setOptions({'margin':1});
+                
+                /*if(mode==1){
+                    contents.addClass('in-bar');
+                }else{
+                    contents.removeClass('in-bar');
+                }*/
+                
+                if(mode==3){
+                    contents.find("span").hide();
+                }else{
+                    contents.find("span").show();
+                }
+
+                vis_timeline.redraw();
+                
+        }})
+        .hide();
+            
+        $("<button>").button({icons: {
+            primary: "ui-icon-tag",
+            secondary: "ui-icon-triangle-1-s"            
+            },text:false, label:top.HR("Label settings")})
+            .click(function(){  
+                $('.menu-or-popup').hide(); //hide other
+
+                var menu = $( menu_label_settings )
+                .show()
+                .position({my: "right top", at: "right bottom", of: this });
+                $( document ).one( "click", function() { menu.hide(); });
+                return false;
+                
+            })
+            .appendTo(toolbar);
+            
+        /*   
         $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
         $("<label for='btn_timeline_labels'>Show labels2</label>").appendTo(toolbar);
         $("#btn_timeline_labels").button({icons: {
@@ -421,7 +484,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             },text:false, label:top.HR("Show labels")})
             .click(function(){ __timelineShowLabels(); })
             .appendTo(toolbar);
-        
+        */
         
     }
     
@@ -514,19 +577,25 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                         }
                     };
 
-                    if(!gmap){ 
-                        //tmap.map.addControls(mapOptions);
-                    }
-                    tmap.getNativeMap().setOptions(mapOptions);
+                    var nativemap = tmap.getNativeMap();
+                    nativemap.setOptions(mapOptions);
 
-                    gmap = tmap.map; //background gmap - gmap or other - needed for direct access  
-
-                    loadMapDocuments(tmap.getNativeMap(), _startup_mapdocument); //loading the list of map documents see map_overlay.js
+                    loadMapDocuments(nativemap, _startup_mapdocument); //loading the list of map documents see map_overlay.js
                     
                     _initDrawListeners();
                     
-                    tmap.datasets.main.hide();
-                    tmap.datasets.main.show();
+                    if(dataset.mapenabled>0){
+                        tmap.datasets.main.hide();
+                        tmap.datasets.main.show();
+                    }else if (!_startup_mapdocument) { //zoom to whole world
+                        var swBound = new google.maps.LatLng(-40, -120);
+                        var neBound = new google.maps.LatLng(70, 120);
+                        var bounds = new google.maps.LatLngBounds(swBound, neBound); 
+                        nativemap.fitBounds(bounds);
+                    }
+
+                    
+                    
                 }
                 
                 _updateLayout();
@@ -1462,9 +1531,10 @@ ed_html +
     
     function _printMap() {
         
-          if(!gmap) return;
-        
-          var map = gmap;          
+          //if(!gmap) return;
+          //var map = gmap;          
+          
+          if(!tmap) return;
 
           tmap.getNativeMap().setOptions({
                 panControl: false,
@@ -1564,8 +1634,8 @@ ed_html +
         
         onWinResize: function(){
             _onWinResize();
-            if(gmap){ //fix google map bug
-                gmap.resizeTo(0,0)
+            if(tmap && tmap.map){ //fix google map bug
+                tmap.map.resizeTo(0,0)
             }
         },
 
