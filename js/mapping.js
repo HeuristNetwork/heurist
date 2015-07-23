@@ -303,8 +303,10 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         function __timelineZoomAll(ds){
             
-            vis_timeline.fit(); //short way
-            return;
+            if(!ds){
+                vis_timeline.fit(); //short way
+                return;
+            }
             
             if(!ds) ds = vis_timeline.itemsData;
             
@@ -331,8 +333,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             
             var sels = vis_timeline.getSelection();
             if(sels && sels['length']>0){
-                   vis_timeline.focus(sels); //short way
-                   return;
+                   //vis_timeline.focus(sels); //short way - not work proprely
+                   //return;
                 
                    var ds = new vis.DataSet(vis_timeline.itemsData.get(sels));
                    __timelineZoomAll(ds);
@@ -381,7 +383,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             }
         }
         
-        var toolbar = $("#timeline_toolbar").css('font-size','0.8em');
+        var toolbar = $("#timeline_toolbar").zIndex(3).css('font-size','0.8em');
 
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
@@ -428,6 +430,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             select: function( event, ui ) {
                 
                 var contents = $(".vis-item-content");
+                var spinner = $("#timeline_spinner");
                 
                 menu_label_settings.find('span').removeClass('ui-icon ui-icon-check');
                 ui.item.find('span').addClass('ui-icon ui-icon-check');
@@ -435,19 +438,19 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 var mode =  Number(ui.item.attr('id').substr(3));
                 
                 if(mode==0){
-                    contents.css({'width':'30em'});                    
+                    $.each(contents, function(i,item){item.style.width = 'auto';});//.css({'width':''});                    
                 }else if(mode==2){
-                    contents.css({'width':'10em'});                    
+                    contents.css({'width': spinner.spinner('value')+'em'});                    
                 }
                 
                 vis_timeline.setOptions({'label_in_bar':(mode==1)}); //, 'label_width': ((mode==0)?'0':'10em') });
                 vis_timeline.setOptions({'margin':1});
                 
-                /*if(mode==1){
-                    contents.addClass('in-bar');
+                if(mode==2){
+                    spinner.show();
                 }else{
-                    contents.removeClass('in-bar');
-                }*/
+                    spinner.hide();
+                }
                 
                 if(mode==3){
                     contents.find("span").hide();
@@ -456,6 +459,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 }
 
                 vis_timeline.redraw();
+
                 
         }})
         .hide();
@@ -475,6 +479,23 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 
             })
             .appendTo(toolbar);
+            
+        var spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
+        $("#timeline_spinner").spinner({
+              value: 10,  
+              spin: function( event, ui ) {
+                if ( ui.value > 100 ) {
+                  $( this ).spinner( "value", 100 );
+                  return false;
+                } else if ( ui.value < 5 ) {
+                  $( this ).spinner( "value", 5 );
+                  return false;
+                } else {
+                    $(".vis-item-content").css({'width': ui.value+'em'});                    
+                    
+                }
+              }
+            }).css('width','2em').hide();            
             
         /*   
         $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
