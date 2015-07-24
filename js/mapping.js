@@ -523,7 +523,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                            orientation:'both', //scal on top and bottom
                            selectable:true, multiselect:true, 
                            zoomMax:31536000000*500000,
-                           margin:1};
+                           margin:1,
+                           minHeight: $(ele).height()
+                           };
                         //31536000000 - year
             // Create a Timeline
             vis_timeline = new vis.Timeline(ele, items, options);        
@@ -1662,6 +1664,12 @@ ed_html +
 
         printMap: function(){
              _printMap();
+        },
+        
+        setTimelineMinheight: function(){
+            if(vis_timeline){
+                  vis_timeline.setOptions( {minHeight: $("#"+timelinediv_id).height()} ); 
+            }
         }
     }
 

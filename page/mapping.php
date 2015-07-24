@@ -211,6 +211,10 @@
                 layout_opts.south__size = th>200?200:th;
                 layout_opts.south__spacing_open = 7;
                 layout_opts.south__spacing_closed = 7;
+                layout_opts.south__onresize_end = function() { 
+                   if(mapping) mapping.setTimelineMinheight();
+                };
+
 
 <?php if(@$_REQUEST['notimeline']){ ?>
                 layout_opts.south__size = 0;

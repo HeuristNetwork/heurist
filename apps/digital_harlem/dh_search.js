@@ -91,6 +91,9 @@ $.widget( "heurist.dh_search", {
     
    
 /*
+   1. go trough all fields with isfacet=true
+   2. use code parameter to create reverse query to search facet values
+   
 samples of faceted queries for some variables  
 
 use code parameter for variable to build invert query    
@@ -122,7 +125,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                
                function __crt( idx ){
                    var qp = null;
-                   if(idx>0){
+                   if(idx>0){  //this relation or link
                        
                         var pref = '';
                         qp = {};
@@ -139,7 +142,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                             pref = 'relatedfrom';    
                         }
                         qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
-                   }else{
+                   }else{ //this is simple field
                        qp = {'ids':'XYZ'};
                    }
                    return qp;
@@ -246,7 +249,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
        $.each(this._searches[content_id], function(idx, field){
        
            if(field['var']){
-                var inpt = $("<div>").editing_input(
+                var inpt = $("<div>").editing_input(   //this is our widget for edit given fieldtype value
                     {
                         varid: 'X'+idx,
                         recID: -1,
@@ -295,6 +298,8 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                                          __fillQuery(val);
                                     }else{
                                         if(typeof val === 'string' && val.indexOf('X')===0){
+                                            
+                                            //find input widget and get its value
                                             var vals = $(_inputs[val]).editing_input('getValues');
                                             if(vals && vals.length>0 && !top.HEURIST4.util.isempty(vals[0])){
                                                 predicate[key] = vals[0];
@@ -313,6 +318,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                         }
 
                         //add to request faceted queries
+                        /*
                         var facets = [];
                         $.each(this._searches[content_id], function(index, field){
                             if(field['isfacet'] && field['code']){
@@ -320,6 +326,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                                 facets.push(['code']);
                             }
                         });
+                        */
 
                           
                         var query = JSON.parse(JSON.stringify(query_orig)); //clone 
@@ -355,6 +362,9 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                                             that.res_name.val('');
                                             that.res_name.show();
                                             that.res_btn.show();
+                                            
+                                            that._recalculateFacets(content_id);
+                                            
                                         }else{
                                             that.res_lbl.html('Found no matches....');
                                             that.res_name.hide();
@@ -377,6 +387,33 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
         
                 //
        
+    },
+    
+    // perform search for facet values and redraw facet fields
+    // query - current query - if resultset > 1000, use query
+    _recalculateFacets: function(content_id, field_index){
+        
+        return;
+        // this._currentquery
+        // this._resultset
+        if(!field_index) field_index = 0;
+
+        var i=0;
+        for(;i<this._searches[content_id].length;i++){
+            var field = this._searches[content_id][i];
+            if(i>=field_index && field['isfacet'] && field['facet']){
+                //start search
+                
+                if(this._resultset && this._resultset.count_total()>1000){
+        
+                }
+                
+
+               _recalculateFacets(content_id, i+1);                 
+               break;
+            }
+        }
+        
     },
     
     _onSearchResult: function(){
