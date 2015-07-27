@@ -993,7 +993,7 @@
         //DEGUG 
         if(@$params['qa']){
             //print $query;
-//error_log($query);
+// error_log($query);
             //exit();
         }else{
 //error_log("AAA ".$query);            

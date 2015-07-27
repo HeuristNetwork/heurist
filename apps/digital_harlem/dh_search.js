@@ -75,7 +75,7 @@ $.widget( "heurist.dh_search", {
       ],
       [    //ADDRESS
     {"var":"1","id":"1","rtid":"12","code":"12:1","title":"Street Number","type":"freetext","levels":[],"search":[]},
-    {"var":"2","id":"1","rtid":"11", "code":"12:lt73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[]},
+    {"var":"2","id":"1","rtid":"11", "code":"12:lt73:11:1","title":"Street Name","type":"freetext","levels":[],"search":[],"isfacet":true},
     {"var":"3","id":"1","rtid":"16","code":"12:lf90:16:1","title":"Location Name","type":"freetext","levels":[],"search":[]},
     {"var":"4","id":"3","rtid":"12","code":"12:3","title":"Keywords in Comments","type":"freetext","levels":[],"search":[]},
     {"var":"5","id":"89","rtid":"16","code":"12:lf90:16:89","title":"Location type","type":"enum","levels":[],"search":[]},
@@ -89,6 +89,8 @@ $.widget( "heurist.dh_search", {
     
     //CHURCHES    {"t":"12"},{"linkedfrom:90":[{"t":"16"},{"f:89":"4042"}]} 
     
+//heurist.sydney.edu.au/h4-ao/php/api/record_search.php?db=digital_harlem&qa={"t":"11","linkedfrom:73":{"ids":"688,949,1231,1401,1642,1987,2299,2317,2338,2447,2829,2938,3410,3731,4039,4306,38435"}}    
+//http://heurist.sydney.edu.au/h4-ao/php/api/record_search.php?db=digital_harlem&qa={%22t%22:%2211%22,%22linkedfrom:73%22:%22688,949,1231,1401,1642,1987,2299,2317,2338,2447,2829,2938,3410,3731,4039,4306,38435%22}
    
 /*
    1. go trough all fields with isfacet=true
@@ -143,7 +145,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                         }
                         qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
                    }else{ //this is simple field
-                       qp = {'ids':'XYZ'};
+                       qp = 'IDSXYZ'; //{'ids':'XYZ'};
                    }
                    return qp;
                }
@@ -155,6 +157,32 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
        
    },
     
+    
+   _setFacetQuery: function( query_orig, ids ){
+        
+                        function __fillQuery(q){
+                            $(q).each(function(idx, predicate){
+                                
+                                $.each(predicate, function(key,val)
+                                {
+                                        if( $.isArray(val) || $.isPlainObject(val) ){
+                                         __fillQuery(val);
+                                }else if( (typeof val === 'string') && (val == 'XYZ') && (key == "ids") ) {
+                                        //substitute with array of ids
+                                        predicate[key] = ids.join(',');
+                                }else if( (typeof val === 'string') && (val == 'IDSXYZ') ){ // && (key == "ids")
+                                        //substitute with array of ids
+                                        predicate[key] = ids.join(',');
+                                }
+                                });                            
+                            });
+                        }
+                        
+        var query = JSON.parse(JSON.stringify(query_orig)); //clone 
+        __fillQuery(query);
+        
+        return query;                        
+   },
 
     // the widget's constructor
     _create: function() {
@@ -294,7 +322,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                                 
                                 $.each(predicate, function(key,val)
                                 {
-                                    if( $.isArray(val) ){
+                                    if( $.isArray(val) || $.isPlainObject(val) ){
                                          __fillQuery(val);
                                     }else{
                                         if(typeof val === 'string' && val.indexOf('X')===0){
@@ -317,7 +345,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                             });
                         }
 
-                        //add to request faceted queries
+                        //add to request faceted queries  - search everything on server side
                         /*
                         var facets = [];
                         $.each(this._searches[content_id], function(index, field){
@@ -338,7 +366,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                         }
                         
                         var that = this;
-                        var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id'), facets: facets };
+                        var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id') }; //, facets: facets
                         
                         //perform search
                         top.HAPI4.RecordMgr.search(request, 
@@ -388,28 +416,50 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                 //
        
     },
-    
+
+    // there are 2 ways - search facet values on the server side in the same time whrn main query is performed
+    // or search after completion of main search    
+    //
     // perform search for facet values and redraw facet fields
     // query - current query - if resultset > 1000, use query
+    //
+    //
     _recalculateFacets: function(content_id, field_index){
         
-        return;
         // this._currentquery
         // this._resultset
         if(!field_index) field_index = 0;
 
-        var i=0;
+        var i = field_index;
         for(;i<this._searches[content_id].length;i++){
             var field = this._searches[content_id][i];
             if(i>=field_index && field['isfacet'] && field['facet']){
                 //start search
                 
-                if(this._resultset && this._resultset.count_total()>1000){
+                if(false && this._resultset && this._resultset.count_total()>1000){
+                    //replace with current query
         
+                }else{
+                    //replace with list of ids
+                    
                 }
-                
 
-               _recalculateFacets(content_id, i+1);                 
+                
+                var query = this._setFacetQuery( field['facet'], this._resultset.getIds() );
+                
+                        var that = this;
+                        var request = {qa: query, w: 'a', f: null, l:3000, source:this.element.attr('id') }; //, facets: facets
+                        
+                        //perform search
+                        top.HAPI4.RecordMgr.search(request, 
+                                function(response) {
+                                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                                            
+                                        }
+                                        
+                                        that._recalculateFacets(content_id, i+1);
+                                });
+                                
                break;
             }
         }

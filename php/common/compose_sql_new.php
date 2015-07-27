@@ -87,8 +87,19 @@
   */
 $mysqli = null;
   
+  
+/*
+
+[{"t":14},{"f:74":"X0"}, 
+              {"related_to:100":[{"t":"15"},{"f:80":"X1"}]},   //charge/conviction
+              {"relatedfrom:109":[{"t":"10"},{"f:97":"X2"},{"f:92":"X3"},{"f:98":"X4"},{"f:20":"X5"},{"f:18":"X6"}]},   //persons involved
+              
+              {"related_to:99":[{"t":"12"}, {"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}  //address->street(11)  and linkedfrom role(16) role of place
+           ]
+  
+*/  
 // $params need for 
-// qa - query array
+// qa - json query array
 // w - domain all or bookmarked
 // limit and offset
 // 
@@ -300,6 +311,9 @@ class HLimb {
            $cnt = count($this->limbs)-1;
            foreach ($this->limbs as $ind=>$limb){
                 $res = $limb->makeSQL();
+                
+//echo print_r($res, true)."<br>";                    
+                
                 if($res && @$res["where"]){
                     $this->addTable(@$res["from"]);
                     if(false && $cnt==1){
@@ -312,6 +326,7 @@ class HLimb {
                 }
            }     
            
+           //IMPORTANT!!!!!!!! 
            if(count($wheres)>1){  //@TODO!  this is temporal solution!!!!!
                 $where = implode($cnj, $wheres);
            }
@@ -448,6 +463,13 @@ class HPredicate {
                     }else{
                          return $this->predicateField();
                     }
+
+                case 'ids':
+                case 'id':
+                
+                    $res = $this->predicateRecIds();
+                    
+                    return $res;
                     
                 case 'linked_to':
                 
@@ -510,7 +532,32 @@ class HPredicate {
         
     }
     
-    
+    function predicateRecIds(){
+
+        $this->field_type = "link";
+        $p = $this->qlevel;
+        
+        if($this->query){
+            $this->query->makeSQL();
+            if($this->query->where_clause && trim($this->query->where_clause)!=""){
+                $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+            }else{
+                return null;
+            }
+            
+        }else{
+            $val = $this->getFieldValue();
+            
+            if(!$this->field_list){
+                $val = "=0";
+            }
+        }
+
+        $where = "r$p.rec_ID".$val;
+        
+        return array("where"=>$where);
+        
+    }
     
     /*
     linked_to: pointer field type : query     recordtype  
@@ -557,12 +604,14 @@ class HPredicate {
     * find records that have pointers to specified records
     */
     function predicateLinkedFrom(){
-        
+
         $this->field_type = "link";
         $p = $this->qlevel;
         
         if($this->query){
+            
             $this->query->makeSQL();
+
             if($this->query->where_clause && trim($this->query->where_clause)!=""){
                 $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
             }else{
@@ -570,6 +619,7 @@ class HPredicate {
             }
             
         }else{
+
             $val = $this->getFieldValue();
             
             if(!$this->field_list){

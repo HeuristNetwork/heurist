@@ -31,6 +31,35 @@
     */
 
 //error_log("recSearch ".print_r($_REQUEST, true));
+     
+    /*
+     parameters
+     
+     db - database
+     f - map|structure   request for details and structure 
+     idonly - 1 - returns only id  @todo merge f and idonly
+     publiconly  - returns only public records
+     vo - returns in heurist3 format (valid for idonly=1)
+     w -   a/b  all|bookmark
+     
+     topids - ids of top query to search dependent records (see rules)
+     parentquery
+     rules
+     
+     limit
+     offset
+     nochunk - return all records
+     
+     q - main query in old format (plain text)
+     qa - main query in new json format
+     sql - sql query
+     
+     getrelrecs - 1
+
+     id - unique query identiicator    
+    
+    */ 
+     
         
     
     $response = array();
