@@ -659,9 +659,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     dataset.loadItems(_mapdata[0].options.items);
                     dataset.hide();
                     dataset.show();
+                    _loadVisTimeline(_mapdata[0]);
                 }
                 
-                _loadVisTimeline(_mapdata[0]);
                 
                 __onDataLoaded(tmap, true);
                 return; 

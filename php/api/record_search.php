@@ -78,6 +78,10 @@
 
         $response = recordSearchFacets($system, $_REQUEST);
         
+    }else if(@$_REQUEST['a'] == 'getfacets_new'){ //returns     
+
+        $response = recordSearchFacets_new($system, $_REQUEST);
+        
     }else if(@$_REQUEST['a'] == 'related'){    
         
         $response = recordSearchRealted($system, $_REQUEST['ids']);        

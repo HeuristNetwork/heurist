@@ -157,6 +157,9 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null, $publicOnly=
 
     $offset = get_offset($params);
 
+    if(!$query->where_clause){
+        $query->where_clause = "(1=1)";
+    }
     
     // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
     return array("from"=>" FROM ".$query->from_clause, "where"=>$query->where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
@@ -327,7 +330,7 @@ class HLimb {
            }     
            
            //IMPORTANT!!!!!!!! 
-           if(count($wheres)>1){  //@TODO!  this is temporal solution!!!!!
+           if(count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
                 $where = implode($cnj, $wheres);
            }
        }

@@ -34,7 +34,7 @@
  5. gather results
  
 */    
-function recordSearchFacets_New($system, $params, $ids, $currentUser, $publicOnly){
+function recordSearchFacets_New2($system, $params, $ids, $currentUser, $publicOnly){
     
     $facets = $params['facets'];
     

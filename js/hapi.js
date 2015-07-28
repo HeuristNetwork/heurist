@@ -502,7 +502,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             // find ranges for faceted search
             //             
             ,get_facets: function(request, callback){
-                if(request) request.a = 'getfacets';
+                if(request && !request.a) request.a = 'getfacets';
                 _callserver('record_search', request, callback);
             }
 
