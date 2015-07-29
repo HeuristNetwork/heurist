@@ -43,7 +43,10 @@ $.widget( "heurist.svs_list", {
         var that = this;
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
+        this.search_faceted_old = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
         this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
+        
+        
         this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.5em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
                     //.removeClass('ui-widget-content')
                     .appendTo( this.search_tree );
@@ -1013,33 +1016,56 @@ $.widget( "heurist.svs_list", {
                 catch (err) {
                     facet_params = null;
                 }
-                if(!facet_params || !Hul.isArray(facet_params.rectypes)){
+                if(!facet_params || !Hul.isArray(facet_params.facets)){
                     // Do something about the exception here
                     Hul.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters. Remove this search'), null, "Error");
                     return;
                 }
 
                 var that = this;
-                //use special widget
-                if($.isFunction($('body').search_faceted)){ //already loaded
-                    //init faceted search
-                    this.search_faceted.show();
-                    this.search_tree.hide();
+                
+                
+                if(facet_params['version']==2){
+                    
+                        this.search_faceted.show();
+                        this.search_tree.hide();
 
-                    var noptions= { query_name:qname, params:facet_params,
-                        onclose:function(event){
-                            that.search_faceted.hide();
-                            that.search_tree.show();
-                    }};
+                        var noptions= { query_name:qname, params:facet_params,
+                            onclose:function(event){
+                                that.search_faceted.hide();
+                                that.search_tree.show();
+                        }};
 
-                    if(this.search_faceted.html()==''){ //not created yet
-                        this.search_faceted.search_faceted( noptions );                    
-                    }else{
-                        this.search_faceted.search_faceted('option', noptions ); //assign new parameters
-                    }
-
+                        if(this.search_faceted.html()==''){ //not created yet
+                            this.search_faceted.search_faceted2( noptions );                    
+                        }else{
+                            this.search_faceted.search_faceted2('option', noptions ); //assign new parameters
+                        }
+                    
                 }else{
-                    $.getScript(top.HAPI4.basePath+'apps/search/search_faceted.js', that._doSearch2(qname, qsearch) );
+                
+                    //use special widget
+                    if($.isFunction($('body').search_faceted)){ //already loaded
+                        //init faceted search
+                        this.search_faceted_old.show();
+                        this.search_tree.hide();
+
+                        var noptions= { query_name:qname, params:facet_params,
+                            onclose:function(event){
+                                that.search_faceted_old.hide();
+                                that.search_tree.show();
+                        }};
+
+                        if(this.search_faceted_old.html()==''){ //not created yet
+                            this.search_faceted_old.search_faceted( noptions );                    
+                        }else{
+                            this.search_faceted_old.search_faceted('option', noptions ); //assign new parameters
+                        }
+
+                    }else{
+                        $.getScript(top.HAPI4.basePath+'apps/search/search_faceted.js', that._doSearch2(qname, qsearch) );
+                    }
+                
                 }
 
             }else{
@@ -1178,6 +1204,7 @@ $.widget( "heurist.svs_list", {
         
         this.search_tree.remove(); 
         this.search_faceted.remove(); 
+        this.search_faceted_old.remove(); 
     }
     
     , _showDbSummary: function(){

@@ -615,7 +615,7 @@ $.widget( "heurist.search", {
                  top.HEURIST4.current_query_request = jQuery.extend(true, {}, data); //the only place where this values is assigned
                  that.query_request = data; //keep for search in current result
 
-                 if(data.source!=that.element.attr('id') ){
+                 if(data.source!=that.element.attr('id') ){   //search from outside
                     top.HAPI4.currentRecordset = null;
                     that.input_search.val(data.q);
                     that.options.search_domain = data.w;

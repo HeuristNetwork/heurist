@@ -569,7 +569,7 @@ function appAddContent($app_container, app, options){
                
         }else if(app.widgetname=='dh_maps'){
 
-               widget = $content.dh_maps( options );
+               widget = $content.dh_maps( options ); 
         }else    
                 {
                     //this is normal way of widget initialization   

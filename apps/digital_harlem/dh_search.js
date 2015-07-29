@@ -309,6 +309,8 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
+        
+        
         // remove generated elements
         this.tab_header.remove();
         this.tab_control.remove();
