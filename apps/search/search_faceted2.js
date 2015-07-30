@@ -275,6 +275,7 @@ $.widget( "heurist.search_faceted2", {
 
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
+                facets[facet_index].selectedvalue = null;
             }
             //this._refresh();
         }
@@ -485,10 +486,13 @@ $.widget( "heurist.search_faceted2", {
                 var query = JSON.parse(JSON.stringify(field['facet'])); //clone 
                 __fillQuery(query);                
                 
+                var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
+                
                 var request = {qa: query, w: 'a', a:'getfacets_new',
                                      facet_index: i, 
                                      field:  field['id'],
                                      type:   field['type'],
+                                     step:   step_level,
                                      source:this.element.attr('id') }; //, facets: facets
 
 
@@ -524,12 +528,27 @@ $.widget( "heurist.search_faceted2", {
                     var $input_div = $("#fv_"+field['var']);
                     //$facet_values.css('background','none');
 
+                    //create favets container if it does not exists
                     var $facet_values = $input_div.find('.facets');
                     if( $facet_values.length < 1 ){
                         var dd = $input_div.find('.input-cell');
                         $facet_values = $('<div>').addClass('facets').appendTo( $(dd[0]) );
                     }
                     $facet_values.css('background','none');
+                    
+                    //add current value to history
+                    if(top.HEURIST4.util.isnull(field.selectedvalue)){ //reset history
+                        field.history = []; 
+                    }else{
+                        //replace/add for current step and remove that a bigger
+                        if(!field.history || field.history.length==0){
+                            field.history = [];
+                            field.history.push({text:top.HR('all'), value:null});
+                        }else{
+                            field.history = field.history.slice(0, field.selectedvalue.step);
+                        }
+                        field.history.push(field.selectedvalue);
+                    }
                     
                     //draw history
                     if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
@@ -674,21 +693,13 @@ $.widget( "heurist.search_faceted2", {
                 
                 var field = this.options.params.facets[facet_index];
                 
-                if(top.HEURIST4.util.isempty(value)){ //reset history
-                    field.history = []; 
+                if(top.HEURIST4.util.isempty(value)){
+                    value = '';
+                    field.selectedvalue = null;
                 }else{
-                    var currentvalue = {text:label, value:value, step:step};
-
-                    //replace/add for current step and remove that a bigger
-                    if(hist.length==0){
-                        hist.push({text:top.HR('all'), value:null});
-                    }else{
-                        hist = hist.slice(0, step);
-                    }
-
-                    hist.push(currentvalue);
-                    field.history = hist;
+                    field.selectedvalue = {text:label, value:value, step:step};                    
                 }
+                
                 
                 // assign value to edit_inpout
                 var varid = field['var'];
@@ -696,8 +707,8 @@ $.widget( "heurist.search_faceted2", {
                 
                 // make link in bold
                 //$("#fv_"+varid).find('.facets div a').css('font-weight','normal');
-                $("#fv_"+varid).find('.facet_link').css('font-weight','normal'); 
-                link.css('font-weight','bold');
+                $("#fv_"+varid).find('.facet_link').css({'font-weight':'normal', 'backgground-color':'none'}); 
+                link.css({'font-weight':'bold', 'backgground-color':'gray'});
                 
                 // this._refresh();
 
