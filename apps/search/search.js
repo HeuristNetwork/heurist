@@ -756,7 +756,7 @@ $.widget( "heurist.search", {
             qsearch = qsearch + ' t:'+this.select_rectype.val();
         }
 
-        if ( qsearch ) {
+        if ( qsearch ) {     
 
             // q - query string
             // w  all|bookmark

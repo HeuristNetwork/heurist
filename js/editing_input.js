@@ -363,8 +363,10 @@ $.widget( "heurist.editing_input", {
              defaultTermID:value, topOptions:true, supressTermCode:true});
     },
 
-    setValue: function(idx, value, display_value){
-        alert("selected "+value+"  "+display_value);
+    setValue: function(value, idx, display_value){
+        // alert("selected "+value+"  "+display_value);
+        if(!idx) idx = 0;
+        this.inputs[idx].val( value );
     },
 
     getValues: function(){
