@@ -1284,11 +1284,11 @@ $.widget( "heurist.search", {
 
     , _doLogin: function(){
         
-        if(false && !$.isFunction(doLogin)){  // already loaded in index.php
+        if(doLogin && $.isFunction(doLogin)){  // already loaded in index.php
+            doLogin(this.options.isloginforced);
+        }else{
             //var that = this;
             $.getScript(top.HAPI4.basePath+'apps/profile/profile_login.js', this._doLogin );
-        }else{
-            doLogin(this.options.isloginforced);
         }
         
         

@@ -360,7 +360,7 @@ $.widget( "heurist.search_faceted", {
                                 var f_link = that._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(",")});
 
                                 var $span = $("<span>").css('display','inline-block').append(f_link)
-                                .append($('<span class="ui-icon ui-icon-carat-1-e" />')
+                                    .append($('<span class="ui-icon ui-icon-carat-1-e" />')
                                     .css({'display':'inline-block','height':'13px'}));
                                 $span.insertBefore($before);
                                 //$span.before($before);

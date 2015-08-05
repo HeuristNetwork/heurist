@@ -20,6 +20,7 @@
     */
     
     define('BOOKMARK', 'bookmark');
+    define('NO_BOOKMARK', 'nobookmark');
     define('BIBLIO', 'biblio'); //outdated @toremove
     define('EVERYTHING', 'everything');
 

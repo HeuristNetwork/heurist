@@ -130,6 +130,8 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null, $publicOnly=
         $search_domain = BOOKMARK;
     } else if (@$params['w'] == 'e') { //everything - including temporary
         $search_domain = EVERYTHING;
+    } else if (@$params['w'] == 'nobookmark') { //all without BOOKMAR koin
+        $search_domain = NO_BOOKMARK;
     } else {                // all records entries
         $search_domain = "a";
     }    
@@ -216,7 +218,9 @@ class HQuery {
 
             if($this->search_domain!=null){
               
-                if ($this->search_domain == BOOKMARK) {
+                if ($this->search_domain == NO_BOOKMARK){
+                    $this->from_clause = 'Records r'.$this->level.' ';
+                }else if ($this->search_domain == BOOKMARK) {
                     $this->from_clause = 'usrBookmarks b LEFT JOIN Records r'.$this->level.' ON b.bkm_recID=r'.$this->level.'.rec_ID ';
                 }else{
                     $this->from_clause = 'Records r'.$this->level.' LEFT JOIN usrBookmarks b ON b.bkm_recID=r'.$this->level.'.rec_ID and b.bkm_UGrpID='.$this->currUserID.' ';

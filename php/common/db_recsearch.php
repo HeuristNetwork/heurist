@@ -630,6 +630,8 @@
     // field - field id to search
     // type - field type (todo - search it dynamically with getDetailType)
     //
+    // this version does not calculate COUNT for related records
+    //
     function recordSearchFacets_new($system, $params){
 
 // error_log(">>".print_r($params, true));
@@ -643,9 +645,16 @@
             $step_level  = @$params['step'];
             $publicOnly  = (@$params['publiconly']==1);
             $fieldid     = $params['field'];
+            //do not include bookmark join
+            if(!(strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0)){
+                 $params['w'] = NO_BOOKMARK;
+            }
+            
+//
+error_log(print_r($params['qa'], true));            
 
             //get SQL clauses for current query
-            $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUse, $publicOnly);
+            $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);
 
             $select_field  = "";
             $detail_link   = "";
@@ -829,20 +838,30 @@
                 }
             }
 
+            if($params['needcount']==1){
             
-            $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
-            if($grouporder_clause==""){
-                    $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
+                $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                if($grouporder_clause==""){
+                        $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
+                }
+            
+            }else{ //for fields from related records - search distinc values only
+                
+                $select_clause = "SELECT DISTINCT $select_field as rng, 0 as cnt ";
+                if($grouporder_clause==""){
+                        $grouporder_clause = " ORDER BY $select_field"; 
+                }
             }
             
-
             //count query
             $query =  $select_clause.$qclauses["from"].$detail_link." WHERE ".$qclauses["where"].$details_where.$grouporder_clause;
+            
 
             //            
 //DEBUG echo $query."<br>";            
             //
-//error_log("COUNT >>>".$query);
+//
+error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -1241,7 +1260,7 @@
         //DEGUG 
         if(@$params['qa']){
             //print $query;
-// error_log($query);
+//error_log("QA: ".$query);
             //exit();
         }else{
 //error_log("AAA ".$query);            
