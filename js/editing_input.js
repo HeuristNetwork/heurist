@@ -70,7 +70,7 @@ $.widget( "heurist.editing_input", {
             if(repeatable){
 
                 this.btn_add = $( "<button>")
-                .addClass("smallbutton")
+                .addClass("smallbutton editint-inout-repeat-button")
                 //.css('display','table-cell')
                 //.css({width:'16px', height:'16px', display:'table-cell'})
                 .appendTo( this.element )
@@ -89,6 +89,7 @@ $.widget( "heurist.editing_input", {
 
             }else{
                 $( "<span>")
+                .addClass('editint-inout-repeat-button')
                 .css({width:'16px', display:'table-cell'})
                 .appendTo( this.element );
 

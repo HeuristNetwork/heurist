@@ -650,8 +650,7 @@
                  $params['w'] = NO_BOOKMARK;
             }
             
-//
-error_log(print_r($params['qa'], true));            
+//error_log(print_r($params['qa'], true));            
 
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);
@@ -860,8 +859,7 @@ error_log(print_r($params['qa'], true));
             //            
 //DEBUG echo $query."<br>";            
             //
-//
-error_log("COUNT >>>".$query);
+//error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){
