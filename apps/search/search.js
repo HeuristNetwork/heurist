@@ -30,7 +30,7 @@ $.widget( "heurist.search", {
 
         isapplication:true,  // send and recieve the global events
 
-        searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
+        searchdetails: "map", // "map", //level of search results  map - with details, structure - with detail and structure
 
         isloginforced:true,
         has_paginator: false,
@@ -617,7 +617,13 @@ $.widget( "heurist.search", {
 
                  if(data.source!=that.element.attr('id') ){   //search from outside
                     top.HAPI4.currentRecordset = null;
-                    that.input_search.val(data.q);
+                    
+                    if($.isArray(data.q)){
+                        that.input_search.val(JSON.stringify(data.q));
+                    }else{
+                        that.input_search.val(data.q);
+                    }
+                    
                     that.options.search_domain = data.w;
                     that._refresh();
                  }

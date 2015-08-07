@@ -154,8 +154,9 @@ $.widget( "heurist.resultList", {
 
         //----------------------
 
-        this.span_info = $("<label>").css('font-style','italic').appendTo(
-            $( "<div>").css({'position':'absolute','right':'80px','min-width':'10em','padding':'6px 2em 0 0px'}).appendTo( this.div_toolbar ));
+        this.span_pagination = $( "<div>").css({'position':'absolute','right':'80px','min-width':'10em','padding':'6px 2em 0 0px'}).appendTo( this.div_toolbar )
+        $( "<span>").appendTo( this.span_pagination );
+        this.span_info = $("<span>").css('font-style','italic').appendTo( this.span_pagination );
 
         //-----------------------
 
@@ -199,6 +200,7 @@ $.widget( "heurist.resultList", {
 
                 that.loadanimation(false);
                 if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
+                    
                     that._renderRecordsIncrementally(data); //hRecordSet
                 }
 
@@ -207,7 +209,7 @@ $.widget( "heurist.resultList", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                that.span_info.hide();
+                that.span_pagination.hide();
 
                 if(data){
 
@@ -242,7 +244,8 @@ $.widget( "heurist.resultList", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                   that.span_info.show();
+                   that.span_pagination.show();
+                   that._renderPagesNavigator();
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
 
@@ -475,54 +478,12 @@ $.widget( "heurist.resultList", {
             if( total_count_of_curr_request > 0 )
             {
 
-                if(this._count_of_divs<10001){
-
-                    var recs = recordset.getRecords();
-                    
-                    var recorder = recordset.getOrder();
-
-                    var html = '';
-                    var recID, idx;
-                    for(idx=0; idx<recorder.length; idx++) {
-                        recID = recorder[idx];
-                        if(recID){
-                            //var recdiv = this._renderRecord(recs[recID]);
-                            html  += this._renderRecord_html(recordset, recs[recID]);
-                            this._count_of_divs++;
-                            /*this._on( recdiv, {
-                                click: this._recordDivOnClick
-                            });*/
-                        }
-                    }
-                    this.div_content[0].innerHTML += html;
-                    this.span_info.html("Records: "+this._count_of_divs); //that.div_content.find('.recordDiv').length);
-
-                    /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
-                    this._on( lastdiv.nextAll(), {
-                                click: this._recordDivOnClick
-                            });*/
-                }
-                $allrecs = this.div_content.find('.recordDiv');
-                this._on( $allrecs, {
-                    click: this._recordDivOnClick,
-                    mouseover: this._recordDivOnHover,
-                    dblclick: function(event){ //start edit on dblclick
-                     
-                        var $rdiv = $(event.target);
-                        if(!$rdiv.hasClass('recordDiv')){
-                            $rdiv = $rdiv.parents('.recordDiv');
-                        }
-                        var recID = $rdiv.attr('recid');
-
-                        event.preventDefault();
-                        window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
-                        
-                    }
-                });
+                if(this._count_of_divs<100){//01
                 
-                if(!top.HAPI4.is_logged()){
-                    $(this.div_content).find('.logged-in-only').css('visibility','hidden');    
-                }
+                    this._renderPage(0, recordset);
+
+                }                
+                
                 
 
             }else if(this._count_of_divs<1) {
@@ -993,6 +954,162 @@ $.widget( "heurist.resultList", {
 
     , _renderProgress: function(){
 
+    },
+
+    current_page: 0,
+    max_page: 0,
+    count_total: null,
+    pagesize: 100,
+    
+    //
+    // redraw list of pages
+    //    
+    _renderPagesNavigator: function(){
+
+        this.count_total = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.length():0; //count_total
+        
+        this.max_page = 0;
+        //this.current_page = 0;
+
+        if(this.count_total>0){
+
+            this.max_page = Math.ceil(this.count_total / this.pagesize); 
+            if(this.current_page>this.max_page-1){
+                this.current_page = 0;
+            }
+        }      
+
+        var pageCount = this.max_page;
+        var currentPage = this.current_page;
+        var start = 0;
+        var finish = 0;
+
+        //this._renderRecNumbers();
+        
+        var span_pages = $(this.span_pagination.children()[0]);//first();
+        span_pages.empty();
+
+        this.span_info.html("Records: "+this.count_total); //that.div_content.find('.recordDiv').length);
+        
+        
+        if (pageCount < 2) {
+            return;
+        }
+
+        // KJ's patented heuristics for awesome useful page numbers
+        if (pageCount > 9) {
+            if (currentPage < 5) { start = 1; finish = 8; }
+            else if (currentPage < pageCount-4) { start = currentPage - 2; finish = currentPage + 4; }
+                else { start = pageCount - 7; finish = pageCount; }
+        } else {
+            start = 1; finish = pageCount;
+        }
+
+
+        /*if (currentPage == 0) {
+        this.btn_goto_prev.hide();
+        }else{
+        this.btn_goto_prev.show();
+        }
+        if (currentPage == pageCount-1) {
+        this.btn_goto_next.hide();
+        }else{
+        this.btn_goto_next.show();
+        }*/
+
+        var that = this;
+
+        if (start != 1) {    //force first page
+            $( "<button>", { text: "1"}).css({'font-size':'0.7em'}).button()
+            .appendTo( span_pages ).on("click", function(){ that._renderPage(0); } );
+            if(start!=2){
+                $( "<span>" ).html("..").appendTo( span_pages );
+            }
+        }
+        for (i=start; i <= finish; ++i) {
+            var $btn = $( "<button>", { text: ''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
+            .appendTo( span_pages )
+            .click( function(event){ 
+                var page = Number(this.id.substring(4));    
+                that._renderPage(page); 
+            } );
+            if(i-1==currentPage){        
+               $btn.button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
+            }
+        }
+        if (finish != pageCount) { //force last page
+            if(finish!= pageCount-1){
+                $( "<span>" ).html("..").appendTo( span_pages );
+            }
+            $( "<button>", { text: ''+pageCount }).css({'font-size':'0.7em'}).button()
+                .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
+        }
+
+    }
+    
+    , _renderPage: function(pageno, recordset){
+        
+                    if(!recordset) recordset = top.HAPI4.currentRecordset;
+                    
+                    if(pageno<0){
+                        pageno = 0;
+                    }else{
+                        this.current_page = pageno;
+                        this._renderPagesNavigator(); //redraw paginator
+                    }
+                    
+                    this._clearAllRecordDivs();
+        
+                    var recs = recordset.getRecords();
+                    
+                    var recorder = recordset.getOrder();
+
+                    var html = '';
+                    var recID, idx = pageno*this.pagesize,
+                        len = Math.min(recorder.length, idx+this.pagesize);
+                    
+                    
+                    for(; idx<len; idx++) {
+                        recID = recorder[idx];
+                        if(recID){
+                            //var recdiv = this._renderRecord(recs[recID]);
+                            html  += this._renderRecord_html(recordset, recs[recID]);
+                            this._count_of_divs++;
+                            /*this._on( recdiv, {
+                                click: this._recordDivOnClick
+                            });*/
+                        }
+                    }
+                    this.div_content[0].innerHTML += html;
+
+                    /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
+                    this._on( lastdiv.nextAll(), {
+                                click: this._recordDivOnClick
+                            });*/
+
+                    $allrecs = this.div_content.find('.recordDiv');
+                    this._on( $allrecs, {
+                        click: this._recordDivOnClick,
+                        mouseover: this._recordDivOnHover,
+                        dblclick: function(event){ //start edit on dblclick
+                         
+                            var $rdiv = $(event.target);
+                            if(!$rdiv.hasClass('recordDiv')){
+                                $rdiv = $rdiv.parents('.recordDiv');
+                            }
+                            var recID = $rdiv.attr('recid');
+
+                            event.preventDefault();
+                            window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                            
+                        }
+                    });
+                
+                    //hide edit link
+                    if(!top.HAPI4.is_logged()){
+                        $(this.div_content).find('.logged-in-only').css('visibility','hidden');    
+                    }
+        
     }
 
 });
