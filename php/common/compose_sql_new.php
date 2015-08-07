@@ -231,7 +231,7 @@ class HQuery {
             }
             
             foreach($this->top_limb->tables as $table){
-                $this->from_clause =  $this->from_clause.", ".$table.$this->level;
+                $this->from_clause =  $this->from_clause.", ".$table; //.$this->level;    ART20150807
                 if($table=="recDetails rd"){
                     $this->where_clause = " (r".$this->level.".rec_ID=rd".$this->level.".dtl_RecID) AND ";    
                 }
@@ -247,8 +247,8 @@ class HQuery {
 */
 class HLimb {
     
-    var $parent;
-    var $limbs = array();
+    var $parent;           //query
+    var $limbs = array();  //limbs and predicates
     var $conjunction = "all"; //and
     
     //result
@@ -287,7 +287,7 @@ class HLimb {
                }
            }else{ //this is predicate
            
-               $predicate = new HPredicate($this->parent, $key, $value );
+               $predicate = new HPredicate($this->parent, $key, $value, count($this->limbs) );
 
 //echo  $key."  ".$value."  ".$predicate->valid;           
            
@@ -374,6 +374,7 @@ class HPredicate {
     var $field_list = false; //list of id values
     
     var $qlevel;
+    var $index_of_predicate;
     //@todo - remove?
     var $negate = false;
     var $exact = false;
@@ -402,10 +403,11 @@ class HPredicate {
 */    
     
     
-    function HPredicate(&$parent, $key, $value) {
+    function HPredicate(&$parent, $key, $value, $index_of_predicate) {
         
          $this->parent = &$parent;
-         $this->qlevel = $this->parent->level;
+         $this->qlevel = $this->parent->level; //
+         $this->index_of_predicate = $index_of_predicate;
         
          $key = explode(":", $key);
          $this->pred_type  = $key[0];
@@ -430,7 +432,7 @@ class HPredicate {
     function makeSQL(){
         
         global $mysqli;
-
+        
         /*if(false && $this->query){
 
             $this->query->makeSQL();
@@ -580,7 +582,9 @@ class HPredicate {
     function predicateLinkedTo(){
         
         $this->field_type = "link";
+
         $p = $this->qlevel;
+        $rl = "rl".$p."x".$this->index_of_predicate;
         
         if($this->query){
             $this->query->makeSQL();
@@ -600,11 +604,11 @@ class HPredicate {
             }
         }
 
-        $where = "r$p.rec_ID=rl$p.rl_SourceID AND ".
-                (($this->field_id) ?"rl$p.rl_DetailTypeID=".$this->field_id :"rl$p.rl_RelationID is null")
-                 ." AND rl$p.rl_TargetID".$val;
+        $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
+                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+                 ." AND $rl.rl_TargetID".$val;
         
-        return array("from"=>"recLinks rl", "where"=>$where);
+        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
 
     /**
@@ -614,6 +618,7 @@ class HPredicate {
 
         $this->field_type = "link";
         $p = $this->qlevel;
+        $rl = "rl".$p."x".$this->index_of_predicate;
         
         if($this->query){
             
@@ -636,11 +641,11 @@ class HPredicate {
             }
         }
 
-        $where = "r$p.rec_ID=rl$p.rl_TargetID AND ".
-                (($this->field_id) ?"rl$p.rl_DetailTypeID=".$this->field_id :"rl$p.rl_RelationID is null")
-                ." AND rl$p.rl_SourceID".$val;                                                             
+        $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
+                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+                ." AND $rl.rl_SourceID".$val;                                                             
         
-        return array("from"=>"recLinks rl", "where"=>$where);
+        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
     
     
@@ -651,7 +656,8 @@ class HPredicate {
         
         $this->field_type = "link";
         $p = $this->qlevel;
-        
+        $rl = "rl".$p."x".$this->index_of_predicate;
+
         if($this->query){
             $this->query->makeSQL();
             if($this->query->where_clause && trim($this->query->where_clause)!=""){
@@ -671,11 +677,11 @@ class HPredicate {
             }
         }
 
-        $where = "r$p.rec_ID=rl$p.rl_SourceID AND ".
-                (($this->field_id && false) ?"rl$p.rl_RelationTypeID=".$this->field_id :"rl$p.rl_RelationID is not null")
-                ." AND rl$p.rl_TargetID".$val;
+        $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
+                (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
+                ." AND $rl.rl_TargetID".$val;
         
-        return array("from"=>"recLinks rl", "where"=>$where);
+        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
 
     /**
@@ -684,7 +690,8 @@ class HPredicate {
     function predicateRelatedFrom(){
         
         $this->field_type = "link";
-        $p = $this->qlevel;
+        $p = $this->qlevel; //parent level
+        $rl = "rl".$p."x".$this->index_of_predicate;
         
         if($this->query){
             $this->query->makeSQL();
@@ -704,11 +711,11 @@ class HPredicate {
             }
         }
 
-        $where = "r$p.rec_ID=rl$p.rl_TargetID AND ".
-                (($this->field_id && false) ?"rl$p.rl_RelationTypeID=".$this->field_id :"rl$p.rl_RelationID is not null")
-                  ." AND rl$p.rl_SourceID".$val;
+        $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
+                (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
+                  ." AND $rl.rl_SourceID".$val;
         
-        return array("from"=>"recLinks rl", "where"=>$where);
+        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
     
     
@@ -719,6 +726,7 @@ class HPredicate {
         
         $this->field_type = "link";
         $p = $this->qlevel;
+        $rl = "rl".$p."x".$this->index_of_predicate;
         
         if($this->query){
             $this->query->makeSQL();
@@ -734,10 +742,10 @@ class HPredicate {
             }
         }
 
-        $where = "(r$p.rec_ID=rl$p.rl_SourceID AND rl$p.rl_TargetID".$val.") OR (r$p.rec_ID=rl$p.rl_TargetID AND rl$p.rl_SourceID".$val.")";
+        $where = "(r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val.")";
 
         
-        return array("from"=>"recLinks rl", "where"=>$where);
+        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
     
 

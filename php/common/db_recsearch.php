@@ -871,7 +871,7 @@
                     if(count($ranges)>0 && @$ranges[$row[0]]){
                         array_push($data, array($ranges[$row[0]]["label"], $row[1], $ranges[$row[0]]["query"]));
                     }else{
-                        array_push($data, array($row[0], $row[1], ($step_level>1 || $dt_type!="freetext")?$row[0]:$row[0]."%") );
+                        array_push($data, array($row[0], $row[1], ($step_level>0 || $dt_type!="freetext")?$row[0]:$row[0]."%") );
                         //array_push($data, $row);
                         
 //DEBUG echo $row[0]."    ".$row[1]."<br>";                                    
@@ -1258,7 +1258,7 @@
         //DEGUG 
         if(@$params['qa']){
             //print $query;
-//error_log("QA: ".$query);
+//echo ("QA: ".$query);
             //exit();
         }else{
 //error_log("AAA ".$query);            
