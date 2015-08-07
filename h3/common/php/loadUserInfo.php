@@ -52,6 +52,12 @@
 		    $res = mysql_query('select svs_Name, svs_Query, svs_Query not like "%w=bookmark%" as w_all, svs_ID from usrSavedSearches where svs_UGrpID='.get_user_id().' order by w_all, svs_Name');
 		    $first = true;
 		    while ($row = mysql_fetch_assoc($res)) {
+                
+                json_decode($row['svs_Query']);
+                if (json_last_error() == JSON_ERROR_NONE){
+                    continue;
+                }
+                
 			    if (! $first) print ",";  print "\n"; $first = false;
 			    //this is for searches from  obsolete published-searches table. they start with "q";
 			    if (preg_match('/^q/', $row['svs_Query'])) {
@@ -123,6 +129,12 @@
 		    if (@$workgroups) {
 			    $res = mysql_query("select svs_UGrpID, svs_ID, svs_Name, svs_Query from usrSavedSearches left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID = svs_UGrpID where svs_UGrpID in (".join(",", $workgroups).") order by grp.ugr_Name, svs_Name");
 			    while ($row = mysql_fetch_assoc($res)) {
+                    
+                    json_decode($row['svs_Query']);
+                    if (json_last_error() == JSON_ERROR_NONE){
+                        continue;
+                    }
+                    
 				    $wg = $row['svs_UGrpID'];
 				    if (! @$ws[$wg])
 					    $ws[$wg] = array();
