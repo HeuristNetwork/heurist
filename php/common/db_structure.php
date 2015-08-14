@@ -115,7 +115,7 @@
         " left join defDetailTypes on rst_DetailTypeID = dty_ID".
         " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)";
         if($rectypeids){
-            $querywhere = " where rst_RecTypeID in (".(is_array($rectypeids)?join(",", $rectypeids) :$rectypeids).")";
+            $querywhere = " where rst_RecTypeID in (".(is_array($rectypeids)?implode(",", $rectypeids) :$rectypeids).")";
         } else {
             $querywhere = "";
         }

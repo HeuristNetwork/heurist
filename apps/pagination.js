@@ -243,7 +243,6 @@ $.widget( "heurist.pagination", {
 
     },
 
-    //
     // show current records range and total count
     //
     _renderRecNumbers: function(){
