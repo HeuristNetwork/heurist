@@ -225,14 +225,15 @@ $.widget( "heurist.search_faceted2", {
 
     //
     // crerate lists of queries to search facet values
+    // create main JSON query
     //
-    ,_createFacetQueries: function(){
+    ,_initFacetQueries: function(){
        
-       var that = this;
+       var that = this, mainquery = [];
        
        $.each(this.options.params.facets, function(index, field){
        
-           if(field['var'] && field['code'] && (that._isAllFacets || field['isfacet'])){
+           if( !top.HEURIST4.util.isnull(field['var']) && field['code'] && (that._isAllFacets || field['isfacet'])){
                //create new query and add new parameter
                var code = field['code'];
                code = code.split(':');
@@ -252,8 +253,10 @@ $.widget( "heurist.search_faceted2", {
                             pref = 'linkedfrom';    
                         }else if(fld.indexOf('rf')==0){
                             pref = 'related_to';    
+                            //pref = 'links';
                         }else if(fld.indexOf('rt')==0){
                             pref = 'relatedfrom';    
+                            //pref = 'links';
                         }
                         qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
                    }else{ //this is simple field
@@ -262,14 +265,80 @@ $.widget( "heurist.search_faceted2", {
                    return qp;
                }
                
+                function __checkEntry(qarr, key, val){
+                    var len0 = qarr.length, notfound = true, isarray;
+                    
+                    for (var i=0;i<len0;i++){
+                        if(! top.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
+                            
+                            if(top.HEURIST4.util.isArray(qarr[i][key])){ //next level
+                                return qarr[i][key];   
+                            }else if(qarr[0][key]==val){ //already exists
+                                return qarr;
+                            }
+                        }
+                    }
+
+                    var predicat = {};
+                    predicat[key] = val;
+                    qarr.push(predicat);
+                    
+                    if(top.HEURIST4.util.isArray(val)){
+                        return val;
+                    }else{
+                         return qarr;
+                    }
+                }            
+               
                /*if(code.length-2 == 0){
                    field['facet'] = {ids:'$IDS'};
                }else{}*/
                field['facet'] = __crt( code.length-2 );
+               field['id']   = code[code.length-1];
+               field['rtid'] = code[code.length-2];
+               
+                    var curr_level = mainquery;     
+                    var j = 0;    
+                    while(j<code.length){
+                        
+                        var rtid = code[j];
+                        var dtid = code[j+1];
+                        
+                        //add recordtype
+                        curr_level = __checkEntry(curr_level,"t",rtid);
+                        
+                        var linktype = dtid.substr(0,2);
+                        var slink = null;
+                        
+                        if(linktype=='rt'){
+                            slink = "related_to:";
+                            //slink = "links:";
+                        }else if(linktype=='rf'){
+                            slink = "relatedfrom:";
+                            //slink = "links:";
+                        }else if(linktype=='lt'){
+                            slink = "linked_to:";
+                        }else if(linktype=='lf'){
+                            slink = "linkedfrom:";
+                        }
+
+                        var key, val;                         
+                        if(slink!=null){
+                            key  = slink+dtid.substr(2);
+                            val = [];
+                        }else{
+                            key = "f:"+dtid
+                            val = "$X"+field['var']; 
+                        }
+                        curr_level = __checkEntry(curr_level, key, val);
+                    
+                        j=j+2;
+                    }               
                
            }
        });
-       
+     
+       this.options.params['qa'] = mainquery;
    }
     
     //reset current search 
@@ -287,9 +356,10 @@ $.widget( "heurist.search_faceted2", {
             //this._refresh();
             this._isAllFacets = facets[0]['isfacet'];
         }
-
-       // create list of queries to search facet values 
-       this._createFacetQueries();
+        
+        // create list of queries to search facet values 
+        this._initFacetQueries();
+        
        
        this.facets_list.empty();
        
@@ -308,7 +378,7 @@ $.widget( "heurist.search_faceted2", {
        
            //content_id+"_"+
            
-           if(field['var']){
+           if(!top.HEURIST4.util.isnull(field['var'])){
                 var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
                     {
                         varid: field['var'],  //content_id+"_"+
@@ -323,7 +393,7 @@ $.widget( "heurist.search_faceted2", {
                         detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                 });
                 
-                if(field['var'] && field['code'] && (that._isAllFacets || field['isfacet']) ){
+                if(!top.HEURIST4.util.isnull(field['var']) && field['code'] && (that._isAllFacets || field['isfacet']) ){
                     inpt.find('.input-div').hide();
                     inpt.find('.header').css({'background-color': 'lightgray', 'font-weight': 'bold', 'padding': '5px', 'width': '100%'});
                     //inpt.find('.editint-inout-repeat-button').hide();
@@ -574,7 +644,7 @@ $.widget( "heurist.search_faceted2", {
     }
     
     , _redrawFacets: function( response ) {
-
+        
                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     //@TODO this.cached_counts.push(response);

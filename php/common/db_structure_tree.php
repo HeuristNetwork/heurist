@@ -83,8 +83,15 @@
     
     function __assignCodes($def){
                         foreach($def['children'] as $idx => $det){
-                            if(@$def['code'])
-                                $def['children'][$idx]['code'] = $def['code'].":".$det['code']; 
+                            if(@$def['code']){
+
+                                if(@$det['code']){
+                                    $def['children'][$idx]['code'] = $def['code'].":".$det['code']; 
+                                }else{
+                                    $def['children'][$idx]['code'] = $def['code'];    
+                                }
+                                
+                            }
                                  
 //$def['children'][$idx]['title'] = $det['title'].$def['children'][$idx]['code'];                    
 //error_log($det['title']);        

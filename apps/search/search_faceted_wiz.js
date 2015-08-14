@@ -435,9 +435,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.parent().hide();
                 
                 if(this.options.params.rectypes) {         
-                    $(opt_rectypes).val(this.options.params.rectypes[0]); //ART20150810 - to remove
-                }else{
-                    $(opt_rectypes).val(this.options.params.rectype);
+                    $(opt_rectypes).val(this.options.params.rectypes[0]);
                 }
                 
             }else{ //add new saved search
@@ -558,8 +556,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 if(this.options.params.rectypes){
                     rectype = this.options.params.rectypes.join();
-                }else{
-                    rectype = this.options.params.rectype;
                 }
 
                 //load definitions for given rectypes
@@ -747,7 +743,7 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
 
-    // 3d step
+    // 3d step  - fill facets array and create query JSON
     , _initStep3_FacetsRanges: function() {
 
         var listdiv = $(this.step3).find("#facets_list");
@@ -761,7 +757,7 @@ $.widget( "heurist.search_faceted_wiz", {
         
         // ------------------------------------------------------
 
-        
+        // NOT USED - @todo remove
         function __get_queries(node){
 
             var res = [];
@@ -810,43 +806,12 @@ $.widget( "heurist.search_faceted_wiz", {
                 res.push(res2[i]);
             }
 
-            /*
-            if( parent.data.type=="rectype"){
-            fieldnode = parent.parent;
-            //if rectype find parent field and get rectype constraints
-            if(fieldnode.isRoot()){ //this is top most rectype
-            if(isOneRoot){
-            return [{ title:node.title, type:node.data.type, query:"t:"+parent.key+" "+node.key }]; 
-            }else{
-            return [{ title:node.title, type:node.data.type, query:node.key }]; 
-            }
-            } else { //pointer field
-            if(fieldnode.data.rt_ids){ //constrained
-            res.push( { title:node.title, type:node.data.type, query:"t:"+fieldnode.data.rt_ids+" "+node.key }); 
-            }else{
-            res.push( { title:node.title, type:node.data.type, query:node.key });    
-            }
-            res.push(__get_queries(fieldnode));
-            }
-            }else{ //pointer field
-            fieldnode = parent;
-
-            if(fieldnode.data.rt_ids){ //constrained
-            res.push( { title:node.title, type:node.data.type, query:"t:"+fieldnode.data.rt_ids+" "+node.key }); 
-            }else{
-            res.push( { title:node.title, type:node.data.type, squery:node.key });    
-            }
-            res.push(__get_queries(fieldnode));
-            }
-            */
             return res;
         } //end __get_queries ------------------------------------
 
         var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
         var fieldIds = tree.getSelectedNodes(false);
         len = fieldIds.length;  
-        
-        var query = [];            
         
         facets = [];
 
@@ -858,23 +823,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
                 
                     var ids = node.data.code.split(":");
+                            //rtid: ids[ids.length-2],
+                            //id:  ids[ids.length-1],
                 
                     facets.push( { 
                             'var': facets.length,
-                            rtid: ids[ids.length-2],
-                            id:  ids[ids.length-1],
                             code:node.data.code,
                             title:(node.data.name?node.data.name:node.title), 
                             type:node.data.type
                              } );
-                             
-                    /*for(var j=0;j<ids.length;j++){
-                        
-                        if(j%2 == 0){ //rectype
-                             query
-                        }
-                        query.push             
-                    }*/
                 }
             }
 
@@ -888,7 +845,11 @@ $.widget( "heurist.search_faceted_wiz", {
             }
 
             this.options.params.facets = facets;  
-            this.options.params.qa = query;
+            this.options.params.version = 2;
+            
+            if(len>0){
+                facets[0].isfacet = true;    
+            }
 
             return true;
         }else{
@@ -903,8 +864,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var listdiv = $(this.step4).find("#facets_preview");
 
-        var noptions= { query_name:"test", params:this.options.params, ispreview: true}
-
+        var noptions= { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
+        
         if(listdiv.html()==''){ //not created yet
             listdiv.search_faceted2( noptions );                    
         }else{

@@ -882,7 +882,7 @@
             }
 
         }else{
-            $response = $system->addError(HEURIST_INVALID_REQUEST);
+            $response = $system->addError(HEURIST_INVALID_REQUEST, "Facet query parameters are invalid. Try to edit and correct this facet search");
         }
 
         return $response;

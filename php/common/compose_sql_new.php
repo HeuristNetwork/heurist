@@ -381,7 +381,7 @@ class HPredicate {
     var $lessthan = false;
     var $greaterthan = false;
 
-    var $allowed = array("title","t","type","ids","id","f","field","linked_to","linkedfrom","related_to","relatedfrom");
+    var $allowed = array("title","t","type","ids","id","f","field","linked_to","linkedfrom","related_to","relatedfrom","links");
 /*
     url, u:           url
     notes, n:        description
@@ -730,7 +730,11 @@ class HPredicate {
         
         if($this->query){
             $this->query->makeSQL();
-            $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+            if($this->query->where_clause && trim($this->query->where_clause)!=""){
+                $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+            }else{
+                return null;
+            }
             
         }else{
             $val = $this->getFieldValue();
@@ -742,7 +746,7 @@ class HPredicate {
             }
         }
 
-        $where = "(r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val.")";
+        $where = "($rl.rl_RelationID is not null) AND ((r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val."))";
 
         
         return array("from"=>"recLinks ".$rl, "where"=>$where);
