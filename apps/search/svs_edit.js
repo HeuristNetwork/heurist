@@ -62,7 +62,7 @@ function hSvsEdit(args) {
                 
                 svs_id.val(svsID);
                 svs_name.val(svs[_NAME]);
-                svs_query.val( request.q );
+                svs_query.val( $.isArray(request.q)?JSON.stringify(request.q):request.q );
                 svs_rules.val( request.rules );
                 svs_notes.val( request.notes );
                 
@@ -82,7 +82,7 @@ function hSvsEdit(args) {
                     
                 } else if( squery && (squery.q || squery.rules) ) {
                     
-                    svs_query.val( Hul.isempty(squery)?'':squery.q );
+                    svs_query.val( Hul.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
                     svs_rules.val( Hul.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
                     
                 } else if(!Hul.isempty(squery)){

@@ -109,7 +109,7 @@ $.widget( "heurist.search_faceted2", {
         
         this.btn_reset = $( "<button>", { text: top.HR("Initial state") })
         .appendTo( this.div_toolbar )
-        .button();
+        .button().hide();
 
         this.btn_save = $( "<button>", { text: top.HR("Save state") })
         .appendTo( this.div_toolbar )
@@ -166,13 +166,11 @@ $.widget( "heurist.search_faceted2", {
     },
 
     /* 
-    * private function 
+    * private function    - NOT USED
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
         
-         if(this.div_title) this.div_title.html("<b>"+this.options.query_name+"</b>");
-
          var facets = this.options.params.facets;
          var hasHistory = false, facet_index, len = facets?facets.length:0;
          for (facet_index=0;facet_index<len;facet_index++){
@@ -182,6 +180,8 @@ $.widget( "heurist.search_faceted2", {
               }
          }
         
+
+        if(this.div_title) this.div_title.html("<b>"+this.options.query_name+"</b>");
 
         if(this.options.ispreview){
             this.btn_save.hide(); 
@@ -357,21 +357,31 @@ $.widget( "heurist.search_faceted2", {
             this._isAllFacets = facets[0]['isfacet'];
         }
         
-        // create list of queries to search facet values 
-        this._initFacetQueries();
+       // create list of queries to search facet values 
+       this._initFacetQueries();
         
        
        this.facets_list.empty();
        
        var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white'}).addClass('fieldset_search').appendTo(this.facets_list);
 
-       var that = this;
-       
-       
-       if(that._isAllFacets){
+       if(this.div_title) this.div_title.html("<b>"+this.options.query_name+"</b>");
+
+       if(this._isAllFacets){
             $fieldset.css({'padding':'0'});
+            this.btn_submit.hide();
        }
        
+        if(this.options.ispreview){
+            this.btn_close.hide(); 
+        }else{
+            this.btn_close.show(); 
+        }
+        this.btn_reset.hide()   
+        this.btn_save.hide(); 
+       
+       
+       var that = this;
        that._input_fields = {};
        
        $.each(this.options.params.facets, function(idx, field){
@@ -521,7 +531,12 @@ $.widget( "heurist.search_faceted2", {
                     top.HEURIST4.util.showMsgErr('Define at least one search criterion');
                 }
                 return;
+            }else if(!this.options.ispreview){
+                this.btn_reset.show()   
+                //@todo this.btn_save.show(); 
             }
+            
+            
             
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
@@ -539,7 +554,7 @@ $.widget( "heurist.search_faceted2", {
             //that._recalculateFacets(content_id);
     }
     
-    // there are 2 ways - search facet values on the server side in the same time whrn main query is performed
+    // there are 2 ways - search facet values on the server side in the same time when main query is performed
     // or search after completion of main search    
     //
     // perform search for facet values and redraw facet fields
