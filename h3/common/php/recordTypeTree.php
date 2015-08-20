@@ -217,7 +217,8 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             case 'separator':
             case 'relmarker':
                     return null;
-            case 'enum':    //@todo!!!!
+            case 'enum':
+            case 'relationtype':
 
                 $res = array(
                     "termfield_name" => $dt_label,
