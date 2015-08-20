@@ -399,9 +399,8 @@ $.widget( "heurist.search_faceted2", {
        
            //content_id+"_"+
            
-           if(!top.HEURIST4.util.isnull(field['var'])){
-                var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
-                    {
+           
+           var ed_options = {
                         varid: field['var'],  //content_id+"_"+
                         recID: -1,
                         rectypeID: field['rtid'],
@@ -412,7 +411,22 @@ $.widget( "heurist.search_faceted2", {
                         title: field['title'],
                         showclear_button: false,
                         detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
-                });
+                };
+                
+           if(isNaN(Number(field['id']))){
+               ed_options['dtFields'] = {
+                   dty_Type: field['type'],
+                   rst_RequirementType: 'optional',
+                   rst_MaxValues: 1,
+                   rst_DisplayWidth:0
+               };
+           }
+           
+           if(!top.HEURIST4.util.isnull(field['var'])){
+                var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
+                        ed_options
+                    );
+                    
                 
                 if(!top.HEURIST4.util.isnull(field['var']) && field['code'] && (that._isAllFacets || field['isfacet']) ){
                     inpt.find('.input-div').hide();

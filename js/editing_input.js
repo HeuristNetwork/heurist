@@ -159,10 +159,13 @@ $.widget( "heurist.editing_input", {
     */
     f: function(fieldname){
         //get field defintion
-        var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
-        var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-
-        return rfrs[fi[fieldname]];
+        if(isNaN(Number(this.options.dtID))){
+            return this.options['dtFields'][fieldname];
+        }else{
+            var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
+            return rfrs[fi[fieldname]];
+        }
     },
 
     /**

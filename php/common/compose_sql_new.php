@@ -527,10 +527,23 @@ class HPredicate {
         $val = $this->getFieldValue();
         if(!$val) return null;
         
-        $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
+        if($this->field_id=="title"){
+
+            $res = "(r".$this->qlevel.".rec_Title ".$val.")";
+            
+        }else if($this->field_id=="modified"){
+
+            $res = "(r".$this->qlevel.".rec_Modified ".$val.")";
+            
+        }else{
         
-        $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val.")";
+        
+            $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
+            
+            $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
+                .$p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val.")";
+            
+        }
         
         return array("where"=>$res);  ///"from"=>"recDetails rd", 
         

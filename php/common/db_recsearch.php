@@ -1272,6 +1272,8 @@ if(@$params['debug'])
         }else{
 //error_log("AAA ".$query);            
         }
+        
+//error_log("AAA ".$query);            
 
 
         $res = $mysqli->query($query);
