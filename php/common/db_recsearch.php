@@ -844,6 +844,13 @@
                         $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
                 }
             
+            }else if($params['needcount']==2){ //count for related
+            
+                $select_clause = "SELECT $select_field as rng, count(distinct r0.rec_ID) as cnt ";
+                if($grouporder_clause==""){
+                        $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
+                }
+            
             }else{ //for fields from related records - search distinc values only
                 
                 $select_clause = "SELECT DISTINCT $select_field as rng, 0 as cnt ";
@@ -857,7 +864,9 @@
             
 
             //            
-//DEBUG echo $query."<br>";            
+//DEBUG 
+if(@$params['debug'])
+    echo $query."<br>";            
             //
 //error_log("COUNT >>>".$query);
 

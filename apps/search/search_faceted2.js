@@ -90,6 +90,7 @@ $.widget( "heurist.search_faceted2", {
     _first_query:[], //query for all empty values
     _isInited: true,
     _isAllFacets: false, // if first field has isfacet=true - consider all fields as facets
+    _current_query: null,
 
     // the widget's constructor
     _create: function() {
@@ -239,13 +240,18 @@ $.widget( "heurist.search_faceted2", {
                code = code.split(':');
                
                function __crt( idx ){
-                   var qp = null;
+                   var res = null;
                    if(idx>0){  //this relation or link
                        
+                        res = [];
+                       
                         var pref = '';
-                        qp = {};
+                        var qp = {};
                         
                         qp['t'] = code[idx];
+                        res.push(qp);
+                        
+                        
                         var fld = code[idx-1]; //link field
                         if(fld.indexOf('lf')==0){
                             pref = 'linked_to';    
@@ -258,11 +264,14 @@ $.widget( "heurist.search_faceted2", {
                             pref = 'relatedfrom';    
                             //pref = 'links';
                         }
+                        
+                        qp = {};
                         qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
+                        res.push(qp);
                    }else{ //this is simple field
-                       qp = '$IDS'; //{'ids':'$IDS}'};
+                       res = '$IDS'; //{'ids':'$IDS}'};
                    }
-                   return qp;
+                   return res;
                }
                
                 function __checkEntry(qarr, key, val){
@@ -357,6 +366,8 @@ $.widget( "heurist.search_faceted2", {
             this._isAllFacets = facets[0]['isfacet'];
         }
         
+        
+       this._current_query = null;
        // create list of queries to search facet values 
        this._initFacetQueries();
         
@@ -539,6 +550,7 @@ $.widget( "heurist.search_faceted2", {
             
             
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
+            this._current_query = query;
             
             var request = { q: query, w: this.options.params.domain, 
                             f: 'map', 
@@ -611,8 +623,39 @@ $.widget( "heurist.search_faceted2", {
                                 });                            
                             });
                 }
+
+                //get other parameters for given rectype
+                function __getOtherParameters(query, rt){
+                    
+                            var res = null;
+
+                            if($.isArray(query)){
+                            
+                            $(query).each(function(idx, predicate){
+                                
+                                $.each(predicate, function(key,val)
+                                {
+                                        if(key=='t' && val==rt){
+
+                                            query.splice(idx,1);
+                                            res = query
+                                            return false;
+                                            
+                                        }else if( $.isArray(val) || $.isPlainObject(val) ){
+                                            
+                                            res = __getOtherParameters(val, rt);
+                                            return false;
+                                        }
+                                });                            
+                            });
+                            
+                            }
+                    
+                            return res;
+                    
+                }
                 
-                var query, needcount = 0;
+                var query, needcount = 2;
                 if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 
                     if(this._isInited){
@@ -627,7 +670,19 @@ $.widget( "heurist.search_faceted2", {
                     
                 }else{
                     query = JSON.parse(JSON.stringify(field['facet'])); //clone 
+                    
+                    //change $IDS for current set of target record type
                     __fillQuery(query);                
+                    
+                    //add other parameters for rectype of this facet
+                    if(this._current_query){
+                        var copyquery = JSON.parse(JSON.stringify(this._current_query)); 
+                        var otherparams = __getOtherParameters(copyquery, field['rtid']);
+                        if(null!=otherparams){
+                             query = query.concat(otherparams);
+                        }
+                    }
+                    
                 }
                         
                 
