@@ -665,6 +665,9 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 			switch ($detailType) {
 			case 'enum':
+            case 'relationtype':
+            
+                $domain = ($detailType=="enum")?"enum":"relation";
 
 				$fi = $dtTerms['fieldNamesToIndex'];
 
@@ -675,8 +678,8 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                 $res = array();
                 
 				foreach ($dtValue as $key => $value){
-					if(array_key_exists($value, $dtTerms['termsByDomainLookup']['enum'])){
-						$term = $dtTerms['termsByDomainLookup']['enum'][$value];
+					if(array_key_exists($value, $dtTerms['termsByDomainLookup'][$domain])){
+						$term = $dtTerms['termsByDomainLookup'][$domain][$value];
 
 						$res_id = _add_term_val($res_id, $value);
 						$res_cid = _add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);

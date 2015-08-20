@@ -698,6 +698,22 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     top:40% !important;
 }
 
+.svs-contextmenu{
+    
+}
+    
+ul.ui-fancytree > li:hover > .svs-contextmenu {
+    display: inline-block;
+}
+.svs-contextmenu {
+    display: none;
+    cursor: pointer;
+    position:absolute;
+    right:2px;
+    width:15px;
+    padding-right:2px;
+}
+
 /*
 ::-webkit-scrollbar-button {
     background: #8ea9b9

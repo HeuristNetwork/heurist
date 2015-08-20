@@ -763,7 +763,7 @@ $.widget( "heurist.svs_list", {
        */
       var that = this;
       tree.contextmenu({
-        delegate: "span.fancytree-node",
+        delegate: "li", //span.fancytree-node
         menu: [
           {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
           {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" },
@@ -791,6 +791,13 @@ $.widget( "heurist.svs_list", {
         }
       });
 
+      $.each( tree.find('li'), function( idx, item ){
+          $('<div class="svs-contextmenu ui-icon ui-icon-pencil"></div>')
+          .click(function(event){ tree.contextmenu("open", $(event.target) ); top.HEURIST4.util.stopEvent(event); return false;})
+          .appendTo(item);
+      })
+      
+      
           var context_opts = this._getAddContextMenu(groupID);
   
   

@@ -54,7 +54,16 @@ $.widget( "heurist.mainMenu", {
 
         // bind click events
         this._on( this.div_logo, {
-            click: function(){$( "#heurist-about" ).dialog("open");}
+            click: function(){
+                
+                    var init_search = top.HEURIST.displayPreferences['defaultSearch'];
+                    if(!top.HEURIST4.util.isempty(init_search)){
+                        var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                        top.HAPI4.RecordMgr.search(request, $(document));
+                    }else{
+                        $( "#heurist-about" ).dialog("open");
+                    }
+            }
         });
 
         //'padding-left':'15px', 'display':'inline-block',  'vertical-align': 'middle'
