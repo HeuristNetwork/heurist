@@ -58,11 +58,9 @@
 	$res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
 	$lastModified = mysql_fetch_row($res);
 	$lastModified = strtotime($lastModified[0]);
-	/*****DEBUG****///error_log("lastmod = $lastModified with current time = ".@$_SERVER["REQUEST_TIME"]);
 	// not changed since last requested so return
 	if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 		header('HTTP/1.1 304 Not Modified');
-		/*****DEBUG****///error_log(" exiting loadCommonInfo with 'Not Modified' $lastModified");
 		exit();
 	}
 
@@ -71,7 +69,7 @@
 	header('Pragma: no-cache');
 
     ob_start();
-    
+
     // This is the best place I can think of to stick this stuff --kj, 2008-07-21
 	print "if (!top.HEURIST) top.HEURIST = {};\n";
 	print "top.HEURIST.VERSION = " . json_format(HEURIST_VERSION) . ";\n";
@@ -84,12 +82,12 @@
     print "if (!top.HEURIST.baseURL_V4) top.HEURIST.baseURL_V4 = ".json_format(HEURIST_BASE_URL_V4) . ";\n";
 	print "if (!top.HEURIST.iconDir) top.HEURIST.iconDir = ".json_format(HEURIST_ICON_DIR) . ";\n";
 	print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = ".json_format(HEURIST_ICON_URL) . ";\n";
-    
+
     //print "alert(top.HEURIST.iconBaseURL);";
 
 	// $cache=true - use cache
 	//$cache = (!array_keys(@$_REQUEST, 'cache') || @$_REQUEST['cache']=="1");
-    
+
 	/* rectypes are an array of names sorted alphabetically, and lists of
 	primary (bibliographic) and other rectypes, also sorted alphbetically */
 	print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures(true)).";\n";
@@ -168,7 +166,6 @@ top.HEURIST.ratings = {"0": "not rated",
 	print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";
 	print "top.HEURIST.workgroupIDs = " . json_format($workgroupIDs) . ";\n";
 	print "\n";
-	/*****DEBUG****///error_log("made to line ".__LINE__." in file ".__FILE__);
 
 ?>
 

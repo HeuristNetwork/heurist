@@ -1026,7 +1026,7 @@ if (defined('T1000_DEBUG')) if (! is_a($child, 'PlainText')) error_log($this->co
 			}
 			if (is_a($child, 'Scope')) $not_found = false;
 		}
-if (defined('T1000_DEBUG')) error_log("fin");
+        if (defined('T1000_DEBUG')) error_log("fin");
 		if ($any_children_satisfied  and  $all_children_satisfied)
 			$this->satisfied = true;
 if (defined('T1000_DEBUG')) error_log($this->component_description() . ": any children required ($any_children_required), any children satisfied ($any_children_satisfied), all children satisfied ($all_children_satisfied), this->satisfied (" . $this->satisfied . ")");

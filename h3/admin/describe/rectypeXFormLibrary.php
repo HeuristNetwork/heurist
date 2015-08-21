@@ -141,18 +141,18 @@ function buildform($rt_id) {
 		error_log("rectypes " . print_r($rectypes['typedefs'][$rt_id], true));
 		return array(null, null, null, null, "Rectype# $rt_id not found");
 	}
-    
+
 	$report = "";
 	$rectype = $rectypes['typedefs'][$rt_id];
-	//		error_log("rectype is ".print_r($rectype,true));
+
 	//record type info
 	$rtName = $rectypes['names'][$rt_id];
-    
+
 	//detail or field type info
 	$fieldTypeConceptIDIndex = $di['dty_ConceptID'];
 	$fieldTypeNameIndex = $di['dty_Name'];
 	$fieldBaseTypeIndex = $di['dty_Type'];
-    
+
 	//record field info
 	$fieldNameIndex = $rid['rst_DisplayName'];
 	$fieldDefaultValIndex = $rid['rst_DefaultValue'];
@@ -166,7 +166,7 @@ function buildform($rt_id) {
 		$rtConceptID = "0-" . $rt_id;
 	}
 	$rtDescription = $rectype['commonFields'][$ri['rty_Description']];
-    
+
 	// output structure variables
 	$model = "<instance>\n" . "<fhml id=\"heuristscholar.org:$rtConceptID\" version=\"" . date("Ymd") . "\">\n" . "<database id=\"" . HEURIST_DBID . "\" urlBase=\"" . HEURIST_BASE_URL . "\">" . HEURIST_DBNAME . "</database>\n" . "<query depth=\"0\" db=\"" . HEURIST_DBNAME . "\" q=\"t:$rt_id\" />\n" . "<generatedBy userID=\"" . get_user_id() . "\">" . get_user_name() . "</generatedBy>\n" . "<createdBy/>\n" . "<deviceID/>\n" . "<createTime/>\n" . "<uuid/>\n" . "<records count=\"1\">\n" . "<record depth=\"0\">\n" . "<type>\n" . "<conceptID>$rtConceptID</conceptID>\n" . "<label>$rtName</label>\n" . "</type>\n" . "<nonce/>\n" . "<details>\n";
 	$bind = "<bind nodeset=\"createdBy\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"username\"/>\n" . "<bind nodeset=\"createTime\" type=\"dateTime\" jr:preload=\"timestamp\" jr:preloadParams=\"start\"/>\n" . "<bind nodeset=\"deviceID\" type=\"string\" jr:preload=\"property\" jr:preloadParams=\"deviceid\"/>\n" . "<bind nodeset=\"uuid\" type=\"string\" readonly=\"true()\" calculate=\"uuid()\"/>\n" . "<bind nodeset=\"records/record/nonce\" type=\"string\" readonly=\"true()\" calculate=\"concat(/fhml/deviceID,'|',/fhml/createTime,'|',/fhml/uuid)\"/>\n";
@@ -175,7 +175,7 @@ function buildform($rt_id) {
 	//@todo - sort by rst_DisplayOrder
 	$fieldsLeft = count($rectype['dtFields']);
 	$atGroupStart = true; //init separator detection for repatables
-    
+
 	foreach ($rectype['dtFields'] as $dt_id => $rt_dt) {
 		if ($rt_dt[$rid['rst_NonOwnerVisibility']] == 'hidden') {
 			continue;
@@ -207,7 +207,7 @@ function buildform($rt_id) {
 		if (!$dt_conceptid) {
 			$dt_conceptid = "0-" . $dt_id;
 		}
-        
+
 		$defaultValue = $rt_dt[$fieldDefaultValIndex]; // load default value
 		//for controlled vocabs convert any local term ID to it's concept ID
 		if ($baseType == "enum" && array_key_exists("$defaultValue", $termLookup)) {

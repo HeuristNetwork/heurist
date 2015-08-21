@@ -114,42 +114,42 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
     }
 
     $label = mb_strtolower($label);
-    
+
     if(is_array($allowed_terms)){
         $term_ID = array_search($label, $allowed_terms, true);
     }else{
         $term_ID = getTermByLabel($label);
     }
-    
+
     return $term_ID;
-    
+
     //OLD WAY return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
 }
 
-function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){        
-    global $dtyIDDefs;        
+function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
+    global $dtyIDDefs;
 
-    if(!@$dtyIDDefs[$dtyID]){        
-        $terms = getTermsFromFormat($defs);        
-        if (($cntTrm = count($terms)) > 0) {        
-            if ($cntTrm == 1) {  //vocabulary        
-                $terms = getTermOffspringList($terms[0]);        
-            }else{        
-                $nonTerms = getTermsFromFormat($defs_nonsel);        
-                if (count($nonTerms) > 0) {        
-                    $terms = array_diff($terms,$nonTerms);        
-                }        
-            }        
-            if (count($temp)<1) {        
-                $dtyIDDefs[$dtyID] = "all";        
-            }else{        
-                $dtyIDDefs[$dtyID] = $terms;        
-            }        
-        }        
-    }        
+    if(!@$dtyIDDefs[$dtyID]){
+        $terms = getTermsFromFormat($defs);
+        if (($cntTrm = count($terms)) > 0) {
+            if ($cntTrm == 1) {  //vocabulary
+                $terms = getTermOffspringList($terms[0]);
+            }else{
+                $nonTerms = getTermsFromFormat($defs_nonsel);
+                if (count($nonTerms) > 0) {
+                    $terms = array_diff($terms,$nonTerms);
+                }
+            }
+            if (count($temp)<1) {
+                $dtyIDDefs[$dtyID] = "all";
+            }else{
+                $dtyIDDefs[$dtyID] = $terms;
+            }
+        }
+    }
 
-    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);        
-}        
+    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
+}
 
 //
 // similar functions are in saveRecordDetail and importRectype
@@ -162,14 +162,12 @@ function getTermsFromFormat($formattedStringOfTermIDs){
         }
 
         if (strpos($formattedStringOfTermIDs,"{")!== false) {
-            /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
             if (strrpos($temp,":") == strlen($temp)-1) {
                 $temp = substr($temp,0, strlen($temp)-1);
             }
             $termIDs = explode(":",$temp);
         } else {
-            /*****DEBUG****///echo ( "term array string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
             $termIDs = explode(",",$temp);
         }

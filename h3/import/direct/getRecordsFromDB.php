@@ -645,7 +645,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
                         $fid = intval($allrectypes['typedefs']['commonNamesToIndex']["rty_ConceptID"]);
 
                         foreach ($rectypes as $id => $def) {
-//error_log($id."  ".count($def)); //print_r($def,true));
                             if(is_numeric($id) && $def['commonFields'][$fid]==$conceptid){
                                     return $id;
                             }
@@ -676,14 +675,11 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
                         $conceptid = $dbid."-".$id;
 
-//error_log(">>".$conceptid);
-
                         $terms = $allterms['termsByDomainLookup'][$type];
                         $fid = intval($allterms['fieldNamesToIndex']["trm_ConceptID"]);
 
                         foreach ($terms as $id => $def) {
                             if(is_numeric($id) && $def[$fid]==$conceptid){
-//error_log("found>>".$def[$fid]."  ".$id);
                                     return $id;
                             }
                         }
@@ -1031,7 +1027,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 							$details["t:".$key] = $values;
 						}
 
-						/*****DEBUG****///error_log("DETAILS:>>>>".print_r($details,true));
 						$ref = null;
 
 						//add-update Heurist record
@@ -1089,8 +1084,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 					ob_flush();flush(); // flush to screen
 
 				} // end of loop for record types
-
-				/*****DEBUG****///error_log("DEBUG: UNRESOLVED POINTERS>>>>>".print_r($unresolved_pointers, true));
 
 				if(count($missed_terms)>0){
 					print "<br><br>*********************************************************";
@@ -1150,7 +1143,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 
 					if (count($inserts)>0) {//insert all new details
 						$query1 = "insert into $dbPrefix".HEURIST_DBNAME.".recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values " . join(",", $inserts);
-						/*****DEBUG****///error_log(">>>>>>>>>>>>>>>".$query1);
 						mysql_query($query1);
 						print "<br><br>Total count of resolved pointers:".count($inserts);
 					}
@@ -1264,7 +1256,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 			function jsonError($message) {
 
 				//mysql_query("rollback");
-				error_log("ERROR :".$message);
+                error_log("ERROR :".$message);
 
 				//$rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
 			}

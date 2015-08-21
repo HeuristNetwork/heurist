@@ -50,35 +50,34 @@ mysql_connection_select(DATABASE);
 
 
 if (! @$_REQUEST['q']  ||  (@$_REQUEST['ver'] && intval(@$_REQUEST['ver']) < SEARCH_VERSION))
-	construct_legacy_search();	// migration path
+    construct_legacy_search();	// migration path
 
 if ( $_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark') {		// my bookmark entries
-	$search_type = BOOKMARK;
-	$query = 'select distinct bkm_ID ';
+    $search_type = BOOKMARK;
+    $query = 'select distinct bkm_ID ';
 } else if (! @$_REQUEST['w']  ||$_REQUEST['w'] == 'a'  ||  $_REQUEST['w'] == 'all') {			// all records entries
-	$search_type = BOTH;
-	$query = 'select distinct rec_ID ';
+    $search_type = BOTH;
+    $query = 'select distinct rec_ID ';
 } else {
-	return;	// wwgd
+    return;	// wwgd
 }
 if (@$where){
-	$query = REQUEST_to_query($query, $search_type,NULL,"0");
+    $query = REQUEST_to_query($query, $search_type,NULL,"0");
 } else {
-	$query = REQUEST_to_query($query, $search_type);
+    $query = REQUEST_to_query($query, $search_type);
 }
 if (preg_match('/.* order by (.*)/', $query, $matches)) {
-	$order_col = $matches[1];
-	if ($search_type == BOTH  ||  ! preg_match('/bib_/', $order_col)) {
-		define('rss_search-order', $order_col);
-	}
-	$query = substr($query, 0, strlen($query) - strlen(' order by ' . $matches[1]));
+    $order_col = $matches[1];
+    if ($search_type == BOTH  ||  ! preg_match('/bib_/', $order_col)) {
+        define('rss_search-order', $order_col);
+    }
+    $query = substr($query, 0, strlen($query) - strlen(' order by ' . $matches[1]));
 }
 
 
 // hack!  Instead of stupidly searching the useless usrBookmarks (bookmarks) table, give us rec_ids instead
 $query = str_replace("select distinct bkm_ID from", "select distinct rec_ID from", $query);
 $SEARCHES['rss_search'] = $query;
-/*****DEBUG****///error_log("query = ".$query);
 
 $template = file_get_contents('searchRSSTemplate.xml');
 

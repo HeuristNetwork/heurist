@@ -1,14 +1,14 @@
 <?php
 
 /*
- * urlproxy.php
- * read html and inserts JS on the fly to disable web links
- *
- * @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
- * @link: http://HeuristScholar.org
- * @license http://www.gnu.org/licenses/gpl-3.0.txt
- * @package Heurist academic knowledge management system
- * @todo
+* urlproxy.php
+* read html and inserts JS on the fly to disable web links
+*
+* @copyright (C) 2005-2010 University of Sydney Digital Innovation Unit.
+* @link: http://HeuristScholar.org
+* @license http://www.gnu.org/licenses/gpl-3.0.txt
+* @package Heurist academic knowledge management system
+* @todo
 
 to test
 http://dictionaryofsydney.org/natural_feature/cockatoo_island
@@ -60,7 +60,7 @@ Besides the script in this file hides  footer-content and search-bar in any DOS 
 
 For browse page it calls new function excludeNotAllowed.
 
- */
+*/
 require_once('fileUtils.php');
 
 $baseURL = "http://dictionaryofsydney.org/";
@@ -70,23 +70,22 @@ $localFolder = "/var/www/htML/maritime/cache/";
 
 if(array_key_exists('htm', $_REQUEST)){
 
-        $addr = $_REQUEST['htm'];
-        $url = $baseURL.$addr;
-        $filename = $localFolder.str_replace("/","_",$addr);
+    $addr = $_REQUEST['htm'];
+    $url = $baseURL.$addr;
+    $filename = $localFolder.str_replace("/","_",$addr);
 
-//error_log(">>>".$filename."  ".$url);
 
-        getRemoteFile($filename, null, $url);
-        header('Content-Type: text/html');
+    getRemoteFile($filename, null, $url);
+    header('Content-Type: text/html');
 
 }else if(array_key_exists('kml', $_REQUEST)){
 
-        $kml = $_REQUEST['kml'];
-        $url = $baseURL."kml/full/".$kml;
-        $filename = $localFolder.$kml;
-        getRemoteFile($filename, null, $url);
+    $kml = $_REQUEST['kml'];
+    $url = $baseURL."kml/full/".$kml;
+    $filename = $localFolder.$kml;
+    getRemoteFile($filename, null, $url);
 
-        header('Content-Type: application/vnd.google-earth.kml+xml');
+    header('Content-Type: application/vnd.google-earth.kml+xml');
 }else{
     exit;
 }
@@ -108,18 +107,16 @@ function getRemoteFile($filename, $js_content, $url){
 
         $raw = loadRemoteURLContent($url);
 
-//error_log(">>>".strlen($raw));
-
         if ($raw) {
 
-                if(file_exists($filename)){
-                    unlink($filename);
-                }
-                $fp = fopen($filename, "w");
-                //$fp = fopen($filename, "x");
-                fwrite($fp, $raw);
-                //fflush($fp);    // need to insert this line for proper output when tile is first requestet
-                fclose($fp);
+            if(file_exists($filename)){
+                unlink($filename);
+            }
+            $fp = fopen($filename, "w");
+            //$fp = fopen($filename, "x");
+            fwrite($fp, $raw);
+            //fflush($fp);    // need to insert this line for proper output when tile is first requestet
+            fclose($fp);
 
         }
 

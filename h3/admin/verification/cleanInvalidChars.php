@@ -41,25 +41,25 @@ $invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),ch
 $replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
 $textDetails = array();
 $res = mysql_query("SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name ".
-					"FROM recDetails left join defDetailTypes on dtl_DetailTypeID = dty_ID  ".
-					"WHERE dty_Type in ('freetext','blocktext') ORDER BY dtl_RecID");
+    "FROM recDetails left join defDetailTypes on dtl_DetailTypeID = dty_ID  ".
+    "WHERE dty_Type in ('freetext','blocktext') ORDER BY dtl_RecID");
 while ($row = mysql_fetch_assoc($res)) {
-	array_push($textDetails, $row);
+    array_push($textDetails, $row);
 }
 ?>
 <html>
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Clean Invalid Characters</title>
-    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-	</head>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Clean Invalid Characters</title>
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+    </head>
     <body class="popup">
         <div class="banner"><h2>Clean Invalid Characters</h2></div>
-        
+
         <div id="page-inner" style="overflow:auto;padding-left: 20px;">
             <div>This function removes invalid characters in the data fields in the database records<br />&nbsp;<hr /></div>
-            
+
             <table>
                 <?php
 
@@ -67,40 +67,39 @@ while ($row = mysql_fetch_assoc($res)) {
 
                 $prevInvalidRecId = 0;
                 foreach ($textDetails as $textDetail) {
-	                if (! check($textDetail['dtl_Value'])){
-		                if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
-			                print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/edit/editRecord.html?recID=".
-					                $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
-			                $prevInvalidRecId = $textDetail['dtl_RecID'];
-			                mysql__update("Records", "rec_ID=".$textDetail['dtl_RecID'],array("rec_Modified" => $now));
-		                }
-		                print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</pre></td></tr>\n";
-		                $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
-		                mysql__update("recDetails", "dtl_ID=".$textDetail['dtl_ID'], array("dtl_Value" =>$newText));
-		                if (mysql_error()) {
-			                print "<tr><td><pre>" . "Error ". mysql_error()."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
-		                }else {
-			                print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
-		                }
-	                }
+                    if (! check($textDetail['dtl_Value'])){
+                        if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
+                            print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/edit/editRecord.html?recID=".
+                            $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
+                            $prevInvalidRecId = $textDetail['dtl_RecID'];
+                            mysql__update("Records", "rec_ID=".$textDetail['dtl_RecID'],array("rec_Modified" => $now));
+                        }
+                        print "<tr><td><pre>" . "Invalid characters found in ".$textDetail['dty_Name'] . " field :</pre></td></tr>\n";
+                        $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
+                        mysql__update("recDetails", "dtl_ID=".$textDetail['dtl_ID'], array("dtl_Value" =>$newText));
+                        if (mysql_error()) {
+                            print "<tr><td><pre>" . "Error ". mysql_error()."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+                        }else {
+                            print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+                        }
+                    }
                 }
 
                 function check($text) {
-	                global $invalidChars;
-	                foreach ($invalidChars as $charCode){
-		                if (strpos($text,$charCode)) {
-			                error_log("found invalid char " );
-			                return false;
-		                }
-	                }
-	                return true;
+                    global $invalidChars;
+                    foreach ($invalidChars as $charCode){
+                        if (strpos($text,$charCode)) {
+                            return false;
+                        }
+                    }
+                    return true;
                 }
 
                 ?>
             </table>
-            
+
             <p>
-            [end of check]
+                [end of check]
             </p>
         </div>
     </body>

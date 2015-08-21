@@ -73,40 +73,13 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	} else if (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
-        
-error_log("LOAD FROM ".$_REQUEST['url']);        
 
         $src = loadRemoteURLContentWithRange($_REQUEST['url'], null, false, 120);
 
-/*        
-		$ch = curl_init();
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0 );
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_URL, @$_REQUEST['url']);
-        
-        if(defined("HEURIST_HTTP_PROXY")){
-            curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-            if(defined("HEURIST_HTTP_PROXY_AUTH")){
-                curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
-            }
-        }
-        
-		//curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
-        
-		$src = curl_exec($ch);
-		$error = curl_error($ch);
-		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-error_log("CODE=".$error);        
-        
-		if (intval($code) >= 400)
-			$error = 'URL could not be retrieved. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
-*/      
         if(!$src){
             $error = 'URL could not be retrieved. Verify your proxy setting in configuration file. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
         }
-            
+
 		$srcname = @$_REQUEST['url'];
 	}
 
@@ -117,9 +90,6 @@ error_log("CODE=".$error);
 		$base_url_root = preg_replace('!([^:/])/.*!', '$1', $base_url);
 		$base_url_base = preg_replace('!([^:/]/.*/)[^/]*$!', '$1', $base_url);
 		if (substr($base_url_base, -1, 1) != '/') $base_url_base = $base_url_base . '/';
-/*****DEBUG****///error_log($base_url);
-/*****DEBUG****///error_log($base_url_root);
-/*****DEBUG****///error_log($base_url_base);
 
 		// clean up the page a little
 		$src = preg_replace('/<!-.*?->/s', '', $src);
@@ -133,7 +103,7 @@ error_log("CODE=".$error);
 		else
 			$notes_src_str = " [source: ".$srcname."]";
 
-            
+
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
 
 		/* get a list of the link-texts that we are going to ignore */
@@ -176,7 +146,6 @@ error_log("CODE=".$error);
 				//while (preg_match('!/\\.\\.(?:/|$)!', $matches[2][$i]))	/* remove ..s */
 					//$matches[2][$i] = preg_replace('!(http://.+)(?:/[^/]*)/\\.\\.(/|$)!', '\\1\\2', $matches[2][$i]);
 
-		/*****DEBUG****///		error_log($matches[1][$i]);
 			}
 
 			$matches[3][$i] = trim(preg_replace('/\s+/', ' ', str_replace('&nbsp;', ' ', strip_tags($matches[3][$i]))));
@@ -185,23 +154,23 @@ error_log("CODE=".$error);
 
 			$forbidden = 0;
 			if (@$ignored[$lcase]){
-                    $forbidden = 1;            // ignore forbidden links  
-            } 
+                    $forbidden = 1;            // ignore forbidden links
+            }
 			else {
 				foreach ($wildcard_ignored as $wc => $len) {
 					if (substr($lcase, 0, $len) == $wc) { $forbidden = 1; break; }
 				}
 			}
 			if (! @$forbidden  and  substr($matches[3][$i], 0, 5) != 'http:') {
-                
+
 				if (($word_limit and ! $matches[3][$i])
 				 or (substr_count($matches[3][$i], ' ')+1 < $word_limit)) {
-                    $forbidden = 1;    // ignore short links   
+                    $forbidden = 1;    // ignore short links
                  }
 			}
 			if (@$forbidden) {
 				if (@$last_url) {
-                    $notes[$last_url] .= strip_tags(@$matches[1][$i]);   
+                    $notes[$last_url] .= strip_tags(@$matches[1][$i]);
                 }
 				continue;
 			}
@@ -547,63 +516,6 @@ function records_check($url, $title, $notes, $user_rec_id) {
 
 	return 0;
 }
-
-/*  ARTEM : Now we use common function from actionMethods.php
-
-	 * Insert a new bookmark with the relevant input-cells;
-	 * return true on success,
-	 * return false on failure, or if the Records record is already bookmarked by this user.
-
-function bookmark_insert($url, $title, $tags, $rec_id) {
-
-	$res = mysql_query('select * from usrBookmarks where bkm_recID="'.mysql_real_escape_string($rec_id).'"
-	                                              and bkm_UGrpID="'.get_user_id().'"');
-	//if already bookmarked then return
-	if (mysql_num_rows($res) > 0) return 0;
-	//insert the bookmark
-	if (mysql__insert('usrBookmarks', array(
-		'bkm_recID' => $rec_id,
-		'bkm_Added' => date('Y-m-d H:i:s'),
-		'bkm_Modified' => date('Y-m-d H:i:s'),
-		'bkm_UGrpID' => get_user_id())))
-	{
-		$bkm_ID = mysql_insert_id();
-		// find the tag ids for each tag.
-		$all_tags = mysql__select_assoc('usrTags', 'lower(tag_Text)', 'tag_ID', 'tag_UGrpID='.get_user_id());
-		$input_tags = explode(',', $tags);
-		$tag_ids = array();
-
-//		$kwd_string = '';
-		foreach ($input_tags as $tag) {
-			if ( @$all_tags[strtolower(trim($tag))] ) {
-				array_push($tag_ids, $all_tags[strtolower(trim($tag))]);
-//				if ($kwd_string) $kwd_string .= ',';
-//				$kwd_string .= trim($kwd);
-			}
-		}
-
-
-error_log(">>>>".print_r($tag_ids,true));
-
-//		mysql_query('delete from usrRecTagLinks where kwl_pers_id='.$bkm_ID);
-		if ($tag_ids) {
-			$insert_stmt = '';
-			$tgi_count = 0;
-			foreach ($tag_ids as $tag_id) {
-				if ($insert_stmt) $insert_stmt .= ',';
-				$insert_stmt .= '(' . $rec_id . ',' . $tag_id . ',' . ++$tgi_count . ')';
-			}
-
-			$insert_stmt = 'insert into usrRecTagLinks (rtl_RecID, rtl_TagID, rtl_Order) values ' . $insert_stmt;
-			mysql_query($insert_stmt);
-		}
-
-		return 1;
-	} else {
-		return 0;
-	}
-}
-*/
 
 
 function my_htmlspecialchars_decode($str) {

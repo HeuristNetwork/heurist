@@ -30,114 +30,113 @@
 
 function makeEntryPage($record){
 
- $doc_content = "";
- $fileid = $record->getDet(DT_ENTRY_WML, 'dtfile');
- if(!$fileid){
- 	$fileid = $record->getDet(DT_FILE, 'dtfile');
- }
-
- if($fileid){
-
- 	$file = get_uploaded_file_info_internal($fileid);
-
- 	$filename = $file['fullpath'];
-
- //error_log("file=".$file."   filename=".$filename);
-
- 	if(file_exists($filename)){
-
-		$xml = new DOMDocument();
-		$xml->load($filename);
-
-		if($xml){
-
-            $xsl = new DOMDocument;
-			$xsl->load(dirname(__FILE__)."/../xsl/wordml2TEI.xsl");
-            
-			$proc = new XSLTProcessor();
-			$proc->importStyleSheet($xsl);
-
-            $xml->loadXML($proc->transformToXML($xml));
-			$xsl->load(dirname(__FILE__)."/../xsl/tei_to_html_basic2.xsl");
-			$proc->importStyleSheet($xsl);
-            
-			$doc_content = $proc->transformToXML($xml);
-		}
-	}else{
-        $doc_content = "No content as yet ( file not found ".$filename." )";
-        add_error_log(">>>>> CONTENT EMPTY. entry ".$record->id()."  file not found ".$filename);
+    $doc_content = "";
+    $fileid = $record->getDet(DT_ENTRY_WML, 'dtfile');
+    if(!$fileid){
+        $fileid = $record->getDet(DT_FILE, 'dtfile');
     }
 
-    if(!$doc_content){
-        $doc_content = "No content as yet";
-        add_error_log(">>>>> CONTENT EMPTY. entry ".$record->id()." can not provide xsl transformation");
+    if($fileid){
+
+        $file = get_uploaded_file_info_internal($fileid);
+
+        $filename = $file['fullpath'];
+
+
+        if(file_exists($filename)){
+
+            $xml = new DOMDocument();
+            $xml->load($filename);
+
+            if($xml){
+
+                $xsl = new DOMDocument;
+                $xsl->load(dirname(__FILE__)."/../xsl/wordml2TEI.xsl");
+
+                $proc = new XSLTProcessor();
+                $proc->importStyleSheet($xsl);
+
+                $xml->loadXML($proc->transformToXML($xml));
+                $xsl->load(dirname(__FILE__)."/../xsl/tei_to_html_basic2.xsl");
+                $proc->importStyleSheet($xsl);
+
+                $doc_content = $proc->transformToXML($xml);
+            }
+        }else{
+            $doc_content = "No content as yet ( file not found ".$filename." )";
+            add_error_log(">>>>> CONTENT EMPTY. entry ".$record->id()."  file not found ".$filename);
+        }
+
+        if(!$doc_content){
+            $doc_content = "No content as yet";
+            add_error_log(">>>>> CONTENT EMPTY. entry ".$record->id()." cannot provide xsl transformation");
+        }
+
     }
+    ?>
+    <div id="content-left-col">
 
- }
-?>
-<div id="content-left-col">
+        <?=$doc_content ?>
 
-	<?=$doc_content ?>
+        <div id="pagination">
+            <a id="previous" href="#">&#171; previous</a>
+            <a id="next" href="#">next &#187;</a>
+        </div>
+    </div>
+    <div id="content-right-col">
+        <?php
+        makeAnnotations($record);
+        ?>
+    </div>
 
-	<div id="pagination">
-		<a id="previous" href="#">&#171; previous</a>
-		<a id="next" href="#">next &#187;</a>
-	</div>
-</div>
-<div id="content-right-col">
-<?php
-		makeAnnotations($record);
-?>
-</div>
-
-<div class="clearfix"></div>
-<?php
+    <div class="clearfix"></div>
+    <?php
 } //end makeEntryPage
 
 
 function compare_annotations($a1,  $b1, $ind){
 
-                if(intval(@$a1[$ind]) < intval(@$b1[$ind])){
-                    return -1;
-                }else if (intval(@$a1[$ind]) == intval(@$b1[$ind])) {
-                    if(count($a1)==$ind+1){
-                        return 0;
-                    }else{
-                        return compare_annotations($a1,  $b1, $ind+1);
-                    }
-                }else{
-                    return 1;
-                }
+    if(intval(@$a1[$ind]) < intval(@$b1[$ind])){
+        return -1;
+    }else if (intval(@$a1[$ind]) == intval(@$b1[$ind])) {
+        if(count($a1)==$ind+1){
+            return 0;
+        }else{
+            return compare_annotations($a1,  $b1, $ind+1);
+        }
+    }else{
+        return 1;
+    }
 
 }
 function sort_annotations(Record $a,  Record $b){
 
-            if($a && $b){
+    if($a && $b){
 
-                $a1 = explode(',', $a->getDet(DT_ANNOTATION_START_ELEMENT));
-                array_push($a1, $a->getDet(DT_ANNOTATION_START_WORD));
-                $b1 = explode(',', $b->getDet(DT_ANNOTATION_START_ELEMENT));
-                array_push($b1, $b->getDet(DT_ANNOTATION_START_WORD));
+        $a1 = explode(',', $a->getDet(DT_ANNOTATION_START_ELEMENT));
+        array_push($a1, $a->getDet(DT_ANNOTATION_START_WORD));
+        $b1 = explode(',', $b->getDet(DT_ANNOTATION_START_ELEMENT));
+        array_push($b1, $b->getDet(DT_ANNOTATION_START_WORD));
 
-                return compare_annotations($a1, $b1, 0);
+        return compare_annotations($a1, $b1, 0);
 
-                //return (intval(@$a1[0]) < intval(@$b1[0])) ?-1:1;
-                        ///&& (intval(@$a1[1]) <= intval(@$b1[1])) ?-1:1;
-                        //&& (intval($a->getDet(DT_ANNOTATION_START_WORD)) < intval($b->getDet(DT_ANNOTATION_START_WORD)))?-1:1;
-                        //(intval(@$a1[2]) < intval(@$b1[2])) &&
-                        //(intval(@$a1[3]) < intval(@$b1[3])) ?-1:1;
-                        //
+        //return (intval(@$a1[0]) < intval(@$b1[0])) ?-1:1;
+        ///&& (intval(@$a1[1]) <= intval(@$b1[1])) ?-1:1;
+        //&& (intval($a->getDet(DT_ANNOTATION_START_WORD)) < intval($b->getDet(DT_ANNOTATION_START_WORD)))?-1:1;
+        //(intval(@$a1[2]) < intval(@$b1[2])) &&
+        //(intval(@$a1[3]) < intval(@$b1[3])) ?-1:1;
+        //
 
-/*
-                return (intval(@$a1[0]) < intval(@$b1[0]))?-1:
-                        (intval(@$a1[1]) < intval(@$b1[1]))?-1:
-                        (intval(@$a1[2]) < intval(@$b1[2]))?-1:
-                        (intval(@$a1[3]) < intval(@$b1[3]))?-1:
-                        (intval($a->getDet(DT_ANNOTATION_START_WORD)) < intval($b->getDet(DT_ANNOTATION_START_WORD)))?-1:1;
-*/
-            }else{
-                return 0;
-            }
+        /*
+        return (intval(@$a1[0]) < intval(@$b1[0]))?-1:
+        (intval(@$a1[1]) < intval(@$b1[1]))?-1:
+        (intval(@$a1[2]) < intval(@$b1[2]))?-1:
+        (intval(@$a1[3]) < intval(@$b1[3]))?-1:
+        (intval($a->getDet(DT_ANNOTATION_START_WORD)) < intval($b->getDet(DT_ANNOTATION_START_WORD)))?-1:1;
+        */
+    }else{
+        return 0;
+    }
 }
 
 /**
@@ -170,38 +169,38 @@ function makeAnnotations($record){
 
         }else if($annotation_type == "Multimedia"){
 
-                //find and add miltimedia
-                $mediarec = getRecordFull($annotated_rec_id);
+            //find and add miltimedia
+            $mediarec = getRecordFull($annotated_rec_id);
 
-//print "<!-- rec ".print_r($mediarec, true)." -->";
+            //print "<!-- rec ".print_r($mediarec, true)." -->";
 
-                if($mediarec && ($mediarec->type()==RT_MEDIA || $mediarec->type()==RT_TILEDIMAGE)){
+            if($mediarec && ($mediarec->type()==RT_MEDIA || $mediarec->type()==RT_TILEDIMAGE)){
 
-                    $media_type = $mediarec->getFeatureTypeName();
-                    $out = null;
+                $media_type = $mediarec->getFeatureTypeName();
+                $out = null;
 
-                    if($media_type=="image"){
-                        $out = getImageTag($mediarec, 'thumbnail', 'thumbnail2');
-                    }else if($media_type=="audio"){
-                        $out = getAudioTag($mediarec);
-                    }else if($media_type=="video"){
-                        $out = getVideoTag($mediarec);
-                    }
-
-                    if($out){
-                        $images = $images.'<div class="annotation-img annotation-id-'.$ann_id.'">'.$out.'</div>';
-                        $hide = true;
-                    }
-
-                }else{
-                    //  print "<!-- NOT FOUND ".$annotated_rec_id." ".print_r($annotation, true)."-->";
-
+                if($media_type=="image"){
+                    $out = getImageTag($mediarec, 'thumbnail', 'thumbnail2');
+                }else if($media_type=="audio"){
+                    $out = getAudioTag($mediarec);
+                }else if($media_type=="video"){
+                    $out = getVideoTag($mediarec);
                 }
 
-                if(!$mediarec){
-                    add_error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
-                    continue;
+                if($out){
+                    $images = $images.'<div class="annotation-img annotation-id-'.$ann_id.'">'.$out.'</div>';
+                    $hide = true;
                 }
+
+            }else{
+                //  print "<!-- NOT FOUND ".$annotated_rec_id." ".print_r($annotation, true)."-->";
+
+            }
+
+            if(!$mediarec){
+                add_error_log("ERROR >>>> entry ".$record->id().". annotation ".$annotation->id().". Entity not found ".$annotated_rec_id);
+                continue;
+            }
 
 
             if ($is_generation){
@@ -240,31 +239,27 @@ function makeAnnotations($record){
         if(!is_numeric($end_word)) $end_word = 'null';
 
 
-
-
-//error_log(print_r($annotation, true));
-
-                $refs .= "window.refs.push( {
-                    startElems : [ ".$annotation->getDet(DT_ANNOTATION_START_ELEMENT)." ],
-                    endElems : [ ".$annotation->getDet(DT_ANNOTATION_END_ELEMENT)." ],
-                    startWord : ".$start_word.",
-                    endWord : ".$end_word.",
-                    ".($hide?'hide : true,':'')."
-                    targetID : \"".$annotated_rec_id."\",
-                    href : \"".$annotated_url."\",
-                    recordID : \"".$ann_id."\" } );\n";
+        $refs .= "window.refs.push( {
+        startElems : [ ".$annotation->getDet(DT_ANNOTATION_START_ELEMENT)." ],
+        endElems : [ ".$annotation->getDet(DT_ANNOTATION_END_ELEMENT)." ],
+        startWord : ".$start_word.",
+        endWord : ".$end_word.",
+        ".($hide?'hide : true,':'')."
+        targetID : \"".$annotated_rec_id."\",
+        href : \"".$annotated_url."\",
+        recordID : \"".$ann_id."\" } );\n";
 
     }//foreach
-?>
+    ?>
 
     <script type="text/javascript">
         if (! window["refs"]) {
-                window["refs"] = [];
-  <?=$refs ?>
+            window["refs"] = [];
+            <?=$refs ?>
         }
     </script>
 
-<?php
+    <?php
     //print "<!-- image annotations -->";
     print $images;
 }

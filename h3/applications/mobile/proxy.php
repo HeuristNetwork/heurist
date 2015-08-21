@@ -1,96 +1,95 @@
 <?php
-    require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
-    if (@$httpProxy != '') {
-        define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
-        if (@$httpProxyAuth != '') {
-            define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
-        }
+require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
+if (@$httpProxy != '') {
+    define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
+    if (@$httpProxyAuth != '') {
+        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
     }
+}
 
-    $ttl = 86400; //cache timeout in seconds
+$ttl = 86400; //cache timeout in seconds
 
-    $x = intval($_GET['x']);
-    $y = intval($_GET['y']);
-    $z = intval($_GET['z']);
-    if(array_key_exists('r', $_GET)){
-    	$r = strip_tags($_GET['r']);
-	}else{
-		$r = 'mapnik';
-	}
+$x = intval($_GET['x']);
+$y = intval($_GET['y']);
+$z = intval($_GET['z']);
+if(array_key_exists('r', $_GET)){
+    $r = strip_tags($_GET['r']);
+}else{
+    $r = 'mapnik';
+}
 
-	if($r=='mapquest'){
-          $mimetype = 'image/jpg';
-          $ext = "jpg";
-	}else{
-          $mimetype = 'image/png';
-          $ext = "png";
-	}
+if($r=='mapquest'){
+    $mimetype = 'image/jpg';
+    $ext = "jpg";
+}else{
+    $mimetype = 'image/png';
+    $ext = "png";
+}
 
-    /*switch ($r)
-    {
-      case 'mapnik':
-        $r = 'mapnik';
-        break;
-      case 'osma':
-      default:
-        $r = 'osma';
-        break;
-    }*/
+/*switch ($r)
+{
+case 'mapnik':
+$r = 'mapnik';
+break;
+case 'osma':
+default:
+$r = 'osma';
+break;
+}*/
 
-    // refer http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
-    
-    //This requires settign to appropraite file path for the server\
-    // TODO: set this using relative paths
-    $filename = "/var/www/html/HEURIST/HEURIST_FILESTORE/OpenLayersMapCache/${r}_${z}_${x}_${y}.".$ext;
+// refer http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
-	if(!file_exists($filename) || filemtime($filename)<time()-(86400*30))
-	{
+//This requires settign to appropraite file path for the server\
+// TODO: set this using relative paths
+$filename = "/var/www/html/HEURIST/HEURIST_FILESTORE/OpenLayersMapCache/${r}_${z}_${x}_${y}.".$ext;
+
+if(!file_exists($filename) || filemtime($filename)<time()-(86400*30))
+{
     //if (!is_file($filename) || filemtime($filename)<time()-(86400*30))
 
-      $server = array();
-      switch ($r)
-      {
-      	case 'mapnik':
-          $server[] = 'a.tile.openstreetmap.org';
-          $server[] = 'b.tile.openstreetmap.org';
-          $server[] = 'c.tile.openstreetmap.org';
+    $server = array();
+    switch ($r)
+    {
+        case 'mapnik':
+            $server[] = 'a.tile.openstreetmap.org';
+            $server[] = 'b.tile.openstreetmap.org';
+            $server[] = 'c.tile.openstreetmap.org';
 
-          $url = 'http://'.$server[array_rand($server)];
-          $url .= "/".$z."/".$x."/".$y.".png";
-          break;
+            $url = 'http://'.$server[array_rand($server)];
+            $url .= "/".$z."/".$x."/".$y.".png";
+            break;
 
-      	case 'ocm':
+        case 'ocm':
 
-          $server[] = 'a.tile.opencyclemap.org';
-          $server[] = 'b.tile.opencyclemap.org';
-          $server[] = 'c.tile.opencyclemap.org';
+            $server[] = 'a.tile.opencyclemap.org';
+            $server[] = 'b.tile.opencyclemap.org';
+            $server[] = 'c.tile.opencyclemap.org';
 
-          $url = 'http://'.$server[array_rand($server)];
-          $url .= "/cycle/".$z."/".$x."/".$y.".png";
+            $url = 'http://'.$server[array_rand($server)];
+            $url .= "/cycle/".$z."/".$x."/".$y.".png";
 
-          break;
-      	case 'mapquest':
+            break;
+        case 'mapquest':
 
-          $server[] = 'otile1.mqcdn.com';
-          $server[] = 'otile2.mqcdn.com';
-          $server[] = 'otile3.mqcdn.com';
-          $server[] = 'otile4.mqcdn.com';
+            $server[] = 'otile1.mqcdn.com';
+            $server[] = 'otile2.mqcdn.com';
+            $server[] = 'otile3.mqcdn.com';
+            $server[] = 'otile4.mqcdn.com';
 
-          $url = 'http://'.$server[array_rand($server)];
-          $url .= "/tiles/1.0.0/osm/".$z."/".$x."/".$y.".jpg";
+            $url = 'http://'.$server[array_rand($server)];
+            $url .= "/tiles/1.0.0/osm/".$z."/".$x."/".$y.".jpg";
 
-          break;
-      	case 'osma':
-      	default:
-          $server[] = 'a.tah.openstreetmap.org';
-          $server[] = 'b.tah.openstreetmap.org';
-          $server[] = 'c.tah.openstreetmap.org';
+            break;
+        case 'osma':
+        default:
+            $server[] = 'a.tah.openstreetmap.org';
+            $server[] = 'b.tah.openstreetmap.org';
+            $server[] = 'c.tah.openstreetmap.org';
 
-          $url = 'http://'.$server[array_rand($server)].'/Tiles/tile.php';
-          $url .= "/".$z."/".$x."/".$y.".png";
-          break;
-      }
-// error_log("URL>>>>".$url);
+            $url = 'http://'.$server[array_rand($server)].'/Tiles/tile.php';
+            $url .= "/".$z."/".$x."/".$y.".png";
+            break;
+    }
 
 
     $ch = curl_init();
@@ -104,49 +103,49 @@
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
 
     curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT'] );
-    
+
     if ( defined("HEURIST_HTTP_PROXY") ) {
-      curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-      if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
-          curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
-      }
+        curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
     }
     curl_setopt($ch, CURLOPT_URL, $url);
     $raw = curl_exec($ch);
 
-	  $error = curl_error($ch);
-	  if ($error) {
-			$code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-			error_log("$error ($code)" . " url = ". $url);
-			curl_close($ch);
-			return;
-	  }else{
-			curl_close($ch);
+    $error = curl_error($ch);
+    if ($error) {
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+        error_log("$error ($code)" . " url = ". $url);
+        curl_close($ch);
+        return;
+    }else{
+        curl_close($ch);
 
-			if(file_exists($filename)){
-				unlink($filename);
-			}
-			$fp = fopen($filename, "w");
-			//$fp = fopen($filename, "x");
-			fwrite($fp, $raw);
-			//fflush($fp);    // need to insert this line for proper output when tile is first requestet
-			fclose($fp);
+        if(file_exists($filename)){
+            unlink($filename);
+        }
+        $fp = fopen($filename, "w");
+        //$fp = fopen($filename, "x");
+        fwrite($fp, $raw);
+        //fflush($fp);    // need to insert this line for proper output when tile is first requestet
+        fclose($fp);
 
-	  }
     }
+}
 /*
-    $exp_gmt = gmdate("D, d M Y H:i:s", time() + $ttl * 60) ." GMT";
-    $mod_gmt = gmdate("D, d M Y H:i:s", filemtime($filename)) ." GMT";
-    header("Expires: " . $exp_gmt);
-    header("Last-Modified: " . $mod_gmt);
-    header("Cache-Control: public, max-age=" . $ttl * 60);
-    // for MSIE 5
-    header("Cache-Control: pre-check=" . $ttl * 60, FALSE);
+$exp_gmt = gmdate("D, d M Y H:i:s", time() + $ttl * 60) ." GMT";
+$mod_gmt = gmdate("D, d M Y H:i:s", filemtime($filename)) ." GMT";
+header("Expires: " . $exp_gmt);
+header("Last-Modified: " . $mod_gmt);
+header("Cache-Control: public, max-age=" . $ttl * 60);
+// for MSIE 5
+header("Cache-Control: pre-check=" . $ttl * 60, FALSE);
 */
-	if(file_exists($filename)){
-    	header('Content-Type: '.$mimetype);
-		header('access-control-allow-origin: *');
-		header('access-control-allow-credentials: true');
-    	readfile($filename);
-	}
+if(file_exists($filename)){
+    header('Content-Type: '.$mimetype);
+    header('access-control-allow-origin: *');
+    header('access-control-allow-credentials: true');
+    readfile($filename);
+}
 ?>

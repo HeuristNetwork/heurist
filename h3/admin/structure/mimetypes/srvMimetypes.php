@@ -78,7 +78,6 @@
 			array_push($records, $row);
 		}
 
-//error_log(">>>>".print_r($records,true));
 
 		print json_format($records);
 
@@ -103,7 +102,6 @@
 			$query = null;
 		}
 
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>> QUERY =".$query);
 		if($query){
 			$res = mysql_query($query);
 			while ($row = mysql_fetch_row($res)) {

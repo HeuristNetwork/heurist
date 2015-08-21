@@ -36,6 +36,7 @@
 	// TODO: We may need to hobble/delete some of the functionality on Heurist_Master_Index to avoid people
 	// creating unwanted records or importing random crap into it
 
+
 	$dbID = 0;
 	$error = "";
 	require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
@@ -99,7 +100,6 @@
 	}
 	if($res) { // query OK, now see if we have found the user
 		if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
-			/*****DEBUG****///error_log('inserting a record for '.$usrEmail,', '.$usrPassword,', '.$usrEmail,', '.$usrFirstName,', '.$usrLastName);
 			$res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`, `ugr_FirstName`, `ugr_lastName`)
 				VALUES  ('$usrEmail','$usrPassword','$usrEmail','y','$usrFirstName','$usrLastName')");
 			// Note: we use $usrEmail as user name because the person's name may be repeated across many different users of
@@ -108,9 +108,10 @@
 				$indexdb_user_id = mysql_insert_id();
 				header('Location: ' . HEURIST_BASE_URL . '/common/connect/login.php?db=' . HEURIST_DBNAME . (isset($last_uri) ? '&last_uri=' . urlencode($last_uri) : '')); // TODO: Change to HEURIST_BASE_URL
 			} else { // Unable to create the new user
-				error_log('unable to crate new user');
-				$error = "Unable to write new user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
-				$returnData = $dbID . "," . $error;
+				$error = "Unable to write new user in Heurist master index database\n" .
+                    "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+				error_log($error);
+                $returnData = $dbID . "," . $error;
 				echo $returnData; // if you can't set up user it isn't worth trying to register the database''
 			}
 		} else { // existing user
@@ -118,7 +119,8 @@
 			$indexdb_user_id = $row[0]; // set the user ID for the user in the index database, everything else is known
 		}
 
-    // TODO: It seems like the user ID is not being set properly, at least that seems to be indicated by the fact that the mailout comes with indexdb_user_id=0
+    // TODO: It seems like the user ID is not being set properly,
+    //       at least that seems to be indicated by the fact that the mailout comes with indexdb_user_id=0
 
 	} else {// error trying to find usergroup in UGrps table
 		$error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
@@ -129,7 +131,8 @@
 	// write the core database record describing the database to be registered and allocate registration ID
 	// This is not a fully valid Heurist record, we let the edit form take care of that
 	// First look to see if there is an existing registration - note, this uses the URL to find the record, not the registration ID
-	// TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly with slight URL variations to spawn multiple registrations of dummy databases
+	// TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly
+    // with slight URL variations to spawn multiple registrations of dummy databases
 
 	$res = mysql_query("select rec_ID, rec_Title from Records where `rec_URL`='$serverURL'");
 

@@ -109,7 +109,7 @@
 
     if($isNewDB){
         $definitions_filename = $templateFileName;
-    
+
         if(!file_exists($definitions_filename)){
                 //($isExtended?"coreDefinitionsExtended.txt":"coreDefinitions.txt"))){
 		        $errorCreatingTables = true;

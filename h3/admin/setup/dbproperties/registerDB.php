@@ -134,9 +134,6 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID ".
                     "from sysIdentification where 1");
 
-                // TODO: remove debug
-                //error_log("Hiding registration form");
-
                 // Start by hiding the registration/title edit form
                 echo '<script type="text/javascript">';
                 echo 'document.getElementById("registerDBForm").style.display = "none";';
@@ -182,19 +179,13 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
 
                 // Do the work of registering the database if a suitable title is set
 
-                // TODO: remove debug
-                //error_log("About to test length");
-
                 if(isset($_POST['dbDescription'])) {
-
-                    //error_log("About to test length ".strlen($_POST['dbDescription']));
 
                     if(strlen($_POST['dbDescription']) > 39 && strlen($_POST['dbDescription']) < 1000) {
                         $dbDescription = $_POST['dbDescription'];
                         echo '<script type="text/javascript">';
                         echo 'document.getElementById("registerDBForm").style.display = "none";';
                         echo '</script>';
-                        error_log("About to call registerDatabase");
                         registerDatabase(); // this does all the work of registration
                     } else {
                         echo "<p style='color:red;font-weight:bold'>The database description should be an informative description ".
@@ -233,9 +224,6 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                     "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 
-                    // TODO: remove debug
-                    error_log("DB Registration attempt with URL: ".$reg_url);
-
                     $data = loadRemoteURLContent($reg_url);
                     if (!$data) {
                         die("Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />".
@@ -250,7 +238,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     if ($dbID == 0) { // Unable to allocate a new database identifier
                         $decodedData = explode(',', $data);
                         $errorMsg = $decodedData[0];
-                        error_log ('registerDB.php had problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
+                        error_log ('registerDB.php had a problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
                         $msg = "Problem allocating a database identifier from the Heurist master index, " .
                         "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
                         " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
@@ -318,7 +306,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                                 " - one of the update queries failed');
                             }
                         ?>
-                        <script> // automatically call H3MasterIndix metadata edit form for this database
+                        <script> // automatically call Heurist_Master_Index metadata edit form for this database
                             window.open("<?=$url?>",'_blank');
                         </script>
                         <?php

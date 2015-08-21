@@ -15,7 +15,7 @@
 */
 
 /**
-* service to add a record, will load editor for temporary record 
+* service to add a record, will load editor for temporary record
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,7 +27,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Add 
+* @subpackage  Records/Add
 */
 
 
@@ -40,8 +40,6 @@ if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 // $_REQUEST['bkmrk_bkmk_description'] = mb_convert_encoding($_REQUEST['bkmrk_bkmk_description'], 'utf-8');
 
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
-
-/*****DEBUG****///error_log("in add record request - ".print_r($_REQUEST,true));
 
 
 define('LATEST_BOOKMARKLET_VERSION', '20060713');	//note! this must be in synch with import/bookmarklet/bookmarkletPopup.php
@@ -153,7 +151,6 @@ if (@$_REQUEST['bkmrk_bkmk_url']) {
 		$bkmk = mysql_fetch_assoc($res);
 		$bkm_ID = $bkmk['bkm_ID'];
         $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkm_ID.'&fromadd=exists' . $outdate;
-//DEBUG error_log("Rediect 1 ".$url);        
 		header('Location: ' . $url);
 		return;
 	}
@@ -296,7 +293,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 								. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 			return;
 		}
-       
+
 
 		mysql__insert('Records', array('rec_URL' => $url,
 										'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
@@ -311,10 +308,12 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
 										'rec_FlagTemporary' => ($url  ||  @$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
 
+        // TODO: why isn't there some action if ther's a MySQL error other than writing to the error log?
+
         if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
 
         $rec_id = mysql_insert_id();
-        
+
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
 		if (@$_REQUEST['bkmrk_bkmk_title']) {
 			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
@@ -362,10 +361,10 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 															(@$userDefaultVisibility ? $userDefaultVisibility :
 																(defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable'))),
                                     'rec_FlagTemporary' => (@$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
-                                    
+
 
         if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
-                                    
+
 /*****DEBUG****///error_log( " after insert error = ". mysql_error());
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
@@ -414,7 +413,7 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
-//DEBUG error_log("Rediect 2 ".$url);        
+//DEBUG error_log("Rediect 2 ".$url);
 		header('Location: ' . $url );
 		return;
 	}
@@ -506,11 +505,11 @@ if ($rec_id) {
 	if ($bkm_ID) {
 		if ($isNewRecID) {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg;
-//DEBUG error_log("Rediect 3 ".$url);        
+//DEBUG error_log("Rediect 3 ".$url);
 			header('Location: ' . $url);
 		} else {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bkmk' . $outdate . $wg;
-//DEBUG error_log("Rediect 4 ".$url);        
+//DEBUG error_log("Rediect 4 ".$url);
 			header('Location: ' . $url);
 		}
 		return;

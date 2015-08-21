@@ -154,7 +154,6 @@ function checkVersionOnMainServer($version_in_session)
                     // TODO: HEURIST_VERSION is not rendering the local version in the email below, yet HEURIST_SERVER_NAME works
                     // and it seems to have set the $variables and to detect local version OK ???
 
-                    error_log("Heurist Version = ".HEURIST_VERSION); // DEBUG
                     $email_title = null;
                     if($major_local<$major){
                         $email_title = "Major new version of Heurist Vsn ".$current_version[0]." available for "

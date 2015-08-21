@@ -109,12 +109,11 @@
 
                 // Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
 
-                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
-
-                //DEBUG error_log(">>>>".HEURIST_HTTP_PROXY."  ".$reg_url);
+                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11";
+                //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
 
                 //get json array of registered databases
-                $data = loadRemoteURLContent($reg_url, true); //without proxy 
+                $data = loadRemoteURLContent($reg_url, true); //without proxy
 
                 if($data){
                     $data = json_decode($data);

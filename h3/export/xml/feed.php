@@ -52,217 +52,211 @@ $explanation="This feed returns the results of a HEURIST search. The search URL 
 
 print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 if($isAtom){
-?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/">
-	<title>HEURIST Search results</title>
-	<link href="<?=htmlspecialchars(HEURIST_BASE_URL)?>"/>
-	<subtitle><?=$explanation?></subtitle>
-	<updated><?=date("r")?></updated>
-	<copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
-	<generator>HEURIST search</generator>
-	<author>
-		<name>Information at Heurist</name>
-		<email>info@heuristscholar.org</email>
-	</author>
-	<entry>
-		<title>HEURIST home</title>
-		<link href="<?=htmlspecialchars(HEURIST_BASE_URL_V4)?>?<?=htmlspecialchars($_SERVER['QUERY_STRING'])?>"/>
-		<id><?=htmlspecialchars(HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME)?></id>
-		<published><?=date("r")?></published>
-		<summary>HEURIST home page (search)</summary>
-	</entry>
-<?php
+    ?>
+    <feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/">
+    <title>HEURIST Search results</title>
+    <link href="<?=htmlspecialchars(HEURIST_BASE_URL)?>"/>
+    <subtitle><?=$explanation?></subtitle>
+    <updated><?=date("r")?></updated>
+    <copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
+    <generator>HEURIST search</generator>
+    <author>
+        <name>Information at Heurist</name>
+        <email>info@heuristscholar.org</email>
+    </author>
+    <entry>
+        <title>HEURIST home</title>
+        <link href="<?=htmlspecialchars(HEURIST_BASE_URL_V4)?>?<?=htmlspecialchars($_SERVER['QUERY_STRING'])?>"/>
+        <id><?=htmlspecialchars(HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME)?></id>
+        <published><?=date("r")?></published>
+        <summary>HEURIST home page (search)</summary>
+    </entry>
+    <?php
 }else{
-//
-//	<atom:link href="=urlencode(HEURIST_CURRENT_URL)" rel="self" type="application/rss+xml"/>
-?>
-<rss version="2.0" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
-<channel>
-	<title>HEURIST Search results</title>
-	<link><?=htmlspecialchars(HEURIST_BASE_URL)?></link>
-	<description><?=$explanation?></description>
-	<language>en-gb</language>
-	<pubDate><?=date("r")?></pubDate>
-	<copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
-	<generator>HEURIST search</generator>
-	<managingEditor>info@heuristscholar.org (Information at Heurist)</managingEditor>
-	<atom:link href="<?=htmlspecialchars(HEURIST_CURRENT_URL)?>" rel="self" type="application/rss+xml"/>
-<item>
-	<title>HEURIST home</title>
-	<description>HEURIST home page (search)</description>
-	<pubDate><?=date("r")?></pubDate>
-	<link><?=htmlspecialchars(HEURIST_BASE_URL_V4."?".$_SERVER['QUERY_STRING'])?></link>
-	<guid isPermaLink="false"><?=htmlspecialchars(HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME)?></guid>
-</item>
-<?php
+    //
+    //	<atom:link href="=urlencode(HEURIST_CURRENT_URL)" rel="self" type="application/rss+xml"/>
+    ?>
+    <rss version="2.0" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+    <title>HEURIST Search results</title>
+    <link><?=htmlspecialchars(HEURIST_BASE_URL)?></link>
+    <description><?=$explanation?></description>
+    <language>en-gb</language>
+    <pubDate><?=date("r")?></pubDate>
+    <copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
+    <generator>HEURIST search</generator>
+    <managingEditor>info@heuristscholar.org (Information at Heurist)</managingEditor>
+    <atom:link href="<?=htmlspecialchars(HEURIST_CURRENT_URL)?>" rel="self" type="application/rss+xml"/>
+    <item>
+        <title>HEURIST home</title>
+        <description>HEURIST home page (search)</description>
+        <pubDate><?=date("r")?></pubDate>
+        <link><?=htmlspecialchars(HEURIST_BASE_URL_V4."?".$_SERVER['QUERY_STRING'])?></link>
+        <guid isPermaLink="false"><?=htmlspecialchars(HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME)?></guid>
+    </item>
+    <?php
 }
 
-                                //   0       1         2        3                4                5            6                                                        7
-        $squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, rec_Added, ".
-        "b.dtl_Value, c.dtl_Value ";
-        $joinTable = " left join recDetails b on (b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
+//   0       1         2        3                4                5            6                                                        7
+$squery = "select distinct rec_ID, rec_URL, rec_Title, rec_ScratchPad, rec_RecTypeID, rec_Modified, rec_Added, ".
+"b.dtl_Value, c.dtl_Value ";
+$joinTable = " left join recDetails b on (b.dtl_RecID=rec_ID and b.dtl_DetailTypeID=".(defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:"0").
 ") left join recDetails c on (c.dtl_RecID=rec_ID and c.dtl_DetailTypeID=".(defined('DT_CREATOR')?DT_CREATOR:"0").") ";
 
 
 
-    if(true || @$_REQUEST['rules']){ //search with h4 search engine
-    
-        $h4way = true;
+if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
-        //$_REQUEST['idonly'] = 1;
-        //$_REQUEST['vo'] = 'h3';
-        //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-        $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";  //call h4
-        $reclist = loadRemoteURLContent($url);
-        $reclist = json_decode($reclist, true);
-        
-        if (array_key_exists('error', $reclist)) {
-            print "Error: ".$reclist['error'];
-            return;
-        }
-        
-        $reccount = $reclist['resultCount'];
-        $reclist = explode(",", $reclist['recIDs']);
-        
-        
-/*****DEBUG****///error_log("2.>>>>".$reccount."  ".print_r($reclist, true));        
-        
-    }else{
-        
-        $h4way = false;
-        
-        if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
-            $search_type = BOOKMARK;    // my bookmarks
-        else
-            $search_type = BOTH;    // all records
+    $h4way = true;
 
-        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
-        if (!$limit || $limit<1){
-                $limit = 1000; //default limit in dispPreferences
-        }
+    //$_REQUEST['idonly'] = 1;
+    //$_REQUEST['vo'] = 'h3';
+    //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
+    $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&idonly=1&vo=h3";  //call h4
+    $reclist = loadRemoteURLContent($url);
+    $reclist = json_decode($reclist, true);
 
-        $squery_res = prepareQuery(null, $squery, $search_type, $joinTable, "", null, $limit);
-
-/*****DEBUG****///error_log("1.>>>>".$squery_res);
-
-        $reclist = mysql_query($squery_res);
-        $reccount = mysql_num_rows($reclist);
+    if (array_key_exists('error', $reclist)) {
+        print "Error: ".$reclist['error'];
+        return;
     }
 
-        $uniq_id = 1;
-        $idx = 0;
-
-		if ($reccount>0)
-		{
-
-				while (($h4way && $idx<$reccount) || (!$h4way && ($row = mysql_fetch_row($reclist)))) {
-                    
-                    if($h4way){
-                        $recID = $reclist[$idx];
-                        $idx++;
-                        $squery_res = $squery." from Records ".$joinTable." where rec_ID=".$recID;
-                        $res = mysql_query($squery_res);
-                        if($res){
-                            $row = mysql_fetch_row($res);
-                            if(!$row) continue;
-                        }
-                    }
-                    
-
-	//find rectitle for creator
-	if($row[8]){
-		$creator = mysql__select_array("Records","rec_Title", "rec_ID=".$row[8]);
-		$creator = count($creator)>0?$creator[0]:null;
-	}else{
-		$creator = null;
-	}
-
-	// grab the user tags, as a single comma-delimited string
-	$kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=rtl_TagID", "tag_Text",
-							"rtl_RecID=".$row[0]." and tag_UGrpID=".get_user_id() . " order by rtl_Order, rtl_ID");
-	$tagString = join(",", $kwds);
-
-	//get url for thumbnail
-	$thubURL = getThumbnailURL($row[0]);
+    $reccount = $reclist['resultCount'];
+    $reclist = explode(",", $reclist['recIDs']);
 
 
-	$url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-	$uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-	//HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
-	//$uid = $uniq_id;
-	$uniq_id++;
-
-//error_log(">>>>>> added=".$row[6]."    edt=".$row[5]);
-
-	$date_published = date("r", strtotime(($row[5]==null)? $row[6] : $row[5]));
-
-	$description = ($row[7])? "<![CDATA[".$row[7]."]]>":"";
-
-if($isAtom){
-?>
-<entry>
-	<title><?=htmlspecialchars($row[2])?></title>
-	<summary><?=$description?></summary>
-	<category>type/<?=$row[4]?></category>
-	<published><?=$date_published?></published>
-	<id><?=$uid?></id>
-	<link href="<?=$url?>"/>
-<?php
-	if($creator!=null){
-print "<author><name><![CDATA[".$creator."]]></name></author>";
-	}
 }else{
-?>
-<item>
-	<title><?=htmlspecialchars($row[2])?></title>
-	<description><?=$description?></description>
-	<category>type/<?=$row[4]?></category>
-	<pubDate><?=$date_published?></pubDate>
-	<guid isPermaLink="false"><?=$uid?></guid>
-	<link><?=$url?></link>
-<?php
-	if($creator!=null){
-// this is email - not creator's rectitle
-//print "\n	<author><![CDATA[".$creator."]]></author>";
-	}
+
+    $h4way = false;
+
+    if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
+        $search_type = BOOKMARK;    // my bookmarks
+    else
+        $search_type = BOTH;    // all records
+
+    $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+    if (!$limit || $limit<1){
+        $limit = 1000; //default limit in dispPreferences
+    }
+
+    $squery_res = prepareQuery(null, $squery, $search_type, $joinTable, "", null, $limit);
+
+    $reclist = mysql_query($squery_res);
+    $reccount = mysql_num_rows($reclist);
 }
 
-	if($tagString){
-print "\n	<media:keywords>".$tagString."</media:keywords>";
-	}
-	if($thubURL){
-		//width=\"120\" height=\"80\"
-print "\n	<media:thumbnail url=\"".htmlspecialchars($thubURL)."\"/>";
-	}
+$uniq_id = 1;
+$idx = 0;
 
-//geo rss
-	$geos = mysql__select_array("recDetails", "if(a.dtl_Geo is null, null, asText(a.dtl_Geo)) as dtl_Geo",
-	 						"a.dtl_RecID=".$row[0]." and a.dtl_Geo is not null");
+if ($reccount>0)
+{
 
-					if(count($geos)>0){
-						$wkt = $geos[0];
-						$geom = geoPHP::load($wkt,'wkt');
-						$gml = $geom->out('georss');
-						if($gml){
-							$gml = "<georss:".substr($gml,1);
-							$gml = str_replace("</","</georss:",$gml);
-							print "\n	".$gml;
-						}
-					}
+    while (($h4way && $idx<$reccount) || (!$h4way && ($row = mysql_fetch_row($reclist)))) {
 
-print ($isAtom)?'</entry>':'</item>';
+        if($h4way){
+            $recID = $reclist[$idx];
+            $idx++;
+            $squery_res = $squery." from Records ".$joinTable." where rec_ID=".$recID;
+            $res = mysql_query($squery_res);
+            if($res){
+                $row = mysql_fetch_row($res);
+                if(!$row) continue;
+            }
+        }
 
 
-				}//while wkt records
+        //find rectitle for creator
+        if($row[8]){
+            $creator = mysql__select_array("Records","rec_Title", "rec_ID=".$row[8]);
+            $creator = count($creator)>0?$creator[0]:null;
+        }else{
+            $creator = null;
+        }
+
+        // grab the user tags, as a single comma-delimited string
+        $kwds = mysql__select_array("usrRecTagLinks left join usrTags on tag_ID=rtl_TagID", "tag_Text",
+            "rtl_RecID=".$row[0]." and tag_UGrpID=".get_user_id() . " order by rtl_Order, rtl_ID");
+        $tagString = join(",", $kwds);
+
+        //get url for thumbnail
+        $thubURL = getThumbnailURL($row[0]);
 
 
-		}
+        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        //HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
+        //$uid = $uniq_id;
+        $uniq_id++;
+
+        $date_published = date("r", strtotime(($row[5]==null)? $row[6] : $row[5]));
+
+        $description = ($row[7])? "<![CDATA[".$row[7]."]]>":"";
+
+        if($isAtom){
+            ?>
+            <entry>
+            <title><?=htmlspecialchars($row[2])?></title>
+            <summary><?=$description?></summary>
+            <category>type/<?=$row[4]?></category>
+            <published><?=$date_published?></published>
+            <id><?=$uid?></id>
+            <link href="<?=$url?>"/>
+            <?php
+            if($creator!=null){
+                print "<author><name><![CDATA[".$creator."]]></name></author>";
+            }
+        }else{
+            ?>
+            <item>
+            <title><?=htmlspecialchars($row[2])?></title>
+            <description><?=$description?></description>
+            <category>type/<?=$row[4]?></category>
+            <pubDate><?=$date_published?></pubDate>
+            <guid isPermaLink="false"><?=$uid?></guid>
+            <link><?=$url?></link>
+            <?php
+            if($creator!=null){
+                // this is email - not creator's rectitle
+                //print "\n	<author><![CDATA[".$creator."]]></author>";
+            }
+        }
+
+        if($tagString){
+            print "\n	<media:keywords>".$tagString."</media:keywords>";
+        }
+        if($thubURL){
+            //width=\"120\" height=\"80\"
+            print "\n	<media:thumbnail url=\"".htmlspecialchars($thubURL)."\"/>";
+        }
+
+        //geo rss
+        $geos = mysql__select_array("recDetails", "if(a.dtl_Geo is null, null, asText(a.dtl_Geo)) as dtl_Geo",
+            "a.dtl_RecID=".$row[0]." and a.dtl_Geo is not null");
+
+        if(count($geos)>0){
+            $wkt = $geos[0];
+            $geom = geoPHP::load($wkt,'wkt');
+            $gml = $geom->out('georss');
+            if($gml){
+                $gml = "<georss:".substr($gml,1);
+                $gml = str_replace("</","</georss:",$gml);
+                print "\n	".$gml;
+            }
+        }
+
+        print ($isAtom)?'</entry>':'</item>';
+
+
+    }//while wkt records
+
+
+}
 
 if($isAtom){
-print '</feed>';
+    print '</feed>';
 }else{
-print '</channel>';
-print '</rss>';
+    print '</channel>';
+    print '</rss>';
 }
 
 

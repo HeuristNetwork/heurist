@@ -15,7 +15,7 @@
 /**
 * global.css
 * Global styles for Heurist
-* 
+*
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -861,7 +861,7 @@ ul li ul div.separator {
 }
 #views ul li a{background-repeat:no-repeat !important; background-position:5px 3px !important; padding-left:28px !important}
 
-#tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator 
+#tabs li ul li a.separator, #tabs li.active ul li a.separator, ul.menu li ul li a.separator, ul.menu li.active ul li a.separator, #quicklink-cell li ul li a.separator, #views li ul li a.separator
 {border-top:1px solid #aaa;}
 
 .error{
@@ -872,9 +872,11 @@ ul li ul div.separator {
 #errorMsg{
 	width:100%;
 	height:99%;
-	background-color:#FFF;
-	text-align:center;
-	vertical-align: middle;
+	background-color:#000;
+    color: red;
+	text-align:left;
+	vertical-align: top;
+    padding:20px;
 }
 .relationPane span, #errorMsg span, .errorMsg span, div#errorMsg span, h4 span{
 	background-color: rgba(100, 100, 100, 0.6);
@@ -913,7 +915,7 @@ h3 {
 	width: 75px;
 	padding-left: 2px;
 	padding-right: 2px;
-	/* background-image:url(../images/bug_off.png); 
+	/* background-image:url(../images/bug_off.png);
     Cute but pointless as illegible and only comprehensible, maybe, to geeks */
 	background-repeat:no-repeat;
 	background-position:50%;

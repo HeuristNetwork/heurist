@@ -1,60 +1,60 @@
 <?php
-    /**
-    * importCSV.php: UI for delimited text file normalising data import
-    * filename: explanation
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.2
-    */
+/**
+* importCSV.php: UI for delimited text file normalising data import
+* filename: explanation
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
-    /**
-    * import_session:  import_table, reccount,
-    *                  columns:[col1,col2,col3, ...],    names of columns in file header
-    *                  uniqcnt: [cnt1, cnt2, .... ],     count of uniq values per column
-    *                  mapping:[rt1.dt1, rt2.dt2, rt3.dt3],   mapping of value fields to rectype.detailtype
-    *                  indexes:[]   names of column =>rectype : columns in importtable that contains record_ID
-    */
+/**
+* import_session:  import_table, reccount,
+*                  columns:[col1,col2,col3, ...],    names of columns in file header
+*                  uniqcnt: [cnt1, cnt2, .... ],     count of uniq values per column
+*                  mapping:[rt1.dt1, rt2.dt2, rt3.dt3],   mapping of value fields to rectype.detailtype
+*                  indexes:[]   names of column =>rectype : columns in importtable that contains record_ID
+*/
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
-    require_once('importCSV_lib.php');
-    set_time_limit(0);
+require_once('importCSV_lib.php');
+set_time_limit(0);
 
-    $mysqli = mysqli_connection_overwrite(DATABASE);
-    mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
+$mysqli = mysqli_connection_overwrite(DATABASE);
+mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
 
-    if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
-        $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
-        header('Content-type: text/javascript');
-        print json_encode($res);
+if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
+    $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
+    header('Content-type: text/javascript');
+    print json_encode($res);
+    exit();
+} else
+    if( @$_REQUEST["clearsession"] ){
+        clear_import_session($_REQUEST["clearsession"]);
         exit();
     } else
-        if( @$_REQUEST["clearsession"] ){
-            clear_import_session($_REQUEST["clearsession"]);
+        if( @$_REQUEST["getsession"] ){ //download session
+            download_import_session($_REQUEST["getsession"], @$_REQUEST["idfield"], @$_REQUEST["mode"]);
             exit();
         } else
-            if( @$_REQUEST["getsession"] ){ //download session
-                download_import_session($_REQUEST["getsession"], @$_REQUEST["idfield"], @$_REQUEST["mode"]);
+            if( @$_REQUEST["deleteunmatched"] ){ //download session
+                delete_unmatched_records($_REQUEST["deleteunmatched"], @$_REQUEST["idfield"]);
                 exit();
-            } else
-                if( @$_REQUEST["deleteunmatched"] ){ //download session
-                    delete_unmatched_records($_REQUEST["deleteunmatched"], @$_REQUEST["idfield"]);
-                    exit();
-                }
+            }
 
 
 ?>
@@ -197,37 +197,37 @@
             }
         </script>
         <?php
-            //USER_ID:=get_user_id()
-            $imp_session = null;
+        //USER_ID:=get_user_id()
+        $imp_session = null;
 
-            $sa_mode = @$_REQUEST['sa_mode'];
-            $step = intval(@$_REQUEST["step"]);
-            if(!$step) $step=0;
+        $sa_mode = @$_REQUEST['sa_mode'];
+        $step = intval(@$_REQUEST["step"]);
+        if(!$step) $step=0;
 
+        ob_start();
+        echo '<div id="div-progress" style="display:none" class="loading">&nbsp;</div>';
+        ob_flush();flush();
+
+        //load session
+        if(intval(@$_REQUEST["import_id"])>0){
             ob_start();
-            echo '<div id="div-progress" style="display:none" class="loading">&nbsp;</div>';
+            echo '<script>showProgressMsg("Please wait, processing ... ")</script>';
+            ob_flush();flush();
+            $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
+        }
+
+        //first step - load file into import table
+        if($step==1 && $imp_session==null){
+            ob_start();
+            echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
             ob_flush();flush();
 
-            //load session
-            if(intval(@$_REQUEST["import_id"])>0){
-                ob_start();
-                echo '<script>showProgressMsg("Please wait, processing ... ")</script>';
-                ob_flush();flush();
-                $imp_session = get_import_session($mysqli, $_REQUEST["import_id"]);
+
+            if(@$_REQUEST["filename"]){ //after postprocessing - additional step load from temp file
+                $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], (@$_REQUEST["preprocess"]=="1"));
+            }else{
+                $imp_session = postmode_file_selection();
             }
-
-            //first step - load file into import table
-            if($step==1 && $imp_session==null){
-                ob_start();
-                echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
-                ob_flush();flush();
-
-
-                if(@$_REQUEST["filename"]){ //after postprocessing - additional step load from temp file
-                    $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], (@$_REQUEST["preprocess"]=="1"));
-                }else{
-                    $imp_session = postmode_file_selection();
-                }
             ?>
 
             <script type="text/javascript">
@@ -243,41 +243,41 @@
             </script>
 
             <?php
-                if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
+            if(is_array($imp_session) && (@$imp_session['errors'] || @$imp_session['err_encoding']) ){ //preprocessing
 
-                    if(count(@$imp_session['errors'])>0){
+                if(count(@$imp_session['errors'])>0){
 
-                        $col_count = $imp_session['col_count'];
-                        $errors = $imp_session['errors'];
-                        $fields = $imp_session['fields'];
+                    $col_count = $imp_session['col_count'];
+                    $errors = $imp_session['errors'];
+                    $fields = $imp_session['fields'];
 
-                        print "<h4>ERROR. Wrong field count in parsed data. Expected field count:&nbsp;&nbsp;".$col_count." </h4>";
-                        print "<div>Header: ".implode(", ", $fields)."</div>";
-                        print "<hr width='100%' />";
+                    print "<h4>ERROR. Wrong field count in parsed data. Expected field count:&nbsp;&nbsp;".$col_count." </h4>";
+                    print "<div>Header: ".implode(", ", $fields)."</div>";
+                    print "<hr width='100%' />";
 
-                        print "<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>";
+                    print "<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>";
 
-                        foreach($errors as $err){
-                            print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
-                        }
-                        print "</table>";
-
+                    foreach($errors as $err){
+                        print "<tr><td>".$err['no']."</td><td>".$err['cnt']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
                     }
-                    if(count(@$imp_session['err_encoding'])>0){
+                    print "</table>";
 
-                        $errors = $imp_session['err_encoding'];
+                }
+                if(count(@$imp_session['err_encoding'])>0){
 
-                        print "<h4>ERROR. Wrong encoding detected in import file. At least ".count($errors)." lines have such issue. Please save in UTF8.</h4>";
-                        print "<hr width='100%' />";
+                    $errors = $imp_session['err_encoding'];
 
-                        print "<table><tr><th>Line#</th><th>Raw data</th></tr>";
+                    print "<h4>ERROR. Wrong encoding detected in import file. At least ".count($errors)." lines have such issue. Please save in UTF8.</h4>";
+                    print "<hr width='100%' />";
 
-                        foreach($errors as $err){
-                            print "<tr><td>".$err['no']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
-                        }
-                        print "</table>";
+                    print "<table><tr><th>Line#</th><th>Raw data</th></tr>";
 
+                    foreach($errors as $err){
+                        print "<tr><td>".$err['no']."</td><td>".htmlspecialchars($err['line'])."</td></tr>";
                     }
+                    print "</table>";
+
+                }
                 ?>
 
                 <div class="actionButtons" >
@@ -290,9 +290,9 @@
         </html>
 
         <?php
-            exit();
+        exit();
 
-        }else if(is_array($imp_session) && @$imp_session['fatal_error']){ //preprocessing
+    }else if(is_array($imp_session) && @$imp_session['fatal_error']){ //preprocessing
         ?>
         <p style='color:red'>ERROR: <?=$imp_session['fatal_error']?></p>
         <hr width="100%" />
@@ -305,9 +305,9 @@
         </html>
 
         <?php
-            exit();
+        exit();
 
-        }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
+    }else if(is_array($imp_session) && @$imp_session['warning']){ //preprocessing
         ?>
 
         <h4><?=$imp_session['warning']?></h4>
@@ -326,9 +326,9 @@
             <input type="hidden" name="csv_mvsep" value="<?=$_REQUEST['csv_mvsep']?>">
 
             <?php
-                $fields = @$imp_session['fields'];
-                if($fields){
-                    $k=0;
+            $fields = @$imp_session['fields'];
+            if($fields){
+                $k=0;
                 ?>
 
                 <div>Please select input columns that contain dates which may contain human-friendly dates such as 1827, 14 sep 1827, 14th Sept 1827.<br />
@@ -344,7 +344,7 @@
 
                 <table>
                 <?php
-                    foreach($fields as $field){
+                foreach($fields as $field){
                     ?>
                     <tr>
                         <td width=50px;></td>
@@ -352,12 +352,12 @@
                         <td><label><?=$field?></td>
                     </tr>
                     <?php
-                        $k++;
-                    }
-                    print '</table>';
-                }else{
-                    print '<input type="hidden" name="preprocess" value="1">';
+                    $k++;
                 }
+                print '</table>';
+            }else{
+                print '<input type="hidden" name="preprocess" value="1">';
+            }
             ?>
 
         </form>
@@ -365,12 +365,12 @@
         </html>
 
         <?php
-            exit();
-        }
+        exit();
     }
+}
 
-    //session is loaded - render second step page
-    if(is_array($imp_session)){
+//session is loaded - render second step page
+if(is_array($imp_session)){
 
     ?>
     <script src="../../common/php/loadCommonInfo.php?db=<?=HEURIST_DBNAME?>"></script>
@@ -386,34 +386,33 @@
 
     <?php
 
-        $mode_import_result = "";
-        if($step>1){
-            $res = null;
+    $mode_import_result = "";
+    if($step>1){
+        $res = null;
 
-            if($sa_mode==0){ //matching
+        if($sa_mode==0){ //matching
 
-                if($step==2){  //find  - NOT USED ANYMORE  - we trying to assign IDs at once
-                    // ARTEM TODO: REMOVE REDUNDANT CODE
+            if($step==2){  //find  - NOT USED ANYMORE  - we trying to assign IDs at once
+                // ARTEM TODO: REMOVE REDUNDANT CODE
 
-                    ob_start();
-                    echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
-                    ob_flush();flush();
+                ob_start();
+                echo '<script>showProgressMsg("Please wait, matching in progress")</script>';
+                ob_flush();flush();
 
-                    $res = matchingSearch($mysqli, $imp_session, $_REQUEST);
+                $res = matchingSearch($mysqli, $imp_session, $_REQUEST);
 
-                    //error_log(print_r($res, true));
 
-                }else if($step==3){  //assign ids
+            }else if($step==3){  //assign ids
 
-                    ob_start();
-                    echo '<script>showProgressMsg("Please wait, assign of records ids")</script>';
-                    ob_flush();flush();
+                ob_start();
+                echo '<script>showProgressMsg("Please wait, assign of records ids")</script>';
+                ob_flush();flush();
 
-                    $res = assignMultivalues($mysqli, $imp_session, $_REQUEST);
-                    //NOT USED ANYMORE $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
+                $res = assignMultivalues($mysqli, $imp_session, $_REQUEST);
+                //NOT USED ANYMORE $res = matchingAssign($mysqli, $imp_session, $_REQUEST);
 
-                    if(is_array($res) && count(@$res['validation']['disambiguation'])>0){
-                        //There is ambiguity with your matching criteria. Please resolve it before proceeding further
+                if(is_array($res) && count(@$res['validation']['disambiguation'])>0){
+                    //There is ambiguity with your matching criteria. Please resolve it before proceeding further
                     ?>
 
                     <script>
@@ -424,23 +423,23 @@
                     </script>
 
                     <?php
-                    }else{
-                        print '<script>form_vals["auto_switch_to_import"] = "1";</script>';
-                        //$sa_mode = 1; //ART switch to import  autimatically???
-                    }
+                }else{
+                    print '<script>form_vals["auto_switch_to_import"] = "1";</script>';
+                    //$sa_mode = 1; //ART switch to import  autimatically???
                 }
-            }else{//importing
+            }
+        }else{//importing
 
-                if($step==2){  //verification
+            if($step==2){  //verification
 
-                    ob_start();
-                    echo '<script>showProgressMsg("Please wait, mapping validation in progress")</script>';
-                    ob_flush();flush();
+                ob_start();
+                echo '<script>showProgressMsg("Please wait, mapping validation in progress")</script>';
+                ob_flush();flush();
 
-                    $res = validateImport($mysqli, $imp_session, $_REQUEST);
+                $res = validateImport($mysqli, $imp_session, $_REQUEST);
 
-                }else if($step==3){  //create records - load to import data to database
-                    $mode_import_result = ' style="display:none"';
+            }else if($step==3){  //create records - load to import data to database
+                $mode_import_result = ' style="display:none"';
                 ?>
 
                 <div id="main_import_result">
@@ -449,26 +448,26 @@
                     <div id="div-progress2"></div>
                     <div>
                         <?php
-                            ob_flush();flush();
+                        ob_flush();flush();
 
-                            $res = doImport($mysqli, $imp_session, $_REQUEST);
+                        $res = doImport($mysqli, $imp_session, $_REQUEST);
                         ?>
                     </div>
                     <br /><br /><input type="button" value="Back to previous screen" onClick="{showRecords('mapping');}">
                 </div><!-- main_import_result -->
                 <?php
-                }
+            }
 
-            }
-            if(is_array($res)) {
-                $imp_session = $res;
-            }else if($res && !is_array($res)){
-                print '<script>form_vals["error_message"] = "'.$res.'";</script>';
-                //echo "<p style='color:red'>ERROR: ".$res."</p>";
-            }
         }
+        if(is_array($res)) {
+            $imp_session = $res;
+        }else if($res && !is_array($res)){
+            print '<script>form_vals["error_message"] = "'.$res.'";</script>';
+            //echo "<p style='color:red'>ERROR: ".$res."</p>";
+        }
+    }
 
-        $len = count($imp_session['columns']);
+    $len = count($imp_session['columns']);
 
     ?>
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
@@ -523,11 +522,11 @@
         </div>
 
         <?php
-            if(@$imp_session['load_warnings']){
-                print "<div style='padding:20px;'><span style='color:red;font-size:14px; font-weight:bold'>"
-                ."Warning: there are errors in the data read</span>&nbsp;"
-                .$imp_session['load_warnings'][0]."&nbsp;&nbsp;<a href='#' onclick='showRecords(\"load_warnings\")'><b>show errors &gt;</b></a></div>";
-            }
+        if(@$imp_session['load_warnings']){
+            print "<div style='padding:20px;'><span style='color:red;font-size:14px; font-weight:bold'>"
+            ."Warning: there are errors in the data read</span>&nbsp;"
+            .$imp_session['load_warnings'][0]."&nbsp;&nbsp;<a href='#' onclick='showRecords(\"load_warnings\")'><b>show errors &gt;</b></a></div>";
+        }
         ?>
 
         <input type="hidden" value="<?=$sa_mode?>" name="sa_mode" id="sa_mode"/>
@@ -556,39 +555,39 @@
                 </td>
 
                 <?php
-                    //
-                    // render validation result box
-                    //
+                //
+                // render validation result box
+                //
 
-                    $validationRes = @$imp_session['validation'];
-                    if($validationRes){
-                        $cnt_error   = intval(@$validationRes['count_error']);
-                        $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
+                $validationRes = @$imp_session['validation'];
+                if($validationRes){
+                    $cnt_error   = intval(@$validationRes['count_error']);
+                    $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
 
-                        $cnt_disamb   = count(@$validationRes['disambiguation']);
-                        $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
+                    $cnt_disamb   = count(@$validationRes['disambiguation']);
+                    $show_disamb    = ($cnt_disamb>0)?"<a href='#' onclick='showRecords(\"disamb\")'>show</a>" :"&nbsp;";
 
 
-                        $url = 'importCSV.php/import.csv?db='.HEURIST_DBNAME.'&getsession='.@$_REQUEST["import_id"].'&idfield='.@$_REQUEST["recid_field"].'&mode=';
+                    $url = 'importCSV.php/import.csv?db='.HEURIST_DBNAME.'&getsession='.@$_REQUEST["import_id"].'&idfield='.@$_REQUEST["recid_field"].'&mode=';
 
-                        $cnt_update  = intval(@$validationRes['count_update']);
-                        $cnt_update_rows  = intval(@$validationRes['count_update_rows']);
-                        $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
-                        $download_update= ($cnt_update>0)?"<a href='#' onclick='window.open(\"".$url."0\" ,\"_blank\")'>download</a>" :"&nbsp;";
+                    $cnt_update  = intval(@$validationRes['count_update']);
+                    $cnt_update_rows  = intval(@$validationRes['count_update_rows']);
+                    $show_update = ($cnt_update>0)?"<a href='#' onclick='showRecords(\"update\")'>show</a>" :"&nbsp;";
+                    $download_update= ($cnt_update>0)?"<a href='#' onclick='window.open(\"".$url."0\" ,\"_blank\")'>download</a>" :"&nbsp;";
 
-                        $cnt_insert  = intval(@$validationRes['count_insert']);
-                        $cnt_insert_rows  = intval(@$validationRes['count_insert_rows']);
-                        if($cnt_insert>0){
-                            $show_insert = "<a href='#' onclick='showRecords(\"insert\")' title='show rows to be inserted as new records'>show</a>";
-                            $download_insert= "<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>"
-                            ." &nbsp;&nbsp; <input type=\"checkbox\" title=\"Do not insert new records. Do update only\" "
-                            ." onclick=\"{document.getElementById('ignore_insert').value=this.checked?1:0; }\"> ignore ";
-                        }else{
-                            $show_insert = "&nbsp;";
-                            $download_insert= "&nbsp;";
-                        }
+                    $cnt_insert  = intval(@$validationRes['count_insert']);
+                    $cnt_insert_rows  = intval(@$validationRes['count_insert_rows']);
+                    if($cnt_insert>0){
+                        $show_insert = "<a href='#' onclick='showRecords(\"insert\")' title='show rows to be inserted as new records'>show</a>";
+                        $download_insert= "<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>"
+                        ." &nbsp;&nbsp; <input type=\"checkbox\" title=\"Do not insert new records. Do update only\" "
+                        ." onclick=\"{document.getElementById('ignore_insert').value=this.checked?1:0; }\"> ignore ";
+                    }else{
+                        $show_insert = "&nbsp;";
+                        $download_insert= "&nbsp;";
+                    }
 
-                        $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
+                    $cnt_insert_nonexist_id  = intval(@$validationRes['count_insert_nonexist_id']);
 
                     ?>
                     <td><div class="analized2">
@@ -631,7 +630,7 @@
                                     onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
                                     -->
                                     <?php }
-                                    if($cnt_disamb>0){
+                                if($cnt_disamb>0){
                                     ?>
                                     <span class="matching">
                                     <input type="button" value="Resolve ambiguous matches"
@@ -641,23 +640,23 @@
                                         <input type="button" value="Insert/Update step>>" title="Go to Import step"
                                             onclick='$( "#tabs_actions" ).tabs( "option", "active", 1 );' style="font-weight: bold;"></span>
                                     <?php
-                                    }
+                                }
                                 ?>
                             </div>
                         </div>
                     </td>
 
                     <?php
-                    }else{
-                        print '<td></td>';
-                    }
+                }else{
+                    print '<td></td>';
+                }
                 ?>
 
                 <td>
                     <span class="importing">
                         <?php
-                            //($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")
-                            if($sa_mode==1 && $validationRes){  ?>
+                        //($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")
+                        if($sa_mode==1 && $validationRes){  ?>
                             <span class="analized2">
                                 <input type="button" value="Create/Update records"
                                     onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
@@ -714,26 +713,26 @@
                         </thead>
 
                         <?php
-                            //
-                            // render table allowing contextual selection of key fields for matching
-                            //
-                            for ($i = 0; $i < $len; $i++) {
-                                // Keyfield selection
-                                print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
-                                .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
-                                .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
-                                .'/></span></td>';
-                                // Unique values
-                                print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td>';
-                                // input column name
-                                print '<td style="padding-left:15px;" class="truncate">'.$imp_session['columns'][$i].'</td>';
-                                // Select mapping for imported column, initially hidden until keyfield checkbox selected
-                                print '<td style="width:306px;">&nbsp;<span style="display:none;">'
-                                .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px;" onchange="{onFtSelect2('.$i.');}">'
-                                . '</select></span></td>';
-                                // Imported data value for column
-                                print '<td id="impval_'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
-                            }
+                        //
+                        // render table allowing contextual selection of key fields for matching
+                        //
+                        for ($i = 0; $i < $len; $i++) {
+                            // Keyfield selection
+                            print '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_keyfield_'
+                            .$i.'" value="field_'.$i.'" onchange="{showHideSelect2('.$i.');}" '
+                            .(in_array($i, $imp_session['multivals'])?'multivalue="yes"':'').' column="'.$imp_session['columns'][$i].'"'
+                            .'/></span></td>';
+                            // Unique values
+                            print '<td align="center">'.$imp_session['uniqcnt'][$i].'</td>';
+                            // input column name
+                            print '<td style="padding-left:15px;" class="truncate">'.$imp_session['columns'][$i].'</td>';
+                            // Select mapping for imported column, initially hidden until keyfield checkbox selected
+                            print '<td style="width:306px;">&nbsp;<span style="display:none;">'
+                            .'<select name="sa_keyfield_'.$i.'" id="sa_keyfield_'.$i.'" style="max-width:260px;" onchange="{onFtSelect2('.$i.');}">'
+                            . '</select></span></td>';
+                            // Imported data value for column
+                            print '<td id="impval_'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
+                        }
                         ?>
                     </table>
                 </div>
@@ -750,26 +749,26 @@
                     <select id="recid_field" name="recid_field" onchange="{onRecIDselect2()}">
                         <option value="">select...</option>
                         <?php
-                            //created ID fields
-                            $hasc = false;
-                            for ($i = 0; $i < $len; $i++) {
-                                $rectype = @$imp_session['indexes']["field_".$i];
-                                $isIndex = ($rectype!=null);
-                                if($isIndex){
-                                    $hasc = true;
-                                    print '<option class="idfield_'.$rectype.'" value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
-                                }
+                        //created ID fields
+                        $hasc = false;
+                        for ($i = 0; $i < $len; $i++) {
+                            $rectype = @$imp_session['indexes']["field_".$i];
+                            $isIndex = ($rectype!=null);
+                            if($isIndex){
+                                $hasc = true;
+                                print '<option class="idfield_'.$rectype.'" value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
                             }
-                            if($hasc)
-                                print '<option id="idfield_separator" value="0" disabled="disabled" >-------</option>';
-                            //all other fields
-                            for ($i = 0; $i < $len; $i++) {
-                                $rectype = @$imp_session['indexes']["field_".$i];
-                                $isIndex = ($rectype!=null);
-                                if(!$isIndex){
-                                    print '<option value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
-                                }
+                        }
+                        if($hasc)
+                            print '<option id="idfield_separator" value="0" disabled="disabled" >-------</option>';
+                        //all other fields
+                        for ($i = 0; $i < $len; $i++) {
+                            $rectype = @$imp_session['indexes']["field_".$i];
+                            $isIndex = ($rectype!=null);
+                            if(!$isIndex){
+                                print '<option value="field_'.$i.'">'.$imp_session['columns'][$i].'</option>';
                             }
+                        }
                         ?>
                     </select>
                     <span class=help>
@@ -828,74 +827,74 @@
                     </thead>
 
                     <?php
-                        //
-                        // render mapping table with list of columns and datatype selectors
-                        //
-                        $sIndexes = "";
-                        $sRemain = "";
-                        $sProcessed = "";
-                        $recStruc = getAllRectypeStructures(true);
-                        $idx_dt_name = $recStruc['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-                        //$idx_rt_name = $recStruc['commonNamesToIndex']['rty_Name'];
+                    //
+                    // render mapping table with list of columns and datatype selectors
+                    //
+                    $sIndexes = "";
+                    $sRemain = "";
+                    $sProcessed = "";
+                    $recStruc = getAllRectypeStructures(true);
+                    $idx_dt_name = $recStruc['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+                    //$idx_rt_name = $recStruc['commonNamesToIndex']['rty_Name'];
 
-                        for ($i = 0; $i < $len; $i++) {
+                    for ($i = 0; $i < $len; $i++) {
 
-                            $isProcessed = @$imp_session["mapping"]["field_".$i];
-                            $isIndex = false;
+                        $isProcessed = @$imp_session["mapping"]["field_".$i];
+                        $isIndex = false;
 
-                            // set up checkboxes for selection of fields to insert / update
-                            if($isProcessed){
-                                $checkbox = '<td align="center"><input type="checkbox" disabled="disabled" /></td>'; //processed
-                            }else{
-                                $rectype = @$imp_session['indexes']["field_".$i];
-                                $isIndex = ($rectype!=null);
-                                $checkbox = '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_dt_'
-                                .$i.'" onchange="{showHideSelect('.$i.');}"/></span></td>';
-                            }
-
-                            $s = '<tr>'.$checkbox;
-
-                            // count of unique values
-                            $s = $s.'<td align="center">'.$imp_session['uniqcnt'][$i];
-
-                            // column names
-                            $s = $s.'</td><td style="padding-left:15px; class="truncate">'.$imp_session['columns'][$i].'</td>';
-
-                            // mapping
-                            if($isProcessed){ // already selected
-                                $rt_dt = explode(".",$isProcessed);
-                                $recTypeName = $recStruc['names'][$rt_dt[0]]; //['commonFields'][ $idx_rt_name ];
-                                $dt_Name = intval($rt_dt[1])>0?$recStruc['typedefs'][$rt_dt[0]]['dtFields'][$rt_dt[1]][$idx_dt_name]:$rt_dt[1];
-                                $s = $s.'<td class="truncate">'.$recTypeName.' '.$dt_Name.'  ('.$rt_dt[0].'.'.$rt_dt[1].')</td>';
-                            }else{ // to select
-                                $s = $s.'<td style="width:306px;">&nbsp;<span style="display:none;">'
-                                .'<select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="max-width:260px" onchange="{onFtSelect('.$i.');}"'
-                                . ($isIndex?'class="indexes"':'').'></select></span></td>';
-                            }
-
-                            // imported value for current example record]
-                            $s = $s.'<td id="impval'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
-
-                            if($isProcessed){
-                                $sProcessed = $sProcessed.$s;
-                            }else{
-                                if($isIndex){
-                                    $sIndexes=$sIndexes.$s;
-                                }else {
-                                    $sRemain=$sRemain.$s;
-                                }
-                            }
-                        }//for
-                        if($sIndexes){
-                            print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="4"><br /><b>Record IDs</b></td>'
-                            .'<td class="subh"><br />Negative value indicates new record to be created</td></tr>'.$sIndexes;
+                        // set up checkboxes for selection of fields to insert / update
+                        if($isProcessed){
+                            $checkbox = '<td align="center"><input type="checkbox" disabled="disabled" /></td>'; //processed
+                        }else{
+                            $rectype = @$imp_session['indexes']["field_".$i];
+                            $isIndex = ($rectype!=null);
+                            $checkbox = '<td align="center">&nbsp;<span style="display:none;"><input type="checkbox" id="cbsa_dt_'
+                            .$i.'" onchange="{showHideSelect('.$i.');}"/></span></td>';
                         }
-                        if($sRemain){
-                            print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="6"><br /><b>Remaining Data</b></td></tr>'.$sRemain;
+
+                        $s = '<tr>'.$checkbox;
+
+                        // count of unique values
+                        $s = $s.'<td align="center">'.$imp_session['uniqcnt'][$i];
+
+                        // column names
+                        $s = $s.'</td><td style="padding-left:15px; class="truncate">'.$imp_session['columns'][$i].'</td>';
+
+                        // mapping
+                        if($isProcessed){ // already selected
+                            $rt_dt = explode(".",$isProcessed);
+                            $recTypeName = $recStruc['names'][$rt_dt[0]]; //['commonFields'][ $idx_rt_name ];
+                            $dt_Name = intval($rt_dt[1])>0?$recStruc['typedefs'][$rt_dt[0]]['dtFields'][$rt_dt[1]][$idx_dt_name]:$rt_dt[1];
+                            $s = $s.'<td class="truncate">'.$recTypeName.' '.$dt_Name.'  ('.$rt_dt[0].'.'.$rt_dt[1].')</td>';
+                        }else{ // to select
+                            $s = $s.'<td style="width:306px;">&nbsp;<span style="display:none;">'
+                            .'<select name="sa_dt_'.$i.'" id="sa_dt_'.$i.'" style="max-width:260px" onchange="{onFtSelect('.$i.');}"'
+                            . ($isIndex?'class="indexes"':'').'></select></span></td>';
                         }
-                        if($sProcessed){
-                            print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="6"><br /><b>Already imported</b></td></tr>'.$sProcessed;
+
+                        // imported value for current example record]
+                        $s = $s.'<td id="impval'.$i.'" style="text-align: left;padding-left: 16px;"> </td></tr>';
+
+                        if($isProcessed){
+                            $sProcessed = $sProcessed.$s;
+                        }else{
+                            if($isIndex){
+                                $sIndexes=$sIndexes.$s;
+                            }else {
+                                $sRemain=$sRemain.$s;
+                            }
                         }
+                    }//for
+                    if($sIndexes){
+                        print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="4"><br /><b>Record IDs</b></td>'
+                        .'<td class="subh"><br />Negative value indicates new record to be created</td></tr>'.$sIndexes;
+                    }
+                    if($sRemain){
+                        print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="6"><br /><b>Remaining Data</b></td></tr>'.$sRemain;
+                    }
+                    if($sProcessed){
+                        print '<tr height="40"; style="valign:bottom"><td class="subh" colspan="6"><br /><b>Already imported</b></td></tr>'.$sProcessed;
+                    }
 
                     ?>
                 </table>
@@ -906,19 +905,19 @@
     </div>
 
     <?php
-        //Warnings that SQL command LOAD DATA generates
-        if(@$imp_session['load_warnings']){
+    //Warnings that SQL command LOAD DATA generates
+    if(@$imp_session['load_warnings']){
         ?>
         <div id="main_load_warnings" style="display:none;">
         <h4>WARNINGS ON LOAD DATA</h4>
         <hr width="100%" />
         <?php
-            renderWarnings( $imp_session );
-            print "</div>";
-        }
+        renderWarnings( $imp_session );
+        print "</div>";
+    }
 
-        if($validationRes){
-            if($cnt_error>0){
+    if($validationRes){
+        if($cnt_error>0){
             ?>
             <div id="main_error" style="display:none;">
             <h4>ROWS WITH FIELD ERRORS</h4>
@@ -929,52 +928,52 @@
             <br />
 
             <?php
-                //<span class="help">&nbsp;(* indicates fields with invalid values)</span>
-                //                <font color="red"><@$validationRes['err_message']</font>
+            //<span class="help">&nbsp;(* indicates fields with invalid values)</span>
+            //                <font color="red"><@$validationRes['err_message']</font>
 
-                renderRecords( 'error', $imp_session );
-                print "</div>";
-            }
+            renderRecords( 'error', $imp_session );
+            print "</div>";
+        }
 
-            if($cnt_insert>0){
+        if($cnt_insert>0){
             ?>
             <div id="main_insert" style="display:none;">
             <h4>RECORDS TO BE CREATED</h4>
             <hr width="100%" />
             <?php
-                renderRecords( 'insert', $imp_session );
-                print "</div>";
-            }
+            renderRecords( 'insert', $imp_session );
+            print "</div>";
+        }
 
-            if($cnt_update>0){
+        if($cnt_update>0){
             ?>
             <div id="main_update" style="display:none;">
             <h4>RECORDS TO BE UPDATED</h4>
             <hr width="100%" />
             <?php
-                renderRecords( 'update', $imp_session );
-                print "</div>";
-            }
+            renderRecords( 'update', $imp_session );
+            print "</div>";
+        }
 
-            if($cnt_disamb>0){
+        if($cnt_disamb>0){
             ?>
 
             <div id="main_disamb" style="display:none;">
             <h4>DISAMBIGUATION</h4>
             <hr width="100%" />
             <?php
-                renderDisambiguation( 'disamb', $imp_session );
-                print "</div>";
-            }
+            renderDisambiguation( 'disamb', $imp_session );
+            print "</div>";
         }
+    }
 
-        print '</form>';
+    print '</form>';
 
-        // PAGE STEP 1 ================================================================================
-    }else{
-        if($imp_session!=null){
-            echo "<p style='color:red'>ERROR: ".$imp_session."</p>";
-        }
+    // PAGE STEP 1 ================================================================================
+}else{
+    if($imp_session!=null){
+        echo "<p style='color:red'>ERROR: ".$imp_session."</p>";
+    }
     ?>
 
     <script type="text/javascript">
@@ -1084,7 +1083,7 @@
         </table>
     </form>
     <?php
-    }
+}
 ?>
 
 <div id="divMatchingPopup" style="display:none;padding:10px;">
@@ -1108,381 +1107,381 @@
 
 <?php
 
-    //
-    // get file from _REQUEST and call import to db if everything is OK
-    //
-    function postmode_file_selection() {
+//
+// get file from _REQUEST and call import to db if everything is OK
+//
+function postmode_file_selection() {
 
-        // there are two ways into the file selection mode;
-        // either the user has just arrived at the import page,
-        // or they've selected a file *and might progress to file-parsing mode*
-        $error = '';
-        if (@$_FILES['import_file']) {
-            if ($_FILES['import_file']['size'] == 0) {
-                $error = 'no file was uploaded';
-            } else {
-                switch ($_FILES['import_file']['error']) {
-                    case UPLOAD_ERR_OK:
-                        break;
-                    case UPLOAD_ERR_INI_SIZE:
-                    case UPLOAD_ERR_FORM_SIZE:
-                        $error = "The uploaded file was too large.  Please consider importing it in several stages.";
-                        break;
-                    case UPLOAD_ERR_PARTIAL:
-                        $error = "The uploaded file was only partially uploaded.";
-                        break;
-                    case UPLOAD_ERR_NO_FILE:
-                        $error = "No file was uploaded.";
-                        break;
-                    case UPLOAD_ERR_NO_TMP_DIR:
-                        $error = "Missing a temporary folder.";
-                        break;
-                    case UPLOAD_ERR_CANT_WRITE:
-                        $error = "Failed to write file to disk";
-                        break;
-                    default:
-                        $error = "Unknown file error";
-                }
-            }
-
-            if (!$error) {    // move on to the next stage!
-                $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name'], $_FILES['import_file']['name'], true);
+    // there are two ways into the file selection mode;
+    // either the user has just arrived at the import page,
+    // or they've selected a file *and might progress to file-parsing mode*
+    $error = '';
+    if (@$_FILES['import_file']) {
+        if ($_FILES['import_file']['size'] == 0) {
+            $error = 'no file was uploaded';
+        } else {
+            switch ($_FILES['import_file']['error']) {
+                case UPLOAD_ERR_OK:
+                    break;
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    $error = "The uploaded file was too large.  Please consider importing it in several stages.";
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $error = "The uploaded file was only partially uploaded.";
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $error = "No file was uploaded.";
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $error = "Missing a temporary folder.";
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    $error = "Failed to write file to disk";
+                    break;
+                default:
+                    $error = "Unknown file error";
             }
         }
 
-        return $error;
+        if (!$error) {    // move on to the next stage!
+            $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name'], $_FILES['import_file']['name'], true);
+        }
+    }
+
+    return $error;
+}
+
+
+//
+// read header (1st line)
+// create temporary table import_datetime
+// load file into table
+// add record to import_log
+//
+function postmode_file_load_to_db($filename, $original, $is_preprocess) {
+
+    global $mysqli;
+
+    //$val_separator = $_REQUEST["val_separator"];
+    $csv_mvsep     = $_REQUEST["csv_mvsep"];
+    $csv_delimiter = $_REQUEST["csv_delimiter"];
+    $csv_linebreak = $_REQUEST["csv_linebreak"];
+    $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
+
+    if($csv_delimiter=="tab") {
+        $csv_delimiter = "\t";
+    }
+
+    if($csv_linebreak=="auto"){
+        ini_set('auto_detect_line_endings', true);
+        $lb = null;
+    }else{
+        $lb = str_replace("\\n", "\n", $csv_linebreak);
+        $lb = str_replace("\\r", "\r", $lb);
+        $lb = str_replace("\\t", "\t", $lb);
+    }
+
+    $handle = @fopen($filename, "r");
+    if (!$handle) {
+        if (! file_exists($filename)) return 'file does not exist';
+        else if (! is_readable($filename)) return 'file is not readable';
+            else return 'file could not be read';
+    }
+
+    //fgetcsv и str_getcsv depends on server locale
+    // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
+    setlocale(LC_ALL, 'en_US.utf8');
+
+    // read header
+    if($csv_linebreak=="auto"){
+        $line = fgets($handle, 1000000);
+    }else{
+        $line = stream_get_line($handle, 1000000, $lb);
+    }
+    fclose($handle);
+    if(!$line){
+        return "Empty header line";
+    }
+
+    //get fields
+    $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+    $len = count($fields);
+
+    if($len>200){
+        return "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.";
+    }
+
+    if($is_preprocess){
+        $temp_file = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
+        if (move_uploaded_file($filename, $temp_file)) {
+            if($len==1){
+                return array("warning"=>"You appear to have only one value per line. This probably indicates that "
+                    ."you have selected the wrong separator type.",
+                    "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
+            }else{
+                return array("warning"=>"Please verify the list of columns",
+                    "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
+            }
+        }else {
+            return "Failed to keep the uploaded file '$temp_file'."; //array("fatal_error"=>"Failed to keep the uploaded file '$temp_file'.");
+        }
+    }
+
+    //array( "filename"=>$temp_name, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals )
+
+    $preproc = preprocess_uploaded_file($filename);
+
+    if(count($preproc['errors'])>0 || count($preproc['err_encoding'])>0){
+        return array("errors"=>$preproc['errors'],
+            "col_count"=>$preproc['col_count'],
+            "fields"=>$preproc['fields'],
+            "err_encoding"=>$preproc['err_encoding']
+        );
+    }
+
+    $filename = $preproc['filename'];
+
+    $import_table = "import".date("YmdHis");
+
+    //create temporary table import_datetime
+    $query = "CREATE TABLE `".$import_table."` (`imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, ";
+    $columns = "";
+    $counts = "";
+    $mapping = array();
+    for ($i = 0; $i < $len; $i++) {
+        $query = $query."`field_".$i."` ".(in_array($i, $preproc['memos'])?" text, ":" varchar(300), " ) ;
+        $columns = $columns."field_".$i.",";
+        $counts = $counts."count(distinct field_".$i."),";
+        //array_push($mapping,0);
+    }
+
+    $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;";
+
+    $columns = substr($columns,0,-1);
+    $counts = $counts." count(*) ";
+
+
+    if (!$mysqli->query($query)) {
+        return "can not create table: " . $mysqli->error;
+    }
+
+    if($csv_enclosure=="'") $csv_enclosure = "\\".$csv_enclosure;
+
+    if(strpos($filename,"\\")>0){
+        $filename = str_replace("\\","\\\\",$filename);
+    }
+
+    //load file into table
+    $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
+    ." CHARACTER SET UTF8"
+    ." FIELDS TERMINATED BY '".$csv_delimiter."' "
+    ." OPTIONALLY ENCLOSED BY '".$csv_enclosure."' "
+    ." LINES TERMINATED BY '\n'"  //.$csv_linebreak."' "   //".$csv_linebreak."
+    //." IGNORE 1 LINES
+    ." (".$columns.")";
+
+
+    if (!$mysqli->query($query)) {
+        return "can not import data: ".$mysqli->error;
+    }
+
+    $warnings = array();
+    if ($info = $mysqli->info) {
+        if ($mysqli->warning_count) {
+            array_push($warnings, $info);
+            $e = $mysqli->get_warnings();
+            do {
+                array_push($warnings, $e->message); //$e->errno.": ".
+            } while ($e->next());
+        }
+        /*if(strpos("$info", "Warnings: 0")===false){
+        $mysqli->query("SHOW WARNINGS");
+        }*/
+    }
+
+    if(!$is_preprocess && file_exists($filename)){
+        unlink($filename);
+    }
+
+    //calculate uniqe values
+    $query = "select ".$counts." from ".$import_table;
+    $res = $mysqli->query($query);
+    if (!$res) {
+        return "can not count unique values: " . $mysqli->error;
+    }
+
+    $uniqcnt = $res->fetch_row();
+    $reccount = array_pop ( $uniqcnt );
+
+    //add record to import_log
+    $session = array("reccount"=>$reccount,
+        "import_table"=>$import_table,
+        "import_name"=>($original."  ".date("Y-m-d H:i:s")),
+        "columns"=>$fields,   //names of columns in file header
+        "memos"=>$preproc['memos'],
+        "multivals"=>$preproc['multivals'],
+        "csv_enclosure"=>$_REQUEST['csv_enclosure'],
+        "csv_mvsep"=>$_REQUEST['csv_mvsep'],
+        "uniqcnt"=>$uniqcnt,   //count of uniq values per column
+        "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype
+        "indexes"=>array() );  //names of columns in importtable that contains record_ID
+
+    $session = saveSession($mysqli, $session);
+    if(count($warnings)>0){
+        $session['load_warnings'] = $warnings;
+    }
+    return $session;
+}
+
+/*
+Read file
+
+Add error to log if wrong field count
+Identify memo fields by presence of \r within text and flag
+Identify repeating value fields and flag - will not be used as key fields
+Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
+Convert dates to standardised format.
+
+Write processed file
+
+return 3 arrays:
+errors
+memos
+multivalues
+*/
+function preprocess_uploaded_file($filename){
+
+    $errors = array();
+    $err_encoding = array();
+    $memos = array();  //multiline fields
+    $multivals = array();
+    $datefields = @$_REQUEST["datefield"];
+    $memofields = @$_REQUEST["memofield"];
+    if(!$datefields) $datefields = array();
+    if(!$memofields) $memofields = array();
+
+    $csv_mvsep     = $_REQUEST["csv_mvsep"];
+    $csv_delimiter = $_REQUEST["csv_delimiter"];
+    $csv_linebreak = $_REQUEST["csv_linebreak"];
+    $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
+    $csv_dateformat = $_REQUEST["csv_dateformat"];
+
+    if($csv_delimiter=="tab") {
+        $csv_delimiter = "\t";
+    }
+
+    if($csv_linebreak=="auto"){
+        ini_set('auto_detect_line_endings', true);
+        $lb = null;
+    }else{
+        $lb = str_replace("\\n", "\n", $csv_linebreak);
+        $lb = str_replace("\\r", "\r", $lb);
+        $lb = str_replace("\\t", "\t", $lb);
+    }
+
+    $handle = @fopen($filename, "r");
+    if (!$handle) {
+        if (! file_exists($filename)) return 'file does not exist';
+        else if (! is_readable($filename)) return 'file is not readable';
+            else return 'file could not be read';
+    }
+
+    $len = 0;
+    $header = null;
+
+    $temp_name = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
+    if (!is_writable($temp_name)) {
+        return "can not save preprocessed file $temp_name";
+    }
+    if (!$handle_wr = fopen($temp_name, 'w')) {
+        return "Cannot open file ($temp_name)";
     }
 
 
-    //
-    // read header (1st line)
-    // create temporary table import_datetime
-    // load file into table
-    // add record to import_log
-    //
-    function postmode_file_load_to_db($filename, $original, $is_preprocess) {
+    $line_no = 0;
+    while (!feof($handle)) {
 
-        global $mysqli;
-
-        //$val_separator = $_REQUEST["val_separator"];
-        $csv_mvsep     = $_REQUEST["csv_mvsep"];
-        $csv_delimiter = $_REQUEST["csv_delimiter"];
-        $csv_linebreak = $_REQUEST["csv_linebreak"];
-        $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
-
-        if($csv_delimiter=="tab") {
-            $csv_delimiter = "\t";
-        }
-
-        if($csv_linebreak=="auto"){
-            ini_set('auto_detect_line_endings', true);
-            $lb = null;
-        }else{
-            $lb = str_replace("\\n", "\n", $csv_linebreak);
-            $lb = str_replace("\\r", "\r", $lb);
-            $lb = str_replace("\\t", "\t", $lb);
-        }
-
-        $handle = @fopen($filename, "r");
-        if (!$handle) {
-            if (! file_exists($filename)) return 'file does not exist';
-            else if (! is_readable($filename)) return 'file is not readable';
-                else return 'file could not be read';
-        }
-
-        //fgetcsv и str_getcsv depends on server locale
-        // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
-        setlocale(LC_ALL, 'en_US.utf8');
-
-        // read header
-        if($csv_linebreak=="auto"){
-            $line = fgets($handle, 1000000);
+        if($csv_linebreak=="auto" || $lb==null){
+            $line = fgets($handle, 1000000);      //read line and auto detect line break
         }else{
             $line = stream_get_line($handle, 1000000, $lb);
         }
-        fclose($handle);
-        if(!$line){
-            return "Empty header line";
+
+        if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
+            array_push($err_encoding, array("no"=>$line_no, "line"=>substr($line,0,2000)));
+            //if(count($err_encoding)>100) break;
         }
 
-        //get fields
         $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
-        $len = count($fields);
 
-        if($len>200){
-            return "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.";
-        }
-
-        if($is_preprocess){
-            $temp_file = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
-            if (move_uploaded_file($filename, $temp_file)) {
-                if($len==1){
-                    return array("warning"=>"You appear to have only one value per line. This probably indicates that "
-                        ."you have selected the wrong separator type.",
-                        "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
-                }else{
-                    return array("warning"=>"Please verify the list of columns",
-                        "filename"=>$temp_file, "original"=>$original, "fields"=>$fields );
-                }
-            }else {
-                return "Failed to keep the uploaded file '$temp_file'."; //array("fatal_error"=>"Failed to keep the uploaded file '$temp_file'.");
-            }
-        }
-
-        //array( "filename"=>$temp_name, "errors"=>$errors, "memos"=>$memos, "multivals"=>$multivals )
-
-        $preproc = preprocess_uploaded_file($filename);
-
-        if(count($preproc['errors'])>0 || count($preproc['err_encoding'])>0){
-            return array("errors"=>$preproc['errors'],
-                "col_count"=>$preproc['col_count'],
-                "fields"=>$preproc['fields'],
-                "err_encoding"=>$preproc['err_encoding']
-            );
-        }
-
-        $filename = $preproc['filename'];
-
-        $import_table = "import".date("YmdHis");
-
-        //create temporary table import_datetime
-        $query = "CREATE TABLE `".$import_table."` (`imp_ID` int(10) unsigned NOT NULL AUTO_INCREMENT, ";
-        $columns = "";
-        $counts = "";
-        $mapping = array();
-        for ($i = 0; $i < $len; $i++) {
-            $query = $query."`field_".$i."` ".(in_array($i, $preproc['memos'])?" text, ":" varchar(300), " ) ;
-            $columns = $columns."field_".$i.",";
-            $counts = $counts."count(distinct field_".$i."),";
-            //array_push($mapping,0);
-        }
-
-        $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;";
-
-        $columns = substr($columns,0,-1);
-        $counts = $counts." count(*) ";
-
-
-        if (!$mysqli->query($query)) {
-            return "can not create table: " . $mysqli->error;
-        }
-
-        if($csv_enclosure=="'") $csv_enclosure = "\\".$csv_enclosure;
-
-        if(strpos($filename,"\\")>0){
-            $filename = str_replace("\\","\\\\",$filename);
-        }
-
-        //load file into table
-        $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
-        ." CHARACTER SET UTF8"
-        ." FIELDS TERMINATED BY '".$csv_delimiter."' "
-        ." OPTIONALLY ENCLOSED BY '".$csv_enclosure."' "
-        ." LINES TERMINATED BY '\n'"  //.$csv_linebreak."' "   //".$csv_linebreak."
-        //." IGNORE 1 LINES
-        ." (".$columns.")";
-
-
-        if (!$mysqli->query($query)) {
-            return "can not import data: ".$mysqli->error;
-        }
-
-        $warnings = array();
-        if ($info = $mysqli->info) {
-            if ($mysqli->warning_count) {
-                array_push($warnings, $info);
-                $e = $mysqli->get_warnings();
-                do {
-                    array_push($warnings, $e->message); //$e->errno.": ".
-                } while ($e->next());
-            }
-            /*if(strpos("$info", "Warnings: 0")===false){
-            $mysqli->query("SHOW WARNINGS");
-            }*/
-        }
-
-        if(!$is_preprocess && file_exists($filename)){
-            unlink($filename);
-        }
-
-        //calculate uniqe values
-        $query = "select ".$counts." from ".$import_table;
-        $res = $mysqli->query($query);
-        if (!$res) {
-            return "can not count unique values: " . $mysqli->error;
-        }
-
-        $uniqcnt = $res->fetch_row();
-        $reccount = array_pop ( $uniqcnt );
-
-        //add record to import_log
-        $session = array("reccount"=>$reccount,
-            "import_table"=>$import_table,
-            "import_name"=>($original."  ".date("Y-m-d H:i:s")),
-            "columns"=>$fields,   //names of columns in file header
-            "memos"=>$preproc['memos'],
-            "multivals"=>$preproc['multivals'],
-            "csv_enclosure"=>$_REQUEST['csv_enclosure'],
-            "csv_mvsep"=>$_REQUEST['csv_mvsep'],
-            "uniqcnt"=>$uniqcnt,   //count of uniq values per column
-            "mapping"=>$mapping,   //mapping of value fields to rectype.detailtype
-            "indexes"=>array() );  //names of columns in importtable that contains record_ID
-
-        $session = saveSession($mysqli, $session);
-        if(count($warnings)>0){
-            $session['load_warnings'] = $warnings;
-        }
-        return $session;
-    }
-
-    /*
-    Read file
-
-    Add error to log if wrong field count
-    Identify memo fields by presence of \r within text and flag
-    Identify repeating value fields and flag - will not be used as key fields
-    Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
-    Convert dates to standardised format.
-
-    Write processed file
-
-    return 3 arrays:
-    errors
-    memos
-    multivalues
-    */
-    function preprocess_uploaded_file($filename){
-
-        $errors = array();
-        $err_encoding = array();
-        $memos = array();  //multiline fields
-        $multivals = array();
-        $datefields = @$_REQUEST["datefield"];
-        $memofields = @$_REQUEST["memofield"];
-        if(!$datefields) $datefields = array();
-        if(!$memofields) $memofields = array();
-
-        $csv_mvsep     = $_REQUEST["csv_mvsep"];
-        $csv_delimiter = $_REQUEST["csv_delimiter"];
-        $csv_linebreak = $_REQUEST["csv_linebreak"];
-        $csv_enclosure = ($_REQUEST["csv_enclosure"]==1)?"'":'"';
-        $csv_dateformat = $_REQUEST["csv_dateformat"];
-
-        if($csv_delimiter=="tab") {
-            $csv_delimiter = "\t";
-        }
-
-        if($csv_linebreak=="auto"){
-            ini_set('auto_detect_line_endings', true);
-            $lb = null;
+        if($len==0){
+            $header = $fields;
+            $len = count($fields);
         }else{
-            $lb = str_replace("\\n", "\n", $csv_linebreak);
-            $lb = str_replace("\\r", "\r", $lb);
-            $lb = str_replace("\\t", "\t", $lb);
-        }
+            $line_no++;
 
-        $handle = @fopen($filename, "r");
-        if (!$handle) {
-            if (! file_exists($filename)) return 'file does not exist';
-            else if (! is_readable($filename)) return 'file is not readable';
-                else return 'file could not be read';
-        }
+            if(trim($line)=="") continue;
 
-        $len = 0;
-        $header = null;
-
-        $temp_name = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
-        if (!is_writable($temp_name)) {
-            return "can not save preprocessed file $temp_name";
-        }
-        if (!$handle_wr = fopen($temp_name, 'w')) {
-            return "Cannot open file ($temp_name)";
-        }
-
-
-        $line_no = 0;
-        while (!feof($handle)) {
-
-            if($csv_linebreak=="auto" || $lb==null){
-                $line = fgets($handle, 1000000);      //read line and auto detect line break
+            if($len!=count($fields)){
+                // Add error to log if wrong field count
+                array_push($errors, array("cnt"=>count($fields), "no"=>$line_no, "line"=>substr($line,0,2000)));
+                if(count($errors)>100) break;
             }else{
-                $line = stream_get_line($handle, 1000000, $lb);
-            }
+                $k=0;
+                $newfields = array();
+                foreach($fields as $field){
 
-            if(count($err_encoding)<100 && !mb_detect_encoding($line, 'UTF-8', true)){
-                array_push($err_encoding, array("no"=>$line_no, "line"=>substr($line,0,2000)));
-                //if(count($err_encoding)>100) break;
-            }
+                    //Identify repeating value fields and flag - will not be used as key fields
+                    if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
+                        array_push($multivals, $k);
+                    }
+                    if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
+                        array_push($memos, $k);
+                    }
 
-            $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+                    //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
+                    if(in_array($k, $memos)){
+                        $field = trim($field);
+                    }else{
+                        $field = trim(preg_replace('/([\s])\1+/', ' ', $field));
+                    }
 
-            if($len==0){
-                $header = $fields;
-                $len = count($fields);
-            }else{
-                $line_no++;
+                    //Convert dates to standardised format.
+                    if(in_array($k, $datefields) && $field!=""){
+                        if(is_numeric($field) && abs($field)<99999){ //year????
 
-                if(trim($line)=="") continue;
-
-                if($len!=count($fields)){
-                    // Add error to log if wrong field count
-                    array_push($errors, array("cnt"=>count($fields), "no"=>$line_no, "line"=>substr($line,0,2000)));
-                    if(count($errors)>100) break;
-                }else{
-                    $k=0;
-                    $newfields = array();
-                    foreach($fields as $field){
-
-                        //Identify repeating value fields and flag - will not be used as key fields
-                        if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
-                            array_push($multivals, $k);
-                        }
-                        if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
-                            array_push($memos, $k);
-                        }
-
-                        //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
-                        if(in_array($k, $memos)){
-                            $field = trim($field);
                         }else{
-                            $field = trim(preg_replace('/([\s])\1+/', ' ', $field));
-                        }
-
-                        //Convert dates to standardised format.
-                        if(in_array($k, $datefields) && $field!=""){
-                            if(is_numeric($field) && abs($field)<99999){ //year????
-
-                            }else{
-                                if($csv_dateformat==1){
-                                    $field = str_replace("/","-",$field);
-                                }
-                                $field = strtotime($field);
-                                $field = date('Y-m-d H:i:s', $field);
+                            if($csv_dateformat==1){
+                                $field = str_replace("/","-",$field);
                             }
+                            $field = strtotime($field);
+                            $field = date('Y-m-d H:i:s', $field);
                         }
-
-                        //Doubling up as an escape for quote marks
-                        $field = addslashes($field);
-                        $field = $csv_enclosure.$field.$csv_enclosure;
-                        array_push($newfields, $field);
-                        $k++;
                     }
 
-                    $line = implode($csv_delimiter, $newfields)."\n";
+                    //Doubling up as an escape for quote marks
+                    $field = addslashes($field);
+                    $field = $csv_enclosure.$field.$csv_enclosure;
+                    array_push($newfields, $field);
+                    $k++;
+                }
 
-                    if (fwrite($handle_wr, $line) === FALSE) {
-                        return "Cannot write to file ($temp_name)";
-                    }
+                $line = implode($csv_delimiter, $newfields)."\n";
+
+                if (fwrite($handle_wr, $line) === FALSE) {
+                    return "Cannot write to file ($temp_name)";
                 }
             }
-
         }
-        fclose($handle);
-        fclose($handle_wr);
 
-        unlink($filename);
-
-        return array( "filename"=>$temp_name, "col_count"=>$len, "errors"=>$errors, "err_encoding"=>$err_encoding, "memos"=>$memos, "multivals"=>$multivals, "fields"=>$header );
     }
+    fclose($handle);
+    fclose($handle_wr);
+
+    unlink($filename);
+
+    return array( "filename"=>$temp_name, "col_count"=>$len, "errors"=>$errors, "err_encoding"=>$err_encoding, "memos"=>$memos, "multivals"=>$multivals, "fields"=>$header );
+}
 
 ?>

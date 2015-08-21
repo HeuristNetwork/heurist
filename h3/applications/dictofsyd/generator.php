@@ -42,11 +42,11 @@
     require_once(dirname(__FILE__)."/php/utilsMakes.php");
 
     $error_log = array();
-    
+
     if(@$_REQUEST['step']=="1" || @$_REQUEST['step']=="2"){ //start generation
 
         if($_REQUEST['pwd']=="DoSRocks2013!"){ // this is a very simple challenge password - should be replaced
-        
+
             mysql_connection_select();
             $is_generation = true;
             $urlbase = "../"; // why reset this here, it is set in incvars.php ??
@@ -59,7 +59,7 @@
             $ft = $_REQUEST['ft'];  //recoord type
 
             if(@$_REQUEST['step']=="1"){
-                
+
                 if(@$_REQUEST['rebuildcache']=="1"){
                      createAndFillFactoidsCache();
                 }
@@ -70,7 +70,7 @@
                     $where = ", ".$ft." as enttype, d2.dtl_Value as rname from Records r, recDetails d ".
                     " left join recDetails d2 on d.dtl_RecID=d2.dtl_RecID and d2.dtl_DetailTypeID=".DT_NAME.
                     " where r.rec_RecTypeID=".RT_ENTITY." and r.rec_ID=d.dtl_RecID and d.dtl_DetailTypeID=".DT_ENTITY_TYPE." and d.dtl_Value=".$ft;
-               
+
                 }else if($ft==RT_ROLE){ // $ft = record type for Role = 27
                     $where = ", 0 as enttype, d2.dtl_Value as rname from Records r, recDetails d ".
                     " left join recDetails d2 on d.dtl_RecID=d2.dtl_RecID and d2.dtl_DetailTypeID=".DT_NAME.
@@ -108,9 +108,9 @@
                 $media_is_recreate = (@$_REQUEST['filecreate']=='1');
                 $media_thumb = $path.$media_filepath."thumbnail/";
                 $media_full = $path.$media_filepath."full/";
-                
+
                 if(@$_REQUEST['deployurl']){
-                    $deployurl = @$_REQUEST['deployurl']; 
+                    $deployurl = @$_REQUEST['deployurl'];
                 }
 
 
@@ -129,7 +129,7 @@
                 $query = 'select r.rec_ID as rec_id, r.rec_RecTypeID as rtype '.$where;
 
                 echo "Generating Dictionary of Sydney website ...<br>";
-                
+
                 $res2 = mysql_query($query);
                 $cntp = 1;
 
@@ -174,12 +174,12 @@
                         }else{
                             //report error
                             echo "".($cntp)." <div style='color:red'>$rname - ERROR!!!</div>";
-                            add_error_log("ERROR>>>> Can not create page for $ranme. Record #".$rec_id);
+                            add_error_log("ERROR>>>> Cannot create page for $ranme. Record #".$rec_id);
                             continue;
                         }
                     } catch (Exception $e) {
                         echo "".($cntp)." <div style='color:red'>$rname - ERROR:". $e->getMessage()."</div>";
-                        add_error_log("ERROR>>>> Can not create page for $ranme. Record #".$rec_id."  Sys.message: ".$e->getMessage());
+                        add_error_log("ERROR>>>> Cannot create page for $ranme. Record #".$rec_id."  Sys.message: ".$e->getMessage());
                         continue;
                     }
 
@@ -191,7 +191,7 @@
                         saveAsFile($out, $path_preview."/".$rec_id);
                     }else{
                         echo "".($cntp)." <div style='color:blue'>$rname - preview generation failed</div>";
-                        add_error_log("ERROR>>>> Can not create Preview for $ranme. Record #".$rec_id);
+                        add_error_log("ERROR>>>> Cannot create Preview for $ranme. Record #".$rec_id);
                     }
 
                     if($row2['rtype']==RT_ENTRY){
@@ -203,7 +203,7 @@
                             saveAsFile($out, $path_citation."/".$rec_id);
                         }else{
                             echo "".($cntp)." <div style='color:blue'>$rname - citation generation failed</div>";
-                            add_error_log("ERROR>>>> Can not create citation for $ranme. Record #".$rec_id);
+                            add_error_log("ERROR>>>> Cannot create citation for $ranme. Record #".$rec_id);
                         }
 
                     }else if($row2['rtype']==RT_MEDIA){
@@ -216,14 +216,14 @@
                             saveAsFile($out, $path_popup."/".$rec_id);
                         }else{
                             echo "".($cntp)." <div style='color:blue'>$rname - popup generation failed</div>";
-                            add_error_log("ERROR>>>> Can not create media popup for $ranme. Record #".$rec_id);
+                            add_error_log("ERROR>>>> Cannot create media popup for $ranme. Record #".$rec_id);
                         }
 
                         //copy full media file and create thumbnail (for images)
                         if($media_is_recreate){
                             if(!publicMedia($record, $path.$media_filepath)){
                                 echo "".($cntp)." <div style='color:blue'>$rname - copy media file failed</div>";
-                                add_error_log("ERROR>>>> Can not copy media file for $ranme. Record #".$rec_id);
+                                add_error_log("ERROR>>>> Cannot copy media file for $ranme. Record #".$rec_id);
                             }
                         }
                     }
@@ -247,13 +247,13 @@
                 }
 
                 echo "<br /><br />".($cntp-1)." pages have been generated <br />";
-                
+
                 echo "errors: ".count($error_log)."<br>";
                 if(count($error_log)>0){
                     echo "See error log file for details<br />";
                     file_put_contents($path.'error_log.txt', implode("\n", $error_log) );
                 }
-                
+
                 if($cntp>1){
                     $mtime0 = explode(' ', microtime());
                     $tottime = ($mtime0[0] + $mtime0[1] - $stime0);
@@ -261,13 +261,13 @@
                     //echo "Max time ".printf(' %.3f sec.', $maxtime[0])."   ".$maxtime[1]."<br />";
                     echo "Average ".sprintf(' %.3f sec.', $tottime/($cntp-1))." sec<br />";
                 }
-                
-                
+
+
 
             /*} // end of step 1 = find lsit of entities
-            
-            else 
-            
+
+            else
+
             if(@$_REQUEST['step']=="2"){ //start generation browse pages  ===============================
             */
 
@@ -317,7 +317,7 @@
                         "27"=>"role",
                         "29"=>"term",
                         "24"=>"contributor");
-                    
+
                     $ft = $types2[$ft];
                     $types = array($ft);
                 }
@@ -337,9 +337,9 @@
                     }
                     ob_flush();flush();
                 }//foreach
-                
+
                 print '<script>$("a").removeAttr("disabled");</script>';
-            }   
+            }
 
             echo "<a href='./generator.php'>back to form</a>";
         }else{
@@ -376,7 +376,7 @@ input[readonly="readonly"]{
 ?>
             <h1>Dictionary of Sydney web site generator (H3)</h1>
             <h4>Artem Osmakov Feb 2013</h4>
-                        
+
             <b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="<?=$urlbase?>browse.php" target=_blank>Go to live preview</a></b> <p/>
 
             <form method="post">
@@ -413,10 +413,10 @@ input[readonly="readonly"]{
                     <tr class="shade"><td>Folder on server</td><td><input readonly="readonly" type="text" value="/var/www/html/HEURIST/HEURIST_FILESTORE/dosh3-deploy/" name="path" size="100"></td></tr>
                     <tr class="shade"><td>Subfolder for media</td><td><input readonly="readonly" type="text" value="deployed_files/" name="filepath" size="80"></td></tr> <!-- <label class="hints">&nbsp;leave empty to use getMedia.php</label> -->
                     <tr><td>Regenerate media files</td><td><input type="checkbox" value="1" name="filecreate"><label class="hints">&nbsp;check this box if new media files have been added since last generation (doubles processing time)</label></td></tr>
-                    
+
                     <tr class="shade"><td>Password</td><td><input type="password" value="" name="pwd"></td></tr>
                     <tr class="shade"><td>Rebuild Annotation/Factoid cache</td><td><input type="checkbox" checked="checked" value="1" name="rebuildcache"></td></tr>
-                    
+
                     <!-- tr><td>Test limit</td><td><input type="text" value="" name="limit" size="10"> leave empty to generate all</td></tr -->
                     <tr><td colspan="2"><button type="submit">Start</button></td></tr>
                 </table>
@@ -428,9 +428,9 @@ input[readonly="readonly"]{
             </form>
             <hr />
 
-            
+
             <!--
-            
+
             <h3>Browse pages and scripts</h3>
             <form method="post">
                 <input name="step" value="2" type="hidden" />
@@ -459,7 +459,7 @@ input[readonly="readonly"]{
                     <tr><td colspan="2"><button type="submit">Start</button></td></tr>
                 </table>
             </form>
-            
+
             -->
 
             <?php
@@ -472,7 +472,7 @@ input[readonly="readonly"]{
     * original H3 database does not contain these tables. They are required to improve performance
     */
     function createAndFillFactoidsCache(){
-        
+
             $cmdline="mysql -u".READONLY_DBUSERNAME." -p".READONLY_DBUSERPSWD." -D hdb_DoS3 < buildFactoidsAnnotationCache.sql";
             $output2 = exec($cmdline . ' 2>&1', $output, $res2);
             if ($res2 != 0 ) {
@@ -483,11 +483,11 @@ input[readonly="readonly"]{
             }else{
                 print "<p>Annotation/Factoids cache tables have been regenerated.</p>";
             }
-        
-        
+
+
         /*
         Do this before generation becuase it improves performance
-        
+
         use hdb_DoS3;
         DROP TABLE IF EXISTS `recFacctoidsCache`;
         CREATE TABLE `recFacctoidsCache` (
