@@ -740,7 +740,7 @@ $.widget( "heurist.search_faceted2", {
                     var field = this.options.params.facets[facet_index];
                     
                     var j,i;
-                    var $input_div = $("#fv_"+field['var']);
+                    var $input_div = $(this.element).find("#fv_"+field['var']);
                     //$facet_values.css('background','none');
 
                     //create favets container if it does not exists

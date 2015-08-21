@@ -152,7 +152,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
                         },
             buttons: [
-                {text:top.HR('Back'),
+                {text:top.HR('Back'), id:'btnBack',
                     click: function() {
                         that.navigateWizard(-1);
                 }},
@@ -301,7 +301,11 @@ $.widget( "heurist.search_faceted_wiz", {
                         //top.HEURIST4.util.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
                         //setTimeout(function(){svs_name.focus();},2200);
                         return;
+                }else{
+                    message.empty();
+                    svs_name.removeClass( "ui-state-error" );
                 }
+                
                 
                 if(this.isversion==2){
                        this.step = 1; 
@@ -396,6 +400,14 @@ $.widget( "heurist.search_faceted_wiz", {
             $("#btnNext").button('option', 'label', top.HR('Save'));
 
         }
+        
+        if(newstep==0){
+            var that = this;
+            setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
+            $("#btnBack").hide();
+        }else{
+            $("#btnBack").show();
+        }
             
         this.step = newstep;
     }
@@ -408,12 +420,14 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var $dlg = this.step0;
         if($dlg){
-            $dlg.find('.messages').empty();
-
+            
             var svs_id = $dlg.find('#svs_ID');
             var svs_name = $dlg.find('#svs_Name');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
             var opt_rectypes = $dlg.find("#opt_rectypes").get(0);
+
+            $dlg.find('.messages').empty();
+            svs_name.removeClass( "ui-state-error" );
             
             if($(opt_rectypes).is(':empty')){
                 top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
@@ -715,22 +729,25 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                         
                         if(facets && facets.length>0){
-                        var tree = treediv.fancytree("getTree");
-                        tree.visit(function(node){
-                                        
-                                    if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
-                                        //find it among facets  
-                                        for(var i=0; i<facets.length; i++){
-                                            if(facets[i].code && facets[i].code==node.data.code){
-                                                node.setSelected(true);
-                                                break;        
-                                            }
-                                        }                        
-                                    }
-                            });    
-                        }        
+                            var tree = treediv.fancytree("getTree");
+                            tree.visit(function(node){
+                                            
+                                        if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
+                                            //find it among facets  
+                                            for(var i=0; i<facets.length; i++){
+                                                if(facets[i].code && facets[i].code==node.data.code){
+                                                    node.setSelected(true);
+                                                    break;        
+                                                }
+                                            }                        
+                                        }
+                                });    
+                        }  
                         
-                        
+                        var cb = treediv.find("span.fancytree-checkbox");
+                        if(cb.length>0){
+                            $(cb[0]).removeClass("fancytree-checkbox");
+                        }
                         
                         that.current_tree_rectype_ids = rectypeIds;
 

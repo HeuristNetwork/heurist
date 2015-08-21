@@ -683,6 +683,21 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
    min-width: 12em !important;
 }
 
+.fancytree-has-children span.fancytree-checkbox
+{
+    background-position: 0px -48px;
+}
+.fancytree-has-children.fancytree-partsel span.fancytree-checkbox
+{
+    background-position: -32px -48px;
+}
+.fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
+{
+    background-position: -32px -48px;
+}
+
+
+
 .heurist-helper2{ /*display and visibility*/
     font-size: 0.8em;
 }
