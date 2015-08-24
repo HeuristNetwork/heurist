@@ -69,12 +69,15 @@ search: [t:10 f:1]
 ]
 
 
-
 NOTE - to make search for facet value faster we may try to omit current search in query and search for entire database
             
 */
 
+
+
 $.widget( "heurist.search_faceted2", {
+
+    _MIN_DROPDOWN_CONTENT: 50, //min number in dropdown selector, otherwise facet values are displayed in explicit list
 
     // default options
     options: {
@@ -97,12 +100,14 @@ $.widget( "heurist.search_faceted2", {
 
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);   
+
+        this.div_header = $( "<div>" ).appendTo( this.element );
         
         if(!this.options.ispreview){
-            this.div_title = $("<div style='text-align:center;height:1.8em'></div").appendTo( this.element );
+            this.div_title = $("<div style='text-align:left;padding-top:1.4em;padding-left:1em;display:inline-block;'></div").appendTo( this.div_header );
         }
 
-        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","height":"2.4em","text-align":"center"}).appendTo( this.element );
+        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"1.8em","padding-right":"0.6em"}).appendTo( this.div_header );
 
         this.btn_submit = $( "<button>", { text: top.HR("Submit") })
         .appendTo( this.div_toolbar )
@@ -239,9 +244,10 @@ $.widget( "heurist.search_faceted2", {
                var code = field['code'];
                code = code.split(':');
                
+               //create query to search facet values
                function __crt( idx ){
                    var res = null;
-                   if(idx>0){  //this relation or link
+                   if(idx>0){  //this is relation or link
                        
                         res = [];
                        
@@ -274,7 +280,9 @@ $.widget( "heurist.search_faceted2", {
                    return res;
                }
                
-                function __checkEntry(qarr, key, val){
+               
+               
+               function __checkEntry(qarr, key, val){
                     var len0 = qarr.length, notfound = true, isarray;
                     
                     for (var i=0;i<len0;i++){
@@ -297,7 +305,7 @@ $.widget( "heurist.search_faceted2", {
                     }else{
                          return qarr;
                     }
-                }            
+               }            
                
                /*if(code.length-2 == 0){
                    field['facet'] = {ids:'$IDS'};
@@ -333,7 +341,9 @@ $.widget( "heurist.search_faceted2", {
 
                         var key, val;                         
                         if(slink!=null){
-                            key  = slink+dtid.substr(2);
+
+                            var rtid_linked = code[j+2];
+                            key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
                             val = [];
                         }else{
                             key = "f:"+dtid
@@ -399,6 +409,15 @@ $.widget( "heurist.search_faceted2", {
        
            //content_id+"_"+
            
+          var codes = field['code'].split(':');
+          var j = 0;
+          var harchy = [];
+          while (j<codes.length){
+               harchy.push(top.HEURIST4.rectypes.names[codes[j]]);
+               j = j + 2;
+          }
+          
+          harchy = "<span>"+ harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
            
            var ed_options = {
                         varid: field['var'],  //content_id+"_"+
@@ -408,7 +427,7 @@ $.widget( "heurist.search_faceted2", {
                         rectypes: top.HEURIST4.rectypes,
                         values: '',
                         readonly: false,
-                        title: field['title'],
+                        title:   harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
                         showclear_button: false,
                         detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                 };
@@ -430,7 +449,7 @@ $.widget( "heurist.search_faceted2", {
                 
                 if(!top.HEURIST4.util.isnull(field['var']) && field['code'] && (that._isAllFacets || field['isfacet']) ){
                     inpt.find('.input-div').hide();
-                    inpt.find('.header').css({'background-color': 'lightgray', 'font-weight': 'bold', 'padding': '5px', 'width': '100%'});
+                    inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
                     //inpt.find('.editint-inout-repeat-button').hide();
                 }
 
@@ -795,23 +814,45 @@ $.widget( "heurist.search_faceted2", {
                         
                         //{id:null, text:top.HR('all'), children:termtree}
                         //draw terms and all its parents    
-                        function __drawTerm(term, level, $container){
+                        function __drawTerm(term, level, $container, as_list){
+                            
+                                //draw itslef - draw children
+                                if(term.value){
+                                    
+                                        if(as_list){                                    
+                                            f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count} );
+                                            $("<div>").css({"display":"block","padding":"0 "+(level*5)+"px"})
+                                                    .append(f_link)
+                                                    .appendTo($container_new);
+                                        }else{
+                                            that._createOption( facet_index, level, {text:term.text, value:term.value, count:term.count} ).appendTo($container);
+                                        }
+                                }
+                        }//__drawTerm
+                        
+                        //
+                        //calc number of terms with values
+                        //
+                        function __calcTerm(term, level){
+                            
+                            var res_count = 0;
                             
                             if(top.HEURIST4.util.isArrayNotEmpty(term.children)){ //is root or has children
 
                                 var k, tlist = [], $span = null;
                                 for (k=0; k<term.children.length; k++){
-                                    var res = __drawTerm(term.children[k], level+1, $container_new);
-                                    if(res!=null){
-                                        tlist.push(res);
-                                    }
+                                    var cnt = __calcTerm(term.children[k], level+1);
+                                    res_count = res_count + cnt;
                                 }
                                 
                                 //sometimes value my equal to header
                                 var headerData = __checkTerm(term);
-                                if(tlist.length>0 || headerData!=null){
-                                    var $container_new = $("<div>").css({"display":"block","padding-left":"5px"});
-                                    //add header
+                                if(headerData!=null){
+                                        term.value = headerData.value;
+                                        term.count = headerData.count;
+                                        res_count++;
+                                }else if(res_count>0){
+                                    
                                     var term_value = '';
                                     if(term.termssearch){
                                         if(term.termssearch.indexOf(term.id)<0){
@@ -821,82 +862,45 @@ $.widget( "heurist.search_faceted2", {
                                     }else{
                                         term_value = term.id;
                                     }
-                                    var f_link;
                                     
-                                    if(!top.HEURIST4.util.isempty(term_value) || !top.HEURIST4.util.isnull(field.selectedvalue)){
+                                    if(!top.HEURIST4.util.isempty(term_value) || !top.HEURIST4.util.isnull(field.selectedvalue)){                               
                                     
-                                        f_link = that._createFacetLink( facet_index, headerData!=null?headerData:{text:term.text, value:term_value, count:0} );
-                                        $("<div>").css({"display":"block"})
-                                                    .append(f_link)
-                                                    //.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}))
-                                                    .appendTo($container_new);
-                                                    
-                                    }
-                                
-                                    //first add branches
-                                    k = 0;
-                                    while(k<tlist.length){
-                                        if(!$.isPlainObject(tlist[k])){
-                                             $(tlist[k]).appendTo($container_new);
-                                             tlist.splice(k,1);
-                                        }else{
-                                             k++;
-                                        }
-                                    }
-                                    //then leaves
-                                    if(tlist.length<11){
-                                        for (k=0; k<tlist.length; k++){
-                                            f_link = that._createFacetLink(facet_index, tlist[k] );
-                                            $("<div>").css({"display":"block","padding":"0 5px"}).append(f_link).appendTo($container_new);
-                                        }
-                                    }else{
-                                        var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
-                                        
-                                        that._createOption( facet_index, {text:'...', value:'', count:0} ).appendTo($sel);
-                                        
-                                        //create dropdown selection
-                                        for (k=0; k<tlist.length; k++){
-                                            that._createOption( facet_index, tlist[k] ).appendTo($sel);
-                                        }                                                                  //"font-size":"0.9em",
-                                        $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($container_new) );
-                                        
-                                        $sel.change(function(event){ that._onTermSelect(event); });
-                                    }
-
+                                        term.value = term_value;
+                                        term.count = 0;
+                                        res_count++;
                                     
-                                   $container_new.appendTo($container);
-                                   return $container_new;
-                                    
-                                }else{
-                                    return null;
+                                    } 
                                 }
                                 
-                                /*
-                                if($span==null && res!=null) $span = res;
-                                if($span!=null){
-                                   //insert header before this span and return new one to insert header above
-                                   if(term.id!=null || field.selectedvalue){
-                                       var f_link = that._createFacetLink( facet_index, {text:term.text, value:term.id, count:0} );
-                                       var $res = $("<div>").css({"display":"block"}).append(f_link);
-                                       $res.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
-                                       $res.insertBefore($span);
-                                   }
-
-                                   //add new container
-                                   $container_new.appendTo($container);
-                                   return $container_new;
-                                }else{
-                                   $container_new = null;
-                                   return null; //no entries in resultset
-                                }*/
-                                
-                            }else{
-                                //leaves
-                                return __checkTerm(term);
+                            }else {
+                                var termData =__checkTerm(term);
+                                if(termData!=null){
+                                    //leave
+                                    term.value = termData.value;
+                                    term.count = termData.count;
+                                    res_count = 1; 
+                                }
                             }
-                        }//__drawTerm
+                            
+                            return res_count;
+                        }//__calcTerms
                         
-                        __drawTerm(term, 0, $facet_values);
+                        
+                        //calculate the total number of terms with value
+                        var tot_cnt = __calcTerm(term, 0, null);
+                        var as_list = (tot_cnt < that._MIN_DROPDOWN_CONTENT);
+                        
+                        if(as_list){
+                                __drawTerm(term, 0, $facet_values, true);
+                        }else{
+                                var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
+                                $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
+                                $sel.change(function(event){ that._onTermSelect(event); });
+                                __drawTerm(term, 0, $sel, false);
+                        }
+                        
+                        
+                        //draw
                             
                         
                        /*sort by term label
@@ -1034,16 +1038,16 @@ $.widget( "heurist.search_faceted2", {
                 
     }            
 
-    ,_createOption : function(facet_index, cterm){
+    ,_createOption : function(facet_index, indent, cterm){
         
         //var step = cterm.step;
         var hist = this.options.params.facets[facet_index].history;
         if(!hist) hist = [];
         var step = hist.length+1;
         
-        var lbl = cterm.text;
+        var lbl = (new Array( indent + 1 ).join( " . " )) + cterm.text;
         if(cterm.count>0){
-            lbl = lbl + " ("+cterm.count+")";
+            lbl =  lbl + " ("+cterm.count+")";
         } 
 
         var f_link = $("<option>",{facet_index:facet_index, facet_value:cterm.value, facet_label:lbl, step:step}).text(lbl).addClass("facet_link")

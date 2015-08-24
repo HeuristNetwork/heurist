@@ -411,8 +411,9 @@ class HPredicate {
         
          $key = explode(":", $key);
          $this->pred_type  = $key[0];
-         if(count($key)>1){
-            $this->field_id = $key[1];
+         $ll = count($key);
+         if($ll>1){
+            $this->field_id = $key[$ll-1];
          }
          
          if( in_array($this->pred_type, $this->allowed) ){
