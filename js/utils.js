@@ -376,7 +376,6 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                         }else{
                             optgroup.appendChild(new_optgroup);
                         }
-
                     }
 
                 }else{

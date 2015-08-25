@@ -133,10 +133,13 @@ $.widget( "heurist.search_faceted_wiz", {
         var that = this;
 
         this.element.css({overflow: 'none !important'}).addClass('ui-heurist-bg-light');
-
+        
+        var ht = $(window).height();
+        if(ht>700) ht = 700;
+        
         this.element.dialog({
             autoOpen: false,
-            height: 700,
+            height: 300,
             width: 500,
             modal: true,
             title: top.HR("Define Faceted Search"),
@@ -192,10 +195,20 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step2 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
         .appendTo(this.element);
-        $("<div>").html(top.HR("Select fields that act as facet")).appendTo(this.step2);
+        
+        var header = $("<div>").appendTo(this.step2);
+        
+        header.html("<label>"+top.HR("Select fields that act as facet")+
+            "</label><span style='float:right;height:1em'><input type='checkbox' id='fsw_showreverse' /><label for='fsw_showreverse'>"+
+            top.HR("Show linked-from record types (reverse pointers)")+"</label></span>");
+        
+        //$("<label>").text(top.HR("Select fields that act as facet")).appendTo(header);
+        //$("<checkbox>").text(top.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
+        
         $("<div>",{id:'field_treeview'}).appendTo(this.step2);
         this.step_panels.push(this.step2);
 
+        
         //ranges
         this.step3 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
@@ -382,7 +395,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             this._showStep(newstep);
             
-             if(false && newstep==3)               //skip step
+             if(newstep==3)               //skip step - define ranges
                 this.navigateWizard(1);
 
         }
@@ -406,6 +419,10 @@ $.widget( "heurist.search_faceted_wiz", {
             setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
             $("#btnBack").hide();
         }else{
+            var ht = $(window).height();
+            if(ht>700) ht = 700;
+            this.element.dialog( "option", "height",  ht );
+            
             $("#btnBack").show();
         }
             
@@ -663,6 +680,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                         //setTimeout(function(){
                         treediv.fancytree({
+                            //extensions: ["filter"],
                             //            extensions: ["select"],
                             checkbox: true,
                             selectMode: 3,  // hierarchical multi-selection    
@@ -728,8 +746,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                         
                         
+                        var tree = treediv.fancytree("getTree");
+                        
                         if(facets && facets.length>0){
-                            var tree = treediv.fancytree("getTree");
                             tree.visit(function(node){
                                             
                                         if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
@@ -744,12 +763,34 @@ $.widget( "heurist.search_faceted_wiz", {
                                 });    
                         }  
                         
+                        //change default checkbox for branch root
                         var cb = treediv.find("span.fancytree-checkbox");
                         if(cb.length>0){
                             $(cb[0]).removeClass("fancytree-checkbox");
                         }
                         
                         that.current_tree_rectype_ids = rectypeIds;
+                             
+                       $("#fsw_showreverse").change(function(event){
+                           
+                                var showrev = $(event.target).is(":checked");
+                           
+                                tree.visit(function(node){
+                                     if(node.data.isreverse==1){ //  top.HEURIST4.util.isArrayNotEmpty(node.children) && 
+                                        if(showrev){
+                                            $(node.li).show();
+                                        }else{
+                                            $(node.li).hide();
+                                        }
+                                     }
+                                });
+                        });
+        
+                        //tree.options.filter.mode = "hide";
+                        //tree.options.filter.highlight = false;
+                        $("#fsw_showreverse").attr('checked', false); 
+                        $("#fsw_showreverse").change();
+                        
 
                     }else{
                         top.HEURIST4.util.redirectToError(response.message);
@@ -987,7 +1028,7 @@ function showSearchFacetedWizard( params ){
     }else if(!$.isFunction($('body').fancytree)){
 
         $.getScript(top.HAPI4.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
-
+        
     }else{
 
         var manage_dlg = $('#heurist-search-faceted-dialog');

@@ -823,10 +823,14 @@ $.widget( "heurist.search_faceted2", {
                                             f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count} );
                                             $("<div>").css({"display":"block","padding":"0 "+(level*5)+"px"})
                                                     .append(f_link)
-                                                    .appendTo($container_new);
+                                                    .appendTo($container);
                                         }else{
                                             that._createOption( facet_index, level, {text:term.text, value:term.value, count:term.count} ).appendTo($container);
                                         }
+                                }
+                                if(term.children)
+                                for (var k=0; k<term.children.length; k++){
+                                    __drawTerm(term.children[k], level+1, $container, as_list);
                                 }
                         }//__drawTerm
                         
@@ -839,7 +843,8 @@ $.widget( "heurist.search_faceted2", {
                             
                             if(top.HEURIST4.util.isArrayNotEmpty(term.children)){ //is root or has children
 
-                                var k, tlist = [], $span = null;
+                                var k;
+                                if(term.children)
                                 for (k=0; k<term.children.length; k++){
                                     var cnt = __calcTerm(term.children[k], level+1);
                                     res_count = res_count + cnt;
@@ -886,9 +891,17 @@ $.widget( "heurist.search_faceted2", {
                         }//__calcTerms
                         
                         
+                       
                         //calculate the total number of terms with value
                         var tot_cnt = __calcTerm(term, 0, null);
                         var as_list = (tot_cnt < that._MIN_DROPDOWN_CONTENT);
+
+
+                        if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
+                            var $span = $('<span>').css('display','block');
+                            var f_link = this._createFacetLink(facet_index, term);
+                            $span.append(f_link).appendTo($facet_values);
+                        }                        
                         
                         if(as_list){
                                 __drawTerm(term, 0, $facet_values, true);
@@ -1010,6 +1023,7 @@ $.widget( "heurist.search_faceted2", {
                                 }
                             }
                         }
+
                         
                         
                         for (i=0;i<response.data.length;i++){
@@ -1045,12 +1059,13 @@ $.widget( "heurist.search_faceted2", {
         if(!hist) hist = [];
         var step = hist.length+1;
         
-        var lbl = (new Array( indent + 1 ).join( " . " )) + cterm.text;
+        var lbl = cterm.text; //(new Array( indent + 1 ).join( " . " )) + 
         if(cterm.count>0){
             lbl =  lbl + " ("+cterm.count+")";
         } 
 
-        var f_link = $("<option>",{facet_index:facet_index, facet_value:cterm.value, facet_label:lbl, step:step}).text(lbl).addClass("facet_link")
+        var f_link = $("<option>",{facet_index:facet_index, facet_value:cterm.value, facet_label:lbl, step:step})
+                            .css('padding-left', ((indent-1)*2)+'em' ).text(lbl).addClass("facet_link")
         
         return f_link;
     }

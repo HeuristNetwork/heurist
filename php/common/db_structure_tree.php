@@ -377,7 +377,8 @@
                     
                 $stype = ($detailType=='resource' || $detailType=='relmarker')?"":$dbs_lookups[$detailType];
                 if($reverseRecTypeId!=null){
-                    $stype = $stype."reverse";
+                    $stype = $stype."linked from";
+                    $res['isreverse'] = 1;
                 }
                 if($stype!=''){
                     $stype = " <span style='font-size:0.7em'>(" . $stype .")</span>";   

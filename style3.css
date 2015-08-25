@@ -686,6 +686,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .fancytree-has-children span.fancytree-checkbox
 {
     background-position: 0 -176px;
+    width:0;
 }
 .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
@@ -711,6 +712,12 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;
+}
+
+.svs-acordeon-group{
+    padding-top:1em;
+    font-size: 1em;  
+    font-weight:bold;
 }
 
 .svs-contextmenu{

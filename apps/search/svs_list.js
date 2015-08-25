@@ -306,6 +306,7 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before( 
               $('<div>')
                 .attr('grpid',  'dbs').addClass('svs-acordeon')
+                .css('border','none')
                 .append( this._defineHeader(top.HR('Database Summary'), 'dbs').click( function(){ that._showDbSummary(); })
                 ) );
         
@@ -316,9 +317,16 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'rules').addClass('svs-acordeon')
+                .css('border','none')
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
 
+                
+            this.helper_btm.before(
+                $('<div>')
+                    .addClass('svs-acordeon-group')
+                    .html(top.HR('PERSONAL')));
+                
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'bookmark').addClass('svs-acordeon')
@@ -330,20 +338,29 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'all').addClass('svs-acordeon')
+                .css('border','none')
                 .append( this._defineHeader(top.HR('My Searches'), 'all'))
                 .append( this._defineContent('all') ));
 
             var groups = top.HAPI4.currentUser.usr_GroupsList;
 
-            for (var groupID in groups)
-            {
-                if(groupID){
-                    var name = groups[groupID][1];
-                    this.helper_btm.before(
-                        $('<div>')
-                        .attr('grpid',  groupID).addClass('svs-acordeon')
-                        .append( this._defineHeader(name, groupID))
-                        .append( this._defineContent(groupID) ));
+            if(groups){
+                
+                this.helper_btm.before(
+                $('<div>')
+                    .addClass('svs-acordeon-group')
+                    .html(top.HR('WORKGROUPS')));
+            
+                for (var groupID in groups)
+                {
+                    if(groupID){
+                        var name = groups[groupID][1];
+                        this.helper_btm.before(
+                            $('<div>')
+                            .attr('grpid',  groupID).addClass('svs-acordeon')
+                            .append( this._defineHeader(name, groupID))
+                            .append( this._defineContent(groupID) ));
+                    }
                 }
             }
         }else{
