@@ -42,7 +42,13 @@ $.widget( "heurist.resultList", {
     _lastSelectedIndex: -1, //required for shift-click selection
     _count_of_divs: 0,
 
-
+    //navigation-pagination
+    current_page: 0,
+    max_page: 0,
+    count_total: null,
+    pagesize: 100,
+    hintDiv:null, // rollover for thumbnails
+    
 
 
     // the constructor
@@ -50,6 +56,8 @@ $.widget( "heurist.resultList", {
 
         var that = this;
 
+        that.hintDiv = new HintDiv('resultList_thumbnail_rollover', 160, 160, '<div id="thumbnail_rollover_img" style="width:100%;height:100%;"></div>');
+        
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
@@ -175,7 +183,7 @@ $.widget( "heurist.resultList", {
                         + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
                         + ' ' + top.HAPI4.Event.ON_REC_SELECT
                         + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
-        }
+        }                                                                     
 
         $(this.document).on(this._events, function(e, data) {
 
@@ -478,7 +486,7 @@ $.widget( "heurist.resultList", {
             if( total_count_of_curr_request > 0 )
             {
 
-                if(this._count_of_divs<100){//01
+                if(this._count_of_divs<this.pagesize){//01
                 
                     this._renderPage(0, recordset);
 
@@ -573,9 +581,16 @@ $.widget( "heurist.resultList", {
         .appendTo($recdiv);
 
         if(fld('rec_ThumbnailURL')){
+            var that = this;
+            
             $(document.createElement('div'))
             .addClass('recTypeThumb')
             .css({'background-image': 'url('+ fld('rec_ThumbnailURL') + ')', 'opacity':'1' } )
+            .hover( function(event){ 
+                $("#thumbnail_rollover_img").css({'background-image': 'url('+ fld('rec_ThumbnailURL') + ')', 'background-size':'100% auto' } );
+                that.hintDiv.showAt(event);
+            }, 
+            function(){ that.hintDiv.hide(); } )
             .appendTo($recdiv);
         }
 
@@ -674,7 +689,7 @@ $.widget( "heurist.resultList", {
 
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
-            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
+            html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
         }
 
         var html_pwdrem = '';
@@ -716,6 +731,8 @@ $.widget( "heurist.resultList", {
 
 
         return html;
+        
+        
 
         /*$('<div>',{
             id: 'rec_edit_link',
@@ -956,11 +973,6 @@ $.widget( "heurist.resultList", {
 
     },
 
-    current_page: 0,
-    max_page: 0,
-    count_total: null,
-    pagesize: 100,
-    
     //
     // redraw list of pages
     //    
@@ -1049,7 +1061,10 @@ $.widget( "heurist.resultList", {
     
     , _renderPage: function(pageno, recordset){
         
-                    if(!recordset) recordset = top.HAPI4.currentRecordset;
+                    if(!recordset){
+                        recordset = top.HAPI4.currentRecordset;  
+                        this._clearAllRecordDivs();
+                    } 
                     
                     if(pageno<0){
                         pageno = 0;
@@ -1058,8 +1073,6 @@ $.widget( "heurist.resultList", {
                         this._renderPagesNavigator(); //redraw paginator
                     }
                     
-                    this._clearAllRecordDivs();
-        
                     var recs = recordset.getRecords();
                     
                     var recorder = recordset.getOrder();
@@ -1069,7 +1082,7 @@ $.widget( "heurist.resultList", {
                         len = Math.min(recorder.length, idx+this.pagesize);
                     
                     
-                    for(; idx<len; idx++) {
+                    for(; (idx<len && this._count_of_divs<this.pagesize); idx++) {
                         recID = recorder[idx];
                         if(recID){
                             //var recdiv = this._renderRecord(recs[recID]);
@@ -1104,6 +1117,18 @@ $.widget( "heurist.resultList", {
                             
                         }
                     });
+                    
+                    var that = this;
+                    $(".realThumb").hover( function(event){ 
+                        var bg = $(event.target).css('background-image');
+                        $("#thumbnail_rollover_img").css({'background-image': bg, 
+                                'background-size':'contain', 'background-repeat':'no-repeat', 'background-position': 'center' } );
+                        that.hintDiv.showAt(event);
+                    }, 
+                    function(){ that.hintDiv.hide(); } );
+        
+
+                    
                 
                     //hide edit link
                     if(!top.HAPI4.is_logged()){

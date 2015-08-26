@@ -47,6 +47,15 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
     
+    cloneJSON:function (data){
+        try{  
+            return JSON.parse(JSON.stringify(data));  
+        }catch (ex2){
+            console.log('can not clone json array '+data);
+            return [];
+        }
+    },
+   
     em: function(input) {
         var emSize = parseFloat($("body").css("font-size"));
         return (emSize * input);
@@ -972,11 +981,19 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
     checkLength2: function( input, title, min, max ) {
 
-        if ( (max>0 && input.val().length > max) || input.val().length < min ) {
+        var len = input.val().length;
+        if ( (max>0 &&  len > max) || len < min ) {
             input.addClass( "ui-state-error" );
             if(max>0 && min>1){
                 message_text = top.HR(title)+" "+top.HR("length must be between ") +
-                min + " "+top.HR("and")+" " + max + ".";
+                min + " "+top.HR("and")+" " + max + ". ";
+                if(len<min){
+                    message_text = message_text + (min-len) + top.HR(" characters left");
+                }else{
+                    message_text = message_text + (len-max) + top.HR(" characters over");
+                }
+                
+                
             }else if(min==1){
                 message_text = top.HR(title)+" "+top.HR("required field");
             }

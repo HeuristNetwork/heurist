@@ -355,7 +355,7 @@ div .selected_last{
 .recordDiv .recTypeThumb {
     background-position: center center;
     background-repeat: no-repeat;
-    background-size: 100% auto;
+    background-size: contain; /* 100% auto */
     position: absolute;
     text-align: center;
     margin: 0;

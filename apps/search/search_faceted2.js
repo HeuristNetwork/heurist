@@ -104,7 +104,7 @@ $.widget( "heurist.search_faceted2", {
         this.div_header = $( "<div>" ).appendTo( this.element );
         
         if(!this.options.ispreview){
-            this.div_title = $("<div style='text-align:left;padding-top:1.4em;padding-left:1em;display:inline-block;'></div").appendTo( this.div_header );
+            this.div_title = $("<div style='text-align:left;padding-top:1.4em;padding-left:1em;display:inline-block;width:70%'></div").addClass('truncate').appendTo( this.div_header );
         }
 
         this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"1.8em","padding-right":"0.6em"}).appendTo( this.div_header );
@@ -195,9 +195,11 @@ $.widget( "heurist.search_faceted2", {
         }else{
             
             if(hasHistory) {
+                this.div_title.css('width','45%');
                 this.btn_reset.show()   
                 //this.btn_save.show();  //@todo
             }else{
+                this.div_title.css('width','70%');
                 this.btn_reset.hide()   
                 this.btn_save.hide(); 
             }
@@ -398,6 +400,7 @@ $.widget( "heurist.search_faceted2", {
         }else{
             this.btn_close.show(); 
         }
+        this.div_title.css('width','70%');
         this.btn_reset.hide()   
         this.btn_save.hide(); 
        
@@ -440,27 +443,36 @@ $.widget( "heurist.search_faceted2", {
                    rst_DisplayWidth:0
                };
            }
-           
+
            if(!top.HEURIST4.util.isnull(field['var'])){
+               
+             if( field['code'] && (that._isAllFacets || field['isfacet']) ){
+                    
+                    //inpt.find('.input-div').hide();
+                    //inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
+                    //inpt.find('.editint-inout-repeat-button').hide();
+                    
+                    $("<div>",{id: "fv_"+field['var'] }).html(
+                        '<div class="header" style="width: 100%; background-color: lightgray; padding: 5px; width:100%">'+
+                            '<label for="input0_1">'+ed_options.title+'</label>'+
+                        '</div>'+
+                        '<div class="input-cell"></div>').appendTo($fieldset);
+                    
+             }else{
+
                 var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
                         ed_options
                     );
-                    
-                
-                if(!top.HEURIST4.util.isnull(field['var']) && field['code'] && (that._isAllFacets || field['isfacet']) ){
-                    inpt.find('.input-div').hide();
-                    inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
-                    //inpt.find('.editint-inout-repeat-button').hide();
-                }
 
                 inpt.appendTo($fieldset);
                 that._input_fields['$X'+field['var']] = inpt;
+             }
            }
        });
        
        this._isInited = true;
        //get empty query
-       this._first_query = JSON.parse(JSON.stringify( this.options.params.qa )); //clone 
+       this._first_query = top.HEURIST4.util.cloneJSON( this.options.params.qa ); //clone 
        this._fillQueryWithValues( this._first_query );
        this._recalculateFacets(-1);
     }
@@ -563,7 +575,7 @@ $.widget( "heurist.search_faceted2", {
     
     ,doSearch : function(){
 
-            var query = JSON.parse(JSON.stringify( this.options.params.qa )); //clone 
+            var query = top.HEURIST4.util.cloneJSON( this.options.params.qa ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
             
             if(isform_empty){
@@ -576,6 +588,7 @@ $.widget( "heurist.search_faceted2", {
                 }
                 return;
             }else if(!this.options.ispreview){
+                this.div_title.css('width','45%');
                 this.btn_reset.show()   
                 //@todo this.btn_save.show(); 
             }
@@ -702,14 +715,14 @@ $.widget( "heurist.search_faceted2", {
                     needcount = 1;
                     
                 }else{
-                    query = JSON.parse(JSON.stringify(field['facet'])); //clone 
+                    query = top.HEURIST4.util.cloneJSON(field['facet']); //clone 
                     
                     //change $IDS for current set of target record type
                     __fillQuery(query);                
                     
                     //add other parameters for rectype of this facet
                     if(this._current_query){
-                        var copyquery = JSON.parse(JSON.stringify(this._current_query)); 
+                        var copyquery = top.HEURIST4.util.cloneJSON(this._current_query); 
                         var otherparams = __getOtherParameters(copyquery, field['rtid']);
                         if(null!=otherparams){
                              query = query.concat(otherparams);
@@ -1153,8 +1166,8 @@ $.widget( "heurist.search_faceted2", {
                 
                 
                 // assign value to edit_inpout - to remove
-                var varid = field['var'];
-                $( this._input_fields[ '$X'+varid ] ).editing_input('setValue', value);
+                //var varid = field['var'];
+                //$( this._input_fields[ '$X'+varid ] ).editing_input('setValue', value);
                 
                 // make link in bold
                 //$("#fv_"+varid).find('.facets div a').css('font-weight','normal');

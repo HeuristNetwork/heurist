@@ -420,7 +420,20 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
-                            top.HEURIST4.util.showMsgErr(response.message);
+                            var msg = response.message;
+                            
+                            if(!msg){
+                                msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
+                            }
+                            if(response.sysmsg){
+                                msg = msg + "<br>System error:" + response.sysmsg;
+                            }
+                            
+                            top.HEURIST4.util.showMsgErr(msg);
+                        
+                            if(!top.HEURIST4.util.isnull(document)){    
+                                document.trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
+                            }
                         }
                         if(!top.HEURIST4.util.isnull(document)){
                             document.trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event

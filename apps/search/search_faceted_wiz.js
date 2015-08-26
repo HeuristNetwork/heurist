@@ -199,7 +199,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var header = $("<div>").appendTo(this.step2);
         
         header.html("<label>"+top.HR("Select fields that act as facet")+
-            "</label><span style='float:right;height:1em'><input type='checkbox' id='fsw_showreverse' /><label for='fsw_showreverse'>"+
+            "</label><span style='float:right;height:1em'><input type='checkbox' id='fsw_showreverse' />&nbsp;<label for='fsw_showreverse'>"+
             top.HR("Show linked-from record types (reverse pointers)")+"</label></span>");
         
         //$("<label>").text(top.HR("Select fields that act as facet")).appendTo(header);

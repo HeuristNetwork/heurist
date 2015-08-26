@@ -1273,9 +1273,8 @@ if(@$params['debug'])
 //error_log("AAA ".$query);            
         }
         
-//error_log("AAA ".$query);            
-
-
+        
+        
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);

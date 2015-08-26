@@ -80,7 +80,8 @@ $.widget( "heurist.mainMenu", {
 
         this.divMainMenu = $( "<div>")
                         //.css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
-                        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
+                        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })  //two rows
+                        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'1.5em', 'text-align':'right', 'width':'45em' })  //one rows
                         .addClass('logged-in-only')
                         .appendTo(this.element);
 
@@ -94,15 +95,17 @@ $.widget( "heurist.mainMenu", {
                         .appendTo(this.divMainMenu);
 
 
+        this.divMainMenuItems = $('<ul>')
+                                .addClass('horizontalmenu')
+                                //.css({'float':'right'})  remove remark for 2 row menu
+                                .appendTo( this.divMainMenu );
+                                
         this.divProfileItems = $( "<ul>")
-                        .css('float','right')
+                        //.css('float','right')       remove remark for 2 row menu
                         .addClass('horizontalmenu')
                         .appendTo( this.divMainMenu );
 
-        this.divMainMenuItems = $('<ul>')
-                                .addClass('horizontalmenu')
-                                .css({'float':'right'})
-                                .appendTo( this.divMainMenu );
+                                
 
         this._initMenu('Profile', this.divProfileItems);
         this._initMenu('Database');

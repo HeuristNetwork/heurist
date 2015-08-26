@@ -332,7 +332,7 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method editRules
+                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method 
                 }
             }});
 
@@ -342,7 +342,7 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method editRules
+                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method 
                 }
             }});
 
@@ -520,6 +520,7 @@ $.widget( "heurist.search", {
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART
                             + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
                             + ' ' + top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, function(e, data) { that._onSearchGlobalListener(e, data) } );
 
         this._refresh();
@@ -683,6 +684,12 @@ $.widget( "heurist.search", {
                 
             }
 
+        }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //get new chunk of data from server
+            
+                 that.div_progress.css('display','none');
+                 that.div_search.css('display','inline-block');
+
+            
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
 
 
@@ -693,7 +700,7 @@ $.widget( "heurist.search", {
                     //create flat rule array
                     that._doApplyRules(rules); //indexes are rest inside this function
 
-                    //if rules were applied before - need to remove all records except original and re-render
+                    //if rules were applied before - need to remove all records except original set and re-render
                     if(!top.HEURIST.util.isempty(that._rules) && that._rules[0].results.length>0){
 
                          //keep json (to possitble save as saved searches)
@@ -719,7 +726,7 @@ $.widget( "heurist.search", {
                          this._renderProgress();
 
                          //fake result searh event
-                         $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event
+                         $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
                          $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
                     } else if(!top.HEURIST.util.isempty(that._rules)){
                         Hul.showMsgFlash('Rule sets require an initial search result as a starting point.', 3000, top.HR('Warning'), data.target);
@@ -751,6 +758,9 @@ $.widget( "heurist.search", {
         return lbl;
     },
 
+    //
+    // search from input - query is defined manually
+    //
     _doSearch: function(){
 
         //if(!top.HEURIST4.util.isempty(search_query)){
@@ -785,7 +795,7 @@ $.widget( "heurist.search", {
             //this._onSearchStart();
 
             //perform search
-            top.HAPI4.RecordMgr.search(request, $(this.document));
+            top.HAPI4.RecordMgr.search(request, $(this.document));    //search from input (manual query definition)
         }
 
     }
@@ -996,7 +1006,9 @@ $.widget( "heurist.search", {
     ,_destroy: function() {
 
         $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT);
-        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT+' '+top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES);
+        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+
+            ' '+top.HAPI4.Event.ON_REC_SEARCHRESULT+
+            ' '+top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES);
 
         // remove generated elements
         //this.btn_search_allonly.remove();  // bookamrks search off
@@ -1037,7 +1049,7 @@ $.widget( "heurist.search", {
                     this.query_request.increment = true;  //it shows that this is not initial search request
                     this.query_request.o = new_offset;
                     this.query_request.source = this.element.attr('id');
-                    top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
+                    top.HAPI4.RecordMgr.search(this.query_request, $(this.document));   //search for next chunk
                     return true;
             }else{
 
@@ -1092,7 +1104,7 @@ $.widget( "heurist.search", {
                      this.query_request.increment = true; //it shows that this is not initial search request
                      this.query_request.o = 0;
                      this.query_request.source = this.element.attr('id');
-                     top.HAPI4.RecordMgr.search(this.query_request, $(this.document));
+                     top.HAPI4.RecordMgr.search(this.query_request, $(this.document)); //search rules
                      return true;
 
             }
@@ -1102,12 +1114,6 @@ $.widget( "heurist.search", {
     }
 
     , _searchCompleted: function(){
-
-         this.div_progress.css('display','none');
-         this.div_search.css('display','inline-block');
-
-         //this.div_progress.hide();
-         //this.div_search.show();
 
          if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
             $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event

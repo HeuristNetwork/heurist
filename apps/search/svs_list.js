@@ -134,7 +134,9 @@ $.widget( "heurist.svs_list", {
             that._refresh();
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
-            if(data) that.currentSearch = data;
+            if(data && !data.increment){
+                that.currentSearch = Hul.cloneJSON(data);  
+            } 
         });
 
         this._refresh();
@@ -1097,6 +1099,11 @@ $.widget( "heurist.svs_list", {
                 var request = Hul.parseHeuristQuery(qsearch);
                 
                 if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
+                    
+                    if(this.currentSearch){
+                        this.currentSearch.rules = Hul.cloneJSON(request.rules);
+                    }
+                    
                     $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ {rules:request.rules, target:ele} ]); //global app event   - see resultList.js for listener
                 }else{
                     //additional params
@@ -1149,12 +1156,15 @@ $.widget( "heurist.svs_list", {
     }
 
     // mode: saved, rules, faceted
+    // groupID - current user or workgroup
+    // svsID - saved search id
+    // squery
     , editSavedSearch: function(mode, groupID, svsID, squery, node){
 
         var that = this;
             
         var callback = function(event, request) {    
-                if(Hul.isempty(svsID)){     //new 
+                if(Hul.isempty(svsID)){     //new saved search
                 
                     //update tree after addition - add new search to root
                     if(Hul.isnull(node)){
@@ -1204,7 +1214,7 @@ $.widget( "heurist.svs_list", {
             this.edit_dialog.show( mode, groupID, svsID, squery, callback );
                 
         }else{
-            $.getScript(top.HAPI4.basePath+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, callback, svsID, squery); } );
+            $.getScript(top.HAPI4.basePath+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
     
     },
