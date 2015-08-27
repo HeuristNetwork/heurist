@@ -420,6 +420,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
+                            //@todo - dentralize error message processing
                             var msg = response.message;
                             
                             if(!msg){

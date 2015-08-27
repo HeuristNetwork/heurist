@@ -1042,6 +1042,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         });
     },
 
+    
     /**
     * show url in iframe within popup dialog
     */
@@ -1059,7 +1060,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                            .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center')
                            .appendTo( $(opener.document).find('body') );
                            
-                var $dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+                var $dosframe = $( "<iframe>").css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                 
                 //on close event listener
                 $dosframe[0].close = function() {

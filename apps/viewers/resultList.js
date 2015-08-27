@@ -586,11 +586,6 @@ $.widget( "heurist.resultList", {
             $(document.createElement('div'))
             .addClass('recTypeThumb')
             .css({'background-image': 'url('+ fld('rec_ThumbnailURL') + ')', 'opacity':'1' } )
-            .hover( function(event){ 
-                $("#thumbnail_rollover_img").css({'background-image': 'url('+ fld('rec_ThumbnailURL') + ')', 'background-size':'100% auto' } );
-                that.hintDiv.showAt(event);
-            }, 
-            function(){ that.hintDiv.hide(); } )
             .appendTo($recdiv);
         }
 
@@ -689,7 +684,9 @@ $.widget( "heurist.resultList", {
 
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
-            html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
+            html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
+        }else{
+            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
         }
 
         var html_pwdrem = '';
@@ -713,7 +710,6 @@ $.widget( "heurist.resultList", {
         }
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
-            + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
             + html_thumb
             + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
@@ -1118,6 +1114,7 @@ $.widget( "heurist.resultList", {
                         }
                     });
                     
+                    /* show image on hover
                     var that = this;
                     $(".realThumb").hover( function(event){ 
                         var bg = $(event.target).css('background-image');
@@ -1126,6 +1123,7 @@ $.widget( "heurist.resultList", {
                         that.hintDiv.showAt(event);
                     }, 
                     function(){ that.hintDiv.hide(); } );
+                    */
         
 
                     

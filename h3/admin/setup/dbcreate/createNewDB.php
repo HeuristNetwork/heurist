@@ -78,6 +78,9 @@ function prepareDbName(){
 
 
             function showProgress(force){
+                
+                $('.error').hide();
+                
                 var ele = document.getElementById("loading");
                 if(force) ele.style.display = "block";
                 if(ele.style.display != "none"){
@@ -220,13 +223,21 @@ function prepareDbName(){
                     },
                 params);
             }
+            
+            function closeDialog(newDBName){
+                
+                var url = "<?php echo HEURIST_BASE_URL_V4?>"+"?db="+newDBName;
+                window.open(url, "_blank" );
+                
+                <?php echo (@$_REQUEST['popup']=="1"?"window.close();":"") ?>                
+            }
 
         </script>
     </head>
 
     <body class="popup">
 
-        <?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
+        <?php echo (@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
 
         <div id="page-inner" style="overflow:auto">
             <div id="loading" style="display:none">
@@ -423,11 +434,12 @@ function prepareDbName(){
                     //get path registered db template and download coreDefinitions.txt
                     $reg_url = @$_REQUEST['url_template'];
                     
-                    print $reg_url."</br>";
-                    
+                    //debug print $reg_url."</br>";
+
+if(true){                    
                     $templateFileName = "NOT DEFINED";
                     if($reg_url){
-                            
+
                             $isTemplateDB = true;
                         
                             $data = loadRemoteURLContent($reg_url, true); //without proxy 
@@ -520,7 +532,8 @@ function prepareDbName(){
                     }else{
                         mysql_connection_insert(DATABASE);
                         $query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, " .
-                            "ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".                                    get_user_id());
+                            "ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".
+                            get_user_id());
                         $details = mysql_fetch_row($query);
                         $longName = mysql_real_escape_string($details[0]);
                         $firstName = mysql_real_escape_string($details[1]);
@@ -552,14 +565,16 @@ function prepareDbName(){
                         ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
                         ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                     // TODO: error check, although this is unlikely to fail
+                    
+}                    
 
                     echo "<h2>Congratulations, your new database '$newDBName' has been created</h2>";
 
                     echo "<p><strong>Admin username:</strong> ".$name."<br />";
                     echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
 
-                    echo "<p>Click here to log in to your new database: <p style=\"padding-left:6em\"><b><a href=\"".
-                    HEURIST_BASE_URL_V4."?db=".$newDBName."\" title=\"\" target=\"_new\">".
+                    echo "<p>Click here to log in to your new database: <p style=\"padding-left:6em\"><b><a href=\"#\"".
+                    " title=\"\" onclick=\"closeDialog('".$newDBName."'); return false;\">".
                     HEURIST_BASE_URL_V4."?db=".$newDBName.
                     "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
 
