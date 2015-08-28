@@ -329,7 +329,9 @@
 
                     $order_field = $select_field;
                     if(strpos($select_field, "dtl_Value")>0){
-                        $select_field = "cast(if(cast(getTemporalDateString(TOPDET.dtl_Value) as DATETIME) is null,concat(cast(getTemporalDateString(TOPDET.dtl_Value) as SIGNED),'-1-1'),getTemporalDateString(TOPDET.dtl_Value)) as DATETIME)";
+                        $select_field = "cast(if(cast(getTemporalDateString(TOPDET.dtl_Value) as DATETIME) is null,"
+                            ."concat(cast(getTemporalDateString(TOPDET.dtl_Value) as SIGNED),'-1-1'),"
+                            ."getTemporalDateString(TOPDET.dtl_Value)) as DATETIME)";
                     }
                     $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(*) as cnt  ";
                     //min-max query
@@ -596,7 +598,6 @@
             $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"].$grouporder_clause;
 
             //
-//error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -655,6 +656,8 @@
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);
 
+//error_log("WHERE=".$qclauses["where"]);            
+            
             $select_field  = "";
             $detail_link   = "";
             $details_where = "";
@@ -663,6 +666,7 @@
                    $select_field = "r0.rec_RecTypeID";
             }else if($fieldid=='recTitle' || $fieldid=='title'){
                    $select_field = "r0.rec_Title";
+                   $dt_type = "freetext";
             }else if($fieldid=='recModified' || $fieldid=='modified'){
                    $select_field = "r0.rec_Modified";
             }else{
@@ -673,191 +677,57 @@
                    //$details_where = " and (dt0.dtl_Value is not null)";
             }
                 
+            $select_clause = "";
             $grouporder_clause = "";
-            $ranges = array();
 
-            if(false && $dt_type=="date" || $dt_type=="year"){
+            if($dt_type=="date" || $dt_type=="year"){
 
-                    /*      GROUP BY DECADES
-                    select concat(decade, '-', decade + 9) as year, count(*) as count
-                    from (select floor(year(dtl_Value) / 10) * 10 as decade
-                    from recDetails, Records where dt_RecId=rec_ID and dtl_DetailTypeId=2)
-                    group by decade
-
-                    select dtl_Value, getTemporalDateString(dtl_Value) as bdate, floor( if( dtl_Value = concat( '', 0 + dtl_Value ), dtl_Value,  year(dtl_Value) ) / 10) * 10 as decade 
-                    from recDetails, Records where dtl_RecId=rec_ID and dtl_DetailTypeId=2 and rec_RecTypeID=20
-
-
-                    select count(*) as count, concat(decade, '-', decade + 9) as year
-                    from (select floor(year(`year`) / 10) * 10 as decade
-                    from tbl_people) t
-                    group by decade
-                    GROUP BY YEAR(record_date), MONTH(record_date)
-                    GROUP BY EXTRACT(YEAR_MONTH FROM record_date)
-                    */                
-
-                    $order_field = $select_field;
-                    if(strpos($select_field, "dtl_Value")>0){
-                        $select_field = "cast(if(cast(getTemporalDateString(TOPDET.dtl_Value) as DATETIME) is null,concat(cast(getTemporalDateString(TOPDET.dtl_Value) as SIGNED),'-1-1'),getTemporalDateString(TOPDET.dtl_Value)) as DATETIME)";
-                    }
-                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(*) as cnt  ";
-                    //min-max query
-                    $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"];
-
-                    //DEBUG error_log("MINMAX >>>".$query);
-
-                    $res = $mysqli->query($query);
-                    if (!$res){
-                        $response = $system->addError(HEURIST_DB_ERROR, "Minmax query error", $mysqli->error);
-                    }else{
-
-                        $row = $res->fetch_row();
-                        $min = new DateTime($row[0]);
-                        $max = new DateTime($row[1]);
-                        $cnt = $row[2];
-                        $INTERVAL_NUM = 10;
-
-                        if($cnt>$INTERVAL_NUM){ //otherwise individual values
-
-                            //find delta 1000 years, 100 years, 10 years, 1 year, 12 month, days                    
-                            $diff = $max->diff($min);
-                            $format = "Y";
-
-                            //error_log("difference >>>".$diff->y."   ".$row[0]."  ".$row[1]);                        
-
-                            if($diff->y > 20){
-                                if($diff->y > 2000){
-                                    $div=1000;
-                                }else if($diff->y > 150){
-                                    $div=100;
-                                }else{
-                                    $div=10;
-                                }
-                                $delta = new DateInterval("P".$div."Y");
-                                $min = DateTime::createFromFormat('Y-m-d', str_pad( floor(intval($min->format('Y'))/$div)*$div, 4, "0", STR_PAD_LEFT).'-01-01' );
-                            }else if($diff->y > 1){
-                                $delta = new DateInterval("P1Y");
-                                $min = date_create($min->format('Y-1-1'));
-                            }else if($diff->m > 1){
-                                $delta = new DateInterval("P1M");
-                                $format = "Y-M";
-                                $min = date_create($min->format('Y-m-1'));
-                            }else {
-                                $delta = new DateInterval("P1D");
-                                $format = "Y-m-d";
-                            }
-
-                            $caseop = "(case ";
-
-                            while ($min<$max){
-
-                                $smin = $min->format('Y-m-d');
-                                $ssmin = $min->format($format);
-                                $min->add($delta);
-                                $smax = $min->format('Y-m-d');
-                                //$ssmax = $min->format($format);
-
-                                $caseop .= " when ( $select_field>='".$smin."' and $select_field<'".$smax."') then '".count($ranges)."' ";
-
-                                array_push($ranges, array("label"=>$ssmin, "query"=>"$smin<>$smax"));
-                            }
-
-                            $caseop .= " end)";                        
-
-                            $grouporder_clause = " GROUP BY rng ORDER BY $order_field"; 
-                            $select_field = $caseop; 
-                        }
-                    }
-
-
+                    $select_field = "cast(if(cast(getTemporalDateString(".$select_field.") as DATETIME) is null,"
+                        ."concat(cast(getTemporalDateString(".$select_field.") as SIGNED),'-1-1'),"
+                        ."getTemporalDateString(".$select_field.")) as DATETIME)";
+                    
+                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max  ";
             }
-            else if(false && $dt_type=="integer" || $dt_type=="float"){
+            else if($dt_type=="integer" || $dt_type=="float"){
 
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
 
-                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(*) as cnt ";
-                    //min-max query
-                    $query =  $select_clause.$qclauses["from"].$where_clause.$qclauses["where"];
-
-                    //DEBUG error_log("MINMAX >>>".$query);
-
-                    $res = $mysqli->query($query);
-                    if (!$res){
-                        $response = $system->addError(HEURIST_DB_ERROR, "Minmax query error", $mysqli->error);
-                    }else{
-                        $row = $res->fetch_row();
-                        $min = $row[0];
-                        $max = $row[1];
-                        $cnt = $row[2];
-
-                        $INTERVAL_NUM = 10;
-
-                        if($cnt>$INTERVAL_NUM){ //otherwise individual values
-
-                            $delta = ($max - $min)/$INTERVAL_NUM;
-                            if($dt=="integer"){
-                                if(Math.abs($delta)<1){
-                                    $delta = $delta<0?-1:1;
-                                }
-                                $delta = Math.floor($delta);
-                            }
-                            $cnt = 0;
-                            $caseop = "(case ";
-
-
-                            while ($min<$max && $cnt<$INTERVAL_NUM){
-                                $val1 = ($min+$delta>$max)?$max:$min+$delta;
-                                if($cnt==$INTERVAL_NUM-1){
-                                    $val1 = $max;
-                                }
-
-                                $caseop .= " when $select_field between ".$min." and ".$val1." then '".count($ranges)."' ";
-
-                                array_push($ranges, array("label"=>"$min ~ $val1", "query"=>"$min<>$val1"));
-
-                                $min = $val1;
-                                $cnt++;
-                            }
-
-                            $caseop .= " end)";
-
-                            $grouporder_clause = " GROUP BY rng ORDER BY $select_field"; 
-                            $select_field = $caseop; 
-                        }
-                    }
-
+                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max ";
+ 
             }
-            else if($dt_type==null || $dt_type=="freetext"){ //freetext and other
+            else { //freetext and other if($dt_type==null || $dt_type=="freetext")
                 
-                if($step_level>0){
+                if($step_level>0 || $dt_type!="freetext"){
 
                 }else{
                     $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";    
                 }
-            }
-
-            if($params['needcount']==1){
             
-                $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
-                if($grouporder_clause==""){
-                        $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
-                }
-            
-            }else if($params['needcount']==2){ //count for related
-            
-                $select_clause = "SELECT $select_field as rng, count(distinct r0.rec_ID) as cnt ";
-                if($grouporder_clause==""){
-                        $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
-                }
-            
-            }else{ //for fields from related records - search distinc values only
+                if($params['needcount']==1){
                 
-                $select_clause = "SELECT DISTINCT $select_field as rng, 0 as cnt ";
-                if($grouporder_clause==""){
-                        $grouporder_clause = " ORDER BY $select_field"; 
+                    $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                    if($grouporder_clause==""){
+                            $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
+                    }
+                
+                }else if($params['needcount']==2){ //count for related
+                
+                    $select_clause = "SELECT $select_field as rng, count(distinct r0.rec_ID) as cnt ";
+                    if($grouporder_clause==""){
+                            $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field"; 
+                    }
+                
+                }else{ //for fields from related records - search distinc values only
+                    
+                    $select_clause = "SELECT DISTINCT $select_field as rng, 0 as cnt ";
+                    if($grouporder_clause==""){
+                            $grouporder_clause = " ORDER BY $select_field"; 
+                    }
                 }
+                
             }
+            
             
             //count query
             $query =  $select_clause.$qclauses["from"].$detail_link." WHERE ".$qclauses["where"].$details_where.$grouporder_clause;
@@ -877,14 +747,7 @@ if(@$params['debug'])
                 $data = array();
 
                 while ( $row = $res->fetch_row() ) {
-                    if(count($ranges)>0 && @$ranges[$row[0]]){
-                        array_push($data, array($ranges[$row[0]]["label"], $row[1], $ranges[$row[0]]["query"]));
-                    }else{
-                        array_push($data, array($row[0], $row[1], ($step_level>0 || $dt_type!="freetext")?$row[0]:$row[0]."%") );
-                        //array_push($data, $row);
-                        
-//DEBUG echo $row[0]."    ".$row[1]."<br>";                                    
-                    }
+                    array_push($data, array($row[0], $row[1], ($step_level>0 || $dt_type!="freetext")?$row[0]:$row[0]."%") );
                 }
                 $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], "facet_index"=>@$params['facet_index'] );
                 $res->close();
@@ -1270,9 +1133,10 @@ if(@$params['debug'])
 //echo ("QA: ".$query);
             //exit();
         }else{
-//error_log("AAA ".$query);            
+//error_log("QA: ".$query);            
         }
         
+//error_log("AAA".$query);            
         
         
         $res = $mysqli->query($query);

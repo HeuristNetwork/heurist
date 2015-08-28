@@ -43,7 +43,6 @@ $.widget( "heurist.svs_list", {
         var that = this;
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
-        this.search_faceted_old = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
         this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
         
         
@@ -1063,34 +1062,14 @@ $.widget( "heurist.svs_list", {
                         }};
 
                         if(this.search_faceted.html()==''){ //not created yet
-                            this.search_faceted.search_faceted2( noptions );                    
+                            this.search_faceted.search_faceted( noptions );                    
                         }else{
-                            this.search_faceted.search_faceted2('option', noptions ); //assign new parameters
+                            this.search_faceted.search_faceted('option', noptions ); //assign new parameters
                         }
                     
                 }else{
                 
-                    //use special widget
-                    if($.isFunction($('body').search_faceted)){ //already loaded
-                        //init faceted search
-                        this.search_faceted_old.show();
-                        this.search_tree.hide();
-
-                        var noptions= { query_name:qname, params:facet_params,
-                            onclose:function(event){
-                                that.search_faceted_old.hide();
-                                that.search_tree.show();
-                        }};
-
-                        if(this.search_faceted_old.html()==''){ //not created yet
-                            this.search_faceted_old.search_faceted( noptions );                    
-                        }else{
-                            this.search_faceted_old.search_faceted('option', noptions ); //assign new parameters
-                        }
-
-                    }else{
-                        $.getScript(top.HAPI4.basePath+'apps/search/search_faceted.js', that._doSearch2(qname, qsearch) );
-                    }
+                    Hul.showMsgErr("This faceted search is old version. Please edit and save to upgrade it")    
                 
                 }
 
@@ -1238,7 +1217,6 @@ $.widget( "heurist.svs_list", {
         
         this.search_tree.remove(); 
         this.search_faceted.remove(); 
-        this.search_faceted_old.remove(); 
     }
     
     , _showDbSummary: function(){

@@ -390,7 +390,7 @@ $.widget( "heurist.profile", {
     if(response.status == top.HAPI4.ResponseStatus.OK){
     alert(response.data);
     }else{
-    top.HEURIST4.util.showMsgErr(response.message);
+    top.HEURIST4.util.showMsgErr(response);
     }
     }
     );

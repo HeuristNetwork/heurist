@@ -764,13 +764,16 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             msg = response.status;
             if(response.message){
                 msg = msg + '<br>' + response.message;
+            }else{
+                msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
             }
+            
             if(response.sysmsg){
 
                 if(typeof response.sysmsg['join'] === "function"){
-                    msg = msg + '<br>' +response.sysmsg.join('<br>');
+                    msg = msg + '<br>System error: ' +response.sysmsg.join('<br>');
                 }else{
-                    msg = msg + '<br>' + response.sysmsg;
+                    msg = msg + '<br>System error: ' + response.sysmsg;
                 }
 
             }

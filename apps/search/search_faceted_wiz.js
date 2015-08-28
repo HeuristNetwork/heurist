@@ -196,11 +196,11 @@ $.widget( "heurist.search_faceted_wiz", {
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
         .appendTo(this.element);
         
-        var header = $("<div>").appendTo(this.step2);
+        var header = $("<div>").css('font-size','0.8em').appendTo(this.step2);
         
         header.html("<label>"+top.HR("Select fields that act as facet")+
-            "</label><span style='float:right;height:1em'><input type='checkbox' id='fsw_showreverse' />&nbsp;<label for='fsw_showreverse'>"+
-            top.HR("Show linked-from record types (reverse pointers)")+"</label></span>");
+            "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
+            top.HR("Show linked-from record types (reverse pointers)")+"</label>");
         
         //$("<label>").text(top.HR("Select fields that act as facet")).appendTo(header);
         //$("<checkbox>").text(top.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
@@ -592,7 +592,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //load definitions for given rectypes
                 window.HAPI4.SystemMgr.get_defs({rectypes: rectype, 
                         mode:4, 
-                        fieldtypes:['enum','freetext']},  //ART20150810 this.options.params.fieldtypes.join() }, 
+                        fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() }, 
                 
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -925,9 +925,9 @@ $.widget( "heurist.search_faceted_wiz", {
         var noptions= { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
         
         if(listdiv.html()==''){ //not created yet
-            listdiv.search_faceted2( noptions );                    
+            listdiv.search_faceted( noptions );                    
         }else{
-            listdiv.search_faceted2('option', noptions ); //assign new parameters
+            listdiv.search_faceted('option', noptions ); //assign new parameters
         }
 
     }

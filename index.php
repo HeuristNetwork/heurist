@@ -109,7 +109,7 @@
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
-        <script type="text/javascript" src="apps/search/search_faceted2.js"></script>
+        <script type="text/javascript" src="apps/search/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>

@@ -144,12 +144,19 @@
 
             if(@$dbs_rtStructs['typedefs'][$recTypeId]){
                 $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                
+                $children_links = array();
 
                 foreach ($details as $dtID => $dtValue){
                     
                     $res_dt = __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, null);
                     if($res_dt){
-                        array_push($children, $res_dt);
+                        
+                        if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
+                            array_push($children_links, $res_dt);
+                        }else{
+                            array_push($children, $res_dt);
+                        }
                         /*
                         if(is_array($res_dt) && count($res_dt)==1){
                         $res["f".$dtID] = $res_dt[0];    
@@ -160,6 +167,10 @@
                         */
                     }
                 }//for
+                
+                //add resource and relation at the end of result array
+                $children = array_merge($children, $children_links);
+                
                 
                 //find all reverse links and relations
                 if($mode==4){ //&& $recursion_depth==0){
@@ -361,7 +372,7 @@
 
             default:
                 //error_log("2>>>".$mode."  ".$detailType."  ".$dt_label."   ".($detailType=='float'));            
-                if (($mode==3) ||  in_array($detailType, $fieldtypes))
+                if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
                 {
                     //error_log("!!!!!!!!!");                    
                     $res = array();

@@ -412,7 +412,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                                             that._currenttype  = content_id;
                                             that._resultset = new hRecordSet(response.data);
                                         }else{
-                                            top.HEURIST4.util.showMsgErr(response.message);
+                                            top.HEURIST4.util.showMsgErr(response);
                                             return;
                                         }
                                     
@@ -622,7 +622,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                     that._recalculateFacets(svs_id, facet_index);
 
                 }else{
-                    top.HEURIST4.util.showMsgErr(response.message);
+                    top.HEURIST4.util.showMsgErr(response);
                 }
                 
                 

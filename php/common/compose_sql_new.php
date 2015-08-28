@@ -538,11 +538,16 @@ class HPredicate {
             
         }else{
         
-        
-            $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
+           if(false && $this->isDateTime()){ 
+                $field_name = 'str_to_date(getTemporalDateString('.$p.'.dtl_Value), "%Y-%m-%d %H:%i:%s") ';            
+           }else{
+                $field_name = $p."dtl_Value ";
+           }
+                
+            //old $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
             
             $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-                .$p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val.")";
+                .$p."dtl_DetailTypeID=".$this->field_id." AND ".$field_name.$val.")";
             
         }
         
@@ -766,6 +771,66 @@ class HPredicate {
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
     
+    
+    function isDateTime() {
+
+            if (strpos($this->value,"<>")>0) {
+                $vals = explode("<>", $this->value);
+                
+                if(is_numeric($vals[0]) || is_numeric($vals[1])) return false;
+                
+                $timestamp0 = strtotime($vals[0]);
+                $timestamp1 = strtotime($vals[1]);
+            }else{
+                
+                if(is_numeric($this->value)) return false;
+                
+                $timestamp0 = strtotime($this->value);
+                $timestamp1 = 1;
+            }
+            return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
+    }
+
+    function makeDateClause() {
+
+            if (strpos($this->value,"<>")) {
+
+                $vals = explode("<>", $this->value);
+                $timestamp0 = strtotime($vals[0]);
+                $timestamp1 = strtotime($vals[1]);
+                return "between '".date('Y-m-d', $timestamp0)."' and '".date('Y-m-d', $timestamp1)."'";
+
+            }else{
+
+                $timestamp = strtotime($this->value);
+                if ($this->exact) {
+                    $datestamp = date('Y-m-d H:i:s', $timestamp);
+                    return "= '$datestamp'";
+                }
+                else if ($this->lessthan) {
+                    $datestamp = date('Y-m-d H:i:s', $timestamp);
+                    return "< '$datestamp'";
+                }
+                else if ($this->greaterthan) {
+                    $datestamp = date('Y-m-d H:i:s', $timestamp);
+                    return "> '$datestamp'";
+                }
+                else {
+                    // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
+                    $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
+                    if (@$matches[0]) {
+                        $date = $matches[0];
+                    }
+                    else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
+                        $date = date('Y-m', $timestamp);
+                    }
+                    else {
+                        $date = date('Y-m-d', $timestamp);
+                    }
+                    return "like '$date%'";
+                }
+            }
+    }    
 
     
     /**
@@ -796,6 +861,7 @@ class HPredicate {
         if($this->value=='') return null;
         
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
+        
         if (is_numeric($this->value)) {
             if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
@@ -810,18 +876,37 @@ class HPredicate {
             $res = " $in (" . $this->value . ")";
             
             $this->field_list = true;
-        }
-        else {
+        
+        } else if($this->isDateTime()){
             
-            if($eq=='=' && !$this->exact){
-                $eq = 'like';
-                $k = strpos($this->value,"%");
-                if($k===false || ($k>0 && $k<strlen())){
-                    $this->value = '%'.$this->value.'%';
+//error_log("is date: ".$this->value);           
+            
+            $res = $this->makeDateClause();
+        
+        } else {
+            
+            if (strpos($this->value,"<>")>0) { 
+                $vals = explode("<>", $this->value);
+                
+                $between = (($this->negate)?" not":"")." between ";
+                if(is_numeric($vals[0]) && is_numeric($vals[1])){
+                    $res = $between.$vals[0]." and ".$vals[1];
+                }else{
+                    $res = $between.$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                 }
-            }
+                
+            }else{
             
-            $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                if($eq=='=' && !$this->exact){
+                    $eq = 'like';
+                    $k = strpos($this->value,"%");
+                    if($k===false || ($k>0 && $k+1<strlen($this->value))){
+                        $this->value = '%'.$this->value.'%';
+                    }
+                }
+            
+                $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+            }
         }                
         
         return $res;        

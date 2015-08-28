@@ -99,7 +99,7 @@ $.widget( "heurist.pagination", {
                         top.HAPI4.SystemMgr.save_prefs({'search_limit': newlimit},
                             function(response){
                                 if(response.status != top.HAPI4.ResponseStatus.OK){
-                                    top.HEURIST4.util.showMsgErr(response.message);
+                                    top.HEURIST4.util.showMsgErr(response);
                                 }
                             }
                         );

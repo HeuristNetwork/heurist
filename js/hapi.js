@@ -94,6 +94,23 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     }
 
+    // not used
+    function _processerror(response){
+        
+        if(response.status != top.HAPI4.ResponseStatus.OK){
+                var msg = response.message;
+                
+                if(!msg){
+                    msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
+                }
+                if(response.sysmsg){
+                    msg = msg + "<br>System error:" + response.sysmsg;
+                }
+                
+                top.HEURIST4.util.showMsgErr(msg);
+        }
+    }
+    
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
     * 
@@ -121,13 +138,19 @@ function hAPI(_db, _oninit) { //, _currentUser
             dataType: "json",
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
+                
+                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: jqXHR.responseText }
+                //_processerror(response);
+                
                 if(callback){
-                    callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                        message: jqXHR.responseText });
+                    callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
+                
+                //_processerror(response);
+                
                 if(callback){
                     callback(response);
                 }
@@ -420,18 +443,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
-                            //@todo - dentralize error message processing
-                            var msg = response.message;
                             
-                            if(!msg){
-                                msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
-                            }
-                            if(response.sysmsg){
-                                msg = msg + "<br>System error:" + response.sysmsg;
-                            }
+                            top.HEURIST4.util.showMsgErr(response);
                             
-                            top.HEURIST4.util.showMsgErr(msg);
-                        
                             if(!top.HEURIST4.util.isnull(document)){    
                                 document.trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
                             }
