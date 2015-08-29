@@ -1009,12 +1009,20 @@ $.widget( "heurist.search_faceted", {
                     
                         console.log(facet_index);
                     
-                        $facet_values.css({'width':'100%','padding':'0.5em'});
+                        //$facet_values.parent().css({'width':'100%'});
+                        $facet_values.css({'width':'100%','padding':'1em'});
 
                         var cterm = response.data[0];
                         
                         var mmin = cterm[0];
                         var mmax = cterm[1];
+                        
+                        if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
+                                    var cvalue = field.history[0];
+                                    cvalue.value = null;
+                                    var f_link = this._createFacetLink(facet_index, cvalue);
+                                    $('<span>').css('display','block').append(f_link).appendTo($facet_values);
+                        }
                         
                         if(!(top.HEURIST4.util.isempty(mmin) || top.HEURIST4.util.isempty(mmax))){
                             
@@ -1023,8 +1031,25 @@ $.widget( "heurist.search_faceted", {
                                 mmax = mmax.replace(' ','T');
                                 mmin = Date.parse(mmin); 
                                 mmax = Date.parse(mmax); 
+                                //find date interval for proper formating
+                                var delta = mmax-mmin;
+                                var date_format = "yyyy-mm-dd HH:MM:ss";
+                                var daymsec = 24*60*60*1000;
+                                
+                                if(delta>3*365*daymsec){ //3 years
+                                    date_format = "yyyy";
+                                }else if(delta>365*daymsec){ //6 month
+                                    date_format = "yyyy-mm";
+                                }else if(delta>daymsec){ //1 day
+                                    date_format = "yyyy-mm-dd";
+                                }
+                            
+                                
                             }
                             
+                        if(mmin==mmax){
+                            $("<span>").text(cterm[0]).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
+                        }else 
                         if(!(isNaN(mmin) || isNaN(mmax))){
                             
                             
@@ -1040,14 +1065,15 @@ $.widget( "heurist.search_faceted", {
                                         max = arguments[1];
                                     }
                                     if(field['type']=="date"){
-                                        min = (new Date(min)).toISOString(); 
-                                        max = (new Date(max)).toISOString(); 
+                                        min = (new Date(min)).format(date_format);  //toISOString(); 
+                                        max = (new Date(max)).format(date_format);
                                     }
                                     $( "#facet_range"+facet_index )
                                         .text( min + " - " + max );
                                 }
                             }
                             
+                            //preapre value to be sent to server and start search
                             function __onSlideStop( event, ui){
 
                                 var min = ui.values[ 0 ];
@@ -1082,6 +1108,7 @@ $.widget( "heurist.search_faceted", {
                                       slide: __updateSliderLabel,
                                       stop: __onSlideStop
                                     })
+                                    .css({'position':'absolute','left':'1em','right':'2em'})
                             .appendTo($facet_values);
 
                             __updateSliderLabel(mmin, mmax);
