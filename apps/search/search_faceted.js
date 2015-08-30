@@ -145,12 +145,22 @@ $.widget( "heurist.search_faceted", {
         this.doReset();
         
         var that = this;
+        var current_query_request_id;
         
-        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data) {
+        $(this.document).on(top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART, 
+        
+        function(e, data) {
 
-            if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
-                //if(data && data.queryid() == that._request_id){
-                if(data && data.source==that.element.attr('id') ){   //search from this widget
+            if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+            
+                    if(data.source==that.element.attr('id') ){   //search from this widget
+                          current_query_request_id = data.id;
+                    }
+                
+            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                
+                if(data && data.queryid()==current_query_request_id) {
+                      //search from this widget
                       that._isInited = false;
                       that._recalculateFacets(-1);       
                 }         
@@ -214,7 +224,7 @@ $.widget( "heurist.search_faceted", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         
-        $(this.document).off( top.HAPI4.Event.ON_REC_SEARCH_FINISH );
+        $(this.document).off( top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART );
         
         // remove generated elements
         if(this.div_title) this.div_title.remove();
@@ -359,7 +369,7 @@ $.widget( "heurist.search_faceted", {
            }
        });
      
-       this.options.params['qa'] = mainquery;
+       this.options.params['q'] = mainquery;
    }
     
     //
@@ -477,7 +487,7 @@ $.widget( "heurist.search_faceted", {
        
        this._isInited = true;
        //get empty query
-       this._first_query = top.HEURIST4.util.cloneJSON( this.options.params.qa ); //clone 
+       this._first_query = top.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
        this._fillQueryWithValues( this._first_query );
        this._recalculateFacets(-1);
     }
@@ -580,7 +590,7 @@ $.widget( "heurist.search_faceted", {
     
     ,doSearch : function(){
 
-            var query = top.HEURIST4.util.cloneJSON( this.options.params.qa ); //clone 
+            var query = top.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
             
             if(isform_empty){
@@ -603,11 +613,11 @@ $.widget( "heurist.search_faceted", {
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             this._current_query = query;
             
-            var request = { q: query, w: this.options.params.domain, 
+            var request = { q: query, 
+                            w: this.options.params.domain, 
                             f: 'map', 
                             source:this.element.attr('id'), 
                             qname:this.options.query_name
-                            //id: this._request_id 
                             }; //, facets: facets
             
             //perform search
@@ -737,12 +747,13 @@ $.widget( "heurist.search_faceted", {
                 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
                 
-                var request = {qa: query, w: 'a', a:'getfacets_new',
+                var request = {q: query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  field['id'],
                                      type:   field['type'],
                                      step:   step_level,
                                      needcount: needcount,
+                                     qname:this.options.query_name, 
                                      source:this.element.attr('id') }; //, facets: facets
 
 

@@ -43,7 +43,7 @@ $.widget( "heurist.svs_list", {
         var that = this;
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
-        this.search_faceted = $( "<div>" ).css({'height':'100%'}).appendTo( this.element ).hide(); 
+        this.search_faceted = $( "<div>", {id:this.element.attr('id')+'_search_faceted'} ).css({'height':'100%'}).appendTo( this.element ).hide(); 
         
         
         this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.5em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
@@ -1069,7 +1069,10 @@ $.widget( "heurist.svs_list", {
                     
                 }else{
                 
-                    Hul.showMsgErr("This faceted search is old version. Please edit and save to upgrade it")    
+                    Hul.showMsgErr("This faceted search is old version. "
+                    +"We apologise for this error which is due to changes in the format of saved searches "
+                    +"required to support new features, and the costs of providing backward compatibility "
+                    +"for a relatively small user-base.")    
                 
                 }
 

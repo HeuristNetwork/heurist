@@ -482,7 +482,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                 
                 var query = this._setFacetQuery( field['facet'], this._resultset.getIds() );
                 
-                var request = {qa: query, w: 'a', a:'getfacets_new',
+                var request = {q: query, w: 'a', a:'getfacets',
                                      svs_id: svs_id,
                                      facet_index: i, 
                                      field:  field['id'],

@@ -1266,10 +1266,8 @@ function ShowReps() {
                 var topWindowDims = top.HEURIST.util.innerDimensions(window);
                 var xpos = topWindowDims.w - 400;
 
-                var w = top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
+                top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
                     "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
-            //
-                insertPopupID = w.id;
             }
         }
 
