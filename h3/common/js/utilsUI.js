@@ -511,7 +511,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if (options["no-resize"] === undefined) options["no-resize"] = true;
 
         if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
-            return top.HEURIST.util.popupWindow(parentWindow, options);
+            top.HEURIST.util.popupWindow(parentWindow, options);
+            return null;
         }else{
             return top.HEURIST4.util.showElementAsDialog(options);
         }

@@ -761,13 +761,15 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         if(typeof response === "string"){
             msg = response;
         }else{
-            msg = response.status;
+            msg = ""; //response.status;
             if(response.message){
                 msg = msg + '<br>' + response.message;
             }else{
-                msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
+                msg = "Server returns nothing. Either server not accessible or script is corrupted."
+                +" Please try later and if issue persists please consult your system administrator "
+                +" or contact development team";   
             }
-            
+
             if(response.sysmsg){
 
                 if(typeof response.sysmsg['join'] === "function"){
@@ -775,7 +777,24 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 }else{
                     msg = msg + '<br>System error: ' + response.sysmsg;
                 }
+                
+            }
+            if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL){
 
+                msg = msg + "<br><br>The system is not configured properly. Please consult your system administrator";
+            
+            }else if(response.status==top.HAPI4.ResponseStatus.INVALID_REQUEST){
+
+                msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please contact development team";
+
+            }else if(response.status==top.HAPI4.ResponseStatus.REQUEST_DENIED){
+
+                msg = msg + "<br><br>This action is not allowed for your current permissions";
+
+            }else if(response.status==top.HAPI4.ResponseStatus.DB_ERROR){
+                msg = msg + "<br><br>Please consult your system administrator. Error may be due to an incomplete "   
+                        +"database eg. missing stored procedures, functions, triggers, or there may be an "
+                        +"error in our code (in which case we need to know so we can fix it";
             }
         }
 
@@ -1151,7 +1170,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             };
             $dlg.dialog(opts);
         
-            return {id:0};
+            return $dlg;
     },
     
     getScrollBarWidth: function() {

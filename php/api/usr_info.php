@@ -59,6 +59,7 @@
 
                 if($system->login($username, $password, $session_type)){
                     $res = $system->getCurrentUserAndSysInfo();
+                    checkDatabaseFunctions($mysqli);
                 }
 
             } else if ($action=="reset_password") {    
