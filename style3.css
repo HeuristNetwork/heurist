@@ -740,3 +740,7 @@ ul.ui-fancytree > li:hover > .svs-contextmenu {
 ::-webkit-scrollbar-button {
     background: #8ea9b9
 }*/
+.div-table-cell{
+    display: table-cell;
+    vertical-align: middle;    
+}

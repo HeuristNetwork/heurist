@@ -170,12 +170,11 @@ $.widget( "heurist.search", {
         
         
         this.div_search_header = $('<div>')
-        .css('display', 'inline-block')
-        //.css({'vertical-align':'top'})
+        .addClass('div-table-cell')
         .appendTo( this.div_search );
         
-        $( "<span>" ).text(top.HR("Filter criteria"))
-        .css({'font-weight':'bold','font-size':'1.2em','padding-right':'0.2em','vertical-align': 'top'})
+        $( "<label>" ).text(top.HR("Filter criteria"))
+        .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'super'})
         .appendTo( this.div_search_header );
 
         
@@ -195,7 +194,7 @@ $.widget( "heurist.search", {
         */    
             
         var link = $('<a>',{href:'#'})
-            .html('<img src="'+top.HAPI4.basePath+'assets/info.png" width="20" title="Show syntax and examples of the Heurist query language" />')
+            .html('<img src="'+top.HAPI4.basePath+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
             .css('padding-right','1em')
             .appendTo(this.div_search_header);
             this._on( link, {  click: function(){ 
@@ -203,11 +202,12 @@ $.widget( "heurist.search", {
             } });
 
 
-        
         this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )                  
         .css({'margin-right':'0.2em', 'max-width':sz_input, 'width':sz_input, 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'}) 
         .addClass("text ui-widget-content ui-corner-all")
-        .appendTo( this.div_search );
+        .appendTo( $('<div>')
+        .addClass('div-table-cell')
+        .appendTo( this.div_search ) );
         
         var menu_h = top.HEURIST4.util.em(1); 
         
@@ -241,9 +241,7 @@ $.widget( "heurist.search", {
         // search buttons
         //
         this.div_search_as_guest = $('<div>')
-        .css('display', 'inline-block')
-        .addClass('logged-out-only')
-        .css({'vertical-align':'top'})
+        .addClass('div-table-cell logged-out-only')
         .appendTo( this.div_search );
 
         this.btn_search_as_guest = $( "<button>", {
@@ -256,8 +254,7 @@ $.widget( "heurist.search", {
         }});
 
         this.div_search_as_user = $('<div>')
-        .addClass('logged-in-only')
-        .css('display', 'inline-block')
+        .addClass('div-table-cell logged-in-only')
         //.css({'position':'absolute'})
         .appendTo( this.div_search );
         
