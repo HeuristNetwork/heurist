@@ -1557,15 +1557,23 @@ function EditRecStructure() {
                     //alert('It appears that you removed some field(s) that are in use in the title mask. Please edit the title mask to correct it. '+obj);
                     var ele = document.getElementById("dlgWrongTitleMask");
 
-                    warningPopupID = Hul.popupTinyElement(window, ele,
-                                { "no-titlebar": false, "no-close": false, width: 320, height:100 });
+                    
+                    var $dlg = Hul.popupTinyElement(window, ele,
+                                { "no-titlebar": false, "no-close": false, width: 400, height:160 });
 
+                    $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
+                            /*if($dlg!=null){
+                                $dlg.dialog('close');  
+                            }*/ 
+                            _doEditTitleMask();
+                    });
 
                 }
 
             }, squery);
     }
 
+    
     //show edit title mask
     function _doEditTitleMask(){
         top.HEURIST.util.closePopupLast();

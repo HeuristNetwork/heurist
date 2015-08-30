@@ -219,17 +219,17 @@
             </span>
         </div>
 
-        <div style="display: none;text-align:center; padding:5px; width:90%" id="dlgWrongTitleMask">
+        <div style="display: none;text-align:left; padding:5px; width:90%" id="dlgWrongTitleMask">
             The current title mask appears to be invalid.
             This generally means that fields used in the mask have been removed from the record structure.
             A valid title mask is essential for display of the record in search results.
-            <div style="padding-top: 10px;">
-                <input style="margin-right: 10px;" type="button" value="Fix title mask"
-                    onClick="{top.HEURIST.util.popups.list[top.HEURIST.util.popups.list.length-1].opener.editStructure.doEditTitleMask();}"/>
+            <div style="padding-top: 10px;text-align:center;">
+                <input style="margin-right: 10px;" type="button" value="Fix title mask" id="dlgWrongTitleMask_closeBtn"/>
             </div>
         </div>
 
         <script  type="text/javascript">
+
             //
             //  starts initialization on load completion of this window
             //
