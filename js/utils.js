@@ -1134,8 +1134,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                                     $dlg.remove();
                                 }
                         };
-                        $dosframe.attr('src', url);
                         $dlg.dialog(opts);
+                        $dosframe.attr('src', url);
     },
     
     showElementAsDialog: function(options){

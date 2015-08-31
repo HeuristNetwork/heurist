@@ -171,10 +171,11 @@ $.widget( "heurist.search", {
         
         this.div_search_header = $('<div>')
         .addClass('div-table-cell')
+        //.css('padding-top','0.4em')
         .appendTo( this.div_search );
         
         $( "<label>" ).text(top.HR("Filter criteria"))
-        .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'super'})
+        .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
 
         
@@ -202,12 +203,14 @@ $.widget( "heurist.search", {
             } });
 
 
+        this.div_search_input = $('<div>')
+            .addClass('div-table-cell')
+            .appendTo( this.div_search );            
+            
         this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )                  
         .css({'margin-right':'0.2em', 'max-width':sz_input, 'width':sz_input, 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'}) 
         .addClass("text ui-widget-content ui-corner-all")
-        .appendTo( $('<div>')
-        .addClass('div-table-cell')
-        .appendTo( this.div_search ) );
+        .appendTo(  this.div_search_input );
         
         var menu_h = top.HEURIST4.util.em(1); 
         
@@ -324,7 +327,7 @@ $.widget( "heurist.search", {
 
             //$('<br>').appendTo( this.div_search );
             this.div_search_links = $('<div>').css({'text-align':'right','width':sz_input,'padding-top':'0.3em'}) //, 'width':'30%', 'max-width':'500px' })
-                    .appendTo( this.div_search );
+                    .appendTo(  this.div_search_input );
 
             var link = $('<a>',{
                 text: 'Quick', href:'#'
@@ -398,24 +401,30 @@ $.widget( "heurist.search", {
                 }                
             });     */
             
-            var link = $('<a>',{href:'#'})
-            .html('<img src="'+top.HAPI4.basePath+'assets/magicwand.png" width="20" title="'+
-                    top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
-            .css({'padding-right':'1em','padding-left':'1em'})
-            .insertBefore( this.btn_search_as_user );
-            this._on( link, {  click: this.showSearchAssistant });
+                this.div_buttons = $('<div>')
+                    .addClass('div-table-cell logged-in-only')
+                    //.css({'padding-top':'0.4em'})
+                    .insertBefore( this.div_search_as_guest );
+                
+                
+                var link = $('<a>',{href:'#'})
+                .html('<img src="'+top.HAPI4.basePath+'assets/magicwand.png" width="20" title="'+
+                        top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
+                .css({'padding-right':'1em','padding-left':'1em'})
+                .appendTo( this.div_buttons );
+                this._on( link, {  click: this.showSearchAssistant });
 
-            link = $('<a>',{href:'#'})
-            .html('<img src="'+top.HAPI4.basePath+'assets/savefloppy.png" width="20" title="'+
-                    top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
-            .css('padding-right','1em')
-            .insertBefore( this.btn_search_as_user );
-            this._on( link, {  click: function(){ 
-                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
-                if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method 
-                }                
-            } });
+                link = $('<a>',{href:'#'})
+                .html('<img src="'+top.HAPI4.basePath+'assets/savefloppy.png" width="20" title="'+
+                        top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
+                .css('padding-right','1em')
+                .appendTo( this.div_buttons );
+                this._on( link, {  click: function(){ 
+                    var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                    if(app && app.widget){
+                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method 
+                    }                
+                } });
                         
 
             //show quick search assistant
