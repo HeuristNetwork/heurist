@@ -418,9 +418,19 @@
         <!-- message of the day TODO: FIX OR REMOVE, SEEMS THIS IS NOT DISPLAYED ALTHOUGH IT IS IN PAGE SOURCE-->
         <div id="message"> Heurist 3 : Open Source <a href="../help/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
         <!-- quicklinks -->
-        <div id="quicklinks">
-            <div id="logged-in" style="height:22px"></div>
-            <ul id=quicklink-cell>
+        <div id="quicklinks" style="padding-top: 25px">
+                <!--<div id="logged-in" style="height:22px"></div>-->
+            
+                <div style="display:inline-block;padding-top: 5px;">cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></div>
+                <script>
+                    top.HEURIST.whenLoaded(recordEvent, function() {
+                        var citeAs = document.getElementById("cite-as-url");
+                        citeAs.href = window.location.protocol + "//" + window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
+                        citeAs.appendChild(document.createTextNode(citeAs.href));
+                    });
+                </script>
+            
+            <ul id=quicklink-cell style="display: inline-block;padding-left:15px;display:inline-block">
                 <!-- <li><a href="../../help/index.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li> -->
                 <li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report to the Heurist developers"><b>Report bug</b></a></li>
                 <li><a id=contact-link href="mailto:info@heuristscholar.org"><b>Contact us</b></a></li>
@@ -526,6 +536,19 @@
             </div>
 
             <div id="search-nav" class="sidebar-nav"></div>
+
+            <div id="dates-added-update-info" class="sidebar-nav" style="text-align:right;">
+                <span id=adddate></span><br>
+                <span id=moddate></span>
+            </div>
+                <script>
+                    top.HEURIST.whenLoaded(recordEvent, function() {
+                        document.getElementById("adddate").appendChild(document.createTextNode("added: " + top.HEURIST.edit.record.adddate));
+                        if(top.HEURIST.edit.record.moddate)
+                            document.getElementById("moddate").appendChild(document.createTextNode("updated: " + top.HEURIST.edit.record.moddate));
+                    });
+                </script>
+            
         </div>
         <!-- end sidebar -->
 
@@ -598,17 +621,6 @@
         <!-- footer -->
         <div id=footer>
             <div id="rty_description" class="help"></div>
-            <span class="edit-mode-depended">last accessed: <span id=moddate></span>
-                <span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
-                <script>
-                    top.HEURIST.whenLoaded(recordEvent, function() {
-                        document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
-                        var citeAs = document.getElementById("cite-as-url");
-                        citeAs.href = window.location.protocol + "//" + window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
-                        citeAs.appendChild(document.createTextNode(citeAs.href));
-                    });
-                </script>
-            </span>
         </div>
         <!-- end footer -->
 

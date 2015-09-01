@@ -691,6 +691,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
     background-position: -64px -48px;
+    width:16;
 }
 .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
 {
@@ -743,4 +744,8 @@ ul.ui-fancytree > li:hover > .svs-contextmenu {
 .div-table-cell{
     display: table-cell;
     vertical-align: middle;    
+}
+
+.mandatory > label{
+    color:red;
 }

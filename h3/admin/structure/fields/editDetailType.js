@@ -874,7 +874,10 @@ function DetailTypeEditor() {
                 _recreateRecTypesPreview(that.keepType, null);
 
                 if((el.value=="freetext" || el.value=="blocktext") && _dtyID<0){
-                    _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 500, width:800, title:"Information", modal:true} );
+                    if(top.HEURIST4){
+                        $("#topdiv_closebtn").hide();
+                    }
+                    _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
 
             }

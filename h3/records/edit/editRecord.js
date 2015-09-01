@@ -3642,7 +3642,7 @@ if (! top.HEURIST.edit) {
         this.document = elt;
 
         this.typeDescription = "URL (internet address)";
-        this.shortName = "URL";
+        this.shortName = "Primary URL";
 
         var row = parentElement.appendChild(this.document.createElement("div"));
         if (required) {    // internet bookmark

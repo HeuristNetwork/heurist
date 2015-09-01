@@ -67,77 +67,14 @@ if(isset($_POST['data'])) {
   <link rel="stylesheet" type="text/css" href="../style3.css">
   
   <style>
-/*  
-    #form {
-        display: inline-block;
-    }
-    
-    .row {
-        position: relative;
-        padding: 3px;
-        margin-left: 5px;
-        margin-right: 5px;
-    }
-    
-    .row label {
-        width: 100px;
-        text-align: right;
-        display: inline-block;
-        margin-right: 5px;
-    }
-    
-    .required {
-        color: #f11;
-        font-weight: bold;
-    }
-    
-    
-    .row select {
-        min-width: 200px;
-    }
-    
-    .row input {
-        width: 300px;
-    }
-    
-    #top {
-        width: 100px;
-        display: inline-block;
-        text-align: right;
-        vertical-align: top;
-        margin-right: 5px;
-    }
-    
-    #right {
-        display: inline-block;
-    }
-    
-    
-    .row textarea {
-        width: 300px;       
-    }
-    
-    #message-info {
-        font-size: 10px;   
-    }
-    #prepare {
+    #btn_redo {
+        cursor: pointer;
         float: right;
-        border: 1px solid black;
-        padding: 5px;
-        background-color: #fff;
-        font-weight: bold;
-        cursor: pointer;
-    }
-   */ 
-    #redo {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background-color: rgba(255, 255, 255, 0.5);
-        color: #000;
-        border: 1px solid white;
-        font-size: 20px;
-        cursor: pointer;
+        font-size: 1.4em;
+        height: 1.8em;
+        margin-left: 2px;
+        margin-top: 6px;
+        width: 1.8em;
     }
     
   </style>
@@ -156,7 +93,7 @@ if(isset($_POST['data'])) {
         </div>
             
         <div>
-            <div class="header"><label for="email">Email:</label></div>
+            <div class="header mandatory"><label for="email">Email:</label></div>
             <select name="email" id="email" class="text ui-widget-content ui-corner-all mandatory"></select>
         </div>
         <div>
@@ -191,18 +128,24 @@ if(isset($_POST['data'])) {
         
         <div>
             <div class="header_narrow"><label for="subject">Subject :</label></div>
-            <input type="text" name="subject" id="subject" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:29.2em"/>
+            <input type="text" name="subject" id="subject" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:24.2em"/>
         </div>
         <div>
             <div class="header_narrow" style="vertical-align:top"><label for="message">Message :</label></div>
-            <textarea name="message" id="message" rows="10" class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:30em"></textarea>
-            <textarea name="message" id="message-prepared" rows="10" class="text ui-widget-content ui-corner-all mandatory" style="display: none"></textarea>
+            <textarea name="message2" id="message" rows="10" class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em"></textarea>
+            <textarea name="message" id="message-prepared" rows="10" 
+                                                            class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em;display: none"></textarea>
+            <button id="btn_redo" style="display: none" onclick="redo()">&#10226;</button>
+                                                            
             <div style="font-size: smaller; margin-top: 2px;">may include html; #fieldname to include content of field</div>
-            <button id="redo" style="display: none" onclick="redo()">&#10226;</button>
        </div>
 
-       <div>
-            <button id="prepare" onClick="prepare()">Prepare and send emails</button>
+       <div style="display:block;padding-top:1em;text-align:right;width:100%">
+            <button type="button" id="prepare" 
+                    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                    role="button" aria-disabled="false" onClick="prepare()">
+                    <span class="ui-button-text">Prepare emails</span>
+            </button>
        </div>
         
         
@@ -291,7 +234,7 @@ if(isset($_POST['data'])) {
                 this.record = records[r]; // Reference to first record
                 var rectype = record[rectype_index]; // Record type of first record
                 this.definitions = top.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
-                console.log("Rectype: " + rectype + ", definitions", definitions);
+                console.log("Rectype: " + rectype + ", definitions", this.definitions);
                 
                 // TEXT ONLY DROPDOWNS
                 var text_options = determineOptions(text_types);
@@ -325,8 +268,8 @@ if(isset($_POST['data'])) {
         
         // Swaps the text area's
         function redo() {
-            $("#prepare").text("Prepare emails");    
-            $("#redo").hide(); // Hide redo button
+            $("#prepare > span").text("Prepare emails");    
+            $("#btn_redo").hide(); // Hide redo button
             $("#message-prepared").slideUp(500, function(e) {  // Hide prepared message
                 $("#message").slideDown(500);  // Show raw message
             })   
@@ -388,7 +331,7 @@ if(isset($_POST['data'])) {
             //console.log("Raw message: " + rawMessage);  
  
             // Check action
-            var buttonText = $("#prepare").text()
+            var buttonText = $("#prepare > span").text()
             if(buttonText.indexOf("Prepare") >= 0) { // Check button text to determine action
                 // PREPARE EMAILS
                 var message = prepareMessage(rawMessage, record, definitions);
@@ -396,9 +339,9 @@ if(isset($_POST['data'])) {
                 // Show prepared message in new text area
                 //console.log("Prepared message: " + message);
                 $("#message").slideUp(500, "linear", function(e) {
-                    $("#redo").slideDown(500);
+                    $("#btn_redo").slideDown(500);
                     $("#message-prepared").val(message).slideDown(500);
-                    $("#prepare").text("Send emails");    
+                    $("#prepare > span").text("Send emails");    
                 });
             }else{
                 // SEND EMAILS
@@ -413,12 +356,18 @@ if(isset($_POST['data'])) {
                     
                     // Email
                     var emailIndex = $("#email").val();  // Dropdown index
-                    var emailType = definitions[emailIndex][type_index];  // Field type
-                    email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
                     
-                    // Message
-                    email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
-                    data.emails.push(email);
+                    if(emailIndex>0){
+                        var emailType = definitions[emailIndex][type_index];  // Field type
+                        email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
+                    
+                        // Message
+                        email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
+                        data.emails.push(email);
+                    }else{
+                         top.HEURIST4.util.showMsgErr("Define email field. It is mandatory");
+                         return;
+                    }
                 }
                 
                 // Include e-mail to current user/database owner
@@ -429,9 +378,9 @@ if(isset($_POST['data'])) {
                 console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
-                    alert(response);  
+                    top.HEURIST4.util.showMsgDlg(response);  
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.status + " --> " + jqXHR.responseText);
+                    top.HEURIST4.util.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
                 });
 
             }
