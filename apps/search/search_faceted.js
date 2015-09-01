@@ -748,6 +748,15 @@ $.widget( "heurist.search_faceted", {
                 }
                         
                 
+                if( (!top.HEURIST4.util.isnull(field['selectedvalue'])) 
+                    && (field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year")){  //run only once to get min/max values
+                
+                       var response = {status:top.HAPI4.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
+                       that._redrawFacets(response)
+                       break;
+                }
+                
+                
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
                 
                 var request = {q: query, w: 'a', a:'getfacets',
@@ -805,11 +814,11 @@ $.widget( "heurist.search_faceted", {
                         field.history = []; 
                     }else{
                         //replace/add for current step and remove that a bigger
-                        if(!field.history || field.history.length==0){
+                        if( top.HEURIST4.util.isArrayNotEmpty(field.history) ){
+                            field.history = field.history.slice(0, field.selectedvalue.step);
+                        }else{
                             field.history = [];
                             field.history.push({text:top.HR('all'), value:null});
-                        }else{
-                            field.history = field.history.slice(0, field.selectedvalue.step);
                         }
                         field.history.push(field.selectedvalue);
                     }
@@ -1023,20 +1032,25 @@ $.widget( "heurist.search_faceted", {
                     
                         console.log(facet_index);
                     
-                        //$facet_values.parent().css({'width':'100%'});
-                        $facet_values.css({'width':'100%','padding':'1em'});
+                        $facet_values.parent().css({'width':'100%','display':'block','padding-left':'1em','padding-right':'2em'});
+                        //$facet_values.css({'width':'100%','padding':'1em'});
 
                         var cterm = response.data[0];
                         
-                        var mmin = cterm[0];
-                        var mmax = cterm[1];
-                        
                         if(top.HEURIST4.util.isArrayNotEmpty(field.history)){
-                                    var cvalue = field.history[0];
-                                    cvalue.value = null;
-                                    var f_link = this._createFacetLink(facet_index, cvalue);
+                                    var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0});
                                     $('<span>').css('display','block').append(f_link).appendTo($facet_values);
                         }
+                        if(field.selectedvalue){
+                                if($.isNumeric(field.selectedvalue.value) ||  field.selectedvalue.value.indexOf('<>')<0  ){
+                                    cterm = [field.selectedvalue.value, field.selectedvalue.value];
+                                }else{
+                                    cterm = field.selectedvalue.value.split('<>');
+                                }
+                        }
+                        
+                        var mmin  = cterm[0];
+                        var mmax  = cterm[1];
                         
                         if(!(top.HEURIST4.util.isempty(mmin) || top.HEURIST4.util.isempty(mmax))){
                             
@@ -1048,7 +1062,7 @@ $.widget( "heurist.search_faceted", {
                                 //find date interval for proper formating
                                 var delta = mmax-mmin;
                                 var date_format = "yyyy-mm-dd HH:MM:ss";
-                                var daymsec = 24*60*60*1000;
+                                var daymsec = 86400000; //24*60*60*1000;
                                 
                                 if(delta>3*365*daymsec){ //3 years
                                     date_format = "yyyy";
@@ -1057,13 +1071,21 @@ $.widget( "heurist.search_faceted", {
                                 }else if(delta>daymsec){ //1 day
                                     date_format = "yyyy-mm-dd";
                                 }
-                            
                                 
+                            }else{
+                                mmin = Number(mmin);
+                                mmax = Number(mmax);
                             }
                             
-                        if(mmin==mmax){
+                            var delta = top.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0;
+                            
+                            if(mmin==mmax){
+                                delta = field['type']=="date"?86400000:10; 
+                            }
+                            
+                        /*if(mmin==mmax){
                             $("<span>").text(cterm[0]).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
-                        }else 
+                        }else */
                         if(!(isNaN(mmin) || isNaN(mmax))){
                             
                             
@@ -1079,8 +1101,16 @@ $.widget( "heurist.search_faceted", {
                                         max = arguments[1];
                                     }
                                     if(field['type']=="date"){
-                                        min = (new Date(min)).format(date_format);  //toISOString(); 
-                                        max = (new Date(max)).format(date_format);
+                                        try{
+                                            min = (new Date(min)).format(date_format);  //toISOString(); 
+                                        }catch(err) {
+                                           min = ""; 
+                                        }
+                                        try{
+                                            max = (new Date(max)).format(date_format);
+                                        }catch(err) {
+                                            max = ""; 
+                                        }
                                     }
                                     $( "#facet_range"+facet_index )
                                         .text( min + " - " + max );
@@ -1106,23 +1136,26 @@ $.widget( "heurist.search_faceted", {
                                     value = '';
                                     field.selectedvalue = null;
                                 }else{
-                                    field.selectedvalue = {text:'???', value:value, step:0};                    
+                                    field.selectedvalue = {text:'???', value:value, step:1};                    
                                 }
                                 
                                 that.doSearch();
                             }
                         
-                            var flbl = $("<label>",{id:"facet_range"+facet_index}).appendTo($facet_values);
+                        
+                            var flbl = $("<div>",{id:"facet_range"+facet_index})
+                                        .css({'padding-bottom':'1em'})
+                                        .appendTo($facet_values);
                             var slider = $("<div>",{facet_index:facet_index})
                                 .slider({
                                       range: true,
-                                      min: mmin,
-                                      max: mmax,
+                                      min: mmin - delta,
+                                      max: mmax + delta,
                                       values: [ mmin, mmax ],
                                       slide: __updateSliderLabel,
                                       stop: __onSlideStop
                                     })
-                                    .css({'position':'absolute','left':'1em','right':'2em'})
+                                .css('height','0.4em')
                             .appendTo($facet_values);
 
                             __updateSliderLabel(mmin, mmax);

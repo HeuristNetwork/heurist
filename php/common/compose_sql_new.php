@@ -795,11 +795,21 @@ class HPredicate {
 
             if (strpos($this->value,"<>")) {
 
+                
                 $vals = explode("<>", $this->value);
                 $timestamp0 = strtotime($vals[0]);
                 $timestamp1 = strtotime($vals[1]);
-                return "between '".date('Y-m-d', $timestamp0)."' and '".date('Y-m-d', $timestamp1)."'";
 
+                if(strpos($vals[0],"-")===0){ //date function does not work with BCE
+                    $min = $vals[0];
+                }else{
+                    $min = date('Y-m-d', $timestamp0);
+                }
+
+                return "between '".$min."' and '".date('Y-m-d', $timestamp1)."'";
+
+                
+                
             }else{
 
                 $timestamp = strtotime($this->value);
@@ -843,6 +853,8 @@ class HPredicate {
         
         //@todo between , datetime, terms
         
+//
+         if (strpos($this->value,"<>")===false) { 
                     if(strpos($this->value, '-')===0){
                          $this->negate = true;
                          $this->value = substr($this->value, 1);
@@ -856,6 +868,7 @@ class HPredicate {
                          $this->greaterthan = true;
                          $this->value = substr($this->value, 1);
                     }
+         }
                     $this->value = $this->cleanQuotedValue($this->value);        
         
         if($this->value=='') return null;
@@ -879,8 +892,7 @@ class HPredicate {
         
         } else if($this->isDateTime()){
             
-//error_log("is date: ".$this->value);           
-            
+//
             $res = $this->makeDateClause();
         
         } else {
@@ -892,7 +904,7 @@ class HPredicate {
                 if(is_numeric($vals[0]) && is_numeric($vals[1])){
                     $res = $between.$vals[0]." and ".$vals[1];
                 }else{
-                    $res = $between.$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
+                    $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                 }
                 
             }else{
