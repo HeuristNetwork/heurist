@@ -1032,8 +1032,8 @@ $.widget( "heurist.search_faceted", {
                     
                         console.log(facet_index);
                     
-                        $facet_values.parent().css({'width':'100%','display':'block','padding-left':'1em','padding-right':'2em'});
-                        //$facet_values.css({'width':'100%','padding':'1em'});
+                        $facet_values.parent().css({'display':'block','padding-left':'1em','padding-right':'2em'});
+                        //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
 
                         var cterm = response.data[0];
                         
