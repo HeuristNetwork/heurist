@@ -558,18 +558,25 @@
             <!-- banner -->
             <div class="banner">
                 <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
-                    <input type=radio name="editmode" id=input-record-edit-simplemode
-                            onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode();" class=minimal>
-                    <label for=input-record-edit-simplemode>Simple Mode</label>
-                    <input type=radio name="editmode" id=input-record-edit-advancedmode
-                            onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'true' : 'false');setEditMode();" class=minimal>
-                    <label for=input-record-edit-advancedmode>Advanced Mode</label>
+                
+                    <input type=checkbox id=ui-pref-simplemode 
+                        onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode()" class=minimal>
+                    <label for=ui-pref-simplemode style="vertical-align:top">simplified view</label>
+
+                    <label style="padding-left:3em;vertical-align:top">show:</label>
+
+                    <input type=checkbox id=ui-pref-tabs onClick="" class=minimal>
+                    <label for=ui-pref-tabs style="vertical-align:top">tabs</label>
+
+                    
+                    <input type=checkbox id=ui-pref-showhelp onClick="top.HEURIST.util.helpToggler(this)" class=minimal>
+                    <label for=ui-pref-showhelp style="vertical-align:top">help</label>
+
+                    <input type=checkbox id=ui-pref-optfields  class=public-visible
+                            onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+                    <label class=public-visible for=ui-pref-optfields style="vertical-align:top">optional fields</label>
                 </div>
-                <a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
-                <div class=public-visible style="display:inline-block;margin:3px 10px">
-                    <input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-                    <label for=input-visibility>show optional fields</label>
-                </div>
+                
                 <div id="admin_editrectype" style="float:right;width:230px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
                 <span id="changed_marker" style="display:none;float:right;width:16px;height:16px;margin-top:4px;margin-right:4px;background-image: url('../../common/images/save-disk.gif')"></span>
             </div>
@@ -611,8 +618,8 @@
                     */
                     //ART document.getElementById("act-stay").checked = true;
                 }
-
-                var helpLink = top.document.getElementById("help-link");
+                
+                var helpLink = top.document.getElementById("ui-pref-showhelp");
                 top.HEURIST.util.setHelpDiv(helpLink,null);
             });
         </script>
@@ -746,18 +753,17 @@
                     $(".edit-mode-depended").css('display','block');
                     $("#rectype-change").css('display','inline-block');
                     $("#page").css('left','200px');
-                    $("#page").css('top','140px');
-                    $("#input-record-edit-advancedmode").attr('checked',true);
+                    $("#page").css('top','120px');
+                    $("#ui-pref-simplemode").attr('checked',false);
                 }else{
                     $(".edit-mode-depended").css('display','none');
                     $("#rectype-change").css('display','none');
                     $("#page").css('left','10px');
                     $("#page").css('top','120px');
-                    $("#input-record-edit-simplemode").attr('checked',true);
+                    $("#ui-pref-simplemode").attr('checked',true);
                 }
             }
-            $("#input-record-edit-advancedmode").css('vertical-align','top');
-            $("#input-record-edit-simplemode").css('vertical-align','top');
+            $("#ui-pref-simplemode").css('vertical-align','top');
             setEditMode();
         </script>
 

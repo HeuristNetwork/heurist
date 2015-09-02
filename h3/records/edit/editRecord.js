@@ -127,11 +127,11 @@ if (! top.HEURIST.edit) {
                 try {
                     newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
 
-                    var helpLink = top.document.getElementById("help-link");
+                    var helpLink = top.document.getElementById("ui-pref-showhelp");
                     top.HEURIST.util.setHelpDiv(helpLink,null);
 
                     var status = top.HEURIST.displayPreferences["input-visibility"];
-                    document.getElementById("input-visibility").checked = (status === "all");
+                    document.getElementById("ui-pref-optfields").checked = (status === "all");
                     //init class for body element
                     top.HEURIST.util.setDisplayPreference("input-visibility", status);
 
@@ -346,18 +346,18 @@ if (! top.HEURIST.edit) {
                 if (document.getElementById('workgroup-val')) {
                     if (top.HEURIST.edit.record.workgroup) {
                         document.getElementById('workgroup-val').innerHTML = '';
-                        document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.edit.record.workgroup));
+                        document.getElementById('workgroup-val').appendChild(document.createTextNode('Owner: '+top.HEURIST.edit.record.workgroup));
                     } else {
-                        document.getElementById('workgroup-val').innerHTML = 'everyone';
+                        document.getElementById('workgroup-val').innerHTML = 'Owner: everyone';
                     }
                     if (top.HEURIST.edit.record.visibility) {
                         var recVis = top.HEURIST.edit.record.visibility;
                         var othersAccess = (recVis == "hidden")? "hidden (owners only)" :
                         (recVis == "viewable")? "any logged-in user" :
                         (recVis == "pending")? "pending publication" : "public";
-                        document.getElementById('workgroup-access').innerHTML = othersAccess;
+                        document.getElementById('workgroup-access').innerHTML = "<b>Access: </b> "+othersAccess;
                     } else {
-                        document.getElementById('workgroup-access').innerHTML = 'visible';
+                        document.getElementById('workgroup-access').innerHTML = "<b>Access: </b> visible";
                     }
                     document.getElementById('workgroup-div').style.display = "inline-block";
                 }
@@ -519,7 +519,7 @@ if (! top.HEURIST.edit) {
                                 personalWindow.document.getElementById("tags").value = tags;
                                 top.HEURIST.edit.changed("personal");
                             }
-                            top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                            top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
 
                             setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
                     } });
@@ -1688,7 +1688,7 @@ if (! top.HEURIST.edit) {
                             buttonElt.title = "Edit compound date " + dateBox.strTemporal;
                         }
                     }
-                    top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                    top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                 },
                 width: "700",
                 height: "500"
@@ -2373,7 +2373,7 @@ if (! top.HEURIST.edit) {
                 if (bibID) element.input.setResource(element, bibID, bibTitle);
                 thisRef.choosing = false;
                 setTimeout(function() { element.textElt.focus(); }, 100);
-                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
             },
             height: (window.innerHeight<700?window.innerHeight-40:660)
         } );
@@ -2626,7 +2626,7 @@ if (! top.HEURIST.edit) {
                     _recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
                     */
                 }
-                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
             } // onSelecTermsUpdate
 
             var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -2648,7 +2648,7 @@ if (! top.HEURIST.edit) {
                             if(context=="ok") {
                                 onSelecTermsUpdate(sAllTerms, "");
                             }
-                            top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                            top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                         }
                     }
                 );
@@ -3061,7 +3061,7 @@ if (! top.HEURIST.edit) {
                         { callback: function(type, value)
                             {
                                 thisRef.setGeo(newDiv, value? (type+" "+value) : "");
-                                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                             }
                         }
                     );
@@ -3924,10 +3924,8 @@ if (! top.HEURIST.edit) {
                     }
 
                 }
-                var helpDiv = document.getElementById("help-link");
-                if(helpDiv) {
-                    top.HEURIST.util.setHelpDiv(helpDiv,null);
-                }
+                var helpDiv = document.getElementById("ui-pref-showhelp");
+                top.HEURIST.util.setHelpDiv(helpDiv,null);
 
                 return true; //prevent close
             }

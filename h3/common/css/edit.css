@@ -45,11 +45,11 @@
 #workgroup-div {
 	border-left:1px solid #D6D6D6;
 	bottom:0;
-	padding:8px 0;
+	padding:8px 0 0 8px;
 	position:absolute;
 	right:200px;
 	top:0;
-	width: 130px;
+	width: 180px;
 	overflow:hidden;
 }
 #rectype-edit {
@@ -136,9 +136,9 @@
 }
 #workgroup-val-div {
 	white-space: nowrap;
-	padding-left: 20px;
-	background: transparent url(../images/workgroup_icon-small.gif) scroll top left no-repeat;
-	max-width:90px;
+	/*padding-left: 20px;
+	background: transparent url(../images/workgroup_icon-small.gif) scroll top left no-repeat;*/
+	max-width:140px;
 	overflow:hidden;
 }
 
