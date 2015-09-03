@@ -92,7 +92,8 @@
              src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
-        <script type="text/javascript" src="ext/js/date.format.js"></script>
+        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script --> 
+        <script type="text/javascript" src="ext/js/date.format.js"></script> 
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>

@@ -157,6 +157,7 @@ var layouts = [
                 apps:[
                      {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping 
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List'} }
+                    ,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                     ]
             }]
         },  

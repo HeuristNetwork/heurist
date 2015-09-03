@@ -356,6 +356,10 @@ $.widget( "heurist.mainMenu", {
                             options.width  = dim.w*0.95;
                         }else if (link.hasClass('fixed')){
                             options.height=dim.h*0.8; options.width=800;
+                        }else if (link.hasClass('fixed2')){
+                            if(dim.h>700){ options.height=dim.h*0.8;}
+                            else { options.height=dim.h-20; }
+                            options.width=800;
                         }else if (link.hasClass('landscape')){
                             options.height=dim.h*0.5;
                             options.width=dim.w*0.8;
