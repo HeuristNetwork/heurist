@@ -46,7 +46,7 @@
             $currentUser = $system->getCurrentUser();
 
             $query = "select min(cast(dtl_Value as decimal)) as min, max(cast(dtl_Value as decimal)) as max from Records, recDetails where rec_ID=dtl_RecID and rec_RecTypeID="
-            .$params['rt']." and dtl_DetailTypeID=".$params['dt'];
+            .$params['rt']." and dtl_DetailTypeID=".$params['dt']." and dtl_Value is not null and dtl_Value!=''";
 
             //@todo - current user constraints
 
@@ -145,7 +145,7 @@
             }else{
                    $select_field  = "dt0.dtl_Value";
                    $detail_link   = ", recDetails dt0 ";
-                   $details_where = " AND (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID=".$fieldid.") AND (dt0.dtl_Value is not null)";
+                   $details_where = " AND (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID=".$fieldid.") AND (NULLIF(dt0.dtl_Value, '') is not null)";
                    //$detail_link   = " LEFT JOIN recDetails dt0 ON (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID=".$fieldid.")";
                    //$details_where = " and (dt0.dtl_Value is not null)";
             }
@@ -210,8 +210,7 @@
 //DEBUG 
 if(@$params['debug']) echo $query."<br>";            
             //
-//
-error_log("COUNT >>>".$query);
+//error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){

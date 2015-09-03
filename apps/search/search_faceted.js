@@ -113,15 +113,15 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button();
         
-        this.btn_reset = $( "<button>", { text: top.HR("Initial state") })
+        this.btn_reset = $( "<button>", { text: top.HR("Initial state"), title:top.HR("Reset all facets to their initial states") })
         .appendTo( this.div_toolbar )
-        .button().hide();
-
+        .button({icons: {primary: "ui-icon-arrowreturnthick-1-w"}, text:false}).hide();
+        
         this.btn_save = $( "<button>", { text: top.HR("Save state") })
         .appendTo( this.div_toolbar )
         .button().hide(); //@todo
 
-        this.btn_close = $( "<button>", { text: top.HR("Close") })
+        this.btn_close = $( "<button>", { text: top.HR("Close"), title:top.HR("Close this facet search and return to the list of saved searches") })
         .appendTo( this.div_toolbar )
         .button({icons: {secondary: "ui-icon-close"}});
 
@@ -153,7 +153,7 @@ $.widget( "heurist.search_faceted", {
 
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
             
-                    if(data.source==that.element.attr('id') ){   //search from this widget
+                    if(date && data.source==that.element.attr('id') ){   //search from this widget
                           current_query_request_id = data.id;
                     }else{
                         //search from ourside - close this widget
@@ -1055,21 +1055,23 @@ $.widget( "heurist.search_faceted", {
                         if(!(top.HEURIST4.util.isempty(mmin) || top.HEURIST4.util.isempty(mmax))){
                             
                             if(field['type']=="date"){
-                                mmin = mmin.replace(' ','T');
+                                mmin = mmin.replace(' ','T');                                                                     
                                 mmax = mmax.replace(' ','T');
                                 mmin = Date.parse(mmin); 
                                 mmax = Date.parse(mmax); 
+                                //mmin = moment(mmin).valueOf();//unix offset  
+                                //mmax = moment(mmax).valueOf();
                                 //find date interval for proper formating
                                 var delta = mmax-mmin;
-                                var date_format = "yyyy-mm-dd HH:MM:ss";
+                                var date_format = "dd mmm yyyy HH:MM"; //"YYYY-MM-DD hh:mm:ss";
                                 var daymsec = 86400000; //24*60*60*1000;
                                 
                                 if(delta>3*365*daymsec){ //3 years
                                     date_format = "yyyy";
                                 }else if(delta>365*daymsec){ //6 month
-                                    date_format = "yyyy-mm";
+                                    date_format = "mmm yyyy";
                                 }else if(delta>daymsec){ //1 day
-                                    date_format = "yyyy-mm-dd";
+                                    date_format = "dd mmm yyyy";
                                 }
                                 
                             }else{
@@ -1086,8 +1088,20 @@ $.widget( "heurist.search_faceted", {
                         /*if(mmin==mmax){
                             $("<span>").text(cterm[0]).css({'font-style':'italic', 'padding-left':'10px'}).appendTo($facet_values);
                         }else */
-                        if(!(isNaN(mmin) || isNaN(mmax))){
+                        if(isNaN(mmin) || isNaN(mmax)){
                             
+                            var s = "Server returns invalid "+field['type'];
+                            if(isNaN(mmin)&&isNaN(mmax)){
+                                s = s + " min and max values: "+cterm[0]+" and "+cterm[1];
+                            }else{
+                                s = s + " " +(isNaN(mmin)?"min":"max")+" value: "+(isNaN(mmin)?cterm[0]:cterm[1]);
+                            }
+                           
+                           $("<span>").text(s)
+                            .css({'font-style':'italic', 'padding-left':'10px'})
+                            .appendTo($facet_values); 
+                            
+                        }else{
                             
                             function __updateSliderLabel() {
                                       
@@ -1102,11 +1116,13 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     if(field['type']=="date"){
                                         try{
-                                            min = (new Date(min)).format(date_format);  //toISOString(); 
+                                           min = (new Date(min)).format(date_format);
+                                           //min = moment(min).format(date_format);
                                         }catch(err) {
                                            min = ""; 
                                         }
                                         try{
+                                            //max = moment(max).format(date_format);
                                             max = (new Date(max)).format(date_format);
                                         }catch(err) {
                                             max = ""; 

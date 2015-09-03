@@ -118,7 +118,7 @@
         
         //add default fields
         if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
-        array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  'title'=>"RecTitle <span style='font-size:0.7em'>(Cconstructed text)</span>", 'code'=>$recTypeId.":title"));
+        array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 'code'=>$recTypeId.":title"));
         array_push($children, array('key'=>'recModified', 'type'=>'date',      'title'=>"Modified  <span style='font-size:0.7em'>(Date)</span>", 'code'=>$recTypeId.":modified"));
         if($mode==3) {
             array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
