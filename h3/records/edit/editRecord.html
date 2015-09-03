@@ -565,12 +565,11 @@
 
                     <label style="padding-left:3em;vertical-align:top">show:</label>
 
-                    <input type=checkbox id=ui-pref-tabs onClick="" class=minimal>
-                    <label for=ui-pref-tabs style="vertical-align:top">tabs</label>
-
+                    <input type=checkbox id=ui-pref-tabs onClick="" class=minimal style="display:none">
+                    <label for=ui-pref-tabs style="vertical-align:top;padding-right:1em;display:none">tabs</label>
                     
                     <input type=checkbox id=ui-pref-showhelp onClick="top.HEURIST.util.helpToggler(this)" class=minimal>
-                    <label for=ui-pref-showhelp style="vertical-align:top">help</label>
+                    <label for=ui-pref-showhelp style="vertical-align:top;padding-right:1em">help</label>
 
                     <input type=checkbox id=ui-pref-optfields  class=public-visible
                             onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
