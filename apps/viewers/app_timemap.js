@@ -25,7 +25,8 @@ $.widget( "heurist.app_timemap", {
         recordset: null,
         selection: null, //list of record ids
         layout:null, //['header','map','timeline']
-        startup:0         //map document loaded on map init
+        startup:0,         //map document loaded on map init
+        autoupdate:true   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
     },
     
     _events: null,
@@ -55,10 +56,14 @@ $.widget( "heurist.app_timemap", {
                         .appendTo( this.framecontent );
 
         this._events = top.HAPI4.Event.LOGOUT 
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH 
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART 
                             + ' ' + top.HAPI4.Event.ON_REC_SELECT 
                             + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
+                            
+        if(this.options.autoupdate){
+            this._events = this._events
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH 
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
+        }
 
         $(this.document).on(this._events, function(e, data) {
 

@@ -267,7 +267,7 @@
                                         var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
                                         //top.HEURIST4.query_request = request;
                                         setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
-                                    }else{
+                                    }else if(layoutid!='L06'){
                                         var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                                         if(!top.HEURIST4.util.isempty(init_search)){
                                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };

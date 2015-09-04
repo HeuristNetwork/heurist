@@ -33,6 +33,7 @@
     */
     function svsGetByUser($system, $ugrID=null){
 
+        //user id is not defined - take current user
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
 

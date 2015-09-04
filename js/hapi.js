@@ -276,7 +276,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', request, callback);
             }
 
-            /**
+            /**                         
             * Returns detailed description of groupfs for current user
             * 
             * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
@@ -288,10 +288,15 @@ function hAPI(_db, _oninit) { //, _currentUser
             /**
             *  Get saved searched for current user and all usergroups where user is memeber
             * 
+            * request 
+            *    UGrpID: group id -  if not defined returns all saved searches for current user
             *  response data - array of  svs_ID:[svs_Name, svs_Query, svs_UGrpID]
             */
-            ,ssearch_get: function(callback){
-                _callserver('usr_info', {a:'svs_get'}, callback);
+            ,ssearch_get: function(request, callback){
+                if(!request) request = {};
+                
+                request.a = 'svs_get';
+                _callserver('usr_info', request, callback);
             }
 
             /**

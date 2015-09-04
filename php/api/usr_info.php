@@ -41,11 +41,11 @@
 
         //no enough permission for guest
         if ( $system->get_user_id()<1 && 
-            !( $action=='login' || $action=='reset_password' || $action=="svs_get" || $action=="svs_savetree"  || $action=="svs_gettree" 
+            !( $action=='login' || $action=='reset_password' || $action=="svs_savetree"  || $action=="svs_gettree" 
                || $action=="usr_save" || $action=="usr_get" || $action=="sysinfo" ) ) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED, "Operation denied. Not enough rights");
-
+            
         }else{
 
             $res = false;

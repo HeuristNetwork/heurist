@@ -153,7 +153,7 @@ $.widget( "heurist.search_faceted", {
 
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
             
-                    if(date && data.source==that.element.attr('id') ){   //search from this widget
+                    if(data && data.source==that.element.attr('id') ){   //search from this widget
                           current_query_request_id = data.id;
                     }else{
                         //search from ourside - close this widget

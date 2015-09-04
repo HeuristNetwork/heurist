@@ -181,7 +181,7 @@ $.widget( "heurist.svs_list", {
         var that = this;
         if(!top.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
 
-            top.HAPI4.SystemMgr.ssearch_get(
+            top.HAPI4.SystemMgr.ssearch_get( null, 
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
                         top.HAPI4.currentUser.usr_SavedSearch = response.data;
