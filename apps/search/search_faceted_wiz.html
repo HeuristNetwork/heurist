@@ -55,6 +55,19 @@
             <div class="header"><label for="opt_rectypes">Select record type</label></div>
             <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
         </div>
+        
+        <div>
+            <div class="header_narrow" style="vertical-align:top"><label for="svs_Rules">Rules</label></div>
+            <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
+                style="margin-top:0.4em;width:300px" readonly="readonly"></textarea>
+                <div style="font-size: smaller; margin-top: 2px;">Please edit rules with button on the right</div>
+
+            <div id="svs_btnset">
+                <div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
+                <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+            </div>
+
+        </div>        
 <!--
         <div class="advanced-mode">
             <div class="header"><label for="opt_rectype_as_facets">Record types act as facet</label></div>
