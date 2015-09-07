@@ -132,6 +132,9 @@ function prepareDbName(){
             }
 
 
+            //
+            // fill hidden field url_template with link to script getDBStructureAsSQL
+            //
             function onBeforeSubmit(){
 
                 var ele = document.getElementById("url_template");
@@ -434,20 +437,25 @@ function prepareDbName(){
                     //get path registered db template and download coreDefinitions.txt
                     $reg_url = @$_REQUEST['url_template'];
                     
-                    //debug print $reg_url."</br>";
+                    //debug print $reg_url."</br>"; 
 
 if(true){                    
                     $templateFileName = "NOT DEFINED";
+                    $templateFoldersContent = "NOT DEFINED";
+                    
                     if($reg_url){
+                        
+                            $nouse_proxy = true;
 
                             $isTemplateDB = true;
                         
-                            $data = loadRemoteURLContent($reg_url, true); //without proxy 
+                            $data = loadRemoteURLContent($reg_url, $nouse_proxy); //without proxy 
                             $resval = isDefinitionsInvalid($data);
                             
                             if($resval){
                                 if(defined("HEURIST_HTTP_PROXY")){
-                                    $data = loadRemoteURLContent($reg_url, false); //with proxy
+                                    $nouse_proxy = false;
+                                    $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
                                     $resval = isDefinitionsInvalid($data);
                                     if($resval){
                                         $data = null;
@@ -463,7 +471,7 @@ if(true){
                                 echo ("<br>Please check whether this database is valid; consult Heurist support if needed</p>");
                                 return false;
                             }
-                     
+
                         //save data into file       
                         if(defined('HEURIST_SETTING_DIR')){
                               
@@ -471,11 +479,33 @@ if(true){
                               $res = file_put_contents ( $templateFileName, $data );
                               if(!$res){
                                 echo ("<p class='error'>Error: cannot save definitions from template database into local file.");
-                                echo ("Please varify that folder ".HEURIST_SETTING_DIR." is writeable</p>");
+                                echo ("Please verify that folder ".HEURIST_SETTING_DIR." is writeable</p>");
                                 return false;
                              }
                         
+                            //download content of some folder from template database
+                            
+                            $reg_url = str_replace("getDBStructureAsSQL", "getDBFolders", $reg_url); //replace to other script
+                            $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
+                            
+                            if($data){
+                                
+                                $templateFoldersContent = HEURIST_SETTING_DIR . get_user_id() . '_dbfolders.zip';
+                                $res = file_put_contents ( $templateFoldersContent, $data );
+                                if(!$res){
+                                    echo ("<p class='error'>Warning: cannot save content of settting folders from template database into local file.");
+                                    echo ("Please verify that folder ".HEURIST_SETTING_DIR." is writeable</p>");
+                                    return false;
+                                }
+                            }else{
+                                    echo ("<p class='error'>Warning: server does not return the content of settting folders from template database.");
+                                    echo ("Please verify that zip extension on remote server is installed and upload folder is writeable</p>");
+                                    return false;
+                            }
+                            
                         }
+                        
+                        
                     }else if($isTemplateDB){
                                 echo ("<p class='error'> Wrong parameters: Template database is not defined.</p>");
                                 return false;
@@ -487,7 +517,7 @@ if(true){
                                 echo ("<p class='error'>Error: definitions file ".$templateFileName."not found</p>");
                                 return false;
                     }
-
+                    
                     if(!createDatabaseEmpty($newDBName)){
                         $isCreateNew = true;
                         return false;
@@ -554,6 +584,10 @@ if(true){
 
 
                     createDatabaseFolders($newDBName);
+                    
+                    if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
+                        unzip($templateFoldersContent, HEURIST_UPLOAD_ROOT.$newDBName."/");
+                    }
 
                     // Prepare to write to the newly created database
                     mysql_connection_insert($newname);
