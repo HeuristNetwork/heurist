@@ -34,7 +34,10 @@
             if(file_exists($thumbfile)){
                 downloadFile('image/png', $thumbfile);
             }else{
-                //@todo $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
+                //@todo - change to the same script in h4
+                $thumb_url = HEURIST_BASE_URL_OLD."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$fileid;
+                header("Location: ".$thumb_url);
+                exit();
             }
         }else if(@$_REQUEST['id']) {
 

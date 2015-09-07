@@ -300,14 +300,14 @@
     * @param mixed $mysqli
     * @param mixed $name
     */
-    function isFuncionExists($mysqli, $name){
+    function isFunctionExists($mysqli, $name){
         $res = false;
         try{
 
              // search function
              $res = $mysqli->query('SHOW CREATE FUNCTION '.$name);
              if($res){
-                $row2 = mysqli_fetch_row();
+                $row2 = mysqli_fetch_row($res);
                 if($row2){
                     $res = true;
                  }
@@ -328,10 +328,10 @@
 
             $res = false;
 
-            if(isFuncionExists($mysqli, 'NEW_LEVENSHTEIN') && isFuncionExists($mysqli, 'NEW_LIPOSUCTION')
-                && isFuncionExists($mysqli, 'hhash') && isFuncionExists($mysqli, 'simple_hash')
-                //&& isFuncionExists('set_all_hhash')
-                && isFuncionExists($mysqli, 'getTemporalDateString')){
+            if(isFunctionExists($mysqli, 'NEW_LEVENSHTEIN') && isFunctionExists($mysqli, 'NEW_LIPOSUCTION')
+                && isFunctionExists($mysqli, 'hhash') && isFunctionExists($mysqli, 'simple_hash')
+                //&& isFunctionExists('set_all_hhash')
+                && isFunctionExists($mysqli, 'getTemporalDateString')){
 
                 $res = true;
 

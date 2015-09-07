@@ -403,7 +403,7 @@ function saveAttachments($files_arr, $email){
 
             if(is_numeric($file_id)){
 
-                $full_name = HEURIST_FILESTORE_DIR."/ulf_".$file_id."_".$name;
+                $full_name = HEURIST_FILES_DIR."/ulf_".$file_id."_".$name;   //@todo!!!!
 
                 /*if(!is_file($full_name))
                 {

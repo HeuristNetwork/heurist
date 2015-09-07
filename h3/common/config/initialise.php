@@ -91,6 +91,8 @@ HEURIST_FILESTORE_URL    - url to DB filestore folder   (used in this file only)
 
 HEURIST_ICON_DIR   - path
 HEURIST_ICON_URL   - url
+HEURIST_FILES_DIR  - path to user uploaded files
+HEURIST_FILES_URL  - url to user uploaded files
 HEURIST_THUMB_DIR
 HEURIST_THUMB_URL
 HEURIST_SMARTY_TEMPLATES_DIR
@@ -370,6 +372,10 @@ if (!defined('HEURIST_SCRATCHSPACE_DIR')) {
     returnErrorMsgPage(1, "Cannot access system temp directory <b>". sys_get_temp_dir() .
         "</b><p>Check permissions).");
 }
+
+// Define folder for File upload folder
+testDirWriteableAndDefine('HEURIST_FILES_DIR', HEURIST_FILESTORE_DIR . "file_uploads/", "File upload folder");
+define('HEURIST_FILES_URL', HEURIST_FILESTORE_URL . 'file_uploads/');
 
 // Define the site relative path for rectype icons
 testDirWriteableAndDefine('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . "rectype-icons/", "Icons directory");
