@@ -734,7 +734,7 @@ $.widget( "heurist.search", {
                     if(that.query_request!=null && data.queryid()==that.query_request.id) {
 
                     //save increment into current rules.results
-                    var records_ids = data.getIds();
+                    var records_ids = Hul.cloneJSON(data.getIds());
                     if(records_ids.length>0){
                         // rules:[ {query:query, results:[], parent:index},  ]
                         if(that._rule_index==-2){
@@ -756,6 +756,7 @@ $.widget( "heurist.search", {
                                 //unite record sets
                                 top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.doUnite(data);
                             }
+                            top.HAPI4.currentRecordsetByLevels = that._rules; //contains main result set and rules result sets
 
                         }
                     }
@@ -792,7 +793,6 @@ $.widget( "heurist.search", {
 
                          //remove results of other rules and re-render the original set of records only
                          var rec_ids_level0 = [];
-
                          var idx;
                          that._rules[0].results = that._rules[0].results;
                          for(idx=0; idx<that._rules[0].results.length; idx++){
@@ -870,8 +870,10 @@ $.widget( "heurist.search", {
                 qsearch = this.query_request.q + ' AND ' + qsearch;
             }
 
-            var request = {q: qsearch, w: this.options.search_domain, f: this.options.searchdetails
-                            , source:this.element.attr('id') };
+            var request = { q: qsearch, 
+                            w: this.options.search_domain, 
+                            f: this.options.searchdetails,
+                            source:this.element.attr('id') };
 
             //that._trigger( "onsearch"); //this widget event
             //that._trigger( "onresult", null, resdata ); //this widget event

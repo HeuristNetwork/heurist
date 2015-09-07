@@ -620,7 +620,8 @@ $.widget( "heurist.search_faceted", {
                             w: this.options.params.domain, 
                             f: 'map', 
                             source:this.element.attr('id'), 
-                            qname:this.options.query_name
+                            qname: this.options.query_name,
+                            rules: this.options.params.rules
                             }; //, facets: facets
             
             //perform search
@@ -631,6 +632,7 @@ $.widget( "heurist.search_faceted", {
     }
     
     //
+    // called on ON_REC_SEARCH_FINISH
     // perform search for facet values and redraw facet fields
     // @todo query - current query - if resultset > 1000, use query
     // _recalculateFacets (call server) -> as callback _redrawFacets -> _recalculateFacets (next facet)
@@ -665,7 +667,15 @@ $.widget( "heurist.search_faceted", {
                     subs_value =  this._first_query;
                 }else{
                     //replace with list of ids
-                    subs_value = top.HAPI4.currentRecordset.getIds().join(',');
+                    var main_res = top.HAPI4.currentRecordsetByLevels[0].results;
+                    var rec_ids_level0 = [];
+                    var idx;
+                    for(idx=0; idx<main_res.length; idx++){
+                         rec_ids_level0 = rec_ids_level0.concat(main_res[idx]);
+                    }
+                    subs_value = rec_ids_level0.join(',');
+                    
+                    //subs_value = top.HAPI4.currentRecordset.getIds().join(',');
                 }
                 
                 //

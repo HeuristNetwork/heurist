@@ -299,6 +299,28 @@ $.widget( "heurist.search_faceted_wiz", {
                 if($dlg.html()==''){
                     $dlg.load("apps/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
+                        
+                        $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
+                        
+                        $dlg.find("#svs_Rules_edit")                  
+                            .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                            .attr('title', top.HR('Edit Rule Set'))
+                            .css({'height':'16px', 'width':'16px'})
+                            .click(function( event ) {
+                                //that.
+                                that._editRules( $dlg.find('#svs_Rules') );
+                            });
+                            
+                        $dlg.find("#svs_Rules_clear")                  
+                            .button({icons: {primary: "ui-icon-close"}, text:false})
+                            .attr('title', top.HR('Clear Rule Set'))
+                            .css({'height':'16px', 'width':'16px'})
+                            .click(function( event ) {
+                                $dlg.find('#svs_Rules').val('');
+                            });
+                
+                        
+                        
                     });
                 }else{
                     this._initStep0_options();
@@ -453,25 +475,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
             }
             
-            $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
-            
-            $dlg.find("#svs_Rules_edit")                  
-                .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                .attr('title', top.HR('Edit Rule Set'))
-                .css({'height':'16px', 'width':'16px'})
-                .click(function( event ) {
-                    //that.
-                    that._editRules( $dlg.find('#svs_Rules') );
-                });
-                
-            $dlg.find("#svs_Rules_clear")                  
-                .button({icons: {primary: "ui-icon-close"}, text:false})
-                .attr('title', top.HR('Clear Rule Set'))
-                .css({'height':'16px', 'width':'16px'})
-                .click(function( event ) {
-                    $dlg.find('#svs_Rules').val('');
-                });
-        
             
             var svsID = this.options.svsID;
 
