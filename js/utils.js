@@ -802,6 +802,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     },
     
     //load content to dialog and show it
+    // 
+    //
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
@@ -844,7 +846,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return $dlg;
     },
     
-    // buttons - callback function
+    //
+    // buttons - callback function or array of buttons for dialog option
+    //
     showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
 
         if(!$.isFunction(top.HR)){
@@ -926,6 +930,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         
         $dlg.dialog(options);
         
+        return $dlg;
         //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});

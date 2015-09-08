@@ -247,7 +247,7 @@ $.widget( "heurist.resultList", {
 
                 }else{ //fake restart
                         that._clearAllRecordDivs();
-                        that.loadanimation(true);
+                        //that.loadanimation(true);
                 }
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
@@ -723,7 +723,11 @@ $.widget( "heurist.resultList", {
             + '<div title="Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
             //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-            + '</div></div>';
+            + '</div>'
+            + '<div title="Click to view record" class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
+            + '</div>'
+            + '</div>';
 
 
         return html;
@@ -767,9 +771,6 @@ $.widget( "heurist.resultList", {
             that = this,
             $rdiv;
 
-        var isedit = ($target.parents('.rec_edit_link').length>0); //this is edit click
-        var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
-
         if(!$target.hasClass('recordDiv')){
             $rdiv = $target.parents('.recordDiv');
         }else{
@@ -778,14 +779,27 @@ $.widget( "heurist.resultList", {
         
         var selected_rec_ID = $rdiv.attr('recid');
 
+        var isedit = ($target.parents('.rec_edit_link').length>0); //this is edit click
+
         if(isedit){
             var url = top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
             window.open(url, "_new");
             return;
-        }else if (ispwdreminder){
-            var pwd = $rdiv.attr('pwd');
-            top.HEURIST4.util.showMsgDlg(pwd, null, "Password reminder", $target);
-            return;
+        }else {
+            var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
+            if (ispwdreminder){
+                var pwd = $rdiv.attr('pwd');
+                top.HEURIST4.util.showMsgDlg(pwd, null, "Password reminder", $target);
+                return;
+            }else{
+                var isview = ($target.parents('.rec_view_link').length>0); //this is edit click
+                if(isview){
+                    var url = top.HAPI4.basePathOld + "records/view/renderRecordData.php?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
+                    
+                    top.HEURIST4.util.showDialog(url, { width: 600, height: 500 });
+                    return;
+                }
+            }
         }
         
         

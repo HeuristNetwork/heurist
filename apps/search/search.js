@@ -695,13 +695,16 @@ $.widget( "heurist.search", {
 
         if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
+            //data is search query request
             if(data!=null && top.HEURIST4.util.isempty(data.topids)){ //topids not defined - this is not rules request
 
                  top.HEURIST4.current_query_request = jQuery.extend(true, {}, data); //the only place where this values is assigned
                  that.query_request = data; //keep for search in current result
 
+                 top.HAPI4.currentRecordset = null;
+                 top.HAPI4.currentRecordsetByLevels = null;
+                 
                  if(data.source!=that.element.attr('id') ){   //search from outside
-                    top.HAPI4.currentRecordset = null;
                     
                     if($.isArray(data.q)){
                         that.input_search.val(JSON.stringify(data.q));
@@ -718,15 +721,7 @@ $.widget( "heurist.search", {
                  }
             }
 
-        /*}else if(e.type == top.HAPI4.Event.ON_REC_SEARCHTERMINATE){ //search is terminated with message 
-        
-                 top.HEURIST4.current_query_request = null; //the only place where this values is assigned
-                 that.query_request = null; //keep for search in current result
-                 top.HAPI4.currentRecordset = null;
-                 that.input_search.val('');
-                 that.options.search_domain = 'a';
-                 that._refresh();
-         */   
+ 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
             if(data){
@@ -799,7 +794,7 @@ $.widget( "heurist.search", {
                             rec_ids_level0 = rec_ids_level0.concat(that._rules[0].results[idx]);
                          }
 
-                         //var recordset_level0
+                         //var recordset_level0 - only main set remains all result from rules are removed
                          top.HAPI4.currentRecordset = top.HAPI4.currentRecordset.getSubSetByIds(rec_ids_level0);
 
                          that._rule_index = -2;
@@ -877,8 +872,7 @@ $.widget( "heurist.search", {
 
             //that._trigger( "onsearch"); //this widget event
             //that._trigger( "onresult", null, resdata ); //this widget event
-
-            top.HAPI4.currentRecordset = null;
+            //top.HAPI4.currentRecordset = null;
             //this._onSearchStart();
 
             //perform search

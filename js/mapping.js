@@ -1647,6 +1647,10 @@ ed_html +
             addQueryLayer(params, -1);    //see map_overlay.js
         },
 
+        addRecordsetLayer: function(params, recordset){
+            addRecordsetLayer(params, -1, recordset);    //see map_overlay.js
+        },
+        
         loadMapDocumentById: function(recId){
             //_loadMapDocumentById(recId);
             var mapdocs = $("#map-doc-select");

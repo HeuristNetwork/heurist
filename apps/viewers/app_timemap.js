@@ -267,5 +267,12 @@ $.widget( "heurist.app_timemap", {
             }
     }
     
+    , addRecordsetLayer: function(params, recordset){
+            var mapping = this.mapframe[0].contentWindow.mapping;
+            if(mapping){
+                mapping.addRecordsetLayer(params, recordset);  //see js/mapping.js
+            }
+    }
+
 
 });

@@ -450,7 +450,7 @@ function addQueryLayer(source, index) {
         var query = null;
         try{
             var query = top.HEURIST4.util.isObject(source.query) ?source.query :JSON.parse(source.query);
-            if(!(query && query['qa'])){
+            if(!(query && query['q'])){
                 query = null;
             }else{
                 //query = {q: JSON.stringify(query['qa']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};    
@@ -473,48 +473,10 @@ function addQueryLayer(source, index) {
                 //console.log(response);
                 
                 if(response.status == top.HAPI4.ResponseStatus.OK){
-                    // Show info on map
-                    var recset = new hRecordSet(response.data);
-                    var mapdata;
-                    
-                    //preprocess for Digital Harlem 
-                    if(top.HAPI4.sysinfo['layout']=='L06'){
-                        recset.preprocessForDigitalHarlem();
-                        mapdata = recset.toTimemap("dyn"+source.id, 13); //@todo  address RT is hardcoded!!!!
-                    }else{
-                        //convert to map datasource
-                        var mapdata = recset.toTimemap("dyn"+source.id);
-                    }
-                    
-                    //mapping.load(mapdata);
-                    if (mapping.addDataset(mapdata)){
-        
-                       var overlay = {
-                        id: source.id,
-                        title: source['title'],                
-                        setVisibility: function(checked) {
-                            this.visible = checked;
-                            mapping.showDataset(mapdata[0].id, checked);
-                        },                          
-                        removeOverlay: function(){
-                            mapping.deleteDataset(mapdata[0].id);
-                        }
-                       };
-                       if(index>=0){
-                            overlays[index] = overlay;
-                       }else{
-                            index = 'A'+Math.floor((Math.random() * 10000) + 1);
-                            overlays_not_in_doc[index] = overlay;
 
-                            $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"
-          +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
-                            +overlay.title+"</div>");
-                            _initLegend();
-                       }
-                    }
-                    //console.log(recset);
-                    //mapping.load();
-
+                    var recset = hRecordSet(response.data);
+                    addRecordsetLayer(source, index, recset);
+                    
                 }else{
                     alert(response.message);
                 }
@@ -529,8 +491,46 @@ function addQueryLayer(source, index) {
 * Reflects current query in legend
 * dataset name is "main"
 */
-function addCurrentQueryLayer(source, index) {
+function addRecordsetLayer(source, index, recset) {
 
+            // Show info on map
+            var mapdata;
+            
+            //preprocess for Digital Harlem - @todo more elegant way
+            if(top.HAPI4.sysinfo['layout']=='L06'){
+                recset.preprocessForDigitalHarlem();
+                mapdata = recset.toTimemap("dyn"+source.id, 13); //@todo  address RT is hardcoded!!!!
+            }else{
+                //convert to map datasource
+                mapdata = recset.toTimemap("dyn"+source.id);
+            }
+            
+            //mapping.load(mapdata);
+            if (mapping.addDataset(mapdata)){
+
+               var overlay = {
+                id: source.id,
+                title: source['title'],                
+                setVisibility: function(checked) {
+                    this.visible = checked;
+                    mapping.showDataset(mapdata[0].id, checked);
+                },                          
+                removeOverlay: function(){
+                    mapping.deleteDataset(mapdata[0].id);
+                }
+               };
+               if(index>=0){
+                    overlays[index] = overlay;
+               }else{
+                    index = 'A'+Math.floor((Math.random() * 10000) + 1);
+                    overlays_not_in_doc[index] = overlay;
+
+                    $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"
+  +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
+                    +overlay.title+"</div>");
+                    _initLegend();
+               }
+            }
 }
 
 

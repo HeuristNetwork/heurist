@@ -320,6 +320,10 @@ $.widget( "heurist.search_faceted_wiz", {
                             });
                 
                         
+                        var ishelp_on = top.HAPI4.get_prefs('help_on');
+                        $dlg.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
+
+                        
                         
                     });
                 }else{
@@ -480,6 +484,15 @@ $.widget( "heurist.search_faceted_wiz", {
 
             var isEdit = (parseInt(svsID)>0);
 
+            //fill with list of user groups in case non bookmark search
+            var selObj = svs_ugrid.get(0); //select element
+            top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+                [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
+                function(){
+                    svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
+            });
+            
+            
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
@@ -490,7 +503,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 this.options.domain = this.options.params.domain;
                 
                 svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.params.domain:svs[2]);
-                svs_ugrid.parent().hide();
+                //svs_ugrid.parent().hide();
+                svs_ugrid.attr('disabled','disabled');;
                 
                 if(this.options.params.rectypes) {         
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
@@ -502,15 +516,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_name.val('');
                 svs_rules.val('');
 
-                //fill with list of user groups in case non bookmark search
-                var selObj = svs_ugrid.get(0); //select element
-                top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-                    [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
-                    function(){
-                        svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
-                });
                 svs_ugrid.val(this.options.domain);
-                svs_ugrid.parent().show();
+                svs_ugrid.removeAttr('disabled');;
+                //svs_ugrid.parent().show();
             }
             
             

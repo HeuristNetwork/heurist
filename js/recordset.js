@@ -460,6 +460,7 @@ function hRecordSet(initdata) {
     //  1) find relation master type (event or person)
     //  2) compose description
     //  3) change icon
+    //
     function _preprocessForDigitalHarlem(){
         
         //NOTE: address may relates to the same person several times (residency in separate periods of time) 

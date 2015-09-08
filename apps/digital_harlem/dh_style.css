@@ -104,12 +104,12 @@ a:hover {
         padding: 0px;
         float:left;
         height: 25px;
-        width: 75px;
+        min-width: 75px;
         margin-top: 7px;
         margin-left: 10px;
         text-align: center;
         background-color: #2C547A;
-        background-position: left;
+        background-position: center;
         background-repeat: no-repeat;
         overflow: hidden;
 }
@@ -120,6 +120,7 @@ a.menuitem {
       display: block;;
       padding: 7px;
       background-image: url(assets/menubutton_bg.jpg);
+      background-size: 99% 95%;
       color: #ffffff;
       font-family: Verdana;
       font-weight: bold;

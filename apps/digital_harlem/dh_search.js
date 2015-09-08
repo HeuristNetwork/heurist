@@ -49,7 +49,7 @@ $.widget( "heurist.dh_search", {
         //this.res_name = $('<input>').appendTo(this.res_div);
         this.res_btn = $('<button>', {text:top.HR('Add To Map')})
             .button({icons:{primary:'ui-icon-circle-plus'}})
-            .on("click", function(event){ that._onAddLayer(true); } )
+            .on("click", function(event){ that._onAddLayer(); } )
             .appendTo(this.res_div);
     
         //this.res_div_input =  $('<div>', {id:'res_div_input'}).appendTo(this.res_div).hide();
@@ -207,18 +207,54 @@ $.widget( "heurist.dh_search", {
     // add kayer to current map document
     _onAddLayer: function(){
         
-        if(arguments.length>0 && $("#dh_layer_name")){
+        if($("#dh_layer_name").length>0){
             $("#dh_layer_name").val('');
         }
 
-        if(top.HEURIST4.util.isempty( $("#dh_layer_name").val() )){
             
-           top.HEURIST4.util.showMsgDlg('<input id="dh_layer_name" type="text">', this._onAddLayer, 'Define layer name');
+           var that = this;
+            
+           var $dlg = top.HEURIST4.util.showMsgDlg('<label>What would you like to call the new map layer:</label>&nbsp;<input id="dh_layer_name" type="text">', 
+                   [
+                    {text:'Add Layer', click:function(){
+                        var layer_name = $dlg.find("#dh_layer_name").val();
+                        if(Hul.isempty(layer_name)){
+                            //top.HEURIST4.util.showMsgErr
+                        }else{
+                            
+                            var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name}; //, query: {q:that.currentSearch.q, rules:that.currentSearch.rules} };
+                            
+                            var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+                            if(app && app.widget){
+                                $(app.widget).app_timemap('addRecordsetLayer', params, top.HAPI4.currentRecordset);
+                            }
+                                        
+                            
+                            $dlg.dialog( "close" );
+                        }
+                        
+                    }},
+                    {text:'Cancel', click:function(){ $dlg.dialog( "close" ); }}
+                   ]
+           , 'New map layer');
             
            //top.HEURIST4.util.showMsgErr('Define name of layer');
-           return;
-        }
         
+
+           
+            /*
+           function(){
+                var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name, query: {q:this.currentSearch.q, rules:this.currentSearch.rules} };
+                
+                var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+                if(app && app.widget){
+                    $(app.widget).app_timemap('addQueryLayer', params);
+                }
+           }
+           */
+        
+        
+        /*
         var rules = ''; 
         
         if(this._currenttype==10){
@@ -235,11 +271,8 @@ $.widget( "heurist.dh_search", {
         var layer_name = $("#dh_layer_name").val();
         
         var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name, query: {q:this.currentSearch, rules:rules} };
-        
-        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
-        if(app && app.widget){
-            $(app.widget).app_timemap('addQueryLayer', params);
-        }
+        */
+
       
     }
     

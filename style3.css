@@ -311,7 +311,7 @@ H2 {
     font-size:1.2em;
 }
 
-h3:hover > #rec_add_link, div.recordDiv:hover > .rec_edit_link {
+h3:hover > #rec_add_link, div.recordDiv:hover > .rec_edit_link, div.recordDiv:hover > .rec_view_link {
     display: block;
 }
 h3 > #rec_add_link, div.recordDiv > .rec_edit_link {
@@ -319,9 +319,19 @@ h3 > #rec_add_link, div.recordDiv > .rec_edit_link {
     display: none;
     height: 16px;
     width: 16px;
-    top: 0.4em;
-    right: 0.4em;
+    top: 2px;
+    right: 18px;
 }
+
+div.recordDiv > .rec_view_link {
+    position: absolute;
+    display: none;
+    height: 16px;
+    width: 16px;
+    top: 2px;
+    right: 2px;
+}
+
 /*
 h3 > #rec_edit_link{
     display: none;

@@ -153,11 +153,13 @@ $.widget( "heurist.search_faceted", {
 
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
             
-                    if(data && data.source==that.element.attr('id') ){   //search from this widget
-                          current_query_request_id = data.id;
-                    }else{
-                        //search from ourside - close this widget
-                        that.doClose();
+                    if(data){
+                        if(data.source==that.element.attr('id') ){   //search from this widget
+                              current_query_request_id = data.id;
+                        }else{
+                            //search from ourside - close this widget
+                            that.doClose();
+                        }
                     }
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
@@ -381,6 +383,8 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
+        $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
+        
         var facets = this.options.params.facets;
 
         if(top.HEURIST4.util.isArrayNotEmpty(facets)){
@@ -493,6 +497,7 @@ $.widget( "heurist.search_faceted", {
        this._first_query = top.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
        this._fillQueryWithValues( this._first_query );
        this._recalculateFacets(-1);
+
     }
 
     ,doSaveSearch: function(){
@@ -500,6 +505,7 @@ $.widget( "heurist.search_faceted", {
     }
 
     ,doClose: function(){
+        $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
         this._trigger( "onclose");
     }
 
@@ -650,7 +656,21 @@ $.widget( "heurist.search_faceted", {
                 if(div_facets.length>0)
                     div_facets.empty()
                     .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white20.gif) no-repeat center center');
-        } 
+        }
+        
+        function __getMainSetIds(){
+            
+                    var rec_ids_level0 = [];
+                    if(top.HAPI4.currentRecordsetByLevels){
+                        var main_res = top.HAPI4.currentRecordsetByLevels[0].results;
+                        var idx;
+                        for(idx=0; idx<main_res.length; idx++){
+                             rec_ids_level0 = rec_ids_level0.concat(main_res[idx]);
+                        }
+                    }
+                    return rec_ids_level0.join(',');
+        }
+         
 
         var that = this;
         
@@ -667,14 +687,7 @@ $.widget( "heurist.search_faceted", {
                     subs_value =  this._first_query;
                 }else{
                     //replace with list of ids
-                    var main_res = top.HAPI4.currentRecordsetByLevels[0].results;
-                    var rec_ids_level0 = [];
-                    var idx;
-                    for(idx=0; idx<main_res.length; idx++){
-                         rec_ids_level0 = rec_ids_level0.concat(main_res[idx]);
-                    }
-                    subs_value = rec_ids_level0.join(',');
-                    
+                    subs_value = __getMainSetIds();
                     //subs_value = top.HAPI4.currentRecordset.getIds().join(',');
                 }
                 
@@ -735,7 +748,8 @@ $.widget( "heurist.search_faceted", {
                         query =  this._first_query;
                     }else{
                         //replace with list of ids
-                        query = {ids:top.HAPI4.currentRecordset.getIds().join(',')};
+                        query = {ids: __getMainSetIds()};
+                        //query = {ids:top.HAPI4.currentRecordset.getIds().join(',')};
                     }
                 
                     needcount = 1;

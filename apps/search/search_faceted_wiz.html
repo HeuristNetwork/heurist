@@ -27,37 +27,24 @@
             <div class="header"><label for="svs_Name">Saved search name</label></div>
             <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" />
         </div>
-        <!--    
-        <div>
-        <div class="header"><label for="svs_Query">Query</label></div>
-        <input type="text" name="svs_Query" id="svs_Query" value="" class="text ui-widget-content ui-corner-all" />
-        </div>
-        -->    
-
-        <div>
-            <div class="header"  style="padding-top: 10px;"><label for="svs_UGrpID">Save in user group</label></div>
-            <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
-        </div>
-
-<!--        
-        <br /><hr />
-        <p style="text-align: center; padding: 8px">
-            <input type="radio" name="opt_mode" id="opt_mode_simple" value="false" checked="checked" class="ui-widget-content ui-corner-all" />
-            <label for="opt_mode_simple">Simplified</label>
-            <input type="radio" name="opt_mode" id="opt_mode_advanced" value="true" class="ui-widget-content ui-corner-all" />
-            <label for="opt_mode_advanced">Advanced settings</label>
-        </p>
-        <hr /><br />
-        
--->        
 
         <div class="simple-mode">
             <div class="header"><label for="opt_rectypes">Select record type</label></div>
             <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
         </div>
+
+        <div>
+            <div class="header"  style="padding-top: 10px;"><label for="svs_UGrpID">Save in user group</label></div>
+            <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+        
+        
+        <div class="heurist-helper1" style="display:block;font-size:smaller;border-top:1px solid;padding:1em 0 1em;">
+            You may add a set of rules which will be used to expand the search result and bring in additional records each time a facet selection is made. This may be useful for bringing in information from related records, such as map location or dates for display on a map / timeline.        
+        </div>
         
         <div>
-            <div class="header_narrow" style="vertical-align:top"><label for="svs_Rules">Rules</label></div>
+            <div class="header" style="vertical-align:top"><label for="svs_Rules">Rules</label></div>
             <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
                 style="margin-top:0.4em;width:300px" readonly="readonly"></textarea>
                 <div style="font-size: smaller; margin-top: 2px;">Please edit rules with button on the right</div>
@@ -68,27 +55,6 @@
             </div>
 
         </div>        
-<!--
-        <div class="advanced-mode">
-            <div class="header"><label for="opt_rectype_as_facets">Record types act as facet</label></div>
-            <input type="checkbox" name="opt_rectype_as_facets" id="opt_rectype_as_facets" value="remember" class="ui-widget-content ui-corner-all" />
-        </div>
-
-        <div class="advanced-mode">
-            <div class="header"><label for="opt_use_freetext">Include text fields</label></div>
-            <input type="checkbox" name="opt_use_freetext" id="opt_use_freetext" value="remember" class="ui-widget-content ui-corner-all" />
-        </div>
-        <div class="advanced-mode">
-            <div class="header"><label for="opt_use_date">Include date fields</label></div>
-            <input type="checkbox" name="opt_use_date" id="opt_use_date" value="remember" class="ui-widget-content ui-corner-all" />
-        </div>
-        <div class="advanced-mode">
-            <div class="header"><label for="opt_use_numeric">Include numeric fields</label></div>
-            <input type="checkbox" name="opt_use_numeric" id="opt_use_numeric" value="remember" class="ui-widget-content ui-corner-all" />
-        </div>
-        <br />
-        <p class="advanced-mode">Term list and pointer fields are included by default</p>
--->
 
     </fieldset>
   </form>
