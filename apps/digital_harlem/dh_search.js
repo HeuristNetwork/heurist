@@ -214,7 +214,7 @@ $.widget( "heurist.dh_search", {
             
            var that = this;
             
-           var $dlg = top.HEURIST4.util.showMsgDlg('<label>What would you like to call the new map layer:</label>&nbsp;<input id="dh_layer_name" type="text">', 
+           var $dlg = top.HEURIST4.util.showMsgDlg('<label>What would you like to call<br>the new map layer:</label><br><br><input id="dh_layer_name" type="text">', 
                    [
                     {text:'Add Layer', click:function(){
                         var layer_name = $dlg.find("#dh_layer_name").val();
@@ -222,11 +222,16 @@ $.widget( "heurist.dh_search", {
                             //top.HEURIST4.util.showMsgErr
                         }else{
                             
-                            var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name}; //, query: {q:that.currentSearch.q, rules:that.currentSearch.rules} };
-                            
                             var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
                             if(app && app.widget){
-                                $(app.widget).app_timemap('addRecordsetLayer', params, top.HAPI4.currentRecordset);
+                                //add new layer witg given name
+                                var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name}; //, query: {q:that.currentSearch.q, rules:that.currentSearch.rules} };
+                            
+                                params.recordset = top.HAPI4.currentRecordset;
+                                
+                                $(app.widget).app_timemap('addRecordsetLayer', params);
+                                //remove current search layer
+                                //@todo
                             }
                                         
                             

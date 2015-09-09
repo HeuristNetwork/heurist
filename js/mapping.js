@@ -562,7 +562,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     * 
     * @param _mapdata
     */
-    function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener){
+    function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
 
             function __onDataLoaded(_tmap, _notfirst){
                 tmap = _tmap;
@@ -621,10 +621,13 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     
                 }
                 
-                _updateLayout();
-                
-                //highlight selection
-                _showSelection(false);
+                if(_callback){
+                    _callback.call();
+                }else{
+                    _updateLayout();
+                    //highlight selection
+                    _showSelection(false);
+                }
                 
             }// __onDataLoaded       
         
@@ -1621,8 +1624,8 @@ ed_html +
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        load: function(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener){
-            _load(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener);
+        load: function(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback){
+            _load(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback);
         },
         
         // mapdata - recordset converted to timemap dataset
@@ -1643,12 +1646,14 @@ ed_html +
              _showSelection( true );
         },
         
+        // add layer to map 
         addQueryLayer: function(params){
             addQueryLayer(params, -1);    //see map_overlay.js
         },
 
-        addRecordsetLayer: function(params, recordset){
-            addRecordsetLayer(params, -1, recordset);    //see map_overlay.js
+        // add layer to map 
+        addRecordsetLayer: function(params){
+            addRecordsetLayer(params, -1);    //see map_overlay.js
         },
         
         loadMapDocumentById: function(recId){

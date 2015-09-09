@@ -569,7 +569,6 @@ if(@$params['debug']) echo $query."<br>";
         }else{
         
             if(@$params['q']){
-//error_log("query ".is_array(@$params['q'])."   q=".print_r($params['q'], true));
                     
                     if(is_array(@$params['q'])){
                         $query_json = $params['q'];
@@ -578,22 +577,36 @@ if(@$params['debug']) echo $query."<br>";
                     }
 
                     if(is_array($query_json) && count($query_json)>0){
-//error_log("!!! 1"); 
                        $params['qa'] = $query_json;    
+                    }else{
+                        //return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Invalid search request. Missed query parameter");
+                    }
+                    
+                    
+            }else if( @$params['qa'] && !is_array($params['qa'])){
+                
+                    $query_json = json_decode(@$params['qa'], true);
+                    if(is_array($query_json) && count($query_json)>0){
+                        $params['qa'] = $query_json;            
+                    }else{
+                        return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Invalid search request. Cannot parse query parameter");                        
                     }
             }
-           
             
             if(@$params['qa']){
                 $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   
             }else if(@$params['q']){
-                $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL   OR compose_sql_query at once
+                $aquery = get_sql_query_clauses($mysqli, $params, $currentUser, $publicOnly);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }else{
                 return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Invalid search request. Missed query parameter");
             }
             
 // error_log("query ".print_r($aquery, true));        
             $chunk_size = @$params['nochunk']? PHP_INT_MAX  :1001;
+            
+            if(!isset($aquery["where"]) || trim($aquery["where"])===''){
+                return $system->addError(HEURIST_DB_ERROR, "Invalid search request. Query can not be composed", null);
+            }
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
         
@@ -602,10 +615,10 @@ if(@$params['debug']) echo $query."<br>";
         //DEGUG 
         if(@$params['qa']){
             //print $query;
-//echo ("QA: ".$query);
+//error_log("QA: ".$query);
             //exit();
         }else{
-//error_log("QA: ".$query);            
+//error_log("Q: ".$query);            
         }
         
 //error_log("AAA".$query);            

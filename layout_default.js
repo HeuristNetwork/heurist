@@ -65,8 +65,8 @@ var widgets = [
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
 
-    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},
-    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
+    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},  // map in iframe
+    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},                                          
     {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'apps/viewers/staticPage.js'},
     
     {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},

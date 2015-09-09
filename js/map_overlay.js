@@ -6,8 +6,8 @@
 HeuristOverlay.prototype = new google.maps.OverlayView();
 var map;
 var data;
-var overlays = {};
-var overlays_not_in_doc = {};
+var overlays = {};             //layer in current map document
+var overlays_not_in_doc = {};  //main layer(current query) and layers add by user manually
 
 /**
 * Adds a map overlay to the given map.
@@ -61,7 +61,7 @@ function fillMapDocumentsDropDown() {
         ele.append("<option value='"+data[i].id+"'>"+data[i].title+"</option>"); //["+data[i].id+"]
     } 
     
-    // Option listener
+    // select listener - load map documents
     ele.change(function(e) {
         // Clean old data
         removeOverlays();
@@ -82,7 +82,7 @@ function fillMapDocumentsDropDown() {
             // Show overlay for selected Map Document
             loadMapDocument(data[index]);  
             
-            $("#legend").show();
+            //$("#legend").show();
             
             _initLegend();
             
@@ -91,13 +91,13 @@ function fillMapDocumentsDropDown() {
         }else{
             $("#btnMapEdit").button( "disable" );
             $("#btnMapEdit").attr('title','');
-            $("#legend").hide();
+            //$("#legend").hide();
         }
     });   
 }
 
 /**
-* Removes all overlays 
+* Removes all overlays that are in map document (layers added manually remain in the legend and on map)
 */
 function removeOverlays() {
     for(var property in overlays) {
@@ -145,11 +145,17 @@ function _initLegend() {
                 var checked = $(this).prop("checked");
    
                 // Update overlay
-                var overlay = (index.indexOf('A')<0) ?overlays[index] :overlays_not_in_doc[index];
+                var overlay = overlays[index] ?overlays[index] :overlays_not_in_doc[index];  //overlays[index]
                 if(overlay){
                     overlay.setVisibility(checked);                          
                 }
             });
+            
+            if(Object.keys(overlays_not_in_doc).length+oObject.keys(overlays).legend>0){
+                $("#legend").show();
+            }else{
+                $("#legend").hide();
+            }
 }
 
 function _loadMapDocumentById(recId) {
@@ -187,7 +193,7 @@ function loadMapDocument(doc) {
         }
     }
     
-    // Top layer
+    // Top layer - artem: JJ made it wrong
     addLayerOverlay(bounds, doc.toplayer, index);
 }
 
@@ -246,8 +252,6 @@ function addLayerOverlay(bounds, layer, index) {
         }
     }   
 }
-
-
 
 /**
 * Adds a tiled map image layer to the map
@@ -453,11 +457,11 @@ function addQueryLayer(source, index) {
             if(!(query && query['q'])){
                 query = null;
             }else{
-                //query = {q: JSON.stringify(query['qa']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};    
+                query = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};    
             }
         }catch(err){
         }
-        if(query==null){
+        if(query==null){ //this is simple (non JSON) queru without rules
             query = {q: source.query, w: "all"};
         }
         query['rules_onserver'] = 1; 
@@ -474,8 +478,8 @@ function addQueryLayer(source, index) {
                 
                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                    var recset = hRecordSet(response.data);
-                    addRecordsetLayer(source, index, recset);
+                    source.recordset = hRecordSet(response.data);
+                    addRecordsetLayer(source, index);
                     
                 }else{
                     alert(response.message);
@@ -488,28 +492,33 @@ function addQueryLayer(source, index) {
 }
 
 /**
-* Reflects current query in legend
-* dataset name is "main"
+* 
 */
-function addRecordsetLayer(source, index, recset) {
+function addRecordsetLayer(source, index) {
 
             // Show info on map
-            var mapdata;
+            var mapdata = null;
+            
+            var recset = source.recordset;
+            
+            var datasetname = (source.id=='main') ?source.id:"dyn"+source.id;
             
             //preprocess for Digital Harlem - @todo more elegant way
-            if(top.HAPI4.sysinfo['layout']=='L06'){
-                recset.preprocessForDigitalHarlem();
-                mapdata = recset.toTimemap("dyn"+source.id, 13); //@todo  address RT is hardcoded!!!!
-            }else{
-                //convert to map datasource
-                mapdata = recset.toTimemap("dyn"+source.id);
+            if(recset!=null){
+                if(top.HAPI4.sysinfo['layout']=='L06'){
+                    recset.preprocessForDigitalHarlem();
+                    mapdata = recset.toTimemap(datasetname, 12); //show only address records @todo  address RT is hardcoded!!!!
+                }else{
+                    //convert to map datasource
+                    mapdata = recset.toTimemap(datasetname);
+                }
             }
             
             //mapping.load(mapdata);
             if (mapping.addDataset(mapdata)){
 
                var overlay = {
-                id: source.id,
+                id: datasetname,
                 title: source['title'],                
                 setVisibility: function(checked) {
                     this.visible = checked;
@@ -519,10 +528,15 @@ function addRecordsetLayer(source, index, recset) {
                     mapping.deleteDataset(mapdata[0].id);
                 }
                };
-               if(index>=0){
+               if(index>=0){  //this layer belong to map document
                     overlays[index] = overlay;
-               }else{
+                    
+               }else{ // this layer is explicitely (by user) added
                     index = 'A'+Math.floor((Math.random() * 10000) + 1);
+                    
+                    //var dataset_name = mapdata[0].id;
+                    //overlays_not_in_doc[]
+                    
                     overlays_not_in_doc[index] = overlay;
 
                     $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"
@@ -530,6 +544,10 @@ function addRecordsetLayer(source, index, recset) {
                     +overlay.title+"</div>");
                     _initLegend();
                }
+            }else{  //dataset is empty or failed to add - remove from legend
+            
+                //var dataset_name = _mapdata[0].id;
+                
             }
 }
 
