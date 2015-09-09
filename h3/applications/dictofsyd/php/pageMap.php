@@ -78,7 +78,6 @@ function makeFullTimeMap(Record $record){
 			$entity_name = $entity->getDet(DT_NAME);
 			$entity_type = $entity->type_classname();
 
-			//DEBUG print $factoid->getFeatureTypeName()."  ".$entity_name."<br/>";
 
 			if($geo || $date_start){
 

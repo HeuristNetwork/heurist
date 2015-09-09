@@ -320,8 +320,7 @@ function getRecordFull($rec_id, $dttypes=null){
             $record->init($row);
             $record->setDetails(getRecordDetails($rec_id, $dttypes));
 
-            //DEBUG	$record->toString();
-        }
+            }
     }
 
     return $record;

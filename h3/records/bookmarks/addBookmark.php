@@ -27,7 +27,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Add 
+* @subpackage  Records/Add
 */
 
 
@@ -59,7 +59,6 @@ if (array_key_exists("rec_OwnerUGrpID",$bib) &&
 		$bib["rec_OwnerUGrpID"] != $usrID &&
 		$bib["rec_OwnerUGrpID"] != 0 &&
 		$bib["rec_NonOwnerVisibility"] == "hidden") {
-/*****DEBUG****///	error_log("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	$res = mysql_query("select ugl_GroupID from ".USERS_DATABASE.".sysUsrGrpLinks ".
 						"where ugl_UserID=$usrID and ugl_GroupID=" . intval($bib["rec_OwnerUGrpID"]));
 	if (! mysql_num_rows($res)) {

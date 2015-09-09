@@ -813,7 +813,7 @@ function returnErrorMsgPage($critical, $msg = null) {
     if ($redirect) {
 
         if (defined('ISSERVICE')) { // ISSERVICE set by files (~27) which include initialise.php. 0 if returns html, otherwise 1
-            echo "/*DEBUG: it happens in " . $_SERVER['PHP_SELF'] . " */ location.replace(\"" . $redirect . "\");";
+            echo "/* Info: it happens in " . $_SERVER['PHP_SELF'] . " */ location.replace(\"" . $redirect . "\");";
         } else {
             header("Location: " . $redirect);
         }

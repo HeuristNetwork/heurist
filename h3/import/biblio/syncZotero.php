@@ -55,7 +55,7 @@
                 ele = document.getElementById('divLoading');
                 ele.style.display = 'block';
                 return true;
-            }        
+            }
         </script>
     </head>
 
@@ -85,7 +85,7 @@
             if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
                 die("Sorry, library key for Zotero synchronisation is not defined. To set it, go to Admin > Database > Advanced Properties");
             }
-            
+
             //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
 
 
@@ -489,9 +489,9 @@
                         }
                     }//for fields in content
 
-                    
+
                     echo print_r($details, true);
-                    
+
 
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid);
                     if($new_recid){
@@ -505,7 +505,7 @@
                         }
                     }
 
-                    
+
                 }//entry
 
             }//end loop by items in fetch
@@ -514,10 +514,10 @@
 
         }// end of loop
 
-        
+
         print "<div>Added: ".$cnt_added."</div>";
         print "<div>Updated: ".$cnt_updated."</div>";
-        
+
 
         print "<div>Create/update resource records</div>";
 
@@ -528,11 +528,7 @@
         // $dt_id - field that must contain pointer to resource
         // $resource_rt_id - record type for resouce record
         // $resource_dt_id
-        
-        //DEBUG print "<br>Unresolved: ";
-        //DEBUG print print_r($unresolved_pointers, true);
-        
-        
+
 
         $ptr_cnt = 0;
         foreach($unresolved_pointers as $rec_id=>$pntdata)
@@ -545,17 +541,13 @@
             foreach($pntdata as $dt_id=>$recdata){  //detail id in main record
 
                 foreach($recdata as $resource_rt_id=>$resource_details){ //recordtype
-                
-                    //DEBUG print "<br>Try : ".print_r($resource_details, true);
 
                     $recource_recid = createResourceRecord($resource_rt_id, $resource_details);
 
                     if(!is_array($recource_recid)){
                         $recource_recid = array("0"=>$recource_recid);
                     }
-                    
-                    //DEBUG print "<br>Found for ".$rec_id." : ".print_r($recource_recid, true);
-                    
+
                     foreach($recource_recid as $idx=>$res_rec_id){
                         //update main record
                         $inserts = array($rec_id, $dt_id, $res_rec_id, 1);
@@ -949,7 +941,7 @@
                 }
 
             }
-            
+
         }
         return $new_recid;
     }

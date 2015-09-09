@@ -96,7 +96,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 	* Result handler for search on server
 	*/
 	var _updateUserList = function (context) {
-   
+
 		var arr = [],
 			user, ind;
 
@@ -231,7 +231,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 	* Updates LOCAL filter conditions for datatable
 	*/
 	var _updateFilterLocal  = function () {
-        
+
 	    var filter_select = ((filterBySelection2 && filterBySelection2.checked)?1:0);
 	    // Reset sort
 	    var state = _myDataTable.getState();
@@ -245,7 +245,7 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 		    scope   : _myDataTable,
 		    argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 	    });
-        
+
 	};
 
 
@@ -307,7 +307,6 @@ function UserManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				_grpID = grpID;
 
-//				Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				//init listeners for filter controls
 				_initListeners();
@@ -661,7 +660,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
 //console.log('uupdate rol '+params);
 			//DOES NOT WORK top.HEURIST.util.getJsonData(baseurl, __onUpdateRoles, params);
-            
+
         $.ajax({
             url: baseurl,
             type: "GET",
@@ -682,8 +681,8 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
                         _updateFilter();
                     }
             }
-        });            
-            
+        });
+
 	}
 
 	//
@@ -739,7 +738,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				my_tooltip.mouseout(__hideToolTip2);
 
 				var xy = Hul.getMousePos(event);
-				my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+				my_tooltip.html(textTip);
 
 				Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
 				hideTimer = window.setTimeout(_hideToolTip, 5000);
@@ -1002,7 +1001,6 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 		function __onUserSelection(usersSelected){
 				if(!Hul.isempty(usersSelected)){
-//DEBUG alert(usersSelected);
 
 					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&role=member&recIDs="+encodeURIComponent(usersSelected);

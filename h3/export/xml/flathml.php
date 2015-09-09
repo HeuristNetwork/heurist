@@ -392,8 +392,6 @@ if (is_logged_in()) {
 */
 function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     global $ACCESSABLE_OWNER_IDS, $PUBONLY;
-    /*****DEBUG****/
-    //error_log("in findPointers");
     //saw TODO add error checking for numeric values in $rtyIDs and $dtyIDs
     // find all detail values for resource type details which exist for any record with an id in $rec_ids
     // and also is of a type in rtyIDs if rtyIDs is set to non null

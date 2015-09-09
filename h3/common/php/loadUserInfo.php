@@ -52,12 +52,12 @@
 		    $res = mysql_query('select svs_Name, svs_Query, svs_Query not like "%w=bookmark%" as w_all, svs_ID from usrSavedSearches where svs_UGrpID='.get_user_id().' order by w_all, svs_Name');
 		    $first = true;
 		    while ($row = mysql_fetch_assoc($res)) {
-                
+
                 json_decode($row['svs_Query']);
                 if (json_last_error() == JSON_ERROR_NONE){
                     continue;
                 }
-                
+
 			    if (! $first) print ",";  print "\n"; $first = false;
 			    //this is for searches from  obsolete published-searches table. they start with "q";
 			    if (preg_match('/^q/', $row['svs_Query'])) {
@@ -87,7 +87,7 @@
 			    array_push($ids, $kwd_id);
 		    }
 	    ?>
-        
+
 	    top.HEURIST.user.workgroupTags = <?= json_format($rows); ?>;
 	    top.HEURIST.user.workgroupTagOrder = <?= json_format($ids); ?>;
 
@@ -117,8 +117,6 @@
 		    if (is_array(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])) {
 			    $query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";
 
-    /*****DEBUG****///error_log(">>>>>>>>>>>> PREFIX=".HEURIST_SESSION_DB_PREFIX."   ".$query);
-    /*****DEBUG****///error_log("session data".print_r($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'],true));
 			    $workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", $query);
 			    print join(", ", $workgroups);
 		    }
@@ -129,12 +127,12 @@
 		    if (@$workgroups) {
 			    $res = mysql_query("select svs_UGrpID, svs_ID, svs_Name, svs_Query from usrSavedSearches left join ".USERS_DATABASE.".sysUGrps grp on grp.ugr_ID = svs_UGrpID where svs_UGrpID in (".join(",", $workgroups).") order by grp.ugr_Name, svs_Name");
 			    while ($row = mysql_fetch_assoc($res)) {
-                    
+
                     json_decode($row['svs_Query']);
                     if (json_last_error() == JSON_ERROR_NONE){
                         continue;
                     }
-                    
+
 				    $wg = $row['svs_UGrpID'];
 				    if (! @$ws[$wg])
 					    $ws[$wg] = array();
@@ -176,8 +174,8 @@
 ?>
 
     top.HEURIST.is_registration_allowed = <?= ((defined('HEURIST_ALLOW_REGISTRATION') && HEURIST_ALLOW_REGISTRATION) ?"true" :"false")?>;
-    top.HEURIST.is_logged_in = function() { 
-        return <?= intval(is_logged_in()) ?> > 0; 
+    top.HEURIST.is_logged_in = function() {
+        return <?= intval(is_logged_in()) ?> > 0;
     };
     top.HEURIST.get_user_id = function() { return <?= intval(get_user_id()) ?>; };
     top.HEURIST.get_user_name = function() { return "<?= addslashes(get_user_name()) ?>"; };
@@ -189,7 +187,7 @@
         if (wgID == 0 || usrID == wgID) return true;
         if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;
         var wgroups = wgID?[wgID]:top.HEURIST.user.workgroups;
-        
+
         for (j=0; j < wgroups.length; i++) {
             var wgAdmins = top.HEURIST.workgroups[wgroups[j]].admins;
             for (i=0; i < wgAdmins.length; i++) {
@@ -199,7 +197,7 @@
         }
     };
 
-<?php 
+<?php
     if (! is_admin()) { ?>
 	    top.document.body.className += " is-not-admin";
 <?php }  if (! is_logged_in()) { ?>

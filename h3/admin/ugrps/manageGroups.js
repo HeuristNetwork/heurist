@@ -200,7 +200,6 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
 		_ispopup = (Dom.get('titleBanner')==null);
-//		Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				_usrID = usrID;
 				//////////////////// create data table

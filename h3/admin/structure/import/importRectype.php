@@ -456,7 +456,6 @@
 
         //disambiguate name
         $def_field[$idx_name] = doDisambiguate($def_field[$idx_name], $trg_fieldtypes['names']);
-        //DEBUG if(strpos($def_field[$idx_name],"eader")>0) print "<br>after:".$def_field[$idx_name];
 
         if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype"){
             //change terms ids for enum and reltypes
@@ -549,8 +548,6 @@
         if(@$rectypes_correspondence[$rtyID]){
 
             $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
-
-            // DEBUG  print "<br>mask before: ".$mask."  rty=".$rectypes_correspondence[$rtyID];
 
             // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code
             $res = updateTitleMask( $rectypes_correspondence[$rtyID], $mask);
@@ -845,10 +842,8 @@
 
         //array of valid ids
         $terms_ids =  getTermsFromFormat($terms_ids, $domain);
-        //DEBUG print "terms_ids= ".print_r($terms_ids, true)."<br>";
         foreach ($terms_ids as $term_id){
             $topmost = getTopMostTermParent($term_id, $domain);
-            //DEBUG print "topmost= ".$topmost."<br>";
             if($topmost && !in_array($topmost, $imp_terms[$domain])){
                 array_push($imp_terms[$domain], $topmost);
             }

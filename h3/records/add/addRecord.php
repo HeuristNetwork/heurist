@@ -337,7 +337,6 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 // no recID or url passed in so create a new record
 if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	/* create a new public note */
-/*****DEBUG****///error_log("in add making new records new reco ownid = ". HEURIST_NEWREC_OWNER_ID);
 	$isNewRecID = true;
 	$rt = intval($_REQUEST['rec_rectype']);
 	if (!check_rectype_exist($rt)) {
@@ -365,7 +364,6 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 
         if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
 
-/*****DEBUG****///error_log( " after insert error = ". mysql_error());
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
 		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.
@@ -413,7 +411,6 @@ if ($rec_id  &&  ! @$_REQUEST['force_new']) {
 			insert_woot_content($rec_id, $description);
 		}
         $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id='.$bkmk['bkm_ID'].'&fromadd=exists' . $outdate . "#personal";
-//DEBUG error_log("Rediect 2 ".$url);
 		header('Location: ' . $url );
 		return;
 	}
@@ -505,11 +502,9 @@ if ($rec_id) {
 	if ($bkm_ID) {
 		if ($isNewRecID) {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bib' . $outdate . $wg;
-//DEBUG error_log("Rediect 3 ".$url);
 			header('Location: ' . $url);
 		} else {
             $url = HEURIST_BASE_URL . 'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&bkmk_id=' . $bkm_ID . '&fromadd=new_bkmk' . $outdate . $wg;
-//DEBUG error_log("Rediect 4 ".$url);
 			header('Location: ' . $url);
 		}
 		return;

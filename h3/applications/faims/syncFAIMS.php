@@ -121,7 +121,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             $upload = @$_FILES["file"];
             $dbname_faims = null;
 
-            //DEBUG echo print_r($upload, true)."<br>";
             if($step=='1'){
 
                 if($mode_dir==1){
@@ -1281,8 +1280,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         //another relation - save previous
                         if($details && count($details)>0){
 
-                            //DEBUG print ">>>ADD RECROD111 ".$faims_id."  ".print_r($details, true)."<br>";
-
                             //since hiearchy is a graph in faims - it may be many-to-many relationship
                             foreach ($details["t:".DT_PRIMARY_RESOURCE] as $idx=>$recId_Source) {
                                 if($recId_Source>0)
@@ -1294,8 +1291,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                                                 "t:".DT_RELATION_TYPE => $details["t:".DT_RELATION_TYPE],
                                                 "t:".$dt_SourceRecordID => $details["t:".$dt_SourceRecordID]
                                             );
-
-                                            //DEBUG print ">>>".print_r($details2, true)."<br>";
 
                                             insert_update_Record($recID, $rectype, $details2, $faims_id);
                                         }
@@ -1321,7 +1316,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
 
                                 $recIdcontainer = $containerRecords[$faims_id];
-                                //DEBUG print ">>>> SOURCE CONTAINER ".$recIdcontainer."  faims=".$faims_id."<br>";
                                 $faims_id = $faims_id."_container";
 
                                 array_push( $details["t:".DT_PRIMARY_RESOURCE], $recIdcontainer);
@@ -1333,8 +1327,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                                 $participatesVerb = $row[3];
                                 $reltype = reset($reltypeMap[$faims_atype]);
                                 $is_source_rec = ( $reltype == $reltypeMap[$faims_atype][$participatesVerb] ); //first element of array
-
-                                //DEBUG print ">>>> HIERARCHY ".$participatesVerb."  ".$reltype."  is source ".$is_source_rec."<br>";
 
                             }else{
                                 $reltype = $reltypeMap[$faims_atype];
@@ -1353,8 +1345,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                             //find the existing record in Heurist database
                             $recID = getRecordByFaimsId($faims_id);
-
-                            //DEBUG print "RECID ".(($recID>0)?$recID:"new")." for ".$faims_id."<br>";
 
                         }else{
                             $recID = 0;
@@ -1386,8 +1376,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                                 $reltype = reset($reltypeMap[$faims_atype]);
                                 $is_source_rec = ( $reltype == $reltypeMap[$faims_atype][$participatesVerb] ); //first element of array
 
-                                //DEBUG print ">>>> HIERARCHY2 ".$participatesVerb."  ".$reltype."  is source ".$is_source_rec."<br>";
-
                             }
                         }else{
                             $details = true;
@@ -1410,7 +1398,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             if($details && count($details)>0){
 
-                //DEBUG print ">>>ADD RECROD!!!! ".$faims_id."  ".print_r($details, true)."<br>";
 
                 foreach ($details["t:".DT_PRIMARY_RESOURCE] as $idx=>$recId_Source) {
                     foreach ($details["t:".DT_TARGET_RESOURCE] as $idx=>$recId_Target) {
@@ -1557,7 +1544,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }
 
 
-            //  break; //DEBUG
 
             }//for records
             */

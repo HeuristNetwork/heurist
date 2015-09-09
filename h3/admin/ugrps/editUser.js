@@ -369,7 +369,6 @@ function UserEditor() {
 
 
 		if(str !== null) {
-//DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
 			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
