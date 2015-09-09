@@ -6,7 +6,7 @@
 * @copyright   (C) 2005-2014 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0      
+* @version     4.0
 */
 
 /*
@@ -27,7 +27,7 @@ $.widget( "heurist.app_timemap", {
         layout:null, //['header','map','timeline']
         startup:0         //map document loaded on map init
     },
-    
+
     _events: null,
 
     recordset_changed: true,
@@ -38,26 +38,26 @@ $.widget( "heurist.app_timemap", {
         var that = this;
 
         //???? this.element.hide();
-        
+
         this.framecontent = $('<div>').addClass('frame_container')
                             //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
                             //     'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
                             .appendTo( this.element );
-         
-        if($(".header"+that.element.attr('id')).length===0){                   
-            this.framecontent.css('top',0);                    
+
+        if($(".header"+that.element.attr('id')).length===0){
+            this.framecontent.css('top',0);
         }
-                            
-                   
+
+
         this.mapframe = $( "<iframe>" )
                         .attr('id', 'map-frame')
                         //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
                         .appendTo( this.framecontent );
 
-        this._events = top.HAPI4.Event.LOGOUT 
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH 
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART 
-                            + ' ' + top.HAPI4.Event.ON_REC_SELECT 
+        this._events = top.HAPI4.Event.LOGOUT
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
+                            + ' ' + top.HAPI4.Event.ON_REC_SELECT
                             + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
 
         $(this.document).on(this._events, function(e, data) {
@@ -69,7 +69,7 @@ $.widget( "heurist.app_timemap", {
                     that.option("recordset", null);
                     that._refresh();
                 }
-                
+
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                 that.loadanimation(false);
@@ -83,27 +83,27 @@ $.widget( "heurist.app_timemap", {
                 that.option("recordset", null);
                 that.option("selection", null);
                 if(data && data.q!='')  {
-                    that.loadanimation(true);   
+                    that.loadanimation(true);
                 }else{
                     that.recordset_changed = true;
                     that._refresh();
                 }
                 //???? that._refresh();
-              
-            // Record selection  
+
+            // Record selection
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
-                
+
                 if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
-                  
-//console.log("_doVisualizeSelection");                  
+
+//console.log("_doVisualizeSelection");
                     that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
-                }            
+                }
             }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
-                
+
                 that._refresh();
-                
+
             }
-                
+
 
         });
 
@@ -139,7 +139,7 @@ $.widget( "heurist.app_timemap", {
                     if( this.options.layout.indexOf('header')<0 )
                             url = url + '&noheader=1';
                 }
-                
+
                 (this.mapframe).attr('src', url);
             }
         }
@@ -149,53 +149,47 @@ $.widget( "heurist.app_timemap", {
     _initmap: function(){
 
         if( !top.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
-            
-            
+
+
             var mapping = this.mapframe[0].contentWindow.mapping;
-            
+
             var that = this;
-            
+
             if(!mapping){
                 setTimeout(function(){ that._initmap()}, 1000); //bad idea
                 return;
             }
-            
-                /* DEBUG
-                console.log(this.options.recordset);
-                console.log(this.options.recordset.getRecords());
-                console.log(this.options.recordset.toTimemap());
-                */
-            
+
             var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
             /*if(mapdataset){
-                
-                                var mylayout = $('#mapping').layout();  
-                
+
+                                var mylayout = $('#mapping').layout();
+
                                 if(mapdataset.mapenabled==0){
-                                    
+
                                     //$(".ui-layout-north").hide();
                                     //$(".ui-layout-center").hide();
                                     //$(".ui-layout-south").css({'width':'100%','height':'100%'});
                                     mylayout.hide('center');
-                                    
+
                                 }else{
-                                    
+
                                     if(mapdataset.timeenabled==0){
                                         mylayout.hide('south');
                                     }else {
-                                        mylayout.show('south', true);   
+                                        mylayout.show('south', true);
                                     }
-                                } 
+                                }
             }*/
-            
+
             mapping.load( mapdataset,
                             this.options.selection,  //array of record ids
                             this.options.startup,    //map document on load
                                 function(selected){
-                                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
+                                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT,
                                         { selection:selected, source:that.element.attr('id') } );
-                                });            
-            
+                                });
+
             this.recordset_changed = false;
         }
 
@@ -206,15 +200,15 @@ $.widget( "heurist.app_timemap", {
             if(top.HEURIST4.util.isnull(this.options.recordset)) return;
 
             this.option("selection", selection);
-            
+
             if(!this.element.is(':visible')
                 || top.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
                     return;
             }
-            
+
             this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see js/mapping.js
-    }    
-    
+    }
+
 
 
     // events bound via _on are removed automatically
@@ -229,7 +223,7 @@ $.widget( "heurist.app_timemap", {
         this.framecontent.remove();
 
     }
-    
+
     , loadanimation: function(show){
         if(show){
             //this.dosframe.hide();
@@ -239,20 +233,20 @@ $.widget( "heurist.app_timemap", {
             //this.dosframe.show();
         }
     }
-    
+
     /**
-    * public method 
+    * public method
     */
-    
+
     , loadMapDocumentById: function(recId){
             var mapping = this.mapframe[0].contentWindow.mapping;
             if(mapping){
                 mapping.loadMapDocumentById(recId);  //see js/mapping.js
             }
     }
-    
+
     /**
-    * Add dataset on map  
+    * Add dataset on map
     * params = {id:$.uniqueId(), title:'Title for Legend', query: '{qa:"", rules:""}'}
     */
     , addQueryLayer: function(params){
@@ -261,6 +255,6 @@ $.widget( "heurist.app_timemap", {
                 mapping.addQueryLayer(params);  //see js/mapping.js
             }
     }
-    
+
 
 });

@@ -116,7 +116,7 @@ function RectypeManager() {
                         '<div class="input-cell">'+
                         '<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
                         '<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
-                        
+
                         '</div></div>'+
                         '</div>')
             }));
@@ -299,15 +299,15 @@ function RectypeManager() {
                     var rectype = td.commonFields;
                     if (rectype && Number(rectype[fi.rty_RecTypeGroupID]) === Number(grpID)) {  //(rectype[9].indexOf(grpID)>-1) {
                         arr.push([Number(rectypeID),
-                                '', //icon 
+                                '', //icon
                                 '', //edit
                                 rectype[fi.rty_Name],
-                                rectype[fi.rty_Description], 
+                                rectype[fi.rty_Description],
                                 (Number(rectype[fi.rty_ShowInLists])===1),
-                                rectype[fi.rty_Status], 
+                                rectype[fi.rty_Status],
                                 grpID, //rectype[fi.rty_RecTypeGroupID],
                                 null,
-                                rectype[fi.rty_ConceptID]]);   
+                                rectype[fi.rty_ConceptID]]);
 
                         /*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
                     }
@@ -374,7 +374,7 @@ function RectypeManager() {
                 },
                 // 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code
                 { key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right', hidden:true },
-                
+
                 { key: "icon", label: "Icon", className:'center', sortable:false,   width:40,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
@@ -387,15 +387,15 @@ function RectypeManager() {
                         "</a>"+
                         "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
                         "<a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
-                        "</div>"+ 
+                        "</div>"+
                         "</div>";
                         elLiner.innerHTML = icon;
                 }},
-                
+
                 { key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
                 },
-                
+
                 { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("name");
@@ -406,8 +406,8 @@ function RectypeManager() {
                         }
                         elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
                 }},
-                
-                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
+
+                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("description");
                         var tit = oRecord.getData("description");
@@ -423,7 +423,7 @@ function RectypeManager() {
                 { key: "struc", hidden:true, label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
                 },
-                                                                            //minWidth:20, maxWidth:20, maxAutoWidth:20, 
+                                                                            //minWidth:20, maxWidth:20, maxAutoWidth:20,
                 { key: "active", label: "Show", sortable:false, width:"30px", formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
                 { key: "info", label: "Dup", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
@@ -688,7 +688,7 @@ function RectypeManager() {
             //
             $th = $( "span:contains('Show')" ).parent().parent(); //yui-dt-col-yui-dt-col23
             $th.css('width','1%');
-            
+
             //$$('.ellipsis').each(ellipsis);
 
         }//if(dt==undefined || dt==null)
@@ -783,7 +783,6 @@ function RectypeManager() {
     //
     function _updateRecordTypeOnServer(event) {
         var str = YAHOO.lang.JSON.stringify(_oRecordType);
-        //DEBUG alert("Stringified changes: " + str);
 
         if(!Hul.isnull(str)) {
             //_updateResult(""); //debug
@@ -958,17 +957,17 @@ function RectypeManager() {
     // duplicate record type and then call edit type dialogue
     //
     function _duplicateType(rectypeID) {
-        
+
             var value = confirm("Do you really want to duplicate record type # "+rectypeID+"?"); //" '"+rt_name+"' ?");
             if(value) {
 
                 function _editAfterDuplicate(context) {
 
                     if(!Hul.isnull(context) && Number(context.id)>0){
-                        
-                        
+
+
                             var rty_ID = Number(context.id);
-                        
+
                             //refresh the local heurist
                             top.HEURIST.rectypes = context.rectypes;
                             _cloneHEU = null;
@@ -981,7 +980,7 @@ function RectypeManager() {
                             curtimestamp = d.getMilliseconds();
 
                             _removeTable(grpID, true);
-                        
+
                             _onAddEditRecordType(context.id, null);
                     }
                 }
@@ -994,8 +993,8 @@ function RectypeManager() {
 
             }
     }
-    
-    
+
+
     //
     // edit strcuture (from image link in table)
     //
@@ -1005,7 +1004,7 @@ function RectypeManager() {
         //this.location.replace(URL);
 
         var dim = Hul.innerDimensions(this.window);
-        
+
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": false,
@@ -1199,8 +1198,6 @@ function RectypeManager() {
 
         //top.HEURIST.rectypes.groups[grpID] = grp;
         var str = YAHOO.lang.JSON.stringify(orec);
-
-        //DEBUG alert(str);
 
         //make this tab active
         function _updateOnSaveGroup(context){
@@ -1445,7 +1442,7 @@ function _upload_icon(rectypeID,mode) {
     if (!mode){
         mode = 0;
     }
-    
+
     rt_name =  top.HEURIST.rectypes.names[rectypeID];
 
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -1456,8 +1453,8 @@ function _upload_icon(rectypeID,mode) {
             height: 500, //(mode==0?200:250),
             width: 700,
             callback: function(context){
-                icon_refresh(rectypeID)  
-            } 
+                icon_refresh(rectypeID)
+            }
     });
 
 }
@@ -1481,7 +1478,7 @@ function icon_refresh(rectypeID) {
             img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png?"+curtimestamp+'")');
             ///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
         }
-        
+
     }
 }
 
