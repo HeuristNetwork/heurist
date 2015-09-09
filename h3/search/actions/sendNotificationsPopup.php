@@ -116,9 +116,10 @@
 
 		<form action="sendNotificationsPopup.php" method="post" style="display: inline;">
 
-			<div style="font-weight: bold; margin-bottom: 3px;">
+			<div style="font-weight: bold; margin-bottom: 1em;">
 				Share these records with other users via email:
 			</div>
+            <div style="margin-bottom: 0.5em;">
 			&nbsp;
 			<?php
 				$res = mysql_query('select usr.'.USERS_ID_FIELD.',concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as fullname
@@ -156,12 +157,17 @@
 			<br>
 			<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/admin/ugrps/listUsergroupMembers.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
 			&nbsp;
+            </div>
 			<textarea name="notify_message" title="email message" style="width: 95%;" rows="3"
 				onfocus="if (this.value=='(enter message here)') this.value='';">(enter message here)</textarea>
-			<div style="width: 95%; margin-top: 3px;">
-				<input type="submit" name="send_notification" id="notify_submit" value="Share" style="float: right;"
+			<div style="width: 95%; margin-top:1em;">
+				<input type="submit" name="send_notification" id="notify_submit" value="Notify" style="float: right;"
 					onclick="return confirm_notification();">
 			</div>
+            <div style="font-weight: bold;">
+                Notification includes a URL which will open the list of records<br>
+                in a Heurist search, from which they can be bookmarked
+            </div>
 
             <input type="hidden" name="h4" id="h4" value="<?= htmlspecialchars(@$_REQUEST['h4']) ?>">
 			<input type="hidden" name="bib_ids" id="bib_ids" value="<?= htmlspecialchars($_REQUEST['bib_ids']) ?>">

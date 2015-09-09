@@ -1,0 +1,62 @@
+<!--
+/**
+* Editing form for faceted searches 
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2014 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+
+<form>
+    <fieldset>
+        <input type="hidden" name="svs_ID" id="svs_ID" />
+        <div>
+            <div class="header"><label for="svs_Name">Saved search name</label></div>
+            <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" />
+        </div>
+
+        <div class="simple-mode">
+            <div class="header"><label for="opt_rectypes">Select record type</label></div>
+            <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+        </div>
+
+        <div>
+            <div class="header"  style="padding-top: 10px;"><label for="svs_UGrpID">Save in user group</label></div>
+            <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+        
+        
+        <div class="heurist-helper1" style="display:block;font-size:smaller;border-top:1px solid;padding:1em 0 1em;">
+            You may add a set of rules which will be used to expand the search result and bring in additional records each time a facet selection is made. This may be useful for bringing in information from related records, such as map location or dates for display on a map / timeline.        
+        </div>
+        
+        <div>
+            <div class="header" style="vertical-align:top"><label for="svs_Rules">Rules</label></div>
+            <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
+                style="margin-top:0.4em;width:300px" readonly="readonly"></textarea>
+                <div style="font-size: smaller; margin-top: 2px;">Please edit rules with button on the right</div>
+
+            <div id="svs_btnset">
+                <div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
+                <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+            </div>
+
+        </div>        
+
+    </fieldset>
+  </form>
+  <br />
+  <p class="messages"></p>

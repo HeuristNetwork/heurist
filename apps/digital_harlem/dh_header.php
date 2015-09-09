@@ -82,6 +82,8 @@
 <?php                            
                     }
 ?>
+<div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{}">BLOG</a></div>
+
   </div>
 
 </div>  <!-- topstuff -->

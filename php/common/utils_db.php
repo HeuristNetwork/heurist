@@ -293,6 +293,58 @@
         return $sysValues;
     }
     
+
+    /**
+    * Check that db function exists
+    *
+    * @param mixed $mysqli
+    * @param mixed $name
+    */
+    function isFunctionExists($mysqli, $name){
+        $res = false;
+        try{
+
+             // search function
+             $res = $mysqli->query('SHOW CREATE FUNCTION '.$name);
+             if($res){
+                $row2 = mysqli_fetch_row($res);
+                if($row2){
+                    $res = true;
+                 }
+             }
+
+        } catch (Exception $e) {
+        }
+        return $res;
+    }
+
+
+    /**
+    * This function is called on login
+    * Validate the presence of db functions. If one of functions does not exist - run admin/setup/dbcreate/addFunctions.sql
+    *
+    */
+    function checkDatabaseFunctions($mysqli){
+
+            $res = false;
+
+            if(isFunctionExists($mysqli, 'NEW_LEVENSHTEIN') && isFunctionExists($mysqli, 'NEW_LIPOSUCTION')
+                && isFunctionExists($mysqli, 'hhash') && isFunctionExists($mysqli, 'simple_hash')
+                //&& isFunctionExists('set_all_hhash')
+                && isFunctionExists($mysqli, 'getTemporalDateString')){
+
+                $res = true;
+
+            }else{
+            
+                include('utils_db_script.php'); //
+                if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../../h3/admin/setup/dbcreate/addProceduresTriggers.sql")){
+                    $res = true;
+                }
+            }
+
+            return $res;
+    }
     
 
 ?>

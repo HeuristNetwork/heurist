@@ -18,6 +18,8 @@
     */
 
 
+   //@todo - reimplement using Singleton pattern 
+    
     //require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
@@ -267,8 +269,6 @@
                     
                     define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
                     
-                    define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . '/filethumbs/');
-                    define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . '/filethumbs/');
                     
                        
             }else{     
@@ -279,10 +279,12 @@
                     }
                     
                     define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
-                    
-                    define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
-                    define('HEURIST_THUMB_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/filethumbs/');
             }
+
+            define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . '/filethumbs/');
+            define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . '/filethumbs/');
+            define('HEURIST_FILES_DIR', HEURIST_FILESTORE_DIR . '/file_uploads/');
+            define('HEURIST_FILES_URL', HEURIST_FILESTORE_URL . '/file_uploads/');
             
             define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
             define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');

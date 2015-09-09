@@ -94,6 +94,23 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     }
 
+    // not used
+    function _processerror(response){
+        
+        if(response.status != top.HAPI4.ResponseStatus.OK){
+                var msg = response.message;
+                
+                if(!msg){
+                    msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
+                }
+                if(response.sysmsg){
+                    msg = msg + "<br>System error:" + response.sysmsg;
+                }
+                
+                top.HEURIST4.util.showMsgErr(msg);
+        }
+    }
+    
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
     * 
@@ -121,13 +138,19 @@ function hAPI(_db, _oninit) { //, _currentUser
             dataType: "json",
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
+                
+                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: jqXHR.responseText }
+                //_processerror(response);
+                
                 if(callback){
-                    callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                        message: jqXHR.responseText });
+                    callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
+                
+                //_processerror(response);
+                
                 if(callback){
                     callback(response);
                 }
@@ -253,7 +276,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', request, callback);
             }
 
-            /**
+            /**                         
             * Returns detailed description of groupfs for current user
             * 
             * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
@@ -265,10 +288,15 @@ function hAPI(_db, _oninit) { //, _currentUser
             /**
             *  Get saved searched for current user and all usergroups where user is memeber
             * 
+            * request 
+            *    UGrpID: group id -  if not defined returns all saved searches for current user
             *  response data - array of  svs_ID:[svs_Name, svs_Query, svs_UGrpID]
             */
-            ,ssearch_get: function(callback){
-                _callserver('usr_info', {a:'svs_get'}, callback);
+            ,ssearch_get: function(request, callback){
+                if(!request) request = {};
+                
+                request.a = 'svs_get';
+                _callserver('usr_info', request, callback);
             }
 
             /**
@@ -420,7 +448,12 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
-                            top.HEURIST4.util.showMsgErr(response.message);
+                            
+                            top.HEURIST4.util.showMsgErr(response);
+                            
+                            if(!top.HEURIST4.util.isnull(document)){    
+                                document.trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
+                            }
                         }
                         if(!top.HEURIST4.util.isnull(document)){
                             document.trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event

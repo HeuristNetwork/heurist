@@ -511,7 +511,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if (options["no-resize"] === undefined) options["no-resize"] = true;
 
         if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
-            return top.HEURIST.util.popupWindow(parentWindow, options);
+            top.HEURIST.util.popupWindow(parentWindow, options);
+            return null;
         }else{
             return top.HEURIST4.util.showElementAsDialog(options);
         }
@@ -1610,16 +1611,24 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
 
         if(!top.HEURIST.util.isnull(helpDiv))
-            {
+        {
             var alts_2 = { "hide": "Click here to show help text", "show": "Click here to hide help text" };
             var alts_1 = { "hide": "Show Help", "show": "Hide Help"};
 
-            helpDiv.title = alts_2[helpStatus];
-            helpDiv.innerHTML = alts_1[helpStatus];
+            if($(helpDiv).attr('type') == 'checkbox'){
+                
+                $(helpDiv).attr('checked', (helpStatus=="show"));
+                $(helpDiv).attr('title', alts_2[helpStatus]);
+            }else{
+                helpDiv.title = alts_2[helpStatus];
+                helpDiv.innerHTML = alts_1[helpStatus];
+            }
         }
 
         //init class for body element
         top.HEURIST.util.setDisplayPreference("help", helpStatus);
+        
+        return helpStatus; 
     },
 /**
 * toggle help event Handler

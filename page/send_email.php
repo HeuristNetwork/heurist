@@ -26,7 +26,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once(dirname(__FILE__).'/common/utils_mail.php');
+require_once(dirname(__FILE__).'/../php/common/utils_mail.php');
 
 // POST request    
 if(isset($_POST['data'])) {
@@ -60,164 +60,96 @@ if(isset($_POST['data'])) {
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <title>Send email</title>
+  <title>Bulk email sender</title>
 
   <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+  <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
+  <link rel="stylesheet" type="text/css" href="../style3.css">
   
   <style>
-    #form {
-        display: inline-block;
-    }
-    
-    .row {
-        position: relative;
-        padding: 3px;
-        margin-left: 5px;
-        margin-right: 5px;
-    }
-    
-    /** Label */
-    .row label {
-        width: 100px;
-        text-align: right;
-        display: inline-block;
-        margin-right: 5px;
-    }
-    
-    .required {
-        color: #f11;
-        font-weight: bold;
-    }
-    
-    
-    .row select {
-        min-width: 200px;
-    }
-    
-    .row input {
-        width: 300px;
-    }
-    
-    /** Message */
-    #top {
-        width: 100px;
-        display: inline-block;
-        text-align: right;
-        vertical-align: top;
-        margin-right: 5px;
-    }
-    
-    #right {
-        display: inline-block;
-    }
-    
-    #redo {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background-color: rgba(255, 255, 255, 0.5);
-        color: #000;
-        border: 1px solid white;
-        font-size: 20px;
+    #btn_redo {
         cursor: pointer;
-    }
-    
-    .row textarea {
-        width: 300px;       
-    }
-    
-    #message-info {
-        font-size: 10px;   
-    }
-    
-    
-    /** Prepare */
-    #prepare {
         float: right;
-        border: 1px solid black;
-        padding: 5px;
-        background-color: #fff;
-        font-weight: bold;
-        cursor: pointer;
+        font-size: 1.4em;
+        height: 1.8em;
+        margin-left: 2px;
+        margin-top: 6px;
+        width: 1.8em;
     }
+    
   </style>
 </head>
 
-<body class="popup" onload="setup()">
+<body class="ui-heurist-bg-light" onload="setup()">
 
-    <div id="form">
-        <!-- Selected records -->
+    <fieldset>
+
         <span id="selected-records"></span>
         
         <hr>
-        
-        <!-- Email -->
-        <div class="row">
-            <label for="email" class="required">Email:</label>
-            <select name="email" id="email"></select>
+
+        <div style="font-size: smaller; margin-top: 2px;display:block">This function assumes that the records contain - at the least - an email address field. Choose this (required) field in the first dropdown. For each record selected, one email will be sent to the address stored in this field. 
+            If name fields also exist, these can be selected in the next two dropdowns and may be used in the body of the message. The first three dropdowns show only text fields. 
+        </div>
+            
+        <div>
+            <div class="header mandatory"><label for="email">Email:</label></div>
+            <select name="email" id="email" class="text ui-widget-content ui-corner-all mandatory"></select>
+        </div>
+        <div>
+            <div class="header"><label for="firstname">First Name:</label></div>
+            <select name="firstname" id="firstname" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+        <div>
+            <div class="header"><label for="familyname">Family Name:</label></div>
+            <select name="familyname" id="familyname" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+
+        <hr>
+
+        <div style="font-size: smaller; margin-top: 2px;display:block">Additional user-defined fields can be selected in the other three dropdowns, which show all available fields. Each selected field can be used in the text of the message and will be substituted in the message body for each email sent.
         </div>
         
-        <!-- First name -->
-        <div class="row">
-            <label for="firstname">FirstName:</label>
-            <select name="firstname" id="firstname"></select>
+        <div>
+            <div class="header"><label for="field1">Field 1:</label></div>
+            <select name="field1" id="field1" class="text ui-widget-content ui-corner-all"></select>
         </div>
-        
-        <!-- Family name -->
-        <div class="row">
-            <label for="familyname">FamilyName:</label>
-            <select name="familyname" id="familyname"></select>
+        <div>
+            <div class="header"><label for="field2">Field 2:</label></div>
+            <select name="field2" id="field2" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+        <div>
+            <div class="header"><label for="field3">Field 3:</label></div>
+            <select name="field3" id="field3" class="text ui-widget-content ui-corner-all"></select>
         </div>
         
         <hr>
         
-        <!-- Field #1 -->
-        <div class="row">
-            <label for="field1">Field1:</label>
-            <select name="field1" id="field1"></select>
+        
+        <div>
+            <div class="header_narrow"><label for="subject">Subject :</label></div>
+            <input type="text" name="subject" id="subject" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:24.2em"/>
         </div>
+        <div>
+            <div class="header_narrow" style="vertical-align:top"><label for="message">Message :</label></div>
+            <textarea name="message2" id="message" rows="10" class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em"></textarea>
+            <textarea name="message" id="message-prepared" rows="10" 
+                                                            class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em;display: none"></textarea>
+            <button id="btn_redo" style="display: none" onclick="redo()">&#10226;</button>
+                                                            
+            <div style="font-size: smaller; margin-top: 2px;">may include html; #fieldname to include content of field</div>
+       </div>
+
+       <div style="display:block;padding-top:1em;text-align:right;width:100%">
+            <button type="button" id="prepare" 
+                    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                    role="button" aria-disabled="false" onClick="prepare()">
+                    <span class="ui-button-text">Prepare emails</span>
+            </button>
+       </div>
         
-        <!-- Field #2 -->
-        <div class="row">
-            <label for="field2">Field2:</label>
-            <select name="field2" id="field2"></select>
-        </div>
         
-        <!-- Field #3 -->
-        <div class="row">
-            <label for="field3">Field3:</label>
-            <select name="field3" id="field3"></select>
-        </div>
-        
-        <hr>
-        
-        <!-- Subject -->
-        <div class="row">
-            <label for="subject" class="required">Subject:</label>
-            <input type="text" name="subject" id="subject">
-        </div>
-        
-        <!-- Message -->
-        <div class="row">
-            <div id="top">
-                <label for="message" class="required">Message:</label>
-                <br/>
-                <div id="message-info">
-                    may include html
-                    <br/>
-                    #fieldname to include content of field
-                </div>
-            </div>
-            <div id="right">
-                <textarea name="message" id="message" rows="15"></textarea>
-                <textarea name="message" id="message-prepared" rows="15" style="display: none"></textarea>
-                <button id="redo" style="display: none" onclick="redo()">&#10226;</button>
-            </div>
-        </div>
-        
-        <!-- Prepare -->
-        <button id="prepare" onClick="prepare()">Prepare emails</button>
-    </div>
+    </fieldset>
  
 
     <!-- Javascript -->
@@ -302,7 +234,7 @@ if(isset($_POST['data'])) {
                 this.record = records[r]; // Reference to first record
                 var rectype = record[rectype_index]; // Record type of first record
                 this.definitions = top.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
-                console.log("Rectype: " + rectype + ", definitions", definitions);
+                console.log("Rectype: " + rectype + ", definitions", this.definitions);
                 
                 // TEXT ONLY DROPDOWNS
                 var text_options = determineOptions(text_types);
@@ -336,8 +268,8 @@ if(isset($_POST['data'])) {
         
         // Swaps the text area's
         function redo() {
-            $("#prepare").text("Prepare emails");    
-            $("#redo").hide(); // Hide redeo button
+            $("#prepare > span").text("Prepare emails");    
+            $("#btn_redo").hide(); // Hide redo button
             $("#message-prepared").slideUp(500, function(e) {  // Hide prepared message
                 $("#message").slideDown(500);  // Show raw message
             })   
@@ -399,7 +331,7 @@ if(isset($_POST['data'])) {
             //console.log("Raw message: " + rawMessage);  
  
             // Check action
-            var buttonText = $("#prepare").text()
+            var buttonText = $("#prepare > span").text()
             if(buttonText.indexOf("Prepare") >= 0) { // Check button text to determine action
                 // PREPARE EMAILS
                 var message = prepareMessage(rawMessage, record, definitions);
@@ -407,9 +339,9 @@ if(isset($_POST['data'])) {
                 // Show prepared message in new text area
                 //console.log("Prepared message: " + message);
                 $("#message").slideUp(500, "linear", function(e) {
-                    $("#redo").slideDown(500);
+                    $("#btn_redo").slideDown(500);
                     $("#message-prepared").val(message).slideDown(500);
-                    $("#prepare").text("Send emails");    
+                    $("#prepare > span").text("Send emails");    
                 });
             }else{
                 // SEND EMAILS
@@ -424,12 +356,18 @@ if(isset($_POST['data'])) {
                     
                     // Email
                     var emailIndex = $("#email").val();  // Dropdown index
-                    var emailType = definitions[emailIndex][type_index];  // Field type
-                    email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
                     
-                    // Message
-                    email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
-                    data.emails.push(email);
+                    if(emailIndex>0){
+                        var emailType = definitions[emailIndex][type_index];  // Field type
+                        email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
+                    
+                        // Message
+                        email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
+                        data.emails.push(email);
+                    }else{
+                         top.HEURIST4.util.showMsgErr("Define email field. It is mandatory");
+                         return;
+                    }
                 }
                 
                 // Include e-mail to current user/database owner
@@ -440,9 +378,9 @@ if(isset($_POST['data'])) {
                 console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
-                    alert(response);  
+                    top.HEURIST4.util.showMsgDlg(response);  
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.status + " --> " + jqXHR.responseText);
+                    top.HEURIST4.util.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
                 });
 
             }

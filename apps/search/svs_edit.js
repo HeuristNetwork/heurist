@@ -142,7 +142,9 @@ function hSvsEdit(args) {
 
     }  
     
-    // @todo
+    // 
+    //
+    //
     function _editRules(ele_rules, squery) {
         
                var that = this;
@@ -355,7 +357,7 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 450,
+                    height: 475,
                     width: 450,
                     modal: true,
                     resizable: false,

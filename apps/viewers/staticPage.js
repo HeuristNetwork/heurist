@@ -41,9 +41,6 @@ $.widget( "heurist.staticPage", {
                         'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})*/
                    .appendTo( this.element );
                    
-        //this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
-
-        
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
                 that._refresh();
@@ -89,11 +86,19 @@ $.widget( "heurist.staticPage", {
         
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
-            this.options.url = top.HAPI4.basePath +  this.options.url.replace("[dbname]",  top.HAPI4.database);
+            if(this.options.url.indexOf('http')<0){
+                this.options.url = top.HAPI4.basePath +  this.options.url.replace("[dbname]",  top.HAPI4.database);
+                
+                //var that=this;
+                $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
+            }else{
+                if(!this.dosframe){
+                    this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.div_content );
+                }
+                this.dosframe.attr('src', this.options.url);
+            }
             this._loaded_url = this.options.url;
-            //var that=this;
-            $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
-            //this.dosframe.attr('src', this.options.url);
+            //
         }
         
     },

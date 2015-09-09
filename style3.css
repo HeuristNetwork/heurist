@@ -311,7 +311,7 @@ H2 {
     font-size:1.2em;
 }
 
-h3:hover > #rec_add_link, div.recordDiv:hover > .rec_edit_link {
+h3:hover > #rec_add_link, div.recordDiv:hover > .rec_edit_link, div.recordDiv:hover > .rec_view_link {
     display: block;
 }
 h3 > #rec_add_link, div.recordDiv > .rec_edit_link {
@@ -319,9 +319,19 @@ h3 > #rec_add_link, div.recordDiv > .rec_edit_link {
     display: none;
     height: 16px;
     width: 16px;
-    top: 0.4em;
-    right: 0.4em;
+    top: 2px;
+    right: 18px;
 }
+
+div.recordDiv > .rec_view_link {
+    position: absolute;
+    display: none;
+    height: 16px;
+    width: 16px;
+    top: 2px;
+    right: 2px;
+}
+
 /*
 h3 > #rec_edit_link{
     display: none;
@@ -355,7 +365,7 @@ div .selected_last{
 .recordDiv .recTypeThumb {
     background-position: center center;
     background-repeat: no-repeat;
-    background-size: 100% auto;
+    background-size: contain; /* 100% auto */
     position: absolute;
     text-align: center;
     margin: 0;
@@ -683,6 +693,23 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
    min-width: 12em !important;
 }
 
+.fancytree-has-children span.fancytree-checkbox
+{
+    background-position: 0 -176px;
+    width:0;
+}
+.fancytree-has-children.fancytree-partsel span.fancytree-checkbox
+{
+    background-position: -64px -48px;
+    width:16;
+}
+.fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
+{
+    background-position: -64px -48px;
+}
+
+
+
 .heurist-helper2{ /*display and visibility*/
     font-size: 0.8em;
 }
@@ -696,6 +723,12 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;
+}
+
+.svs-acordeon-group{
+    padding-top:1em;
+    font-size: 1em;  
+    font-weight:bold;
 }
 
 .svs-contextmenu{
@@ -718,3 +751,11 @@ ul.ui-fancytree > li:hover > .svs-contextmenu {
 ::-webkit-scrollbar-button {
     background: #8ea9b9
 }*/
+.div-table-cell{
+    display: table-cell;
+    vertical-align: middle;    
+}
+
+.mandatory > label{
+    color:red;
+}

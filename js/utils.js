@@ -47,6 +47,15 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
     
+    cloneJSON:function (data){
+        try{  
+            return JSON.parse(JSON.stringify(data));  
+        }catch (ex2){
+            console.log('can not clone json array '+data);
+            return [];
+        }
+    },
+   
     em: function(input) {
         var emSize = parseFloat($("body").css("font-size"));
         return (emSize * input);
@@ -376,7 +385,6 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                         }else{
                             optgroup.appendChild(new_optgroup);
                         }
-
                     }
 
                 }else{
@@ -753,18 +761,40 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         if(typeof response === "string"){
             msg = response;
         }else{
-            msg = response.status;
+            msg = ""; //response.status;
             if(response.message){
                 msg = msg + '<br>' + response.message;
+            }else{
+                msg = "Server returns nothing. Either server not accessible or script is corrupted."
+                +" Please try later and if issue persists please consult your system administrator "
+                +" or contact development team";   
             }
+
             if(response.sysmsg){
 
                 if(typeof response.sysmsg['join'] === "function"){
-                    msg = msg + '<br>' +response.sysmsg.join('<br>');
+                    msg = msg + '<br>System error: ' +response.sysmsg.join('<br>');
                 }else{
-                    msg = msg + '<br>' + response.sysmsg;
+                    msg = msg + '<br>System error: ' + response.sysmsg;
                 }
+                
+            }
+            if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL){
 
+                msg = msg + "<br><br>The system is not configured properly. Please consult your system administrator";
+            
+            }else if(response.status==top.HAPI4.ResponseStatus.INVALID_REQUEST){
+
+                msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please contact development team";
+
+            }else if(response.status==top.HAPI4.ResponseStatus.REQUEST_DENIED){
+
+                msg = msg + "<br><br>This action is not allowed for your current permissions";
+
+            }else if(response.status==top.HAPI4.ResponseStatus.DB_ERROR){
+                msg = msg + "<br><br>Please consult your system administrator. Error may be due to an incomplete "   
+                        +"database eg. missing stored procedures, functions, triggers, or there may be an "
+                        +"error in our code (in which case we need to know so we can fix it";
             }
         }
 
@@ -772,6 +802,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     },
     
     //load content to dialog and show it
+    // 
+    //
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
@@ -814,7 +846,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return $dlg;
     },
     
-    // buttons - callback function
+    //
+    // buttons - callback function or array of buttons for dialog option
+    //
     showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
 
         if(!$.isFunction(top.HR)){
@@ -896,6 +930,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         
         $dlg.dialog(options);
         
+        return $dlg;
         //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
@@ -973,11 +1008,19 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
     checkLength2: function( input, title, min, max ) {
 
-        if ( (max>0 && input.val().length > max) || input.val().length < min ) {
+        var len = input.val().length;
+        if ( (max>0 &&  len > max) || len < min ) {
             input.addClass( "ui-state-error" );
             if(max>0 && min>1){
                 message_text = top.HR(title)+" "+top.HR("length must be between ") +
-                min + " "+top.HR("and")+" " + max + ".";
+                min + " "+top.HR("and")+" " + max + ". ";
+                if(len<min){
+                    message_text = message_text + (min-len) + top.HR(" characters left");
+                }else{
+                    message_text = message_text + (len-max) + top.HR(" characters over");
+                }
+                
+                
             }else if(min==1){
                 message_text = top.HR(title)+" "+top.HR("required field");
             }
@@ -1026,6 +1069,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         });
     },
 
+    
     /**
     * show url in iframe within popup dialog
     */
@@ -1043,7 +1087,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                            .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center')
                            .appendTo( $(opener.document).find('body') );
                            
-                var $dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+                var $dosframe = $( "<iframe>").css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                 
                 //on close event listener
                 $dosframe[0].close = function() {
@@ -1095,8 +1139,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                                     $dlg.remove();
                                 }
                         };
-                        $dosframe.attr('src', url);
                         $dlg.dialog(opts);
+                        $dosframe.attr('src', url);
     },
     
     showElementAsDialog: function(options){
@@ -1131,7 +1175,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             };
             $dlg.dialog(opts);
         
-            return {id:0};
+            return $dlg;
     },
     
     getScrollBarWidth: function() {

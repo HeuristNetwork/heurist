@@ -370,24 +370,32 @@
     /**
     * Zips everything in a directory
     *
-    * @param mixed $source       Source folder
+    * @param mixed $source       Source folder or array of folders
     * @param mixed $destination  Destination file
     */
-    function zip($source, $destination, $verbose=true) {
-        if (!extension_loaded('zip') || !file_exists($source)) {
-            echo "<br/>The file or directory at ".$source." does not exist";
+    function zip($source, $folders, $destination, $verbose=true) {
+        if (!extension_loaded('zip')) {
+            echo "<br/>PHP Zip extension is not accessible";
             return false;
         }
+        if (!file_exists($source)) {
+            echo "<br/>".$source." is not found";
+            return false;
+        }
+        
 
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
             if($verbose) echo "<br/>Failed to create zip file at ".$destination;
             return false;
         }
-
+        
+        
         $source = str_replace('\\', '/', realpath($source));
 
         if (is_dir($source) === true) {
+
+
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
             foreach ($files as $file) {
@@ -396,9 +404,25 @@
                 // Ignore "." and ".." folders
                 if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
                     continue;
-
+                    
                 // Determine real path
                 $file = realpath($file);
+                
+                //ignore files that are not in list of specifiede folders                        
+                $is_filtered = true;
+                if( $folders ){
+                    
+                    $is_filtered = false;
+                    foreach ($folders as $folder) {
+                        if( strpos($file, $source."/".$folder)===0 ){
+                            $is_filtered = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if(!$is_filtered) continue;
+                
                 if (is_dir($file) === true) { // Directory
                     $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
                 }
@@ -409,19 +433,37 @@
         } else if (is_file($source) === true) {
             $zip->addFromString(basename($source), file_get_contents($source));
         }
-
+        
         // Close zip and show output if verbose
         $numFiles = $zip->numFiles;
         $zip->close();
         $size = filesize($destination) / pow(1024, 2);
 
         if($verbose) {
-            echo "<br/>Successfully dumped data from ".$source." to ".$destination;
+            echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
             echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
         }
         return true;
     }
 
+    function unzip($zipfile, $destination){
+        
+        if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
+        
+            $zip = new ZipArchive;
+            if ($zip->open($zipfile) === TRUE) {
+                $zip->extractTo($destination);
+                $zip->close();
+                return true;
+            } else {
+                return false;
+            }
+            
+        }else{
+            return false;    
+        }
+    }
+    
 
     /**
     * "Deletes" a database: makes a .sql dump of the database content
@@ -492,7 +534,9 @@
     }
 
 
-
+    //
+    // create new empty upload folder and copy content from admin/setup
+    //
     function createDatabaseFolders($newDBName){
 
         // Create a default upload directory for uploaded files eg multimedia, images etc.

@@ -80,7 +80,8 @@ $.widget( "heurist.mainMenu", {
 
         this.divMainMenu = $( "<div>")
                         //.css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
-                        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
+                        //.css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })  //two rows
+                        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'1.5em', 'text-align':'right' })  //one rows
                         .addClass('logged-in-only')
                         .appendTo(this.element);
 
@@ -94,15 +95,17 @@ $.widget( "heurist.mainMenu", {
                         .appendTo(this.divMainMenu);
 
 
+        this.divMainMenuItems = $('<ul>')
+                                .addClass('horizontalmenu')
+                                .css({'float':'left', 'padding-right':'2em'}) 
+                                .appendTo( this.divMainMenu );
+                                
         this.divProfileItems = $( "<ul>")
                         .css('float','right')
                         .addClass('horizontalmenu')
                         .appendTo( this.divMainMenu );
 
-        this.divMainMenuItems = $('<ul>')
-                                .addClass('horizontalmenu')
-                                .css({'float':'right'})
-                                .appendTo( this.divMainMenu );
+                                
 
         this._initMenu('Profile', this.divProfileItems);
         this._initMenu('Database');
@@ -353,6 +356,10 @@ $.widget( "heurist.mainMenu", {
                             options.width  = dim.w*0.95;
                         }else if (link.hasClass('fixed')){
                             options.height=dim.h*0.8; options.width=800;
+                        }else if (link.hasClass('fixed2')){
+                            if(dim.h>700){ options.height=dim.h*0.8;}
+                            else { options.height=dim.h-20; }
+                            options.width=800;
                         }else if (link.hasClass('landscape')){
                             options.height=dim.h*0.5;
                             options.width=dim.w*0.8;

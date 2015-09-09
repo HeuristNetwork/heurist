@@ -75,7 +75,6 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     return;
     }*/
 
-
     $res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
     if (mysql_num_rows($res) != 1) return;
     $file = mysql_fetch_assoc($res);
@@ -107,7 +106,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         //add database media storage folder for relative paths
         $path = $filename;
         if( $path && !file_exists($path) ){
-            chdir(HEURIST_FILESTORE_DIR);
+            chdir(HEURIST_FILES_DIR);
             $path = realpath($path);
             if(file_exists($path)){
                 $filename = $path;

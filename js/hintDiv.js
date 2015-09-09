@@ -70,7 +70,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 				'background-color':'RGBA(0,0,0,0.75)',
 				'padding':'5px',
 				'border':'1px solid #fff',
-				'min-width':'200',
+				'min-width': isNaN(width)?200:width,
 				'color':'#EDEDED',
 				'border-radius':'5px',
 				'-moz-border-radius':'5px',

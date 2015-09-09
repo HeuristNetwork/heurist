@@ -1,5 +1,5 @@
 /**
-* Time Map Widget - load map into frame
+* Time Map Widget - load map into iframe
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -25,7 +25,8 @@ $.widget( "heurist.app_timemap", {
         recordset: null,
         selection: null, //list of record ids
         layout:null, //['header','map','timeline']
-        startup:0         //map document loaded on map init
+        startup:0,         //map document loaded on map init
+        autoupdate:true   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
     },
 
     _events: null,
@@ -54,11 +55,16 @@ $.widget( "heurist.app_timemap", {
                         //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
                         .appendTo( this.framecontent );
 
-        this._events = top.HAPI4.Event.LOGOUT
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
-                            + ' ' + top.HAPI4.Event.ON_REC_SELECT
+
+        this._events = top.HAPI4.Event.LOGOUT 
+                            + ' ' + top.HAPI4.Event.ON_REC_SELECT 
                             + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
+                            
+        if(this.options.autoupdate){
+            this._events = this._events
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH 
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
+        }
 
         $(this.document).on(this._events, function(e, data) {
 
@@ -129,7 +135,7 @@ $.widget( "heurist.app_timemap", {
 
         if ( this.element.is(':visible') && this.recordset_changed) {  //to avoid reload if recordset is not changed
 
-            if( this.mapframe.attr('src') ){
+            if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap()
             }else {
                 var url = top.HAPI4.basePath + '/page/mapping.php?db='+top.HAPI4.database;
@@ -159,37 +165,22 @@ $.widget( "heurist.app_timemap", {
                 setTimeout(function(){ that._initmap()}, 1000); //bad idea
                 return;
             }
-
-            var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
-            /*if(mapdataset){
-
-                                var mylayout = $('#mapping').layout();
-
-                                if(mapdataset.mapenabled==0){
-
-                                    //$(".ui-layout-north").hide();
-                                    //$(".ui-layout-center").hide();
-                                    //$(".ui-layout-south").css({'width':'100%','height':'100%'});
-                                    mylayout.hide('center');
-
-                                }else{
-
-                                    if(mapdataset.timeenabled==0){
-                                        mylayout.hide('south');
-                                    }else {
-                                        mylayout.show('south', true);
-                                    }
-                                }
-            }*/
-
-            mapping.load( mapdataset,
+            
+            //now all is done in addRecordsetLayer  var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
+            
+            mapping.load( null, //mapdataset,
                             this.options.selection,  //array of record ids
                             this.options.startup,    //map document on load
-                                function(selected){
-                                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT,
+                                function(selected){  //callback if something selected on map
+                                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
                                         { selection:selected, source:that.element.attr('id') } );
-                                });
-
+                                },
+                          function(){ //callback function
+                              var params = {id:'main', recordset:that.options.recordset, title:'Current query'  }
+                              that.addRecordsetLayer(params, -1);
+                          }      
+                                );            
+            
             this.recordset_changed = false;
         }
 
@@ -253,6 +244,13 @@ $.widget( "heurist.app_timemap", {
             var mapping = this.mapframe[0].contentWindow.mapping;
             if(mapping){
                 mapping.addQueryLayer(params);  //see js/mapping.js
+            }
+    }
+    
+    , addRecordsetLayer: function(params){
+            var mapping = this.mapframe[0].contentWindow.mapping;
+            if(mapping){
+                mapping.addRecordsetLayer(params);  //see js/mapping.js
             }
     }
 

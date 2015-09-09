@@ -65,8 +65,8 @@ var widgets = [
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
 
-    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},
-    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
+    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},  // map in iframe
+    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},                                          
     {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'apps/viewers/staticPage.js'},
     
     {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},
@@ -151,12 +151,15 @@ var layouts = [
                     //css:{width:'100%',height:'100%'}},
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
         ]},
-        west:{size:270, resizable:false, apps:[{appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
+        west:{size:270, resizable:false, apps:[
+                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false} },
+                {appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false, 
                 apps:[
                      {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping 
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List'} }
+                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false} }
+                    ,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                     ]
             }]
         },  

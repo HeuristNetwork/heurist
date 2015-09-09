@@ -366,7 +366,7 @@ function hRecordSet(initdata) {
         return dataset;
     }//end _toTimemap
 
-   // @todo change temporal to moment for conversion
+   // @todo change temporal to moment.js for conversion
    function _parseDates(start, end){
          if(window['Temporal'] && start){   
                 //Temporal.isValidFormat(start)){
@@ -402,7 +402,7 @@ function hRecordSet(initdata) {
                                             if(!dt2) dt2 = temporal.getTDate('TAQ');
                                             end = __forVis(dt2);
                                         }else{
-                                            dt = temporal.getTDate('DAT');
+                                            dt = temporal.getTDate('DAT');  //simple date
                                         }
                                         
                                         if(dt){
@@ -460,6 +460,7 @@ function hRecordSet(initdata) {
     //  1) find relation master type (event or person)
     //  2) compose description
     //  3) change icon
+    //
     function _preprocessForDigitalHarlem(){
         
         //NOTE: address may relates to the same person several times (residency in separate periods of time) 

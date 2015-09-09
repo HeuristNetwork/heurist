@@ -83,9 +83,11 @@ function doLogin(isforsed){
 
                                         $dlg.dialog( "close" );
                                         //that._refresh();
-                                    }else{
+                                    }else if(response.status == top.HAPI4.ResponseStatus.REQUEST_DENIED){
                                         message.addClass( "ui-state-highlight" );
                                         message.text(response.message);
+                                    }else {
+                                        top.HEURIST4.util.showMsgErr(response);
                                     }
                                 }
 

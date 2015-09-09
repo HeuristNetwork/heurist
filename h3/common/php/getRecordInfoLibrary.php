@@ -219,7 +219,7 @@ function getBaseProperties($recID, $bkmID) {
             concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
             grp.ugr_Name as workgroup, rec_ScratchPad as notes,
             rec_NonOwnerVisibility as visibility, bkm_PwdReminder as passwordReminder,
-            bkm_Rating as rating, rec_Modified, rec_FlagTemporary
+            bkm_Rating as rating, rec_Added, rec_Modified, rec_FlagTemporary
             from usrBookmarks left join Records on bkm_recID=rec_ID and bkm_UGrpID=' . get_user_id() . '
             left join defRecTypes on rty_ID = rec_RecTypeID
             left join ' . USERS_DATABASE . '.sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID
@@ -228,7 +228,7 @@ function getBaseProperties($recID, $bkmID) {
         $res = mysql_query('select rec_ID, rec_Title as title, rty_Name as rectype, rty_ID as rectypeID,
             rec_URL as url, grp.ugr_ID as workgroupID, grp.ugr_Name as workgroup,
             concat(grp.ugr_FirstName,\' \',grp.ugr_LastName) as name,
-            rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Modified,
+            rec_ScratchPad as notes, rec_NonOwnerVisibility as visibility, rec_Added, rec_Modified,
             rec_FlagTemporary
             from Records left join usrBookmarks on bkm_recID=rec_ID
             left join defRecTypes on rty_ID = rec_RecTypeID
@@ -245,6 +245,7 @@ function getBaseProperties($recID, $bkmID) {
     $props["rectype"] = $row["rectype"];
     $props["rectypeID"] = $row["rectypeID"];
     $props["url"] = $row["url"];
+    $props["adddate"] = $row["rec_Added"];
     $props["moddate"] = $row["rec_Modified"];
     $props["isTemporary"] = $row["rec_FlagTemporary"] ? true : false;
     if (@$row["passwordReminder"]) {

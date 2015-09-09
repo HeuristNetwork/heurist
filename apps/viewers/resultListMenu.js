@@ -583,7 +583,7 @@ $.widget( "heurist.resultListMenu", {
         }
         
         // Open URL
-        var url = top.HAPI4.basePath+ "php/send_email.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePath+ "page/send_email.php?db=" + top.HAPI4.database;
         top.HEURIST.user.selectedRecordIds = ids;
         Hul.showDialog(url, { width:500, height:600 });
         
@@ -819,7 +819,7 @@ $.widget( "heurist.resultListMenu", {
         recIDs_list = recIDs_list.join(",");
         var url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?h4=1&db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
         
-        Hul.showDialog(url, {height:230});
+        Hul.showDialog(url, {height:230, title: top.HR('Notification')} );
     },
         
     

@@ -142,7 +142,7 @@ $.widget( "heurist.svs_manager", {
 
             var that = this;
 
-            top.HAPI4.SystemMgr.ssearch_get(
+            top.HAPI4.SystemMgr.ssearch_get( null,
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
                         top.HAPI4.currentUser.usr_SavedSearch = response.data;

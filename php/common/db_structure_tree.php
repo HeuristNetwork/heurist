@@ -115,10 +115,11 @@
 
         $res = array();
         $children = array();
+        
         //add default fields
         if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
-        array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  'title'=>'RecTitle', 'code'=>$recTypeId.":title"));
-        array_push($children, array('key'=>'recModified', 'type'=>'date',      'title'=>'Modified', 'code'=>$recTypeId.":modified"));
+        array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 'code'=>$recTypeId.":title"));
+        array_push($children, array('key'=>'recModified', 'type'=>'date',      'title'=>"Modified  <span style='font-size:0.7em'>(Date)</span>", 'code'=>$recTypeId.":modified"));
         if($mode==3) {
             array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
             array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
@@ -143,12 +144,19 @@
 
             if(@$dbs_rtStructs['typedefs'][$recTypeId]){
                 $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                
+                $children_links = array();
 
                 foreach ($details as $dtID => $dtValue){
                     
                     $res_dt = __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, null);
                     if($res_dt){
-                        array_push($children, $res_dt);
+                        
+                        if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
+                            array_push($children_links, $res_dt);
+                        }else{
+                            array_push($children, $res_dt);
+                        }
                         /*
                         if(is_array($res_dt) && count($res_dt)==1){
                         $res["f".$dtID] = $res_dt[0];    
@@ -160,13 +168,17 @@
                     }
                 }//for
                 
+                //add resource and relation at the end of result array
+                $children = array_merge($children, $children_links);
+                
+                
                 //find all reverse links and relations
                 if($mode==4){ //&& $recursion_depth==0){
                     $reverse_rectypes = __getReverseLinkedRecordTypes($recTypeId);
                     foreach ($reverse_rectypes as $rtID => $dtID){
                         //$dtValue =  $dbs_rtStructs['typedefs'][$rtID]['dtFields'][$dtID];
 
-                        $res_dt = __getDetailSection($system, $rtID, $dtID, $recursion_depth, $mode, $fieldtypes, $rtID);
+                        $res_dt = __getDetailSection($system, $rtID, $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId);
                         if($res_dt){
                             array_push($children, $res_dt);
                         }
@@ -308,12 +320,12 @@
 
                     
                     if($reverseRecTypeId!=null){
-                            $res = __getRecordTypeTree($system, $reverseRecTypeId, $recursion_depth+1, $mode, $fieldtypes);
+                            $res = __getRecordTypeTree($system, $recTypeId, $recursion_depth+1, $mode, $fieldtypes);
                             if($res){
-                                $res['rt_ids'] = "".$reverseRecTypeId; //list of rectype - constraint
+                                $res['rt_ids'] = "".$recTypeId; //list of rectype - constraint
                                 //$res['reverse'] = "yes";
                                 $pref = ($detailType=="resource")?"lf":"rf";
-                                $dt_title = " <span style='font-style:italic'>" . $rtNames[$reverseRecTypeId] ."  ". $dt_title . "</span>";
+                                $dt_title = " <span style='font-style:italic'>" . $rtNames[$recTypeId] ."  ". $dt_title . "</span>";
                             }
                     }else{
 
@@ -360,7 +372,7 @@
 
             default:
                 //error_log("2>>>".$mode."  ".$detailType."  ".$dt_label."   ".($detailType=='float'));            
-                if (($mode==3) ||  in_array($detailType, $fieldtypes))
+                if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
                 {
                     //error_log("!!!!!!!!!");                    
                     $res = array();
@@ -370,18 +382,28 @@
         //error_log("3>>>>".is_array($res)."<  ".$detailType."  ".$dt_label);
         if(is_array($res)){
 
-            if(!@$res['code']) $res['code'] = $recTypeId.":".$pref.$dtID;
+            if(!@$res['code']) $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)
             $res['key'] = "f:".$dtID;
             if($mode==4){
-                $res['title'] = $dt_title . " <span style='font-size:0.7em'>(" 
-                    . $dbs_lookups[$detailType] 
-                    . (($reverseRecTypeId!=null)?" [reverse]":"" ) .")</span>";   
+                    
+                $stype = ($detailType=='resource' || $detailType=='relmarker')?"":$dbs_lookups[$detailType];
+                if($reverseRecTypeId!=null){
+                    $stype = $stype."linked from";
+                    $res['isreverse'] = 1;
+                }
+                if($stype!=''){
+                    $stype = " <span style='font-size:0.7em'>(" . $stype .")</span>";   
+                }
+                
+                $res['title'] = $dt_title . $stype;
                 //$res['code'] = 
             }else{
                 $res['title'] = $dt_title;    
             }
             $res['type'] = $detailType;
             $res['name'] = $dt_label;
+            
+            
             
         }            
         return $res;

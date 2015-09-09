@@ -90,6 +90,8 @@
              src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
+        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script --> 
+        <script type="text/javascript" src="ext/js/date.format.js"></script> 
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>
@@ -97,6 +99,8 @@
         <script type="text/javascript" src="js/recordset.js"></script>
         <script type="text/javascript" src="js/hapi.js"></script>
         <script type="text/javascript" src="js/layout.js"></script>
+        <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
+        
         <script type="text/javascript" src="apps/others/help_tips.js"></script>
 
         <script type="text/javascript" src="h3/common/js/temporalObjectLibrary.js"></script>
@@ -105,7 +109,7 @@
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
-        <script type="text/javascript" src="apps/search/search_faceted2.js"></script>
+        <script type="text/javascript" src="apps/search/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
@@ -261,7 +265,7 @@
                                         var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
                                         //top.HEURIST4.query_request = request;
                                         setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
-                                    }else{
+                                    }else if(layoutid!='L06'){
                                         var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                                         if(!top.HEURIST4.util.isempty(init_search)){
                                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };

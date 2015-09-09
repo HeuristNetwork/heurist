@@ -58,6 +58,10 @@
 		        float:right;
 	        }
 	        .errorMsg {width:100%; text-align:center;}
+            
+            #info_div > p{
+                font-size: 11px;line-height: 21px;                
+            }
         </style>
     </head>
 
@@ -208,17 +212,17 @@
             </div>
 
             <div id="info_div" style="padding:1em;display: none;">
-                <p>
+                <p style="font-size: 11px;line-height: 21px; padding-bottom:1em">
                     <b>Text fields</b> should only be used for unstructured data, 
                     such as text strings (eg. place name, family name, artwork title) 
                     or descriptive information (eg. notes, abstract, narrative).
                 </p>
                 
-                <p>
+                <p style="font-size: 11px;line-height: 21px;; padding-bottom:1em">
                     You may wish to consider using a <b>terms list, record pointer</b> 
                     or <b>relationship</b> marker field type:</p>
 
-                <p>
+                <p style="font-size: 11px;line-height: 21px;; padding-bottom:1em">
                     <b>Term list</b> fields should be used for any form of controlled list,
                     typology, categorisation or coding in which the same value will be reused repeatedly
                     (eg. gender, condition, country, species, type of artefact, presence/absence) 
@@ -229,7 +233,7 @@
                     about each category eg. characteristics of the country, images and description of a species.
                 </p>
 
-                <p>
+                <p style="font-size: 11px;line-height: 21px;; padding-bottom:1em">
                     <b>Record pointer</b> fields allow a record to reference other records of specified type 
                     which contain sets of related information, often components of the parent record, 
                     eg. a ship's captain, a person's father, a period of military service, educational episode, place of birth.
@@ -242,7 +246,7 @@
                     but is not otherwise recorded.
                 </p>
 
-                <p>
+                <p style="font-size: 11px;line-height: 21px;; padding-bottom:2em">
                     <b>Relationship marker</b> fields create a connection between two entities with an explicit relationship
                     type (selected from a dropdown), as well as a date range and other contextual information. 
                     
@@ -254,7 +258,13 @@
                     record which can carry significant extra information about the relationship.
                 </p>
                 
-                <div style="float:right;padding-right: 50px;"><input type="button" value="OK" id="topdiv_closebtn"/></div>
+                <div style="float:right;padding-right: 50px;">
+                <button type="button" id="topdiv_closebtn" 
+                        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+                        role="button" aria-disabled="false"
+                        <span class="ui-button-text">OK</span>
+                </button>  
+                </div>              
             </div>
                                     
             <script type="text/javascript">

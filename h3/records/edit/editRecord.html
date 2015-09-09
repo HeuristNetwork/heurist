@@ -418,9 +418,19 @@
         <!-- message of the day TODO: FIX OR REMOVE, SEEMS THIS IS NOT DISPLAYED ALTHOUGH IT IS IN PAGE SOURCE-->
         <div id="message"> Heurist 3 : Open Source <a href="../help/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
         <!-- quicklinks -->
-        <div id="quicklinks">
-            <div id="logged-in" style="height:22px"></div>
-            <ul id=quicklink-cell>
+        <div id="quicklinks" style="padding-top: 25px">
+                <!--<div id="logged-in" style="height:22px"></div>-->
+            
+                <div style="display:inline-block;padding-top: 5px;">cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></div>
+                <script>
+                    top.HEURIST.whenLoaded(recordEvent, function() {
+                        var citeAs = document.getElementById("cite-as-url");
+                        citeAs.href = window.location.protocol + "//" + window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
+                        citeAs.appendChild(document.createTextNode(citeAs.href));
+                    });
+                </script>
+            
+            <ul id=quicklink-cell style="display: inline-block;padding-left:15px;display:inline-block">
                 <!-- <li><a href="../../help/index.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li> -->
                 <li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report to the Heurist developers"><b>Report bug</b></a></li>
                 <li><a id=contact-link href="mailto:info@heuristscholar.org"><b>Contact us</b></a></li>
@@ -526,6 +536,19 @@
             </div>
 
             <div id="search-nav" class="sidebar-nav"></div>
+
+            <div id="dates-added-update-info" class="sidebar-nav" style="text-align:right;">
+                <span id=adddate></span><br>
+                <span id=moddate></span>
+            </div>
+                <script>
+                    top.HEURIST.whenLoaded(recordEvent, function() {
+                        document.getElementById("adddate").appendChild(document.createTextNode("added: " + top.HEURIST.edit.record.adddate));
+                        if(top.HEURIST.edit.record.moddate)
+                            document.getElementById("moddate").appendChild(document.createTextNode("updated: " + top.HEURIST.edit.record.moddate));
+                    });
+                </script>
+            
         </div>
         <!-- end sidebar -->
 
@@ -535,18 +558,24 @@
             <!-- banner -->
             <div class="banner">
                 <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
-                    <input type=radio name="editmode" id=input-record-edit-simplemode
-                            onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode();" class=minimal>
-                    <label for=input-record-edit-simplemode>Simple Mode</label>
-                    <input type=radio name="editmode" id=input-record-edit-advancedmode
-                            onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'true' : 'false');setEditMode();" class=minimal>
-                    <label for=input-record-edit-advancedmode>Advanced Mode</label>
+                
+                    <input type=checkbox id=ui-pref-simplemode 
+                        onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode()" class=minimal>
+                    <label for=ui-pref-simplemode style="vertical-align:top">simplified view</label>
+
+                    <label style="padding-left:3em;vertical-align:top">show:</label>
+
+                    <input type=checkbox id=ui-pref-tabs onClick="" class=minimal style="display:none">
+                    <label for=ui-pref-tabs style="vertical-align:top;padding-right:1em;display:none">tabs</label>
+                    
+                    <input type=checkbox id=ui-pref-showhelp onClick="top.HEURIST.util.helpToggler(this)" class=minimal>
+                    <label for=ui-pref-showhelp style="vertical-align:top;padding-right:1em">help</label>
+
+                    <input type=checkbox id=ui-pref-optfields  class=public-visible
+                            onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
+                    <label class=public-visible for=ui-pref-optfields style="vertical-align:top">optional fields</label>
                 </div>
-                <a id="help-link" href='#' onClick="top.HEURIST.util.helpToggler(this)" style="width:80px;padding-right:0;text-align:center"></a>
-                <div class=public-visible style="display:inline-block;margin:3px 10px">
-                    <input type=checkbox id=input-visibility onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-                    <label for=input-visibility>show optional fields</label>
-                </div>
+                
                 <div id="admin_editrectype" style="float:right;width:230px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
                 <span id="changed_marker" style="display:none;float:right;width:16px;height:16px;margin-top:4px;margin-right:4px;background-image: url('../../common/images/save-disk.gif')"></span>
             </div>
@@ -588,8 +617,8 @@
                     */
                     //ART document.getElementById("act-stay").checked = true;
                 }
-
-                var helpLink = top.document.getElementById("help-link");
+                
+                var helpLink = top.document.getElementById("ui-pref-showhelp");
                 top.HEURIST.util.setHelpDiv(helpLink,null);
             });
         </script>
@@ -598,17 +627,6 @@
         <!-- footer -->
         <div id=footer>
             <div id="rty_description" class="help"></div>
-            <span class="edit-mode-depended">last accessed: <span id=moddate></span>
-                <span>cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></span>
-                <script>
-                    top.HEURIST.whenLoaded(recordEvent, function() {
-                        document.getElementById("moddate").appendChild(document.createTextNode(top.HEURIST.edit.record.moddate));
-                        var citeAs = document.getElementById("cite-as-url");
-                        citeAs.href = window.location.protocol + "//" + window.location.host+ top.HEURIST.basePath +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
-                        citeAs.appendChild(document.createTextNode(citeAs.href));
-                    });
-                </script>
-            </span>
         </div>
         <!-- end footer -->
 
@@ -734,18 +752,17 @@
                     $(".edit-mode-depended").css('display','block');
                     $("#rectype-change").css('display','inline-block');
                     $("#page").css('left','200px');
-                    $("#page").css('top','140px');
-                    $("#input-record-edit-advancedmode").attr('checked',true);
+                    $("#page").css('top','120px');
+                    $("#ui-pref-simplemode").attr('checked',false);
                 }else{
                     $(".edit-mode-depended").css('display','none');
                     $("#rectype-change").css('display','none');
                     $("#page").css('left','10px');
                     $("#page").css('top','120px');
-                    $("#input-record-edit-simplemode").attr('checked',true);
+                    $("#ui-pref-simplemode").attr('checked',true);
                 }
             }
-            $("#input-record-edit-advancedmode").css('vertical-align','top');
-            $("#input-record-edit-simplemode").css('vertical-align','top');
+            $("#ui-pref-simplemode").css('vertical-align','top');
             setEditMode();
         </script>
 
