@@ -14,8 +14,8 @@
 
 /**
 
-* brief description of file 
-* 
+* brief description of file
+*
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -36,7 +36,7 @@ var selectTerms;
 var Dom = YAHOO.util.Dom,
 	Hul = top.HEURIST.util;
 
-/** 
+/**
 * SelectTerms
 * class for pop-up window to select terms for editing detail type
 *
@@ -47,7 +47,7 @@ var Dom = YAHOO.util.Dom,
 * apply
 * cancel
 */
-    
+
 function SelectTerms(_isFilterMode, _isWindowMode) {
 
 	var _className = "SelectTerms",
@@ -283,7 +283,6 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 
         if(str !== null) {
-//DEBUG alert("Stringified changes: " + str);
 
             // 3. sends data to server
             var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :

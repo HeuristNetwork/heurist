@@ -74,7 +74,6 @@ function EditRecStructure() {
 		if (location.search.length > 1) {
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = window.HEURIST.parameters.rty_ID;
-			//DEBUG Dom.get("ed_rty_ID").value = rty_ID;
 			var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID+".png";
 			var formTitle = document.getElementById('recordTitle');
 			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
@@ -1489,7 +1488,6 @@ function EditRecStructure() {
 		btnSaveOrder.style.visibility = "hidden";
 
 		if(!Hul.isnull(str)){
-			//DEBUG  alert(str);
 			var updateResult = function(context){
 				if(!Hul.isnull(context)){
 					top.HEURIST.rectypes = context.rectypes;
@@ -1501,7 +1499,6 @@ function EditRecStructure() {
                     window.close(_structureWasUpdated);
                 }
 			};
-//DEBUG alert(str);
 			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
 			var callback = updateResult;
 			var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
@@ -2209,14 +2206,6 @@ function onRepeatValueChange(evt){
 		el_max.value=el_min.value;
 	}
 }
-
-// DEBUG
-//temp function to fill values with given rty_ID
-/*
-function _tempFillValue(){
-editStructure.initTabDesign(document.getElementById("ed_rty_ID").value);
-}
-*/
 
 
 function _preventSel(event){

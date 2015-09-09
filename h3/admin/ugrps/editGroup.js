@@ -15,7 +15,7 @@
 /**
 * editGroup.js
 * A form to edit user groups, or create a new group. It is utilized as pop-up from manageGroup
-* 
+*
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -193,7 +193,6 @@ function GroupEditor() {
 				}
 				if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
 				{
-					// DEBUG alert(el.value+" "+String(_entity[i]));
 					_updatedFields.push(fname);
 					_updatedDetails.push(el.value);
 				}
@@ -299,7 +298,6 @@ function GroupEditor() {
 
 
 		if(!Hul.isempty(str)) {
-//DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
 			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";

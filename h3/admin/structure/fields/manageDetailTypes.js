@@ -815,7 +815,6 @@ function DetailTypeManager() {
 	//
 	function _updateDetailTypeOnServer(event) {
 		var str = YAHOO.lang.JSON.stringify(_oDetailType);
-//DEBUG alert("Stringified changes: " + str);
 
 		if(!Hul.isnull(str)) {
 			//_updateResult(""); //debug

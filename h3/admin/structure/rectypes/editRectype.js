@@ -3,7 +3,7 @@ var Hul = top.HEURIST.util;
 var rectypeID = Hul.getUrlParameter('rectypeID', this.location.search);
 var db = (top.HEURIST.parameters && top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    
+
 
 
 function EditRectype() {
@@ -11,7 +11,7 @@ function EditRectype() {
 var rectype,
     defaultGroupID,
     supressEditStructure,
-    
+
     titleMaskIsOk = true,
     _keepTitleMask,
     _keepStatus,
@@ -19,12 +19,12 @@ var rectype,
 
 var _openEditStrucutreAfterClose = false,
     _isIconWasUpdated = false;
-    
-    
+
+
 function init() {
-    
+
     var query = this.location.search;
-    
+
     defaultGroupID = Hul.getUrlParameter('groupID',query);
     supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
 
@@ -93,8 +93,8 @@ function _upload_icon(mode) {
         }
         _isIconWasUpdated = true;
     }
-    
-    
+
+
     var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
 
     Hul.popupURL(top, sURL, {
@@ -121,7 +121,7 @@ function initializeEmptyForm() {
     document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
     document.getElementById("divIconAndThumb").style.display = "none";
     document.getElementById("divIconAndThumbNew").style.display = "block";
-    
+
 
     getGroups();
     // Set group from URL
@@ -375,7 +375,6 @@ function updateRectypeOnServer_continue()
         //do not close the window
 
     }else if(str != null) {
-        //DEBUG            alert("Stringified changes: " + str);
 
         // TODO: Change base URL
         var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
@@ -383,11 +382,11 @@ function updateRectypeOnServer_continue()
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
         "&data=" + encodeURIComponent(str);
-        
+
         if(!(rectypeID>0)){
             params = params + '&icon='+ encodeURIComponent(_rectype_icon);
         }
-        
+
         Hul.getJsonData(baseurl, callback, params);
 
     } else { //nothing changed
@@ -602,7 +601,7 @@ function fromUItoArray(isShowWarn) {
 
 /**
 * put your comment there...
-* 
+*
 */
 function testTitleMask()
 {
@@ -676,15 +675,15 @@ function _onEditMask(){
             onChangeStatus: function(e) {
                 _onChangeStatus(e);
             },
-            
+
             editMask: function(){
                 _onEditMask();
             },
-            
+
             upload_icon: function (mode){
                 _upload_icon(mode);
             },
-            
+
             save : function (openEditStructure) {
                 _openEditStrucutreAfterClose = openEditStructure;
                 updateRectypeOnServer();
@@ -766,7 +765,7 @@ function _showInfoToolTip(event) {
         //xy = [posx = event.target.x,posy = event.target.y];
 
 
-        my_tooltip.html(textTip);    //DEBUG xy[0]+",    "+xy[1]+"<br/>"+
+        my_tooltip.html(textTip);
 
         var border_top = $(window).scrollTop();
         var border_right = $(window).width();

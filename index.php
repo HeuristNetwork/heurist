@@ -30,8 +30,6 @@
     require_once(dirname(__FILE__)."/php/System.php");
     //require_once ('/common/db_structure.php');
 
-    //FOR DEBUG $_REQUEST['db'] = 'artem_todelete11';
-
     // either init system or redirect to database selection
     $system = new System();
     if(@$_REQUEST['db']){
@@ -106,7 +104,7 @@
         <script type="text/javascript" src="apps/others/help_tips.js"></script>
 
         <script type="text/javascript" src="h3/common/js/temporalObjectLibrary.js"></script>
-        
+
         <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>

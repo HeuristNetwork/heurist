@@ -44,7 +44,7 @@
     require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
     require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
 
-    
+
     if (! is_logged_in()) return;
 
     mysql_connection_overwrite(DATABASE);
@@ -62,7 +62,7 @@
                 $fields["t:".$matches[1]] = $val;
             }
         }
-        
+
         $matches = findFuzzyMatches($fields, $rec_types, $rec_id);
 
         if ($matches && count($matches)) {
@@ -86,9 +86,6 @@
         $TL[$row['trm_ID']] = $row;
     }
 
-
-    /*****DEBUG****///error_log(" Save dtl Post before  ".print_r($_POST,true));
-
     if ($_POST["save-mode"] == "edit"  &&  intval($_POST["recID"])) {
         $updated = updateRecord(intval($_POST["recID"]),$rtyID);
     } else if ($_POST["save-mode"] == "new") {
@@ -97,11 +94,8 @@
         $updated = false;
     }
 
-    /*****DEBUG****///error_log(" Save dtl Request  ".print_r($_REQUEST,true));
-    /*****DEBUG****///error_log(" Save dtl Post  ".print_r($_POST,true));
-
     if ($updated) {
-        updateRecTypeUsageCount(); //getRecordInfoLibrary                  
+        updateRecTypeUsageCount(); //getRecordInfoLibrary
 
         // Update bib record data
         // Update recDetails, rec_ScratchPad and rec_Title in (parent.parent).HEURIST.record
@@ -123,19 +117,16 @@
         }
 
         if (strpos($formattedStringOfTermIDs,"{")!== false) {
-            /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
             if (strrpos($temp,":") == strlen($temp)-1) {
                 $temp = substr($temp,0, strlen($temp)-1);
             }
             $termIDs = explode(":",$temp);
         } else {
-            /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
             $termIDs = explode(",",$temp);
         }
         // Validate termIDs
-        /*****DEBUG****///error_log( "term IDS = ". print_r($termIDs,true));
         foreach ($termIDs as $trmID) {
             // check that the term valid
             if ( $trmID && array_key_exists($trmID,$TL) && !in_array($trmID,$validTermIDs)){ // valid trm ID
@@ -147,7 +138,7 @@
 
     /**
     * Verify rectype pointer value or term id
-    * 
+    *
     * @param mixed $id  - rectype id (for resource) or term id (for enum reltype)
     * @param mixed $dtyID - field type id
     * @param mixed $rtyID - rectype id
@@ -207,10 +198,10 @@
                 if (is_numeric($row[2])) {
                     $rtFieldDefs['max'][$row[0]] = $row[2];
                 }
-/*                
-These fields are never defined in UI. Thus, they should aleays be null. It was for overwrite of base field constraints by further contraints within the recstructure, 
+/*
+These fields are never defined in UI. Thus, they should aleays be null. It was for overwrite of base field constraints by further contraints within the recstructure,
 which is one step too many and has been removed from design by Ian in approx 2011
-                
+
                 if ( $row[1] === 'enum' || $row[1] === 'relationtype') {
                     //create term Id list and term list.
                     $terms = getTermsFromFormat($row[3]);
@@ -238,12 +229,10 @@ which is one step too many and has been removed from design by Ian in approx 201
                             $rtFieldDefs[$row[0]] = "all";
                     }
                 }
-*/                
+*/
             }
         }
-        /*****DEBUG****///error_log("save record isValidID rtFields = ".print_r($rtFieldDefs,true));
-        /*****DEBUG****///error_log("save record isValidID rdtyDefs = ".print_r($dtyIDDefs,true)."  ");
-        
+
         // not used
         // if ($rtFieldDefs && $rtyID && array_key_exists($dtyID, $rtFieldDefs)) {
         //    $res = $rtFieldDefs[$dtyID] === "all" || in_array($id, $rtFieldDefs[$dtyID]);
@@ -282,7 +271,6 @@ which is one step too many and has been removed from design by Ian in approx 201
             return;
         }
         $record = mysql_fetch_assoc($res);
-        /*****DEBUG****///error_log("save record dtls POST ".print_r($_POST,true));
         // Upload any files submitted ... (doesn't have to take place right now, but may as well)
         uploadFiles();  //Artem: it does not work here - since we uploaded files at once
 
@@ -291,7 +279,6 @@ which is one step too many and has been removed from design by Ian in approx 201
 
 // find UPDATES - everything that is in current record and has a post value is treated as an update
         $recDetailUpdates = array();
-        /*****DEBUG****///error_log("save record dtls ".print_r($recDetails,true));
         foreach ($recDetails as $dtyID => $dtlIDs) {
             $eltName ="type:".$dtyID;
             $skipEltName = "_type:".$dtyID;
@@ -320,17 +307,14 @@ which is one step too many and has been removed from design by Ian in approx 201
 
             $bdInputHandler = getInputHandlerForType($dtyID); //returns the particular handler (processor) for given field type
             foreach ($dtlIDs as $dtlID => $val) {
-                /*****DEBUG****///error_log(" in saveRecord details loop  $dtyID,  $dtlID, ".print_r($val,true));
                 $eltID ="bd:".$dtlID;
 
                 $val = @$_POST[$eltName][$eltID];
                 if (! $bdInputHandler->inputOK($val,$dtyID,$rtyID)) {
-                    /*****DEBUG****///error_log(" in saveRecord update details value check error  $dtyID,  $dtlID, ".print_r($val,true));
                     continue;	// faulty input ... ignore
                 }
 
                 $toadd = $bdInputHandler->convertPostToMysql($val);
-                /*****DEBUG****///error_log(" in saveRecord update details value converted from $val to $toadd");
                 if ($toadd==null) continue;
 
                 $recDetailUpdates[$dtlID] = $toadd;
@@ -348,9 +332,6 @@ which is one step too many and has been removed from design by Ian in approx 201
                 unset($recDetails[$dtyID][$dtlID]);	// remove data from local reflection of the database
             }
         }
-        /*****DEBUG****///error_log("save record dtls POST after updates removed ".print_r($_POST,true));
-        /*****DEBUG****///error_log("save record dtls after updates removed ".print_r($recDetails,true));
-
 
 // find DELETES
         // Anything left in recDetails now represents recDetails rows that need to be deleted
@@ -362,14 +343,11 @@ which is one step too many and has been removed from design by Ian in approx 201
                 array_push($bibDetailDeletes, $dtlID);
             }
         }
-        /*****DEBUG****///error_log("save record dtlIDs to delete = ".print_r($bibDetailDeletes,true));
 
 // find INSERTS
         // Try to insert anything left in POST as new recDetails rows
         $bibDetailInserts = array();
 
-
-        /*****DEBUG****///error_log(" in saveRecord checking for inserts  _POST =".print_r($_POST,true));
 
         foreach ($_POST as $eltName => $bds) {
             // if not properly formatted or empty or an empty array then skip it
@@ -379,14 +357,12 @@ which is one step too many and has been removed from design by Ian in approx 201
             $bdInputHandler = getInputHandlerForType($dtyID);
             foreach ($bds as $eltID => $val) {
                 if (! $bdInputHandler->inputOK($val,$dtyID,$rtyID)) {
-                    /*****DEBUG****///error_log(" in saveRecord insert details value check error for $eltName,  $eltID, ".print_r($val,true));
                     continue;	// faulty input ... ignore
                 }
 
                 $newBibDetail = $bdInputHandler->convertPostToMysql($val);
                 $newBibDetail["dtl_DetailTypeID"] = $dtyID;
                 $newBibDetail["dtl_RecID"] = $recID;
-                /*****DEBUG****///error_log("new detail ".print_r($newBibDetail,true));
                 array_push($bibDetailInserts, $newBibDetail);
 
                 unset($_POST[$eltName][$eltID]);	// remove data from post submission
@@ -422,15 +398,13 @@ which is one step too many and has been removed from design by Ian in approx 201
                 $recUpdates["rec_NonOwnerVisibility"] = 'pending';
             }
         }
-        /*****DEBUG****///error_log(" in saveRecord update recUpdates = ".print_r($recUpdates,true));
         mysql__update("Records", "rec_ID=$recID", $recUpdates);
         $biblioUpdated = (mysql_affected_rows() > 0)? true : false;
-        
+
         if (mysql_error()) error_log("error rec update ".mysql_error());
         $updatedRowCount = 0;
         foreach ($recDetailUpdates as $bdID => $vals) {
 
-            /*****DEBUG****///error_log(" in saveRecord update details dtl_ID = $bdID value =".print_r($vals,true));
 
             mysql__update("recDetails", "dtl_ID=$bdID and dtl_RecID=$recID", $vals);
             if (mysql_affected_rows() > 0) {
@@ -441,7 +415,6 @@ which is one step too many and has been removed from design by Ian in approx 201
 
         $insertedRowCount = 0;
         foreach ($bibDetailInserts as $vals) {
-            /*****DEBUG****///error_log(" in saveRecord insert details detail =".print_r($vals,true));
             mysql__insert("recDetails", $vals);
             if (mysql_affected_rows() > 0) {
                 ++$insertedRowCount;
@@ -451,7 +424,6 @@ which is one step too many and has been removed from design by Ian in approx 201
 
         $deletedRowCount = 0;
         if ($bibDetailDeletes) {
-            /*****DEBUG****///error_log(" in saveRecord delete details ".print_r($bibDetailDeletes,true));
             mysql_query("delete from recDetails where dtl_ID in (" . join($bibDetailDeletes, ",") . ") and dtl_RecID=$recID");
             if (mysql_affected_rows() > 0) {
                 $deletedRowCount = mysql_affected_rows();
@@ -480,10 +452,10 @@ which is one step too many and has been removed from design by Ian in approx 201
                 where rec_ID = $recID");
 
             mysql_query("commit");
-            
+
             // Update memcached's copy of record (if it is cached)
             updateCachedRecord($recID);
-            updateRecordIndexEntry(DATABASE, $record["rec_RecTypeID"], $recID);  // TODO: Doesn't properly update Elasticsearch 
+            updateRecordIndexEntry(DATABASE, $record["rec_RecTypeID"], $recID);  // TODO: Doesn't properly update Elasticsearch
 
             return true;
         } else {
@@ -734,15 +706,12 @@ which is one step too many and has been removed from design by Ian in approx 201
                 if ($res){
                     $tempRtyID = mysql_fetch_row($res);
                 }
-/*****DEBUG****///error_log("find record type: select rec_RecTypeID from Records where rec_ID = ".$postVal);
-/*****DEBUG****///error_log("RES=".$tempRtyID);
                 if ($tempRtyID){
                     $tempRtyID = @$tempRtyID[0];
                 } else {
                     return false;
                 }
                 $res = isValidID($tempRtyID,$dtyID,$rtyID);
-/*****DEBUG****///error_log("VALID ID=".$res);
                 return $res;
             }else{
                 return false;
@@ -791,7 +760,6 @@ which is one step too many and has been removed from design by Ian in approx 201
             if (! @$labelToID) {
                 $labelToID = mysql__select_assoc("defTerms", "trm_Label", "trm_ID", "1");
             }
-            /*****DEBUG****///
             // if value is term label
             if (!is_numeric($postVal) && array_key_exists($postVal,$labelToID)) {
                 $postVal = $labelToID[$postVal];
@@ -813,7 +781,6 @@ which is one step too many and has been removed from design by Ian in approx 201
             }
         }
         function inputOK($postVal, $dtyID, $rtyID) {
-            /*****DEBUG****///error_log("FILE:>>>>>>>>>>>".$postVal);
             return (is_numeric($postVal) || preg_match("/\\S/", $postVal));
         }
     }

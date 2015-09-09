@@ -147,7 +147,6 @@ function MimetypeEditor() {
 			if( !Hul.isnull(el) ){
 				if(_isNew || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
 				{
-					// DEBUG alert(el.value+" "+String(_entity[i]));
 					_updatedFields.push(fname);
 					_updatedDetails.push(el.value);
 				}
@@ -248,7 +247,6 @@ function MimetypeEditor() {
 
 
 		if(!Hul.isempty(str)) {
-//DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
 			var baseurl = top.HEURIST.basePath + "admin/structure/mimetypes/srvMimetypes.php";

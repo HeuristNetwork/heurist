@@ -2181,8 +2181,6 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
     $recordType = @$params['sa_rectype'];
     //$id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
-    //DEBUG print "NEW ".print_r($details, true)."<br><br>";
-
     //add-update Heurist record
     $out = saveRecord($recordId, $recordType,
         @$details["recordURL"],

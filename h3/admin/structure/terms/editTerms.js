@@ -839,7 +839,6 @@ function EditTerms() {
         var str = YAHOO.lang.JSON.stringify(oTerms);
 
         if(!Hul.isnull(str)) {
-            //DEBUG alert("Stringified changes: " + str);
 
             var _updateResult = function(context){
 

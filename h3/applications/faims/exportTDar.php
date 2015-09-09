@@ -208,15 +208,11 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             }
 
-            //DEBUG print "tDAR server AUTHORIZATION response:";
-            //DEBUG print "<xmp>".$resp."</xmp>";
 
             $rectyps = explode(",", $rt_toexport);
             if (!in_array(RT_RELATION, $rectyps)) {
                 array_push($rectyps, RT_RELATION);
             }
-
-            //DEBUG print "<p>".$rt_toexport."</p>";
 
             $rtStructs = getAllRectypeStructures(true);
             $dtStructs = getAllDetailTypeStructures(true);
@@ -383,7 +379,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 //get all records for specified recordtype
                 $query = prepareQuery($params, $squery, BOTH, $detTable, $ourwhere, $order);
 
-                //DEBUG print "<p>".$query."</p>";
                 $filename;
 
                 $res = $mysqli->query($query);
@@ -544,7 +539,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         foreach ($details as $detail) {
                             array_push($fields, implode("|", $detail));
                         }
-                        //DEBUG print implode(",", $fields)."<br>";
                         fputcsv($fp, $fields);
                     }
 

@@ -762,22 +762,23 @@ function initMappingClass(){
 						//layer.min_zoom, layer.max_zoom, true);
 
 						layer.extent = M.getImageLayerExtent(layer['extent']);
-/* DEBUG
-if(layer.extent){
-var gmap = M.map.maps.googlev3;
-if(M.marker_1) M.marker_1.setMap(null);
-if(M.marker_2) M.marker_2.setMap(null);
 
-var point = new google.maps.LatLng(layer.extent.sw.lat, layer.extent.sw.lng);
-M.marker_1 = new google.maps.Marker({
-position: point,
-map: gmap});
-point = new google.maps.LatLng(layer.extent.ne.lat, layer.extent.ne.lng);
-M.marker_2 = new google.maps.Marker({
-position: point,
-map: gmap});
-}
-*/
+                        /* DEBUGGING CODE
+                        if(layer.extent){
+                        var gmap = M.map.maps.googlev3;
+                        if(M.marker_1) M.marker_1.setMap(null);
+                        if(M.marker_2) M.marker_2.setMap(null);
+                        var point = new google.maps.LatLng(layer.extent.sw.lat, layer.extent.sw.lng);
+                        M.marker_1 = new google.maps.Marker({
+                        position: point,
+                        map: gmap});
+                        point = new google.maps.LatLng(layer.extent.ne.lat, layer.extent.ne.lng);
+                        M.marker_2 = new google.maps.Marker({
+                        position: point,
+                        map: gmap});
+                        }
+                        */
+
 						if(zoom_mode>0){
 							var layerbnd = layer.extent;
 							if(layerbnd){

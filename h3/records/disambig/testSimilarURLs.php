@@ -15,8 +15,8 @@
 */
 
 /**
-* code for finding similar URLs 
-* 
+* code for finding similar URLs
+*
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -27,7 +27,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
@@ -105,7 +105,6 @@ function site_urls($url) {
 
 	$sitename = preg_replace('!^http://(?:www[.])?([^/]+)(?:.*)!', '$1', $url);
 		// just the host name
-/*****DEBUG****///error_log($sitename);
 
 	$res = mysql_query('select rec_URL, rec_ID, rec_Title from Records where
 	                           rec_URL like "http://'.mysql_real_escape_string($sitename).'/%"

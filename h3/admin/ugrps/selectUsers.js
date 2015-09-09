@@ -96,7 +96,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 	* Result handler for search on server
 	*/
 	var _updateUserList = function (context) {
-   
+
 		var arr = [],
 			user, ind;
 
@@ -156,7 +156,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
         $("#pnlFilterByRole").css('display',nstyle2);
         $("#btnSelectAdd1").css('display',nstyle2);
         $("#btnSelectAdd2").css('display',nstyle2);
-        
+
 		if(!top.HEURIST.is_admin()){
 			//hide create new user for non admin - IJ req 27-09-2012
 			$("#pnlAdd1").css('display','none');
@@ -231,7 +231,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 	* Updates LOCAL filter conditions for datatable
 	*/
 	var _updateFilterLocal  = function () {
-        
+
 	    var filter_select = ((filterBySelection2 && filterBySelection2.checked)?1:0);
 	    // Reset sort
 	    var state = _myDataTable.getState();
@@ -245,7 +245,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 		    scope   : _myDataTable,
 		    argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 	    });
-        
+
 	};
 
 
@@ -307,7 +307,6 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				_grpID = grpID;
 
-//				Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				//init listeners for filter controls
 				_initListeners();
@@ -642,7 +641,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				my_tooltip.mouseout(__hideToolTip2);
 
 				var xy = Hul.getMousePos(event);
-				my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+				my_tooltip.html(textTip);
 
 				Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
 				hideTimer = window.setTimeout(_hideToolTip, 5000);
