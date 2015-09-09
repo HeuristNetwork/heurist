@@ -138,6 +138,8 @@ function _emptyLegend() {
 // assign listeners for checkboxes
 //
 function _initLegend() {
+
+        if(Object.keys(overlays_not_in_doc).length + Object.keys(overlays).length>0){
             // Listen to checkbox changes
             $("#legend input").change(function(e) {
                 // Hide or display the layer
@@ -151,11 +153,10 @@ function _initLegend() {
                 }
             });
             
-            if(Object.keys(overlays_not_in_doc).length+oObject.keys(overlays).legend>0){
                 $("#legend").show();
-            }else{
-                $("#legend").hide();
-            }
+        }else{
+            $("#legend").hide();
+        }
 }
 
 function _loadMapDocumentById(recId) {
@@ -328,6 +329,7 @@ function addUntiledMapImageLayer(source, bounds, index) {
     }
 
     overlays[index] = overlay; 
+    
 }
 
 
@@ -503,9 +505,10 @@ function addRecordsetLayer(source, index) {
             
             var datasetname = (source.id=='main') ?source.id:"dyn"+source.id;
             
-            //preprocess for Digital Harlem - @todo more elegant way
+            
             if(recset!=null){
                 if(top.HAPI4.sysinfo['layout']=='L06'){
+                    //preprocess for Digital Harlem - @todo more elegant way
                     recset.preprocessForDigitalHarlem();
                     mapdata = recset.toTimemap(datasetname, 12); //show only address records @todo  address RT is hardcoded!!!!
                 }else{
@@ -532,20 +535,31 @@ function addRecordsetLayer(source, index) {
                     overlays[index] = overlay;
                     
                }else{ // this layer is explicitely (by user) added
-                    index = 'A'+Math.floor((Math.random() * 10000) + 1);
+                    //index = 'A'+Math.floor((Math.random() * 10000) + 1);
+                    //overlays_not_in_doc[index] = overlay;
                     
-                    //var dataset_name = mapdata[0].id;
-                    //overlays_not_in_doc[]
+                    overlays_not_in_doc[source.id] = overlay;
                     
-                    overlays_not_in_doc[index] = overlay;
-
-                    $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked>"
+                    $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+source.id+"' checked>"
   +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
                     +overlay.title+"</div>");
                     _initLegend();
                }
             }else{  //dataset is empty or failed to add - remove from legend
-            
+               if(index<0 && !overlays_not_in_doc[source.id]){
+                   
+                    var ovr = overlays_not_in_doc[source.id];
+                   
+                    try {
+                        ovr.setVisibility(false);   
+                        if(ovr['removeOverlay']){
+                            ovr.removeOverlay();
+                        }
+                    } catch(err) {
+                        console.log(err);
+                    }  
+                    overlays_not_in_doc[source.id] = null;
+               }
                 //var dataset_name = _mapdata[0].id;
                 
             }
