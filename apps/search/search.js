@@ -86,7 +86,7 @@ $.widget( "heurist.search", {
         
         var sz_search = '500px',
             sz_input = '350px',
-            sz_seach_padding = '0';
+            sz_search_padding = '0';
         
 
         var div_left_visible = (!this.options.isloginforced || this.options.btn_visible_dbstructure);
@@ -144,7 +144,7 @@ $.widget( "heurist.search", {
         }else{ // lefthand - navigation - panel not visible
             sz_search = '600px';
             sz_input = '450px';
-            sz_seach_padding = '50px';
+            sz_search_padding = '50px';
         }
 
 
@@ -398,7 +398,6 @@ $.widget( "heurist.search", {
             //.click( that.showSearchAssistant );              
             
             this._on( btn_assistant, {click: this.showSearchAssistant});
->>>>>>> h4share
 
             $( "<button>", {
                 text: top.HR("Save the current filter and rules as a link in the navigation tree in the left panel")
@@ -443,7 +442,7 @@ $.widget( "heurist.search", {
                         
 
             //show quick search assistant
-            this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
+            //this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
 
         } // quick search assistant
 
@@ -997,7 +996,6 @@ $.widget( "heurist.search", {
                     }
                 });
             
->>>>>>> h4share
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                 $(this).html(top.HR($(this).html()));
