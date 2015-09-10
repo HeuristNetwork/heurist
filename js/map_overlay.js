@@ -520,7 +520,7 @@ function addRecordsetLayer(source, index) {
                 if(top.HAPI4.sysinfo['layout']=='L06'){
                     //preprocess for Digital Harlem - @todo more elegant way
                     recset.preprocessForDigitalHarlem();
-                    mapdata = recset.toTimemap(source.id, 12); //show only address records @todo  address RT is hardcoded!!!!
+                    mapdata = recset.toTimemap(source.id); //show only address records @todo  address RT is hardcoded!!!!
                 }else{
                     //convert to map datasource
                     mapdata = recset.toTimemap(source.id);
