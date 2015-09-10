@@ -126,7 +126,7 @@ if($metod=="searchreports"){
 
     $db = mysqli_connection_overwrite(DATABASE);
 
-    $data  = json_decode(urldecode(@$_REQUEST['data']), true);
+    $data  = json_decode(@$_REQUEST['data'], true); //urldecode
     $recID  = @$_REQUEST['recID'];
 
     if (!array_key_exists('report',$data) ||
@@ -250,11 +250,15 @@ function updateReportSchedule($colNames, $recID, $values){
         $query = "";
         $fieldNames = "";
         $parameters = array("");
-        $fieldNames = join(",",$colNames);
+        
+        $fieldNames = array();//join(",",$colNames);
 
         foreach ($colNames as $colName) {
 
             $val = array_shift($values);
+            
+            if($isInsert && $colName == 'rps_ID') continue;
+            
 
             if (array_key_exists($colName, $sys_usrReportSchedule_ColumnNames))
             {
@@ -262,6 +266,7 @@ function updateReportSchedule($colNames, $recID, $values){
                 if($query!="") $query = $query.",";
 
                 if($isInsert){
+                    array_push($fieldNames, $colName);
                     $query = $query."?";
                 }else{
                     $query = $query."$colName = ?";
@@ -275,11 +280,11 @@ function updateReportSchedule($colNames, $recID, $values){
 
         if($query!=""){
             if($isInsert){
-                $query = "insert into usrReportSchedule (".$fieldNames.") values (".$query.")";
+                $query = "insert into usrReportSchedule (".join(",",$fieldNames).") values (".$query.")";
             }else{
                 $query = "update usrReportSchedule set ".$query." where rps_ID = $recID";
             }
-
+            
             $rows = execSQL($db, $query, $parameters, true);
 
             if ($rows==0 || is_string($rows) ) {

@@ -437,7 +437,13 @@
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
-                Hul.popupURL(this, top.HEURIST.basePath + 'viewers/smarty/repMenu.html?template_file='+template_file,null);
+                Hul.popupURL(this, top.HEURIST.basePath + 'viewers/smarty/repMenu.html?template_file='+template_file, 
+                     { callback: function(filename){
+                                    if(!Hul.isnull(filename)) {
+                                        window.showReps.onPublish( filename )
+                                    }
+                                 } 
+                     } );
 
                 /* OLD WAY
                 var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+

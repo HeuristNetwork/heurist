@@ -1252,8 +1252,9 @@ function ShowReps() {
 
             
             if(top.HEURIST4){
+                
                 //show jquery dialog
-                 $(ele).dialog({
+                insertPopupID = $(ele).dialog({
                     autoOpen: true,
                     height: 260,
                     width: 400,
@@ -1268,16 +1269,28 @@ function ShowReps() {
 
                 top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
                     "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
+                    
             }
-        }
+        }//__shownewpopup
 
-        if(top.HEURIST.util.popups.list.length>0){ //close previous
-            top.HEURIST.util.closePopupAll();
-            //top.HEURIST.util.closePopup(insertPopupID);
-            insertPopupID = null;
-            //setTimeout(__shownewpopup, 2000);
-        }else{
+        
+        if(top.HEURIST4){
+
+            if(insertPopupID){
+                $(insertPopupID).dialog('close');
+                insertPopupID = null;
+            }
             __shownewpopup();
+            
+        }else{        
+            if(top.HEURIST.util.popups.list.length>0){ //close previous
+                top.HEURIST.util.closePopupAll();
+                //top.HEURIST.util.closePopup(insertPopupID);
+                insertPopupID = null;
+                //setTimeout(__shownewpopup, 2000);
+            }else{
+                __shownewpopup();
+            }
         }
     }
 
@@ -1286,7 +1299,15 @@ function ShowReps() {
     //
     function _insertSelectedVars( varid, inloop, isif ){
 
-        top.HEURIST.util.closePopupAll();
+        if(top.HEURIST4){
+             if(insertPopupID){
+                  $(insertPopupID).dialog('close');
+                  insertPopupID = null;
+             }
+        }else{
+            top.HEURIST.util.closePopupAll();
+        }
+        
         if(varid==null){
             //top.HEURIST.util.closePopup(insertPopupID);
             insertPopupID = null;
