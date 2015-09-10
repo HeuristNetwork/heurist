@@ -82,7 +82,7 @@
 <?php                            
                     }
 ?>
-<div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{}">BLOG</a></div>
+<div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://digitalharlemblog.wordpress.com/', 'DHBlog'); }">BLOG</a></div>
 
   </div>
 

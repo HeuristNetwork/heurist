@@ -972,6 +972,8 @@ $.widget( "heurist.search_faceted", {
                                 var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
                                 $sel.change(function(event){ that._onTermSelect(event); });
+                                
+                                that._createOption( facet_index, 0, {text:top.HR('select...'), value:null, count:0} ).appendTo($sel);
                                 __drawTerm(term, 0, $sel, false);
                         }
                         
