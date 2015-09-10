@@ -81,18 +81,14 @@ function fillMapDocumentsDropDown() {
         if(index >= 0 && index < data.length) {
             // Show overlay for selected Map Document
             loadMapDocument(data[index]);  
-            
-            //$("#legend").show();
-            
-            _initLegend();
-            
             $("#btnMapEdit").button( "enable" );
             $("#btnMapEdit").attr('title',"Edit current map "+data[index].title+" - add or remove map layers, change settings");
         }else{
             $("#btnMapEdit").button( "disable" );
             $("#btnMapEdit").attr('title','');
-            //$("#legend").hide();
         }
+        
+        _initLegend();
     });   
 }
 
@@ -110,7 +106,7 @@ function removeOverlays() {
             } catch(err) {
                 console.log(err);
             }  
-            overlays[property] = null;
+            delete overlays[property];
         }
     }
     overlays = {};
@@ -123,15 +119,40 @@ function _emptyLegend() {
     $("#legend .content").empty();
     
     //add list of layers that are not in map document
-    for(var idx in overlays_not_in_doc) {
-        if (overlays_not_in_doc.hasOwnProperty(idx) && overlays_not_in_doc[idx] !== undefined) {
-            $("#legend .content").append("<div style='display:block;padding:2px'><input type='checkbox' style='margin-right:5px' value='"
-                    +idx
-                    +"' "+(overlays_not_in_doc[idx].visible?"checked>":">")
-          +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
-                    +overlays_not_in_doc[idx].title+"</div>");
+    for(var layerid in overlays_not_in_doc) {
+        if (overlays_not_in_doc.hasOwnProperty(layerid) && overlays_not_in_doc[layerid] !== undefined) {
+            _addLegendEntryForLayer(layerid);
         }
     }
+}
+
+function _addLegendEntryForLayer(layerid){
+    
+    var overlay = overlays_not_in_doc[layerid];
+    
+    $("#legend .content").append("<div style='display:block;padding:2px;' id='"
+            +layerid+"'><input type='checkbox' style='margin-right:5px' value='"
+            +layerid+"' "+
+            +(overlay.visible?"checked>":">")
+            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+
+            '" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
+    +overlay.title+"</div>");
+    
+}
+
+
+
+function _showHideLayer(event){
+                // Hide or display the layer
+                var layerid = $(this).prop("value");
+                var checked = $(this).prop("checked");
+   
+                // Update overlay
+                var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
+                if(overlay){
+                    overlay.setVisibility(checked);
+                    overlay.visible = checked;                          
+                }
 }
 
 //
@@ -141,19 +162,8 @@ function _initLegend() {
 
         if(Object.keys(overlays_not_in_doc).length + Object.keys(overlays).length>0){
             // Listen to checkbox changes
-            $("#legend input").change(function(e) {
-                // Hide or display the layer
-                var index = $(this).prop("value");
-                var checked = $(this).prop("checked");
-   
-                // Update overlay
-                var overlay = overlays[index] ?overlays[index] :overlays_not_in_doc[index];  //overlays[index]
-                if(overlay){
-                    overlay.setVisibility(checked);                          
-                }
-            });
-            
-                $("#legend").show();
+            $("#legend input").change(_showHideLayer);
+            $("#legend").show();
         }else{
             $("#legend").hide();
         }
@@ -503,17 +513,17 @@ function addRecordsetLayer(source, index) {
             
             var recset = source.recordset;
             
-            var datasetname = (source.id=='main') ?source.id:"dyn"+source.id;
+            //var datasetname = (source.id=='main') ?source.id:"dyn"+source.id;
             
             
             if(recset!=null){
                 if(top.HAPI4.sysinfo['layout']=='L06'){
                     //preprocess for Digital Harlem - @todo more elegant way
                     recset.preprocessForDigitalHarlem();
-                    mapdata = recset.toTimemap(datasetname, 12); //show only address records @todo  address RT is hardcoded!!!!
+                    mapdata = recset.toTimemap(source.id, 12); //show only address records @todo  address RT is hardcoded!!!!
                 }else{
                     //convert to map datasource
-                    mapdata = recset.toTimemap(datasetname);
+                    mapdata = recset.toTimemap(source.id);
                 }
             }
             
@@ -521,8 +531,9 @@ function addRecordsetLayer(source, index) {
             if (mapping.addDataset(mapdata)){
 
                var overlay = {
-                id: datasetname,
-                title: source['title'],                
+                id: source.id,
+                title: source['title'], 
+                visible:true,               
                 setVisibility: function(checked) {
                     this.visible = checked;
                     mapping.showDataset(mapdata[0].id, checked);
@@ -538,19 +549,21 @@ function addRecordsetLayer(source, index) {
                     //index = 'A'+Math.floor((Math.random() * 10000) + 1);
                     //overlays_not_in_doc[index] = overlay;
                     
-                    overlays_not_in_doc[source.id] = overlay;
-                    
-                    $("#legend .content").append("<div style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+source.id+"' checked>"
-  +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
-                    +overlay.title+"</div>");
-                    _initLegend();
+                    if(!overlays_not_in_doc[source.id])
+                    {
+                        overlays_not_in_doc[source.id] = overlay;
+                        _addLegendEntryForLayer(source.id);
+                        _initLegend();
+                    }
                }
             }else{  //dataset is empty or failed to add - remove from legend
-               if(index<0 && !overlays_not_in_doc[source.id]){
+               if(index<0 && overlays_not_in_doc[source.id]){
                    
                     var ovr = overlays_not_in_doc[source.id];
                    
                     try {
+                        $("#legend .content").find('#'+source.id).remove();
+                        
                         ovr.setVisibility(false);   
                         if(ovr['removeOverlay']){
                             ovr.removeOverlay();
@@ -558,10 +571,9 @@ function addRecordsetLayer(source, index) {
                     } catch(err) {
                         console.log(err);
                     }  
-                    overlays_not_in_doc[source.id] = null;
+                    delete overlays_not_in_doc[source.id];
+                    _initLegend();
                }
-                //var dataset_name = _mapdata[0].id;
-                
             }
 }
 

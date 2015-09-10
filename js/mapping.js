@@ -562,7 +562,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     * 
     * @param _mapdata
     */
-    function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
+    function _load_OLD(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
 
             function __onDataLoaded(_tmap, _notfirst){
                 tmap = _tmap;
@@ -740,6 +740,93 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         if(true){ //}(hasItems && (_mapdata[0].mapenabled>0)){
             
         }
+            
+    }
+
+
+    function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
+
+            function __onDataLoaded(_tmap, _notfirst){
+                tmap = _tmap;
+                
+                if(!_notfirst){
+                    //first map initialization
+                    
+                    // Add controls if the map is not initialized yet
+                    var mapOptions = {
+                        panControl: true,
+                        zoomControl: true,
+                        mapTypeControl: true,
+                        scaleControl: true,     
+                        overviewMapControl: true,
+                        rotateControl: true,
+                        scrollwheel: true,
+                        mapTypeControlOptions: {
+                            mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
+                        }
+                    };
+
+                    var nativemap = tmap.getNativeMap();
+                    nativemap.setOptions(mapOptions);
+
+                    loadMapDocuments(nativemap, _startup_mapdocument); //loading the list of map documents see map_overlay.js
+                    
+                    _initDrawListeners();
+                    
+                    if(false && dataset.mapenabled>0){
+                        tmap.datasets.main.hide();
+                        tmap.datasets.main.show();
+                    }else if (!_startup_mapdocument) { //zoom to whole world
+                        var swBound = new google.maps.LatLng(-40, -120);
+                        var neBound = new google.maps.LatLng(70, 120);
+                        var bounds = new google.maps.LatLngBounds(swBound, neBound); 
+                        nativemap.fitBounds(bounds);
+                    }
+                }
+                
+                if(_callback){
+                    _callback.call();
+                }else{
+                    _updateLayout();
+                    //highlight selection
+                    _showSelection(false);
+                }
+                
+            }// __onDataLoaded       
+        
+        $( document ).bubble('closeAll');  //close all popups      
+        
+        //asign 2 global for mapping - on select listener and startup map document
+        if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
+        _startup_mapdocument = __startup_mapdocument;
+        
+        //mapdata = _mapdata || [];
+        selection = _selection || [];
+        
+        //timemap is already inited
+        if(tmap && tmap.datasets){ 
+            __onDataLoaded(tmap, true);    
+            return;
+        }
+        
+        // add fake/empty datasets for further use in mapdocument (it is not possible to add datasets dynamically)
+        if(!_mapdata){
+            _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
+        }
+        
+        // Initialize TimeMap
+        tmap = TimeMap.init({
+            mapId: mapdiv_id, // Id of gmap div element (required)
+            timelineId: null, //timelinediv_id, // Id of timeline div element (required)
+            datasets: _mapdata, 
+            
+            options: {
+                mapZoom: defaultZoom,
+                theme: customTheme,
+                eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
+            }
+            , dataLoadedFunction: __onDataLoaded
+            }, tmap);
             
     }
     
