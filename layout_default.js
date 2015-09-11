@@ -40,7 +40,7 @@ var widgets = [
     {id:'ha01', name:'Databases', widgetname:'about', script:'apps/about.js', minsize:[200,200], size:[300,300], isframe:false },
     {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
 
-    {id:'ha10', name:'Search', widgetname:'search', script:'apps/search/search.js'},
+    {id:'h4_search', name:'Search', widgetname:'search', script:'apps/search/search.js'},
 
     {id:'ha_search_tree', name:'Saved searches', widgetname:'svs_list', script:'apps/search/svs_list.js'},
     {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
@@ -101,7 +101,7 @@ var layouts = [
         north:{size:'12em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
+                {appid:'h4_search', hasheader:false, css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result 
@@ -120,7 +120,7 @@ var layouts = [
  /*   {id:'L04', name:'gridster example', theme:'smoothness', type:'gridster', 
         options:{widget_base_dimensions:[50, 50]},
         mainmenu: { col:1, row:1, size_x:10, size_y:1, apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},
-        search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'ha10', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},    
+        search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'h4_search', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},    
         search_nav:{ col:1, row:2, size_x:3, size_y:10, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         
         pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result 
@@ -133,7 +133,7 @@ var layouts = [
     {id:'L05', name:'Free example', theme:'heurist', type:'free', 
         mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
             apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
-                  {appid:'ha10', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} }, 
+                  {appid:'h4_search', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} }, 
                   {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
                   {appid:'h3_resultList', name: 'Search result' },
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
@@ -152,7 +152,7 @@ var layouts = [
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
         ]},
         west:{size:270, resizable:false, apps:[
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false} },
+                {appid:'h4_search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
                 {appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false, 
@@ -182,7 +182,7 @@ var layouts = [
 /*    {id:'L02', name:'connections', theme:'smoothness',
     north:{size:40, resizable:false,
             apps:[
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
+                {appid:'h4_search', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
         ]},    
         center:{dropable:false, apps:[
         {appid:'h4_connections', options:{title:'Connections'} }]}  //search result 
@@ -192,7 +192,7 @@ var layouts = [
             apps:[
                 {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none', 'background':'none'} },    //about
                 {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'50%', border:'none', 'background':'none'} },   //profile
-                {appid:'ha10', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
+                {appid:'h4_search', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
                 {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none', 'background':'none'} }  //pagination               
         ]},
         west:{size:160, minsize:160, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches

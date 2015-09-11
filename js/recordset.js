@@ -249,6 +249,9 @@ function hRecordSet(initdata) {
         var mapenabled = 0,
             timeenabled = 0;
             
+        var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');    
+        if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
+            
         dataset_name = dataset_name || "main";
          
         var tot = 0;
@@ -281,74 +284,81 @@ function hRecordSet(initdata) {
                     //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
                 }
 
-                item = {
-                    title: recName,
-                    start: (startDate || ''),
-                    end: (endDate && endDate!=startDate)?endDate:'',
-                    placemarks:[],
-                    options:{
-
-                        description: description,
-                        //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
-                        //link: record.url,  //for timeline popup
-                        recid: recID,
-                        bkmid: _getFieldValue(record, 'bkm_ID'),
-                        rectype: recTypeID,
-                        iconId: iconId,
-                        title: recName,
-                        
-                        eventIconImage: iconId + 'm.png',
-                        icon: top.HAPI4.iconBaseURL + iconId + 'm.png',
-                        
-                        start: (startDate || ''),
-                        end: (endDate && endDate!=startDate)?endDate:'',
-                        
-                        URL:   _getFieldValue(record, 'rec_URL'),
-                        thumb: html_thumb,
-                        
-                        info: _getFieldValue(record, 'rec_Info')
-                        
-                        //,infoHTML: (infoHTML || ''),
-                    }
-                };
-                
                 //need to verify date and convert from                        
                  var dres = _parseDates(startDate, endDate);
                  if(dres){
                         
-                        titem = {
-                            id: recID,
-                            group: dataset_name,
-                            content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
-                            title: recName,
-                            start: dres[0],
-                        }
-                        if(dres[1] && dres[0]!=dres[1]){
-                            titem['end'] = dres[1];
-                        }else{
-                            titem['type'] = 'point';
-                        }
+                        if(timeenabled<MAXITEMS){
+                     
+                            titem = {
+                                id: recID,
+                                group: dataset_name,
+                                content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
+                                title: recName,
+                                start: dres[0],
+                            }
+                            if(dres[1] && dres[0]!=dres[1]){
+                                titem['end'] = dres[1];
+                            }else{
+                                titem['type'] = 'point';
+                            }
+                            titems.push(titem);
                         
-                        
+                        }
                     
-                         timeenabled++;
-                         titems.push(titem);
-                         
+                        timeenabled++;
+                        
                     //}
                 }
                 
 
                 shape = _parseCoordinates(type, wkt, 0);
                 if(shape){
-                    item.placemarks.push(shape);
-                    item.options.places = [shape];
+                    
+                    if(mapenabled<MAXITEMS){
+                        
+                        item = {
+                            title: recName,
+                            start: (startDate || ''),
+                            end: (endDate && endDate!=startDate)?endDate:'',
+                            placemarks:[],
+                            options:{
+
+                                description: description,
+                                //url: (record.url ? "'"+record.url+"' target='_blank'"  :"'javascript:void(0);'"), //for timemap popup
+                                //link: record.url,  //for timeline popup
+                                recid: recID,
+                                bkmid: _getFieldValue(record, 'bkm_ID'),
+                                rectype: recTypeID,
+                                iconId: iconId,
+                                title: recName,
+                                
+                                eventIconImage: iconId + 'm.png',
+                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png',
+                                
+                                start: (startDate || ''),
+                                end: (endDate && endDate!=startDate)?endDate:'',
+                                
+                                URL:   _getFieldValue(record, 'rec_URL'),
+                                thumb: html_thumb,
+                                
+                                info: _getFieldValue(record, 'rec_Info')
+                                
+                                //,infoHTML: (infoHTML || ''),
+                            }
+                        };  
+                                          
+                        item.placemarks.push(shape);
+                        item.options.places = [shape];
+                        aitems.push(item);
+                    
+                    }
+                    
                     mapenabled++;
                 }else{
-                    item.options.places = [];
+                    //item.options.places = [];
                 }
 
-                aitems.push(item);
-                
                 tot++;
         }}
 
@@ -551,9 +561,9 @@ function hRecordSet(initdata) {
 
                                 shtml = '<div style="text-align:left"><p><b>'+evt_title+'</b></p>'
                                         + '<b>'+ __addterm('', _getFieldValue(rel_event, DT_EVENT_TYPE) )+'</b><br/><br/>'                                  
-                                        + 'Location of the event here at ' + _getFieldValue(record, 'rec_Title')+'<br/><br/>'
+                                        + 'Location of the event at ' + _getFieldValue(record, 'rec_Title')+'<br/><br/>'
                                         + event_desc
-                                        + evt_datetime +'<br/><br/>' + uniqid
+                                        + evt_datetime +'<br/><br/>' //DEBUG + uniqid
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'
                                 _setFieldValue(relrec, 'rec_Info', shtml);
@@ -567,7 +577,7 @@ function hRecordSet(initdata) {
                                 
                                 var evt_address_reltype =_getFieldValue(relrec, DT_RELATION_TYPE);
                                 if(evt_address_reltype==4536){
-                                    evt_address_reltype = ' in which the crime scene was here at this address '
+                                    evt_address_reltype = ' in which the crime scene was at this address '
                                 }else{
                                     evt_address_reltype = __addterm(' which ', evt_address_reltype, 'relation' );    
                                 }
@@ -604,7 +614,7 @@ function hRecordSet(initdata) {
                                         + evt_address_reltype
                                         + _getFieldValue(record, 'rec_Title') + '<br/>' 
                                         + evt_address_desc  + '<br/><br/>' 
-                                        + evt_datetime +'<br/><br/>'  + uniqid                                 
+                                        + evt_datetime +'<br/><br/>'  // DEBUG + uniqid                                 
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'
                                 _setFieldValue(relrec, 'rec_Info', shtml);
@@ -641,7 +651,7 @@ function hRecordSet(initdata) {
                                         + '<b>'+ __addterm('', _getFieldValue(relrec, DT_RELATION_TYPE), 'relation' ) +'</b><br/><br/>'                                  
                                         + 'At this address ' + _getFieldValue(record, 'rec_Title')+'<br/><br/>'
                                         + desc
-                                        + evt_datetime            + uniqid
+                                        + evt_datetime            //DEBUG + uniqid
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'
                                 _setFieldValue(relrec, 'rec_Info', shtml);

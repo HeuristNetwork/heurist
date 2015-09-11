@@ -153,20 +153,23 @@
             $select_clause = "";
             $grouporder_clause = "";
 
-            if($dt_type=="date" || $dt_type=="year"){
+            if($dt_type=="date"){
 
+                    $details_where = $details_where." AND (cast(getTemporalDateString(".$select_field.") as DATETIME) is not null  OR cast(getTemporalDateString(".$select_field.") as SIGNED) is not null)";
+                    
                     $select_field = "cast(if(cast(getTemporalDateString(".$select_field.") as DATETIME) is null,"
                         ."concat(cast(getTemporalDateString(".$select_field.") as SIGNED),'-1-1'),"
                         ."getTemporalDateString(".$select_field.")) as DATETIME)";
                     
-                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max  ";
+                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
+                    
             }
-            else if($dt_type=="integer" || $dt_type=="float"){
+            else if($dt_type=="integer" || $dt_type=="float" || $dt_type=="year"){
 
                     //if ranges are not defined there are two steps 1) find min and max values 2) create select case
                     $select_field = "cast($select_field as DECIMAL)";
 
-                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max ";
+                    $select_clause = "SELECT min($select_field) as min, max($select_field) as max, count(distinct r0.rec_ID) as cnt ";
  
             }
             else { //freetext and other if($dt_type==null || $dt_type=="freetext")
@@ -210,6 +213,7 @@
 //DEBUG 
 if(@$params['debug']) echo $query."<br>";            
             //
+//
 //error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
@@ -219,7 +223,16 @@ if(@$params['debug']) echo $query."<br>";
                 $data = array();
 
                 while ( $row = $res->fetch_row() ) {
-                    array_push($data, array($row[0], $row[1], ($step_level>0 || $dt_type!="freetext")?$row[0]:$row[0]."%") );
+                    
+                    if($dt_type=="integer" || $dt_type=="float" || $dt_type=="year" || $dt_type=="date"){
+                        $third_element = $row[2];
+                    }else if($step_level>0 || $dt_type!='freetext'){
+                        $third_element = $row[0];
+                    }else{
+                        $third_element = $row[0].'%';
+                    }
+                    
+                    array_push($data, array($row[0], $row[1], $third_element ));
                 }
                 $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], "facet_index"=>@$params['facet_index'] );
                 $res->close();

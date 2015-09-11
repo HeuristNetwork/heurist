@@ -20,7 +20,7 @@
 var Hul = top.HEURIST4.util;
 
 //constants 
-//const _NAME = 0, _QUERY = 1, _GRPID = 2;
+//const _NAME = 0, _QUERY = 1, _GRPID = 2, _ISFACETED=3;
 
 $.widget( "heurist.dh_search", {
 
@@ -30,7 +30,7 @@ $.widget( "heurist.dh_search", {
         UGrpID: 1007
     },
 
-    _currenttype:null,
+    _currenttype:null,  //absolete
     currentSearch: null,
     usr_SavedSearch: null,   //list of saved searches for given group
 
@@ -153,12 +153,15 @@ $.widget( "heurist.dh_search", {
                 }
                 catch (err) {
                 }
-                if(isfaceted){
+                
+                this.usr_SavedSearch[svsID].push(isfaceted);
+                
+                if(true || isfaceted){
                     
                     $('<button>', {text: this.usr_SavedSearch[svsID][_NAME], 'data-svs-id':svsID })
                         .css({'width':'100%','margin-top':'0.4em'})
                         .button().on("click", function(event){ 
-                                    that._doSearch2($(this).attr('data-svs-id')); 
+                                    that._doSearch2( $(this).attr('data-svs-id') ); 
                                 })
                         .appendTo(this.search_list);
                 }
@@ -170,6 +173,7 @@ $.widget( "heurist.dh_search", {
         
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
+        if(this.usr_SavedSearch[svsID][3]){  //_ISFACETED
                 var facet_params = null;
                 try {
                     facet_params = $.parseJSON(qsearch);
@@ -201,6 +205,21 @@ $.widget( "heurist.dh_search", {
                         }
                     
               this._currenttype = facet_params.rectypes[0];
+              
+        } else {
+            var request = Hul.parseHeuristQuery(qsearch);
+    
+    
+            request.f = this.options.searchdetails;
+            request.source = this.element.attr('id');
+            request.qname = this.usr_SavedSearch[svsID][_NAME];
+            request.notes = null; //unset to reduce traffic
+
+            //get hapi and perform search
+            top.HAPI4.RecordMgr.search(request, $(this.document));
+            
+            
+        }
 
     },
 

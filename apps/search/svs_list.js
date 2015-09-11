@@ -1080,7 +1080,8 @@ $.widget( "heurist.svs_list", {
 
                 var request = Hul.parseHeuristQuery(qsearch);
                 
-                if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
+                //query is not defenied, but rules are - this is pure rule set - apply it to current result set
+                if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){  
                     
                     if(this.currentSearch){
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);

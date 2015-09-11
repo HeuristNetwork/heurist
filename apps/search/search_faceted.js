@@ -771,7 +771,7 @@ $.widget( "heurist.search_faceted", {
                     
                 }
                         
-                
+                /* alas, ian want to get count on every step
                 if( (!top.HEURIST4.util.isnull(field['selectedvalue'])) 
                     && (field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year")){  //run only once to get min/max values
                 
@@ -779,6 +779,7 @@ $.widget( "heurist.search_faceted", {
                        that._redrawFacets(response)
                        break;
                 }
+                */
                 
                 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
@@ -1056,7 +1057,7 @@ $.widget( "heurist.search_faceted", {
                     }else 
                     if(field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year"){  //add slider
                     
-                        console.log(facet_index);
+//console.log(facet_index);
                     
                         $facet_values.parent().css({'display':'block','padding-left':'1em','padding-right':'2em'});
                         //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
@@ -1067,6 +1068,8 @@ $.widget( "heurist.search_faceted", {
                                     var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0});
                                     $('<span>').css('display','block').append(f_link).appendTo($facet_values);
                         }
+                        var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
+                        
                         if(field.selectedvalue){
                                 if($.isNumeric(field.selectedvalue.value) ||  field.selectedvalue.value.indexOf('<>')<0  ){
                                     cterm = [field.selectedvalue.value, field.selectedvalue.value];
@@ -1081,6 +1084,13 @@ $.widget( "heurist.search_faceted", {
                         if(!(top.HEURIST4.util.isempty(mmin) || top.HEURIST4.util.isempty(mmax))){
                             
                             if(field['type']=="date"){
+                                if(mmin.indexOf("-00-00")>0){
+                                    mmin = mmin.replace("-00-00","-01-01");
+                                }
+                                if(mmax.indexOf("-00-00")>0){
+                                    mmax = mmax.replace("-00-00","-01-01");
+                                }
+                                
                                 mmin = mmin.replace(' ','T');                                                                     
                                 mmax = mmax.replace(' ','T');
                                 mmin = Date.parse(mmin); 
@@ -1131,14 +1141,16 @@ $.widget( "heurist.search_faceted", {
                             
                             function __updateSliderLabel() {
                                       
-                                if(arguments && arguments.length==2){
-                                    var min, max;      
+                                if(arguments && arguments.length>1){
+                                    var min, max, cnt;      
                                     if(isNaN(arguments[0])){
                                         min = arguments[1].values[ 0 ];
                                         max = arguments[1].values[ 1 ];
+                                        cnt = 0;
                                     }else{
                                         min = arguments[0];
                                         max = arguments[1];
+                                        cnt = arguments[2];
                                     }
                                     if(field['type']=="date"){
                                         try{
@@ -1155,7 +1167,7 @@ $.widget( "heurist.search_faceted", {
                                         }
                                     }
                                     $( "#facet_range"+facet_index )
-                                        .text( min + " - " + max );
+                                        .text( min + " - " + max + ((cnt>0)?" ("+cnt+")":"") );
                                 }
                             }
                             
@@ -1200,7 +1212,8 @@ $.widget( "heurist.search_faceted", {
                                 .css('height','0.4em')
                             .appendTo($facet_values);
 
-                            __updateSliderLabel(mmin, mmax);
+                            //show initial values
+                            __updateSliderLabel(mmin, mmax, sl_count);
                             
                         }
                         }
