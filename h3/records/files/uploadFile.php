@@ -648,6 +648,31 @@
     }
 
     /**
+    * 
+    * 
+    * 
+    * @param mixed $path
+    */
+    function resolveFilePath($path){
+        
+            if( $path && !file_exists($path) ){
+                chdir(HEURIST_FILES_DIR);
+                $fpath = realpath($path);
+                if(file_exists($fpath)){
+                    return $fpath;
+                }else{
+                    chdir(HEURIST_FILESTORE_DIR);
+                    $fpath = realpath($path);
+                    if(file_exists($fpath)){
+                        return $fpath;
+                    }
+                }
+            }
+            
+            return $path;
+    }
+    
+    /**
     * put your comment there...
     *
     * @param mixed $fileID
@@ -711,15 +736,7 @@
                 $res['fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
             }
             //add database media storage folder for relative paths
-            $path = @$res['fullpath'];
-
-            if( $path && !file_exists($path) ){
-                chdir(HEURIST_FILES_DIR);
-                $path = realpath($path);
-                if(file_exists($path)){
-                    $res['fullpath'] = $path;
-                }
-            }
+            $res['fullpath'] = resolveFilePath(@$res['fullpath']);
 
             $params = parseParameters($res["parameters"]);
             $res["mediaType"] =	(array_key_exists('mediatype', $params))?$params['mediatype']:null;

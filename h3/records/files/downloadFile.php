@@ -190,6 +190,7 @@
       /* Redirect browser */
       //header('HTTP/1.1 201 Created', true, 201);
       //if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
+      
       header('Location: '.$filedata['URL']);
     }
     /* Make sure that code below does not get executed when we redirect. */

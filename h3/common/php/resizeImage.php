@@ -104,14 +104,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 
     if(isset($filename)){
         //add database media storage folder for relative paths
-        $path = $filename;
-        if( $path && !file_exists($path) ){
-            chdir(HEURIST_FILES_DIR);
-            $path = realpath($path);
-            if(file_exists($path)){
-                $filename = $path;
-            }
-        }
+        $filename = resolveFilePath($filename);
     }
 
     if (isset($filename) && file_exists($filename)){
