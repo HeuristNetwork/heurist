@@ -126,17 +126,24 @@ function _emptyLegend() {
     }
 }
 
-function _addLegendEntryForLayer(layerid){
+function _addLegendEntryForLayer(layerid, on_top){
     
     var overlay = overlays_not_in_doc[layerid];
     
-    $("#legend .content").append("<div style='display:block;padding:2px;' id='"
+    var legenditem = "<div style='display:block;padding:2px;' id='"
             +layerid+"'><input type='checkbox' style='margin-right:5px' value='"
             +layerid+"' "+
             +(overlay.visible?"checked>":">")
             +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+
             '" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
-    +overlay.title+"</div>");
+    +overlay.title+"</div>";
+    
+    if(on_top){
+        $("#legend .content").prepend(legenditem);
+    }else{
+        $("#legend .content").append(legenditem);
+    };
+    
     
 }
 
@@ -549,12 +556,46 @@ function addRecordsetLayer(source, index) {
                     //index = 'A'+Math.floor((Math.random() * 10000) + 1);
                     //overlays_not_in_doc[index] = overlay;
                     
-                    if(!overlays_not_in_doc[source.id])
+                    var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');    
+                    if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
+                    
+                    var sMsg = '';
+                    if(mapdata[0].mapenabled > MAXITEMS){
+                           sMsg = mapdata[0].mapenabled +' records to display on this map';    
+                    }
+                    if(mapdata[0].timeenabled > MAXITEMS){
+                           sMsg = (sMsg?' and ':'') + mapdata[0].timeenabled +' records to display on timeline';    
+                    }
+                    if(sMsg!=''){
+
+    sMsg = '<p style="padding-bottom:1em;">There are '+ sMsg +', which exceeds the limit of '+MAXITEMS+' records set in your profile.</p>'
+    + '<p style="padding-bottom:1em;">Google Maps and VIS Timeline do not work well with thousands of objects, and may hang your browser or cause it to report the page as non-responsive. Only the first '+MAXITEMS+' records will therefore be displayed.</p>'
+    + '<p>We recommend refining your filters to retrieve fewer records before mapping. You may also change the record limits for map and timeline in Profile &gt; My Preferences.</p>';
+                            
+
+                            overlay.title = overlay.title + ' <span style="font-weight:bold;color:red">(Partial)</span>'
+                    }
+                    
+                    
+                    
+                    /*if(!overlays_not_in_doc[source.id])
                     {
                         overlays_not_in_doc[source.id] = overlay;
-                        _addLegendEntryForLayer(source.id);
-                        _initLegend();
+                        $("#legend .content").find('#'+source.id).remove();
+                    }*/
+                    
+                    overlays_not_in_doc[source.id] = overlay;
+                    var legenditem = $("#legend .content").find('#'+source.id);
+                    if(legenditem.length>0) legenditem.remove();
+                    
+                    _addLegendEntryForLayer(source.id, true);
+                    _initLegend();
+
+                    if(sMsg!=''){
+                        setTimeout(function(){top.HEURIST4.util.showMsgErr(sMsg);}, 1000);
+                         
                     }
+                   
                }
             }else{  //dataset is empty or failed to add - remove from legend
                if(index<0 && overlays_not_in_doc[source.id]){

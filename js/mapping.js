@@ -520,7 +520,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             var ele = document.getElementById(timelinediv_id);
             // Configuration for the Timeline
             var options = {dataAttributes: ['id'], 
-                           orientation:'both', //scal on top and bottom
+                           orientation:'both', //scale on top and bottom
                            selectable:true, multiselect:true, 
                            zoomMax:31536000000*500000,
                            margin:1,
@@ -547,7 +547,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             
         }else{
             vis_timeline.setItems(items);
-            vis_timeline.redraw();
+            //vis_timeline.redraw();
+            vis_timeline.fit(); //short way
         }
         
         //if(mapdata.timeenabled>0)
@@ -556,12 +557,12 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     }
     
     
-    /**
+    /*
     * Load timemap datasets 
     * @see hRecordSet.toTimemap()
     * 
     * @param _mapdata
-    */
+    
     function _load_OLD(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
 
             function __onDataLoaded(_tmap, _notfirst){
@@ -618,7 +619,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     }
 
                     
-                    
                 }
                 
                 if(_callback){
@@ -644,9 +644,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             var tl_theme = Timeline.ClassicTheme.create();
             tl_theme.autoWidth = true;
             tl_theme.mouseWheel = "default";//"zoom";
-            /*TODO tl_theme.event.bubble.bodyStyler = function(elem){
-            $(elem).addClass("popup_body");
-            };*/
             tl_theme.event.track.offset = 1.4;
         }
 
@@ -702,35 +699,35 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 //showMapCtrl: true,
                 //ART 201302 useMarkerCluster: (mapdata.count_mapobjects<300),
                 // TODO onlyTimeline: false, //TODO (mapdata.count_mapobjects<1),
-                /*                                        
-                mapZoom: 1, //default zoom
-                centerMapOnItems: bounds ? false : true,
-                showMapCtrl: false,
-                showMapTypeCtrl: false,
-                mapZoom: RelBrowser.Mapping.defaultZoom,
-                centerMapOnItems: bounds ? false : true,
-                mapType: M.customMapTypes[0] || mxn.Mapstraction.ROAD,
+                                                        
+                //mapZoom: 1, //default zoom
+                //centerMapOnItems: bounds ? false : true,
+                //showMapCtrl: false,
+                //showMapTypeCtrl: false,
+                //mapZoom: RelBrowser.Mapping.defaultZoom,
+                //centerMapOnItems: bounds ? false : true,
+                //mapType: M.customMapTypes[0] || mxn.Mapstraction.ROAD,
                 //!!! theme: TimeMapTheme.create("blue", { eventIconPath: RelBrowser.baseURL + "timemap.2.0/images/" }),
-                openInfoWindow: mini ? function () { return false; } : RelBrowser.Mapping.openInfoWindowHandler
-                openInfoWindow: RelBrowser.Mapping.openInfoWindowHandler,
-                */
+                //openInfoWindow: mini ? function () { return false; } : RelBrowser.Mapping.openInfoWindowHandler
+                //openInfoWindow: RelBrowser.Mapping.openInfoWindowHandler,
+                
                 eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
             }
-            /* ART 14072015
-            , bandInfo: [
-                {
-                    theme: tl_theme,
-                    align: "Top",
-                    showEventText: true,
-                    intervalUnit: timeZoomSteps[timeZoomSteps.length - 1].unit,
-                    intervalPixels: timeZoomSteps[timeZoomSteps.length - 1].pixelsPerInterval,
-                    zoomIndex: timeZoomSteps.length - 1,
-                    zoomSteps: timeZoomSteps,
-                    trackHeight: 2.3,
-                    trackGap:    0.2,
-                    width: "100%"
-                }
-            ]*/
+            // ART 14072015   - remove simile timeline
+            //, bandInfo: [
+            //    {
+            //       theme: tl_theme,
+            //        align: "Top",
+            //        showEventText: true,
+            //        intervalUnit: timeZoomSteps[timeZoomSteps.length - 1].unit,
+            //       intervalPixels: timeZoomSteps[timeZoomSteps.length - 1].pixelsPerInterval,
+            //       zoomIndex: timeZoomSteps.length - 1,
+            //        zoomSteps: timeZoomSteps,
+            //        trackHeight: 2.3,
+            //        trackGap:    0.2,
+            //        width: "100%"
+            //    }
+            //]
             , dataLoadedFunction: __onDataLoaded
             }, tmap);
 
@@ -742,7 +739,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         }
             
     }
-
+    */
 
     function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
 
@@ -782,6 +779,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                         var bounds = new google.maps.LatLngBounds(swBound, neBound); 
                         nativemap.fitBounds(bounds);
                     }
+                    
+                    $("#map-settingup-message").hide();
+                    $(".map-inited").show();
                 }
                 
                 if(_callback){

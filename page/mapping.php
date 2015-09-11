@@ -317,7 +317,8 @@
                  $( "#helper" ).load(top.HAPI4.basePathOld+'context_help/mapping_overview.html #content');
                  //$( "#helper" ).find('p').css('padding','10px');
                  $( "#helper" ).dialog({
-                    autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:'90%', height:570,
+                    autoOpen: false, //(top.HAPI4.get_prefs('help_on')=='1'),
+                    width:'90%', height:570,
                     position: { my: "right top", at: "right bottom", of: $('#btn_help') },
                     show: {
                         effect: "slide",
@@ -507,24 +508,29 @@
 
             <!-- Toolbar -->
             <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px important; z-index:999;">
-                <!-- Map document selector -->
-                <span id="mapSelector">
-                <label id="map-doc-select-lbl"><i>Map document:</i></label>
-                <select id="map-doc-select" class="text ui-widget-content ui-corner-all">
-                    <option value="-1" selected="selected">none available</option>
-                </select>
+                
+                <span id="map-settingup-message" style="padding-left:1em;line-height:2em">
+                    Setting up map ...
                 </span>
-                <span id="mapToolbar">
-                <button id="btnMapEdit" disabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
-                <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
-                <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
-                <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
+                
+                <!-- Map document selector -->
+                <span id="mapSelector" class="map-inited" style="display:none">
+                    <label id="map-doc-select-lbl"><i>Map document:</i></label>
+                    <select id="map-doc-select" class="text ui-widget-content ui-corner-all" style="max-width:200px">
+                        <option value="-1" selected="selected">none available</option>
+                    </select>
+                </span>
+                <span id="mapToolbar" class="map-inited" style="display:none">
+                    <button id="btnMapEdit" disabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
+                    <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
+                    <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>
+                    <button id="btnMapDataSource" title="Define new Map geodata source. It may be either raster (Tiled image, geoTiff) or vector (shp, kml) data">New Data Source</button>
                 </span>
 
-                <div style="position: absolute; right: 0px; top:0px" class="ui-buttonset">
-                <button id="btnPrint">Print</button>
-                <button id="btnEmbed">Embed</button>
-                <button id="btn_help">Help</button>
+                <div style="position: absolute; right: 0px; top:0px;display:none" class="ui-buttonset map-inited">
+                    <button id="btnPrint">Print</button>
+                    <button id="btnEmbed">Embed</button>
+                    <button id="btn_help">Help</button>
                 </div>
 
                 <!-- Menu -->
