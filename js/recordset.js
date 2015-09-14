@@ -520,7 +520,7 @@ function hRecordSet(initdata) {
                         //this is just address
                         _setFieldValue(record, 'rec_Icon', 'term4326' );
                         shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(record, 'rec_Title')+'</b></p>'
-                                        + __addpart('<b>Cooment:</b><br/>', _getFieldValue(record, DT_NOTES) )
+                                        + __addpart('<b>Comment:</b><br/>', _getFieldValue(record, DT_NOTES) )
                                         + '<br/><br/>'                                  
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'
@@ -665,6 +665,10 @@ function hRecordSet(initdata) {
         }
     }
 
+    // find relation records of given type for recID
+    // 1. search all relationship records
+    // 2. check target or source fields
+    // 3. check record type
     function _getRelationRecords(forRecID, forRecTypeID){
         var idx, relations = [];
         

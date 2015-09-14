@@ -194,6 +194,9 @@ $.widget( "heurist.recordListExt", {
                         query_string_sel = query_string + '&q=ids:'+recIDs_list.join(',');
                   }
             }
+            
+            var recordset;
+            
             if (this.options.recordset!=null) {
                 /* art2304
                   var recIDs_list = this.options.recordset.getIds();
@@ -201,9 +204,17 @@ $.widget( "heurist.recordListExt", {
                         query_string_all = query_string + '&q=ids:'+recIDs_list.join(',');
                   }
                  */ 
-                  top.HEURIST.totalQueryResultRecordCount = this.options.recordset.length();
+                  
+                  var tot_cnt = this.options.recordset.length();
+                  top.HEURIST.totalQueryResultRecordCount = tot_cnt;
+
+                  var recIDs_list = this.options.recordset.getIds();
+                  
+                  recordset = {"resultCount":tot_cnt, "recordCount":tot_cnt, "recIDs":recIDs_list.join(',')};
+                  
             }else{                         
                   top.HEURIST.totalQueryResultRecordCount = 0;
+                  recordset = {"resultCount":0,"recordCount":0,"recIDs":""};
             }
             
             /* art2304
@@ -214,7 +225,7 @@ $.widget( "heurist.recordListExt", {
             }*/
             
             
-            top.HEURIST.currentQuery_all  = query_string_main; //query_string_all;
+            top.HEURIST.currentQuery_all  = query_string_main+'&h4=on'; //query_string_all;
             top.HEURIST.currentQuery_sel  = query_string_sel;
             top.HEURIST.currentQuery_main = query_string_main;
             
@@ -223,7 +234,12 @@ $.widget( "heurist.recordListExt", {
             
             var showReps = this.dosframe[0].contentWindow.showReps;
             if(showReps){
-                showReps.processTemplate();
+                //@todo - reimplement - send on server JSON with list of record IDs
+                //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
+                if (this.options.recordset!=null){
+                        showReps.assignRecordset(recordset);
+                        showReps.processTemplate();
+                }
             }else{
                 var showMap = this.dosframe[0].contentWindow.showMap;
                 if(showMap){

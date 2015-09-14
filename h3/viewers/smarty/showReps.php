@@ -68,7 +68,7 @@ require_once('libs.inc.php');
     $max_allowed_depth = 2;
 
 
-	if(array_key_exists("q", $_REQUEST) &&
+	if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 			(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
 	{
 
@@ -111,8 +111,14 @@ function executeSmartyTemplate($params){
 	}
 
 //debug error_log(print_r($params, true));
+
+    if(@$params['recordset']){ //we already have the list of record ids
+
+//debug error_log($params['recordset']);        
     
-    if(@$params['rules']){ //search with h4 search engine
+        $qresult = json_decode($params['recordset'], true);
+    
+    }else if(@$params['h4']==1){ //search with h4 search engine
     
         $url = "";
         foreach($params as $key=>$value){
@@ -120,7 +126,7 @@ function executeSmartyTemplate($params){
         }
     
 
-        $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$url."&idonly=1&vo=h3";
+        $url = HEURIST_BASE_URL_V4."php/api/record_search.php?".$url."&idonly=1&vo=h3";
 //debug error_log($url);        
         $result = loadRemoteURLContent($url);
         $qresult = json_decode($result, true);
@@ -134,7 +140,7 @@ function executeSmartyTemplate($params){
 /*****DEBUG****///error_log(print_r($params,true));
 /*****DEBUG****///error_log(print_r($qresult,true));
 
-	if(  ( !array_key_exists('recIDs',$qresult) && !array_key_exists('records',$qresult) ) ||  $qresult['resultCount']==0 ){
+	if( !$qresult || ( !array_key_exists('recIDs',$qresult) && !array_key_exists('records',$qresult) ) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
 			$error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
 		}else{
@@ -1130,14 +1136,18 @@ function smarty_function_wrap($params, &$smarty)
 					}
 
 				}else{
+                    
+                    $lurl = strtolower($value['URL']);
 
-					if($type_media == 'image'){
-						$sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
-					}else if( $value['remoteSource']=='youtube' ){
+					if( $value['remoteSource']=='youtube' ){
 						$sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
                     }else if( $value['remoteSource']=='gdrive' ){
                         $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
-					}else{
+					}else if($type_media == 'image' || strpos($lurl,".jpg")>0 || strpos($lurl,".png")>0 || strpos($lurl,".gif")>0) {
+                        
+                        $sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
+                    }else{
+                        
 						$sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
 					}
 

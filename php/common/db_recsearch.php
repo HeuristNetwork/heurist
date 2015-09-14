@@ -605,6 +605,14 @@ if(@$params['debug']) echo $query."<br>";
                         return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Invalid search request. Cannot parse query parameter");                        
                     }
             }
+    
+/* debug      
+      if(@$params['qa']){
+error_log(print_r($params['qa'], true));      
+      } else if(@$params['q']){
+error_log($params['q']);      
+      }
+*/      
             
             if(@$params['qa']){
                 $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   
@@ -625,14 +633,14 @@ if(@$params['debug']) echo $query."<br>";
         
         }
 
-        //DEGUG 
-        if(@$params['qa']){
-            //print $query;
+//DEGUG 
+if(@$params['qa']){
+    //print $query;
 //error_log("QA: ".$query);
-            //exit();
-        }else{
+    //exit();
+}else{
 //error_log("Q: ".$query);            
-        }
+}
         
 //error_log("AAA".$query);            
         

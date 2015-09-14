@@ -872,6 +872,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 }else{
                     $dlg.html(message);    
                 }
+                
                 isPopup = true;
                 
             }else{
@@ -915,6 +916,11 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             buttons: buttons
         };
         if(isPopup){
+            
+            options.open = function(event, ui){ 
+                $dlg.scrollTop(0);
+            };
+            
             options.height = 515;
             options.width = 705;
             options.resizable = true;

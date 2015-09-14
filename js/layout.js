@@ -825,6 +825,8 @@ function isMouseoverTabControl(e){
         
         initLayoutCardinal(layout, $container);
         
+        top.HEURIST4.mainlayout = $container;
+        
     }else if(layout.type=='gridster'){
 
         initLayoutGridster(layout, $container);

@@ -52,6 +52,7 @@ function ShowReps() {
     codeEditor = null,
     _isAceEditor = false,
     infoMessageBox,
+    _currentRecordset = null,
     _db;
 
     var top_repcontainer = '30px';
@@ -197,6 +198,14 @@ function ShowReps() {
         var callback = _updateTemplatesList;
         Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
     }
+    
+    
+    function _getSelectedTemplate(){
+        
+                var sel = document.getElementById('selTemplates');
+                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+                return sel.options[sel.selectedIndex].value; // by default first entry
+    }
 
     /**
     *
@@ -217,9 +226,7 @@ function ShowReps() {
         }else{
 
             if(Hul.isnull(template_file)){
-                var sel = document.getElementById('selTemplates');
-                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
-                template_file = sel.options[sel.selectedIndex].value; // by default first entry
+                template_file = _getSelectedTemplate();
             }
 
             if(isencode){
@@ -240,10 +247,22 @@ function ShowReps() {
         _showLimitWarning();
 
         var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
-        var squery = _getQueryAndTemplate(template_file, false);
+        var squery = null;
+        
+        if(_currentRecordset!=null){
+
+            //new approach to support h4
+            if(Hul.isnull(template_file)){
+                template_file = _getSelectedTemplate();
+            }
+            
+            squery =  'db='+_db+'&template='+template_file+'&recordset='+JSON.stringify(_currentRecordset);
+            
+        }else{
+            squery = _getQueryAndTemplate(template_file, false);
+        }
 
         if(squery!=null){
-
 
             //infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
@@ -255,9 +274,10 @@ function ShowReps() {
                 }, squery);
 
         }
+        
         //Hul.getJsonData(baseurl, callback, squery);
     }
-
+    
     //
     function _isEditorVisible(){
         //
@@ -1693,6 +1713,12 @@ function ShowReps() {
             _reload(template_file);
         },
 
+        
+        // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599....."}
+        assignRecordset: function(recordset){
+             _currentRecordset = recordset;
+        },
+        
         isNeedSelection: function(){
             return _needSelection;
         },

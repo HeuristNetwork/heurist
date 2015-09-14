@@ -199,6 +199,9 @@ $.widget( "heurist.dh_maps", {
         //hack $('#map-doc-select').click();
         var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
         if(app && app.widget){
+            //switch to Map Tab
+            
+            //load Map Document
             $(app.widget).app_timemap('loadMapDocumentById', recId);
         }
         

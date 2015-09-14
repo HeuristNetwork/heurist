@@ -1230,6 +1230,9 @@ $.widget( "heurist.search", {
                      this.query_request.increment = true; //it shows that this is not initial search request
                      this.query_request.o = 0;
                      this.query_request.source = this.element.attr('id');
+                     
+                     this.query_request.getrelrecs = (top.HAPI4.sysinfo['layout']=='L06')?1:0; //@todo more elegant way: include request for relationship records into rule
+                     
                      top.HAPI4.RecordMgr.search(this.query_request, $(this.document)); //search rules
                      return true;
 

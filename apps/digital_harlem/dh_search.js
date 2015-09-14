@@ -133,7 +133,7 @@ $.widget( "heurist.dh_search", {
     },
 
     //
-    // redraw accordeon - list of workgroups + rules, all, bookmarked
+    // redraw list of saved searches
     //
     _updateSavedSearchList: function(){
         
@@ -214,6 +214,7 @@ $.widget( "heurist.dh_search", {
             request.source = this.element.attr('id');
             request.qname = this.usr_SavedSearch[svsID][_NAME];
             request.notes = null; //unset to reduce traffic
+            request.getrelrecs = 1;
 
             //get hapi and perform search
             top.HAPI4.RecordMgr.search(request, $(this.document));
@@ -223,7 +224,7 @@ $.widget( "heurist.dh_search", {
 
     },
 
-    // add kayer to current map document
+    // add layer to current map document
     _onAddLayer: function(){
         
         if($("#dh_layer_name").length>0){

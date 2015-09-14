@@ -133,7 +133,7 @@ function _addLegendEntryForLayer(layerid, on_top){
     var legenditem = "<div style='display:block;padding:2px;' id='"
             +layerid+"'><input type='checkbox' style='margin-right:5px' value='"
             +layerid+"' "+
-            +(overlay.visible?"checked>":">")
+            +(overlay.visible?"checked='checked'>":">")
             +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+
             '" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
     +overlay.title+"</div>";
