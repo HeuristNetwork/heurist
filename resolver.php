@@ -31,7 +31,7 @@
 
 // called by applyCredentials require_once('configIni.php');
 // called by applyCredentials  require_once(dirname(__FILE__).'/common/config/initialise.php');
-require_once(dirname(__FILE__).'/h3/common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/migrated/common/connect/applyCredentials.php');
 
 // Input is of the form .../resolver.php?db=mydatabase&recID=3456
 
@@ -40,7 +40,7 @@ $id = @$_REQUEST["recID"];
 
 // Redirect to .../records/view/viewRecord.php
 
-header('Location: '.HEURIST_SITE_PATH.'/h3/records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
+header('Location: '.HEURIST_SITE_PATH.'/migrated/records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
 
 return;
 

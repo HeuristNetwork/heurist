@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# install_heurist.sh: installation script for Heurist on ny flavour of Linux
+# install_heurist.sh: installation script for Heurist on any flavour of Linux
 # Note: run install_prerequisities_ubuntu.sh first to install php packages, MySQL, SpatialLite etc.
 
 # @package     Heurist academic knowledge management system
@@ -102,8 +102,8 @@ $2 rm exemplars.tar.bz2
 cd /var/www/html/HEURIST/h4
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
 
-# h3 directory within h4 contains h3 functions not yet converted to h4
-cd h3
+# "migrated" directory within h4 contains h3 functions not yet or partially converted to h4
+cd migrated
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
@@ -115,19 +115,19 @@ echo "Creating directories, sandpit database and setting permissions"
 
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
 
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
 
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
-$2 cp -r /var/www/html/HEURIST/h3/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit
+$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
 
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/filethumbs
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/generated-reports
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/hml-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/html-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/scratch
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/H3Sandpit/backup
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/filethumbs
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/generated-reports
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/hml-output
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/html-output
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/scratch
+$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/backup
 
 # set up override configIni files
 $2 mv /var/www/html/HEURIST/h4/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php

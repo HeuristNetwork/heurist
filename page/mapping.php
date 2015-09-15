@@ -61,10 +61,10 @@
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
         <!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
-        <script type="text/javascript" src="../h3/common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="../migrated/common/js/temporalObjectLibrary.js"></script>
         <script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
         <link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
-        
+
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/timemap2.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/param.js"></script>
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
@@ -98,7 +98,7 @@
                 background-color:lightgray;
             }
             .vis-item-overflow{
-                position:absolute;    
+                position:absolute;
             }
             .vis-item-overflow .vis-item{
                 left:0px;
@@ -211,7 +211,7 @@
                 layout_opts.south__size = th>200?200:th;
                 layout_opts.south__spacing_open = 7;
                 layout_opts.south__spacing_closed = 7;
-                layout_opts.south__onresize_end = function() { 
+                layout_opts.south__onresize_end = function() {
                    if(mapping) mapping.setTimelineMinheight();
                 };
 
@@ -508,11 +508,11 @@
 
             <!-- Toolbar -->
             <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px important; z-index:999;">
-                
+
                 <span id="map-settingup-message" style="padding-left:1em;line-height:2em">
                     Setting up map ...
                 </span>
-                
+
                 <!-- Map document selector -->
                 <span id="mapSelector" class="map-inited" style="display:none">
                     <label id="map-doc-select-lbl"><i>Map document:</i></label>

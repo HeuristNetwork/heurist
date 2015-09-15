@@ -1,12 +1,12 @@
 <?php
 
-    /** 
+    /**
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -18,8 +18,8 @@
     */
 
 
-   //@todo - reimplement using Singleton pattern 
-    
+   //@todo - reimplement using Singleton pattern
+
     //require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
@@ -29,16 +29,16 @@
 
     /**
     *  Class that contains mysqli (dbconnection), current user and system settings
-    *  
-    *  it performs system initialization: 
+    *
+    *  it performs system initialization:
     *   a) establish connection to server
     *   b) define sytems constans - paths
     *   c) perform login and load current user info
     *   d) load system infor (from sysIdentification)
     *   e) keeps array of errors
-    * 
+    *
     * system constants:
-    * 
+    *
     * HEURIST_THUMB_DIR
     * HEURIST_FILESTORE_DIR
     */
@@ -88,7 +88,7 @@
                 $this->mysqli = null;
                 return false;
             }
- 
+
             //dbutils
             $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $this->dbname_full);
             if ( is_array($res) ){
@@ -96,7 +96,7 @@
                 $this->mysqli = null;
                 return false;
             }else{
-                $this->mysqli = $res;   
+                $this->mysqli = $res;
 
                 if($this->dbname_full)  //database is defined
                 {
@@ -114,20 +114,20 @@
                             "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).");
                         return false;
                     }
-                    
+
                     $this->login_verify(); //load user info from session
-                    
+
                     //consts
                     $this->defineConstants();
                 }
-                
-               
-            
+
+
+
                 return true;
             }
-   
+
         }
-        
+
         /**
         * Defines all constants
         */
@@ -142,9 +142,9 @@
             global $dtDefines;
             foreach ($dtDefines as $str => $id) {
                 $this->defineDTLocalMagic($str, $id[1], $id[0]);
-            }    
+            }
         }
-        
+
         /**
         * bind Magic Number Constants to their local id
         * @param    string [$defString] define string
@@ -171,7 +171,7 @@
         * @return    int local rectype ID or null if not found
         */
         function rectypeLocalIDLookup($rtID, $dbID = 2) {
-            global $talkToSysAdmin;                     
+            global $talkToSysAdmin;
             static $RTIDs;
             if (!$RTIDs) {
                 $res = $this->mysqli->query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
@@ -179,7 +179,7 @@
                     echo "Unable to build internal record-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
                     exit();
                 }
-                
+
                 $RTIDs = array();
                 while ($row = $res->fetch_assoc()) {
                     if (!@$RTIDs[$row['dbID']]) {
@@ -188,7 +188,7 @@
                     $RTIDs[$row['dbID']][$row['id']] = $row['localID'];
                 }
                 //print_r(@$RTIDs);
-            }   
+            }
             return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID] : null);
         }
 
@@ -226,7 +226,7 @@
                     echo "Unable to build internal field-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
                     exit();
                 }
-                
+
                 $DTIDs = array();
                 while ($row = $res->fetch_assoc()) {
                     if (!@$DTIDs[$row['dbID']]) {
@@ -238,9 +238,9 @@
             return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null);
         }
 
-        
+
         public function initPathConstants($dbname=null){
-            
+
             global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
                     if(!$dbname) $dbname = HEURIST_DBNAME;
 
@@ -248,11 +248,11 @@
                     $dir_Filestore = "HEURIST_FILESTORE/";
                     $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
                     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
-             
+
 //error_log("root=".$documentRoot."   install=".$install_path);
             if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
-                
-                
+
+
                     if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                         $defaultRootFileUploadPath.= "/"; // append trailing /
                     }
@@ -260,24 +260,24 @@
                         //check for leading /
                         $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
                     }
-                    
+
                     define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
-                    
+
                     if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                          return false;
                     }
-                    
+
                     define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
-                    
-                    
-                       
-            }else{     
-                    
+
+
+
+            }else{
+
                     define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
                     if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                          return false;
                     }
-                    
+
                     define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
             }
 
@@ -285,7 +285,7 @@
             define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . '/filethumbs/');
             define('HEURIST_FILES_DIR', HEURIST_FILESTORE_DIR . '/file_uploads/');
             define('HEURIST_FILES_URL', HEURIST_FILESTORE_URL . '/file_uploads/');
-            
+
             define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
             define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
 
@@ -297,21 +297,21 @@
             if(folderCreate($folder, true)){
                 define('HEURIST_SETTING_DIR', $folder);
             }
-            
+
             return true;
         }
-        
+
         private function getInstallPath(){
-            
+
             $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
             if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
-            
+
             //$topDirs = "apps|js|php|page";
             $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
             $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
-            
+
 //error_log("script ".@$_SERVER["SCRIPT_NAME"]);
-            
+
             if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
                 $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
             }
@@ -320,38 +320,38 @@
             if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
                 $installDir = '';
             }
-            
+
             $install_path = @$_SERVER['DOCUMENT_ROOT'].$installDir;
             if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
-            
+
             if(is_link($install_path)){
                 $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
             }else{
                 $install_path = "";
             }
-            
+
             if($install_path!=""){ //this is simlink
                 //remove code folder - to get real HEURIST installation
                 if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
                 if(strrpos($install_path,"/")>0){
                     $install_path = substr($install_path,0,strrpos($install_path,"/")+1); //remove last folder
-                    
+
                     if(strpos($install_path, $documentRoot)===0){
                         $install_path = substr($install_path, strlen($documentRoot));
                     }
                 }else{
-                    $install_path = "";   
+                    $install_path = "";
                 }
             }else {
-            
-                $install_dir = $installDir; //  /html/h3/
+
+                $install_dir = $installDir; //  /html/h4/
                 if($install_dir){
                     if( substr($install_dir, -1, 1) == '/' ) $install_dir = substr($install_dir,0,-1); //remove last slash
                     if($install_dir!=""){
                         if(strrpos($install_dir,"/")>0){
                             $install_dir = substr($install_dir,0,strrpos($install_dir,"/")+1);  //remove last folder
                         }else{
-                            $install_dir = "";   
+                            $install_dir = "";
                         }
                     }
                     //$install_path = $install_dir . $install_path;
@@ -359,8 +359,8 @@
                 $install_path = $install_dir;
             }
             if( $install_path && substr($install_path, 0, 1) == '/' ) $install_path = substr($install_path,1); //remove first slash
-            
-            return $install_path; 
+
+            return $install_path;
         }
 
         /**
@@ -371,13 +371,13 @@
         }
 
         /**
-        * keep error message (for further use with getError) 
+        * keep error message (for further use with getError)
         */
         public function addError($status, $message='', $sysmsg=null) {
             $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
             return $this->errors;
         }
-        
+
         /**
         * Returns all info for current user and some sys config parameters
         */
@@ -404,7 +404,7 @@
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "basePathOld"=>HEURIST_BASE_URL_OLD)
             );
-            
+
             return $res;
         }
 
@@ -419,7 +419,7 @@
 
         /**
         * Set current user info
-        * 
+        *
         * @param mixed $user
         */
         public function setCurrentUser($user){
@@ -428,7 +428,7 @@
 
         /**
         * Get if of current user, if not looged in returns zero
-        * 
+        *
         */
         public function get_user_id(){
             return $this->current_User? $this->current_User['ugr_ID'] :0;
@@ -455,7 +455,7 @@
 
         /**
         * Returns true if given id is id of current user or it is id of member of one of current user group
-        * 
+        *
         * @param mixed $ug - user ID to check
         */
         public function is_member($ug){
@@ -464,7 +464,7 @@
 
         /**
         * Returns user group ID if given id is id of database owner or admin of given group otehrwise it returns FALSE
-        * 
+        *
         * @param mixed $ugrID - user group id, if it is omitted it takes current user ID
         */
         function is_admin2($ugrID){
@@ -481,9 +481,9 @@
 
         /**
         * Returns true if current user id databse owner admin or admin of given group (depends on context)
-        * 
+        *
         * @param mixed $contx - databasde or group
-        * @param mixed $ug - group ID 
+        * @param mixed $ug - group ID
         */
         public function is_admin($contx = 'database', $ug = 0){
 
@@ -524,7 +524,7 @@
         private function start_my_session(){
 
             //DEBUG error_log($_SERVER['PHP_SELF']." Start session Cooook:".@$_COOKIE['heurist-sessionid']);
-            
+
             if (@$_COOKIE['heurist-sessionid']) {
                 session_id($_COOKIE['heurist-sessionid']);
                 session_cache_limiter('none');
@@ -533,7 +533,7 @@
                 //session_id(sha1(rand()));
                 session_start();
                 $session_id = session_id();
-                
+
                 setcookie('heurist-sessionid', $session_id, 0, '/');//, HEURIST_SERVER_NAME);
             }
 
@@ -548,18 +548,18 @@
             session_start();
             */
         }
-        
-        
+
+
 
         /**
         * Load user info from session
         */
         public function login_verify(){
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
-            
+
             if(!$userID){
-                // h3 backward capability                        
-                $h3session = $this->dbname_full.'.heurist';    
+                // h3 backward capability
+                $h3session = $this->dbname_full.'.heurist';
                 $userID = @$_SESSION[$h3session]['user_id'];
                 if($userID){
                     $_SESSION[$this->dbname_full]['ugr_ID']       = $_SESSION[$h3session]['user_id'];
@@ -568,11 +568,11 @@
                     $_SESSION[$this->dbname_full]['keepalive']    = $_SESSION[$h3session]['keepalive'];
                 }
             }
-            
+
             $islogged = ($userID != null);
             if($islogged){
 
-                //DEBUG error_log($_SERVER['PHP_SELF']." login_verify>>>".print_r(@$_SESSION[$this->dbname_full]['ugr_Preferences'],true)  );            
+                //DEBUG error_log($_SERVER['PHP_SELF']." login_verify>>>".print_r(@$_SESSION[$this->dbname_full]['ugr_Preferences'],true)  );
 
                 if(!@$_SESSION[$this->dbname_full]['ugr_Groups']){
                     $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
@@ -591,13 +591,13 @@
                     //update cookie - to keep it alive for next 30 days
                     setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
                 }
-       
+
             }
             return $islogged;
         }
 
 
-        /**                                                     
+        /**
         * Find user by name and password and keeps user info in current_User and in session
         *
         * @param mixed $username
@@ -630,7 +630,7 @@
                         $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
                         //@todo $_SESSION[$this->dbname_full]['user_access'] = $groups;
                         //$_SESSION[$this->dbname_full]['cookie_version'] = COOKIE_VERSION;
-                        
+
                         $time = 0;
                         if($session_type == 'public'){
                             $time = 0;
@@ -664,7 +664,7 @@
 
                         //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 
-                        //h3 backward capability                        
+                        //h3 backward capability
                         $h3session = $this->dbname_full.'.heurist';
                         $_SESSION[$h3session]['cookie_version'] = 1;
                         $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
@@ -672,7 +672,7 @@
                         $_SESSION[$h3session]['user_id']       = $user['ugr_ID'];
                         $_SESSION[$h3session]['user_access']   = $user['ugr_Groups'];
                         $_SESSION[$h3session]['keepalive']     = ($session_type == 'remember');
-                        
+
                         return true;
                     }else{
                         $this->addError(HEURIST_REQUEST_DENIED,  "Password is incorrect");
@@ -718,7 +718,7 @@
                     $this->addError(HEURIST_SYSTEM_FATAL, "Unable to read sysIdentification", $mysqli->error);
                     return null;
                 }
-                
+
                 $this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
             }
             return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;

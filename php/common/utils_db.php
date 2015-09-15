@@ -1,15 +1,15 @@
 <?php
 
-    /** 
+    /**
     *  Database utilities :   mysql_ - prefix for function
-    * 
+    *
     *  mysql_connection - establish connection
     *  mysql__getdatabases4 - get list of databases
-    *  mysql__select_assoc 
+    *  mysql__select_assoc
     *  mysql__select_value
     *  mysql__select_array
     *  mysql__insertupdate
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2014 University of Sydney
@@ -41,11 +41,11 @@
     */
     function mysql_connection($dbHost, $dbUsername, $dbPassword, $dbname){
 
-        
+
         if(null==$dbHost || $dbHost==""){
             return array(HEURIST_SYSTEM_FATAL, "Database server is not defined. Check your configuration file");
         }
-        
+
         try{
             $mysqli = new mysqli($dbHost, $dbUsername, $dbPassword);
         } catch (Exception $e)  {
@@ -183,9 +183,9 @@
 
     /**
     * insert or update record for given table
-    * 
+    *
     * returns record ID in case success or error message
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $table_name
     * @param mixed $table_prefix
@@ -276,7 +276,7 @@
 
     /**
     * Returns values from sysIdentification
-    * 
+    *
     * @param mixed $mysqli
     */
     function getSysValues($mysqli){
@@ -292,7 +292,7 @@
         }
         return $sysValues;
     }
-    
+
 
     /**
     * Check that db function exists
@@ -336,15 +336,15 @@
                 $res = true;
 
             }else{
-            
+
                 include('utils_db_script.php'); //
-                if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../../h3/admin/setup/dbcreate/addProceduresTriggers.sql")){
+                if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../../migrated/admin/setup/dbcreate/addProceduresTriggers.sql")){
                     $res = true;
                 }
             }
 
             return $res;
     }
-    
+
 
 ?>

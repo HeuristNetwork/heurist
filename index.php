@@ -1,52 +1,52 @@
 <?php
 
-    /**
-    *  Main script
-    *
-    *  1) System init on server side (see System.php) - connects to database , if db parameter is missed redirects to database selecion page
-    *  2) System init on client side (see hapi.js) - init hAPI object
-    *  3) Load localization, theme and basic database structure definition
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2015 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+*  Main script
+*
+*  1) System init on server side (see System.php) - connects to database , if db parameter is missed redirects to database selecion page
+*  2) System init on client side (see hapi.js) - init hAPI object
+*  3) Load localization, theme and basic database structure definition
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    //ini_set('include_path', ini_get('include_path').PATH_SEPARATOR,'/var/www/h4/');
-    //ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.'c:/xampp/htdocs/h4/');  //dirname(__FILE__));
+//ini_set('include_path', ini_get('include_path').PATH_SEPARATOR,'/var/www/h4/');
+//ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.'c:/xampp/htdocs/h4/');  //dirname(__FILE__));
 
-    require_once(dirname(__FILE__)."/php/System.php");
-    //require_once ('/common/db_structure.php');
+require_once(dirname(__FILE__)."/php/System.php");
+//require_once ('/common/db_structure.php');
 
-    // either init system or redirect to database selection
-    $system = new System();
-    if(@$_REQUEST['db']){
-        // connrect to given database
-        if(! $system->init(@$_REQUEST['db']) ){
-            //can not connect to given database
-            $err = $system->getError();
-            $msg = @$err['message'];
-            header('Location: php/databases.php?msg='.rawurlencode($msg));
-            //echo "FATAL ERROR!!!! ".print_r($arr, $system->getError());
-            exit();
-        }
-    }else{
-        //db parameter is missed redirects to database selecion page
-        header('Location: php/databases.php');
+// either init system or redirect to database selection
+$system = new System();
+if(@$_REQUEST['db']){
+    // connrect to given database
+    if(! $system->init(@$_REQUEST['db']) ){
+        //can not connect to given database
+        $err = $system->getError();
+        $msg = @$err['message'];
+        header('Location: php/databases.php?msg='.rawurlencode($msg));
+        //echo "FATAL ERROR!!!! ".print_r($arr, $system->getError());
         exit();
     }
+}else{
+    //db parameter is missed redirects to database selecion page
+    header('Location: php/databases.php');
+    exit();
+}
 
 ?>
 <html>
@@ -66,32 +66,32 @@
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
-<!-- does not work properly
+        <!-- does not work properly
         <script type="text/javascript" src="ext/js/jquery.resize.js"></script>
--->
+        -->
 
-<!--
+        <!--
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
         <script type="text/javascript" src="ext/gridster/utils.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.collision.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.coords.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.draggable.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.gridster.js"></script>
--->
-<!-- for gridster layout - remove comments to use
+        -->
+        <!-- for gridster layout - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
         <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
--->
+        -->
 
 
 
 
         <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/)
-             src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
+        src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
-        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script --> 
-        <script type="text/javascript" src="ext/js/date.format.js"></script> 
+        <!-- script type="text/javascript" src="ext/js/moment.min.js"></script -->
+        <script type="text/javascript" src="ext/js/date.format.js"></script>
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>
@@ -100,10 +100,10 @@
         <script type="text/javascript" src="js/hapi.js"></script>
         <script type="text/javascript" src="js/layout.js"></script>
         <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
-        
+
         <script type="text/javascript" src="apps/others/help_tips.js"></script>
 
-        <script type="text/javascript" src="h3/common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="migrated/common/js/temporalObjectLibrary.js"></script>
 
         <!-- this scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
@@ -126,7 +126,7 @@
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/others/mainMenu.js"></script>
-         script type="text/javascript" src="apps/search.js"></script>
+        script type="text/javascript" src="apps/search.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
         <script type="text/javascript" src="apps/profile_edit.js"></script>
         <script type="text/javascript" src="apps/pagination.js"></script>
@@ -210,9 +210,9 @@
                             window.HEURIST.database = {  name: window.HAPI4.database };
 
                             /*$.getScript(window.HAPI4.basePathOld+'common/js/utilsLoad.js', function(){
-                                $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){
+                            $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){
 
-                                });
+                            });
                             } );*/
 
 
@@ -274,7 +274,7 @@
                                     }
 
                                     if(!(top.HAPI4.sysinfo.db_total_records>0)){
-                                            showTipOfTheDay(false);
+                                        showTipOfTheDay(false);
                                     }
 
                                     $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);

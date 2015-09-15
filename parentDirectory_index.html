@@ -8,7 +8,7 @@
 
     /**
     * Home page for Heurist application, allows registration on sandpit, new or browse existing databases,
-    * links to Heurist Network site. Assumes production version of Heurist will be installed in ./h3
+    * links to Heurist Network site. Assumes production version of Heurist will be installed in ./h4
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -35,8 +35,8 @@
         <meta content="Ian Johnson" name="author">
         <meta content="Open Source collaborative web database software for richly interlinked heterogeneous research data" name="description">
 
-        <link rel=stylesheet type="text/css" href='h3/common/css/global.css'>
-        <link rel=stylesheet type="text/css" href='h3/common/css/login.css'>
+        <link rel=stylesheet type="text/css" href='migrated/common/css/global.css'>
+        <link rel=stylesheet type="text/css" href='migrated/common/css/login.css'>
 
         <style type="text/css">
             button {width:200px;}
@@ -61,73 +61,41 @@
 
                 <div class="separator_row"></div>
                 <div class="options">
-                    <div class="buttons"><button onclick="location.href='h4/h3/admin/ugrps/editUser.html?db=H3Sandpit'">Register as user</button></div>
+                    <div class="buttons"><button onclick="location.href='h4/migrated/admin/ugrps/editUser.html?db=Heurist_Sandpit'">Register as user</button></div>
                     <div class="description">A simple one minute registration allows you to use Heurist on this server
-                    (if enabled by the administrator)</div>
+                        (if enabled by the administrator)</div>
                 </div>
-                <!-- Ian 26/9/13: With Vsn 3.0 we move away from the idea of a shared sandpit to giving users their own individual databases
                 <div class="options">
-                <div class="buttons"><button onclick="location.href='?db=H3Sandpit'">Use Heurist public database</button></div>
-                <div class="description">A simple one minute registration (above) allows you to try out Heurist on this shared 'sandpit' and,
-                when you are ready, generate your own database(s) for real data.</div>
-                </div>
-                -->
-                <div class="options">
-                    <div class="buttons"><button onclick="location.href='h4/h3/admin/setup/dbcreate/createNewDB.php?db=H3Sandpit'">
-                    Create your own database <br>(must register first)</button></div>
+                    <div class="buttons"><button onclick="location.href='h4/migrated/admin/setup/dbcreate/createNewDB.php?db=Heurist_Sandpit'">
+                        Create your own database <br>(must register first)</button></div>
                     <div class="description">Create your first database. Subsequent databases can be created with New Database
-                    from within an existing database. You become the owner of the new databases created.</div>
+                        from within an existing database. You become the owner of the new databases created.</div>
                 </div>
                 <div class="separator_row"></div>
 
                 <div class="options">
                     <div class="buttons"><button onclick="location.href='h4/index.php?db='">Browse databases</button></div>
                     <div class="description">Browse the list of databases on this server - you will only be able to open databases
-                    for which you have login details</div>
+                        for which you have login details</div>
                 </div>
                 <div class="separator_row"></div>
 
-                <!--
-                <div class="options">
-                <div class="buttons"><button onclick="location.href='admin/ugrps/editUser.html'">Register as new user</button></div>
-                <div class="description">A simple two minute process will get you using our shared databasein which you can create
-                and share (or not) internet bookmarks, bibliographic data and any other form of research data you wish.</div>
-                </div>
-                <div class="separator_row small"></div>
-                -->
-
-                <!-- Broken images and outdated content (related to Heurist vsn 2) at Sep 2013. Would be worth reinstating.
-                <div class="options">
-                <div class="buttons"><button onclick="location.href='context_help/tour.html'">Introductory tour</button></div>
-                <div class="description">A quick overview of Heurist's field of application and capabilities</div>
-                </div>
-                -->
 
                 <div class="options">
                     <div class="buttons"><button onclick="location.href='http://HeuristNetwork.org'">Heurist Network site</button></div>
                     <div class="description">A one-stop shop for everything Heurist, including full documentation, training
                         materials, workshops, hosted Heurist services, exemplars and annotated database templates
-                        </div>
+                    </div>
                 </div>
 
-                <!-- We might add these back once we've worked out where they live
-
+                <!-- We might add this back once we've worked out where it lives
                 <div class="separator_row small"></div>
-
                 <div class="options">
                 <div class="buttons"><button onclick="location.href='index.php?ver=1&amp;w=all&amp;
                 q=tag=%22ACL%5CACL%20Products%22&amp;view=thumbs&amp;label=ACL%20Products&amp;sid=4022'">Example applications</button></div>
                 <div class="description">A Heurist search returning links to the websites of a selection of Heurist-based projects</div>
                 </div>
                 <div class="separator_row small"></div>
-                -->
-
-                <!-- Enable this once we have a project website with publications and other links
-                <div class="options">
-                <div class="buttons"><button onclick="location.href='http://www.timemap.net/timelines/index.php?option=com_content&amp;
-                task=view&amp;id=15&amp;Itemid=29'">Publications</button></div>
-                <div class="description">A Heurist search returning links to the websites of a selection of Heurist-based projects</div>
-                </div>
                 -->
 
                 <div class="separator_row" style="margin:0 0 20px 0"></div>
@@ -143,7 +111,7 @@
                 <div class="options" style="padding:5px 0">
                     <div class="buttons" style="text-align:right">Programming:</div>
                     <div class="description">Internal: Artem Osmakov, Tom Murtagh, Kim Jackson, Steve White, Maria Shvedova,
-                    Ireneusz Golka, Damian Evans, Steven Hayes. External: Arjen Lentz, Maxim Nitikin</div>
+                        Ireneusz Golka, Damian Evans, Steven Hayes. External: Arjen Lentz, Maxim Nitikin</div>
                 </div>
 
                 <div class="options" style="padding:5px 0">
@@ -161,7 +129,7 @@
             <div class="resource" style="padding:3px; margin-top:10px">
                 <p>When installing Heurist on another system, you may replace this introductory page with your own,
                 but please leave the following acknowledgement:<br>
-                <strong>Developed with Heurist (C) 2005 - 2015 The University of Sydney.
+                <strong>Powered by Heurist (C) 2005 - 2015 The University of Sydney.
                 See <a href="http://HeuristNetwork.org">HeuristNetwork.org</a> </strong>
             </div>
 

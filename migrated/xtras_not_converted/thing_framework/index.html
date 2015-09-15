@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<title>Full Page Layout with Menu Navigation - Example</title>
+<style type="text/css">
+/*margin and padding on body element
+  can introduce errors in determining
+  element position and are not recommended;
+  we turn them off as a foundation for YUI
+  CSS treatments. */
+body {
+	margin:0;
+	padding:0;
+}
+</style>
+<!-- Individual YUI CSS files -->
+<link rel="stylesheet" type="text/css" href="../migrated/external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
+<link rel="stylesheet" type="text/css" href="../migrated/external/yui/2.8.2r1/build/fonts/fonts-min.css">
+<link rel="stylesheet" type="text/css" href="../migrated/external/yui/2.8.2r1/build/menu/assets/skins/sam/menu.css">
+<link rel="stylesheet" type="text/css" href="../migrated/external/yui/2.8.2r1/build/resize/assets/skins/sam/resize.css">
+<link rel="stylesheet" type="text/css" href="../migrated/external/yui/2.8.2r1/build/layout/assets/skins/sam/layout.css">
+<!-- Individual YUI JS files -->
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/event/event-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/history/history-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/resize/resize-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/utilities/utilities.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/container/container_core-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/container/container-min.js"></script>
+<script type="text/javascript" src="../migrated/external/yui/2.8.2r1/build/menu/menu-min.js"></script>
+
+<!-- Application Modules -->
+<script type="text/javascript" src="EventManager.js"></script>
+<script type="text/javascript" src="RecordsetManager.js"></script>
+<script type="text/javascript" src="UIManager.js"></script>
+
+
+<style>
+    #thingMenuBar {
+        position: static;
+        width:404px;
+    }
+
+    /*
+        For IE 6: trigger "haslayout" for the anchor elements in the root Menu by
+        setting the "zoom" property to 1.  This ensures that the selected state of
+        MenuItems doesn't get dropped when the user mouses off of the text node of
+        the anchor element that represents a MenuItem's text label.
+    */
+
+    #thingMenuBar .yuimenuitemlabel {
+        _zoom: 1;
+    }
+
+    #thingMenuBar .yuimenu .yuimenuitemlabel {
+        _zoom: normal;
+    }
+    /*
+        Turn off the border on the top unit since Menu has it's own border
+    */
+    .yui-skin-sam .yui-layout .yui-layout-unit-top div.yui-layout-bd {
+        border: none;
+    }
+    /*
+        Change some of the Menu colors
+    */
+    .yui-skin-sam .yuimenu .bd {
+        background-color: #F2F2F2;
+    }
+    #thingMenuBar .bd {
+        border: none;
+    }
+    #thingMenuBar .bd .first-of-type .bd {
+        border: 1px solid #808080;
+    }
+</style>
+
+</head>
+
+<body class=" yui-skin-sam">
+<div id="topDiv"> </div>
+<script>
+var Dom = YAHOO.util.Dom,
+   Event = YAHOO.util.Event;
+
+var App = function(){
+	//private members
+    var _className = "Application";  // I know this is a singleton and the application object, but hey it matches the pattern.
+	var _modLoadCount = 0;
+	function _init(){
+			that.em = new EventManager();
+			//  setup events before loading the other modules so they can subscribe
+			that.em.addEvent("AppInit", that);    // first phase of initialization is complete.
+			that.em.addEvent("ModuleLoaded", that);  // this is fired by each module once loaded
+			that.em.subscribe("ModuleLoaded",_onModuleLoaded,that);
+			that.em.addEvent("AppLoaded", that);  // this is fired once all the modules have loaded
+			that.rm = new RecordsetManager(that.em);
+			that.uim = new UIManager(that.em);
+			that.em.fire("AppInit", that);
+	};
+
+	function _onModuleLoaded( eventName, params, obj) {
+		switch(params[0]){
+			case 'rm' :
+				that.rm.loaded = true;
+				_modLoadCount += 1;
+				break;
+			case 'uim':
+				that.uim.loaded = true;
+				_modLoadCount += 2;
+		}
+		if (_modLoadCount == 3) {
+				that.em.fire("AppLoaded",that);
+		}
+	};
+
+
+	//public members
+	var that = {
+			name : "App",
+            getClass: function() { return _className;},
+            isA: function(strClass){ if(strClass === _className) return true; return false;}
+	};
+
+	_init();
+	return that;
+}();  //singleton so make this a call to instantiate it.
+
+</script>
+</body>
+</html>

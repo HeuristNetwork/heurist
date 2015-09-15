@@ -8,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2015 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Tom Murtagh, Kim Jackson, Stephen White
@@ -26,43 +26,44 @@
 
 
 /*
-    **************************************************************
+**************************************************************
 
-    WARNING:
+WARNING:
 
-    Setting any of the values in the configIni.php file overrides the
-    values set in ../heuristConfigIni.php for that instance of Heurist.
-    All other instances will use the value set in ../heuristConfigIni.php
+Setting any of the values in the configIni.php file overrides the
+values set in ../heuristConfigIni.php for that instance of Heurist.
+All other instances will use the value set in ../heuristConfigIni.php
 
-    WE THEREFORE RECOMMEND NOT CHANGING ANYTHING IN THIS FILE
+WE THEREFORE RECOMMEND NOT CHANGING ANYTHING IN THIS FILE
 
-    Values in this file should only be set for testing purposes or
-    by an experienced sysadmin for very unusual server setups
+Values in this file should only be set for testing purposes or
+by an experienced sysadmin for very unusual server setups
 
-    **************************************************************
+**************************************************************
 */
 
 /* --------------------------------------------------------------------------------------------
 
-     Setting up the server to support multiple code versions
-     -------------------------------------------------------
+Setting up the server to support multiple code versions
+-------------------------------------------------------
 
-     Move the file parentDirectory_heuristConfigIni.php to the parent directory of the codebase
-     rename to heuristConfigIni.php and enter MySQL passwords, paths and other config settings there.
-     This allows Heurist instances to exist as multiple codebases on a single server and avoids
-     the need for duplication of information or the accidental distribution of passwords etc.
-     if one of these codebases is used as a code source.
+Move the file parentDirectory_heuristConfigIni.php to the parent directory of the codebase
+rename to heuristConfigIni.php and enter MySQL passwords, paths and other config settings there.
+This allows Heurist instances to exist as multiple codebases on a single server and avoids
+the need for duplication of information or the accidental distribution of passwords etc.
+if one of these codebases is used as a code source.
 
- --------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 */
 
 // *** DO NOT CHANGE VERSION NUMBER ***
 
-$version = "4.0.1"; // sets current program version number, determined by Heurist development lead
-                    // 3.2.0 alpha 8th July 2014, beta 21st July 2014
-                    // 3.3.0 beta 11th Nov 2014
-                    // 3.3.0 27th Nov 2014 / 3.4.0-beta
-                    // 3.4.0 22nd Jan 2015
+$version = "4.1.0"; // sets current program version number, determined by Heurist development lead
+// Vsn 4.1.0 15 sep 2015
+// 3.2.0 alpha 8th July 2014, beta 21st July 2014
+// 3.3.0 beta 11th Nov 2014
+// 3.3.0 27th Nov 2014 / 3.4.0-beta
+// 3.4.0 22nd Jan 2015
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
@@ -91,8 +92,8 @@ $websiteThumbnailPassword = "";
 // $websiteThumbnailYsize = 300;
 
 
-//H4 specific
-$heurist3url = "h3/";
+// records relative path to the migrated H3 functions used by H4
+$heurist3url = "migrated/";
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the ConfigIni.php in the installation need not be configured. This allows unconfigured ConfigIni.php files to exist
@@ -103,6 +104,6 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 $defaultFaimsModulesPath = ""; //'/var/www/faims/modules/';
 
 if (is_file($parentIni)){
-	include_once($parentIni);
+    include_once($parentIni);
 }
 ?>
