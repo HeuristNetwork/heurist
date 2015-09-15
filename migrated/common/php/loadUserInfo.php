@@ -48,13 +48,13 @@
 	    ?>
         top.HEURIST.user = {};
 
-	    top.HEURIST.user.savedSearches = [<?php
+	    top.HEURIST.user.savedSearches =[<?php
 		    $res = mysql_query('select svs_Name, svs_Query, svs_Query not like "%w=bookmark%" as w_all, svs_ID from usrSavedSearches where svs_UGrpID='.get_user_id().' order by w_all, svs_Name');
 		    $first = true;
 		    while ($row = mysql_fetch_assoc($res)) {
 
                 json_decode($row['svs_Query']);
-                if (json_last_error() == JSON_ERROR_NONE){
+                if (json_last_error() == JSON_ERROR_NONE){ //ignore new queries that are json array
                     continue;
                 }
 
@@ -63,7 +63,7 @@
 			    if (preg_match('/^q/', $row['svs_Query'])) {
 				    $row['svs_Query'] = "?".$row['svs_Query'];
 			    }
-			    print "        [ \"" . addslashes($row['svs_Name']) . "\", \"" . addslashes($row['svs_Query']) . "\", ". $row['svs_ID'] .", 0, " . intval($row['w_all']) ." ]";
+                print "        [ \"" . addslashes(str_replace("\n","",$row['svs_Name'])) . "\", \"" . addslashes(str_replace("\n","",$row['svs_Query'])) . "\", ". $row['svs_ID'] .", 0, " . intval($row['w_all']) ." ]";
 		    }
 	    ?>
         ];
