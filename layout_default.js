@@ -1,10 +1,10 @@
-/** 
+/**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2014 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0      
+* @version     4.0
 */
 
 /*
@@ -16,9 +16,9 @@
 */
 
 /**
-* Layout configuration fails 
+* Layout configuration fails
 * @see js/layout.js
-* 
+*
 * @type Array widgets - list of widgets/applications
 * @type Array layouts - list of layouts
 */
@@ -29,11 +29,11 @@
 *  name - title
 *  widgetname - name of jquery widget (init function)
 *  script - link to jquery widget file
-*  misize - array width,height 
+*  misize - array width,height
 *  size   - array width,height
 *  isframe - widget or link will be loaded in iframe
 *  url - link to be loaded (if not widget)
-* 
+*
 * @type Array
 */
 var widgets = [
@@ -53,30 +53,30 @@ var widgets = [
     {id:'ha32', name:'Media', title:'Record media viewer', url:'apps/rec_media.php'},
     {id:'ha33', name:'Relations', title:'Record relations viewer', url:'apps/rec_relation.php'},
     {id:'ha34', name:'Comments', title:'Discussion over record', url:'apps/rec_comments.php'},
-    
+
     {id:'ha52', name:'Report', title:'Smarty report system', url:'apps/rep_smarty.php'},
     {id:'ha53', name:'Transform', url:'apps/rep_xslt.php'},
     {id:'ha54', name:'Crosstabs', url:'php/sync/crosstabs.php', isframe:true},
     {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'apps/exp/rec_viewer_ext.js'},
     */
 
-    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'apps/others/mainMenu.js'},
+    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'apps/topmenu/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/search/resultList.js'},
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
 
     {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},  // map in iframe
-    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},                                          
+    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
     {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'apps/viewers/staticPage.js'},
-    
+
     {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},
-    
+
     // DIGITAL HARLEM APPS
     {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'apps/digital_harlem/dh_search.js'},
     {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'apps/digital_harlem/dh_maps.js'},
     {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'apps/digital_harlem/dh_results.js'},
     {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'apps/digital_harlem/dh_legend.js'}
-    
+
 ];
 
 
@@ -95,58 +95,58 @@ resizable - (false)
 dragable - (false) it is possible to drag around  otherwise fixed position
 options - parameters to init application
 
-*/ 
+*/
 var layouts = [
-    {id:'L01', name:'Heurist Def', theme:'heurist', type:'cardinal', 
+    {id:'L01', name:'Heurist Def', theme:'heurist', type:'cardinal',
         north:{size:'12em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
                 {appid:'h4_search', hasheader:false, css:{position:'absolute', top:'6em', left:0, height:'6em', right:0, border:'none', 'background':'none', 'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
         ]},
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result 
+        center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
-                apps:[                                      
+                apps:[
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'ha51'}, // H4 map V2
-                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
+                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
                     {appid:'h4_connections',   options:{title:'Connections', url: 'page/springDiagram.php?db=[dbname]'}}  //H4 connections
                     //{appid:'h3_recordListExt', name:'Related', options:{ url:'page/relatedRecords.php?db=[dbname]' }} // H4 related records
                 ]
             }]
         }
     },
- /*   {id:'L04', name:'gridster example', theme:'smoothness', type:'gridster', 
+ /*   {id:'L04', name:'gridster example', theme:'smoothness', type:'gridster',
         options:{widget_base_dimensions:[50, 50]},
         mainmenu: { col:1, row:1, size_x:10, size_y:1, apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},
-        search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'h4_search', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},    
+        search: { col:11, row:1, size_x:10, size_y:1, apps:[{appid:'h4_search', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},
         search_nav:{ col:1, row:2, size_x:3, size_y:10, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        
-        pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result 
-        pane2:{col:12, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},  
+
+        pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result
+        pane2:{col:12, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},
         pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'page/springDiagram.php?db=[dbname]'} }]},
-        pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },  
-        pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},  
+        pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },
+        pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},
 
     }, */
-    {id:'L05', name:'Free example', theme:'heurist', type:'free', 
+    {id:'L05', name:'Free example', theme:'heurist', type:'free',
         mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
             apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
-                  {appid:'h4_search', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} }, 
+                  {appid:'h4_search', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
                   {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
                   {appid:'h3_resultList', name: 'Search result' },
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
                     {appid:'ha51'}, // H4 map V2
-                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty  
+                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
                     {appid:'h4_connections',   options:{title:'Connections', url: 'page/springDiagram.php?db=[dbname]'}}  //H4 connections
                         ]}]
         }
     },
-    {id:'L06', name:'Digital Harlem', theme:'heurist', type:'cardinal', 
+    {id:'L06', name:'Digital Harlem', theme:'heurist', type:'cardinal',
         north:{size:140, resizable:false, overflow:'hidden',
             apps:[
-                {appid:'h4_static', hasheader:false, 
+                {appid:'h4_static', hasheader:false,
                     options:{url: 'apps/digital_harlem/dh_header.php?db=[dbname]'}
                     //css:{width:'100%',height:'100%'}},
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
@@ -155,17 +155,17 @@ var layouts = [
                 {appid:'h4_search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
                 {appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false,
-            tabs:[{dockable:false, dragable:false, resizable:false, 
+            tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
-                     {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping 
+                     {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping
                     ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                     ]
             }]
-        },  
+        },
         east:{size:300, minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
-                apps:[                                      
+                apps:[
                     {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
                     {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'apps/digital_harlem/dh_legend.php?db=[dbname]'}}
                 ]
@@ -173,19 +173,19 @@ var layouts = [
         },
         south:{size:40, resizable:false, overflow:'hidden',
             apps:[
-                {appid:'h4_static', hasheader:false, 
+                {appid:'h4_static', hasheader:false,
                     options:{url: 'apps/digital_harlem/dh_footer.html'}
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
         ]},
     },
-    
+
 /*    {id:'L02', name:'connections', theme:'smoothness',
     north:{size:40, resizable:false,
             apps:[
                 {appid:'h4_search', hasheader:false, css:{position:'absolute', top:44, left:180, height:40, right:200, border:'none', 'background':'none'}, options:{has_paginator:false} }   //search
-        ]},    
+        ]},
         center:{dropable:false, apps:[
-        {appid:'h4_connections', options:{title:'Connections'} }]}  //search result 
+        {appid:'h4_connections', options:{title:'Connections'} }]}  //search result
     }, */
     {id:'L03', name:'abandoned', theme:'basic',
         north:{size:88, resizable:false,
@@ -193,15 +193,15 @@ var layouts = [
                 {appid:'ha01', hasheader:false, css:{position:'absolute', top:0,left:0,height:44,width:'50%', border:'none', 'background':'none'} },    //about
                 {appid:'ha02', hasheader:false, css:{position:'absolute', top:0,right:0,height:44,width:'50%', border:'none', 'background':'none'} },   //profile
                 {appid:'h4_search', hasheader:false, css:{position:'absolute', top:44,left:0,height:40,width:'90%', border:'none', 'background':'none'}, options:{has_paginator:false} },   //search
-                {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none', 'background':'none'} }  //pagination               
+                {appid:'ha15', hasheader:false, css:{position:'absolute', top:44,right:0,height:40,width:'50%', border:'none', 'background':'none'} }  //pagination
         ]},
         west:{size:160, minsize:160, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        center:{minsize:300, dropable:true, apps:[{appid:'h3_resultList', dockable:true, dragable:false }]},  //search result 
+        center:{minsize:300, dropable:true, apps:[{appid:'h3_resultList', dockable:true, dragable:false }]},  //search result
         east:{size:'50%', minsize:300, dropable:true,
             tabs:[{dockable:true, dragable:true, resizable:true,
                 apps:[                                      //or viewRecord or renderRecordData
-                    {appid:'h3_recordListExt'},    
-                    {appid:'ha51'}     
+                    {appid:'h3_recordListExt'},
+                    {appid:'ha51'}
                 ]
             }]
         }

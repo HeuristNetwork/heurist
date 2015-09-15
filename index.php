@@ -101,7 +101,7 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="js/layout.js"></script>
         <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
 
-        <script type="text/javascript" src="apps/others/help_tips.js"></script>
+        <script type="text/javascript" src="apps/topmenu/help_tips.js"></script>
 
         <script type="text/javascript" src="migrated/common/js/temporalObjectLibrary.js"></script>
 
@@ -113,7 +113,7 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
         <script type="text/javascript" src="apps/search/search.js"></script>
-        <script type="text/javascript" src="apps/others/mainMenu.js"></script>
+        <script type="text/javascript" src="apps/topmenu/mainMenu.js"></script>
         <script type="text/javascript" src="apps/search/svs_edit.js"></script>
         <script type="text/javascript" src="apps/search/svs_list.js"></script>
         <script type="text/javascript" src="apps/viewers/resultList.js"></script>
@@ -125,7 +125,7 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="apps/profile/profile.js"></script>
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
-        <script type="text/javascript" src="apps/others/mainMenu.js"></script>
+        <script type="text/javascript" src="apps/topmenu/mainMenu.js"></script>
         script type="text/javascript" src="apps/search.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
         <script type="text/javascript" src="apps/profile_edit.js"></script>

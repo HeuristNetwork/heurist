@@ -55,7 +55,7 @@ $.widget( "heurist.mainMenu", {
         // bind click events
         this._on( this.div_logo, {
             click: function(){
-                
+
                     var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                     if(!top.HEURIST4.util.isempty(init_search)){
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };
@@ -97,15 +97,15 @@ $.widget( "heurist.mainMenu", {
 
         this.divMainMenuItems = $('<ul>')
                                 .addClass('horizontalmenu')
-                                .css({'float':'left', 'padding-right':'2em'}) 
+                                .css({'float':'left', 'padding-right':'2em'})
                                 .appendTo( this.divMainMenu );
-                                
+
         this.divProfileItems = $( "<ul>")
                         .css('float','right')
                         .addClass('horizontalmenu')
                         .appendTo( this.divMainMenu );
 
-                                
+
 
         this._initMenu('Profile', this.divProfileItems);
         this._initMenu('Database');
@@ -303,7 +303,7 @@ $.widget( "heurist.mainMenu", {
         if(name!='Database_lo'){
 
             this['menu_'+name] = $('<ul>')
-            .load('apps/others/mainMenu'+(name=='Help_lo'?'Help':name)+'.html?t='+(new Date().getTime()), function(){
+            .load('apps/topmenu/mainMenu'+(name=='Help_lo'?'Help':name)+'.html?t='+(new Date().getTime()), function(){
                 that['menu_'+name].addClass('menu-or-popup')
                 .css({'position':'absolute', 'padding':'5px'})
                 .appendTo( that.document.find('body') )
