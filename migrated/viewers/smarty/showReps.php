@@ -396,6 +396,14 @@ Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bol
 			$surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".HEURIST_DBNAME.
 						"&ver=".$gparams['ver']."&w=".$gparams['w']."&q=".$gparams['q'].
 						"&publish=1&debug=0&template=".$gparams['template'];
+                        
+            if(@$gparams['rules']){
+                $surl = $surl."&rules=".$gparams['rules'];
+            }
+            if(@$gparams['h4']){
+                $surl = $surl."&h4=".$gparams['h4'];
+            }
+                        
 
 ?><br /><br />
 	If you wish to publish the link to report that returns dynamic report output use the following code below. Copy to clipboard by hitting Ctrl-C or [Enter]

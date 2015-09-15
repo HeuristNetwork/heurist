@@ -225,7 +225,7 @@ $.widget( "heurist.recordListExt", {
             }*/
             
             
-            top.HEURIST.currentQuery_all  = query_string_main+'&h4=on'; //query_string_all;
+            top.HEURIST.currentQuery_all  = query_string_main+'&h4=1'; //query_string_all;
             top.HEURIST.currentQuery_sel  = query_string_sel;
             top.HEURIST.currentQuery_main = query_string_main;
             

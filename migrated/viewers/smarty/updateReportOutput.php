@@ -52,6 +52,7 @@ $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
 mysql_connection_select(DATABASE);
 
+//mode of publication  3- to html or js wrapper
 if(array_key_exists('publish',$_REQUEST)){
 	$publish = intval($_REQUEST['publish']);
 }else{
@@ -66,7 +67,7 @@ if($rps_ID==0){
 		doReport($row);
 	}
 
-}else{
+}else if(is_numeric($rps_ID)){
 	//load one
 	$res = mysql_query("select * from usrReportSchedule where rps_ID=".$rps_ID);
 	if(mysql_error()){
@@ -77,6 +78,8 @@ if($rps_ID==0){
 			doReport($row);
 		}
 	}
+}else{
+    echo "Wrong report ID parameter: ".$rps_ID;
 }
 
 exit();
@@ -138,10 +141,11 @@ function doReport($row){
 
 	$hquery = $row['rps_HQuery'];
 	if(strpos($hquery, "&q=")>0){
-		parse_str($hquery, $params);
+		parse_str($hquery, $params); //parse query and put to parameters
 	}else{
 		$params = array("q"=>$hquery);
 	}
+    
 	if(!array_key_exists("ver", $params)){
 		$params["ver"] = "1";
 	}
