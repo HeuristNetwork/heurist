@@ -3,20 +3,15 @@
 * @copyright   (C) 2005-2014 University of Sydney
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
+* @version     4
 
 ---------------------------------------------------------------------
 
 
 Directory:	/saved_searches
 
-Overview:	Saved searches record a Heurist query for either a single user
-		or a workgroup, and are displayed in a tree on the left of the
-		main search page.
+Overview:	Actionbson saved searches - legacy from H3
 
-Notes:		Saved searches can be used to publish subsets of the database through
-		the Publish function, avoiding the needc to specify the query in the
-		publication URL so that it cannot be modified externally to access
-		unintended information
+Notes:		manageCollection.php is the only function from this directory stull used by h4
 
-Updated: 	28 March 2010
+Updated: 	16 Sep 2015

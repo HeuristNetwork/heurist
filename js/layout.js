@@ -1,9 +1,9 @@
 /**
 *  appInitAll - main function which initialises everything
-* 
+*
 *  @see ext/layout
 *  @see layout_defaults.js - configuration file
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2014 University of Sydney
@@ -36,10 +36,10 @@ function appGetWidgetByName(widgetname){
 
 /**
 * Main funtion that inits all stuff
-*  
+*
 * layoutid to be loaded (see layouts in layout_default.js)
-* containerid - container div id 
-* 
+* containerid - container div id
+*
 * this function
 * 1) creates panes (see ext/layout)
 * 2) inits layout container
@@ -47,7 +47,7 @@ function appGetWidgetByName(widgetname){
 */
 function appInitAll(layoutid, containerid){
 
-//--------------------------------------------    
+//--------------------------------------------
 
 var Hul = top.HEURIST4.util;
 
@@ -58,7 +58,7 @@ var layout, $container;
 
 /**
 * Finds layout by id
-* 
+*
 * @param id
 */
 function layoutGetById(id){
@@ -99,10 +99,10 @@ function initLayoutCardinal(){
         togglerContent_closed:  '<div class="ui-icon"></div>',
         tips: {
             Close:                "Click to minimise panel",
-            Resize:               "Drag to resize panel"    
+            Resize:               "Drag to resize panel"
         },
-        onresize_end: function(){ 
-            $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event  
+        onresize_end: function(){
+            $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
         }
     };
 
@@ -155,7 +155,7 @@ function initLayoutCardinal(){
 
     var bg_color = $('.ui-widget-content:first').css('background-color');
     $('body').css('background-color', bg_color);
-    
+
     layoutInitPane('north', bg_color);
     layoutInitPane('west', bg_color);
     layoutInitPane('east', bg_color);
@@ -163,8 +163,9 @@ function initLayoutCardinal(){
     layoutInitPane('center', bg_color);
 
     initDragDropListener();
- /* to remove   
-    // listener for drag-n-droop    
+
+ /* to remove
+    // listener for drag-n-droop
     // move tab to layout and create new tabcontrol
     $( ".pane_dropable" ).droppable({
         accept: function(draggable){ //draggable = li
@@ -208,18 +209,18 @@ function initLayoutCardinal(){
 
         }
     });
-*/    
+*/
     //temp appAdjustContainer();
 }
 
 /**
 * put your comment there...
-* 
+*
 * @param layout
 * @param $container
 */
 function initLayoutFree(){
-    
+
     //pane - the base container for widgets/applications
 
     //1. loop trough all layout panes  - create divs or use existing ones
@@ -230,13 +231,13 @@ function initLayoutFree(){
         if(layout[pos]){
 
             var lpane = layout[pos];
-            
+
             //this div may already exists
             if($('#'+pos).length<1){
                 $pane = $('<div>',{id:pos})
                         .addClass('ui-layout-'+pos)
                         .appendTo($container);
-                //apply css 
+                //apply css
                 if(lpane.css){
                     $pane.css(lpane.css);
                 }else{
@@ -248,36 +249,36 @@ function initLayoutFree(){
 
     var bg_color = $('.ui-widget-content:first').css('background-color');
     $('body').css('background-color', bg_color);
-    
+
     for (i=0; i<panes.length; i++){
         if(reserved.indexOf(panes[i])<0){
              __layoutAddPane(panes[i]);
              layoutInitPane(panes[i], bg_color);
-        }  
+        }
     }
-    
+
     initDragDropListener();
 }
 
 /**
 * Init Gridster layout
-* 
+*
 * @param layout
 * @param $container
 */
 function initLayoutGridster(){
-    
-        if(!$.isFunction($('body').gridster)){        
+
+        if(!$.isFunction($('body').gridster)){
             $.getScript(top.HAPI4.basePath+'ext/gridster/jquery.gridster.js', initLayoutGridster );
             return;
         }
-    
+
     //pane - the base container for widgets/applications
 
     //1. loop trough all layout panes  - create divs or use existing ones
     var panes = Object.keys(layout);
     var i, reserved = ['id', 'name', 'theme', 'type', 'options'];
-    
+
     if(!layout.options){
         layout.options = {};
     }
@@ -295,9 +296,9 @@ function initLayoutGridster(){
         layout.options.resize = {enabled: true};
     }
 
-//dat-row="1" data-col="3" data-sizex="1" data-sizey="2" data-max-sizex="6" data-max-sizey="2"    
+//dat-row="1" data-col="3" data-sizex="1" data-sizey="2" data-max-sizex="6" data-max-sizey="2"
 
-    //add UL to main 
+    //add UL to main
     $container.addClass('gridster');
     var $ul = $('<ul>').css({'background-color': '#EFEFEF', 'list-style-type': 'none', 'position':'absolute'}).appendTo($container);
     var gridster = $ul.gridster(layout.options).data('gridster');
@@ -307,7 +308,7 @@ function initLayoutGridster(){
         if(layout[pos]){
 
             var lpane = layout[pos];
-            
+
             var col,row;
             if(lpane.col>0){
                 col = lpane.col;
@@ -321,9 +322,9 @@ function initLayoutGridster(){
                 row = irow;
                 irow++;
             }
-        
-            gridster.add_widget('<li><div class="ui-layout-'+pos+'"></div></li>', 
-                                          lpane.size_x>0?lpane.size_x:1, 
+
+            gridster.add_widget('<li><div class="ui-layout-'+pos+'"></div></li>',
+                                          lpane.size_x>0?lpane.size_x:1,
                                           lpane.size_y>0?lpane.size_y:1,
                                           col, row);
             /* @todo
@@ -335,28 +336,28 @@ function initLayoutGridster(){
 
     var bg_color = $('.ui-widget-content:first').css('background-color');
     $('body').css('background-color', bg_color);
-    
+
     for (i=0; i<panes.length; i++){
         if(reserved.indexOf(panes[i])<0){
              __layoutAddPane(panes[i]);
              layoutInitPane( panes[i], bg_color );
-        }  
+        }
     }
-    
+
     $('li.gs-w').css({'background-color': '#DDD'});
-    
+
     initDragDropListener();
 }
 
 
 /**
-* Adds application/widgets to specified pane 
-* 
+* Adds application/widgets to specified pane
+*
 * @param pos
 * @param bg_color
 */
 function layoutInitPane(pos, bg_color){
-    
+
         if(layout[pos]){
 
             var lpane = layout[pos];
@@ -402,7 +403,7 @@ function layoutInitPane(pos, bg_color){
 } //end layoutInitPane
 
 function initDragDropListener(){
-    // listener for drag-n-droop    
+    // listener for drag-n-droop
     // move tab to layout and create new tabcontrol
     $( ".pane_dropable" ).droppable({
         accept: function(draggable){ //draggable = li
@@ -492,7 +493,7 @@ function appCreatePanel($pane_content, app, needcontent){
             $header.append(top.HR(app.name || application.name))
             .addClass('ui-widget-header')
             .addClass('ui-corner-all')
-            .addClass('header'+app.appid+'_'+app_counter) 
+            .addClass('header'+app.appid+'_'+app_counter)
             .appendTo($d);
         }
 
@@ -520,9 +521,9 @@ function appCreatePanel($pane_content, app, needcontent){
 
 /**
 * Createas and add div with application content - widget or url
-* 
+*
 * $container - pane in layout
-* app - entry from widgets array 
+* app - entry from widgets array
 * options - application options from layouts array - parameters to init application
 */
 function appAddContent($app_container, app, options){
@@ -539,7 +540,7 @@ function appAddContent($app_container, app, options){
 
         app.widget = $content;
 
-        //this is debug mode to init widgets 
+        //this is debug mode to init widgets
         // app javascript are loaded in index.php header
         if(app.widgetname=='resultList'){
             //DEBUG
@@ -552,7 +553,7 @@ function appAddContent($app_container, app, options){
             widget = $content.recordListExt( options );
         }else if(app.widgetname=='app_timemap'){
             //DEBUG
-            widget = $content.app_timemap( options ); 
+            widget = $content.app_timemap( options );
         }else if(app.widgetname=='svs_manager'){
                 //DEBUG
                 widget = $content.svs_manager( options ); //options
@@ -562,20 +563,20 @@ function appAddContent($app_container, app, options){
         }else if(app.widgetname=='search'){
 
                widget = $content.search( options );
-               
+
         }else if(app.widgetname=='dh_search'){
 
                widget = $content.dh_search( options );
-               
+
         }else if(app.widgetname=='dh_maps'){
 
-               widget = $content.dh_maps( options ); 
-        }else    
+               widget = $content.dh_maps( options );
+        }else
                 {
-                    //this is normal way of widget initialization   
+                    //this is normal way of widget initialization
                     // script is loaded dynamically and init function is widget name
-                    
-                    
+
+
                     $.getScript(app.script, function() {  //+'?t='+(new Date().getTime())
                         if($.isFunction($content[app.widgetname])){
                             $content[app.widgetname]( options );   //call function
@@ -584,7 +585,7 @@ function appAddContent($app_container, app, options){
                         }
                     });
                 }
-                
+
 
     }else if (app.url2) {
         $content.load(app.url2);
@@ -595,7 +596,7 @@ function appAddContent($app_container, app, options){
 
 /**
 * Creates new tabcontrol - it may contains several applications
-* 
+*
 * $content - pane in layout
 * apps - list of application for tab (from layouts array)
 * tab - entry from layout - need for ui parameters
@@ -809,10 +810,10 @@ function isMouseoverTabControl(e){
 //**********************************************************
 
     var layout = layoutGetById(layoutid);
-    
+
     if(layout==null){
         top.HEURIST4.util.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
-        if(layoutid!='L01') layout = layoutGetById('L01');
+        if(layoutid!='H4Default') layout = layoutGetById('H4Default');
         if(layout==null){
             return;
         }
@@ -820,22 +821,22 @@ function isMouseoverTabControl(e){
 
     var $container = $(containerid);
     $container.empty();
-    
+
     if(top.HEURIST4.util.isempty(layout.type) || layout.type=='cardinal'){
-        
+
         initLayoutCardinal(layout, $container);
-        
+
         top.HEURIST4.mainlayout = $container;
-        
+
     }else if(layout.type=='gridster'){
 
         initLayoutGridster(layout, $container);
-        
+
     }else { //}if(layout.type=='free'){
-        
+
         initLayoutFree(layout, $container);
-        
+
     }
-    
+
 
 }

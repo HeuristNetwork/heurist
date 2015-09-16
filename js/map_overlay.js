@@ -20,9 +20,9 @@ function loadMapDocuments(_map, _startup_mapdocument) {
     // Legend collapse listener
     $("#collapse").click(function(e) {
         $(this).text() == "-" ? $(this).text("+") : $(this).text("-");  // Update text to + or -
-        $("#legend .content").toggle(400);   
+        $("#legend .content").toggle(400);
     });
-    
+
     // Load Map Documents & Map Layers
     var api = top.HAPI4.basePath + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
 //console.log("API call URL: " + api);
@@ -51,23 +51,23 @@ function loadMapDocuments(_map, _startup_mapdocument) {
 */
 function fillMapDocumentsDropDown() {
     // Show options in dropdown
-    
+
     var ele = $("#map-doc-select");
-    
+
     ele.empty();
     ele.append("<option value='-1'>"+(data.length>0?'select...':'none available')+"</option>");
-    
+
     for(var i = 0; i < data.length; i++) {
         ele.append("<option value='"+data[i].id+"'>"+data[i].title+"</option>"); //["+data[i].id+"]
-    } 
-    
+    }
+
     // select listener - load map documents
     ele.change(function(e) {
         // Clean old data
         removeOverlays();
-        _emptyLegend();  
-        
-        // Show overlays for the selected option 
+        _emptyLegend();
+
+        // Show overlays for the selected option
         var index = -1;
         var map_document_id = Number($(this).val()); //prop("value");
         for(var i=0;i<data.length;i++){
@@ -76,20 +76,20 @@ function fillMapDocumentsDropDown() {
                 break;
             }
         }
-        
-        
+
+
         if(index >= 0 && index < data.length) {
             // Show overlay for selected Map Document
-            loadMapDocument(data[index]);  
+            loadMapDocument(data[index]);
             $("#btnMapEdit").button( "enable" );
             $("#btnMapEdit").attr('title',"Edit current map "+data[index].title+" - add or remove map layers, change settings");
         }else{
             $("#btnMapEdit").button( "disable" );
             $("#btnMapEdit").attr('title','');
         }
-        
+
         _initLegend();
-    });   
+    });
 }
 
 /**
@@ -99,13 +99,13 @@ function removeOverlays() {
     for(var property in overlays) {
         if (overlays.hasOwnProperty(property) && overlays[property] !== undefined) {
             try {
-                overlays[property].setVisibility(false);   
+                overlays[property].setVisibility(false);
                 if(overlays[property]['removeOverlay']){
                     overlays[property].removeOverlay();
                 }
             } catch(err) {
                 console.log(err);
-            }  
+            }
             delete overlays[property];
         }
     }
@@ -117,7 +117,7 @@ function removeOverlays() {
 */
 function _emptyLegend() {
     $("#legend .content").empty();
-    
+
     //add list of layers that are not in map document
     for(var layerid in overlays_not_in_doc) {
         if (overlays_not_in_doc.hasOwnProperty(layerid) && overlays_not_in_doc[layerid] !== undefined) {
@@ -127,9 +127,9 @@ function _emptyLegend() {
 }
 
 function _addLegendEntryForLayer(layerid, on_top){
-    
+
     var overlay = overlays_not_in_doc[layerid];
-    
+
     var legenditem = "<div style='display:block;padding:2px;' id='"
             +layerid+"'><input type='checkbox' style='margin-right:5px' value='"
             +layerid+"' "+
@@ -137,14 +137,14 @@ function _addLegendEntryForLayer(layerid, on_top){
             +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+
             '" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
     +overlay.title+"</div>";
-    
+
     if(on_top){
         $("#legend .content").prepend(legenditem);
     }else{
         $("#legend .content").append(legenditem);
     };
-    
-    
+
+
 }
 
 
@@ -153,12 +153,12 @@ function _showHideLayer(event){
                 // Hide or display the layer
                 var layerid = $(this).prop("value");
                 var checked = $(this).prop("checked");
-   
+
                 // Update overlay
                 var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
                 if(overlay){
                     overlay.setVisibility(checked);
-                    overlay.visible = checked;                          
+                    overlay.visible = checked;
                 }
 }
 
@@ -187,21 +187,21 @@ function _loadMapDocumentById(recId) {
 * @param doc A map document
 */
 function loadMapDocument(doc) {
-    
+
     //show info popup
     if(!top.HEURIST4.util.isempty( doc['description']) ){
-        top.HEURIST4.util.showMsgDlg(doc['description'], null,doc['title'], null, true);    
+        top.HEURIST4.util.showMsgDlg(doc['description'], null,doc['title'], null, true);
     }
-    
+
     // Bounds
     var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
     var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
-    var bounds = new google.maps.LatLngBounds(swBound, neBound); 
+    var bounds = new google.maps.LatLngBounds(swBound, neBound);
 
     // Map document overlay
     addMapDocumentOverlay(bounds, doc);
     map.fitBounds(bounds);
-    
+
     // Map document layers
     var index = 0;
     if(doc.layers.length > 0) {
@@ -210,7 +210,7 @@ function loadMapDocument(doc) {
             index++;
         }
     }
-    
+
     // Top layer - artem: JJ made it wrong
     addLayerOverlay(bounds, doc.toplayer, index);
 }
@@ -232,21 +232,21 @@ function addLayerOverlay(bounds, layer, index) {
     console.log("addLayerOverlay");
     console.log(layer);
 
-    // Determine way of displaying   
+    // Determine way of displaying
     if(layer !== undefined && layer.dataSource !== undefined) {
         var source = layer.dataSource;
         console.log(source);
-        
+
         // Append to legend   ["+layer.id+"]
         $("#legend .content").append("<label style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked> "
           +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" align="top" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + source.rectypeID+'.png&quot;);">&nbsp;'
           +layer.title+"</label>");
-        
+
         /** MAP IMAGE FILE (TILED) */
         if(source.rectypeID == map_image_file_tiled) {
             console.log("MAP IMAGE FILE (tiled)");
             addTiledMapImageLayer(source, bounds, index);
-            
+
         /** MAP IMAGE FILE (NON-TILED) */
         }else if(source.rectypeID == map_image_file_untiled) {
             // Map image file (non-tiled)
@@ -257,27 +257,27 @@ function addLayerOverlay(bounds, layer, index) {
         }else if(source.rectypeID == kml_file) {
             console.log("KML FILE or SNIPPET");
             addKMLLayer(source, index);
-            
+
         /** SHAPE FILE */
         }else if(source.rectypeID == shape_file) {
             console.log("SHAPE FILE");
             addShapeLayer(source, index);
-  
+
         /* MAPPABLE QUERY */
         }else if(source.rectypeID == mappable_query) {
             console.log("MAPPABLE QUERY");
             addQueryLayer(source, index);
         }
-    }   
+    }
 }
 
 /**
 * Adds a tiled map image layer to the map
 * @param source Source object
-*/                                              
-function addTiledMapImageLayer(source, bounds, index) {  
-    var overlay = {};   
-    
+*/
+function addTiledMapImageLayer(source, bounds, index) {
+    var overlay = {};
+
     // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
      if(source.sourceURL !== undefined) {
         // Tile type
@@ -285,7 +285,7 @@ function addTiledMapImageLayer(source, bounds, index) {
             getTileUrl: function(coord, zoom) {
                 //console.log(coord);
                 //console.log(zoom);
-                
+
                 var bound = Math.pow(2, zoom);
                 var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) + ".png";
                 console.log("URL: " + url);
@@ -297,28 +297,28 @@ function addTiledMapImageLayer(source, bounds, index) {
             radius: 1738000,
             name: "tile"
         });
-        
+
         // Set map options
-        map.overlayMapTypes.insertAt(index, tileType); 
+        map.overlayMapTypes.insertAt(index, tileType);
 
         // Set visibility
         overlay.setVisibility = function(checked) {
             console.log("Setting visibility to: " + checked);
             this.visible = checked;
             if(checked) {
-                map.overlayMapTypes.setAt(index, tileType);    
+                map.overlayMapTypes.setAt(index, tileType);
             }else{
-                map.overlayMapTypes.setAt(index, null);   
+                map.overlayMapTypes.setAt(index, null);
             }
         };
-        
+
         overlay.removeOverlay = function(){
             map.overlayMapTypes.setAt(index, null);
         };
-          
+
      }
 
-    overlays[index] = overlay; 
+    overlays[index] = overlay;
 }
 
 
@@ -329,7 +329,7 @@ function addTiledMapImageLayer(source, bounds, index) {
 */
 function addUntiledMapImageLayer(source, bounds, index) {
     var overlay = {};
-    
+
     // Image
     if(source.sourceURL !== undefined) {
         overlay = new HeuristOverlay(bounds, source.sourceURL, map);
@@ -338,15 +338,15 @@ function addUntiledMapImageLayer(source, bounds, index) {
         overlay.setVisibility = function(checked) {
             this.visible = checked;
             if(checked) {
-                overlay.setMap(map);   
+                overlay.setMap(map);
             }else{
                 overlay.setMap(null);
             }
-        }    
+        }
     }
 
-    overlays[index] = overlay; 
-    
+    overlays[index] = overlay;
+
 }
 
 
@@ -357,47 +357,47 @@ function addUntiledMapImageLayer(source, bounds, index) {
 */
 function addKMLLayer(source, index) {
     var kmlLayer = {};
-    
+
     // KML file
     if(source.files !== undefined) {
         var fileURL = source.files[0];
         console.log("KML file: " + fileURL);
-        
+
         // Display on Google Maps
         kmlLayer = new google.maps.KmlLayer({
             url: fileURL,
             suppressInfoWindows: true,
             preserveViewport: false,
             map: map
-        });  
-    } 
-    
+        });
+    }
+
     // KML snippet
     if(source.kmlSnippet !== undefined) {
         /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
         console.log("KML snippet: " + source.kmlSnippet);
-       
+
         // Display on Google Maps
         kmlLayer = new google.maps.KmlLayer(source.kmlSnippet, {
             suppressInfoWindows: true,
             preserveViewport: false,
             map: map
-        }); 
+        });
     }
-    
-    
+
+
     // Set visiblity method
     kmlLayer.setVisibility = function(checked) {
         this.visible = checked;
         if(checked) {
-            kmlLayer.setMap(map); 
+            kmlLayer.setMap(map);
         }else{
             kmlLayer.setMap(null);
         }
     }
-    
-    overlays[index] = kmlLayer;   
-        
+
+    overlays[index] = kmlLayer;
+
 }
 
 
@@ -411,14 +411,14 @@ function addShapeLayer(source, index) {
     if(source.zipFile !== undefined) {
         // Zip file
         console.log("Zip file: " + source.zipFile);
-        
+
         var layer = {};
-        overlays[index] = layer; 
-        
-        
+        overlays[index] = layer;
+
+
     }else{
         console.log("Reading DATA:");
-        
+
         // Individual components
         if(source.shpFile !== undefined && source.dbfFile !== undefined) {
             // .shp & .dbf
@@ -427,10 +427,10 @@ function addShapeLayer(source, index) {
                 dbf: source.dbfFile
             }, function (data) {
                 addGeoJsonToMap(data, index);
-            }); 
+            });
         }
-        
-        
+
+
     }
 }
 
@@ -442,20 +442,20 @@ function addGeoJsonToMap(data, index) {
     // Add GeoJson to map
     console.log(data);
     var features = map.data.addGeoJson(data.geojson);
-    
+
     // Set visiblity method
     data.setVisibility = function(checked) {
         this.visible = checked;
         if(checked) {
-            features = map.data.addGeoJson(data.geojson);     
+            features = map.data.addGeoJson(data.geojson);
         }else{
             for (var i = 0; i < features.length; i++) {
                 map.data.remove(features[i]);
             }
         }
     }
-    
-    overlays[index] = data;     
+
+    overlays[index] = data;
 }
 
 
@@ -469,62 +469,62 @@ function addQueryLayer(source, index) {
      // Query
     if(source.query !== undefined) {
         console.log("Query: " + source.query);
-        
+
         var query = null;
         try{
             var query = top.HEURIST4.util.isObject(source.query) ?source.query :JSON.parse(source.query);
             if(!(query && query['q'])){
                 query = null;
             }else{
-                query = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};    
+                query = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};
             }
         }catch(err){
         }
         if(query==null){ //this is simple (non JSON) queru without rules
             query = {q: source.query, w: "all"};
         }
-        query['rules_onserver'] = 1; 
+        query['rules_onserver'] = 1;
         query['getrelrecs'] = 1;  //return all related records including relationship records
-        query['f'] = "map"; 
+        query['f'] = "map";
         query['l'] = 3000;
-        
-        
+
+
         // Retrieve records for this query
         top.HAPI4.RecordMgr.search(query,
             function(response){
                 //console.log("QUERY RESPONSE:");
                 //console.log(response);
-                
+
                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     source.recordset = hRecordSet(response.data);
                     addRecordsetLayer(source, index);
-                    
+
                 }else{
                     alert(response.message);
                 }
             }
-        ); 
-        
-        
+        );
+
+
     }
 }
 
 /**
-* 
+*
 */
 function addRecordsetLayer(source, index) {
 
             // Show info on map
             var mapdata = null;
-            
+
             var recset = source.recordset;
-            
+
             //var datasetname = (source.id=='main') ?source.id:"dyn"+source.id;
-            
-            
+
+
             if(recset!=null){
-                if(top.HAPI4.sysinfo['layout']=='L06'){
+                if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){
                     //preprocess for Digital Harlem - @todo more elegant way
                     recset.preprocessForDigitalHarlem();
                     mapdata = recset.toTimemap(source.id); //show only address records @todo  address RT is hardcoded!!!!
@@ -533,85 +533,85 @@ function addRecordsetLayer(source, index) {
                     mapdata = recset.toTimemap(source.id);
                 }
             }
-            
+
             //mapping.load(mapdata);
             if (mapping.addDataset(mapdata)){
 
                var overlay = {
                 id: source.id,
-                title: source['title'], 
-                visible:true,               
+                title: source['title'],
+                visible:true,
                 setVisibility: function(checked) {
                     this.visible = checked;
                     mapping.showDataset(mapdata[0].id, checked);
-                },                          
+                },
                 removeOverlay: function(){
                     mapping.deleteDataset(mapdata[0].id);
                 }
                };
                if(index>=0){  //this layer belong to map document
                     overlays[index] = overlay;
-                    
+
                }else{ // this layer is explicitely (by user) added
                     //index = 'A'+Math.floor((Math.random() * 10000) + 1);
                     //overlays_not_in_doc[index] = overlay;
-                    
-                    var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');    
+
+                    var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');
                     if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
-                    
+
                     var sMsg = '';
                     if(mapdata[0].mapenabled > MAXITEMS){
-                           sMsg = mapdata[0].mapenabled +' records to display on this map';    
+                           sMsg = mapdata[0].mapenabled +' records to display on this map';
                     }
                     if(mapdata[0].timeenabled > MAXITEMS){
-                           sMsg = (sMsg?' and ':'') + mapdata[0].timeenabled +' records to display on timeline';    
+                           sMsg = (sMsg?' and ':'') + mapdata[0].timeenabled +' records to display on timeline';
                     }
                     if(sMsg!=''){
 
     sMsg = '<p style="padding-bottom:1em;">There are '+ sMsg +', which exceeds the limit of '+MAXITEMS+' records set in your profile.</p>'
     + '<p style="padding-bottom:1em;">Google Maps and VIS Timeline do not work well with thousands of objects, and may hang your browser or cause it to report the page as non-responsive. Only the first '+MAXITEMS+' records will therefore be displayed.</p>'
     + '<p>We recommend refining your filters to retrieve fewer records before mapping. You may also change the record limits for map and timeline in Profile &gt; My Preferences.</p>';
-                            
+
 
                             overlay.title = overlay.title + ' <span style="font-weight:bold;color:red">(Partial)</span>'
                     }
-                    
-                    
-                    
+
+
+
                     /*if(!overlays_not_in_doc[source.id])
                     {
                         overlays_not_in_doc[source.id] = overlay;
                         $("#legend .content").find('#'+source.id).remove();
                     }*/
-                    
+
                     overlays_not_in_doc[source.id] = overlay;
                     var legenditem = $("#legend .content").find('#'+source.id);
                     if(legenditem.length>0) legenditem.remove();
-                    
+
                     _addLegendEntryForLayer(source.id, true);
                     _initLegend();
 
                     if(sMsg!=''){
                         setTimeout(function(){top.HEURIST4.util.showMsgErr(sMsg);}, 1000);
-                         
+
                     }
-                   
+
                }
             }else{  //dataset is empty or failed to add - remove from legend
                if(index<0 && overlays_not_in_doc[source.id]){
-                   
+
                     var ovr = overlays_not_in_doc[source.id];
-                   
+
                     try {
                         $("#legend .content").find('#'+source.id).remove();
-                        
-                        ovr.setVisibility(false);   
+
+                        ovr.setVisibility(false);
                         if(ovr['removeOverlay']){
                             ovr.removeOverlay();
                         }
                     } catch(err) {
                         console.log(err);
-                    }  
+                    }
                     delete overlays_not_in_doc[source.id];
                     _initLegend();
                }
@@ -640,7 +640,7 @@ function HeuristOverlay(bounds, image, map) {
     this.image_ = image;
     this.map_ = map;
     this.div_ = null;
-    
+
     // Explicitly call setMap on this overlay.
     this.setMap(map);
 }
@@ -655,7 +655,7 @@ HeuristOverlay.prototype.onAdd = function() {
     div.style.borderStyle = 'none';
     div.style.borderWidth = '0px';
     div.style.position = 'absolute';
-    
+
     // Title
     var span = document.createElement('span');
     span.innerHTML = "Title";
@@ -668,9 +668,9 @@ HeuristOverlay.prototype.onAdd = function() {
     img.style.height = '100%';
     img.style.position = 'absolute';
     div.appendChild(img);
-    
+
     this.div_ = div;
-    
+
     // Add the element to the "overlayLayer" pane.
     var panes = this.getPanes();
     panes.overlayLayer.appendChild(div);

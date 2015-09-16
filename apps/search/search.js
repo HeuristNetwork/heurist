@@ -83,11 +83,11 @@ $.widget( "heurist.search", {
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
-        
+
         var sz_search = '500px',
             sz_input = '350px',
             sz_search_padding = '0';
-        
+
 
         var div_left_visible = (!this.options.isloginforced || this.options.btn_visible_dbstructure);
 
@@ -173,19 +173,19 @@ $.widget( "heurist.search", {
             }})
             .click( function(){ that._addNewRecord(); });
 
-        } // add record button       
-        
-        
+        } // add record button
+
+
         this.div_search_header = $('<div>')
         .addClass('div-table-cell')
         //.css('padding-top','0.4em')
         .appendTo( this.div_search );
-        
+
         $( "<label>" ).text(top.HR("Filter criteria"))
         .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
 
-        
+
         /*
         $( "<button>", {
                 text: top.HR("Show syntax and examples of the Heurist query language")
@@ -196,31 +196,31 @@ $.widget( "heurist.search", {
                 primary: 'icon-info-sign'
             }, text:false})
             .css({'margin-right':'0.2em'}) //, 'background-position':'240px 224px !important'})
-            .click( function(){ 
+            .click( function(){
                 window.open(top.HAPI4.basePathOld+'context_help/advanced_search.html','_blank');
-            }); 
-        */    
-            
+            });
+        */
+
         var link = $('<a>',{href:'#'})
             .html('<img src="'+top.HAPI4.basePath+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
             .css('padding-right','1em')
             .appendTo(this.div_search_header);
-            this._on( link, {  click: function(){ 
+            this._on( link, {  click: function(){
                 window.open(top.HAPI4.basePathOld+'context_help/advanced_search.html','_blank');
             } });
 
 
         this.div_search_input = $('<div>')
             .addClass('div-table-cell')
-            .appendTo( this.div_search );            
-            
-        this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )                  
-        .css({'margin-right':'0.2em', 'max-width':sz_input, 'width':sz_input, 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'}) 
+            .appendTo( this.div_search );
+
+        this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )
+        .css({'margin-right':'0.2em', 'max-width':sz_input, 'width':sz_input, 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
-        
-        var menu_h = top.HEURIST4.util.em(1); 
-        
+
+        var menu_h = top.HEURIST4.util.em(1);
+
 
         this.input_search.data('x', this.input_search.outerWidth());
         this.input_search.data('y', this.input_search.outerHeight());
@@ -360,7 +360,7 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method 
+                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method
                 }
             }});
 
@@ -370,7 +370,7 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method 
+                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                 }
             }});
 
@@ -384,7 +384,7 @@ $.widget( "heurist.search", {
 
         { // Quick search assistant = dropdown search builder
 
-            
+
             /*
             var btn_assistant = $( "<button>", {
                 text: top.HR("Build a Heurist filter using a form-driven approach (simple and advanced options)")
@@ -395,8 +395,8 @@ $.widget( "heurist.search", {
                 primary: 'icon-magic'
             }, text:false})
             .css('margin-right','0.2em');
-            //.click( that.showSearchAssistant );              
-            
+            //.click( that.showSearchAssistant );
+
             this._on( btn_assistant, {click: this.showSearchAssistant});
 
             $( "<button>", {
@@ -408,19 +408,19 @@ $.widget( "heurist.search", {
                 primary: 'icon-save'
             }, text:false})
             .css('margin-right','0.2em')
-            .click( function(){ 
+            .click( function(){
                 var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                 if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method 
-                }                
+                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                }
             });     */
-            
+
                 this.div_buttons = $('<div>')
                     .addClass('div-table-cell logged-in-only')
                     //.css({'padding-top':'0.4em'})
                     .insertBefore( this.div_search_as_guest );
-                
-                
+
+
                 var link = $('<a>',{href:'#'})
                 .html('<img src="'+top.HAPI4.basePath+'assets/magicwand.png" width="20" title="'+
                         top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
@@ -433,13 +433,13 @@ $.widget( "heurist.search", {
                         top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
                 .css('padding-right','1em')
                 .appendTo( this.div_buttons );
-                this._on( link, {  click: function(){ 
+                this._on( link, {  click: function(){
                     var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
                     if(app && app.widget){
-                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method 
-                    }                
+                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                    }
                 } });
-                        
+
 
             //show quick search assistant
             //this._on( this.btn_search_assistant, {  click: this.showSearchAssistant });
@@ -659,7 +659,7 @@ $.widget( "heurist.search", {
             top.HEURIST4.util.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
         }
     },
-    
+
     _showAdvancedAssistant: function(){
                 //call H3 search builder
                 var q = "",
@@ -718,7 +718,7 @@ $.widget( "heurist.search", {
 
                  top.HAPI4.currentRecordset = null;
                  top.HAPI4.currentRecordsetByLevels = null;
-                 
+
                  if(data.source!=that.element.attr('id') ){   //search from outside
 
                     if($.isArray(data.q)){
@@ -780,11 +780,11 @@ $.widget( "heurist.search", {
             }
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //get new chunk of data from server
-            
+
                  that.div_progress.css('display','none');
                  that.div_search.css('display','inline-block');
 
-            
+
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES){
 
 
@@ -880,8 +880,8 @@ $.widget( "heurist.search", {
                 qsearch = this.query_request.q + ' AND ' + qsearch;
             }
 
-            var request = { q: qsearch, 
-                            w: this.options.search_domain, 
+            var request = { q: qsearch,
+                            w: this.options.search_domain,
                             f: this.options.searchdetails,
                             source:this.element.attr('id') };
 
@@ -963,9 +963,9 @@ $.widget( "heurist.search", {
                     click: function(event){
                         $dlg.hide( "blind", {}, 500 );
                     }
-                });               
+                });
 
-                
+
             var dv = $dlg.find('#btns')
             dv.css({'display':'block !important'});
 
@@ -978,8 +978,8 @@ $.widget( "heurist.search", {
                         $dlg.hide( "blind", {}, 500 );
                         that._showAdvancedAssistant();
                     } });
-                
-                
+
+
             var search_quick_go = $( "<button>", {
                 text: top.HR("Go")
             })
@@ -988,14 +988,14 @@ $.widget( "heurist.search", {
             //.zIndex(9999)
             //.css({'position':'absolute', 'right':4, top:4, width:18, height:18})
             .css('float', 'right')
-            .button();        
+            .button();
             that._on( search_quick_go, {
                     click: function(event){
                         $dlg.hide( "blind", {}, 500 );
                         that._doSearch();
                     }
                 });
-            
+
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                 $(this).html(top.HR($(this).html()));
@@ -1230,9 +1230,9 @@ $.widget( "heurist.search", {
                      this.query_request.increment = true; //it shows that this is not initial search request
                      this.query_request.o = 0;
                      this.query_request.source = this.element.attr('id');
-                     
-                     this.query_request.getrelrecs = (top.HAPI4.sysinfo['layout']=='L06')?1:0; //@todo more elegant way: include request for relationship records into rule
-                     
+
+                     this.query_request.getrelrecs = (top.HAPI4.sysinfo['layout']=='DigitalHarlem')?1:0; //@todo more elegant way: include request for relationship records into rule
+
                      top.HAPI4.RecordMgr.search(this.query_request, $(this.document)); //search rules
                      return true;
 

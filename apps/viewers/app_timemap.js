@@ -1,5 +1,6 @@
 /**
-* Time Map Widget - load map into iframe
+* app_timemap.js - load map + timeline into an iframe in the interface.
+* This widget acts as a wrapper for /page/mapping.php
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -41,9 +42,9 @@ $.widget( "heurist.app_timemap", {
         //???? this.element.hide();
 
         this.framecontent = $('<div>').addClass('frame_container')
-                            //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-                            //     'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
-                            .appendTo( this.element );
+        //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
+        //     'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})
+        .appendTo( this.element );
 
         if($(".header"+that.element.attr('id')).length===0){
             this.framecontent.css('top',0);
@@ -51,19 +52,19 @@ $.widget( "heurist.app_timemap", {
 
 
         this.mapframe = $( "<iframe>" )
-                        .attr('id', 'map-frame')
-                        //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
-                        .appendTo( this.framecontent );
+        .attr('id', 'map-frame')
+        //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
+        .appendTo( this.framecontent );
 
 
-        this._events = top.HAPI4.Event.LOGOUT 
-                            + ' ' + top.HAPI4.Event.ON_REC_SELECT 
-                            + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
-                            
+        this._events = top.HAPI4.Event.LOGOUT
+        + ' ' + top.HAPI4.Event.ON_REC_SELECT
+        + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
+
         if(this.options.autoupdate){
             this._events = this._events
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH 
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
         }
 
         $(this.document).on(this._events, function(e, data) {
@@ -83,7 +84,7 @@ $.widget( "heurist.app_timemap", {
                 that.option("recordset", data); //hRecordSet
                 that._refresh();
 
-            // Search start
+                // Search start
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 that.option("recordset", null);
@@ -96,12 +97,12 @@ $.widget( "heurist.app_timemap", {
                 }
                 //???? that._refresh();
 
-            // Record selection
+                // Record selection
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
 
                 if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
 
-//console.log("_doVisualizeSelection");
+                    //console.log("_doVisualizeSelection");
                     that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
                 }
             }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
@@ -141,9 +142,9 @@ $.widget( "heurist.app_timemap", {
                 var url = top.HAPI4.basePath + '/page/mapping.php?db='+top.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
-                            url = url + '&notimeline=1';
+                        url = url + '&notimeline=1';
                     if( this.options.layout.indexOf('header')<0 )
-                            url = url + '&noheader=1';
+                        url = url + '&noheader=1';
                 }
 
                 (this.mapframe).attr('src', url);
@@ -165,22 +166,23 @@ $.widget( "heurist.app_timemap", {
                 setTimeout(function(){ that._initmap()}, 1000); //bad idea
                 return;
             }
-            
-            //now all is done in addRecordsetLayer  var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
-            
+
+            // all this is now done in addRecordsetLayer
+            // var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
+
             mapping.load( null, //mapdataset,
-                            this.options.selection,  //array of record ids
-                            this.options.startup,    //map document on load
-                                function(selected){  //callback if something selected on map
-                                        $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
-                                        { selection:selected, source:that.element.attr('id') } );
-                                },
-                          function(){ //callback function
-                              var params = {id:'main', recordset:that.options.recordset, title:'Current query'  }
-                              that.addRecordsetLayer(params, -1);
-                          }      
-                                );            
-            
+                this.options.selection,  //array of record ids
+                this.options.startup,    //map document on load
+                function(selected){  //callback if something selected on map
+                    $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT,
+                        { selection:selected, source:that.element.attr('id') } );
+                },
+                function(){ //callback function
+                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'  }
+                    that.addRecordsetLayer(params, -1);
+                }
+            );
+
             this.recordset_changed = false;
         }
 
@@ -188,16 +190,16 @@ $.widget( "heurist.app_timemap", {
 
     , _doVisualizeSelection: function (selection) {
 
-            if(top.HEURIST4.util.isnull(this.options.recordset)) return;
+        if(top.HEURIST4.util.isnull(this.options.recordset)) return;
 
-            this.option("selection", selection);
+        this.option("selection", selection);
 
-            if(!this.element.is(':visible')
-                || top.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
-                    return;
-            }
+        if(!this.element.is(':visible')
+            || top.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
+            return;
+        }
 
-            this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see js/mapping.js
+        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see js/mapping.js
     }
 
 
@@ -230,10 +232,10 @@ $.widget( "heurist.app_timemap", {
     */
 
     , loadMapDocumentById: function(recId){
-            var mapping = this.mapframe[0].contentWindow.mapping;
-            if(mapping){
-                mapping.loadMapDocumentById(recId);  //see js/mapping.js
-            }
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping){
+            mapping.loadMapDocumentById(recId);  //see js/mapping.js
+        }
     }
 
     /**
@@ -241,17 +243,17 @@ $.widget( "heurist.app_timemap", {
     * params = {id:$.uniqueId(), title:'Title for Legend', query: '{qa:"", rules:""}'}
     */
     , addQueryLayer: function(params){
-            var mapping = this.mapframe[0].contentWindow.mapping;
-            if(mapping){
-                mapping.addQueryLayer(params);  //see js/mapping.js
-            }
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping){
+            mapping.addQueryLayer(params);  //see js/mapping.js
+        }
     }
-    
+
     , addRecordsetLayer: function(params){
-            var mapping = this.mapframe[0].contentWindow.mapping;
-            if(mapping){
-                mapping.addRecordsetLayer(params);  //see js/mapping.js
-            }
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping){
+            mapping.addRecordsetLayer(params);  //see js/mapping.js
+        }
     }
 
 

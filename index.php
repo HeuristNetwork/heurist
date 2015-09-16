@@ -1,9 +1,9 @@
 <?php
 
 /**
-*  Main script
+*  Main script loading the Heurist application
 *
-*  1) System init on server side (see System.php) - connects to database , if db parameter is missed redirects to database selecion page
+*  1) System init on server side (see System.php) - connects to database , if db parameter is missing redirects to database selection page
 *  2) System init on client side (see hapi.js) - init hAPI object
 *  3) Load localization, theme and basic database structure definition
 *
@@ -24,18 +24,14 @@
 */
 
 
-//ini_set('include_path', ini_get('include_path').PATH_SEPARATOR,'/var/www/h4/');
-//ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.'c:/xampp/htdocs/h4/');  //dirname(__FILE__));
-
 require_once(dirname(__FILE__)."/php/System.php");
-//require_once ('/common/db_structure.php');
 
 // either init system or redirect to database selection
 $system = new System();
 if(@$_REQUEST['db']){
     // connrect to given database
     if(! $system->init(@$_REQUEST['db']) ){
-        //can not connect to given database
+        //cannot connect to given database
         $err = $system->getError();
         $msg = @$err['message'];
         header('Location: php/databases.php?msg='.rawurlencode($msg));
@@ -43,7 +39,7 @@ if(@$_REQUEST['db']){
         exit();
     }
 }else{
-    //db parameter is missed redirects to database selecion page
+    //db parameter is missing, redirects to database selection page
     header('Location: php/databases.php');
     exit();
 }
@@ -58,7 +54,10 @@ if(@$_REQUEST['db']){
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
+
+        <!-- Provides wide variety of icons as font, used eg. for facet search icon. Vsn 2 -->
         <link rel="stylesheet" type="text/css" href="ext/font-awesome/css/font-awesome.min.css" />
+        <!-- Later version of font-awesome, but have not got it to work -->
         <!-- <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" /> -->
 
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -66,11 +65,11 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
-        <!-- does not work properly
-        <script type="text/javascript" src="ext/js/jquery.resize.js"></script>
-        -->
 
-        <!--
+        <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
+             number of widgets. Currently it is commented out of the code in layout_default.js -->
+
+        <!-- for gridster layout, development version - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
         <script type="text/javascript" src="ext/gridster/utils.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.collision.js"></script>
@@ -78,17 +77,16 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="ext/gridster/jquery.draggable.js"></script>
         <script type="text/javascript" src="ext/gridster/jquery.gridster.js"></script>
         -->
-        <!-- for gridster layout - remove comments to use
+        <!-- for gridster layout, production (minimised) version - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.all.css" />
         <script type="text/javascript" src="ext/gridster/jquery.gridster.all.js"></script>
         -->
 
-
-
-
+        <!-- DOCUMENTATION TODO: What's this for? -->
         <!-- jquery-contextmenu (https://github.com/mar10/jquery-ui-contextmenu/)
         src="//cdn.jsdelivr.net/jquery.ui-contextmenu/1/jquery.ui-contextmenu.min.js"
         -->
+
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
         <!-- script type="text/javascript" src="ext/js/moment.min.js"></script -->
         <script type="text/javascript" src="ext/js/date.format.js"></script>
@@ -105,7 +103,8 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="migrated/common/js/temporalObjectLibrary.js"></script>
 
-        <!-- this scripts are loaded explicitely - for debug purposes -->
+        <!-- DOCUMENTATION TODO: explain this -->
+        <!-- these scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="apps/file_manager.js"></script>
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
         <script type="text/javascript" src="apps/svs_manager.js"></script>
@@ -121,6 +120,8 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="apps/digital_harlem/dh_search.js"></script>
         <script type="text/javascript" src="apps/digital_harlem/dh_maps.js"></script>
 
+
+        <!-- DOCUMENTATION TODO: What are these, why are they commented out -->
         <!--
         <script type="text/javascript" src="apps/profile/profile.js"></script>
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
@@ -132,8 +133,7 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="apps/pagination.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
         -->
-        <!-- DEBUG
-        -->
+        <!-- DEBUG -->
 
         <script type="text/javascript" src="apps/profile/profile_login.js"></script>
         <script type="text/javascript" src="apps/viewers/resultListMenu.js"></script>
@@ -162,18 +162,6 @@ if(@$_REQUEST['db']){
                     $(this).trigger( 'myOnShowEvent' );
                     return this;
                 };
-
-                /*overwrite the standard empty method
-                var _empty = $.fn.empty;
-                $.fn.empty = function () {
-                return this.each(function() {
-                $( "*", this ).each(function() {
-                $( this ).triggerHandler( "remove" );
-                });
-                return _empty.call( $(this) );
-                });
-                };
-                */
 
                 //Performs hAPI initialization for given database
                 window.HAPI4 = new hAPI('<?=$_REQUEST['db']?>',
@@ -209,14 +197,6 @@ if(@$_REQUEST['db']){
                             window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                             window.HEURIST.database = {  name: window.HAPI4.database };
 
-                            /*$.getScript(window.HAPI4.basePathOld+'common/js/utilsLoad.js', function(){
-                            $.getScript(window.HAPI4.basePathOld+'common/php/displayPreferences.php', function(){
-
-                            });
-                            } );*/
-
-
-
 
                             //load database structure (record types, field types, terms) definitions
                             window.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
@@ -231,31 +211,16 @@ if(@$_REQUEST['db']){
                                     if(top.HEURIST4.util.isempty(layoutid)){
                                         layoutid = top.HAPI4.get_prefs('layout_id');
                                         if(top.HEURIST4.util.isempty(layoutid)){
-                                            layoutid = "L01";
+                                            layoutid = "H4Default";
                                         }
                                     }
                                     top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
-                                    if(layoutid=='L06'){ //digital harlem - @todo move style to layout
+                                    if(layoutid=='DigitalHarlem'){ //digital harlem - @todo move style to layout
                                         $("head").append($('<link rel="stylesheet" type="text/css" href="apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
                                     }
 
                                     appInitAll(layoutid, "#layout_panes");
-
-                                    /*
-                                    //get all terms and rectypes   terms:0,
-                                    window.HAPI4.SystemMgr.get_defs({terms:'all'}, function(response){
-                                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                                    top.HEURIST4.terms = response.data.terms;
-
-                                    //in layout.js
-                                    appInitAll("l01", "#layout_panes");
-
-                                    }else{
-                                    top.HEURIST4.util.redirectToError(response.message);
-                                    }
-                                    });
-                                    */
 
                                     //perform search in the case that parameter "q" is defined
                                     var qsearch = '<?=@$_REQUEST['q']?>';
@@ -265,7 +230,7 @@ if(@$_REQUEST['db']){
                                         var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
                                         //top.HEURIST4.query_request = request;
                                         setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
-                                    }else if(layoutid!='L06'){
+                                    }else if(layoutid!='DigitalHarlem'){
                                         var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                                         if(!top.HEURIST4.util.isempty(init_search)){
                                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
@@ -294,7 +259,7 @@ if(@$_REQUEST['db']){
                         }
                 });
 
-                //definition of ABOUT dialog
+                //definition of ABOUT dialog, called from Help > About, see content below
                 $( "#heurist-about" ).dialog(
                     {
                         autoOpen: false,
@@ -325,9 +290,8 @@ if(@$_REQUEST['db']){
         <script src="<?=HEURIST_BASE_URL_OLD?>common/js/utilsLoad.js"></script>
         <script src="<?=HEURIST_BASE_URL_OLD?>common/php/displayPreferences.php"></script>
 
-        <!--
-        <script src="../../common/php/getMagicNumbers.php"></script>
-        These are old H3 stuff - needed to support existing features in popups -->
+        <!-- TODO: H4 currently not using Magic Numbers, but should be using them -->
+        <!-- <script src="../../common/php/getMagicNumbers.php"></script> -->
 
         <div id="layout_panes" style="height:100%">
             &nbsp;
@@ -335,8 +299,8 @@ if(@$_REQUEST['db']){
 
         <div id="heurist-about" title="About" style="width:300px">
             <div class='logo'></div>
-            <h4>Heurist academic knowledge management system</h4>
-            <p style="margin-top: 1em;">version     <?=HEURIST_VERSION?></p>
+            <h4>Heurist Academic Knowledge Management System</h4>
+            <p style="margin-top: 1em;">version <?=HEURIST_VERSION?></p>
             <p style="margin-top: 1em;">
                 author: Dr Ian Johnson<br/>
                 programmers: Artem Osmakov, Tom Murtagh, Kim Jackson, Stephen White and others...</p>
