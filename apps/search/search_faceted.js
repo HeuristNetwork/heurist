@@ -92,7 +92,6 @@ $.widget( "heurist.search_faceted", {
     _request_id: 0,
     _first_query:[], //query for all empty values
     _isInited: true,
-    _isAllFacets: false, // if first field has isfacet=true - consider all fields as facets
     _current_query: null,
 
     // the widget's constructor
@@ -256,47 +255,58 @@ $.widget( "heurist.search_faceted", {
        
        $.each(this.options.params.facets, function(index, field){
        
-           if( !top.HEURIST4.util.isnull(field['var']) && field['code'] && (that._isAllFacets || field['isfacet'])){
+           //value is defined - it will be used to create query
+           if( !top.HEURIST4.util.isnull(field['var']) && field['code']){
                //create new query and add new parameter
                var code = field['code'];
                code = code.split(':');
                
-               //create query to search facet values
-               function __crt( idx ){
-                   var res = null;
-                   if(idx>0){  //this is relation or link
-                       
-                        res = [];
-                       
-                        var pref = '';
-                        var qp = {};
-                        
-                        qp['t'] = code[idx];
-                        res.push(qp);
-                        
-                        
-                        var fld = code[idx-1]; //link field
-                        if(fld.indexOf('lf')==0){
-                            pref = 'linked_to';    
-                        }else if(fld.indexOf('lt')==0){
-                            pref = 'linkedfrom';    
-                        }else if(fld.indexOf('rf')==0){
-                            pref = 'related_to';    
-                            //pref = 'links';
-                        }else if(fld.indexOf('rt')==0){
-                            pref = 'relatedfrom';    
-                            //pref = 'links';
-                        }
-                        
-                        qp = {};
-                        qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
-                        res.push(qp);
-                   }else{ //this is simple field
-                       res = '$IDS'; //{'ids':'$IDS}'};
-                   }
-                   return res;
-               }
+               field['id']   = code[code.length-1];
+               field['rtid'] = code[code.length-2];
+               if(field['isfacet']){
                
+               
+                       //create query to search facet values
+                       function __crt( idx ){
+                           var res = null;
+                           if(idx>0){  //this is relation or link
+                               
+                                res = [];
+                               
+                                var pref = '';
+                                var qp = {};
+                                
+                                qp['t'] = code[idx];
+                                res.push(qp);
+                                
+                                
+                                var fld = code[idx-1]; //link field
+                                if(fld.indexOf('lf')==0){
+                                    pref = 'linked_to';    
+                                }else if(fld.indexOf('lt')==0){
+                                    pref = 'linkedfrom';    
+                                }else if(fld.indexOf('rf')==0){
+                                    pref = 'related_to';    
+                                    //pref = 'links';
+                                }else if(fld.indexOf('rt')==0){
+                                    pref = 'relatedfrom';    
+                                    //pref = 'links';
+                                }
+                                
+                                qp = {};
+                                qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
+                                res.push(qp);
+                           }else{ //this is simple field
+                               res = '$IDS'; //{'ids':'$IDS}'};
+                           }
+                           return res;
+                       }
+                       
+                       /*if(code.length-2 == 0){
+                           field['facet'] = {ids:'$IDS'};
+                       }else{}*/
+                       field['facet'] = __crt( code.length-2 );
+               }
                
                
                function __checkEntry(qarr, key, val){
@@ -323,13 +333,6 @@ $.widget( "heurist.search_faceted", {
                          return qarr;
                     }
                }            
-               
-               /*if(code.length-2 == 0){
-                   field['facet'] = {ids:'$IDS'};
-               }else{}*/
-               field['facet'] = __crt( code.length-2 );
-               field['id']   = code[code.length-1];
-               field['rtid'] = code[code.length-2];
                
                     var curr_level = mainquery;     
                     var j = 0;    
@@ -393,9 +396,8 @@ $.widget( "heurist.search_faceted", {
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
                 facets[facet_index].selectedvalue = null;
+                facets[facet_index].isfacet = facets[facet_index].isfacet || top.HEURIST4.util.isnull(facets[facet_index].isfacet);
             }
-            //this._refresh();
-            this._isAllFacets = facets[0]['isfacet'];
         }
         
         
@@ -408,8 +410,8 @@ $.widget( "heurist.search_faceted", {
        
        var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white'}).addClass('fieldset_search').appendTo(this.facets_list);
 
-
-       if(this._isAllFacets){
+       //hide submit button will be displayed in case all fields are input fields (not facets)
+       if(true){ 
             $fieldset.css({'padding':'0'});
             this.btn_submit.hide();
        }
@@ -444,53 +446,67 @@ $.widget( "heurist.search_faceted", {
           
           harchy = "<span>"+ harchy.join(" &gt; ") + "</span><br/>&nbsp;&nbsp;&nbsp;";
            
-           var ed_options = {
-                        varid: field['var'],  //content_id+"_"+
-                        recID: -1,
-                        rectypeID: field['rtid'],
-                        dtID: field['id'],
-                        rectypes: top.HEURIST4.rectypes,
-                        values: '',
-                        readonly: false,
-                        title:   harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
-                        showclear_button: false,
-                        detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
-                };
-                
-           if(isNaN(Number(field['id']))){
-               ed_options['dtFields'] = {
-                   dty_Type: field['type'],
-                   rst_RequirementType: 'optional',
-                   rst_MaxValues: 1,
-                   rst_DisplayWidth:0
-               };
-           }
-
-           if(!top.HEURIST4.util.isnull(field['var'])){
+           if(!top.HEURIST4.util.isnull(field['var']) && field['code'] ){
                
-             if( field['code'] && (that._isAllFacets || field['isfacet']) ){
+             if(field['isfacet']){
                     
                     //inpt.find('.input-div').hide();
                     //inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
                     //inpt.find('.editint-inout-repeat-button').hide();
                     
                     $("<div>",{id: "fv_"+field['var'] }).html(
-                        '<div class="header" style="width: 100%; background-color: lightgray; padding: 5px; width:100%">'+
-                            '<label for="input0_1">'+ed_options.title+'</label>'+
+                        '<div class="header">'+   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
+                            '<label>'+harchy + "<span style='font-weight:bold'>" + field['title'] + '</span></label>'+
                         '</div>'+
                         '<div class="input-cell"></div>').appendTo($fieldset);
-                    
+                  
              }else{
+                 
+                   var ed_options = {
+                                varid: field['var'],  //content_id+"_"+
+                                recID: -1,
+                                rectypeID: field['rtid'],
+                                dtID: field['id'],
+                                rectypes: top.HEURIST4.rectypes,
+                                values: '',
+                                readonly: false,
+                                title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
+                                showclear_button: false,
+                                detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
+                        };
+                        
+                   if(isNaN(Number(field['id']))){
+                       ed_options['dtFields'] = {
+                           dty_Type: field['type'],
+                           rst_RequirementType: 'optional',
+                           rst_MaxValues: 1,
+                           rst_DisplayWidth:0
+                       };
+                   }
 
-                var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
-                        ed_options
-                    );
+                     
+                    var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
+                            ed_options
+                        );
 
-                inpt.appendTo($fieldset);
-                that._input_fields['$X'+field['var']] = inpt;
+                    inpt.appendTo($fieldset);
+                    that._input_fields['$X'+field['var']] = inpt;
+                    
+                    inpt.find('.input-div').css('display','inline-block');
+                    
+                    var btn_add = $( "<button>")
+                    .addClass("smallbutton")
+                    .css('position','absolute')
+                    .appendTo( inpt.find('.input-cell') )
+                    .button({icons:{primary: "ui-icon-search"}, text:false})
+                    that._on( btn_add, { click: "doSearch" });
+                    
              }
            }
        });
+       
+       $fieldset.find('.header').css({width: '100%', 'background-color': 'lightgray', padding: '5px', width:'100%'})
+       $fieldset.find('.input-cell').css({ 'padding':'5px' });
        
        this._isInited = true;
        //get empty query
@@ -541,36 +557,32 @@ $.widget( "heurist.search_faceted", {
                 }else{
                     if(typeof val === 'string' && val.indexOf('$X')===0){
                         
-            
-                        if(that._isAllFacets){
-                            
-                            var facets = that.options.params.facets;
-                            var facet_index, len = facets.length;
-                            for (facet_index=0;facet_index<len;facet_index++){
-                                if(facets[facet_index]["var"] == val.substr(2)){
-                                    var selval = facets[facet_index].selectedvalue;
-                                    if(selval && !top.HEURIST4.util.isempty(selval.value)){
-                                        predicate[key] = selval.value;
-                                        isbranch_empty = false;
-                                    }else{
-                                        delete predicate[key];  
-                                    }
-                                    break;
+                        var facets = that.options.params.facets;
+                        var facet_index, len = facets.length;
+                        for (facet_index=0;facet_index<len;facet_index++){
+                            if(facets[facet_index]["var"] == val.substr(2)){
+
+                                if(!facets[facet_index]['isfacet']){
+                                     var sel = $(_inputs[val]).editing_input('getValues');
+                                     if(sel && sel.length>0){
+                                         facets[facet_index].selectedvalue = {value:sel[0]};
+                                     }else{
+                                         facets[facet_index].selectedvalue = null;
+                                     }
                                 }
+                                
+                                var selval = facets[facet_index].selectedvalue;;
+                                
+                                if(selval && !top.HEURIST4.util.isempty(selval.value)){
+                                    predicate[key] = selval.value;
+                                    isbranch_empty = false;
+                                }else{
+                                    delete predicate[key];  
+                                }
+                                break;
                             }
-                        }else{
-                        
-                            //find input widget and get its value
-                            var vals = $(_inputs[val]).editing_input('getValues');
-                            if(vals && vals.length>0 && !top.HEURIST4.util.isempty(vals[0])){
-                                predicate[key] = vals[0];
-                                isbranch_empty = false;
-                            }else{
-                                delete predicate[key];  
-                                //predicate[key] = '';
-                            }
-                        
                         }
+
                     }
                 }
             });
@@ -603,7 +615,7 @@ $.widget( "heurist.search_faceted", {
             var isform_empty = this._fillQueryWithValues(query);
             
             if(isform_empty){
-                if(this._isAllFacets){
+                if(true){
                     //clear main result set
                     
                     this.doReset();
@@ -678,7 +690,7 @@ $.widget( "heurist.search_faceted", {
         for(;i< this.options.params.facets.length; i++)
         {
             var field = this.options.params.facets[i];
-            if(i>field_index && (that._isAllFacets || field['isfacet']) && field['facet']){
+            if(i>field_index && field['isfacet'] && field['facet']){
                 
                 var subs_value = null;
                 
@@ -810,6 +822,9 @@ $.widget( "heurist.search_faceted", {
         
     }
     
+    //
+    // draw facet values
+    //
     , _redrawFacets: function( response ) {
         
                 if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -1388,6 +1403,43 @@ $.widget( "heurist.search_faceted", {
 
         }
         return f_link;
+    },
+    
+    _createInputField :function(field_index){
+
+               var field = this.options.params.facets[field_index];
+                 
+               var ed_options = {
+                            varid: field['var'],  //content_id+"_"+
+                            recID: -1,
+                            rectypeID: field['rtid'],
+                            dtID: field['id'],
+                            rectypes: top.HEURIST4.rectypes,
+                            values: '',
+                            readonly: false,
+                            title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",
+                            showclear_button: false,
+                            detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
+                    };
+                    
+               if(isNaN(Number(field['id']))){
+                   ed_options['dtFields'] = {
+                       dty_Type: field['type'],
+                       rst_RequirementType: 'optional',
+                       rst_MaxValues: 1,
+                       rst_DisplayWidth:0
+                   };
+               }
+
+                 
+                var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
+                        ed_options
+                    );
+
+                inpt.appendTo($fieldset);
+                that._input_fields['$X'+field['var']] = inpt;
+        
+        
     }
 
 
