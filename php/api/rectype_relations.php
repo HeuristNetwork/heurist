@@ -5,7 +5,7 @@
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2015 University of Sydney
     * @author      Jan Jaap de Groot  <jjedegroot@gmail.com>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0

@@ -1,10 +1,10 @@
-/** 
+/**
 * If not logged in: Login button
 * If logged in:     Addd New Record, Profile and Options button with drop down menus
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2015 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -37,7 +37,7 @@ $.widget( "heurist.profile", {
         // prevent double click to select text
         .disableSelection();
 
-        //--------------------- HELP     
+        //--------------------- HELP
         this.btn_help = $( "<button>", {text: top.HR("Help")} )
         .css('float','right')
         .appendTo( this.element )
@@ -108,9 +108,9 @@ $.widget( "heurist.profile", {
                 }else if(action == "menu-options-about"){
                     $( "#heurist-about" ).dialog("open");
                 }else if(action == "menu-options-help"){
-                    window.open(top.HAPI4.sysinfo.help, '_blank');                        
+                    window.open(top.HAPI4.sysinfo.help, '_blank');
                 }else if(action == "menu-options-db-design"){
-                    window.open(top.HAPI4.basePathOld+'admin/adminMenu.php?db='+top.HAPI4.database, '_blank');                        
+                    window.open(top.HAPI4.basePathOld+'admin/adminMenu.php?db='+top.HAPI4.database, '_blank');
                 }else if(action == "menu-options-db-summary"){
 
                     if($.isFunction($('body').rectype_manager)){ //already loaded
@@ -136,11 +136,11 @@ $.widget( "heurist.profile", {
                     });
                 }
         }})
-        .position({my: "right top", at: "right bottom", of: this.btn_options })    
+        .position({my: "right top", at: "right bottom", of: this.btn_options })
         .hide();
 
 
-        //show/hide menu on button click        
+        //show/hide menu on button click
         this._on( this.btn_options, {
             click: function() {
                 $('.menu-or-popup').hide(); //hide other
@@ -175,7 +175,7 @@ $.widget( "heurist.profile", {
             primary: "ui-icon-key"
         }});
 
-        if(!top.HAPI4.is_ui_normal()){            
+        if(!top.HAPI4.is_ui_normal()){
             //'color':'red','background-color':'white',
             this.login_welcome = $("<div>")
             .html(top.HR((top.HAPI4.sysinfo.registration_allowed==1)?"Please log in":"Please contact to register"))
@@ -183,11 +183,11 @@ $.widget( "heurist.profile", {
                 'float':'right','width':'50%','text-align':'right', 'margin-right':'4px'})
             .addClass('logged-out-only2 ui-state-error ui-corner-all').appendTo( this.element );
 
-            /* flashing prompt                      
-            this.blink_interval = setInterval(function(){ 
-            that.login_welcome.is(":visible")?that.login_welcome.hide():that.login_welcome.show() 
+            /* flashing prompt
+            this.blink_interval = setInterval(function(){
+            that.login_welcome.is(":visible")?that.login_welcome.hide():that.login_welcome.show()
             },500);
-            */             
+            */
         }
 
         //--------------------- PROFILE BUTTON
@@ -257,7 +257,7 @@ $.widget( "heurist.profile", {
         .position({my: "right top", at: "right bottom", of: this.btn_user })
         .hide();
 
-        //show/hide menu on button click        
+        //show/hide menu on button click
         this._on( this.btn_user, {
             click: function() {
                 $('.menu-or-popup').hide(); //hide other
@@ -353,14 +353,14 @@ $.widget( "heurist.profile", {
 
     }, //end _create
 
-    /* 
-    * private function 
+    /*
+    * private function
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
 
-        if(top.HAPI4.currentUser.ugr_ID>0){ 
-            if(this.blink_interval){ 
+        if(top.HAPI4.currentUser.ugr_ID>0){
+            if(this.blink_interval){
                 clearInterval(this.blink_interval);
                 this.blink_interval = null;
             }
@@ -557,8 +557,8 @@ $.widget( "heurist.profile", {
                     that.editProfile();
                 }else{
                     top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
-                }        
-            });          
+                }
+            });
         }
 
     },

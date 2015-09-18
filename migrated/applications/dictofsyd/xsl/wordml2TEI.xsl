@@ -6,7 +6,7 @@
   exclude-result-prefixes="w o aml wx">
 
     <!--
-    * Copyright (C) 2005-2014 University of Sydney
+    * Copyright (C) 2005-2015 University of Sydney
     *
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
     * in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@
     * the License.
     
     * @author      Kim Jackson 
-    * @copyright   (C) 2005-2013 University of Sydney
+    * @copyright   (C) 2005-2015 University of Sydney
     * @link        http://sydney.edu.au/heurist
     * @version     v3 - 23 October 2008
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
