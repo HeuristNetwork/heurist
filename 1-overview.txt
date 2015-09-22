@@ -5,15 +5,10 @@ http://HeuristNetwork.org, http://HeuristScholar.org, http://heurist.sydney.edu.
 Copyright © 2005 - 2015 University of Sydney
 
 Concept/direction: Ian Johnson
-
 Developers: Artem Osmakov, Tom Murtagh, Kim Jackson, Steve White, Maria Shvedova, Steven Hayes, Maxim Nikitin
-
 Programming Interns: Jan Jaap de Groot, Marco Springer, Erik Baiij, Tobias Peirick, Hanna Chamoun
-
 Documentation: Vincent Sheehan
-
 Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
-
 
 Overview:    Heurist is a flexible web-based collaborative database management system built in php, javascript and mysql. It was developed from late 2005 by Ian Johnson, Archaeological Computing Laboratory, University of Sydney, with the assistance of ACL programmers.
 
@@ -21,7 +16,11 @@ Heurist is designed primarily for academic research data (including web bookmark
 
 For full information please visit http://HeuristNetwork.org
 
-Documentation standards and overall structure are described in other files in the /documentation directory
+Documentation standards and overall structure are described in files in the /documentation directory
+
+INSTALLATION: please move the two files " parentDirectory_ ... " to the parent directory of the Heurist instance
+              and edit the heuristConfigIni.php file in the parent directory.
+              Settings for individual instances, which override the parent configuration, can be set in the configIni.php file.
 
 Updated:     22 Sep 2015
 

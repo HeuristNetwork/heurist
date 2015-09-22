@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # copy_distribution_files.sh: Creates a distribution package in h4-build from a Heurist working directory
-# This file is intended for internal use of the development team
+# This file is intended for internal use of the development team and should normally be deleted from the install package.
 
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
