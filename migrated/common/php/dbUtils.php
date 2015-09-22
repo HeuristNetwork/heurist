@@ -513,17 +513,17 @@
 
         // 
         //echo_flush ("<p>Create Database Structure (tables) ".HEURIST_DIR." </p>");
-        if(db_script($newname, HEURIST_DIR."migrated/admin/setup/dbcreate/blankDBStructure.sql")){
+        if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
 
             // echo_flush ('OK');
             // echo_flush ("<p>Add Referential Constraints ");
 
-            if(db_script($newname, HEURIST_DIR."migrated/admin/setup/dbcreate/addReferentialConstraints.sql")){
+            if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
 
                 // echo_flush ('OK');
                 // echo_flush ("<p>Add Procedures and Triggers ");
 
-                if(db_script($newname, HEURIST_DIR."migrated/admin/setup/dbcreate/addProceduresTriggers.sql")){
+                if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
 
                     // echo_flush ('OK');
                     return true;
@@ -548,37 +548,39 @@
             add_index_html($uploadPath); // index file to block directory browsing
         }
 
-        if(recurse_copy( HEURIST_DIR."migrated/admin/setup/rectype-icons", $uploadPath."/rectype-icons" )){
+        if(recurse_copy( HEURIST_DIR."admin/setup/rectype-icons", $uploadPath."/rectype-icons" )){
             add_index_html($uploadPath."/rectype-icons"); // index file to block directory browsing
             add_index_html($uploadPath."/rectype_icons/thumb");
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( HEURIST_DIR."migrated/admin/setup/settings", $uploadPath."/settings" )){
+        if(recurse_copy( HEURIST_DIR."admin/setup/settings", $uploadPath."/settings" )){
             add_index_html($uploadPath."/settings"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy settings folder to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( HEURIST_DIR."migrated/admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
+        if(recurse_copy( HEURIST_DIR."admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
             add_index_html($uploadPath."/smarty-templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( HEURIST_DIR."migrated/admin/setup/xsl-templates", $uploadPath."/xsl-templates" )){
+        if(recurse_copy( HEURIST_DIR."admin/setup/xsl-templates", $uploadPath."/xsl-templates" )){
             add_index_html($uploadPath."/xsl-templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( HEURIST_DIR."documentation", $uploadPath."/documentation" )){
+        
+        if(recurse_copy( HEURIST_DIR."../documentation", $uploadPath."/documentation" )){
             add_index_html($uploadPath."/documentation"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy documentation folder to $uploadPath<br>");
             $warnings = 1;
         }
+                                                                                                   
 
 
         // Create all the other standard folders required for the database
@@ -765,7 +767,7 @@ function checkDatabaseFunctions(){
 
                     $res = true;
 
-                }else if(db_script(DATABASE, HEURIST_DIR."migrated/admin/setup/dbcreate/addProceduresTriggers.sql")){
+                }else if(db_script(DATABASE, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
                     $res = true;
                 }
             }

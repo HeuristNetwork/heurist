@@ -172,7 +172,7 @@ function cloneDatabase($targetdbname) {
     }
 
     echo_flush ("<p>Create Database Structure (tables)</p>");
-    if(db_script($newname, HEURIST_DIR."migrated/admin/setup/dbcreate/blankDBStructure.sql")){
+    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         db_drop($newname);

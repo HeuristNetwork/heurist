@@ -142,7 +142,7 @@ define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 
 // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
-$topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|migrated|records|search|viewers";
+$topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
 
 // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
 $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.

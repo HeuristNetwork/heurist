@@ -147,7 +147,7 @@
         db_drop($tempDBName, false);
 
         if(!db_create($tempDBName) ||
-           !db_script($tempDBName, HEURIST_DIR."migrated/admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql") ){
+           !db_script($tempDBName, HEURIST_DIR."admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql") ){
             unlockDatabase();
             exit();
         }
@@ -338,7 +338,7 @@
 	function processRecTypes($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defRecTypesFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defRecTypesFields.inc";
             // Note re paths: it seems the relative path is ../../structure/crosswalk/ because it is relative to the calling
             // script (createNewDB.php). This can be problematic if buildCrosswalks is called from different levels in the tree
 			$query = "INSERT INTO `defRecTypes` ($flds) VALUES" . $dataSet;
@@ -354,7 +354,7 @@
 	function processDetailTypes($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defDetailTypesFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defDetailTypesFields.inc";
 			$query = "INSERT INTO `defDetailTypes` ($flds) VALUES" . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -369,7 +369,7 @@
 	function processRecStructure($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defRecStructureFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defRecStructureFields.inc";
 			$query = "INSERT INTO `defRecStructure` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -384,7 +384,7 @@
 	function processTerms($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defTermsFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defTermsFields.inc";
 			$query = "SET FOREIGN_KEY_CHECKS = 0;";
 			mysql_query($query);
 			$query = "INSERT INTO `defTerms` ($flds) VALUES " . $dataSet;
@@ -401,7 +401,7 @@
 	function processOntologies($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defOntologiesFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defOntologiesFields.inc";
 			$query = "INSERT INTO `defOntologies` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -416,7 +416,7 @@
 	function processRelationshipConstraints($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defRelationshipConstraintsFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defRelationshipConstraintsFields.inc";
 			$query = "INSERT INTO `defRelationshipConstraints` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -431,7 +431,7 @@
 	function processFileExtToMimetype($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defFileExtToMimetypeFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defFileExtToMimetypeFields.inc";
 			$query = "INSERT INTO `defFileExtToMimetype` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -446,7 +446,7 @@
 	function processRecTypeGroups($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defRecTypeGroupsFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defRecTypeGroupsFields.inc";
 			$query = "INSERT INTO `defRecTypeGroups` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -461,7 +461,7 @@
 	function processDetailTypeGroups($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defDetailTypeGroupsFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defDetailTypeGroupsFields.inc";
 			$query = "INSERT INTO `defDetailTypeGroups` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
@@ -474,7 +474,7 @@
     function processSavedSearches($dataSet) {
         global $errorCreatingTables;
         if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-            include HEURIST_DIR."migrated/admin/structure/crosswalk/usrSavedSearches.inc";
+            include HEURIST_DIR."admin/structure/crosswalk/usrSavedSearches.inc";
             $query = "INSERT INTO `usrSavedSearches` ($flds) VALUES " . $dataSet;
             mysql_query($query);
             if(mysql_error()) {
@@ -487,7 +487,7 @@
 	function processTranslations($dataSet) {
 		global $errorCreatingTables;
 		if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
-			include HEURIST_DIR."migrated/admin/structure/crosswalk/defTranslationsFields.inc";
+			include HEURIST_DIR."admin/structure/crosswalk/defTranslationsFields.inc";
 			$query = "INSERT INTO `defTranslations` ($flds) VALUES " . $dataSet;
 			mysql_query($query);
 			if(mysql_error()) {
