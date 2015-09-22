@@ -382,15 +382,15 @@
             echo "<br/>".$source." is not found";
             return false;
         }
-        
+
 
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
             if($verbose) echo "<br/>Failed to create zip file at ".$destination;
             return false;
         }
-        
-        
+
+
         $source = str_replace('\\', '/', realpath($source));
 
         if (is_dir($source) === true) {
@@ -404,14 +404,14 @@
                 // Ignore "." and ".." folders
                 if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
                     continue;
-                    
+
                 // Determine real path
                 $file = realpath($file);
-                
-                //ignore files that are not in list of specifiede folders                        
+
+                //ignore files that are not in list of specifiede folders
                 $is_filtered = true;
                 if( $folders ){
-                    
+
                     $is_filtered = false;
                     foreach ($folders as $folder) {
                         if( strpos($file, $source."/".$folder)===0 ){
@@ -420,9 +420,9 @@
                         }
                     }
                 }
-                
+
                 if(!$is_filtered) continue;
-                
+
                 if (is_dir($file) === true) { // Directory
                     $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
                 }
@@ -433,7 +433,7 @@
         } else if (is_file($source) === true) {
             $zip->addFromString(basename($source), file_get_contents($source));
         }
-        
+
         // Close zip and show output if verbose
         $numFiles = $zip->numFiles;
         $zip->close();
@@ -447,9 +447,9 @@
     }
 
     function unzip($zipfile, $destination){
-        
+
         if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
-        
+
             $zip = new ZipArchive;
             if ($zip->open($zipfile) === TRUE) {
                 $zip->extractTo($destination);
@@ -458,12 +458,12 @@
             } else {
                 return false;
             }
-            
+
         }else{
-            return false;    
+            return false;
         }
     }
-    
+
 
     /**
     * "Deletes" a database: makes a .sql dump of the database content
@@ -547,34 +547,42 @@
             add_index_html($uploadPath); // index file to block directory browsing
         }
 
-        if(recurse_copy( dirname(__FILE__)."/../../admin/setup/rectype-icons", $uploadPath."/rectype-icons" )){
+        if(recurse_copy( dirname(__FILE__)."migrated/admin/setup/rectype-icons", $uploadPath."/rectype-icons" )){
             add_index_html($uploadPath."/rectype-icons"); // index file to block directory browsing
             add_index_html($uploadPath."/rectype_icons/thumb");
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( dirname(__FILE__)."/../../admin/setup/settings", $uploadPath."/settings" )){
+        if(recurse_copy( dirname(__FILE__)."migrated/admin/setup/settings", $uploadPath."/settings" )){
             add_index_html($uploadPath."/settings"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy settings folder to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( dirname(__FILE__)."/../../admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
+        if(recurse_copy( dirname(__FILE__)."migrated/admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
             add_index_html($uploadPath."/smarty-templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy smarty-templates folder to $uploadPath<br>");
             $warnings = 1;
         }
-        if(recurse_copy( dirname(__FILE__)."/../../admin/setup/xsl-templates", $uploadPath."/xsl-templates" )){
+        if(recurse_copy( dirname(__FILE__)."migrated/admin/setup/xsl-templates", $uploadPath."/xsl-templates" )){
             add_index_html($uploadPath."/xsl-templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
             $warnings = 1;
         }
+        if(recurse_copy( dirname(__FILE__)."documentation", $uploadPath."/documentation" )){
+            add_index_html($uploadPath."/documentation"); // index file to block directory browsing
+        }else{
+            echo ("<h3>Warning:</h3> Unable to create/copy documentation folder to $uploadPath<br>");
+            $warnings = 1;
+        }
+
 
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing
+        $warnings =+ createFolder($newDBName, "file_uploads","used to store uploaded files by default");
         $warnings =+ createFolder($newDBName, "scratch","used to store temporary files");
         $warnings =+ createFolder($newDBName, "hml-output","used to write published records as hml files");
         $warnings =+ createFolder($newDBName, "html-output","used to write published records as generic html files");

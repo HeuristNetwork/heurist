@@ -245,7 +245,7 @@ function prepareDbName(){
         <div id="page-inner" style="overflow:auto">
             <div id="loading" style="display:none">
                 <img alt="loading ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
-                <strong><span id="divProgress">&nbsp;Creating database, please wait</span></strong>
+                <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>
             </div>
 
             <?php
