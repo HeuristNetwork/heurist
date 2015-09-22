@@ -1,2 +1,0 @@
-<rss version="2.0" xmlns:georss="http://www.georss.org/georss"> 
-<channel><title>Test</title><item><title>Test Event</title><description>Test Description</description><pubDate>02 Jan 1980 00:00:00 +0000</pubDate><georss:point>23.456 12.345</georss:point></item></channel></rss> 

@@ -1,2 +1,0 @@
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss"><title>Test</title><entry><title>Test Event</title><updated>1980-01-02</updated><summary type="html">Test Description</summary><georss:point>23.456 12.345</georss:point></entry>
-</feed> 
