@@ -181,7 +181,7 @@ function prepareDbName(){
                 is_db_got = true;
 
                 // request for server side
-                var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+                var baseurl = "<?=HEURIST_BASE_URL?>migrated/admin/setup/dbproperties/getRegisteredDBs.php";
                 var params = "db=<?=HEURIST_DBNAME?>";   // &named=1&excluded=dbid
                 top.HEURIST.util.getJsonData(baseurl,
                     // fillRegisteredDatabasesTable
@@ -324,8 +324,8 @@ function prepareDbName(){
                                 <br />as well as community servers maintained by other research groups.
                             </div>
 
-                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;padding-left: 38px;margin-top: 30px; background-color:lightgray">DATABASE TEMPLATES NOT YET IMPLEMENTED
-
+                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;padding-left: 38px;margin-top: 30px; background-color:lightgray">
+                                <!-- DATABASE TEMPLATES NOT YET IMPLEMENTED -->
                             </div>
                             <!-- TO DO: NEED TO DISPLAY A DROPDOWN LIST OF DATABASES HERE, OR A BROWSE LIST WITH FILTER -->
 
@@ -510,7 +510,7 @@ if(true){
                                 echo ("<p class='error'> Wrong parameters: Template database is not defined.</p>");
                                 return false;
                     }else{
-                        $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
+                        $templateFileName = HEURIST_DIR."migrated/admin/setup/dbcreate/coreDefinitions.txt";
                     }
 
                     if(!file_exists($templateFileName)){

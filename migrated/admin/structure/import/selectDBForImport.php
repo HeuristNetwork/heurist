@@ -109,7 +109,7 @@
 
                 // Send request to getRegisteredDBs on the master Heurist index server, to get all registered databases and their URLs
 
-                $reg_url =  HEURIST_INDEX_BASE_URL . "admin/structure/import/getRegisteredDBs.php?t=11";
+                $reg_url =  HEURIST_INDEX_BASE_URL . "migrated/admin/structure/import/getRegisteredDBs.php?t=11";
                 //HEURIST_INDEX_BASE_URL POINTS TO HEURISTSCHOLAR.ORG
 
                 //get json array of registered databases

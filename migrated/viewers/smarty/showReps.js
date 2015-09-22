@@ -677,12 +677,19 @@ function ShowReps() {
 
         if(template_body && template_body.length>10){
 
-            var squery = _getQuery();
+            var squery;
 
             var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
 
+            if(_currentRecordset!=null){
+                squery =  'db='+_db+'&recordset='+JSON.stringify(_currentRecordset);
+            }else{
+                squery = _getQuery();;
+            }
+            
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
+            
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
             infoMessageBox.show();
 
