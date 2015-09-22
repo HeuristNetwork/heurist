@@ -1,3 +1,4 @@
+<?php 
 
 /**
 * filename: explanation
@@ -19,6 +20,5 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-<?php 
 header("HTTP/1.0 404 Not Found");
 ?>

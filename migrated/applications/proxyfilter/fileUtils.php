@@ -1,4 +1,4 @@
-
+<?php  
 /**
 * filename: explanation
 *
@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-<?php
+
 
 function loadRemoteURLContent($url, $timeout=10) {
     $ch = curl_init();

@@ -1,3 +1,4 @@
+<?php
 
 /**
 * filename: explanation
@@ -19,7 +20,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-<?php
 sleep(1);
 ?>
 <p><strong>This content was loaded via ajax, though it took a second.</strong></p>
