@@ -37,7 +37,7 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title></title>
-        
+
         <!-- yui layout -->
 
         <!--<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
@@ -52,7 +52,7 @@
         <script src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
         <script src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
         <!-- Optional Animation Support
-        <script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script> -->                                         
+        <script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script> -->
         <!-- Optional Resize Support -->
         <script src="../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
         <!-- Source file for the Layout Manager -->
@@ -76,7 +76,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
         -->
         <link rel="stylesheet" type="text/css" href="../../../ext/font-awesome/css/font-awesome.min.css" />
-        
+
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
@@ -125,15 +125,15 @@
             .insert-intree{
                 display:none;
             }
-            
-            /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon 
-                 Remove the jQuery UI Icon 
-                 Remove the jQuery UI Text Indent 
-                 Bump it up - jQuery UI is -8px  
-                  
+
+            /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
+                 Remove the jQuery UI Icon
+                 Remove the jQuery UI Text Indent
+                 Bump it up - jQuery UI is -8px
+
                  Bump it - jQuery UI is -8px
-                 Allow use of icon-large to be properly aligned       
-            */     
+                 Allow use of icon-large to be properly aligned
+            */
             .ui-icon[class*=" icon-"] {
                 background: none repeat scroll 0 0 transparent;
                 text-indent: 0;
@@ -146,7 +146,7 @@
             .ui-icon.icon-large {
                 margin-top: -0.75em;
             }
-            
+
 
         </style>
         <script type="text/javascript">
@@ -207,8 +207,8 @@
                             </select>
                         </td>
                         <td>
-                            <select id="selInsertModifiers" 
-                                    onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}" 
+                            <select id="selInsertModifiers"
+                                    onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
                                     style="width:120px">
                                 <option>choose modifier</option>
                                 <option>capitalize</option>
@@ -293,7 +293,7 @@
                     <span id="recordCount"></span>
                 </div>
                 <button id="btnRepPrint2" style="position: absolute; right: 40px; top:2px;">Print</button>
-                
+
                 <!-- <div id="btnRepPrint2" onclick="onPrint()"  class="button"
                     style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
                                                                    -->
@@ -316,7 +316,7 @@
             </div>
             <div id="templateTree">
                 <div>
-                    <a href="../../context_help/smarty_reports.html" title="Read full documentation on the Smarty templating language"
+                    <a href="context_help/smarty_reports.html" title="Read full documentation on the Smarty templating language"
                         target="_blank"><b>Help on using this function</b></a><br />
                     Position cursor in text on left before selecting actions below
 
@@ -437,12 +437,12 @@
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
-                Hul.popupURL(this, top.HEURIST.basePath + 'viewers/smarty/repMenu.html?template_file='+template_file, 
+                Hul.popupURL(this, top.HEURIST.basePath + 'viewers/smarty/repMenu.html?template_file='+template_file,
                      { callback: function(filename){
                                     if(!Hul.isnull(filename)) {
                                         window.showReps.onPublish( filename )
                                     }
-                                 } 
+                                 }
                      } );
 
                 /* OLD WAY
@@ -574,7 +574,7 @@
 
                 window.showReps.onResize(this.innerWidth);
                 //setupMCE();
-                
+
                 $("#btnRepPrint2").button({text:false, icons: {
                             primary: "icon-print"
                  }})
@@ -582,10 +582,10 @@
 
                 $("#btnRepMenu2").button({text:false, icons: {
                             primary: "icon-gear"
-                 }});                
-                
+                 }});
 
-                
+
+
             }
 
             function loadUserInfoHandler(){
@@ -595,7 +595,7 @@
                 //$('.linkadmin').css('visibility', 'visible');
 
                 var s = '';
-                
+
                 if(top.HEURIST.is_logged_in()){
                     if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
                         s =  '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
@@ -603,21 +603,21 @@
                     } else {
                         s = s + '<li> <a href="#" >Manage (Admins only)</a></li>';
                     }
-                    
+
                     s = s + '<li><a href="#" onClick="onFile()" class="separator">Publish report</a></li>';
-                    
+
                     s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export Template</a></li>' +
                     '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import Template</a></li>';
-                    
+
                     if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
                         s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
                     }
                 }
                  s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (top.HEURIST.is_logged_in()?'class="separator"':'') +'>Refresh</a></li>';
-                
+
 
                 /* OLD MENU ORDER
-                
+
                 var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print report</a></li>'+
                 '<li><a href="#" onClick="onFile()">Get URL for report</a></li>';
 
@@ -637,10 +637,10 @@
 
                 }
                 */
-                
+
                 //$('#btnRepPrint').button( {icon:'ui-icon-print'} );
                 //$('#btnRepMenu2').button( {icon:'ui-icon-gear'} );
-                
+
                 var elem = document.getElementById('toolMenuItems');
                 elem.innerHTML = s;
             }
@@ -648,9 +648,9 @@
             if(!top.HEURIST.rectypes){
                 top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php")
             }
-            
+
             YAHOO.util.Event.addListener(window, "load", loadHandler );
-            
+
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
             $.getScript( top.HEURIST.basePath+"common/php/loadUserInfo.php?db="+_db, loadUserInfoHandler);
             //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );

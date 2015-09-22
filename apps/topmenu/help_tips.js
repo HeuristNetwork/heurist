@@ -1,6 +1,6 @@
 /**
-* Tips of the day
-* 
+* help_tips.js: used to pop up initial tip (when empty database) on how to get started, plus additional tips
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -24,7 +24,7 @@ $.widget( "heurist.help_tips", {
     options: {
         isdialog: true, //show in dialog or embedded
 
-        current_tip: 0  // 
+        current_tip: 0  //
     },
 
     // the constructor
@@ -40,7 +40,7 @@ $.widget( "heurist.help_tips", {
             .css({overflow: 'none !important', width:'100% !important'})
             .appendTo(this.element);
 
-            this.element.css({overflow: 'none !important'})                
+            this.element.css({overflow: 'none !important'})
 
             this.element.dialog({
                 autoOpen: false,
@@ -75,9 +75,9 @@ $.widget( "heurist.help_tips", {
         }else{
             this.wcontainer.addClass('ui-widget-content ui-corner-all').css({'padding':'0.4em',height:'500px'}).appendTo( this.element );
         }
-        
+
         this._setOption("current_tip", parseInt(top.HAPI4.get_prefs('help_tip')));
-        
+
         this._refresh();
 
     }, //end _create
@@ -95,27 +95,27 @@ $.widget( "heurist.help_tips", {
          if(this.options.current_tip>1)
             this._setOption("current_tip", this.options.current_tip-1);
     },
-    
+
     _next: function(){
          this._setOption("current_tip", this.options.current_tip+1);
     },
-    
+
     _setOption: function( key, value ) {
         this._super( key, value );
         if(key=='current_tip'){
             this._refresh();
         }
-    },     
-    
+    },
+
     _refresh: function(){
-        
-        var idx = this.options.current_tip; 
-        
+
+        var idx = this.options.current_tip;
+
         if(top.HEURIST4.util.isnull(idx) || isNaN(idx) || idx<0) idx = 1;
-        
+
         var that = this;
-        
-        this.wcontainer.load("help/tip"+idx+".html?t="+(new Date().time) , function(response, status, xhr){
+
+        this.wcontainer.load("context_help/tips/tip"+idx+".html?t="+(new Date().time) , function(response, status, xhr){
             if(status=="error"){
                 if(idx!=1){
                     that._setOption("current_tip", 1); //reset to 1
@@ -125,12 +125,12 @@ $.widget( "heurist.help_tips", {
             }else{
                 that.options.current_tip = idx;
                 top.HAPI4.SystemMgr.save_prefs({'help_tip':idx, 'help_tip_last':(new Date()) });
-            }                                        
-        });                                                                
-        
-        
+            }
+        });
+
+
     },
-    
+
     show: function(){
         if(this.options.isdialog){
             this.element.dialog("open");
@@ -138,31 +138,31 @@ $.widget( "heurist.help_tips", {
         }else{
             //fill selected value this.element
         }
-    }    
+    }
 
 });
 
 
 /**
 * Show Tip of the Day/Getting strated dialog
-* 
+*
 * @param verify
 */
 function showTipOfTheDay(verify){
-    
+
     if(verify){
         var showtip = top.HAPI4.get_prefs('help_tip_show');
         if(top.HEURIST4.util.isnull(showtip) || showtip){
-            
+
             var lastshown = top.HAPI4.get_prefs('help_tip_last');
             if(!top.HEURIST4.util.isnull(lastshown) && (new Date()).getHours() - (new Date(lastshown)).getHours() < 24){
                 return;
             }
-            
+
         }else{
             return;
         }
-         
+
     }
 
     var manage_dlg = $('#heurist-help-tips');

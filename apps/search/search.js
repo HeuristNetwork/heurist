@@ -197,7 +197,7 @@ $.widget( "heurist.search", {
             }, text:false})
             .css({'margin-right':'0.2em'}) //, 'background-position':'240px 224px !important'})
             .click( function(){
-                window.open(top.HAPI4.basePathOld+'context_help/advanced_search.html','_blank');
+                window.open('context_help/advanced_search.html','_blank');
             });
         */
 
@@ -206,7 +206,7 @@ $.widget( "heurist.search", {
             .css('padding-right','1em')
             .appendTo(this.div_search_header);
             this._on( link, {  click: function(){
-                window.open(top.HAPI4.basePathOld+'context_help/advanced_search.html','_blank');
+                window.open('context_help/advanced_search.html','_blank');
             } });
 
 
@@ -351,7 +351,7 @@ $.widget( "heurist.search", {
 
             $('<a>',{
                 text: 'Syntax',
-                href:  top.HAPI4.basePathOld+'context_help/advanced_search.html', target:'_blank'
+                href:  'context_help/advanced_search.html', target:'_blank'
             }).appendTo(this.div_search_links);
 
             link = $('<a>',{ text: 'Rule Set', href:'#' })

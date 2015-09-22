@@ -314,7 +314,7 @@
                             $helper.dialog( "open" );
                         }
                  });
-                 $( "#helper" ).load(top.HAPI4.basePathOld+'context_help/mapping_overview.html #content');
+                 $( "#helper" ).load('context_help/mapping_overview.html #content');
                  //$( "#helper" ).find('p').css('padding','10px');
                  $( "#helper" ).dialog({
                     autoOpen: false, //(top.HAPI4.get_prefs('help_on')=='1'),
