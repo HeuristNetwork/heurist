@@ -79,8 +79,6 @@ function prepareDbName(){
 
             function showProgress(force){
 
-                $('.error').hide();
-
                 var ele = document.getElementById("loading");
                 if(force) ele.style.display = "block";
                 if(ele.style.display != "none"){
@@ -168,7 +166,7 @@ function prepareDbName(){
                 if(ele) ele.style.display = "none";
 
                 //return false;
-
+                $('.error').hide();
                 showProgress(true);
                 return true;
             }
@@ -274,6 +272,8 @@ function prepareDbName(){
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 // *****************************************
+                //                
+
 
                 makeDatabase(); // this does all the work
 
@@ -303,11 +303,6 @@ function prepareDbName(){
 
                         <input type="hidden" id="url_template" name="url_template">
 
-                        <div>
-                        <?=HEURIST_BASE_URL?><br/>
-                        <?=HEURIST_DIR?>
-                        
-                        </div>
                         
                         <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
                             <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
@@ -445,7 +440,7 @@ function prepareDbName(){
 
                     //debug print $reg_url."</br>";
 
-if(true){
+if(true){ //DEBUG: set to false to avoid real database creation
                     $templateFileName = "NOT DEFINED";
                     $templateFoldersContent = "NOT DEFINED";
 
