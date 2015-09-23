@@ -189,25 +189,25 @@
      {* --------------------------------------------------*}
 
 
-       Other: <b>{$r.recID}</b>  {* the unique record ID *}
+       {$r.recTypeName}: <b>{$r.recID}</b>  {* the unique record ID *}
 
        <b>{$r.f1}</b><br/> {*Title*}
 
-			 <br/> Unsupported record type: please edit the template to add support for it
- 
-     
-               
+			 <br/> Unsupported record type: Please edit the template and copy and modify an existing format to add support for this record type, if required.
+
+
+
 {* Close all the IF statements *}
-  
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-  {/if}	
-      
-      
+
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+  {/if}
+
+
 
 <br/> <hr> <br/> {* line breaks / horizontal rule between each record *}
 
