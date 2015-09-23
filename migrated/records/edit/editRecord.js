@@ -635,9 +635,9 @@ if (! top.HEURIST.edit) {
                 link.className += ' changed';
                 link.title = "Content has been modified";
             }
-            
+
             $("#changed_marker").show();
-            
+
 
             $("#close-button").hide();
             $("#save-record-buttons").show();
@@ -2096,12 +2096,12 @@ if (! top.HEURIST.edit) {
         textElt.name = newDiv.name;
         textElt.value = bdValue? bdValue.value : "";
         textElt.className = "in";
-        textElt.title = "Enter a standard ISO format date (yyyy or yyyy-mm-dd). You may also enter 'today' or 'now', and negative dates for BCE. ";
+        textElt.title = "Enter a standard ISO format date (yyyy or yyyy-mm-dd), 'today', 'yesterday', 'tomorrow' or 'now'. Enter negative dates for BCE.";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
         //top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
         this.addInputHelper.call(this, textElt.value, textElt);
-        
+
         top.HEURIST.edit.makeDateButton(textElt, this.document);
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput
@@ -2139,7 +2139,7 @@ if (! top.HEURIST.edit) {
         textElt.title = "Enter a date or click the icons to the right. Date can be 'now' or 'today', or year only - negative for BCE.";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
-        
+
         top.HEURIST.registerEvent(textElt, "change", function() {
             textElt.strTemporal = null;
             if (windowRef.changed) windowRef.changed();
@@ -2323,15 +2323,15 @@ if (! top.HEURIST.edit) {
 
         top.HEURIST.registerEvent(ViewRec, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-                
+
                 var url = top.HEURIST.basePath +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
                         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
-                
+
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
-                    
+
                         var dim = top.HEURIST.util.innerDimensions(window);
                         var options = {height:dim.h*0.9, width:700, 'close-on-blur':true};
-                    
+
                         top.HEURIST.util.popupURL(top, url, options);
                         return false;
                 }

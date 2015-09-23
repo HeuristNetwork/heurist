@@ -15,7 +15,7 @@
 /**
 * temporal.js
 * Temporal Object Library V 1.0
-* 
+*
 * This file contains Objects for dealing with temporals. Temporals are a robust representation
 * of date - time information allowing for uncertainty and imprecision.
 *
@@ -352,7 +352,7 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "COM"	:	"Comment",
     "EGP"	:	"Egyptian Date",
     "CLD"   :   "Calendar",
-    "CL2"   :   "Non-gregorian value",  //value in calendar value 
+    "CL2"   :   "Non-gregorian value",  //value in calendar value
 };
 
 Temporal.determination = {	0	:	"Unknown",
@@ -516,7 +516,7 @@ Temporal.checkValidity = function ( temporal ) {
                 temp = temp.replace(map.req[i][j] + "=","");//remove from search
             } else {
                 //req field not found
-                valid = false;  
+                valid = false;
                 if (i < map.req.length-1){
                     break;  //ignore if there are several sets
                 } else {
@@ -525,7 +525,7 @@ Temporal.checkValidity = function ( temporal ) {
                 }
             }
         }
-    
+
         if (valid) {  // remove any optional fields
             for (j=0; j < map.opt.length; j++) {
                 temp = temp.replace(map.opt[j] + "=","");
@@ -1033,6 +1033,20 @@ TDate.parse = function () {
 
         var date = new Date();
         var d = date.getDate();
+        var m = date.getMonth()+1;
+        var y = date.getFullYear();
+        str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
+        //str = (new Date()).toDateString();
+    }else if("tomorrow"===str.toLowerCase()){
+        var date = new Date();
+        var d = date.getDate()+1;  // TODO: will give wrong date at end of month
+        var m = date.getMonth()+1;
+        var y = date.getFullYear();
+        str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
+        //str = (new Date()).toDateString();
+    }else if("yesterday"===str.toLowerCase()){
+        var date = new Date();
+        var d = date.getDate()-1; // TODO: will give wrong date at beginning of month
         var m = date.getMonth()+1;
         var y = date.getFullYear();
         str = '' + y +'-'+ (m<=9?'0'+m:m) +'-'+ (d<=9?'0'+d:d);
@@ -1741,7 +1755,7 @@ function isTemporal(str) {
 }
 
 function formatGregJulian(val, isneed){
-    
+
         if(isneed && val){
 
             var tDate = TDate.parse(val);
@@ -1749,10 +1763,10 @@ function formatGregJulian(val, isneed){
             return tDate.getDay()+' '+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
             //toString('d MMM yyyy') - misses space!
             //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
-            
+
         }else{
             return val;
-        }        
+        }
 }
 
 /**
@@ -1762,19 +1776,19 @@ function temporalToHumanReadableString(inputStr) {
     var str = inputStr;
     var cld = '';
     if (str && str.search(/\|VER/) != -1) {	//we have a temporal
-    
+
         var cldname = 'gregorian';
         if (str.match(/CLD=([^\|]+)/)){
               cldname = str.match(/CLD=([^\|]+)/)[1].toLowerCase();
         }
-    
+
         if (str.match(/CL2=([^\|]+)/) && cldname!='gregorian') {
             cld = str.match(/CL2=([^\|]+)/)[1] + ' '+
                   str.match(/CLD=([^\|]+)/)[1];
         }
-        
+
         var isgj = (cldname=='gregorian' || cldname=='julian');
-    
+
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
         }else if (str.search(/TYP=s/) != -1 ) {
