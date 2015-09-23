@@ -103,12 +103,47 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 		return $value;
 }
 
-//
-//
-//
-function removeLeadingYearZeroes($value, $is_greg_or_julian=true){
 
-	$date = parseDateTime($value);
+//
+//
+//
+function validateAndConvertToISO($value){
+          if (strpos($value,"|")!==false) {// temporal encoded date
+                return 'Temporal';
+          }else{
+                //$date = parseDateTime($value);
+                //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
+                return removeLeadingYearZeroes($value, false, true);
+          }
+}
+//
+//   $is_greg_or_julian true - returns full month names
+//
+function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false){
+
+	//$date = parseDateTime($value);
+    // preg_match('/^\d+$/', $value)  && is_int(intval($value))
+    
+    $need_day = true;
+    
+    if( preg_match('/^-?\d+$/', $value) ){
+        $date = array('year'=>$value);
+    }else{
+        
+        $cnt_slash = substr_count($value,'/');
+        if( $cnt_slash>0){  // 6/2006  =  1-6-2006
+            if($cnt_slash==1){
+                $value = '1-'.$value;
+                $need_day = false;
+            }
+            $value = str_replace('/','-',$value);
+            
+        }else if(substr_count($value,'-')==1) {
+            $need_day = false;
+        }
+        
+        $date = date_parse($value);
+    }
 
 	if($date){
 
@@ -124,54 +159,71 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true){
 				$isbce = true;
 				$res = abs($res + 1);
 			}*/
-			$res = "".abs($date['year']);
-		}
+            $res = ''.abs($date['year']);
+            
+            if($is_strict_iso && abs($date['year'])<10000){
+               $res = str_pad($res,4,'0',STR_PAD_LEFT);
+            }
+		}else if($is_strict_iso){
+            return null;
+        }
         
-        if($is_greg_or_julian){
+        $has_time = (@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0);
+        
+        if($is_greg_or_julian && !$is_strict_iso){
 
             $res2 = "";
             if(@$date['day']){
                 $res2 = $date['day']; 
             }
             if(@$date['month']){
-                $res2 = $res2." ".date('M', mktime(0, 0, 0, $date['month'], 1)); //strtotime($date['month'].'01')); 
+                $res2 = $res2.' '.date('M', mktime(0, 0, 0, $date['month'], 1)); //strtotime($date['month'].'01')); 
             }
             
             $res = trim($res2."  ".$res);
 
         }else{
         
-		    if(@$date['month']){
-			    $res = $res."-".str_pad($date['month'],2,'0',STR_PAD_LEFT);
-		    }
-		    if(@$date['day']){
-			    $res = $res."-".str_pad($date['day'],2,'0',STR_PAD_LEFT);
-		    }
+		    if(@$date['month'] || $has_time){
+			    $res = $res.'-'.str_pad($date['month'],2,'0',STR_PAD_LEFT);
+		        if(@$date['day'] && ($need_day || $has_time)){
+			        $res = $res.'-'.str_pad($date['day'],2,'0',STR_PAD_LEFT);
+		        }
+            }
         }
 
-		if(@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+        if(true){
+		if($has_time){
 			if(!@$date['hour']) {
 					$date['hour'] = 0;
 			}
 
 			if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
-				$res = $res." ".str_pad($date['hour'],2,'0',STR_PAD_LEFT);
+				$res = $res.' '.str_pad(''.$date['hour'],2,'0',STR_PAD_LEFT);
 
 				if(!@$date['minute']) { $date['minute'] = 0; }
-				$res = $res.":".str_pad($date['minute'],2,'0',STR_PAD_LEFT);
+				$res = $res.':'.str_pad(''.$date['minute'],2,'0',STR_PAD_LEFT);
 			}
 			if(@$date['second']>0){
-				$res = $res.":".str_pad($date['second'],2,'0',STR_PAD_LEFT);
+				$res = $res.':'.str_pad(''.$date['second'],2,'0',STR_PAD_LEFT);
 			}
 		}
+        }else{   //debug
+            $res = $res.' '.@$date['hour'].':'.@$date['minute'].':'.@$date['second'];
+        }
 
 
 		if($isbce){
-			$res = $res." BCE";
+            if($is_strict_iso){
+                $res = '-'.$res;
+            }else{
+			    $res = $res.' BCE';
+            }
 		}
+        
 		return $res;
 	}else{
-		return $value;
+		return ($is_strict_iso)?null:$value;
 	}
 }
 
@@ -179,17 +231,17 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true){
 //
 //
 function parseDateTime($value) {
-	$isbce= (strpos($value,"-")===0);
+	$isbce= (strpos($value,'-')===0);
 	if($isbce){
 		$value = substr($value,1);
 	}
 
 	//if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
 
-	if($value && strlen($value)>10 && strpos($value,"T")>0){
-		$matches = explode("T",$value);
-	}else if($value && strlen($value)>10 && strpos($value," ")>0){
-		$matches = explode(" ",$value);
+	if($value && strlen($value)>10 && strpos($value,'T')>0){
+		$matches = explode('T',$value);
+	}else if($value && strlen($value)>10 && strpos($value,' ')>0){
+		$matches = explode(' ',$value);
 	}else{
 		$matches = array();
 		$matches[0] = $value;

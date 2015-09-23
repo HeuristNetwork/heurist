@@ -140,7 +140,7 @@ function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
                     $terms = array_diff($terms,$nonTerms);
                 }
             }
-            if (count($temp)<1) {
+            if (count($terms)<1) {
                 $dtyIDDefs[$dtyID] = "all";
             }else{
                 $dtyIDDefs[$dtyID] = $terms;

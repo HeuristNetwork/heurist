@@ -28,6 +28,7 @@
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+    require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once('valueVerification.php');
 ?>
 
@@ -221,13 +222,98 @@
                 ?>
             </div>
 
+            <hr />
+
+            <?php
+            // ----- Fields of type "Date" with  wrong values -------------------
+
+                //find all fields with faulty dates
+                $res = mysql_query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
+                    from recDetails, defDetailTypes, Records a
+                    where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) 
+                    and (dty_Type = "date") and (dtl_Value is not null)');
+                    
+                $wascorrected = 0;
+                $bibs = array();
+                $ids  = array();
+                $dtl_ids = array();
+                while ($row = mysql_fetch_assoc($res)){
+                    
+                    //parse and validate value
+                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value']);
+                    if($row['new_value']=='Temporal'){
+                        continue;
+                    }else if($row['new_value']==trim($row['dtl_Value'])){
+                        continue;
+                    }
+                    
+                    //remove wrong term IDs
+                    if(@$_REQUEST['fixdates']=="1"){
+                         
+                        if($row['new_value']){
+                            mysql_query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);    
+                        }else{
+                            mysql_query('delete from recDetails where dtl_ID='.$row['dtl_ID']);    
+                        }
+                        
+                        $wascorrected++;
+                    }else{
+                        array_push($bibs, $row);
+                        $ids[$row['dtl_RecID']] = 1;
+                        array_push($dtl_ids, $row['dtl_ID']);
+                    }
+                }
+
+                
+                if(count($bibs)==0){
+                    print '<div><h3>All records have recognisable Date values</h3></div>';
+                    if($wascorrected>1){
+                        print "<div>$wascorrected Date fields were corrected</div>";
+                    }
+                }
+                else
+                {
+                ?>
+
+                <div>
+                    <h3>Records with wrong Date fields</h3>
+                    <span>
+                        <a target=_new href='<?=HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
+                            (show results as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected('recCB5');">(show selected as search)</a>
+                    </span>
+                    <div>To fix faulty date values as suggested, please click here:
+                        <button 
+                            onclick="{document.getElementById('page-inner').style.display = 'none'; 
+                                    window.open('listDataErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
+                            Correct</button>
+                    </div>
+                </div>
+
+                <table>
+                    <?php
+                        foreach ($bibs as $row) {
+                        ?>
+                        <tr>
+                            <td><input type=checkbox name="recCB5" value=<?= $row['dtl_RecID'] ?>></td>
+                            <td><a target=_new
+                                    href='../../records/edit/editRecord.html?db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                    <?= $row['dtl_RecID'] ?>
+                                </a></td>
+                            <td><?= substr($row['rec_Title'],0,50) ?></td>
+                            <td><?= $row['dtl_Value'] ?></td>
+                            <td><?= $row['new_value'] ?></td>
+                        </tr>
+                        <?php
+                        }
+                print '</table>';
+                }
+            ?>
 
             <hr />
 
-
-            <!-- ----- Records with term field values which do not exist in the database ------------------- -->
-
             <?php
+            // ----- Records with term field values which do not exist in the database -------------------
                 $wasdeleted = 0;
 
                 //remove wrong term IDs
@@ -302,10 +388,7 @@
                         </tr>
                         <?php
                         }
-                        print "</table>\n";
-                    ?>
-                </table>
-                <?php
+                print '</table>';
                 }
             ?>
 
@@ -382,9 +465,7 @@
                             </tr>
                             <?php
                             }
-                        ?>
-                    </table>
-                    <?php
+                    echo '</table>\n';
                     }
                 ?>
             </div>
