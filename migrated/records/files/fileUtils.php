@@ -200,7 +200,7 @@
                 readfile($filename);                      
   
 //$res = @
-//error_log(">>>".$res);        
+//error_log(">>>".$res.'   '.$mimeType.'   '.filesize($filename));        
         }
     
   }

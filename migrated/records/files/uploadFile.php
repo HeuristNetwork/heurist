@@ -655,16 +655,25 @@
     */
     function resolveFilePath($path){
         
+        
+        
             if( $path && !file_exists($path) ){
-                chdir(HEURIST_FILES_DIR);
+                chdir(HEURIST_FILES_DIR);          // HEURIST_FILESTORE_DIR.'file_uploads'
                 $fpath = realpath($path);
                 if(file_exists($fpath)){
                     return $fpath;
                 }else{
-                    chdir(HEURIST_FILESTORE_DIR);
+                    chdir(HEURIST_FILESTORE_DIR);  
                     $fpath = realpath($path);
                     if(file_exists($fpath)){
                         return $fpath;
+                    }else{
+                        if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                            $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
+                        }
                     }
                 }
             }
