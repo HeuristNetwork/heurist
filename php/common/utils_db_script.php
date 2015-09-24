@@ -1,4 +1,4 @@
-
+<?php
 /**
 * filename: explanation
 *
@@ -19,7 +19,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-<?php
 
 //error_reporting(E_ALL);
 

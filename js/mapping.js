@@ -531,15 +531,20 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             vis_timeline = new vis.Timeline(ele, items, options);        
             //on select listener
             vis_timeline.on('select', function(params){
-                $( document ).bubble( "option", "content", "" );
-                
                 selection = params.items;
+                if(selection && selection.length>0){
+                    
                 var e = params.event;
+                                            //div.vis-item.vis-dot.vis-selected.vis-readonly
                 e.cancelBubble = true;
                 if (e.stopPropagation) e.stopPropagation();
                 e.preventDefault();
+                if($(e.target).hasClass('vis-item vis-dot vis-selected')) return;
+
+                $( document ).bubble( "option", "content", "" );
                 _showSelection(true); //show selction on map
                 _onSelectEventListener.call(that, selection); //trigger global selection event
+                }
             });
             
             //init timeline toolbar
@@ -1054,10 +1059,14 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         if ( isreset || (selection && selection.length>0) ){
             
+            var lastRecID = (selection)?selection[selection.length-1]:-1;
+            
             tmap.each(function(dataset){   
             
                 dataset.each(function(item){ //loop trough all items
 
+                    if(item.opts.places && item.opts.places.length>0){
+                
                         var idx = selection ?selection.indexOf(item.opts.recid) :-1;
                         
                         var itemdata = {
@@ -1116,7 +1125,15 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                                 
                                 items_to_update_data.push(itemdata);
                             }
-                        }                
+                        }   
+                        
+                    }//has places
+                    else{
+                        //for vis timline only
+                        if(lastRecID==item.opts.recid){
+                            lastSelectedItem = item;
+                        }
+                    }             
                 });
             });   
             /*
@@ -1129,7 +1146,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
            
             
             if(items_to_update.length>0) {
-                var lastRecID = (selection)?selection[selection.length-1]:-1;
                 
                 var tlband0 = $("#"+timelinediv_id).find("#timeline-band-0");
                 var keep_height = (tlband0.length>0)?tlband0.height():0;
@@ -1179,8 +1195,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             //item.timeline.layout();
             
             //select items on timeline
-            if(vis_timeline)
+            if(vis_timeline){
                 vis_timeline.setSelection( selection );
+            }
             
         }
         
@@ -1221,7 +1238,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 show_bubble_on_map = false;
                 
             //find recordset for selected item
-            item.dataset.id    
+            //item.dataset.id    
                 
                 
             if(true){ //top.HAPI4.currentRecordset){
@@ -1287,7 +1304,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 
             html =
 ed_html +             
-'<div style="min-width:190px;height:130px;overflow-y:auto;">'+  // border:solid red 1px; 
+'<div style="min-width:190px;height:124px;overflow-y:auto;">'+  // border:solid red 1px; 
 '<div style="font-weight:bold;width:100%;padding-bottom:4px;">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
 '<div class="popup_body">'+ html_thumb + description +'</div>'+
 ((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+temporalToHumanReadableString(startDate)+'</div>':'')+

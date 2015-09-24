@@ -264,7 +264,7 @@
                             items: ".timeline-event-icon"
                 });
                 $( document ).bubble({
-                            items: ".vis-item"
+                            items: ".vis-item,.vis-item-overflow"
                 });
 
                 $( window ).resize(function() {
@@ -314,7 +314,7 @@
                             $helper.dialog( "open" );
                         }
                  });
-                 $( "#helper" ).load('context_help/mapping_overview.html #content');
+                 $( "#helper" ).load('../context_help/mapping_overview.html #content');
                  //$( "#helper" ).find('p').css('padding','10px');
                  $( "#helper" ).dialog({
                     autoOpen: false, //(top.HAPI4.get_prefs('help_on')=='1'),

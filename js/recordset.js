@@ -313,10 +313,7 @@ function hRecordSet(initdata) {
                 
 
                 shape = _parseCoordinates(type, wkt, 0);
-                if(shape){
-                    
-                    if(mapenabled<MAXITEMS){
-                        
+                
                         item = {
                             title: recName,
                             start: (startDate || ''),
@@ -342,22 +339,22 @@ function hRecordSet(initdata) {
                                 URL:   _getFieldValue(record, 'rec_URL'),
                                 thumb: html_thumb,
                                 
-                                info: _getFieldValue(record, 'rec_Info')
+                                info: _getFieldValue(record, 'rec_Info'),
+                                
+                                places: null
                                 
                                 //,infoHTML: (infoHTML || ''),
                             }
                         };  
                                           
+                if(shape){
+                    if(mapenabled<MAXITEMS){
                         item.placemarks.push(shape);
                         item.options.places = [shape];
-                        aitems.push(item);
-                    
                     }
-                    
                     mapenabled++;
-                }else{
-                    //item.options.places = [];
                 }
+                aitems.push(item);
 
                 tot++;
         }}
@@ -520,7 +517,7 @@ function hRecordSet(initdata) {
                         //this is just address
                         _setFieldValue(record, 'rec_Icon', 'term4326' );
                         shtml = '<div style="text-align:left"><p><b>'+_getFieldValue(record, 'rec_Title')+'</b></p>'
-                                        + __addpart('<b>Comment:</b><br/>', _getFieldValue(record, DT_NOTES) )
+                                        + __addpart('<br/>', _getFieldValue(record, DT_NOTES) )
                                         + '<br/><br/>'                                  
                                         + '<a href="javascript:void(0)" class="moredetail" onclick="">More Detail</a>'  //parent.popupcontrol('show','individualpopup.php?IV_ID=862');
                                         + '</div>'

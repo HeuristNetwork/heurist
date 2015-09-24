@@ -124,6 +124,12 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
         $filename2 = $path . $rectype_id . "s.png";
         $alpha = 10;
     }else{
+        $rectype_id = substr($rectype_id, 0, -4);
+        $filename2 = $path . $rectype_id . ".png";
+        
+        if(file_exists($filename2)){
+            download_file($filename2);
+        }
         return;
     }
     

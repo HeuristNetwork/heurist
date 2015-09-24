@@ -89,7 +89,7 @@ content =
         //borders
         +'<div style="position: absolute; left: 1px; top: 1px; border-radius: 2px; background-color: rgb(255, 255, 255); width: 100%; height: '+(h-2)+'px;"></div>'
     +'</div>'
-    +'<div style="top: 9px; right:9px; position: absolute; left: 15px;" class="gm-style-iw">'
+    +'<div style="top: 9px; right:9px; position: absolute; left: 15px; bottom:2px; font-size:0.8em" class="gm-style-iw">'
         //+'<div style="overflow: auto; min-height: '+(h-14)+'px; width:'+(w-30)+'px">' //'max-width: '+(w-30)+'px;">'   display: inline-block; 
             //+'<div style="overflow: auto;">'
                 +content  //<div>!!!</div><div class="infotitle">Fisher lib</div><div class="infodescription"></div>
