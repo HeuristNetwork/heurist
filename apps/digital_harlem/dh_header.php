@@ -1,6 +1,7 @@
+<?php
 
 /**
-* filename: explanation
+* dh_header.php : Writes the Digital Harlem header with statistical information about the database
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -19,10 +20,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-<?php
-
     require_once(dirname(__FILE__)."/../../php/System.php");
-   
+
     $statistics = "";
     $system = new System();
     // connect to given database
@@ -30,23 +29,23 @@
 
         // Building query
         $query = "SELECT rec_RecTypeID as id, count(*) as count FROM Records WHERE rec_RecTypeID in (14,10,12,15) GROUP BY id";
-      
+
                     // Put record types & counts in the table
                     $res = $system->get_mysqli()->query($query);
                     $stats = array();
                     while($row = $res->fetch_assoc()) { // each loop is a complete table row
                             $stats[$row["id"]]= $row["count"];
                     }
-                    
+
         $statistics = '<p>Currently presenting <b title="Number of people">'.@$stats[10]
                     .'</b> people, <b title="Number of events">'.@$stats[14]
                     .'</b> events, <b title="Number of addresses">'.@$stats[12]
                     .'</b> addresses and <b title="Number of documents">'.@$stats[15]
                     .'</b> documentary sources related to Harlem, 1915-1930</p>';
 
-    }   
+    }
 ?>
-   
+
 <div id="topstuff">
 
   <div  id="header">
@@ -76,31 +75,31 @@
 ." FROM Records left join recDetails d2 on rec_ID=d2.dtl_recID and d2.dtl_DetailTypeID=94, recDetails d1 "
 ." WHERE rec_ID=d1.dtl_recID and rec_RecTypeID=25 and d1.dtl_DetailTypeID=4 "
 ." ORDER BY d2.dtl_Value";
-      
+
                     // Put record types & counts in the table
                     $res = $system->get_mysqli()->query($query);
                     $stats = array();
                     while($row = $res->fetch_assoc()) { // each loop is a complete table row
                         if($row["ord"]>0){
-?>                    
-                            <div class="menubutton"><a class="menuitem" href="javascript:void(0)" 
+?>
+                            <div class="menubutton"><a class="menuitem" href="javascript:void(0)"
                                 onClick="{ top.HEURIST4.util.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');}"><?=$row["title"]?></a></div>
 <?php
                         }else{
-?>                            
+?>
 <script>
       top.HEURIST4.util.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
 </script>
-<?php                            
+<?php
                         }
-?>                                                           
+?>
                             <div style="display:none;" id="webcontent<?=$row["id"]?>">
                             <?php
                                 print $row["content"];
                             ?>
-                            </div> 
+                            </div>
 
-<?php                            
+<?php
                     }
 ?>
 <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://digitalharlemblog.wordpress.com/', 'DHBlog'); }">BLOG</a></div>

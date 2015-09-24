@@ -1,6 +1,7 @@
+<?php
 
 /**
-* filename: explanation
+* dh_legend.php : Generates the legend panel for Digital Harlem
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -19,14 +20,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-<?php
     require_once(dirname(__FILE__)."/../../php/System.php");
-   
+
     $statistics = "";
     $system = new System();
     // connect to given database
     if(!(@$_REQUEST['db'] && $system->init(@$_REQUEST['db']))){
-        exit;   
+        exit;
     }
 /*
 <html>
@@ -37,7 +37,7 @@
 </body>
 </html>
 */
-?>  
+?>
 <div id="legendtable">
 <p><b>PLACES</b></p>
 <table>
@@ -57,12 +57,12 @@
     $res = $system->get_mysqli()->query($query);
     while($row = $res->fetch_assoc()) {
             $filename = HEURIST_TERM_ICON_URL.$row["trm_ID"].".png";
-//print $filename."<br>";            
+//print $filename."<br>";
 //print HEURIST_TERM_ICON_DIR.$row["trm_ID"].".png<br>";
             if(file_exists(HEURIST_TERM_ICON_DIR.$row["trm_ID"].".png")){
 print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
 print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
-                
+
             }
     }
 ?>
@@ -80,7 +80,7 @@ print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
             if(file_exists(HEURIST_TERM_ICON_DIR.$row["trm_ID"].".png")){
 print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
 print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
-                
+
             }
     }
 ?>
