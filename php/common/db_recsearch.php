@@ -32,6 +32,8 @@
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_searchfacets.php');
 
+    require_once (dirname(__FILE__).'/../../migrated/common/php/Temporal.php');
+    
     /**
     * Find minimal and maximal values for given detail type and record type
     * 
@@ -613,6 +615,7 @@ error_log(print_r($params['qa'], true));
 error_log($params['q']);      
       }
 */      
+      
             
             if(@$params['qa']){
                 $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser, $publicOnly);   

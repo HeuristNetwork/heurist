@@ -642,20 +642,32 @@
 
                 case 'field':
                 case 'f':
-
+                
                     $colon_pos = strpos($raw_pred_val, ':');
                     if (! $colon_pos) {
                         if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
                         else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
                             else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
                     }
-                    if ($colon_pos === FALSE)
+                    if ($colon_pos === FALSE){
                         return new AnyPredicate($this, $raw_pred_val);
-                    else if ($colon_pos == 0)
+                    } else if ($colon_pos == 0){
                         return new AnyPredicate($this, substr($raw_pred_val, 1));
-                        else
-                            return new FieldPredicate($this, $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos)),
-                                $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1)));
+                    }else{
+                        //field id is defined
+                        
+                        $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
+                        $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
+
+                        if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
+                            else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
+                                else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
+                        if($colon_pos===0){
+                            $value = substr($value,1);
+                        }        
+                        
+                        return new FieldPredicate($this, $fieldtype_id, $value);
+                    }
 
                 case 'linkedfrom': 
                     return new LinkedFromParentPredicate($this, $pred_val);                                            
@@ -922,20 +934,26 @@
 
             }else{
 
-                $timestamp = strtotime($this->value);
+                //old way
+                //$timestamp = strtotime($this->value);
+                //$datestamp = date('Y-m-d H:i:s', $timestamp);
+                
+                //new way
+                $datestamp = validateAndConvertToISO($this->value);
+                
                 if ($this->parent->exact) {
-                    $datestamp = date('Y-m-d H:i:s', $timestamp);
                     return "= '$datestamp'";
                 }
                 else if ($this->parent->lessthan) {
-                    $datestamp = date('Y-m-d H:i:s', $timestamp);
                     return "< '$datestamp'";
                 }
                 else if ($this->parent->greaterthan) {
-                    $datestamp = date('Y-m-d H:i:s', $timestamp);
                     return "> '$datestamp'";
                 }
                 else {
+                    return "like '$datestamp%'";
+                    
+                    //old way
                     // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
                     $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
                     if (@$matches[0]) {
@@ -1331,6 +1349,7 @@
             }
 
             $timestamp = $isin ?false:$this->isDateTime();
+            
             if ($timestamp) {
                 $date_match_pred = $this->makeDateClause();
             }
