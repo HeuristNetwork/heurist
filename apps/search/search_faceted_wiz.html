@@ -1,7 +1,7 @@
 <!--
 /**
-* Editing form for faceted searches 
-* 
+* Editing form for faceted searches
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -24,7 +24,7 @@
     <fieldset>
         <input type="hidden" name="svs_ID" id="svs_ID" />
         <div>
-            <div class="header"><label for="svs_Name">Saved search name</label></div>
+            <div class="header"><label for="svs_Name">Facet search name</label></div>
             <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" />
         </div>
 
@@ -34,29 +34,33 @@
         </div>
 
         <div>
-            <div class="header"  style="padding-top: 10px;"><label for="svs_UGrpID">Save in user group</label></div>
+            <div class="header"  style="padding-top: 10px;"><label for="svs_UGrpID">Save in work group</label></div>
             <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
         </div>
-        
-        
-        <div style="display:block;font-size:smaller;border-top:1px solid;padding:1em 0 1em;">
-            You may add a set of rules which will be used to expand the search result and bring in additional records each time a facet selection is made. This may be useful for bringing in information from related records, such as map location or dates for display on a map / timeline.        
+
+
+        <div style="display:block;font-size:smaller;border-top:1px solid;margin-top: 10px;padding:1em 0 1em;">
+            <div style="display:block;font-size:smaller;margin-left: 160px;padding:1em 0 1em;">
+                You may add a set of rules which will be used to expand the search result set and bring in additional records each time a facet selection is made. Use to bring in information from related records, such as map location or dates for display on a map / timeline.
+            </div>
         </div>
-        
+
         <div>
             <div class="header" style="vertical-align:top"><label for="svs_Rules">Rules</label></div>
             <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
-                style="margin-top:0.4em;width:300px" readonly="readonly"></textarea>
-                <div style="font-size: smaller; margin-top: 2px;">Please edit rules with button on the right</div>
+                style="margin-top:0.4em;width:350px" readonly="readonly"></textarea>
+                <div style="font-size: smaller; margin-top: 2px;">
+                Edit rules with the button on the right of the field.</div>
+
 
             <div id="svs_btnset">
                 <div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
                 <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
             </div>
 
-        </div>        
+        </div>
 
     </fieldset>
   </form>
-  <br />
+  <!-- <br /> -->
   <p class="messages"></p>

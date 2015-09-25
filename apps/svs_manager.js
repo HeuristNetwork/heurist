@@ -1,6 +1,6 @@
 /**
 * Saved search manager - list of saved searches by groups. Requires utils.js
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -88,7 +88,7 @@ $.widget( "heurist.svs_manager", {
         if(this.options.isdialog){
             css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};
         }else{
-            css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};  
+            css1 =  {'overflow-y':'auto','padding':'0.4em','top':'60px','bottom':0,'position':'absolute','left':0,'right':0};
         }
 
         this.div_content = $( "<div>" )
@@ -131,7 +131,7 @@ $.widget( "heurist.svs_manager", {
             });
         }else{
             this._updateGroups();
-        }    
+        }
 
     }, //end _create
 
@@ -175,14 +175,14 @@ $.widget( "heurist.svs_manager", {
         this.wcontainer.remove();
     },
 
-    //fill selector with groups  
+    //fill selector with groups
     _updateGroups: function(){
 
-        var that = this;  
+        var that = this;
         // list of groups for current user
         var selObj = this.select_grp.get(0);
         top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-            [{key:"bookmark"+top.HAPI4.currentUser.ugr_ID, title:top.HR('My Bookmarks')},{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('All Records')}], 
+            [{key:"bookmark"+top.HAPI4.currentUser.ugr_ID, title:top.HR('My Bookmarks')},{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('All Records')}],
             function(){
                 that.select_grp.val(top.HAPI4.currentUser.ugr_ID);
                 that.select_grp.change();
@@ -241,19 +241,19 @@ $.widget( "heurist.svs_manager", {
                 $itemdiv.append( $('<div>')
                     .addClass('edit-delete-buttons')
                     .css('margin','0.4em 1.2em')
-                    .append( $('<div>', { svsid:svsID, title: top.HR('Edit saved search') })
+                    .append( $('<div>', { svsid:svsID, title: top.HR('Edit saved search filter') })
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
                         .click(function( event ) {
                             that._editSavedSearch( $(this).attr('svsid') );
                     }) )
-                    .append($('<div>',{ svsID:svsID, title: top.HR('Delete saved search') })
+                    .append($('<div>',{ svsID:svsID, title: top.HR('Delete saved search filter') })
                         .button({icons: {primary: "ui-icon-close"}, text:false})
                         .click(function( event ) {
                             that._deleteSavedSearch( $(this).attr('svsid') );
                     }) )
                 );
             }
-        }           
+        }
     },
 
     /**
@@ -283,7 +283,7 @@ $.widget( "heurist.svs_manager", {
                 }
 
             );
-            }, "Confirmation");                 
+            }, "Confirmation");
     },
 
     /**
@@ -315,7 +315,7 @@ $.widget( "heurist.svs_manager", {
                 svs_query.val( request.q );
                 svs_rules.val( request.rules );
                 svs_notes.val( request.notes );
-                
+
                 svs_ugrid.val( svs[2]==top.HAPI4.currentUser.ugr_ID ?domain:svs[2] );
                 svs_ugrid.parent().hide();
 

@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* svs_edit.js : functions to edit and save saved searches (filters)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -27,21 +27,21 @@ function hSvsEdit(args) {
          edit_dialog = null,
          callback_method;
 
-     const _NAME = 0, _QUERY = 1, _GRPID = 2;         
-         
+     const _NAME = 0, _QUERY = 1, _GRPID = 2;
+
     /**
     * Initialization
     */
     function _init(args) {
         //this.currentSearch = currentSearch;
     }
-    
+
     /**
     * Assign values to UI input controls
-    * 
+    *
     * squery - need for new - otherwise it takes currentSearch
-    * domain need for new 
-    * 
+    * domain need for new
+    *
     * return false if saved search and true if rules
     */
     function _fromDataToUI(svsID, squery, groupID){
@@ -61,32 +61,32 @@ function hSvsEdit(args) {
 
             var selObj = svs_ugrid.get(0);
             Hul.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-                [{key:'bookmark', title:top.HR('My Bookmarks')}, 
-                 {key:'all', title:top.HR('All Records')},
+                [{key:'bookmark', title:top.HR('My Bookmarks (private)')},
+                 {key:'all', title:top.HR('My Filters (private)')},
                  {key:0, title:top.HR('Searches for guests')}],
                 function(){
                     svs_ugrid.val(Hul.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
             });
-            
+
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
-                
-                
+
+
                 var request = Hul.parseHeuristQuery(svs[_QUERY]);
                 domain  = request.w;
                 svs_ugrid.val(svs[_GRPID]==top.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
-                
+
                 svs_ugrid.parent().hide();
                 //svs_ugrid.attr('disabled', true);
-                
+
                 svs_id.val(svsID);
                 svs_name.val(svs[_NAME]);
                 svs_query.val( $.isArray(request.q)?JSON.stringify(request.q):request.q );
                 svs_rules.val( request.rules );
                 svs_notes.val( request.notes );
-                
+
 
             }else{ //add new saved search
 
@@ -94,26 +94,26 @@ function hSvsEdit(args) {
                 svs_name.val('');
                 svs_rules.val('');
                 svs_notes.val('');
-                
+
                 //var domain = 'all';
 
                 if(Hul.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(squery));
                     svs_query.val('');
-                    
+
                 } else if( squery && (squery.q || squery.rules) ) {
-                    
+
                     svs_query.val( Hul.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
                     svs_rules.val( Hul.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules );
-                    
-                } else if(!Hul.isempty(squery)){
-                    svs_query.val( squery ); 
-                } else {
-                   svs_query.val( '' ); 
-                }
-                
-                //svs_ugrid.val('all');
 
+                } else if(!Hul.isempty(squery)){
+                    svs_query.val( squery );
+                } else {
+                   svs_query.val( '' );
+                }
+
+                // TODO: remove this code if no longer needed
+                //svs_ugrid.val('all');
                 //fill with list of user groups in case non bookmark search
                 /*var selObj = svs_ugrid.get(0);
                 if(domain=="bookmark"){
@@ -125,9 +125,9 @@ function hSvsEdit(args) {
                 //svs_ugrid.parent().show();
                 svs_ugrid.attr('disabled', !Hul.isempty(groupID));
             }
-            
-            var isRules = Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val()); 
-            
+
+            var isRules = Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val());
+
             if(isRules){
                  svs_query.parent().hide();
                  svs_ugrid.parent().hide();
@@ -137,20 +137,20 @@ function hSvsEdit(args) {
                   if(!isEdit) svs_ugrid.parent().show();
                   return false;
             }
-            
-            
-            /* never need to hide! 
-            if(domain=='rules' || (Hul.isempty(svs_query.val()) &&  !Hul.isempty(svs_rules.val())) ){  //THIS IS RULE!!!
+
+
+            /* never need to hide!
+            if(domain=='rules' || (Hul.isempty(svs_query.val()) &&  !Hul.isempty(svs_rules.val())) ){  // We are dealing wit ha rule!!!
                     svs_query.parent().hide();
                     svs_ugrid.parent().hide();
             }*/
-            
+
         }
      }
-     
+
     /**
     * Show faceted search wizard
-    * 
+    *
     * @param params
     */
     function _showSearchFacetedWizard ( params ){
@@ -161,53 +161,53 @@ function hSvsEdit(args) {
             $.getScript(top.HAPI4.basePath+'apps/search/search_faceted_wiz.js', function(){ showSearchFacetedWizard(params); } );
         }
 
-    }  
-    
-    // 
+    }
+
+    //
     //
     //
     function _editRules(ele_rules, squery) {
-        
+
                var that = this;
-                
+
                 var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
                 if(!Hul.isnull(ele_rules)){
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
-                
-                Hul.showDialog(url, { width:1200, height:600, callback: 
+
+                Hul.showDialog(url, { width:1200, height:600, callback:
                     function(res){
                         if(!Hul.isempty(res)) {
                             if(res.mode == 'apply'){ //NOT USED ANYMORE //&& that._query_request){
-                                
-                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
-                                
+
+                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event
+
                             }else if(res.mode == 'save') {
-                                
+
                                 if(Hul.isnull(ele_rules)){ //call from resultListMenu - create new rule
-                                
-                                     //replace rules   
+
+                                     //replace rules
                                      if(!Hul.isObject(squery)){
                                         squery = Hul.parseHeuristQuery(squery);
                                      }
                                      squery.rules = res.rules;
                                      //squery = Hul.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
-                                    
+
                                     //mode, groupID, svsID, squery, callback
                                     _showDialog('saved', null, null, squery ); //open new dialog
                                 }else{
-                                    ele_rules.val( JSON.stringify(res.rules) ); //assign new rules    
+                                    ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
                                 }
                             }
                         }
                     }});
-        
-        
+
+
     }
-     
+
      /**
      * put your comment there...
-     * 
+     *
      * @param svsID
      * @param squery
      * @param mode - faceted, rules or saved
@@ -216,12 +216,12 @@ function hSvsEdit(args) {
      function _showDialog( mode, groupID, svsID, squery, callback ){
 
         if(callback){
-            callback_method = callback;  
-        } 
-        
+            callback_method = callback;
+        }
+
         if (mode == 'faceted'){
-        
-            var facet_params = {};    
+
+            var facet_params = {};
             if(svsID>0){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
@@ -229,25 +229,25 @@ function hSvsEdit(args) {
                         facet_params = $.parseJSON(svs[_QUERY]);
                     }
                     catch (err) {
-                        // Do something about the exception here
-                        Hul.showMsgDlg(top.HR('Can not init edit for faceted search. Corrupted parameters. Remove this search'), null, "Error");
+                        // TODo something about the exception here
+                        Hul.showMsgDlg(top.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove this search.'), null, "Error");
                         return;
                     }
                 }
             }
-            
-            _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, onsave: callback_method }); 
+
+            _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, onsave: callback_method });
             //function(event, request){   that._updateAfterSave(request, 'faceted');
-            
+
         }else if (mode == 'rules' && Hul.isnull(svsID)){ //it happens for new rules only
 
             if(Hul.isnull(squery)) squery = {};
              squery.q = ''; // from rule builder we always save pure query only
              _editRules(null, squery);
-            
+
         }else if(null == edit_dialog){
                 //create new dialog
-                
+
             var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
@@ -257,10 +257,10 @@ function hSvsEdit(args) {
                 $dlg.find('label').each(function(){
                     $(this).html(top.HR($(this).html()));
                 })
-                
+
                 $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
-                
-                $dlg.find("#svs_Rules_edit")                  
+
+                $dlg.find("#svs_Rules_edit")
                     .button({icons: {primary: "ui-icon-pencil"}, text:false})
                     .attr('title', top.HR('Edit Rule Set'))
                     .css({'height':'16px', 'width':'16px'})
@@ -268,8 +268,8 @@ function hSvsEdit(args) {
                         //that.
                         _editRules( $dlg.find('#svs_Rules') );
                     });
-                    
-                $dlg.find("#svs_Rules_clear")                  
+
+                $dlg.find("#svs_Rules_clear")
                     .button({icons: {primary: "ui-icon-close"}, text:false})
                     .attr('title', top.HR('Clear Rule Set'))
                     .css({'height':'16px', 'width':'16px'})
@@ -295,9 +295,9 @@ function hSvsEdit(args) {
                     allFields.removeClass( "ui-state-error" );
 
                     var bValid = Hul.checkLength( svs_name, "Name", message, 3, 30 );
-                    
+
                     if(bValid){
-                        
+
                         var bOk = Hul.checkLength( svs_query, "Query", null, 1 );
                         if(!bOk) bOk = Hul.checkLength( svs_rules, "Rules", null, 1 );
                         if(!bOk){
@@ -306,17 +306,17 @@ function hSvsEdit(args) {
                                 setTimeout(function() {
                                     message.removeClass( "ui-state-highlight", 1500 );
                                 }, 500 );
-                                bValid = false;         
+                                bValid = false;
                         }
                     }
 
                     if(bValid){
 
                         var svs_ugrid = svs_ugrid.val();
-                        
-                        var domain = 'all';    
+
+                        var domain = 'all';
                         if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
-                            domain = svs_ugrid;    
+                            domain = svs_ugrid;
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID;
                             //if(domain!="all"){query_to_save.push('w='+domain);}
                         }
@@ -324,7 +324,7 @@ function hSvsEdit(args) {
                             domain = 'rules';
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
                         }
-                        
+
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
                             svs_Query: Hul.composeHeuristQuery(svs_query.val(), domain, svs_rules.val(), svs_notes.val()),
@@ -404,24 +404,24 @@ function hSvsEdit(args) {
             edit_dialog.dialog("option",'title', top.HR(isRules?'Edit Rule Set':'Edit saved search'));
             edit_dialog.dialog("open");
         }
-         
+
      } //end  _showDialog
-    
-    
+
+
     //public members
     var that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
-        
-        remove: function () { 
+
+        remove: function () {
             //remove edit dialog from body
              edit_dialog.remove();
              edit_dialog = null;
         },
 
-        show: function( mode, groupID, svsID, squery, callback ) { 
+        show: function( mode, groupID, svsID, squery, callback ) {
              _showDialog( mode, groupID, svsID, squery, callback );
         }
 
@@ -430,4 +430,4 @@ function hSvsEdit(args) {
     _init(args);
     return that;  //returns object
 }
-    
+
