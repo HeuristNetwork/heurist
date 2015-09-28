@@ -91,6 +91,21 @@ $.widget( "heurist.dh_search", {
                 
             }
         });
+        
+        
+            var request = { q: {"t":"19","f:144":"532"},    //t:19 f:144:532
+                            w: 'a',
+                            f: 'map',
+                            source:this.element.attr('id') };
+            //perform search
+            top.HAPI4.RecordMgr.search(request, function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            var resdata = new hRecordSet(response.data);
+                        }else{
+                            top.HEURIST4.util.showMsgErr(response);
+                        }
+            });
+        
 
         this._refresh();
     }, //end _create
@@ -217,7 +232,7 @@ $.widget( "heurist.dh_search", {
             request.getrelrecs = 1;
 
             //get hapi and perform search
-            top.HAPI4.RecordMgr.search(request, $(this.document));
+            top.HAPI4.SearchMgr.doSearch( this, request );
             
             
         }

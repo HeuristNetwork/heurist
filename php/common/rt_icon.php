@@ -167,6 +167,19 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
         
         // load icon
         $img_icon = @imagecreatefrompng($filename);
+
+        $color_old = array(54,100,139);      
+        $color_new = array(255, 0, 0);      
+        /* RGB of your inside color */
+        $rgb = $color_new; //array(0,0,255);
+        /* Negative values, don't edit */
+        $rgb = array($color_old[0]-$rgb[0],$color_old[1]-$rgb[1],$color_old[2]-$rgb[2]);
+        imagefilter($img_icon, IMG_FILTER_NEGATE); 
+        imagefilter($img_icon, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
+        imagefilter($img_icon, IMG_FILTER_NEGATE); 
+        //imagealphablending( $im, false );
+        //imagesavealpha( $im, true );
+
         
         /*if($alpha==127){
             imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
@@ -174,6 +187,7 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
         // merge icon
         imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
         
+
         
         /*$bg = imagecolorallocate($img_icon, 255, 255, 255);
         // make the background transparent

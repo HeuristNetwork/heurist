@@ -643,7 +643,7 @@ $.widget( "heurist.search_faceted", {
                             }; //, facets: facets
             
             //perform search
-            top.HAPI4.RecordMgr.search(request, $(this.document));
+            top.HAPI4.SearchMgr.doSearch( this, request );
             
             //perform search for facet values
             //that._recalculateFacets(content_id);
@@ -699,7 +699,7 @@ $.widget( "heurist.search_faceted", {
                     subs_value =  this._first_query;
                 }else{
                     //replace with list of ids
-                    subs_value = __getMainSetIds();
+                    subs_value = top.HAPI4.currentRecordset.getMainSet().join(','); //  __getMainSetIds();
                     //subs_value = top.HAPI4.currentRecordset.getIds().join(',');
                 }
                 
@@ -760,7 +760,7 @@ $.widget( "heurist.search_faceted", {
                         query =  this._first_query;
                     }else{
                         //replace with list of ids
-                        query = {ids: __getMainSetIds()};
+                        query = {ids: top.HAPI4.currentRecordset.getMainSet().join(',')}; //__getMainSetIds()};
                         //query = {ids:top.HAPI4.currentRecordset.getIds().join(',')};
                     }
                 

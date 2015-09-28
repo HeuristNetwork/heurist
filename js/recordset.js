@@ -36,28 +36,42 @@ function hRecordSet(initdata) {
     fields = [],       //array of field names
     records = null,      //list of records objects {idx:[], ....}
     order = [], //array of record IDs in specified order
+    mainset = null, //array of record IDs that belong to main result set (without applied rules)
     
     rectypes = [],      // unique list of record types
     structures = null;  //record structure definitions for all rectypes in this record set
 
+    
+    var _progress = null;
+    
     /**
     * Initialization
     */
     function _init(response) {
 
         if(response){
-        
-        queryid = response.queryid;
-        total_count = Number(response.count);
-        offset = Number(response.offset);
-        fields = response.fields;
-        rectypes = response.rectypes;
-        records = response.records;  //$.isArray(records)
-        structures = response.structures;
-        order = response.order;
-        //@todo - merging
-        
+
+            queryid = response.queryid;
+            total_count = Number(response.count);
+            offset = Number(response.offset);
+            
+            if( top.HEURIST4.util.isArrayNotEmpty(response.mainset) ){
+                mainset = response.mainset;
+            }
+            
+            if( top.HEURIST4.util.isArrayNotEmpty(response['fields']) ){
+                fields = response.fields;
+                rectypes = response.rectypes;
+                structures = response.structures;
+                records = response.records;  //$.isArray(records)
+                order = response.order;
+                //@todo - merging
+            }else{
+                records = [];
+                order = response.records;
+            }
         }
+        
     }
 
     /**
@@ -275,7 +289,7 @@ function hRecordSet(initdata) {
                 wkt         = _getFieldValue(record, 'dtl_Geo'),
                 recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
                 
-                iconId      = _getFieldValue(record, 'rec_Icon');
+                iconId      = _getFieldValue(record, 'rec_Icon');  //used if icon differ from rectype icon
                 if(!iconId) iconId = recTypeID; //by default 
                 
                 var html_thumb = '';
@@ -920,7 +934,7 @@ function hRecordSet(initdata) {
             var _records = {};
             //find all records
             
-            if(!($.isArray(rec_ids) && rec_ids.length>0) ) return null;
+            if(!top.HEURIST4.util.isArrayNotEmpty(fields)) return null;
             
             var recID;
             if(Object.keys(records).length<rec_ids.length){
@@ -943,6 +957,36 @@ function hRecordSet(initdata) {
             }
             
             return this.getSubSet(_records);
+        },
+        
+        //take records from given recordset
+        fillHeader: function( recordset2 ){
+            
+            if(recordset2==null){
+                return;
+            }
+            
+            if(!top.HEURIST4.util.isArrayNotEmpty(fields)) fields = recordset2.getFields();
+            if(top.HEURIST4.util.isArrayNotEmpty(rectypes)) {
+                rectypes2 = recordset2.getRectypes();
+                jQuery.merge( rectypes2, rectypes );
+                rectypes = jQuery.unique( rectypes2 );
+            }else{
+                rectypes = recordset2.getRectypes();
+            }    
+            //structures = response.structures;
+            
+            var records2 = recordset2.getRecords();
+            var order2 = recordset2.getOrder();
+            var idx, recid;
+            
+            for (idx=0;idx<order2.length;idx++){
+                recid = order2[idx];
+                if(recid){ //&& records2[recid]){
+                    records[recid] = records2[recid];
+                }
+            }
+            
         },
         
         /**
@@ -1067,6 +1111,14 @@ function hRecordSet(initdata) {
         getFields: function(){
             return fields;
         },
+        
+        getMainSet: function(){
+            if( top.HEURIST4.util.isArrayNotEmpty(mainset) ){
+                return mainset;
+            }else{
+                return order;
+            }
+        },
 
         /* record - hRecord or rectypeID
         getRecordStructure: function(record){
@@ -1099,8 +1151,15 @@ function hRecordSet(initdata) {
         */
         toTimemap: function(dataset_name, filter_rt){
             return _toTimemap(dataset_name, filter_rt);
-        }
+        },
+        
+        setProgressInfo: function(data){
+            _progress = data;
+        },
 
+        getProgressInfo: function(){
+            return _progress;
+        }
     }
 
     _init(initdata);

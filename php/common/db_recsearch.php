@@ -397,7 +397,7 @@ if(@$params['debug']) echo $query."<br>";
             $params_top = $params;
             $params_top['q'] = @$params['tq'];
             $params_top['s'] = @$params['ts']; //sortby
-            $params_top['l'] = @$params['tl']; //limit
+            $params_top['limit'] = @$params['tl']; //limit
             $params_top['o'] = @$params['to']; //offset
 
             $query_top = get_sql_query_clauses($mysqli, $params_top, $currentUser, $publicOnly);
@@ -456,12 +456,11 @@ if(@$params['debug']) echo $query."<br>";
             
             //find main query
             $fin_result = recordSearch($system, $params, $need_structure, $need_details, $publicOnly);
+            //main result set
             $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] :array_keys($fin_result['data']['records']); //get ids
 
             if(@$params['qa']) unset($params['qa']);
                                                     
-//debug error_log("rules=".print_r($flat_rules, true));
-
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
             
             foreach($flat_rules as $idx => $rule){
@@ -473,8 +472,6 @@ if(@$params['debug']) echo $query."<br>";
                 $params['q'] = $rule['query'];
                 $parent_ids = $flat_rules[$rule['parent']]['results']; //list of record ids of parent resultset
                 $rule['results'] = array(); //reset
-
-//error_log("parent ".$rule['parent']." ids=".print_r($flat_rules[$rule['parent']]['results'], true));
                 
                 //split by 1000 - search based on parent ids (max 1000)
                 $k = 0;
@@ -484,8 +481,6 @@ if(@$params['debug']) echo $query."<br>";
                     $params['topids'] = implode(",", array_slice($parent_ids, $k, 1000));
                     $response = recordSearch($system, $params, false, $need_details2, $publicOnly);
 
-//error_log("topids ".$params['topids']."  params=".print_r($params, true));
-                    
                     if($response['status'] == HEURIST_OK){
 
                             //merge with final results
@@ -546,7 +541,7 @@ if(@$params['debug']) echo $query."<br>";
                                         $fin_result['data']['rectypes'][1] = 1;
                                     }
                                 }
-                            }
+                            }  //$is_get_relation_records
                             
                                 
 //error_log("added ".print_r(($fin_result['data']['records']), true));                                
@@ -572,7 +567,10 @@ if(@$params['debug']) echo $query."<br>";
             }
             
 //error_log("RES = ".print_r($fin_result, true));                            
-//error_log("RES ".print_r(($fin_result['data']['records']), true));                                
+//error_log("RES ".print_r(($fin_result['data']['records']), true));   
+
+            $fin_result['data']['mainset'] = $flat_rules[0]['results'];
+                             
             
             return $fin_result;               
         }//END RULES
@@ -666,7 +664,7 @@ if(@$params['qa']){
                     $records = array();
                     
                     while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //1000 maxim allowed chunk
-                        array_push($records, $row[0]);
+                        array_push($records, (int)$row[0]);
                     }
                     $res->close();
                     
@@ -724,18 +722,18 @@ if(@$params['qa']){
                             //search for specific details
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query(
-                                "select dtl_RecID,
+                                'select dtl_RecID,
                                 dtl_DetailTypeID,
                                 dtl_Value,
                                 astext(dtl_Geo),
                                 dtl_UploadedFileID,
-                                recUploadedFiles.ulf_ObfuscatedFileID,
+                                recUploadedFiles.ulf_ObfuscatedFileID,   
                                 recUploadedFiles.ulf_Parameters
                                 from recDetails 
                                 left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
-                                where dtl_RecID in (" . join(",", array_keys($records)) . ")");
+                                where dtl_RecID in (' . join(',', array_keys($records)) . ')');
                             if (!$res_det){
-                                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName."Search query error (retrieving details)", $mysqli->error);
+                                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving details)', $mysqli->error);
                                 return $response;
                             }else{
                                 while ($row = $res_det->fetch_row()) {
@@ -779,6 +777,7 @@ if(@$params['qa']){
                                 "order"=>$order,
                                 "rectypes"=>$rectypes,
                                 "structures"=>$rectype_structures));
+
                                 
                 }//$is_ids_only          
                 
@@ -827,6 +826,11 @@ if(@$params['qa']){
                     _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
                 }
             }
+        
+    }
+    
+    
+    function _loadRecordDetails( $system, $record_ids){
         
     }
 ?>

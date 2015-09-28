@@ -426,22 +426,25 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  q - query string
             *  w - a|b - domain all or bookmarks
             *  f - none or cs list detail,map,structure,tags,relations,(backward)links,text,comments - details of output
-            *  l - limit
+            *  limit - limit
             *  o - offset
             * 
             *  callback - callback function or  $document we have trigger the event
             */
             ,search: function(request, callback){
 
-                if(!request.increment || top.HEURIST4.util.isnull(request.id)){
-                        request.id = Math.round(new Date().getTime() + (Math.random() * 100));
-                }
+
+                if(!$.isFunction(callback)){   //@todo - remove all this stuff since it is implemented in SearchMgr
                 
-                if(!$.isFunction(callback)){
+                    if(!request.increment || top.HEURIST4.util.isnull(request.id)){
+                            request.id = Math.round(new Date().getTime() + (Math.random() * 100));
+                    }
+                    
                     var document = callback;
                     if(!top.HEURIST4.util.isnull(document) && !request.increment){
                         document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
                     } 
+
                     callback = function(response)
                     {
                         var resdata = null;
@@ -461,8 +464,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 }
 
-                if(top.HEURIST4.util.isnull(request.l)){
-                    request.l = top.HAPI4.get_prefs('search_limit'); //top.HEURIST.displayPreferences['results-per-page'];
+                if(top.HEURIST4.util.isnull(request.limit)){
+                    request.limit = top.HAPI4.get_prefs('search_limit'); //top.HEURIST.displayPreferences['results-per-page'];
                 }
                 
                 //request.chunk = true;
@@ -672,7 +675,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             LOGOUT: "LOGOUT",
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
-            ON_REC_SEARCH_APPLYRULES: "ON_REC_SEARCH_APPLYRULES",
             ON_REC_SEARCHRESULT: "ON_REC_SEARCHRESULT",
             //ON_REC_SEARCHTERMINATE: "ON_REC_SEARCHTERMINATE",
             ON_REC_PAGESET: "ON_REC_PAGESET",
@@ -778,6 +780,10 @@ function hAPI(_db, _oninit) { //, _currentUser
         },*/
 
         RecordMgr: new hRecordMgr(),
+        
+        //@todo - assign it later since we may have different search managers - incremental, partial...
+        //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result
+        SearchMgr: new hSearchMinimal(), //class that responsible for search and incremental loading of result
 
         /*RecordMgr: function(){
         return hRecordMgr();

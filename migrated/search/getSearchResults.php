@@ -172,7 +172,7 @@
 		if (! $fresh) {
 			$record = $memcache->get($key);
 		}
-		if (! $record) {
+		if (true || ! $record) { //ARTEM
 			$record = loadBareRecordFromDB($id);
 			if ($record) {
 				$memcache->set($key, $record);
@@ -252,6 +252,7 @@
 	}
 
 	function loadRecordDetails(&$record) {
+        
 		$recID = $record["rec_ID"];
 		$squery =
 		"select dtl_ID,

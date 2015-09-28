@@ -1087,7 +1087,8 @@ $.widget( "heurist.svs_list", {
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);
                     }
                     
-                    $(this.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ {rules:request.rules, target:ele} ]); //global app event   - see resultList.js for listener
+                    top.HAPI4.SearchMgr.doApplyRules( this, [ {rules:request.rules, target:ele} ] );
+                    
                 }else{
                     //additional params
                     request.f = this.options.searchdetails;
@@ -1099,7 +1100,7 @@ $.widget( "heurist.svs_list", {
                     //that._trigger( "onresult", null, resdata ); //this widget event
 
                     //get hapi and perform search
-                    top.HAPI4.RecordMgr.search(request, $(this.document));
+                    top.HAPI4.SearchMgr.doSearch( this, request );
                 }
             }
         }

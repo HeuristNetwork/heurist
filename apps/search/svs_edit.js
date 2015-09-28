@@ -178,11 +178,8 @@ function hSvsEdit(args) {
                 Hul.showDialog(url, { width:1200, height:600, callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
-                            if(res.mode == 'apply'){ //NOT USED ANYMORE //&& that._query_request){
-                                
-                                $(that.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_APPLYRULES, [ res.rules ]); //global app event  
-                                
-                            }else if(res.mode == 'save') {
+                            
+                            if(res.mode == 'save') {
                                 
                                 if(Hul.isnull(ele_rules)){ //call from resultListMenu - create new rule
                                 

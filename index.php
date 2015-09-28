@@ -97,6 +97,8 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="js/recordset.js"></script>
         <script type="text/javascript" src="js/hapi.js"></script>
         <script type="text/javascript" src="js/layout.js"></script>
+        <script type="text/javascript" src="js/search_incremental.js"></script>
+        <script type="text/javascript" src="js/search_minimal.js"></script>
         <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
 
         <script type="text/javascript" src="apps/topmenu/help_tips.js"></script>
@@ -229,12 +231,16 @@ if(@$_REQUEST['db']){
                                         if(top.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
                                         var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
                                         //top.HEURIST4.query_request = request;
-                                        setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
+                                        setTimeout(function(){
+                                                top.HAPI4.SearchMgr.doSearch(document, request);
+                                        }, 3000);
                                     }else if(layoutid!='DigitalHarlem'){
                                         var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                                         if(!top.HEURIST4.util.isempty(init_search)){
                                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                                            setTimeout(function(){top.HAPI4.RecordMgr.search(request, $(document));}, 3000);
+                                            setTimeout(function(){
+                                                top.HAPI4.SearchMgr.doSearch(document, request);
+                                            }, 3000);
                                         }
                                     }
 

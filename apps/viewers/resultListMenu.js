@@ -441,7 +441,7 @@ $.widget( "heurist.resultListMenu", {
                                 
             this._query_request.id = null;
             this._query_request.source = this.element.attr('id');
-            top.HAPI4.RecordMgr.search(this._query_request, $(this.document));
+            top.HAPI4.SearchMgr.doSearch( this, this._query_request );
     },
 
     getSelectionIds: function(msg, limit){
