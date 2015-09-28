@@ -96,9 +96,9 @@ $.widget( "heurist.ruleBuilder", {
         .attr('title', 'Delete this step in the rule' )
         .css('font-size','0.8em')
         .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
-        
+
         if(this.options.level<3)
-            this.btn_add_next_level = $( "<button>", {text:'Add Next (Lvl '+this.options.level+')'} )
+            this.btn_add_next_level = $( "<button>", {text:'Add Step '+this.options.level} )
             .attr('title', 'Adds another step to this rule' )
             .css('font-size','0.8em')
             .button().appendTo(this.div_btn);
@@ -629,8 +629,8 @@ $.widget( "heurist.ruleBuilder", {
        Target rectype,
        Filter ,
        linktype  0 links (any), 1 linedfrom, 2 linkedto, 3 relationfrom, 4 relatedto
-       
-    
+
+
     */
     _getCodes: function(){
 
