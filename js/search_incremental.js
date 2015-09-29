@@ -345,11 +345,9 @@ function hSearchIncremental() {
     //
     // apply rules to existed result set
     //
-    function _doApplyRules( originator, data ){
+    function _doApplyRules( originator, rules ){
         
-                if(data){
-
-                    var rules = data.rules?data.rules:data;
+                if(rules){
 
                     //create flat rule array
                     _prepareRules( rules ); //indexes are rest inside this function
@@ -385,11 +383,15 @@ function hSearchIncremental() {
                             $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
                             $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ top.HAPI4.currentRecordset ]);  //global app event
                          }
+                         if(!_doSearchIncrement()){//start search rules
+                            _searchCompleted( false );
+                         }
+                         
                     } else if(!top.HEURIST.util.isempty(_rules)){
-                        Hul.showMsgFlash(top.HR('Rule sets require an initial search result as a starting point.'),
-                             3000, top.HR('Warning'), data.target);
+                        return false;
                     }
                 }
+                return true;
     }
     
     //
@@ -466,7 +468,7 @@ function hSearchIncremental() {
  
         // apply rules to existing result set
         doApplyRules:function( originator, request ){
-            _doApplyRules( originator, request );
+            return _doApplyRules( originator, request );
         },
         
         doStop: function(){

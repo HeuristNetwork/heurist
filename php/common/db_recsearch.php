@@ -388,27 +388,8 @@ if(@$params['debug']) echo $query."<br>";
         }
         
         
-        if(@$params['tq']){    //NOT USED TO REMOVE    
-            // if params has "TQ" parameter this is search for linked/related records
-            // tsort, tlimit and toffset are parameters for top(parent) query
-            // besides to simplify query, instead of these 4 parameters we may have "topids" - comma separated list of parent IDS
-            
-            //1. define query parts for top/parent query
-            $params_top = $params;
-            $params_top['q'] = @$params['tq'];
-            $params_top['s'] = @$params['ts']; //sortby
-            $params_top['limit'] = @$params['tl']; //limit
-            $params_top['o'] = @$params['to']; //offset
-
-            $query_top = get_sql_query_clauses($mysqli, $params_top, $currentUser, $publicOnly);
-            
-            //2. define current query - set one of paremters as a reference to the parent query
-            
-            $params['parentquery'] = $query_top;
-
-//error_log("parent query ".print_r($query_top, true));
-        
-        }else if( @$params['topids'] ){ //if topids are defined we use them as starting point for following rule query
+        if ( @$params['topids'] ){ //if topids are defined we use them as starting point for following rule query
+            // it is used for incremental client side only
             
             //@todo - implement it in different way - substitute topids to query json as predicate ids:
          
@@ -424,7 +405,7 @@ if(@$params['debug']) echo $query."<br>";
             $query_top['limit'] =  '';
             $query_top['offset'] =  '';
             
-            $params['parentquery'] = $query_top;
+            $params['parentquery'] = $query_top;  //parentquery parameter is used in  get_sql_query_clauses
             
         }else if( @$params['rules'] ){ //special case - server side operation
         
@@ -454,7 +435,7 @@ if(@$params['debug']) echo $query."<br>";
             
             $params['nochunk'] = 1; //return all records 
             
-            //find main query
+            //find main query results
             $fin_result = recordSearch($system, $params, $need_structure, $need_details, $publicOnly);
             //main result set
             $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] :array_keys($fin_result['data']['records']); //get ids
@@ -527,8 +508,6 @@ if(@$params['debug']) echo $query."<br>";
                                 unset($params2['q']);
                                 
                                 $params2['sql'] = $select_clause.$from.$where;
-                                
-//error_log("SQL REL= ".$params2['sql']);                                                                
                             
                                 $response = recordSearch($system, $params2, false, $need_details, $publicOnly);
                                 if($response['status'] == HEURIST_OK){
@@ -542,9 +521,6 @@ if(@$params['debug']) echo $query."<br>";
                                     }
                                 }
                             }  //$is_get_relation_records
-                            
-                                
-//error_log("added ".print_r(($fin_result['data']['records']), true));                                
                         
                     }else{
                         //@todo terminate execution and return error
@@ -555,7 +531,6 @@ if(@$params['debug']) echo $query."<br>";
                 }//while chunks
                 
             } //for rules
-//error_log("RES = ".print_r($flat_rules, true));                
                 
             
             $fin_result['data']['count'] = count($fin_result['data']['records']);

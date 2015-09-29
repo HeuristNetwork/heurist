@@ -464,51 +464,17 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 }
 
+                
+                //if limit is not defined - get it from preferences
                 if(top.HEURIST4.util.isnull(request.limit)){
-                    request.limit = top.HAPI4.get_prefs('search_limit'); //top.HEURIST.displayPreferences['results-per-page'];
+                    request.limit = top.HAPI4.get_prefs('search_limit');
                 }
                 
-                //request.chunk = true;
-
-                if(top.HEURIST4.util.isnull(request.chunk)){
-                    if(top.HEURIST4.util.isnull(request.rules_onserver)){
-                           request.rules = null; //reset rules parameter - since we search incrementally from client side
-                    }
-                    _callserver('record_search', request, callback);    //standard search 
-                }else{
-                    /*
-                    if(!request.db){
-                        request.db = _database;
-                    }
-
-                    var url = top.HAPI4.basePath+"php/api/record_search.php"; //+(new Date().getTime());
-                    
-                    //response is returned by chunks
-                    $.stream(url, {
-                        type: "http",
-                        dataType: "json",
-                        openData: request, 
-                        
-                        open:function(){
-                            //println("opened");
-                        },
-                        message:function(event){
-                            if(callback){
-                                callback(event.data);
-                            }
-                        },
-                        error:function(){
-                            if(callback){
-                                callback({status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                                    message: jqXHR.responseText });
-                            }
-                        },
-                        close:function(){
-                            //println("closed");
-                        }
-                    });                    
-                    */
+                //
+                if(!top.HEURIST4.util.isnull(request.increment)){
+                       request.rules = null; //reset rules parameter - since we search incrementally from client side
                 }
+                _callserver('record_search', request, callback);    //standard search 
             
             }
             

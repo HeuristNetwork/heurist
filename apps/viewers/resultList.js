@@ -1203,6 +1203,8 @@ $.widget( "heurist.resultList", {
                     
                     if(pageno<0){
                         pageno = 0;
+                    }else if(pageno>=this.max_page){
+                        pageno= this.max_page - 1;     
                     }
                     this.current_page = pageno;
                     this._renderPagesNavigator(); //redraw paginator

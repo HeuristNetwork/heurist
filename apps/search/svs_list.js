@@ -1087,7 +1087,11 @@ $.widget( "heurist.svs_list", {
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);
                     }
                     
-                    top.HAPI4.SearchMgr.doApplyRules( this, [ {rules:request.rules, target:ele} ] );
+                    //target is required 
+                    if(! top.HAPI4.SearchMgr.doApplyRules( this, request.rules ) ){
+                        Hul.showMsgFlash(top.HR('Rule sets require an initial search result as a starting point.'),
+                             3000, top.HR('Warning'), ele);
+                    }
                     
                 }else{
                     //additional params

@@ -68,6 +68,12 @@ function hSearchMinimal() {
             if( top.HEURIST4.util.isnull(request.id) ) { //unique id for request
                 request.id = Math.round(new Date().getTime() + (Math.random() * 100));
             }
+            
+            request.source = _owner_element_id;
+            request.limit = 100000; //or nochunk=1 ?
+            request.nochunk = 1;
+            request.idonly = 1;
+            
             if(!top.HEURIST4.util.isnull(_owner_doc)){
                 $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
@@ -76,15 +82,10 @@ function hSearchMinimal() {
                  _query_request = request; //keep for search in current result
 
              top.HAPI4.currentRecordset = null;
-             top.HAPI4.currentRecordsetByLevels = null;
+             top.HAPI4.currentRecordsetByLevels = null; //to remove
              
-             request.l = 100000; //or nochunk=1 ?
-             request.nochunk = 1;
-             request.idonly = 1;
-             request.rules_onserver = 1;
-        
-            //perform search
-            top.HAPI4.RecordMgr.search(request, _onSearchResult);
+             //perform search
+             top.HAPI4.RecordMgr.search(request, _onSearchResult);
         
     }
     
@@ -140,7 +141,19 @@ function hSearchMinimal() {
     //
     // apply rules to existed result set
     //
-    function _doApplyRules( originator, data ){
+    function _doApplyRules( originator, rules ){
+        
+        if(top.HAPI4.currentRecordset && top.HEURIST4.util.isArrayNotEmpty(top.HAPI4.currentRecordset.getMainSet())){
+        
+            var request = { q: 'ids:'+top.HAPI4.currentRecordset.getMainSet().join(','),
+                            rules: rules,
+                            w: _query_request?_query_request.w:'a'};
+        
+            _doSearch( originator, request );
+            return true;
+        }else{
+            return false;
+        }
     }
     
     //public members
@@ -157,7 +170,7 @@ function hSearchMinimal() {
  
         // apply rules to existing result set
         doApplyRules:function( originator, request ){
-            _doApplyRules( originator, request );
+            return _doApplyRules( originator, request );
         },
         
         doStop: function(){

@@ -504,10 +504,9 @@ function addQueryLayer(source, index) {
         if(query==null){ //this is simple (non JSON) queru without rules
             query = {q: source.query, w: "all"};
         }
-        query['rules_onserver'] = 1;
         query['getrelrecs'] = 1;  //return all related records including relationship records
         query['f'] = "map";
-        query['l'] = 3000;
+        query['limit'] = 3000;
 
 
         // Retrieve records for this query
