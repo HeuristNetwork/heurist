@@ -88,6 +88,11 @@ $.widget( "heurist.resultList", {
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
+        this.div_loading = $( "<div>" )
+        .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
+                'z-index':'99999999', 'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center' })
+        .appendTo( this.element ).hide();
+        
         /*
         this.action_buttons = $('<div>')
         .css('display','inline-block')
@@ -161,10 +166,10 @@ $.widget( "heurist.resultList", {
         $('#list_layout_thumbs').button({icons: {primary: "icon-th-large"}, text:false});
 
         //----------------------
-
-        this.span_pagination = $( "<div>").css({'position':'absolute','right':'80px','min-width':'10em','padding':'6px 2em 0 0px'}).appendTo( this.div_toolbar )
+                                                                                    //,'min-width':'10em'
+        this.span_pagination = $( "<div>").css({'position':'absolute','right':'80px','padding':'6px 2em 0 0px'}).appendTo( this.div_toolbar )
         $( "<span>").appendTo( this.span_pagination );
-        this.span_info = $("<span>").css('font-style','italic').appendTo( this.span_pagination );
+        this.span_info = $("<span>").css({'font-style':'italic','padding':'0 0.5em'}).appendTo( this.span_pagination );
 
         //-----------------------
 
@@ -190,7 +195,7 @@ $.widget( "heurist.resultList", {
             if(e.type == top.HAPI4.Event.ON_LAYOUT_RESIZE){
 
                 var w = that.element.width();
-                if (w < 390) {
+                if ( w < 390 || (w < 430 && that.max_page>1) ) {
                     that.span_info.hide();    
                 }else{
                     that.span_info.show();    
@@ -346,10 +351,19 @@ $.widget( "heurist.resultList", {
         this.menu_share.remove();
         this.menu_more.remove();
         this.menu_view.remove();
+        
+        this._removeNavButtons();
 
+    },
+    
+    _removeNavButtons: function(){
         if(this.btn_page_menu){
             this._off( this.btn_page_menu, 'click');
+            this._off( this.btn_page_prev, 'click');
+            this._off( this.btn_page_next, 'click');
             this.btn_page_menu.remove();
+            this.btn_page_prev.remove();
+            this.btn_page_next.remove();
             this.menu_pages.remove();
         }
     },
@@ -980,9 +994,11 @@ $.widget( "heurist.resultList", {
 
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+            this.div_loading.show();
+            //this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
-            this.div_content.css('background','none');
+            this.div_loading.hide();
+            //this.div_content.css('background','none');
         }
     },
 
@@ -1034,11 +1050,7 @@ $.widget( "heurist.resultList", {
         var finish = 0;
 
         //this._renderRecNumbers();
-        if(this.btn_page_menu){
-            this._off( this.btn_page_menu, 'click');
-            this.btn_page_menu.remove();
-            this.menu_pages.remove();
-        }
+        this._removeNavButtons();
         
         var span_pages = $(this.span_pagination.children()[0]);//first();
         span_pages.empty();
@@ -1126,6 +1138,13 @@ $.widget( "heurist.resultList", {
         
         if(ismenu){
             //show as menu
+            this.btn_page_prev = $( "<button>", {text:currentPage} )
+            .appendTo( span_pages )
+            .css({'font-size':'0.7em', 'width':'1.6em'})
+            .button({icons: {
+                primary: "ui-icon-triangle-1-w"
+            }, text:false});
+            
             this.btn_page_menu = $( "<button>", {
                     text: (currentPage+1)
             })
@@ -1135,6 +1154,14 @@ $.widget( "heurist.resultList", {
                 secondary: "ui-icon-triangle-1-s"
             }});
 
+            this.btn_page_next = $( "<button>", {text:currentPage} )
+            .appendTo( span_pages )
+            .css({'font-size':'0.7em', 'width':'1.6em'})
+            .button({icons: {
+                primary: "ui-icon-triangle-1-e"
+            }, text:false});
+            
+            
             this.menu_pages = $('<ul>'+smenu+'</ul>')   //<a href="#">
                 .zIndex(9999)
                 .css({'font-size':'0.7em', 'position':'absolute'})
@@ -1145,6 +1172,11 @@ $.widget( "heurist.resultList", {
                         that._renderPage(page);
                 }})
                 .hide();
+
+            this._on( this.btn_page_prev, {
+                click: function() {  that._renderPage(that.current_page-1)  }});
+            this._on( this.btn_page_next, {
+                click: function() {  that._renderPage(that.current_page+1)  }});
                 
             this._on( this.btn_page_menu, {
                 click: function() {
@@ -1258,8 +1290,12 @@ $.widget( "heurist.resultList", {
                                         f: 'header',
                                         id: that.current_page, //Math.round(new Date().getTime() + (Math.random() * 100)),
                                         source:this.element.attr('id') };
+                                        
+                        that.loadanimation(true);
 
                         top.HAPI4.RecordMgr.search(request, function( response ){
+                            
+                            that.loadanimation(false);
                             
                             if(response.status == top.HAPI4.ResponseStatus.OK){
 
