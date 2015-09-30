@@ -66,8 +66,8 @@ function doLogin(isforsed){
                         var password = $dlg.find('#password');
                         var session_type = $dlg.find('input[name="session_type"]');
 
-                        var bValid = top.HEURIST4.util.checkLength( username, "username", message, 3, 16 )
-                        && top.HEURIST4.util.checkLength( password, "password", message, 3, 16 );
+                        var bValid = top.HEURIST4.util.checkLength( username, "username", message, 1 )
+                        && top.HEURIST4.util.checkLength( password, "password", message, 1 );         //3,63
 
                         if ( bValid ) {
 

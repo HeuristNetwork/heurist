@@ -78,11 +78,12 @@ function hSearchMinimal() {
                 $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
         
+            //clone - to use mainMenu.js
             top.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
-                 _query_request = request; //keep for search in current result
+            _query_request = request; //keep for search in current result
 
              top.HAPI4.currentRecordset = null;
-             top.HAPI4.currentRecordsetByLevels = null; //to remove
+             top.HAPI4.currentRecordsetByLevels = null; //to remove - not used anymore
              
              //perform search
              top.HAPI4.RecordMgr.search(request, _onSearchResult);
@@ -100,6 +101,9 @@ function hSearchMinimal() {
                 if(_query_request!=null && response.data.queryid==_query_request.id) {
 
                     resdata = new hRecordSet(response.data);
+                    
+                    resdata.setRequest( top.HEURIST4.util.cloneJSON(_query_request) );
+                    
                     top.HAPI4.currentRecordset = resdata;
 
                     _searchCompleted( false );

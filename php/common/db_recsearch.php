@@ -622,12 +622,12 @@ if(@$params['qa']){
         
         $res = $mysqli->query($query);
         if (!$res){
-            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName."Search query error", $mysqli->error);
+            $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error', $mysqli->error);
         }else{
 
             $fres = $mysqli->query('select found_rows()');
             if (!$fres)     {
-                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName."Search query error (retrieving number of records)", $mysqli->error);
+                $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving number of records)', $mysqli->error);
             }else{
 
                 $total_count_rows = $fres->fetch_row();
@@ -644,18 +644,18 @@ if(@$params['qa']){
                     $res->close();
                     
                     if(@$params['vo']=='h3'){ //output version
-                        $response = array("resultCount" => $total_count_rows, 
-                                          "recordCount" => count($records), 
-                                          "recIDs" => implode(",", $records) );
+                        $response = array('resultCount' => $total_count_rows, 
+                                          'recordCount' => count($records), 
+                                          'recIDs' => implode(',', $records) );
                     }else{
                     
-                        $response = array("status"=>HEURIST_OK,
-                            "data"=> array(
-                                "queryid"=>@$params['id'],  //query unqiue id
-                                "count"=>$total_count_rows,
-                                "offset"=>get_offset($params),
-                                "reccount"=>count($records),
-                                "records"=>$records));
+                        $response = array('status'=>HEURIST_OK,
+                            'data'=> array(
+                                'queryid'=>@$params['id'],  //query unqiue id
+                                'count'=>$total_count_rows,
+                                'offset'=>get_offset($params),
+                                'reccount'=>count($records),
+                                'records'=>$records));
 
                     }
                             
@@ -713,22 +713,22 @@ if(@$params['qa']){
                             }else{
                                 while ($row = $res_det->fetch_row()) {
                                     $recID = array_shift($row);
-                                    if( !array_key_exists("d", $records[$recID]) ){
-                                        $records[$recID]["d"] = array();
+                                    if( !array_key_exists('d', $records[$recID]) ){
+                                        $records[$recID]['d'] = array();
                                     }
                                     $dtyID = $row[0];
-                                    if( !array_key_exists($dtyID, $records[$recID]["d"]) ){
-                                        $records[$recID]["d"][$dtyID] = array();
+                                    if( !array_key_exists($dtyID, $records[$recID]['d']) ){
+                                        $records[$recID]['d'][$dtyID] = array();
                                     }
 
                                     if($row[2]){
-                                        $val = $row[1]." ".$row[2]; //for geo
+                                        $val = $row[1].' '.$row[2]; //for geo
                                     }else if($row[3]){
                                         $val = array($row[4], $row[5]); //obfuscted value for fileid
                                     }else { 
                                         $val = $row[1];
                                     }
-                                    array_push($records[$recID]["d"][$dtyID], $val);
+                                    array_push($records[$recID]['d'][$dtyID], $val);
                                 }
                                 $res_det->close();
 
@@ -740,18 +740,18 @@ if(@$params['qa']){
                         }
 
                         //"query"=>$query,
-                        $response = array("status"=>HEURIST_OK,
-                            "data"=> array(
-                                //"query"=>$query,
-                                "queryid"=>@$params['id'],  //query unqiue id
-                                "count"=>$total_count_rows,
-                                "offset"=>get_offset($params),
-                                "reccount"=>count($records),
-                                "fields"=>$fields,
-                                "records"=>$records,
-                                "order"=>$order,
-                                "rectypes"=>$rectypes,
-                                "structures"=>$rectype_structures));
+                        $response = array('status'=>HEURIST_OK,
+                            'data'=> array(
+                                //'query'=>$query,
+                                'queryid'=>@$params['id'],  //query unqiue id
+                                'count'=>$total_count_rows,
+                                'offset'=>get_offset($params),
+                                'reccount'=>count($records),
+                                'fields'=>$fields,
+                                'records'=>$records,
+                                'order'=>$order,
+                                'rectypes'=>$rectypes,
+                                'structures'=>$rectype_structures));
 
                                 
                 }//$is_ids_only          

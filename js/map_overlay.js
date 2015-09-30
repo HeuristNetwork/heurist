@@ -491,26 +491,27 @@ function addQueryLayer(source, index) {
     if(source.query !== undefined) {
         console.log("Query: " + source.query);
 
-        var query = null;
+        var request = null;
         try{
             var query = top.HEURIST4.util.isObject(source.query) ?source.query :JSON.parse(source.query);
             if(!(query && query['q'])){
-                query = null;
+                request = null;
             }else{
-                query = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']), w: "all", f:"map", l:2000};
+                request = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']),
+                            w: "all", f:"map", limit:2000};
             }
         }catch(err){
         }
-        if(query==null){ //this is simple (non JSON) queru without rules
-            query = {q: source.query, w: "all"};
+        if(request==null){ //this is simple (non JSON) queru without rules
+            request = {q: source.query, w: "all"};
         }
-        query['getrelrecs'] = 1;  //return all related records including relationship records
-        query['f'] = "map";
-        query['limit'] = 3000;
+        request['getrelrecs'] = 1;  //return all related records including relationship records
+        request['f'] = "map";
+        request['limit'] = 3000;
 
 
-        // Retrieve records for this query
-        top.HAPI4.RecordMgr.search(query,
+        // Retrieve records for this request
+        top.HAPI4.RecordMgr.search(request,
             function(response){
                 //console.log("QUERY RESPONSE:");
                 //console.log(response);
@@ -521,7 +522,7 @@ function addQueryLayer(source, index) {
                     addRecordsetLayer(source, index);
 
                 }else{
-                    alert(response.message);
+                    top.HEURIST4.util.showMsgErr(response);
                 }
             }
         );
@@ -531,7 +532,8 @@ function addQueryLayer(source, index) {
 }
 
 /**
-*
+*  if recordset has property mapenabled = true, convert recordset to timemap and vis_timeline formats 
+*  if mapenabled = false the request to server side is performed for first 1000 map/time enabled records
 */
 function addRecordsetLayer(source, index) {
 
@@ -540,10 +542,44 @@ function addRecordsetLayer(source, index) {
 
             var recset = source.recordset;
 
-            //var datasetname = (source.id=='main') ?source.id:"dyn"+source.id;
-
-
             if(recset!=null){
+            
+                if(!recset.isMapEnabled()){
+
+                    var request = {w: "all", 
+                                   f: "map", 
+                                   limit:100000};
+                    
+                    if(recset.length()<3001){
+                        request.q = 'ids:'+recset.getIds().join(',');
+                    }else{
+                        var curr_request = recset.getRequest();
+                        request.q = curr_request.q;
+                        request.w = curr_request.w;
+                        if(curr_request.rules) request.rules = curr_request.rules;
+                    }
+                                   
+                    // Retrieve records for this request
+                    top.HAPI4.RecordMgr.search(request,
+                        function(response){
+                            //console.log("QUERY RESPONSE:");
+                            //console.log(response);
+
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
+
+                                source.recordset = hRecordSet(response.data);
+                                source.recordset.setMapEnabled( true );
+                                addRecordsetLayer(source, index);
+
+                            }else{
+                                top.HEURIST4.util.showMsgErr(response);
+                            }
+                        }
+                    );                               
+                    return;               
+                }
+                
+
                 if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){
                     //preprocess for Digital Harlem - @todo more elegant way
                     recset.preprocessForDigitalHarlem();

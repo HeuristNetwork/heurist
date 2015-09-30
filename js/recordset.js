@@ -42,7 +42,9 @@ function hRecordSet(initdata) {
     structures = null;  //record structure definitions for all rectypes in this record set
 
     
-    var _progress = null;
+    var _progress = null,
+        _isMapEnabled = false,
+        _request = null;
     
     /**
     * Initialization
@@ -69,6 +71,7 @@ function hRecordSet(initdata) {
             }else{
                 records = [];
                 order = response.records;
+                _isMapEnabled = false;
             }
         }
         
@@ -1112,6 +1115,11 @@ function hRecordSet(initdata) {
             return fields;
         },
         
+        //  
+        //  list of record ids that belong to main request (search)
+        //  since some records may belong to results of rules requests (linked, related records) 
+        //  or relationship records
+        //
         getMainSet: function(){
             if( top.HEURIST4.util.isArrayNotEmpty(mainset) ){
                 return mainset;
@@ -1119,7 +1127,29 @@ function hRecordSet(initdata) {
                 return order;
             }
         },
+        
+        //
+        // flag that marks if recordset has detail data for mapping and timeline
+        //
+        isMapEnabled: function(){
+            return _isMapEnabled;
+        },
+        
+        setMapEnabled: function(){
+            _isMapEnabled = true;
+        },
 
+        //
+        // keep search request that results this recordset
+        //
+        setRequest: function(request){
+            _request = request;
+        },
+        
+        getRequest: function(){
+            return _request;
+        },
+        
         /* record - hRecord or rectypeID
         getRecordStructure: function(record){
 
