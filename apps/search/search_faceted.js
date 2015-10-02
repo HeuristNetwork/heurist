@@ -636,7 +636,7 @@ $.widget( "heurist.search_faceted", {
             
             var request = { q: query, 
                             w: this.options.params.domain, 
-                            f: 'map', 
+                            detail: 'detail', 
                             source:this.element.attr('id'), 
                             qname: this.options.query_name,
                             rules: this.options.params.rules
@@ -670,20 +670,6 @@ $.widget( "heurist.search_faceted", {
                     .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white20.gif) no-repeat center center');
         }
         
-        function __getMainSetIds(){
-            
-                    var rec_ids_level0 = [];
-                    if(top.HAPI4.currentRecordsetByLevels){
-                        var main_res = top.HAPI4.currentRecordsetByLevels[0].results;
-                        var idx;
-                        for(idx=0; idx<main_res.length; idx++){
-                             rec_ids_level0 = rec_ids_level0.concat(main_res[idx]);
-                        }
-                    }
-                    return rec_ids_level0.join(',');
-        }
-         
-
         var that = this;
         
         var i = field_index;
@@ -699,8 +685,7 @@ $.widget( "heurist.search_faceted", {
                     subs_value =  this._first_query;
                 }else{
                     //replace with list of ids
-                    subs_value = top.HAPI4.currentRecordset.getMainSet().join(','); //  __getMainSetIds();
-                    //subs_value = top.HAPI4.currentRecordset.getIds().join(',');
+                    subs_value = top.HAPI4.currentRecordset.getMainSet().join(',');
                 }
                 
                 //
@@ -760,8 +745,7 @@ $.widget( "heurist.search_faceted", {
                         query =  this._first_query;
                     }else{
                         //replace with list of ids
-                        query = {ids: top.HAPI4.currentRecordset.getMainSet().join(',')}; //__getMainSetIds()};
-                        //query = {ids:top.HAPI4.currentRecordset.getIds().join(',')};
+                        query = {ids: top.HAPI4.currentRecordset.getMainSet().join(',')};
                     }
                 
                     needcount = 1;

@@ -498,7 +498,7 @@ function addQueryLayer(source, index) {
                 request = null;
             }else{
                 request = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']),
-                            w: "all", f:"map", limit:2000};
+                            w: "all", detail:'timemap', limit:2000};
             }
         }catch(err){
         }
@@ -506,7 +506,7 @@ function addQueryLayer(source, index) {
             request = {q: source.query, w: "all"};
         }
         request['getrelrecs'] = 1;  //return all related records including relationship records
-        request['f'] = "map";
+        request['detail'] = 'timemap';
         request['limit'] = 3000;
 
 
@@ -519,6 +519,8 @@ function addQueryLayer(source, index) {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
                     source.recordset = hRecordSet(response.data);
+                    source.recordset.setMapEnabled( true );
+                    
                     addRecordsetLayer(source, index);
 
                 }else{
@@ -546,8 +548,8 @@ function addRecordsetLayer(source, index) {
             
                 if(!recset.isMapEnabled()){
 
-                    var request = {w: "all", 
-                                   f: "map", 
+                    var request = {w: 'all', 
+                                   detail: 'timemap', 
                                    limit:100000};
                     
                     if(recset.length()<3001){

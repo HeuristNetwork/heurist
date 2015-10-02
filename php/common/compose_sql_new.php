@@ -99,11 +99,13 @@ $mysqli = null;
   
 */  
 // $params need for 
-// qa - json query array
+// q - json query array
 // w - domain all or bookmarked
 // limit and offset
+// @todo s - sort
+// @todo publiconly
 // 
-function get_sql_query_clauses_NEW($db, $params, $currentUser=null, $publicOnly=false){
+function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     global $mysqli;
         
@@ -124,24 +126,26 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null, $publicOnly=
         $params['w'] = 'all';
     }
     array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
+    
+    $publicOnly = (@$params['publiconly']==1); //@todo
 
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
         $search_domain = BOOKMARK;
     } else if (@$params['w'] == 'e') { //everything - including temporary
         $search_domain = EVERYTHING;
-    } else if (@$params['w'] == 'nobookmark') { //all without BOOKMAR koin
+    } else if (@$params['w'] == 'nobookmark') { //all without BOOKMARK
         $search_domain = NO_BOOKMARK;
     } else {                // all records entries
         $search_domain = "a";
     }    
 
-//error_log( print_r(@$params['qa'], true) );
+//error_log( print_r(@$params['q'], true) );
     
-    if(is_array(@$params['qa'])){
-        $query_json = $params['qa']; 
+    if(is_array(@$params['q'])){
+        $query_json = $params['q']; 
     }else{
-        $query_json = json_decode(@$params['qa'], true);
+        $query_json = json_decode(@$params['q'], true);
     }
     
 //error_log( print_r($query_json, true) );
@@ -168,12 +172,12 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null, $publicOnly=
     
 }  
 
-//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&qa={"t":3}
-//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&qa={"f:1":"girls"}
-//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&qa={"all":[{"f:1":"girl"},{"t":"5"}]}
+//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&q={"t":3}
+//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&q={"f:1":"girls"}
+//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&q={"all":[{"f:1":"girl"},{"t":"5"}]}
 
-//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&qa={"linked_to:15":{"t":"10"}}
-//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&qa=[{"t":3},{"linked_to:15":{"t":"10"}}]
+//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&q={"linked_to:15":{"t":"10"}}
+//http://heurist.sydney.edu.au/HEURIST/h4/php/api/record_search.php?db=artem_clone1&q=[{"t":3},{"linked_to:15":{"t":"10"}}]
 
 
 // [{"t":3},{"f:1":"?"},{"linked_to:15":[{"t":"10"},{"f:1":"?"}   ] } ]

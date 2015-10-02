@@ -737,7 +737,7 @@ function hRecordSet(initdata) {
     
     /**
     * Returns field value by fieldname
-    * @todo - obtain codes from server side
+    * @todo - obtain fieldtype codes from server side
     */
     function _getFieldValue(record, fldname){
 
@@ -1125,6 +1125,14 @@ function hRecordSet(initdata) {
                 return mainset;
             }else{
                 return order;
+            }
+        },
+
+        setMainSet: function(_mainset){
+            if( top.HEURIST4.util.isArrayNotEmpty(_mainset) ){
+                mainset = _mainset;
+            }else{
+                mainset = null;
             }
         },
         

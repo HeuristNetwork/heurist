@@ -1189,6 +1189,12 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();
         $outer.remove();
         return 100 - widthWithScroll;
+    },
+    
+    
+    showButtonMenu: function(){
+        
+        
     }
 
 

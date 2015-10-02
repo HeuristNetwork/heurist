@@ -67,7 +67,6 @@ $.widget( "heurist.rec_search", {
             isrectype: true,  // show rectype selector
             rectype_set: this.options.rectype_set, // comma separated list of rectypes, null - all
             isapplication: false, // send and recieve the global events
-            searchdetails: null, //get only record headers
 
             onsearch: function(event){
                 that.wresult.rec_list("option", "recordset", null);

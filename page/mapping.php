@@ -236,10 +236,10 @@
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
 
                 //t:26 f:85:3313  f:1:building
-                // Perform database query if possible
+                // Perform database query if possible (for standalone mode - when mapping.php is separate page)
                 if( !top.HEURIST4.util.isempty(q) )
                 {
-                    top.HAPI4.RecordMgr.search({q: q, w: "all", f:"map", l:1000},
+                    top.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
                         function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
                                 console.log("onMapInit response");
@@ -251,7 +251,7 @@
                                 mapping.load(mapdataset);
 
                             }else{
-                                alert(response.message);
+                                top.HEURIST4.util.showMsgErr(response);
                             }
                         }
                     );

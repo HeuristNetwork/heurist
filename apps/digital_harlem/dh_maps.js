@@ -50,7 +50,7 @@ $.widget( "heurist.dh_maps", {
         
         $(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {
             
-            var request = {q:'t:19', w: 'a', f: 'map', l:3000, source:that.element.attr('id') };
+            var request = {q:'t:19', w: 'a', detail: 'header', l:3000, source:that.element.attr('id') };
 
             //perform search
             top.HAPI4.RecordMgr.search(request, 

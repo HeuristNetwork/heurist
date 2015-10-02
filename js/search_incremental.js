@@ -95,7 +95,6 @@ function hSearchIncremental() {
             var total_count_of_curr_request = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.count_total():0;
 
             if(new_offset< total_count_of_curr_request){ //search for next chunk of data within current request
-                    _query_request.increment = true;  //it shows that this is not initial search request
                     _query_request.o = new_offset;
                     _query_request.source = _owner_element_id;
                     top.HAPI4.RecordMgr.search(_query_request, _onSearchResult);//$(_owner_doc));   //search for next chunk
@@ -151,7 +150,6 @@ function hSearchIncremental() {
                      //create request
                      _query_request.q = current_rule.query;
                      _query_request.topids = current_parent_ids[_res_index].join(','); //list of record ids of parent resultset
-                     _query_request.increment = true; //it shows that this is not initial search request
                      _query_request.o = 0;
                      _query_request.source = _owner_element_id;
 
@@ -306,11 +304,11 @@ function hSearchIncremental() {
     
             if(request==null) return;
 
-            if(!request.increment || top.HEURIST4.util.isnull(request.id)){ //unique id for request
+            if(top.HEURIST4.util.isnull(request.id)){ //unique id for request
                 request.id = Math.round(new Date().getTime() + (Math.random() * 100));
                 
             }
-            if(!request.increment && !top.HEURIST4.util.isnull(_owner_doc)){
+            if(!top.HEURIST4.util.isnull(_owner_doc)){
                 $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
         
@@ -320,7 +318,6 @@ function hSearchIncremental() {
                  _query_request = request; //keep for search in current result
 
                  top.HAPI4.currentRecordset = null;
-                 top.HAPI4.currentRecordsetByLevels = null;
 
                  if(request.q!=''){
                      
@@ -337,6 +334,8 @@ function hSearchIncremental() {
                  }
             }
         
+            //reset rules parameter - since we search incrementally from client side
+            request.rules = null;
             //perform search
             top.HAPI4.RecordMgr.search(request, _onSearchResult); //$(_owner_doc)); 
         
@@ -419,6 +418,11 @@ function hSearchIncremental() {
                             if(Hul.isempty(_rules)){
                                 _rules = [{results:[]}];
                             }
+                            //git main result set
+                            if(ruleindex==1 && !top.HEURIST4.util.isArrayNotEmpty(_rules[ruleindex].results) ){
+                                top.HAPI4.currentRecordset.setMainSet( Hul.cloneJSON(top.HAPI4.currentRecordset.getIds()) );
+                            }
+                            
                             _rules[ruleindex].results.push(records_ids);
 
                             //unite

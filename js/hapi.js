@@ -469,11 +469,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(top.HEURIST4.util.isnull(request.limit)){
                     request.limit = top.HAPI4.get_prefs('search_limit');
                 }
-                
-                //
-                if(!top.HEURIST4.util.isnull(request.increment)){
-                       request.rules = null; //reset rules parameter - since we search incrementally from client side
-                }
+
+                // start search                
                 _callserver('record_search', request, callback);    //standard search 
             
             }

@@ -681,8 +681,8 @@ $.widget( "heurist.resultList", {
             + '<div class="recordIcons">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif" class="unbookmarked">'
             + '</div>'
-            + '<div class="recordTitle">' + recID
-            + '</div>' 
+            + '<div class="recordTitle">id ' + recID
+            + '...</div>' 
             + '<div title="Click to edit record" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             + '</div>'
@@ -1289,7 +1289,7 @@ $.widget( "heurist.resultList", {
                         
                         var request = { q: 'ids:'+ rec_toload.join(','),
                                         w: 'a',
-                                        f: 'header',
+                                        detail: 'header',
                                         id: that.current_page, //Math.round(new Date().getTime() + (Math.random() * 100)),
                                         source:this.element.attr('id') };
                                         

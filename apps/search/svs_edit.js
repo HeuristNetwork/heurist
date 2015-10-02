@@ -72,10 +72,9 @@ function hSvsEdit(args) {
             var svs = null;
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
-                isEdit = false;
             }
 
-            if(isEdit && !Hul.isnul(svs)){
+            if(isEdit && !Hul.isnull(svs)){
 
                 svsID = -1;
                 
@@ -94,6 +93,7 @@ function hSvsEdit(args) {
 
 
             }else{ //add new saved search
+                isEdit = false;
 
                 svs_id.val('');
                 svs_name.val('');

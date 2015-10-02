@@ -240,7 +240,7 @@ $.widget( "heurist.app_timemap", {
 
     /**
     * Add dataset on map
-    * params = {id:$.uniqueId(), title:'Title for Legend', query: '{qa:"", rules:""}'}
+    * params = {id:$.uniqueId(), title:'Title for Legend', query: '{q:"", rules:""}'}
     */
     , addQueryLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;

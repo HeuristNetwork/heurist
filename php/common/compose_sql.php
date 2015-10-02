@@ -72,12 +72,11 @@
     *
     * @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
     *                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
-    * @param mixed $publicOnly
     * 
     */
-    function compose_sql_query($db, $select_clause, $params, $currentUser=null, $publicOnly=false) {
+    function compose_sql_query($db, $select_clause, $params, $currentUser=null) {
 
-        $query = get_sql_query_clauses($db, $params, $currentUser=null, $publicOnly=false);
+        $query = get_sql_query_clauses($db, $params, $currentUser=null);
 
         $res_query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
         /*****DEBUG****///error_log("request to query returns ".print_r($res_query,true));
@@ -117,9 +116,8 @@
     *
     * @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
     *                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
-    * @param mixed $publicOnly
     */
-    function get_sql_query_clauses($db, $params, $currentUser=null, $publicOnly=false) {
+    function get_sql_query_clauses($db, $params, $currentUser=null) {
         
         global $mysqli;
         
@@ -143,6 +141,8 @@
         }
         array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
 
+        $publicOnly = (@$params['publiconly']==1); //@todo
+        
         // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
         if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
             $search_domain = BOOKMARK;
@@ -254,9 +254,8 @@
     * $parentquery - array of SQL clauses of parent/top query - it is needed for linked and relation queries that are depended on source/top query
     * @$currUserID
     * NOTUSED @param mixed $wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
-    * NOTUSED @param mixed $publicOnly
     */
-    function parse_query($search_domain, $text, $sort_order='', $parentquery, $currUserID) { //$currUserID, $wg_ids=null, $publicOnly=false
+    function parse_query($search_domain, $text, $sort_order='', $parentquery, $currUserID) {
 
 
         // remove any  lone dashes outside matched quotes.

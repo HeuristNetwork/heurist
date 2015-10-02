@@ -27,7 +27,6 @@ $.widget( "heurist.svs_list", {
     // default options
     options: {
         isapplication:true,  // send and recieve the global events
-        searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
         btn_visible_dbstructure: true,
         btn_visible_filter: false
     },
@@ -1095,7 +1094,7 @@ $.widget( "heurist.svs_list", {
                     
                 }else{
                     //additional params
-                    request.f = this.options.searchdetails;
+                    request.detail = 'detail';
                     request.source = this.element.attr('id');
                     request.qname = qname;
                     request.notes = null; //unset to reduce traffic

@@ -31,8 +31,6 @@ $.widget( "heurist.search", {
 
         isapplication:true,  // send and recieve the global events
 
-        searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
-
         isloginforced:true,
         has_paginator: false,
         btn_visible_dbstructure: false, //show get db strucuture button
@@ -788,7 +786,7 @@ $.widget( "heurist.search", {
 
             var request = { q: qsearch,
                             w: this.options.search_domain,
-                            f: this.options.searchdetails,
+                            detail: 'detail',
                             source: this.element.attr('id') };
 
           top.HAPI4.SearchMgr.doSearch( this, request );                        

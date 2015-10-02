@@ -399,7 +399,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                         }
                         
                         var that = this;
-                        var request = {qa: query, w: 'a', f: 'map', l:3000, source:this.element.attr('id') }; //, facets: facets
+                        var request = {qa: query, w: 'a', detail: 'detail', l:3000, source:this.element.attr('id') }; //, facets: facets
                         
                         //perform search
                         top.HAPI4.RecordMgr.search(request, 

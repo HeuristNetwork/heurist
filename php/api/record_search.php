@@ -35,32 +35,45 @@
     /*
      parameters
      
-     db - database
-     f - map|structure   request for details and structure 
-     idonly - 1 - returns only id  @todo merge f and idonly
-     publiconly  - returns only public records
-     vo - returns in heurist3 format (valid for idonly=1)
-     w -   a/b  all|bookmark
-     
-     topids - ids of top query to search dependent records (see rules)
-     parentquery
-     rules
-     
-     limit
-     offset
-     nochunk - return all records
-     
-     q - main query in old format (plain text)
-     qa - main query in new json format
-     sql - sql query
-     
-     getrelrecs - 1
+    *       FOR RULES
+    *       rules - rules queries - to search related records on server side
+    *       getrelrecs (=1) - search relationship records (along with related) on server side
+    *       topids - list of records ids, it is used to compose 'parentquery' parameter to use in rules (@todo - replace with new rules algorithm)
+    * 
+    *       INTERNAL/recursive 
+    *       parentquery - sql expression to substiture in rule query 
+    *       sql - sql expression to execute (used as recursive parameters to search relationship records)
+    * 
+    *       SEARCH parameters that are used to compose sql expression
+    *       q - query string (old mode) or json array (new mode)
+    *       w (=all|bookmark a|b) - search among all or bookmarked records
+    *       limit  - limit for sql query is set explicitely on client side
+    *       offset - offset parameter value for sql query
+    *       s - sort order
+    *
+    *       OUTPUT parameters        
+    *       vo (=h3) - output format in h3 for backward capability (for detail=ids only)
+    *       needall (=1) - by default it returns only first 1000, to return all set it to 1, 
+    *                      it is set to 1 for server-side rules searches
+    *       publiconly (=1) - ignore current user and returns only public records
+    * 
+    *       detail (former 'f') - ids       - only record ids
+    *                             header    - record header
+    *                             timemap   - record header + timemap details
+    *                             detail    - record header + all details 
+    *                             structure - record header + all details + record type structure (for editing) - NOT USED
+    * 
+    *       CLIENT SIDE
+    *       id - unque id to sync with client side
+    *       source - id of html element that is originator of this search
+    *       qname - original name of saved search (for messaging)
 
-     id - unique query identiicator    
-    
     */ 
      
-        
+    //these are internal parameters, they can not be sent from client side
+    if( @$_REQUEST['sql'] )unset( $_REQUEST['sql'] );
+    if( @$_REQUEST['parentquery'] ) unset ($_REQUEST['parentquery'] );
+    //if( @$_REQUEST['needall'] ) unset ($_REQUEST['needall'] );
     
     $response = array();
 
@@ -98,14 +111,7 @@
             }        
         }
         if($isok){
-        //end temorary!!!
-
-            //DEGUG        $currentUser = array('ugr_ID'=>2);
-            $need_structure = (@$_REQUEST['f']=='structure');
-            $need_details   = (@$_REQUEST['f']=='map' || $need_structure);
-            $publicOnly     = (@$_REQUEST['publiconly']==1);
-
-            $response = recordSearch($system, $_REQUEST, $need_structure, $need_details, $publicOnly);    
+            $response = recordSearch($system, $_REQUEST);    
         
         }
     }

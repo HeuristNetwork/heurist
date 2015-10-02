@@ -70,9 +70,10 @@ function hSearchMinimal() {
             }
             
             request.source = _owner_element_id;
-            request.limit = 100000; //or nochunk=1 ?
-            request.nochunk = 1;
-            request.idonly = 1;
+            request.limit = 100000; 
+            request.needall = 1;
+            request.detail = 'ids';
+            request.getrelrecs = 1;
             
             if(!top.HEURIST4.util.isnull(_owner_doc)){
                 $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
@@ -83,7 +84,6 @@ function hSearchMinimal() {
             _query_request = request; //keep for search in current result
 
              top.HAPI4.currentRecordset = null;
-             top.HAPI4.currentRecordsetByLevels = null; //to remove - not used anymore
              
              //perform search
              top.HAPI4.RecordMgr.search(request, _onSearchResult);

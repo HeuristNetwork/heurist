@@ -26,7 +26,6 @@ $.widget( "heurist.dh_search", {
 
     // default options
     options: {
-        searchdetails: "map", //level of search results  map - with details, structure - with detail and structure
         UGrpID: 1007
     },
 
@@ -65,7 +64,7 @@ $.widget( "heurist.dh_search", {
         $(this.document).on(this._events, function(e, data) {
             if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART)
             {
-                if(data && !data.increment){
+                if(data){ // && !data.increment
                     that.res_div.hide();
                     that.currentSearch = Hul.cloneJSON(data);  
                 } 
@@ -92,22 +91,80 @@ $.widget( "heurist.dh_search", {
             }
         });
         
+        this._refresh();
         
+        
+            // "Featured Individuals" 
             var request = { q: {"t":"19","f:144":"532"},    //t:19 f:144:532
                             w: 'a',
-                            f: 'map',
+                            detail: 'header',
                             source:this.element.attr('id') };
             //perform search
             top.HAPI4.RecordMgr.search(request, function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             var resdata = new hRecordSet(response.data);
+                            //add SELECT and fill it with values
+                            var smenu = '', idx;
+                            var records = resdata.getRecords();
+                            for(idx in records){
+                                if(idx)
+                                {
+                                    var record = records[idx];
+                                    var recID       = resdata.fld(record, 'rec_ID');
+                                        recName     = resdata.fld(record, 'rec_Title');
+                                    smenu = smenu + '<li id="fimap'+recID+'"><a href="#">'+recName+'</a></li>';
+                                }
+                            }
+                            if(smenu=='') return;
+                            
+                            that.btn_fi_menu = $( "<button>", {
+                                text: top.HR('select')+'...'
+                            })
+                            .css({'width':'100%','margin-top':'0.4em'})
+                            .appendTo(  that.search_list )
+                            .button({icons: {
+                                secondary: "ui-icon-triangle-1-s"
+                            }});
+
+                            that.menu_fi = $('<ul>'+smenu+'</ul>')   //<a href="#">
+                                .zIndex(9999)
+                                .css({'position':'absolute'})
+                                .appendTo( that.document.find('body') )
+                                .menu({
+                                    select: function( event, ui ) {
+                                        var map_rec_id =  Number(ui.item.attr('id').substr(5)); 
+                                        
+                                        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+                                        if(app && app.widget){
+                                            //switch to Map Tab
+                                            
+                                            //load Map Document
+                                            $(app.widget).app_timemap('loadMapDocumentById', map_rec_id);
+                                        }                                        
+                                        
+                                        
+                                }})
+                                .hide();
+                                            
+                            that._on( that.btn_fi_menu, {
+                                click: function() {
+                                    $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                                    var menu = $( that.menu_fi )
+                                    //.css('min-width', '80px')
+                                    .show()
+                                    .position({my: "right top", at: "right bottom", of: that.btn_fi_menu });
+                                    menu.width( that.btn_fi_menu.width() );
+                                    $( document ).one( "click", function() { menu.hide(); });
+                                    return false;
+                                }});                                            
+                                            
+                                            
                         }else{
                             top.HEURIST4.util.showMsgErr(response);
                         }
-            });
-        
+                        });
+    
 
-        this._refresh();
     }, //end _create
 
     // events bound via _on are removed automatically
@@ -116,7 +173,13 @@ $.widget( "heurist.dh_search", {
         
         $(this.document).off(this._events);
         this.search_list.remove(); 
-        this.search_faceted.remove(); 
+        this.search_faceted.remove();
+        
+        if(this.btn_fi_menu) {
+            this._off( this.btn_fi_menu, 'click');
+            this.btn_fi_menu.remove();
+            this.menu_fi.remove();
+        }
     },
     
     
@@ -181,6 +244,9 @@ $.widget( "heurist.dh_search", {
                         .appendTo(this.search_list);
                 }
         }
+        
+        //add featured maps
+        
 
     },
 
@@ -225,7 +291,7 @@ $.widget( "heurist.dh_search", {
             var request = Hul.parseHeuristQuery(qsearch);
     
     
-            request.f = this.options.searchdetails;
+            request.detail = 'detail';
             request.source = this.element.attr('id');
             request.qname = this.usr_SavedSearch[svsID][_NAME];
             request.notes = null; //unset to reduce traffic

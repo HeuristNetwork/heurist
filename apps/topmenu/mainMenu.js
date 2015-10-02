@@ -58,7 +58,7 @@ $.widget( "heurist.mainMenu", {
 
                     var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                     if(!top.HEURIST4.util.isempty(init_search)){
-                        var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                        var request = {q: init_search, w: 'a', detail: 'detail', source:'init' };
                         top.HAPI4.SearchMgr.doSearch( this, request );
                     }else{
                         $( "#heurist-about" ).dialog("open");
