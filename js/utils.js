@@ -862,12 +862,18 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         if(message!=null){
             $dlg.empty();
             
-            isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
+            var isobj = (typeof message ===  "object");
+            
+            if(!isobj){
+                isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
+            }
             
             if(isPopupDlg){
 
                 $dlg = top.HEURIST4.util.getPopupDlg();
-                if(message.indexOf('#')===0 && $(message).length>0){
+                if(isobj){
+                    $dlg.append(message);    
+                }else if(message.indexOf('#')===0 && $(message).length>0){
                     $dlg.html($(message).html());    
                 }else{
                     $dlg.html(message);    
@@ -877,7 +883,11 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 
             }else{
                 isPopup = false;
-                $dlg.append('<span>'+top.HR(message)+'</span>');    
+                if(isobj){
+                    $dlg.append(message);    
+                }else{
+                    $dlg.append('<span>'+top.HR(message)+'</span>');    
+                }
             }
         }
 
@@ -1190,12 +1200,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         $outer.remove();
         return 100 - widthWithScroll;
     },
-    
-    
-    showButtonMenu: function(){
-        
-        
-    }
+
 
 
     }//end util

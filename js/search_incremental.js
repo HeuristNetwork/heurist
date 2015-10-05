@@ -49,8 +49,7 @@ function hSearchIncremental() {
 
         _query_request = null,  //current search request - need for "AND" search in current result set
         _owner_doc = null,
-        _owner_element_id = null,
-        _progressCallback = null;
+        _owner_element_id = null;
          
          
          
@@ -60,7 +59,23 @@ function hSearchIncremental() {
     function _init( ) {
     }
     
+    // search with callback
+    function _doSearchWithCallback( request, callback ){
+        
+        top.HAPI4.RecordMgr.search(request,
+            function(response){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    callback( hRecordSet(response.data) );
+                }else{
+                    top.HEURIST4.util.showMsgErr(response);
+                }
+            }
+        );
+        
+    }
+    
     function _doSearch( originator, request ){
+
         
         if(originator){
             if(originator.document){
@@ -74,7 +89,6 @@ function hSearchIncremental() {
             _owner_doc = null;
             _owner_element_id = null;
         }
-        //_progressCallback = progressCallback;
         
         _onSearchStart( request );
     }
@@ -152,8 +166,6 @@ function hSearchIncremental() {
                      _query_request.topids = current_parent_ids[_res_index].join(','); //list of record ids of parent resultset
                      _query_request.o = 0;
                      _query_request.source = _owner_element_id;
-
-                     _query_request.getrelrecs = (top.HAPI4.sysinfo['layout']=='DigitalHarlem')?1:0; //@todo more elegant way: include request for relationship records into rule
 
                      top.HAPI4.RecordMgr.search(_query_request, _onSearchResult); //search rules
                      return true;
@@ -465,7 +477,11 @@ function hSearchIncremental() {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        // originator - widget that initiated the search
+        doSearchWithCallback: function(request, callback){
+            _doSearchWithCallback(request, callback);
+        },
+        
+       // originator - widget that initiated the search
         doSearch:function( originator, request ){
             _doSearch( originator, request );
         },

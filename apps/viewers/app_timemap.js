@@ -27,7 +27,8 @@ $.widget( "heurist.app_timemap", {
         selection: null, //list of record ids
         layout:null, //['header','map','timeline']
         startup:0,         //map document loaded on map init
-        autoupdate:true   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
+        autoupdate:true,   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
+        eventbased:true
     },
 
     _events: null,
@@ -55,65 +56,67 @@ $.widget( "heurist.app_timemap", {
         .attr('id', 'map-frame')
         //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
         .appendTo( this.framecontent );
+          
+          
+        if(this.options.eventbased){
 
+            this._events = top.HAPI4.Event.LOGOUT
+            + ' ' + top.HAPI4.Event.ON_REC_SELECT
+            + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
 
-        this._events = top.HAPI4.Event.LOGOUT
-        + ' ' + top.HAPI4.Event.ON_REC_SELECT
-        + ' ' + top.HAPI4.Event.ON_SYSTEM_INITED;
-
-        if(this.options.autoupdate){
-            this._events = this._events
-            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
-            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
-        }
-
-        $(this.document).on(this._events, function(e, data) {
-
-            if(e.type == top.HAPI4.Event.LOGOUT)
-            {
-                if(that.options.recordset != null){
-                    that.recordset_changed = true;
-                    that.option("recordset", null);
-                    that._refresh();
-                }
-
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
-                that.loadanimation(false);
-                that.recordset_changed = true;
-                that.option("recordset", data); //hRecordSet
-                that._refresh();
-
-                // Search start
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
-
-                that.option("recordset", null);
-                that.option("selection", null);
-                if(data && data.q!='')  {
-                    that.loadanimation(true);
-                }else{
-                    that.recordset_changed = true;
-                    that._refresh();
-                }
-                //???? that._refresh();
-
-                // Record selection
-            }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
-
-                if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
-
-                    //console.log("_doVisualizeSelection");
-                    that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
-                }
-            }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
-
-                that._refresh();
-
+            if(this.options.autoupdate){
+                this._events = this._events
+                + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
+                + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART;
             }
 
+            $(this.document).on(this._events, function(e, data) {
 
-        });
+                if(e.type == top.HAPI4.Event.LOGOUT)
+                {
+                    if(that.options.recordset != null){
+                        that.recordset_changed = true;
+                        that.option("recordset", null);
+                        that._refresh();
+                    }
 
+                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+
+                    that.loadanimation(false);
+                    that.recordset_changed = true;
+                    that.option("recordset", data); //hRecordSet
+                    that._refresh();
+
+                    // Search start
+                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+
+                    that.option("recordset", null);
+                    that.option("selection", null);
+                    if(data && data.q!='')  {
+                        that.loadanimation(true);
+                    }else{
+                        that.recordset_changed = true;
+                        that._refresh();
+                    }
+                    //???? that._refresh();
+
+                    // Record selection
+                }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+
+                    if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
+
+                        //console.log("_doVisualizeSelection");
+                        that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
+                    }
+                }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
+
+                    that._refresh();
+
+                }
+
+            
+            });
+        }
         // (this.mapframe).load(that._initmap);
         // init map on frame load
         this._on( this.mapframe, {
@@ -209,7 +212,7 @@ $.widget( "heurist.app_timemap", {
     , _destroy: function() {
 
         this.element.off("myOnShowEvent");
-        $(this.document).off(this._events);
+        if(this._events)  $(this.document).off(this._events);
 
         // remove generated elements
         this.mapframe.remove();

@@ -31,7 +31,8 @@ $.widget( "heurist.resultList", {
         showcounter: true,
         showmenu: true,
         innerHeader: false,
-        title: null
+        title: null,
+        eventbased:true
         //searchsource: null,
     },
 
@@ -48,6 +49,8 @@ $.widget( "heurist.resultList", {
     count_total: null,  //total records in query - actual number can be less
     pagesize: 100,
     hintDiv:null, // rollover for thumbnails
+    
+    currentRecordset:null,
     
 
 
@@ -182,95 +185,99 @@ $.widget( "heurist.resultList", {
 
 
         //-----------------------     listener of global events
-        this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + " " + top.HAPI4.Event.ON_LAYOUT_RESIZE;
-        if(this.options.isapplication){
-            this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
-                        + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
-                        + ' ' + top.HAPI4.Event.ON_REC_SELECT
-                        + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
-        }                                                                     
+        if(this.options.eventbased)
+        {
+            this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + " " + top.HAPI4.Event.ON_LAYOUT_RESIZE;
+            if(this.options.isapplication){
+                this._events = this._events + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
+                            + ' ' + top.HAPI4.Event.ON_REC_SELECT
+                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH;
+            }                                                                     
 
-        $(this.document).on(this._events, function(e, data) {
+            $(this.document).on(this._events, function(e, data) {
 
-            if(e.type == top.HAPI4.Event.ON_LAYOUT_RESIZE){
+                if(e.type == top.HAPI4.Event.ON_LAYOUT_RESIZE){
 
-                var w = that.element.width();
-                if ( w < 390 || (w < 430 && that.max_page>1) ) {
-                    that.span_info.hide();    
-                }else{
-                    that.span_info.show();    
-                }
-                
-            }else if(e.type == top.HAPI4.Event.LOGIN){
-
-                that._refresh();
-
-            }else  if(e.type == top.HAPI4.Event.LOGOUT)
-            {
-                that._clearAllRecordDivs();
-
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-
-                that.loadanimation(false);
-
-                if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
-                    
-                    that._renderRecordsIncrementally(data); //hRecordSet
-                }
-
-                //@todo show total number of records ???
-
-
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
-
-                that.span_pagination.hide();
-
-                if(data){
-
-                    if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
-                        //new search from outside
-                        var new_title = top.HR(data.qname || that.options.title || 'Search Result');
-                        var $header = $(".header"+that.element.attr('id'));
-                        if($header.length>0){
-                            $header.html('<h3>'+new_title+'</h3>');
-                            $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
-                        }
-                        if(that.innerHeader){
-                            that.innerHeader.html('<h3>'+new_title+'</h3>');
-                        }
-
-                        that._clearAllRecordDivs();
-                        
-                        if(data.q!=''){
-                            that.loadanimation(true);
-                            that._renderProgress();
-                        }else{
-                            that._renderMessage('<div style="font-style:italic;">'+top.HR(data.message)+'</div>');                            
-                        }
-
+                    var w = that.element.width();
+                    if ( w < 390 || (w < 430 && that.max_page>1) ) {
+                        that.span_info.hide();    
+                    }else{
+                        that.span_info.show();    
                     }
                     
-                    that._query_request = data;  //keep current query request
+                }else if(e.type == top.HAPI4.Event.LOGIN){
 
-                }else{ //fake restart
-                        that._clearAllRecordDivs();
-                        //that.loadanimation(true);
+                    that._refresh();
+
+                }else  if(e.type == top.HAPI4.Event.LOGOUT)
+                {
+                    that._clearAllRecordDivs();
+
+                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
+
+                    that.loadanimation(false);
+
+                    if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
+                        
+                        that._renderRecordsIncrementally(data); //hRecordSet
+                    }
+
+                    //@todo show total number of records ???
+
+
+                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
+
+                    that.span_pagination.hide();
+
+                    if(data){
+
+                        if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
+                            //new search from outside
+                            var new_title = top.HR(data.qname || that.options.title || 'Search Result');
+                            var $header = $(".header"+that.element.attr('id'));
+                            if($header.length>0){
+                                $header.html('<h3>'+new_title+'</h3>');
+                                $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
+                            }
+                            if(that.innerHeader){
+                                that.innerHeader.html('<h3>'+new_title+'</h3>');
+                            }
+
+                            that._clearAllRecordDivs();
+                            
+                            if(data.q!=''){
+                                that.loadanimation(true);
+                                that._renderProgress();
+                            }else{
+                                that._renderMessage('<div style="font-style:italic;">'+top.HR(data.message)+'</div>');                            
+                            }
+
+                        }
+                        
+                        that._query_request = data;  //keep current query request
+
+                    }else{ //fake restart
+                            that._clearAllRecordDivs();
+                            //that.loadanimation(true);
+                    }
+
+                }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
+
+                       that.span_pagination.show();
+                       that._renderPagesNavigator();
+
+                }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
+
+                    //this selection is triggered by some other app - we have to redraw selection
+                    if(data && data.source!=that.element.attr('id')) {
+                          that.setSelected(data.selection);
+                    }
                 }
-
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
-                   that.span_pagination.show();
-                   that._renderPagesNavigator();
-
-            }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
-
-                //this selection is triggered by some other app - we have to redraw selection
-                if(data && data.source!=that.element.attr('id')) {
-                      that.setSelected(data.selection);
-                }
-            }
-            //that._refresh();
-        });
+                //that._refresh();
+            });
+            
+        }
         /*
         if(this.options.isapplication){
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
@@ -333,7 +340,9 @@ $.widget( "heurist.resultList", {
     // revert other modifications here
     _destroy: function() {
 
-        $(this.document).off(this._events);
+        if(this._events){
+            $(this.document).off(this._events);
+        }
 
         var that = this;
         /*$.each(this._allbuttons, function(index, value){
@@ -410,68 +419,10 @@ $.widget( "heurist.resultList", {
         $('#list_layout_'+newmode).attr('checked','checked');
         this.mode_selector.buttonset('refresh');
     },
-
-    // @todo move record related stuff to HAPI
-    // NOT USED
-    /*_renderRecords: function(){
-
-        if(this.div_content){
-            var $allrecs = this.div_content.find('.recordDiv');
-            this._off( $allrecs, "click");
-            this.div_content[0].innerHTML = '';//.empty();  //clear
-        }
-
-        if(this.options.recordset){
-            this.loadanimation(false);
-
-            var recs = this.options.recordset.getRecords();
-
-            if( this.options.recordset.count_total() > 0 )
-            {
-                //for(i=0; i<recs.length; i++){
-                //$.each(this.options.records.records, this._renderRecord)
-                var recID;
-                for(recID in recs) {
-                    if(recID){
-                        this._renderRecord(recs[recID]);
-                    }
-                }
-
-                $allrecs = this.div_content.find('.recordDiv');
-                this._on( $allrecs, {
-                    click: this._recordDivOnClick
-                });
-
-            }else{
-
-                var $emptyres = $('<div>')
-                .html(top.HR('No records match the search')+
-                    '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
-                        ?'Note: some records may only be visible to members of particular workgroups'
-                        :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
-                )
-                .appendTo(this.div_content);
-
-                if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
-                    var domain = this._query_request.w
-                    if((domain=='b' || domain=='bookmark')){
-                        var $al = $('<a href="#">')
-                        .text(top.HR('Click here to search the whole database'))
-                        .appendTo($emptyres);
-                        this._on(  $al, {
-                            click: this._doSearch4
-                        });
-
-                    }
-                }
-            }
-        }
-
-    },*/
-
+    
     _clearAllRecordDivs: function(){
 
-        //this.options.recordset = null;
+        //this.currentRecordset = null;
 
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
@@ -482,9 +433,20 @@ $.widget( "heurist.resultList", {
         this._count_of_divs = 0;
     },
 
+    //
+    // this is public methid, it is called on search complete (if events are not used)
+    //
+    updateResultSet: function( recordset, request ){
+                
+        this._clearAllRecordDivs();
+        this._renderRecordsIncrementally(recordset);                     
+        this.span_pagination.show();
+        this._renderPagesNavigator();
+    },
+    
 
     /**
-    * Add new divs and join recordset
+    * Add new divs
     *
     * @param recordset
     */
@@ -492,14 +454,9 @@ $.widget( "heurist.resultList", {
 
         if(recordset)
         {
-            //this.loadanimation(false);
-            /*if(this.options.recordset==null){
-                this.options.recordset = recordset;
-            }else{
-                //unite record sets
-                this.options.recordset = this.options.recordset.doUnite(recordset);
-            }*/
 
+            this.currentRecordset = recordset;
+            
             var total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
 
             this._renderProgress();
@@ -548,131 +505,6 @@ $.widget( "heurist.resultList", {
                 .appendTo(this.div_content);
                 
                 return $emptyres;
-    },
-
-    /**
-    * create div for given record
-    *
-    * NOT USED  - jquery works too slow if there are thousands of divs
-    *
-    * @param record
-    */
-    _renderRecord: function(record){
-
-        var recset = this.options.recordset;
-        function fld(fldname){
-            return recset.fld(record, fldname);
-        }
-
-        /*
-        0 .'bkm_ID,'
-        1 .'bkm_UGrpID,'
-        2 .'rec_ID,'
-        3 .'rec_URL,'
-        4 .'rec_RecTypeID,'
-        5 .'rec_Title,'
-        6 .'rec_OwnerUGrpID,'
-        7 .'rec_NonOwnerVisibility,'
-        8. rec_ThumbnailURL
-
-        9 .'rec_URLLastVerified,'
-        10 .'rec_URLErrorMessage,'
-        11 .'bkm_PwdReminder ';
-        11  thumbnailURL - may not exist
-        */
-
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-
-        $recdiv = $(document.createElement('div'));
-
-        $recdiv
-        .addClass('recordDiv')
-        .attr('id', 'rd'+recID )
-        .attr('recID', recID )
-        .attr('bkmk_id', fld('bkm_ID') )
-        .attr('rectype', rectypeID )
-        //.attr('title', 'Select to view, Ctrl-or Shift- for multiple select')
-        //.on("click", that._recordDivOnClick )
-        .appendTo(this.div_content);
-
-        $(document.createElement('div'))
-        .addClass('recTypeThumb')
-        .css('background-image', 'url('+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png)')
-        .appendTo($recdiv);
-
-        if(fld('rec_ThumbnailURL')){
-            var that = this;
-            
-            $(document.createElement('div'))
-            .addClass('recTypeThumb')
-            .css({'background-image': 'url('+ fld('rec_ThumbnailURL') + ')', 'opacity':'1' } )
-            .appendTo($recdiv);
-        }
-
-        $iconsdiv = $(document.createElement('div'))
-        .addClass('recordIcons')
-        .attr('recID', recID )
-        .attr('bkmk_id', fld('bkm_ID') )
-        .appendTo($recdiv);
-
-        //record type icon
-        $('<img>',{
-            src:  top.HAPI4.basePath+'assets/16x16.gif',
-            title: '@todo rectypeTitle'
-        })
-        //!!! .addClass('rtf')
-        .css('background-image', 'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)')
-        .appendTo($iconsdiv);
-
-        //bookmark icon - asterics
-        $('<img>',{
-            src:  top.HAPI4.basePath+'assets/13x13.gif'
-        })
-        .addClass(fld('bkm_ID')?'bookmarked':'unbookmarked')
-        .appendTo($iconsdiv);
-
-        $('<div>',{
-            title: fld('rec_Title')
-        })
-        .addClass('recordTitle')
-        .html(fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+fld('rec_Title') + "</a>") :fld('rec_Title') )
-        .appendTo($recdiv);
-
-        $('<div>',{
-            id: 'rec_edit_link',
-            title: 'Click to edit record'
-        })
-        .addClass('logged-in-only')
-        .button({icons: {
-            primary: "ui-icon-pencil"
-            },
-            text:false})
-        .click(function( event ) {
-            event.preventDefault();
-            //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
-            window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
-        })
-        .appendTo($recdiv);
-
-
-        /*
-        var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
-        top.HEURIST4.basePath+ "records/edit/editRecord.html?sid=" +
-        top.HEURIST4.search.results.querySid + "&recID="+ res[2] +
-        (top.HEURIST4.database && top.HEURIST4.database.name ? '&db=' + top.HEURIST4.database.name : '');
-
-        if (top.HEURIST4.user && res[6] && (top.HEURIST4.user.isInWorkgroup(res[6])|| res[6] == top.HEURIST4.get_user_id()) || res[6] == 0) {
-        editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
-        top.HEURIST4.basePath + "common/images/edit-pencil.png'/></a></div>";
-        }else{
-        editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
-        top.HEURIST4.basePath + "common/images/edit-pencil-no.png'/></a></div>";
-        }
-        */
-
-
-        return $recdiv;
     },
 
     _renderRecord_html_stub: function(recID){
@@ -899,7 +731,6 @@ $.widget( "heurist.resultList", {
             $rdiv.addClass('selected_last');
             this._lastSelectedIndex = selected_rec_ID;
 
-            //var record = this.options.recordset.getById($rdiv.attr('recID'));
         }
 
         this.triggerSelection();
@@ -921,7 +752,7 @@ $.widget( "heurist.resultList", {
     getSelected: function(){
 
         var selected = []
-        if(top.HAPI4.currentRecordset){
+        if(this.currentRecordset){
             var that = this;
             this.div_content.find('.selected').each(function(ids, rdiv){
                 var rec_ID = $(rdiv).attr('recid');
@@ -934,28 +765,6 @@ $.widget( "heurist.resultList", {
             }
         }
         return selected;
-
-        /* it works but returns recordset
-        var selected = {};
-        var that = this;
-
-        if(top.HAPI4.currentRecordset){
-            this.div_content.find('.selected').each(function(ids, rdiv){
-                var rec_ID = $(rdiv).attr('recid');
-                if(that._lastSelectedIndex!=rec_ID){
-                    var record = top.HAPI4.currentRecordset.getById(rec_ID);
-                    selected[rec_ID] = record;
-                }
-            });
-            if(Number(this._lastSelectedIndex)>0){
-                var record = top.HAPI4.currentRecordset.getById(this._lastSelectedIndex);
-                selected[this._lastSelectedIndex] = record;
-            }
-
-            return top.HAPI4.currentRecordset.getSubSet(selected, this.document);
-        }else{
-            return null
-        }*/
     },
 
     /**
@@ -1029,9 +838,9 @@ $.widget( "heurist.resultList", {
     //    
     _renderPagesNavigator: function(){
 
-        this.count_total = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.length():0; 
+        this.count_total = (this.currentRecordset!=null)?this.currentRecordset.length():0; 
         // length() - downloaded records, count_total() - number of records in query
-        var total_inquery = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.count_total():0; 
+        var total_inquery = (this.currentRecordset!=null)?this.currentRecordset.count_total():0; 
         
         this.max_page = 0;
         //this.current_page = 0;
@@ -1197,7 +1006,7 @@ $.widget( "heurist.resultList", {
     , _renderPage: function(pageno, recordset){
         
                     if(!recordset){
-                        recordset = top.HAPI4.currentRecordset;  
+                        recordset = this.currentRecordset;  
                         this._clearAllRecordDivs();
                     } 
                     
@@ -1301,9 +1110,9 @@ $.widget( "heurist.resultList", {
                             
                             if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                                if(_query_request!=null && response.data.queryid==that.current_page) {
+                                if(response.data.queryid==that.current_page) {
                                     
-                                    top.HAPI4.currentRecordset.fillHeader( new hRecordSet( response.data ));
+                                    that.currentRecordset.fillHeader( new hRecordSet( response.data ));
                                     
                                     that._renderPage( that.current_page );
                                 }

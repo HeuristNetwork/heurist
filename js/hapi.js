@@ -125,6 +125,9 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(!request.db){
             request.db = _database;
         }
+        if(request.notes){
+            request.notes = null; //unset to reduce traffic
+        }
 
         var url = that.basePath+"php/api/"+action+".php"; //+(new Date().getTime());
 

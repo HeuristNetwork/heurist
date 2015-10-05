@@ -364,9 +364,21 @@ if(@$params['debug']) echo $query."<br>";
         if(!@$params['detail']){
             $params['detail'] = @$params['f']; //backward capability
         }
-        
-        if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
-            $params['detail'] = 'ids';
+
+        $fieldtypes_ids = null;
+        if(@$params['detail'] == 'timemap'){
+                $fieldtypes_ids = '9,10,11,28';
+        }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
+            
+            $fieldtypes_ids = explode(',', $params['detail']);
+            if(is_array($fieldtypes_ids) && (count($fieldtypes_ids)>1 || is_numeric($fieldtypes_ids[0])) ){
+                $fieldtypes_ids = implode(',', $fieldtypes_ids);
+                $params['detail'] = 'detail';    
+            }else{
+                $fieldtypes_ids = null;
+                $params['detail'] = 'ids';    
+            }
+            
         }
         
         $is_ids_only = ('ids'==$params['detail']);
@@ -496,7 +508,7 @@ if(@$params['debug']) echo $query."<br>";
                     $params3 = $params;
                     $params3['topids'] = implode(",", array_slice($parent_ids, $k, 3000));
                     if( !$is_last ){  //($is_get_relation_records || 
-                        $params3['detrail'] = 'ids';  //no need in details for preliminary results  ???????
+                        //$params3['detail'] = 'ids';  //no need in details for preliminary results  ???????
                     }
                     
                     $response = recordSearch($system, $params3);
@@ -518,7 +530,8 @@ if(@$params['debug']) echo $query."<br>";
                             }
                             
                             if(!$is_last){ //add top ids for next level
-                                $flat_rules[$idx]['results'] = array_merge($flat_rules[$idx]['results'],  $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
+                                $flat_rules[$idx]['results'] = array_merge($flat_rules[$idx]['results'],  
+                                        $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
                             }
                             
                             if($is_get_relation_records && (strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) ){ //find relation records (recType=1)
@@ -548,9 +561,16 @@ if(@$params['debug']) echo $query."<br>";
                                 
                                 $params2['sql'] = $select_clause.$from.$where;
                             
-                                $response = recordSearch($system, $params2);
+                                $response = recordSearch($system, $params2);  //search for relationship records
                                 if($response['status'] == HEURIST_OK){
-                                     $fin_result['data']['relationship'] = $response['data']['records'];    
+                                    
+                                     if($is_ids_only){ 
+                                        $fin_result['data']['relationship'] = array_merge($fin_result['data']['relationship'], $response['data']['records']);    
+                                     }else{                                          
+                                        $fin_result['data']['relationship'] = _mergeRecordSets($fin_result['data']['relationship'], $response['data']['records']);    
+                                     }
+                                     
+                                      
                                     /*merge with final results
                                     if($is_ids_only){
                                         $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);    
@@ -595,7 +615,7 @@ if(@$params['debug']) echo $query."<br>";
         $chunk_size = PHP_INT_MAX;
         
         if(@$params['sql']){
-             $query = $params['sql']; //that's very dangerous
+             $query = $params['sql']; 
         }else{
             
             $is_mode_json = false;
@@ -633,8 +653,8 @@ if(@$params['debug']) echo $query."<br>";
         
         }
 
-//DEGUG 
-// error_log("Q: ".$query);            
+//DEBUG 
+//error_log("Q: ".$query);            
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -694,7 +714,7 @@ if(@$params['debug']) echo $query."<br>";
                         
                         // load all records
                         while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //3000 maxim allowed chunk
-                            array_push( $row, fileGetThumbnailURL($system, $row[2]) );
+                            array_push( $row, ($fieldtypes_ids)?'':fileGetThumbnailURL($system, $row[2]) );
                             //array_push( $row, $row[4] ); //by default icon if record type ID
                             $records[$row[2]] = $row;
                             array_push($order, $row[2]);
@@ -710,9 +730,18 @@ if(@$params['debug']) echo $query."<br>";
                             $params['detail']=='structure') && count($records)>0){
                             
                             //search for specific details
-                            // @todo - we may use getAllRecordDetails
-                            $res_det = $mysqli->query(
-                                'select dtl_RecID,'
+                            if(!$fieldtypes_ids && $fieldtypes_ids!=''){
+                                
+                                $detail_query =  'select dtl_RecID,'
+                                .'dtl_DetailTypeID,'     // 0                                                                   
+                                .'dtl_Value,'            // 1
+                                .'astext(dtl_Geo), 0, 0, 0 '
+                                .'from recDetails 
+                                where dtl_RecID in (' . join(',', array_keys($records)) . ') '                                
+                                .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
+                                
+                            }else{
+                                $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0                                                                   
                                 .'dtl_Value,'            // 1
                                 .'astext(dtl_Geo),'      // 2
@@ -721,7 +750,16 @@ if(@$params['debug']) echo $query."<br>";
                                 .'recUploadedFiles.ulf_Parameters '         // 5
                                 .'from recDetails 
                                   left join recUploadedFiles on ulf_ID = dtl_UploadedFileID   
-                                where dtl_RecID in (' . join(',', array_keys($records)) . ')');
+                                where dtl_RecID in (' . join(',', array_keys($records)) . ')';                                
+                                
+                            }
+                            
+//error_log( $detail_query );                            
+                            
+                            // @todo - we may use getAllRecordDetails
+                            $res_det = $mysqli->query( $detail_query );
+                                
+                                
                             if (!$res_det){
                                 $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving details)', $mysqli->error);
                                 return $response;

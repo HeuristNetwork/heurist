@@ -145,13 +145,13 @@ var layouts = [
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
         ]},
         west:{size:270, resizable:false, apps:[
-            {appid:'h4_search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
+            //{appid:'h4_search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
             {appid:'dh_search', hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
-                    {appid:'ha51', options:{layout:['map','timeline'], startup:50926} } //mapping
-                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false} }
+                    {appid:'ha51', options:{layout:['map','timeline'], startup:50926, eventbased:false} } //mapping
+                    ,{appid:'h3_resultList', hasheader:true, name: 'List', options:{title:'List', showmenu:false, eventbased:false} }
                     //,{appid:'h4_static', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
                 ]
             }]

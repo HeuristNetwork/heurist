@@ -735,16 +735,21 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     
 }
     
-ul.ui-fancytree > li:hover > .svs-contextmenu {
+ul.ui-fancytree > li:hover > .svs-contextmenu, div:hover > .svs-contextmenu {
     display: inline-block;
 }
-.svs-contextmenu {
+ul.ui-fancytree > li > .svs-contextmenu {
     display: none;
     cursor: pointer;
     position:absolute;
     right:2px;
-    width:15px;
-    padding-right:2px;
+    /*width:15px;
+    padding-right:2px;*/
+}
+div > .svs-contextmenu {
+    display: none;
+    cursor: pointer;
+    float:right;
 }
 
 /*

@@ -151,20 +151,32 @@ function _addLegendEntryForLayer(layerid, on_top){
 
     var overlay = overlays_not_in_doc[layerid];
 
-    var legenditem = "<div style='display:block;padding:2px;' id='"
+    var legenditem = $("<div style='display:block;padding:2px;' id='"
             +layerid+"'><input type='checkbox' style='margin-right:5px' value='"
-            +layerid+"' "+
+            +layerid+"' "
             +(overlay.visible?"checked='checked'>":">")
-            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+
-            '" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
-    +overlay.title+"</div>";
-
+            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'
+            +'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
+    +overlay.title
+            +"</div>");
+            
+            
     if(on_top){
         $("#legend .content").prepend(legenditem);
     }else{
         $("#legend .content").append(legenditem);
     };
 
+    $('<div class="svs-contextmenu ui-icon ui-icon-close"></div>')
+    .click(function(event){ 
+             //$(event.target) ); 
+             top.HEURIST4.util.stopEvent(event); return false;})
+    .appendTo(legenditem);
+    $('<div class="svs-contextmenu ui-icon ui-icon-pencil"></div>')
+    .click(function(event){ 
+             //$(event.target) ); 
+             top.HEURIST4.util.stopEvent(event); return false;})
+    .appendTo(legenditem);
 
 }
 
@@ -494,23 +506,34 @@ function addQueryLayer(source, index) {
         var request = null;
         try{
             var query = top.HEURIST4.util.isObject(source.query) ?source.query :JSON.parse(source.query);
-            if(!(query && query['q'])){
-                request = null;
-            }else{
-                request = {q: JSON.stringify(query['q']), rules: JSON.stringify(query['rules']),
-                            w: "all", detail:'timemap', limit:2000};
+            if(query && query['q']){
+                request = { q: query['q'], 
+                            rules: query['rules'],
+                            w: query['w']?query['w']:'all'}; 
             }
         }catch(err){
         }
-        if(request==null){ //this is simple (non JSON) queru without rules
-            request = {q: source.query, w: "all"};
+        if(request==null){
+            if(source.query){ //this is simple (non JSON) queru without rules
+                request = {q: source.query, w: 'all'};
+            }else{
+                return;
+            }
         }
-        request['getrelrecs'] = 1;  //return all related records including relationship records
+        //request['getrelrecs'] = 1;  //return all related records including relationship records
         request['detail'] = 'timemap';
-        request['limit'] = 3000;
-
+        request['limit'] = 2000;
 
         // Retrieve records for this request
+        top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset ){
+            
+            source.recordset = recordset;
+            source.recordset.setMapEnabled( true );
+            addRecordsetLayer(source, index);
+            
+        });
+        
+        /*
         top.HAPI4.RecordMgr.search(request,
             function(response){
                 //console.log("QUERY RESPONSE:");
@@ -527,7 +550,7 @@ function addQueryLayer(source, index) {
                     top.HEURIST4.util.showMsgErr(response);
                 }
             }
-        );
+        );*/
 
 
     }
@@ -550,23 +573,25 @@ function addRecordsetLayer(source, index) {
 
                     var request = {w: 'all', 
                                    detail: 'timemap', 
-                                   limit:100000};
+                                   limit: 3000};
                     
-                    if(recset.length()<3001){
-                        request.q = 'ids:'+recset.getIds().join(',');
+                    if(recset.length()<2001){
+                        source.query = { q:'ids:'+recset.getIds().join(',') };
                     }else{
                         var curr_request = recset.getRequest();
-                        request.q = curr_request.q;
-                        request.w = curr_request.w;
-                        if(curr_request.rules) request.rules = curr_request.rules;
+                        
+                        source.query = { 
+                                    q: curr_request.q,
+                                    rules: curr_request.rules,
+                                    w: curr_request.w};
                     }
-                                   
+                    
+                    addQueryLayer( source, index );
+                           
                     // Retrieve records for this request
+                    /*
                     top.HAPI4.RecordMgr.search(request,
                         function(response){
-                            //console.log("QUERY RESPONSE:");
-                            //console.log(response);
-
                             if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                 source.recordset = hRecordSet(response.data);
@@ -577,19 +602,14 @@ function addRecordsetLayer(source, index) {
                                 top.HEURIST4.util.showMsgErr(response);
                             }
                         }
-                    );                               
+                    );
+                    */       
+                                   
+                                                   
                     return;               
                 }
                 
-
-                if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){
-                    //preprocess for Digital Harlem - @todo more elegant way
-                    recset.preprocessForDigitalHarlem();
-                    mapdata = recset.toTimemap(source.id); //show only address records @todo  address RT is hardcoded!!!!
-                }else{
-                    //convert to map datasource
-                    mapdata = recset.toTimemap(source.id);
-                }
+                mapdata = recset.toTimemap(source.id, null, source.color);
             }
 
             //mapping.load(mapdata);

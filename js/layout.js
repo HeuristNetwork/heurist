@@ -21,6 +21,11 @@
 */
 
 
+//
+// @todo - convert to Class
+//
+
+var widgetinstances = []; //array of all inited widgets
 
 function appGetWidgetByName(widgetname){
 
@@ -33,6 +38,21 @@ function appGetWidgetByName(widgetname){
     return null;
 }
 
+/**
+* Finds application in widgets array (see layout_default.js)
+*
+* @param id
+*/
+function appGetWidgetById(id){
+
+    var i;
+    for(i=0; i<widgets.length; i++){
+        if(widgets[i].id==id){
+            return widgets[i];
+        }
+    }
+    return null;
+}
 
 /**
 * Main funtion that inits all stuff
@@ -66,22 +86,6 @@ function layoutGetById(id){
     for(i=0; i<layouts.length; i++){
         if(layouts[i].id==id){
             return layouts[i];
-        }
-    }
-    return null;
-}
-
-/**
-* Finds application in widgets array
-*
-* @param id
-*/
-function appGetWidgetById(id){
-
-    var i;
-    for(i=0; i<widgets.length; i++){
-        if(widgets[i].id==id){
-            return widgets[i];
         }
     }
     return null;

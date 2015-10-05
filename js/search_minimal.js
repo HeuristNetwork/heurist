@@ -2,8 +2,6 @@
 * Minimal search
 * returns only ids
 * rules are searched on server side
-* returns only first 2000 records
-* 
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -29,8 +27,7 @@ function hSearchMinimal() {
 
         _query_request = null,
         _owner_doc = null,
-        _owner_element_id = null,
-        _progressCallback = null;
+        _owner_element_id = null;
          
          
          
@@ -40,28 +37,36 @@ function hSearchMinimal() {
     function _init( ) {
     }
     
+    // search with callback
+    function _doSearchWithCallback( request, callback ){
+        
+        top.HAPI4.RecordMgr.search(request,
+            function(response){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    callback( hRecordSet(response.data) );
+                }else{
+                    top.HEURIST4.util.showMsgErr(response);
+                }
+            }
+        );
+        
+    }
+
+    // search with event triggers    
     function _doSearch( originator, request ){
         
-        if(originator){
-            if(originator.document){
-                _owner_doc = originator.document;
-                _owner_element_id = originator.element.attr('id');
+            if(originator){
+                if(originator.document){
+                    _owner_doc = originator.document;
+                    _owner_element_id = originator.element.attr('id');
+                }else{
+                    _owner_doc = originator;
+                    _owner_element_id = 'main_doc';
+                }
             }else{
-                _owner_doc = originator;
-                _owner_element_id = 'main_doc';
+                _owner_doc = null;
+                _owner_element_id = null;
             }
-        }else{
-            _owner_doc = null;
-            _owner_element_id = null;
-        }
-        
-        _onSearchStart( request );
-    }
-    
-    //
-    //
-    //
-    function _onSearchStart( request ){
     
             if(request==null) return;
 
@@ -73,17 +78,17 @@ function hSearchMinimal() {
             request.limit = 100000; 
             request.needall = 1;
             request.detail = 'ids';
-            request.getrelrecs = 1;
+
+            _query_request = request; //keep for search in current result
+        
             
+            //clone - to use mainMenu.js
+            top.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
+            top.HAPI4.currentRecordset = null;
             if(!top.HEURIST4.util.isnull(_owner_doc)){
                 $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
-        
-            //clone - to use mainMenu.js
-            top.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
-            _query_request = request; //keep for search in current result
 
-             top.HAPI4.currentRecordset = null;
              
              //perform search
              top.HAPI4.RecordMgr.search(request, _onSearchResult);
@@ -95,17 +100,17 @@ function hSearchMinimal() {
     //
     function _onSearchResult(response){
 
-            var resdata = null;
+            var recordset = null;
             if(response.status == top.HAPI4.ResponseStatus.OK){
 
                 if(_query_request!=null && response.data.queryid==_query_request.id) {
 
-                    resdata = new hRecordSet(response.data);
+                    recordset = new hRecordSet(response.data);
                     
-                    resdata.setRequest( top.HEURIST4.util.cloneJSON(_query_request) );
+                    recordset.setRequest( top.HEURIST4.util.cloneJSON(_query_request) );
                     
-                    top.HAPI4.currentRecordset = resdata;
-
+                    
+                    top.HAPI4.currentRecordset = recordset;
                     _searchCompleted( false );
                 }
 
@@ -118,7 +123,7 @@ function hSearchMinimal() {
                 }
             }
             if(!top.HEURIST4.util.isnull(_owner_doc)){
-                $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+                $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ recordset ]);  //gloal app event
             }    
     }
     
@@ -167,7 +172,11 @@ function hSearchMinimal() {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        // originator - widget that initiated the search
+        doSearchWithCallback: function(request, callback){
+            _doSearchWithCallback(request, callback);
+        },
+        
+       // originator - widget that initiated the search
         doSearch:function( originator, request ){
             _doSearch( originator, request );
         },

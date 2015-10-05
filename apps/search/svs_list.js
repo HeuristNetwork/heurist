@@ -1097,10 +1097,6 @@ $.widget( "heurist.svs_list", {
                     request.detail = 'detail';
                     request.source = this.element.attr('id');
                     request.qname = qname;
-                    request.notes = null; //unset to reduce traffic
-
-                    //that._trigger( "onsearch"); //this widget event
-                    //that._trigger( "onresult", null, resdata ); //this widget event
 
                     //get hapi and perform search
                     top.HAPI4.SearchMgr.doSearch( this, request );

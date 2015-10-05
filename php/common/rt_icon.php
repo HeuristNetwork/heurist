@@ -38,6 +38,14 @@
     else */
     if(substr($rectype_id,-4,4) != ".png") $rectype_id = $rectype_id . ".png";
     
+    if(@$_REQUEST['color'] && strpos($_REQUEST['color'],'rgb')===0){
+        
+        $clr = substr($_REQUEST['color'],4,-1);
+        $color_new = explode(',',$clr);
+        
+    }else{
+        $color_new = array(255, 0, 0);    
+    }
     
     $filename = HEURIST_ICON_DIR . $rectype_id;
   
@@ -46,11 +54,10 @@
     //
 
 //print $filename;    
-    
     if(file_exists($filename)){
         download_file($filename);
     }else{
-        create_rt_icon_with_bg( $rectype_id );
+        create_rt_icon_with_bg( $rectype_id, $color_new );
     }
  
 function download_file($filename){
@@ -102,7 +109,7 @@ function imagepalettetotruecolor(&$img)
 //
 //
 //    
-function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
+function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
 
     if(substr($rectype_id,0,4)=='term'){
         $rectype_id = substr($rectype_id, 4);
@@ -169,7 +176,7 @@ function create_rt_icon_with_bg( $rectype_id ){ //}, $bg_color ) {
         $img_icon = @imagecreatefrompng($filename);
 
         $color_old = array(54,100,139);      
-        $color_new = array(255, 0, 0);      
+        $color_new = (!$color_new)?array(255, 0, 0):$color_new;      
         /* RGB of your inside color */
         $rgb = $color_new; //array(0,0,255);
         /* Negative values, don't edit */

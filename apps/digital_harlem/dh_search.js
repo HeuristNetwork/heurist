@@ -30,12 +30,19 @@ $.widget( "heurist.dh_search", {
     },
 
     _currenttype:null,  //absolete
-    currentSearch: null,
     usr_SavedSearch: null,   //list of saved searches for given group
+    
+    _currentRequest:null,
+    _currentRecordset:null,
 
     
     // the constructor
     _create: function() {
+        
+        // important - it overwrite default search manager - we use special one 
+        // it adds some parameters to search request and postprocess the result
+        top.HAPI4.SearchMgr = new hSearchMinimalDigitalHarlem();
+        
 
         var that = this;
 
@@ -46,7 +53,7 @@ $.widget( "heurist.dh_search", {
         this.res_div = $('<div>').css({'margin-botton':'1em', 'font-size':'0.9em','padding':'10px','text-align':'center'}).appendTo(this.search_pane).hide();
         this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
         //this.res_name = $('<input>').appendTo(this.res_div);
-        this.res_btn = $('<button>', {text:top.HR('Add To Map')})
+        this.res_btn_add = $('<button>', {text:top.HR('Add To Map')})
             .button({icons:{primary:'ui-icon-circle-plus'}})
             .on("click", function(event){ that._onAddLayer(); } )
             .appendTo(this.res_div);
@@ -58,38 +65,6 @@ $.widget( "heurist.dh_search", {
             //.css({'height':'100%'})
             .css({'position':'absolute',top:'3em',bottom:'0','width':'100%'})
             .appendTo( this.search_pane )
-        
-        this._events = top.HAPI4.Event.ON_REC_SEARCHSTART+ ' ' +  top.HAPI4.Event.ON_REC_SEARCH_FINISH;
-        
-        $(this.document).on(this._events, function(e, data) {
-            if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART)
-            {
-                if(data){ // && !data.increment
-                    that.res_div.hide();
-                    that.currentSearch = Hul.cloneJSON(data);  
-                } 
-                
-            }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
-                
-                //show result  - number of records and add to map button
-                var count_total = (top.HAPI4.currentRecordset!=null)?top.HAPI4.currentRecordset.length():0; //count_total
-                
-                                        that.res_div.show();
-                                            
-                                        if(count_total>0){
-                                            that.res_lbl.html('Found '+count_total+' matches....'); //<br>Provide a layer name<br>
-                                            //that.res_name.val('');
-                                            //that.res_name.show();
-                                            that.res_btn.show();
-                                        }else{
-                                            that.res_lbl.html('Found no matches....');
-                                            //that.res_name.hide();
-                                            that.res_btn.hide();
-                                        }
-                
-                
-            }
-        });
         
         this._refresh();
         
@@ -128,7 +103,7 @@ $.widget( "heurist.dh_search", {
 
                             that.menu_fi = $('<ul>'+smenu+'</ul>')   //<a href="#">
                                 .zIndex(9999)
-                                .css({'position':'absolute'})
+                                .css({'position':'absolute', 'width':that.btn_fi_menu.width() })
                                 .appendTo( that.document.find('body') )
                                 .menu({
                                     select: function( event, ui ) {
@@ -171,7 +146,6 @@ $.widget( "heurist.dh_search", {
     // revert other modifications here
     _destroy: function() {
         
-        $(this.document).off(this._events);
         this.search_list.remove(); 
         this.search_faceted.remove();
         
@@ -294,8 +268,6 @@ $.widget( "heurist.dh_search", {
             request.detail = 'detail';
             request.source = this.element.attr('id');
             request.qname = this.usr_SavedSearch[svsID][_NAME];
-            request.notes = null; //unset to reduce traffic
-            request.getrelrecs = 1;
 
             //get hapi and perform search
             top.HAPI4.SearchMgr.doSearch( this, request );
@@ -304,18 +276,74 @@ $.widget( "heurist.dh_search", {
         }
 
     },
+    
+    //
+    // this is public methid, it is called on search complete
+    //
+    updateResultSet: function( recordset, request ){
+                
+            //show result  - number of records and add to map button
+            var count_total = (recordset!=null)?recordset.length():0; //count_total
+                
+            this.res_div.show();
+                
+            if(count_total>0){
+                this.res_lbl.html('Found '+count_total+' matches....'); //<br>Provide a layer name<br>
+                this.res_btn_add.show();
+                
+                this._currentRequest = request;
+                this._currentRecordset = recordset;
+            }else{
+                this.res_lbl.html('Found no matches....');
+                this.res_btn_add.hide();
+                
+                this._currentRequest = null;
+            }
 
+            //update result set  
+            var app = appGetWidgetByName('resultList');  //appGetWidgetById('ha51'); 
+            if(app && app.widget){
+                $(app.widget).resultList('updateResultSet', recordset);
+            }
+                     
+    },
+    
+    dlgcont:null,
+    
     // add layer to current map document
     _onAddLayer: function(){
         
         if($("#dh_layer_name").length>0){
             $("#dh_layer_name").val('');
         }
-
+        
+        if(this._currentRequest==null) return;
+        //if result > 1000 warning message and exit
+        if( this._currentRequest.total_count>2000){
+            top.HEURIST4.util.showMsgErr(this._currentRequest.total_count
+            + ' records have been retrieved. This is more than can be comfortably plotted on a Google map. '
+            + 'Please narrow down your selection in order to create a useful map');
+            return;
+        }
             
            var that = this;
+           
+           if(this.dlgcont==null){
+               
+               this.dlgcont = $('<label>What would you like to call<br>the new map layer:</label>'
+               + '<br><br><input id="dh_layer_name" type="text">'
+               + '<br><br><label>Color:</label>'
+               + '<br><br><input id="dh_layer_color" value="#FF0000" style="background-color:#f00">');           
+               
+               (this.dlgcont.find('#dh_layer_color')).colorPicker({
+                   color:'#f00',
+                   opacity:false,
+                   valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
+                   cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}'
+               });
+           }
             
-           var $dlg = top.HEURIST4.util.showMsgDlg('<label>What would you like to call<br>the new map layer:</label><br><br><input id="dh_layer_name" type="text">', 
+           var $dlg = top.HEURIST4.util.showMsgDlg(this.dlgcont, 
                    [
                     {text:'Add Layer', click:function(){
                         var layer_name = $dlg.find("#dh_layer_name").val();
@@ -323,63 +351,43 @@ $.widget( "heurist.dh_search", {
                             //top.HEURIST4.util.showMsgErr
                         }else{
                             
-                            var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+                            var app = appGetWidgetByName('app_timemap');
                             if(app && app.widget){
-                                //add new layer witg given name
-                                var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name}; //, query: {q:that.currentSearch.q, rules:that.currentSearch.rules} };
-                            
-                                params.recordset = top.HAPI4.currentRecordset;
+
                                 
-                                $(app.widget).app_timemap('addRecordsetLayer', params);
+                                // 2. search rules (applyRules) with relationship records
+                                // 3. search details for timemap (9,10,11,28) event type (74) and relationships (5,6,7)
+                                var request = { q: 'ids:'+that._currentRecordset.getMainSet().join(','),
+                                        rules: that._currentRequest.rules,
+                                        w: 'all'};
+                
+                                //add new layer with given name
+                                var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1),
+                                     title: layer_name,
+                                     query: request,
+                                     color: $dlg.find("#dh_layer_color").css('background-color') 
+                                };                 
+                                
+                                $(app.widget).app_timemap('addQueryLayer', params);
                                 //remove current search layer
                                 //@todo
                             }
                                         
                             
+                            $('.cp-color-picker').hide();
                             $dlg.dialog( "close" );
+                            that.res_div.hide();
                         }
                         
                     }},
-                    {text:'Cancel', click:function(){ $dlg.dialog( "close" ); }}
+                    {text:'Cancel', click:function(){ 
+                        $('.cp-color-picker').hide();
+                        $dlg.dialog( "close" ); }}
                    ]
            , 'New map layer');
             
            //top.HEURIST4.util.showMsgErr('Define name of layer');
         
-
-           
-            /*
-           function(){
-                var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name, query: {q:this.currentSearch.q, rules:this.currentSearch.rules} };
-                
-                var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
-                if(app && app.widget){
-                    $(app.widget).app_timemap('addQueryLayer', params);
-                }
-           }
-           */
-        
-        
-        /*
-        var rules = ''; 
-        
-        if(this._currenttype==10){
-            //find person->events->addresses and person->addresses
-            rules = [{"query":"t:14 relatedfrom:10","levels":[{"query":"t:12 relatedfrom:14"}]},{"query":"t:12 relatedfrom:10"}];
-        }else if(this._currenttype==14){ //events->addresses
-            rules = [{"query":"t:12 relatedfrom:14"}];
-        }else if(this._currenttype==12){ //address
-        
-        }else{
-            return;
-        }
-        
-        var layer_name = $("#dh_layer_name").val();
-        
-        var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:layer_name, query: {q:this.currentSearch, rules:rules} };
-        */
-
-      
     }
     
 

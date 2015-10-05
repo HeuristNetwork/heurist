@@ -20,8 +20,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-    require_once(dirname(__FILE__)."/../../php/System.php");
+    require_once(dirname(__FILE__).'/../../php/System.php');
 
+    define('PLACE_ICON', 4326);
+    define('PERSON_ROLE', 3306);
+    define('EVENT_TYPE', 3297);
+                       
+    
     $statistics = "";
     $system = new System();
     // connect to given database
@@ -43,7 +48,7 @@
 <table>
   <tbody>
   <tr>
-    <td class="legend_icon"><img src="<?=HEURIST_TERM_ICON_URL?>4326.png"></td>
+    <td class="legend_icon"><img src="<?=HEURIST_TERM_ICON_URL.PLACE_ICON?>.png"></td>
     <td class="legend_text">Address in DB</td>
   </tr>
 </tbody></table>
@@ -53,13 +58,13 @@
 <table>
 <tbody>
 <?php
-    $query = "SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID=3306 ORDER BY trm_Label";
+    $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.PERSON_ROLE.' ORDER BY trm_Label';
     $res = $system->get_mysqli()->query($query);
     while($row = $res->fetch_assoc()) {
-            $filename = HEURIST_TERM_ICON_URL.$row["trm_ID"].".png";
-//print $filename."<br>";
-//print HEURIST_TERM_ICON_DIR.$row["trm_ID"].".png<br>";
-            if(file_exists(HEURIST_TERM_ICON_DIR.$row["trm_ID"].".png")){
+            $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
+//print $filename.'<br>';
+//print HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png<br>';
+            if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
 print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
 print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
 
@@ -73,13 +78,13 @@ print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
 <table>
 <tbody>
 <?php
-    $query = "SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID=3297 ORDER BY trm_Label";
+    $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
     $res = $system->get_mysqli()->query($query);
     while($row = $res->fetch_assoc()) {
-            $filename = HEURIST_TERM_ICON_URL.$row["trm_ID"].".png";
-            if(file_exists(HEURIST_TERM_ICON_DIR.$row["trm_ID"].".png")){
+            $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
+            if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
 print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
-print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
+print '<td class="legend_text">'.$row['trm_Label'].'</td></tr>';
 
             }
     }
