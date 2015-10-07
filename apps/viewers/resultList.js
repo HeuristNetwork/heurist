@@ -439,9 +439,9 @@ $.widget( "heurist.resultList", {
     updateResultSet: function( recordset, request ){
                 
         this._clearAllRecordDivs();
-        this._renderRecordsIncrementally(recordset);                     
         this.span_pagination.show();
         this._renderPagesNavigator();
+        this._renderRecordsIncrementally(recordset);                     
     },
     
 
@@ -464,6 +464,7 @@ $.widget( "heurist.resultList", {
             if( total_count_of_curr_request > 0 )
             {
 
+console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_page);                
                 if(this._count_of_divs<this.pagesize){//01
                 
                     this._renderPage(0, recordset);
@@ -1009,14 +1010,14 @@ $.widget( "heurist.resultList", {
                         recordset = this.currentRecordset;  
                         this._clearAllRecordDivs();
                     } 
-                    
+
+                    this._renderPagesNavigator(); //redraw paginator
                     if(pageno<0){
                         pageno = 0;
                     }else if(pageno>=this.max_page){
                         pageno= this.max_page - 1;     
                     }
                     this.current_page = pageno;
-                    this._renderPagesNavigator(); //redraw paginator
                     
                     var recs = recordset.getRecords();
                     

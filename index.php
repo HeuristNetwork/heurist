@@ -224,7 +224,9 @@ if(@$_REQUEST['db']){
                                         $("head").append($('<link rel="stylesheet" type="text/css" href="apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
                                     }
 
-                                    appInitAll(layoutid, "#layout_panes");
+                                    top.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
+                                    
+                                    top.HAPI4.LayoutMgr.appInitAll(layoutid, "#layout_panes");
 
                                     //perform search in the case that parameter "q" is defined
                                     var qsearch = '<?=@$_REQUEST['q']?>';

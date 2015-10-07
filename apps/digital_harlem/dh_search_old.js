@@ -675,7 +675,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
         
         var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
         
-        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
         if(app && app.widget){
             $(app.widget).app_timemap('addQueryLayer', params);
         }

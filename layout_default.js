@@ -37,7 +37,7 @@
 * @type Array
 */
 
-var widgets = [
+var cfg_widgets = [
     {id:'ha01', name:'Databases', widgetname:'about', script:'apps/about.js', minsize:[200,200], size:[300,300], isframe:false },
     {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
 
@@ -98,7 +98,7 @@ options - parameters to init application
 
 */
 
-var layouts = [
+var cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
     {id:'H4Default', name:'Heurist Def', theme:'heurist', type:'cardinal',

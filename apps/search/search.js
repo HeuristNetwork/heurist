@@ -363,7 +363,7 @@ $.widget( "heurist.search", {
                     .addClass('logged-in-only')
                     .appendTo(this.div_search_links);
             this._on( link, {  click: function(){
-                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method
                 }
@@ -373,7 +373,7 @@ $.widget( "heurist.search", {
                    .addClass('logged-in-only')
                    .appendTo(this.div_search_links);
             this._on( link, {  click: function(){
-                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                 }
@@ -414,7 +414,7 @@ $.widget( "heurist.search", {
             }, text:false})
             .css('margin-right','0.2em')
             .click( function(){
-                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                 }
@@ -439,7 +439,7 @@ $.widget( "heurist.search", {
                 .css('padding-right','1em')
                 .appendTo( this.div_buttons );
                 this._on( link, {  click: function(){
-                    var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                    var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                     if(app && app.widget){
                         $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                     }

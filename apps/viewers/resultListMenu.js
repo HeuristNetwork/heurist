@@ -222,7 +222,7 @@ $.widget( "heurist.resultListMenu", {
           if(action == "menu-search-quick"){  //H4
               
                 //hack $('#btn_search_assistant').click();
-                var app = appGetWidgetByName('search');  //appGetWidgetById('ha10'); 
+                var app = top.HAPI4.LayoutMgr.appGetWidgetByName('search');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha10'); 
                 if(app && app.widget){
                     $(app.widget).search('showSearchAssistant');
                 }
@@ -246,7 +246,7 @@ $.widget( "heurist.resultListMenu", {
               
           }else if(action == "menu-search-save"){  //H4
               
-                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method editRules
                     //$(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
@@ -254,7 +254,7 @@ $.widget( "heurist.resultListMenu", {
 
           }else if(action == "menu-search-rulebuilder"){  
 
-                var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
                     $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method editRules
                     // $(app.widget).search_links('editRules', null); //call public method editRules
@@ -752,7 +752,7 @@ $.widget( "heurist.resultListMenu", {
 
         if(!Hul.isempty(this._collection)){
             
-            var  app = appGetWidgetByName('svs_list');  //appGetWidgetById('ha13');
+            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
             if(app && app.widget){
                 //call method editSavedSearch - save collection as search
 

@@ -501,7 +501,7 @@ function addGeoJsonToMap(data, index) {
 function addQueryLayer(source, index) {
      // Query
     if(source.query !== undefined) {
-        console.log("Query: " + source.query);
+        //console.log("Query: " + source.query);
 
         var request = null;
         try{

@@ -1037,7 +1037,8 @@ function smarty_function_out($params, &$smarty)
 }
 
 //
-// smarty plugin function
+// smarty plugin function 
+    // {wrap var=$s.f8_originalvalue dt="file" width="100" height="auto"} 
 //
 function smarty_function_wrap($params, &$smarty)
 {
@@ -1159,6 +1160,8 @@ function smarty_function_wrap($params, &$smarty)
 						$sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$value['origName']."</a>";
 					}
 
+                    //<img src="{$s.f8_originalvalue['URL']}" width="400"/>
+                    //           thumbURL
 				}
 
 			}

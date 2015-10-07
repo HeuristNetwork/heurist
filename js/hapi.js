@@ -750,6 +750,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         //@todo - assign it later since we may have different search managers - incremental, partial...
         //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result
         SearchMgr: new hSearchMinimal(), //class that responsible for search and incremental loading of result
+        
+        LayoutMgr: new hLayout(),
 
         /*RecordMgr: function(){
         return hRecordMgr();

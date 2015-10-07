@@ -197,9 +197,10 @@ $.widget( "heurist.dh_maps", {
         var recId = $rdiv.attr('recid');
         
         //hack $('#map-doc-select').click();
-        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
         if(app && app.widget){
             //switch to Map Tab
+            top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
             
             //load Map Document
             $(app.widget).app_timemap('loadMapDocumentById', recId);

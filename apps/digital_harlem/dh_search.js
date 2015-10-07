@@ -109,10 +109,11 @@ $.widget( "heurist.dh_search", {
                                     select: function( event, ui ) {
                                         var map_rec_id =  Number(ui.item.attr('id').substr(5)); 
                                         
-                                        var app = appGetWidgetByName('app_timemap');  //appGetWidgetById('ha51'); 
+                                        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
                                         if(app && app.widget){
                                             //switch to Map Tab
-                                            
+                                            top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+            
                                             //load Map Document
                                             $(app.widget).app_timemap('loadMapDocumentById', map_rec_id);
                                         }                                        
@@ -228,6 +229,9 @@ $.widget( "heurist.dh_search", {
         
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
+        //switch to Map Tab
+        top.HAPI4.LayoutMgr.putAppOnTop('resultList');
+        
         if(this.usr_SavedSearch[svsID][3]){  //_ISFACETED
                 var facet_params = null;
                 try {
@@ -301,7 +305,7 @@ $.widget( "heurist.dh_search", {
             }
 
             //update result set  
-            var app = appGetWidgetByName('resultList');  //appGetWidgetById('ha51'); 
+            var app = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
             if(app && app.widget){
                 $(app.widget).resultList('updateResultSet', recordset);
             }
@@ -351,7 +355,7 @@ $.widget( "heurist.dh_search", {
                             //top.HEURIST4.util.showMsgErr
                         }else{
                             
-                            var app = appGetWidgetByName('app_timemap');
+                            var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
                             if(app && app.widget){
 
                                 

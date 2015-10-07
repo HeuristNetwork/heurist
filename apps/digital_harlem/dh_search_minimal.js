@@ -115,7 +115,7 @@ function hSearchMinimalDigitalHarlem() {
 
                 var recordset = new hRecordSet(response.data);
                 
-                var app = appGetWidgetByName('dh_search');  //appGetWidgetById('ha51'); 
+                var app = top.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
                 if(app && app.widget){
                         $(app.widget).dh_search('updateResultSet', recordset, keepRequest);
                 }
