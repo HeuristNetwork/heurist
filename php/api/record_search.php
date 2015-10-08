@@ -105,7 +105,7 @@
             include(dirname(__FILE__).'/../common/utils_db_script.php');
             
             if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../common/sqlCreateRecLinks.sql")){
-                $system->addError(HEURIST_DB_ERROR, "Can not execure script sqlCreateRecLinks.sql");
+                $system->addError(HEURIST_DB_ERROR, "Can not execute script sqlCreateRecLinks.sql");
                 $response = $system->getError();
                 $isok = false;
             }        

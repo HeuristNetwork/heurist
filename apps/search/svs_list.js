@@ -207,14 +207,18 @@ $.widget( "heurist.svs_list", {
     //
     // save current treeview layout
     //
-    _saveTreeData: function(){
+    _saveTreeData: function( groupToSave ){
 
+            isPersonal = (groupToSave=="all" || groupToSave=="bookmark" || groupToSave=="rules");
+        
             var treeData = {};        
               for (var groupID in this.treeviews)
                 if(groupID){
-                    var d = this.treeviews[groupID].toDict(true);
+                    if ( (isPersonal && isNaN(groupID)) || groupToSave == groupID){
                     
-                    treeData[groupID] = d;
+                        var d = this.treeviews[groupID].toDict(true);
+                        treeData[groupID] = d;
+                    }
                 }
           
             var request = { data:JSON.stringify(treeData) };
@@ -441,7 +445,7 @@ $.widget( "heurist.svs_list", {
                                 node.folder = true;  
                                 
                                 node.editCreateNode( "child", {title:"", folder:true}); //New folder
-                                that._saveTreeData();
+                                that._saveTreeData( groupID );
                                 $("#addlink"+groupID).css('display', 'none');
                             }, 300);
                             //tree.trigger("nodeCommand", {cmd: ui.cmd}); 
@@ -595,13 +599,13 @@ $.widget( "heurist.svs_list", {
           },
           dragDrop: function(node, data) {
               data.otherNode.moveTo(node, data.hitMode);
-              that._saveTreeData();
+              that._saveTreeData( groupID );
           }
       };
       fancytree_options['edit'] = {
           save:function(event, data){
               if(''!=data.input.val())
-                    that._saveTreeData(); 
+                    that._saveTreeData( groupID ); 
           }
       };
       fancytree_options['filter'] = { mode: "hide" };
@@ -647,7 +651,7 @@ $.widget( "heurist.svs_list", {
                   
               function __removeNode(){
                     node.remove(); 
-                    that._saveTreeData(); 
+                    that._saveTreeData( groupID ); 
                     if(that.treeviews[groupID].count()<1){
                         $("#addlink"+groupID).css('display', 'block');
                     }
@@ -732,10 +736,13 @@ $.widget( "heurist.svs_list", {
             // refNode = node.getPrevSibling();
             CLIPBOARD.data.moveTo(node, "child");
             CLIPBOARD.data.setActive();
+            that._saveTreeData( groupID );
+            
           } else if( CLIPBOARD.mode === "copy" ) {
             node.addChildren(CLIPBOARD.data).setActive();
+            that._saveTreeData( groupID );
           }
-          that._saveTreeData();
+          
           break;
         default:
           alert("Unhandled command: " + data.cmd);
@@ -795,7 +802,7 @@ $.widget( "heurist.svs_list", {
           ],
         beforeOpen: function(event, ui) {
           var node = $.ui.fancytree.getNode(ui.target);
-          tree.contextmenu("enableEntry", "paste", !!CLIPBOARD);
+          tree.contextmenu("enableEntry", "paste", node.folder && !!CLIPBOARD);
           node.setActive();
         },
         select: function(event, ui) {
@@ -1162,7 +1169,7 @@ $.widget( "heurist.svs_list", {
                     var isfaceted = (mode=='faceted');
                     node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted, isrules:that._hasRules(request.svs_Query) }, node.folder?"child":"after" );    
                     
-                    that._saveTreeData();
+                    that._saveTreeData( groupID );
                     $("#addlink"+groupID).css('display', 'none');
                     
                 }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
@@ -1177,7 +1184,7 @@ $.widget( "heurist.svs_list", {
                     }
                     node.setTitle(request.svs_Name); // + saddition);
                     node.render(true);
-                    that._saveTreeData();
+                    that._saveTreeData( groupID );
                 }
            };
         

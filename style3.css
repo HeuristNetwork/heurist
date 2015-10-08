@@ -735,10 +735,10 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     
 }
     
-ul.ui-fancytree > li:hover > .svs-contextmenu, div:hover > .svs-contextmenu {
+ul > li:hover > .svs-contextmenu, div:hover > .svs-contextmenu {
     display: inline-block;
 }
-ul.ui-fancytree > li > .svs-contextmenu {
+ul > li > .svs-contextmenu {
     display: none;
     cursor: pointer;
     position:absolute;

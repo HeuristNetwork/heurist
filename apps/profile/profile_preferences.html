@@ -44,9 +44,9 @@
             var key;
             sel.empty();
             sel = sel.get(0);
-            for(key in layouts){
+            for(key in cfg_layouts){
                 if(key){
-                    top.HEURIST4.util.addoption(sel, layouts[key]['id'], layouts[key]['name']);
+                    top.HEURIST4.util.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
                 }
             }
         }

@@ -150,11 +150,11 @@
     }
     
     /**
-    * Save saved searches tree data into HEURIST_ICON_DIR
+    * Save saved searches tree data into HEURIST_SETTING_DIR
     * 
-    * in future - save inot text field in user table ???
+    * in future - save into text field in user table ???
     */
-    function svsSaveTreeData($system, $data){
+    function svsSaveTreeDataFile($system, $data){
         
         if(defined('HEURIST_SETTING_DIR')){
             
@@ -200,7 +200,7 @@
             }
     }
     
-    function svsGetTreeData($system){
+    function svsGetTreeDataFile($system){
         
         $ugrID = $system->get_user_id();
         //load saved search tree data
@@ -243,4 +243,88 @@
         }
 
     }
+           
+    /**
+    * Save saved searches tree data into sysUGrps
+    */
+    function svsSaveTreeData($system, $data){
+        
+        $mysqli = $system->get_mysqli();
+
+        $groups = json_decode($data, true);
+        
+        $personal_data = array();
+        
+        $ugrID = $system->get_user_id();
+        $ugr_groups = $system->get_user_group_ids();
+        
+        foreach($groups as $id=>$treedata){
+
+            if($id=="bookmark" || $id=="all" || $id=="rules"){
+                array_push( $personal_data, '"'.$id.'":'.json_encode($treedata) );
+            }else if(in_array($id, $ugr_groups)){
+                //check date of modification 
+//error_log($id.">>>".json_encode($treedata));
+                mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>$id, 'ugr_NavigationTree'=>json_encode($treedata) ));
+            }
+        }
+
+        if(count($personal_data)>0){
+            
+//error_log("personal >>>".implode(',', $personal_data) );
+                mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', 
+                   array( 'ugr_ID'=>$ugrID, 'ugr_NavigationTree'=>implode(',', $personal_data)));
+        }
+
+    
+        return true;
+
+    }
+
+    function svsGetTreeData($system){
+  
+        $mysqli = $system->get_mysqli();
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
+
+        $res = $mysqli->query($query);
+
+        $row_cnt = $res->num_rows;
+        $res->close();
+        if(!$row_cnt){
+            //alter table 
+            $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'";
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Can not modify table to store filters treeview', $mysqli->error);
+            }
+            return false;
+        }
+        
+        $ugrID = $system->get_user_id();
+        //load personal treeviews - rules, my filters (all) and bookmarks
+        $groups = $system->get_user_group_ids(); 
+        
+        $ret = array();
+        
+        $query = 'SELECT `ugr_ID`, `ugr_NavigationTree` FROM `sysUGrps` WHERE ugr_ID in ('.implode(',',$groups).')';
+        $res = $mysqli->query($query);
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR, 'Can not retrieve filters treeviews', $mysqli->error);
+            return false;
+        }
+        while ($row = $res->fetch_row()) {
+            if($row[1]){
+                if($row[0]==$ugrID){
+                    array_push($ret, $row[1] );    
+                }else{
+                    array_push($ret, '"'.$row[0].'":'.$row[1] );    
+                }
+            }
+        }
+        $res->close();
+        
+        return '{'.implode(',', $ret).'}';
+    }
+    
 ?>
