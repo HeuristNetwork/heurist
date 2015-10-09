@@ -1,8 +1,8 @@
 <?php
 
-    /** 
-    * utils_mail.php - main email sending 
-    * 
+    /**
+    * utils_mail.php - main email sending
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    
+
     function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
 
         $res = null;
@@ -35,7 +35,7 @@
             if(!$email_title){
                 $email_title = "";
             }
-            $email_title = "[HEURIST] ".$email_title;
+            $email_title = "HEURIST ".$email_title;
 
             if(!$email_header){
                 $email_header = "From: HEURIST";
@@ -65,9 +65,9 @@
         if($res){ //error
             error_log($res);
         }else{
-            $res = "ok";        
+            $res = "ok";
         }
 
         return "ok";
-    }  
+    }
 ?>

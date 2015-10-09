@@ -441,7 +441,7 @@ function sendNewUserInfoEmail($recID){
             "Go to the address below to review further details and approve the registration:\n".
             HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
-            $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
+            $email_title = 'User Registration for '.$ugr_FullName.' '.$ugr_eMail;
 
             sendEmail($dbowner_Email, $email_title, $email_text, null);
 
@@ -468,33 +468,38 @@ function sendApprovalEmail($recID, $tmp_password){
             $ugr_eMail = $row['ugr_eMail'];
 
             if($tmp_password!=null){
-                $email_text = "A new Heurist account has been created for you.";
+                $email_text = "<b>Welcome! A new Heurist account has been created for you</b>";
             }else{
-                $email_text = "Your Heurist account registration has been approved.";
+                $email_text = "<b>Welcome! Your Heurist account registration has been approved</b>";
             }
 
-            // point them to the home page
-            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."index.html with the username: " . $ugr_Name;
+            // point them to the home page.
+            // TODO: this is inelegant b/c HEURIST_BASE_URL points to eg. /var/ww/html/HEURIST/h4 not to /var/www/html/HEURIST
+            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."../index.html and create yourself a database with the username: " . $ugr_Name;
 
-            //give them a pointer to the search page for the database
-            $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at".
-            HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
+            //give them a pointer to the search page for the database.
+            // Removed Ian 9/10/15 - you don't want them creating data in the sandpit
+            // $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at ".
+            // HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
 
 
             if($tmp_password!=null){
                 $email_text = $email_text." and password: ".$tmp_password.
-                "\n\nTo change your password go to My Profile -> My User Info in the top right menu";
+                "\n\nTo change your password go to Profile -> My User Info in the top right menu";
             }
 
-            $email_text = $email_text."\n\nWe recommend visiting the Help ".
-            "pages, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
+            $email_text = $email_text."\n\nWe recommend visiting http://HeuristNetwork.org and particularly the Learn menu and the online Help ".
+            "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
             sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+            sendEmail($dbowner_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+
         }
+
     }
-}  // sendApprovalEmail
+} // sendApprovalEmail
 
 
 
