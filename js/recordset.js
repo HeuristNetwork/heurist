@@ -360,7 +360,7 @@ function hRecordSet(initdata) {
                                 URL:   _getFieldValue(record, 'rec_URL'),
                                 thumb: html_thumb,
                                 
-                                info: _getFieldValue(record, 'rec_Info'),
+                                info: _getFieldValue(record, 'rec_Info'),  //prepared content for map bubble or URL to script
                                 
                                 places: null
                                 

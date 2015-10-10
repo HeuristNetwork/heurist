@@ -43,7 +43,7 @@ function hSearchMinimalDigitalHarlem() {
     function _doSearchWithCallback( request, callback ){
 
         request.getrelrecs = 1;
-        request.detail = '5,6,7,9,10,11,28,74';
+        request.detail = '5,6,7,9,10,11,28,74';  //@todo - take codes from magic numbers
 
         top.HAPI4.RecordMgr.search(request,
             function(response) {
@@ -131,7 +131,7 @@ function hSearchMinimalDigitalHarlem() {
     }
 
     
-    //@todo - obtain codes from server side
+    //@todo - obtain codes from magic numbers server side
     var RT_ADDRESS = 12,
         RT_EVENT = 14,
         RT_PERSON = 10,
@@ -183,8 +183,8 @@ function hSearchMinimalDigitalHarlem() {
                         //this is just address
                         recordset.setFld(record, 'rec_Icon', 'term4326' );
                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
-                        recordset.setFld(record, 'rec_PopupUrl', 
-                            top.HAPI4.basePathOld + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+recID);
+                        recordset.setFld(record, 'rec_Info', 
+                            top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+recID);
                         
                     }else{
                     
@@ -208,17 +208,17 @@ function hSearchMinimalDigitalHarlem() {
                                 var rels2 = recordset.getRelationRecords(rec_ID_event, RT_PERSON);
                                 if(rels2.length<1){
                                     //3a. this is event->address 
-                                    recordset.setFld(record, 'rec_PopupUrl', 
-                                    top.HAPI4.basePathOld + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database
-                                            +"&recID="+rec_ID_event);
+                                    recordset.setFld(record, 'rec_Info', 
+                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database
+                                            +"&recID="+rec_ID_event+"&addrID="+recID);
                                                             
                                 }else{
                                     //3b. this is address->event->person
-                                    var rel_person = records[rels[i]['related']];
+                                    var rel_person = records[rels2[i]['related']];
                                     
-                                    recordset.setFld(record, 'rec_PopupUrl', 
-                                    top.HAPI4.basePathOld + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
-                                            recordset.fld(rel_person, 'rec_ID'));
+                                    recordset.setFld(record, 'rec_Info', 
+                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                            recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID+"&eventID="+rec_ID_event);
                                 }
                                 
                             }else if(rels[i]['relrt'] == RT_PERSON){
@@ -228,9 +228,9 @@ function hSearchMinimalDigitalHarlem() {
 
                                 recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                                 recordset.setFld(record, 'rec_Icon',     'term'+recordset.fld(relrec, DT_RELATION_TYPE) );
-                                recordset.setFld(record, 'rec_PopupUrl', 
-                                    top.HAPI4.basePathOld + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
-                                                            recordset.fld(rel_person, 'rec_ID'));
+                                recordset.setFld(record, 'rec_Info', 
+                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                                            recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID);
                                                             
                                 recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
                                 recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate'    ) );

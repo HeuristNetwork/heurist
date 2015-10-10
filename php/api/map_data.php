@@ -55,7 +55,7 @@
     * @param mixed $system System reference
     * @param mixed $id     Term ID                 
     */
-    function getTermByID($system, $id) {
+    function _getTermByID($system, $id) {
         $term = new stdClass();
     
         // Select term
@@ -254,15 +254,15 @@
                     
                 } else if(defined('DT_MIME_TYPE') && $type == DT_MIME_TYPE) { 
                     // Mime type
-                    $record->mimeType = getTermByID($system, $value);
+                    $record->mimeType = _getTermByID($system, $value);
                     
                 } else if(defined('DT_IMAGE_TYPE') && $type == DT_IMAGE_TYPE) {
                     // Tiled image type
-                    $record->imageType = getTermByID($system, $value);
+                    $record->imageType = _getTermByID($system, $value);
 
                 }else if(defined('DT_MAP_IMAGE_LAYER_SCHEMA') && $type == DT_MAP_IMAGE_LAYER_SCHEMA) {
                     // Image tiling schema
-                    $record->tilingSchema = getTermByID($system, $value);
+                    $record->tilingSchema = _getTermByID($system, $value);
                     
                     
                 /* SNIPPET */

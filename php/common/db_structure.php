@@ -18,6 +18,9 @@
     */
 
     /**
+    * @todo convert to class (singleton?)
+    * 
+    * 
     * Library of function that provides database structure information: rectypes, fieldtypes and terms defined in database
     * 
     * dbs_ - prefix for functions
@@ -303,7 +306,46 @@
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
     }
+    
+    //
+    // to public method
+    //    
+    function getTermByLabel($term_label, $domain)
+    {
+        global $terms;
 
+        $idx = $terms['fieldNamesToIndex']['trm_Label'];
+
+        $list = $terms['termsByDomainLookup'][$domain];
+        foreach($list as $term_id => $term){
+            if(strcasecmp($term_label, $term[$idx])==0){
+                return $term_id;
+            }
+        }
+
+        return null;
+    }
+
+    function getTermById($term_id, $field='trm_Label'){
+
+        global $terms;
+        
+        $idx = @$terms['fieldNamesToIndex'][$field];
+        //if(null==$idx) return 'AAA'.$idx; 
+        
+        $term = @$terms['termsByDomainLookup']['enum'][$term_id];
+        if(null==$term){
+            $term = @$terms['termsByDomainLookup']['relation'][$term_id];
+        }
+        
+        if($term){
+            return $term[$idx]; 
+        }else{
+            return null; 
+        }
+        
+    }
+    
     //-----------------------------------------------------------------------------------------------
     // INTERNAL FUNCTIONS
 

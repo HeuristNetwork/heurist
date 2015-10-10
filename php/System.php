@@ -128,6 +128,9 @@
 
         }
 
+        // NOTE by Artem: all this stuff with magic numbers are placed here by JJ by mistake - 
+        // there is no reason to resolve all these constants on every request
+        
         /**
         * Defines all constants
         */
@@ -174,7 +177,8 @@
             global $talkToSysAdmin;
             static $RTIDs;
             if (!$RTIDs) {
-                $res = $this->mysqli->query('select rty_ID as localID,rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
+                $res = $this->mysqli->query('select rty_ID as localID, 
+                rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
                 if (!$res) {
                     echo "Unable to build internal record-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
                     exit();

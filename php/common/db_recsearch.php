@@ -250,14 +250,18 @@ if(@$params['debug']) echo $query."<br>";
     * Find all related record IDs for given set record IDs
     * 
     * @param mixed $system
-    * @param mixed $ids
+    * @param mixed $ids - 
+    * 
+    * @return array of direct and reverse links (record id, relation type (termid), detail id)
     */
     function recordSearchRealted($system, $ids){
         
         if(!@$ids){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
         }
-        //$ids = explode(",", $ids);
+        if(is_array($ids)){
+            $ids = explode(",", $ids);
+        }
         
         $direct = array();
         $reverse = array();
@@ -312,6 +316,35 @@ if(@$params['debug']) echo $query."<br>";
 //error_log(print_r($response, true));
 
         return $response;                     
+        
+    }
+    
+    //
+    // returns relationship records(s) for given source and target records
+    //
+    function recordGetRealtionship($system, $sourceID, $targetID ){
+        
+        $mysqli = $system->get_mysqli();
+        
+        //find all target related records
+        $query = 'SELECT rl_RelationID FROM recLinks '
+            .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+       
+//error_log("1>>>".$query);
+        
+        $res = $mysqli->query($query);
+        if (!$res){
+            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+                $ids = array();
+                while ($row = $res->fetch_row()) {
+                    array_push($ids, intval($row[0]));
+                }
+                $res->close(); 
+                
+                return recordSearch($system, array('q'=>'ids:'.implode(',', $ids), 'detail'=>'detail'));
+        }        
+        
         
     }
     
@@ -563,6 +596,10 @@ if(@$params['debug']) echo $query."<br>";
                             
                                 $response = recordSearch($system, $params2);  //search for relationship records
                                 if($response['status'] == HEURIST_OK){
+                                    
+                                     if(!@$fin_result['data']['relationship']){
+                                         $fin_result['data']['relationship'] = array();
+                                     }
                                     
                                      if($is_ids_only){ 
                                         $fin_result['data']['relationship'] = array_merge($fin_result['data']['relationship'], $response['data']['records']);    

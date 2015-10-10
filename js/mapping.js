@@ -582,6 +582,8 @@ console.log('after map init '+_notfirst);
                 if(!_notfirst){
                     //first map initialization
                     
+                    setTimeout(function(){     //temporal solution
+                    
                     // Add controls if the map is not initialized yet
                     var mapOptions = {
                         panControl: true,
@@ -598,12 +600,8 @@ console.log('after map init '+_notfirst);
 
                     var nativemap = tmap.getNativeMap();
                     nativemap.setOptions(mapOptions);
-
-                    loadMapDocuments(nativemap, _startup_mapdocument); //loading the list of map documents see map_overlay.js
-                    
                     _initDrawListeners();
-                    
-                   
+
                     if(false && dataset.mapenabled>0){
                         tmap.datasets.main.hide();
                         tmap.datasets.main.show();
@@ -613,6 +611,10 @@ console.log('after map init '+_notfirst);
                         var bounds = new google.maps.LatLngBounds(swBound, neBound); 
                         nativemap.fitBounds(bounds);
                     } 
+                    
+                    },1000); //temporal solution
+                    
+                    loadMapDocuments(nativemap, _startup_mapdocument); //loading the list of map documents see map_overlay.js
                     
                     $("#map-settingup-message").hide();
                     $(".map-inited").show();
@@ -1098,7 +1100,9 @@ console.log('after map init '+_notfirst);
                 } */
                 
             show_bubble_on_map = (item.getType() != "" && placemark.api!=null);
-            var ed_html =  '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">';
+            var bubble_header = '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
+            var ed_html =  '';
+            var popupURL = null;
                 
                 var recID       = item.opts.recid,
                     rectypeID   = item.opts.rectype,
@@ -1113,19 +1117,22 @@ console.log('after map init '+_notfirst);
             
             if(item.opts.info){
                 
-                html =  ed_html + item.opts.info + '</div>';
+                if(item.opts.info.indexOf('http://')==0){
+                    popupURL =  item.opts.info;
+                }else{
+                    html =  bubble_header + item.opts.info + '</div>';
+                }
                 
             }else{
                 
-                ed_html =  //'<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'  // style="width:100%"
-                ed_html
+                ed_html = bubble_header                
             +   '<div style="display:inline-block;">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
             +   '</div>'
             +  ((top.HAPI4.currentUser.ugr_ID>0)?
-                '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBooble" >'
-              /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBooble" '
+                '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" >'
+              /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" '
             + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
             //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
@@ -1177,8 +1184,19 @@ ed_html +
             {
                 
                 if (item.getType() == "marker") {
-                    placemark.setInfoBubble(html);
-                    placemark.openBubble();
+                    
+                    if(popupURL){
+                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                           if(statusTxt == "success"){
+                                placemark.setInfoBubble(bubble_header+responseTxt+'</div>');
+                                placemark.openBubble();
+                           }
+                        });
+                        
+                    }else{
+                        placemark.setInfoBubble(html);
+                        placemark.openBubble();
+                    }
                     // deselect when window is closed
                     item.closeHandler = placemark.closeInfoBubble.addHandler(function() {
                         // deselect
@@ -1200,7 +1218,7 @@ ed_html +
                     //marker.scrollIntoView();
                     setTimeout(function(){ $( marker ).click();}, 500);
                     
-                }else if(item.event){    //reference to Simile timeline event
+                }else if(item.event){    //reference to Simile timeline event   - NOT USED
                     
                     var painter = item.timeline.getBand(0).getEventPainter();
                     var marker = painter._eventIdToElmt[item.event.getID()]; //find marker div by internal ID
@@ -1228,7 +1246,7 @@ ed_html +
             }
             
             if(top.HAPI4.currentUser.ugr_ID>0){
-                $("#btnEditRecordFromBooble")
+                $("#btnEditRecordFromBubble")
                     .button({icons: {
                         primary: "ui-icon-pencil"
                         }, text:false})

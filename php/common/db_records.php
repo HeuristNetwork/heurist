@@ -831,21 +831,6 @@
         return $validTermIDs;
     }
 
-    function getTermByLabel($term_label, $domain)
-    {
-        global $terms;
-
-        $idx = $terms['fieldNamesToIndex']['trm_Label'];
-
-        $list = $terms['termsByDomainLookup'][$domain];
-        foreach($list as $term_id => $term){
-            if(strcasecmp($term_label, $term[$idx])==0){
-                return $term_id;
-            }
-        }
-
-        return null;
-    }
 
     function getTermsByParent($term_id, $domain, $getalldescents = true)
     {

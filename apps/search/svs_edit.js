@@ -71,13 +71,11 @@ function hSvsEdit(args) {
             var isEdit = (parseInt(svsID)>0);
             var svs = null;
             if(isEdit){
-                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+                svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
             }
 
             if(isEdit && !Hul.isnull(svs)){
 
-                svsID = -1;
-                
                 var request = Hul.parseHeuristQuery(svs[_QUERY]);
                 domain  = request.w;
                 svs_ugrid.val(svs[_GRPID]==top.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
@@ -94,7 +92,8 @@ function hSvsEdit(args) {
 
             }else{ //add new saved search
                 isEdit = false;
-
+                svsID = -1;
+                
                 svs_id.val('');
                 svs_name.val('');
                 svs_rules.val('');
