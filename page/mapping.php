@@ -82,6 +82,9 @@
         <script type="text/javascript" src="../js/mapping.js"></script>
         <script type="text/javascript" src="../js/map_overlay.js"></script>
         <script type="text/javascript" src="../js/bubble.js"></script>
+        
+        <!-- minimum set of required set - @todo load it dynamically for standalone case -->                                       
+        <script type="text/javascript" src="../js/search_minimal.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
@@ -145,19 +148,18 @@
             // Standalone check
             $(document).ready(function() {
                 if(!top.HAPI4){
+                    //load minimum set of required scripts
+                    
                     // In case of standalone page
                     top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onHapiInit);//, < ?=json_encode($system->getCurrentUser())? > );
                 }else{
                     // Not standalone, use HAPI from parent window
-                    onHapiInit(true);
+                    onHapiInit( true );
                 }
             });
 
-            // Callback function on hAPI initialization
-            function onHapiInit(success)
-            {
-                if(success) // Successfully initialized system
-                {
+            function loadStyles(){
+                
                     var prefs = top.HAPI4.get_prefs();
                     if(!top.HR){
                         //loads localization
@@ -171,6 +173,15 @@
                         cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
                     }
                     $("head").append(cssLink);
+                
+            }
+            
+            // Callback function on hAPI initialization
+            function onHapiInit(success)
+            {
+                if(success) // Successfully initialized system
+                {
+                    loadStyles();
 
                     if(!top.HEURIST4.rectypes){
                         top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
@@ -233,8 +244,8 @@
                 // Mapping data
                 var mapdata = [];
                 mapping = new hMapping("map", "timeline", top.HAPI4.basePath, mylayout);
+                
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
-
                 //t:26 f:85:3313  f:1:building
                 // Perform database query if possible (for standalone mode - when mapping.php is separate page)
                 if( !top.HEURIST4.util.isempty(q) )
@@ -255,13 +266,13 @@
                             }
                         }
                     );
+                } else {
+                    mapping.load();//load empty map
                 }
-
-
-
+                
                 //init popup for timeline  ART14072015
                 $( document ).bubble({
-                            items: ".timeline-event-icon"
+                            items: ".timeline-event-icon" //deprecated since 
                 });
                 $( document ).bubble({
                             items: ".vis-item,.vis-item-overflow"

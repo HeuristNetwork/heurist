@@ -71,6 +71,10 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
         }
 
+        if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
+            that.LayoutMgr = new hLayout();
+        }
+        
         /*if(_currentUser){
         that.currentUser = _currentUser;
         }else{}*/
@@ -751,7 +755,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result
         SearchMgr: new hSearchMinimal(), //class that responsible for search and incremental loading of result
         
-        LayoutMgr: new hLayout(),
+        LayoutMgr: null,
 
         /*RecordMgr: function(){
         return hRecordMgr();

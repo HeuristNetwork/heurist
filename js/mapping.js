@@ -563,27 +563,28 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     
 
     function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
-
-        /*         @todo
-                google.maps.event.addListenerOnce(map, 'tilesloaded', function(){
-                    //this part runs when the mapobject is created and rendered
-                    google.maps.event.addListenerOnce(map, 'tilesloaded', function(){
-                        //this part runs when the mapobject shown for the first time
-console.log('tileloaded');                    
-                    });
-                });  */          
-
         
-            function __onDataLoaded(_tmap, _notfirst){
+            function __onDataLoaded(_tmap){
                 tmap = _tmap;
+
+//console.log('after map init');                    
                     
-console.log('after map init '+_notfirst);                    
-                    
-                if(!_notfirst){
                     //first map initialization
-                    
-                    setTimeout(function(){     //temporal solution
-                    
+                var nativemap = tmap.getNativeMap();
+                
+//console.log('is native map '+top.HEURIST4.util.isnull(nativemap)); 
+                
+                google.maps.event.addListenerOnce(nativemap, 'tilesloaded', function(){
+
+//console.log('tileloaded 1');                    
+                    /*this part runs when the mapobject is created and rendered
+                    google.maps.event.addListenerOnce(nativemap, 'tilesloaded', function(){
+                        //this part runs when the mapobject shown for the first time
+console.log('tileloaded 2');                    
+                    });*/
+                
+//console.log('after map init DELAYED');                    
+
                     // Add controls if the map is not initialized yet
                     var mapOptions = {
                         panControl: true,
@@ -600,8 +601,11 @@ console.log('after map init '+_notfirst);
 
                     var nativemap = tmap.getNativeMap();
                     nativemap.setOptions(mapOptions);
-                    _initDrawListeners();
-
+                    
+                    //return;
+                    
+                    //_initDrawListeners();
+                    
                     if(false && dataset.mapenabled>0){
                         tmap.datasets.main.hide();
                         tmap.datasets.main.show();
@@ -611,27 +615,25 @@ console.log('after map init '+_notfirst);
                         var bounds = new google.maps.LatLngBounds(swBound, neBound); 
                         nativemap.fitBounds(bounds);
                     } 
-                    
-                    },1000); //temporal solution
-                    
+
                     loadMapDocuments(nativemap, _startup_mapdocument); //loading the list of map documents see map_overlay.js
-                    
+
                     $("#map-settingup-message").hide();
                     $(".map-inited").show();
-                }
                 
-                if(_callback){
-                    _callback.call();
-                }else{
-                    _updateLayout();
-                    //highlight selection
-                    _showSelection(false);
-                }
-                
+                    if(_callback){
+                        _callback.call();
+                    }else{
+                        _updateLayout();
+                        //highlight selection
+                        _showSelection(false);
+                    }
+                    
+                    console.log('after map init COMPLETED');                    
+                    
+                });          
                 
        }// __onDataLoaded       
-        
-        $( document ).bubble('closeAll');  //close all popups      
         
         //asign 2 global for mapping - on select listener and startup map document
         if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
@@ -642,28 +644,43 @@ console.log('after map init '+_notfirst);
         
         //timemap is already inited
         if(tmap && tmap.datasets){ 
-            __onDataLoaded(tmap, true);    
-            return;
-        }
-        
-        // add fake/empty datasets for further use in mapdocument (it is not possible to add datasets dynamically)
-        if(!_mapdata){
-            _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
-        }
-        
-        // Initialize TimeMap
-        tmap = TimeMap.init({
-            mapId: mapdiv_id, // Id of gmap div element (required)
-            timelineId: null, //timelinediv_id, // Id of timeline div element (required)
-            datasets: _mapdata, 
             
-            options: {
-                mapZoom: defaultZoom,
-                theme: customTheme,
-                eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
+                $( document ).bubble('closeAll');  //close all popups      
+                
+                if(_startup_mapdocument)
+                    loadMapDocumentById(_startup_mapdocument);
+        
+                if(_callback){
+                    _callback.call();
+                }else{
+                    _updateLayout();
+                    //highlight selection
+                    _showSelection(false);
+                }
+            
+        }else{
+        
+            // add fake/empty datasets for further use in mapdocument (it is not possible to add datasets dynamically)
+            if(!_mapdata){
+                _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
             }
-            , dataLoadedFunction: __onDataLoaded
-            }, tmap);
+            
+            // Initialize TimeMap
+            tmap = TimeMap.init({
+                mapId: mapdiv_id, // Id of gmap div element (required)
+                timelineId: null, //timelinediv_id, // Id of timeline div element (required)
+                datasets: _mapdata, 
+                
+                options: {
+                    mapZoom: defaultZoom,
+                    theme: customTheme,
+                    eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
+                }
+                , dataLoadedFunction: __onDataLoaded
+                }, tmap);
+                
+                    
+        }
             
     }
     

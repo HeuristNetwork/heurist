@@ -173,6 +173,8 @@ $.widget( "heurist.app_timemap", {
             // all this is now done in addRecordsetLayer
             // var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
 
+//console.log('ini map from app_timemap');
+            
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids
                 this.options.startup,    //map document on load

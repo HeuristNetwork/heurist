@@ -57,7 +57,7 @@ function loadMapDocuments(_map, _startup_mapdocument) {
             fillMapDocumentsDropDown();
         }
         if(_startup_mapdocument > 0){
-            _loadMapDocumentById(_startup_mapdocument);
+            loadMapDocumentById(_startup_mapdocument);
         }
     }).fail(function( jqxhr, textStatus, error ) {
         var msg = "Map Document API call failed: " + textStatus + ", " + error;
@@ -209,7 +209,7 @@ function _initLegend() {
         }
 }
 
-function _loadMapDocumentById(recId) {
+function loadMapDocumentById(recId) {
         var mapdocs = $("#map-doc-select");
         mapdocs.val(recId).change();
 }
