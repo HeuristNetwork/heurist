@@ -173,6 +173,10 @@
                         cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
                     }
                     $("head").append(cssLink);
+                    
+                    if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){ //digital harlem - @todo move style to layout
+                         $("head").append($('<link rel="stylesheet" type="text/css" href="../apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
+                    }
                 
             }
             

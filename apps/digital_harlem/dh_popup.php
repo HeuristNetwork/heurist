@@ -23,7 +23,7 @@
     require_once (dirname(__FILE__).'/../../php/common/db_recsearch.php');
     require_once (dirname(__FILE__).'/../../php/common/db_structure.php');
     require_once (dirname(__FILE__).'/../../php/common/utils_db.php');
-
+    
     $response = array();
 
     $system = new System();
@@ -49,14 +49,9 @@
 
     //find record and details
     
-    $params = array(
-      'q'=>'ids:'.$ids,
-      'detail'=>'detail'
-    );
-
-    $records = recordSearch($system, $params);
+    $records = recordSearch_2('ids:'.$ids);
   
-    if(@$records['status']!='ok' || count(@$records['data']['records'])<$need_cnt){
+    if(count(@$records['records'])<$need_cnt){
         echo 'Some records not found '.$ids.'  '.print_r($records,true);
         return;
     }
@@ -64,24 +59,50 @@
     //these rectypes are specific for digital harlem
     define('RT_ADDRESS', 12);
     define('RT_EVENT', 14);
+    define('RT_PLACE_ROLE', 16);
+    
     define('DT_EVENT_TYPE', 74);
     define('DT_EVENT_TIME_START', 75);
     define('DT_EVENT_TIME_END', 76);
+
+    define('DT_REPORT_SOURCE_TYPE', 77);
+    define('DT_REPORT_DALINK', 78);
+    define('DT_REPORT_CITATION', 79);
+    define('DT_CHARGE_INITIAL', 80);
+    define('DT_CHARGE_FINAL', 81);
+    define('DT_JUDICIAL_OUTCOME', 83);
+    define('DT_OUTCOME_DATE', 84);
+    
+
+    define('DT_PLACE_USAGE_TYPE', 89);
+
+    define('DT_PERSON_OCCUPATION', 92);
+    define('DT_PERSON_AGE', 93);
+    define('DT_PERSON_SECONDNAME', 96);
+    
+    define('DT_PERSON_RACE', 98);
+    define('DT_PERSON_BIRTHPLACE', 97);
+
+    
     
     define('TERM_MAIN_CRIME_LOCATION', 4536);
 
     global $terms;
     //echo '<br>A'.print_r($records, true);
 
-    $records = $records['data'];
-    
     $recTypeID = getFieldValue($records, $recID, 'rec_RecTypeID');
+    
     
     $moredetailLink =  '<p><a href="javascript:void(0)" class="moredetail" '.
         'onClick="top.HEURIST4.util.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
     
     
     if($recTypeID==RT_ADDRESS){
+        
+        if( @$_REQUEST['full']==1 ){
+            require ('dh_popup_place.php');
+        }
+        
         $comment = getFieldValue($records, $recID, DT_SHORT_SUMMARY);
 ?>        
 <div class="infowindow">
@@ -97,61 +118,35 @@
         }
      
     if($recTypeID==RT_PERSON){
+
+        if( @$_REQUEST['full']==1 ){
+            require ('dh_popup_person.php');
+        }
         
         if($eventID){
              
-             //get relationship record for related event
-             $relation1 = recordGetRealtionship($system, $eventID, $recID );        
-             if(@$relation1['status']!='ok'){
-                return 'Can not get related event for person';
-             }else{
-                $relation1 = $relation1['data']; 
-             }
              // get person role in the event
-             $term_id  = getFieldValue($relation1, 0, DT_RELATION_TYPE);
-             $person_role = getTermById($term_id);
+             $person_role = getTermById_2( recordGetRealtionshipType( $system, $eventID, $recID ) );
+             
+             //$relation1 = recordGetRealtionship_2($system, $eventID, $recID, 'event for person' );        
 
              //get relationship record for address of related event
-             $relation2 = recordGetRealtionship($system, $eventID, $addrID );   
-             if(@$relation2['status']!='ok'){
-                return 'Can not get related addrss for event';
-             }else{
-                $relation2 = $relation2['data']; 
-             }
+             $relation2 = recordGetRealtionship_2($system, $eventID, $addrID, 'address for event' );   
                           
              $event_address = '';
              $term_id = getFieldValue($relation2, 0, DT_RELATION_TYPE);
              if($term_id==TERM_MAIN_CRIME_LOCATION){
                  $event_address = 'in which the crime scene was at';
              }else{
-                 $event_address = 'which '.getTermById( $term_id );
+                 $event_address = 'which '.getTermById_2( $term_id );
              }
              $event_address = $event_address.' this address ,';
              
              $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
              
              //date and time 
-             $date_out = '';
-             $date_start = getFieldValue($records, $eventID, DT_START_DATE);
-             if($date_start){
-                $date_out = '<b>Date: </b>'.$date_start;
-
-                $date_end = getFieldValue($records, $eventID, DT_END_DATE);
-                if($date_end && $date_end!=$date_start){
-                    $date_out = $date_out.(' to '.$date_end);
-                }
-             }
-
-             $time_out = '';
-             $time_start = getFieldValue($records, $eventID, DT_EVENT_TIME_START);
-             if($time_start){
-                $time_out = '<b>Time: </b>'.getTermById($time_start);
-
-                $time_end = getFieldValue($records, $eventID, DT_EVENT_TIME_END);
-                if($time_end && $time_end!=$time_start){
-                    $time_out = $time_out.(' to '.getTermById($time_end) );
-                }
-             }
+             $date_out = composeDates( $records, $eventID, '<b>Date: </b>' );
+             $time_out = composeTime( $records, $eventID, '<b>Time: </b>' );
              
              
 ?>
@@ -178,30 +173,16 @@
         }else{
             
              //get relationship record for related address
-             $relation1 = recordGetRealtionship($system, $recID , $addrID);        
-             if(@$relation1['status']!='ok'){
-                return 'Can not get related address for event';
-             }else{
-                $relation1 = $relation1['data']; 
-             }
+             $relation1 = recordGetRealtionship_2($system, $recID , $addrID, 'address for person');        
+
              // get person role in the event
              $term_id  = getFieldValue($relation1, 0, DT_RELATION_TYPE);
-             $person_role = getTermById($term_id);
+             $person_role = getTermById_2($term_id);
             
              $comment = getFieldValue($relation1, 0, DT_EXTENDED_DESCRIPTION);
              
              //date and time 
-             $date_out = '';
-             $date_start = getFieldValue($relation1, 0, DT_START_DATE);
-             if($date_start){
-                $date_out = '<b>Date: </b>'.$date_start;
-
-                $date_end = getFieldValue($relation1, 0, DT_END_DATE);
-                if($date_end && $date_end!=$date_start){
-                    $date_out = $date_out.(' to '.$date_end);
-                }
-             }
-             
+             $date_out = composeDates( $relation1, 0, '<b>Date: </b>');
 ?>            
         
 <div class="infowindow">
@@ -217,13 +198,13 @@
         }
     }else if($recTypeID==RT_EVENT){
         
+        if( @$_REQUEST['full']==1 ){
+            require ('dh_popup_event.php');
+        }
+        
+        
              //get relationship record for related address
-             $relation2 = recordGetRealtionship($system, $recID, $addrID );   
-             if(@$relation2['status']!='ok'){
-                return 'Can not get related addrss for event';
-             }else{
-                $relation2 = $relation2['data']; 
-             }
+             $relation2 = recordGetRealtionship_2($system, $recID, $addrID, 'address for event' );   
                           
              $event_address = '';
              $term_id = getFieldValue($relation2, 0, DT_RELATION_TYPE);
@@ -236,29 +217,8 @@
              $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
              
              //date and time 
-             $date_out = '';
-             $date_start = getFieldValue($records, $recID, DT_START_DATE);
-             if($date_start){
-                $date_out = '<b>Date: </b>'.$date_start;
-
-                $date_end = getFieldValue($records, $recID, DT_END_DATE);
-                if($date_end && $date_end!=$date_start){
-                    $date_out = $date_out.(' to '.$date_end);
-                }
-             }
-
-             $time_out = '';
-             $time_start = getFieldValue($records, $recID, DT_EVENT_TIME_START);
-             if($time_start){
-                $time_out = '<b>Time: </b>'.getTermById($time_start);
-
-                $time_end = getFieldValue($records, $recID, DT_EVENT_TIME_END);
-                if($time_end && $time_end!=$time_start){
-                    $time_out = $time_out.(' to '.getTermById($time_end) );
-                }
-             }
-
-        
+             $date_out = composeDates( $records, $recID, '<b>Date: </b>');
+             $time_out = composeTime( $records, $recID, '<b>Time: </b>' );
 ?>        
 <div class="infowindow">
     <h3><?php echo getFieldValue($records, $recID, DT_NAME) ?></h3>
@@ -279,17 +239,6 @@
     }
     }
     
-       /*
-function recordGetRealtionship($system, $sourceID, $targetID ){
-    
-    $record = recordGetRealtionship($system, $sourceID, $targetID );
-    if(@$record['status']!='ok'){
-        return 'Can not get relationship record';
-    }else{
-        return $record['data']; 
-    }
-}    */
-
 //
 //
 //
@@ -334,4 +283,73 @@ function getFieldValue($records, $recID, $fieldID, $needall=false){
     }
 }
 
+function composeDates( $records, $recID, $prefix='') {
+     $date_out = '';
+     $date_start = getFieldValue($records, $recID, DT_START_DATE);
+     if($date_start){
+        $date_out = $prefix.$date_start;
+
+        $date_end = getFieldValue($records, $recID, DT_END_DATE);
+        if($date_end && $date_end!=$date_start){
+            $date_out = $date_out.('&nbsp;to&nbsp;'.$date_end);
+        }
+     }
+     return $date_out;
+} 
+
+function composeTime( $records, $recID, $prefix='') {
+    
+             if(!($recID>0)){
+                 $recID = @$records['order'][0]; 
+             }
+    
+             $time_out = '';
+             $time_start = getFieldValue($records, $recID, DT_EVENT_TIME_START);
+             if($time_start){
+                $time_out = $prefix.getTermById( $time_start );
+
+                $time_end = getFieldValue($records, $recID, DT_EVENT_TIME_END);
+                if($time_end && $time_end!=$time_start){
+                    $time_out = $time_out.(' to '.getTermById($time_end) );
+                }
+             }
+             
+             return $time_out;
+}
+
+function getTermById_2($term_id, $type_suffix=''){
+    $ret = getTermById($term_id);
+    if(null==$ret || strpos(strtolower($ret),'unknown')!==false ){
+        return ($type_suffix=='') ?'' :' unknown '.$type_suffix;
+    }else{
+        return $ret;
+    }
+}
+
+function recordGetRealtionship_2($system, $sourceID, $targetID, $remark=' record' ){
+    
+    $res = recordGetRealtionship($system, $sourceID, $targetID );
+     if(@$res['status']!='ok'){
+        echo 'Can not get related '.$remark.'. '.@$res['message'];
+        exit();
+     }else{
+        return $res['data']; 
+     }
+}
+
+function recordSearch_2( $query ){
+
+     global $system;
+
+     $records = recordSearch($system, array(
+            'q'=>$query, 
+            'detail'=>'detail'));
+            
+     if(@$records['status']!='ok'){
+        echo 'Can not get records '.$records['message'];
+        return;
+     }else{
+        return $records['data']; 
+     }         
+}
 ?>

@@ -330,20 +330,22 @@
 
         global $terms;
         
-        $idx = @$terms['fieldNamesToIndex'][$field];
-        //if(null==$idx) return 'AAA'.$idx; 
+        if($term_id>0){
         
-        $term = @$terms['termsByDomainLookup']['enum'][$term_id];
-        if(null==$term){
-            $term = @$terms['termsByDomainLookup']['relation'][$term_id];
+            $idx = @$terms['fieldNamesToIndex'][$field];
+            //if(null==$idx) return 'AAA'.$idx; 
+            
+            $term = @$terms['termsByDomainLookup']['enum'][$term_id];
+            if(null==$term){
+                $term = @$terms['termsByDomainLookup']['relation'][$term_id];
+            }
+            
+            if($term){
+                return $term[$idx]; 
+            }
         }
         
-        if($term){
-            return $term[$idx]; 
-        }else{
-            return null; 
-        }
-        
+        return null; 
     }
     
     //-----------------------------------------------------------------------------------------------

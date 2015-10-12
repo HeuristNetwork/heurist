@@ -318,7 +318,29 @@ if(@$params['debug']) echo $query."<br>";
         return $response;                     
         
     }
-    
+
+    //
+    // returns only first relationship type ID for 2 given records
+    //
+    function recordGetRealtionshipType($system, $sourceID, $targetID ){
+
+        $mysqli = $system->get_mysqli();
+        
+        //find all target related records
+        $query = 'SELECT rl_RelationTypeID FROM recLinks '
+            .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+        $res = $mysqli->query($query);
+        if (!$res){
+            return null;// $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+            if($row = $res->fetch_row()) {
+                return $row[0];
+            }else{
+                return null;
+            }
+        }
+    } 
+       
     //
     // returns relationship records(s) for given source and target records
     //
@@ -347,7 +369,6 @@ if(@$params['debug']) echo $query."<br>";
         
         
     }
-    
 
     /**
     * put your comment there...
