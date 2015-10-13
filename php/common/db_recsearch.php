@@ -573,7 +573,7 @@ if(@$params['debug']) echo $query."<br>";
                             if($is_ids_only){
                                 $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);    
                             }else{                                          
-                                $fin_result['data']['records'] = _mergeRecordSets($fin_result['data']['records'], $response['data']['records']);    
+                                $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], $response['data']['records']);    
                                 
                                 $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
                                 foreach( array_keys($response['data']['records']) as $rt){
@@ -625,7 +625,7 @@ if(@$params['debug']) echo $query."<br>";
                                      if($is_ids_only){ 
                                         $fin_result['data']['relationship'] = array_merge($fin_result['data']['relationship'], $response['data']['records']);    
                                      }else{                                          
-                                        $fin_result['data']['relationship'] = _mergeRecordSets($fin_result['data']['relationship'], $response['data']['records']);    
+                                        $fin_result['data']['relationship'] = mergeRecordSets($fin_result['data']['relationship'], $response['data']['records']);    
                                      }
                                      
                                       
@@ -633,7 +633,7 @@ if(@$params['debug']) echo $query."<br>";
                                     if($is_ids_only){
                                         $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);    
                                     }else{
-                                        $fin_result['data']['records'] = _mergeRecordSets($fin_result['data']['records'], $response['data']['records']);    
+                                        $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], $response['data']['records']);    
                                         $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
                                         $fin_result['data']['rectypes'][1] = 1;
                                     }
@@ -890,7 +890,7 @@ if(@$params['debug']) echo $query."<br>";
     }
     
     
-    function _mergeRecordSets($rec1, $rec2){
+    function mergeRecordSets($rec1, $rec2){
         
         $res = $rec1;
         

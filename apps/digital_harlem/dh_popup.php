@@ -105,7 +105,7 @@
         
         $comment = getFieldValue($records, $recID, DT_SHORT_SUMMARY);
 ?>        
-<div class="infowindow">
+<div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
     <?php echo $comment? 'Building details:<br/>'.$comment:''; ?>
     <?php echo $moredetailLink; ?>        
@@ -150,7 +150,7 @@
              
              
 ?>
-<div class="infowindow">
+<div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
     
     <p><b><?php echo $person_role; ?></b> 
@@ -185,7 +185,7 @@
              $date_out = composeDates( $relation1, 0, '<b>Date: </b>');
 ?>            
         
-<div class="infowindow">
+<div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
 
         <p><b><?php echo $person_role;?></b></p>
@@ -220,7 +220,7 @@
              $date_out = composeDates( $records, $recID, '<b>Date: </b>');
              $time_out = composeTime( $records, $recID, '<b>Time: </b>' );
 ?>        
-<div class="infowindow">
+<div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, DT_NAME) ?></h3>
         <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_EVENT_TYPE)) ?> </b></p>
         
@@ -347,7 +347,7 @@ function recordSearch_2( $query ){
             
      if(@$records['status']!='ok'){
         echo 'Can not get records '.$records['message'];
-        return;
+        exit();
      }else{
         return $records['data']; 
      }         

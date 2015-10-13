@@ -1141,11 +1141,14 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 
 //    options['callback']
                 //(this.document.find('body').innerHeight()-20)
+                        if(isNaN(options.height) || options.height<10){
+                            options.height = top.innerHeight-20;
+                        }
                 
                         var opts = {
                                 autoOpen: true,
                                 width : (options.width>0?options.width+20 :690 ),
-                                height: (options.height>0?options.height+20: 660 ),
+                                height: options.height,
                                 modal: true,
                                 resizable: (options['no-resize']==true),
                                 //draggable: false,

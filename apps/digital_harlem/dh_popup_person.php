@@ -35,7 +35,7 @@
 <div class="infowindow">
 
 
-    <h3>'.<?php echo getFieldValue($records, $recID, DT_NAME).' ' 
+    <h3><?php echo getFieldValue($records, $recID, DT_NAME).' ' 
                                 .getFieldValue($records, $recID, DT_PERSON_SECONDNAME).' '
                                 .getFieldValue($records, $recID, DT_GIVEN_NAMES); ?></h3>             
     <br />

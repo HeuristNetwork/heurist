@@ -29,9 +29,6 @@
          // placeroles for address related event for person
          $records_placeroles = recordSearch_2('[{"t":"16"},{"linked_to:12:90":"'. $recID .'" }]');
          
-         // find Reports related to Events realted to this address
-         $records_eventreports = recordSearch_2('[{"t":"15"},{"relatedfrom:14":[{"t":"14"},{"related_to:12":"'. $recID .'"} ] }]'); 
-
 ?>        
 <html>
     <head>
@@ -87,7 +84,7 @@
              $term_id = recordGetRealtionshipType( $system, $eventID, $recID );
              $event_address = '';
              if($term_id==TERM_MAIN_CRIME_LOCATION){
-                 $event_address = 'Location';
+                 $event_address = 'Crime location';
              }else{
                  $event_address = getTermById_2( $term_id ).' this address';
              }
@@ -228,7 +225,22 @@
 <ul>
 
 <?php 
-        if(@$records_eventreports['reccount']>0){
+        // find Reports related to Events realted to this address
+        $records_eventreports = recordSearch_2('[{"t":"15"},{"relatedfrom:14":[{"t":"14"},{"related_to:12":"'. $recID .'"} ] }]'); 
+
+        // Report (15)  -> DA Report (13) <- Place Role (16) -> Address
+        $records_eventreports2 = recordSearch_2(
+            '[{"t":"15"},{"linked_to:13:78":[{"t":"13"},{"linkedfrom:16:78":[{"t":"16"},{"linked_to:12:90":"'. $recID .'"} ] }]  }] '); 
+
+        if(count($records_eventreports2['records'])>0){    
+                        
+            $records_eventreports['records'] = mergeRecordSets($records_eventreports['records'], $records_eventreports2['records']);    
+        
+            $records_eventreports['order'] = array_merge($records_eventreports['order'], array_keys($records_eventreports2['records']));
+            $records_eventreports['order'] = array_unique($records_eventreports['order']);
+        }
+        
+        if(count($records_eventreports['records'])>0){
         foreach($records_eventreports['order'] as $repID){
             //getFieldValue($records_eventreports, $repID, DT_ORIGINAL_RECORD_ID)
             
