@@ -1075,7 +1075,6 @@ console.log('tileloaded 2');
     //
     function _showPopupInfo(){
         
-        
             //close others bubbles
             $( document ).bubble( "closeAll" );
                     
@@ -1086,40 +1085,23 @@ console.log('tileloaded 2');
                 placemark = item.placemark,
                 show_bubble_on_map = false;
                 
-            //find recordset for selected item
-            //item.dataset.id    
-                
-                
-            if(true){ //top.HAPI4.currentRecordset){
-                
-                /* 
-                var recset = top.HAPI4.currentRecordset;
-                var record = top.HAPI4.currentRecordset.getById(item.opts.recid);
-                
-                function fld(fldname){
-                    return recset.fld(record, fldname);
-                }
-
-                var recID = fld('rec_ID');
-                var rectypeID = fld('rec_RecTypeID');
-                var bkm_ID = fld('bkm_ID');
-                var recTitle = top.HEURIST4.util.htmlEscape(fld('rec_Title')),
-                    startDate   = fld('dtl_StartDate'),
-                    endDate     = fld('dtl_EndDate'),
-                    description = top.HEURIST4.util.htmlEscape(fld('dtl_Description')),
-                    recURL      = fld('rec_URL');
-                
-                var html_thumb = '';
-                if(fld('rec_ThumbnailURL')){                             //class="timeline-event-bubble-image" 
-                    html_thumb = '<img src="'+fld('rec_ThumbnailURL')+'" style="float:left;padding-bottom:5px;padding-right:5px;">'; //'<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
-                }else{
-                    html_thumb =  ''; //top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png';
-                } */
-                
             show_bubble_on_map = (item.getType() != "" && placemark.api!=null);
             var bubble_header = '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
             var ed_html =  '';
             var popupURL = null;
+                
+            if(!top.HEURIST4.util.isnull(item.opts.info)){
+                
+                if(!item.opts.info){
+                    return;   //supress popup
+                }else if(item.opts.info.indexOf('http://')==0){
+                    popupURL =  item.opts.info; //load content from url
+                }else{
+                    html =  bubble_header + item.opts.info + '</div>'; //predefined content
+                }
+                
+            }else{
+                //compose content of popup dynamically
                 
                 var recID       = item.opts.recid,
                     rectypeID   = item.opts.rectype,
@@ -1131,17 +1113,6 @@ console.log('tileloaded 2');
                     recURL      = item.opts.URL,
                     html_thumb  = item.opts.thumb || '';
 
-            
-            if(item.opts.info){
-                
-                if(item.opts.info.indexOf('http://')==0){
-                    popupURL =  item.opts.info;
-                }else{
-                    html =  bubble_header + item.opts.info + '</div>';
-                }
-                
-            }else{
-                
                 ed_html = bubble_header                
             +   '<div style="display:inline-block;">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
@@ -1165,17 +1136,6 @@ ed_html +
 ((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+temporalToHumanReadableString(endDate)+'</div>':'')+
 '</div>';
 
-            }
-                
-                /*
-.truncate {
-  width: 250px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-*/                
-                
             }
                 
             var marker = null;
