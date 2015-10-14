@@ -152,6 +152,7 @@ function hSearchMinimalDigitalHarlem() {
         DT_EVENT_ORDER = 94; //Order of addresses within a serial event, eg. a march or multi-stage crime
         
     var TERM_MAIN_CRIME_LOCATION = 4536,
+        TERM_EVENT_PRIME_LOCATION = 4534,
         TERM_ROLE_RESIDENT = 4527, 
         TERM_PATH = 4537; 
     
@@ -232,19 +233,23 @@ function hSearchMinimalDigitalHarlem() {
                                      
                                     //add links for this person 
                                     if(!links[ eventID ]){
-                                        links[ eventID ] = {primary:[], secondary:[], is_event:true, path:{} };
+                                        links[ eventID ] = {primary:[], secondary:[], is_event:true, path:[] };
                                     }                                            
                                     //verify: is it main crime location
-                                    if(relation_type==TERM_MAIN_CRIME_LOCATION){  //4527 4536         
-                                        links[ personID ].primary.push( recID );
+                                    var relrec = relationships[rels[i]['relation']];
+                                    var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
+                                    var order = recordset.fld(relrec, DT_EVENT_ORDER);
+                                    
+                                    if ((relation_type==TERM_MAIN_CRIME_LOCATION  ||
+                                        relation_type==TERM_EVENT_PRIME_LOCATION)
+                                        && (links[ eventID ].primary.length<1) ){  //4527 4536         
+                                        links[ eventID ].primary.push( recID );
                                     }else{
-                                        links[ personID ].secondary.push( recID );
+                                        links[ eventID ].secondary.push( recID );
                                     }
                                     
-                                    var relrec = relationships[rels[i]['relation']];
-                                    var order = recordset.fld(relrec, DT_EVENT_ORDER);
                                     if(order>0){
-                                        links[ personID ].path[order] = recID;
+                                        links[ eventID ].path.push({order:order, recID:recID});
                                     }
                                             
                                             
@@ -320,6 +325,31 @@ function hSearchMinimalDigitalHarlem() {
             if (links.hasOwnProperty(recID)) //person ID
             {
                 is_event = links[recID].is_event;
+                
+                if(is_event && links[ recID ].path.length>1){
+                    var path = links[ recID ].path;
+                    var vertices = [];
+                    path.sort( function(a, b){return (a.order<b.order)?-1:1; } );
+                    
+                    for(i=0; i<path.length; i++){
+                        var pathAddr = res_records[ path[i].recID ];
+                        var type     = recordset.fld(pathAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
+                        var wkt      = recordset.fld(pathAddr, 'dtl_Geo');
+                        var pnt      = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                        if(pnt!=null){
+                            vertices.push(pnt.point); 
+                        }
+                    }
+                    
+                    if(vertices.length>1){
+                        // add new record to result set
+                        var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:vertices} };
+                        res_records[linkID] = newrec;
+                        res_orders.push(linkID);
+                        linkID++;
+                        continue;
+                    }
+                }
                 
                 for(i=0; i<links[recID].primary.length; i++){
                     
