@@ -370,7 +370,7 @@ $.widget( "heurist.mainMenu", {
                             url = url + that._current_query_string
                         }
 
-                        top.HEURIST4.util.showDialog(url, options);
+                        top.HEURIST4.msg.showDialog(url, options);
 
                         event.preventDefault();
                         return false;
@@ -443,7 +443,7 @@ $.widget( "heurist.mainMenu", {
 
         var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
-        Hul.showDialog(url, { height:550, width:700,
+        top.HEURIST4.msg.showDialog(url, { height:550, width:700,
                     callback:function(responce) {
 /*
                 var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
@@ -480,7 +480,7 @@ $.widget( "heurist.mainMenu", {
         }else{    //selected only
 
             if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                Hul.showMsgDlg("Select at least one record to export");
+                top.HEURIST4.msg.showMsgDlg("Select at least one record to export");
                 return false;
             }
             q = "ids:"+this._selectionRecordIDs.join(",");
@@ -549,7 +549,7 @@ $.widget( "heurist.mainMenu", {
                  q = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
 
                  if(q=='?'){
-                     Hul.showMsgDlg("Define query and perform search");
+                     top.HEURIST4.msg.showMsgDlg("Define query and perform search");
                      return;
                  }
 
@@ -557,7 +557,7 @@ $.widget( "heurist.mainMenu", {
         }else{
 
             if (!top.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                Hul.showMsgDlg("Select at least one record to export");
+                top.HEURIST4.msg.showMsgDlg("Select at least one record to export");
                 return false;
             }
             q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
@@ -705,7 +705,7 @@ $.widget( "heurist.mainMenu", {
                             $dlg.dialog( "close" );
 
                             if(ask_reload){
-                                top.HEURIST4.util.showMsgDlg('Reload page to apply new settings?',
+                                top.HEURIST4.msg.showMsgDlg('Reload page to apply new settings?',
                                     function(){
                                         window.location.reload();
                                     }, 'Confirmation');
@@ -770,7 +770,7 @@ $.widget( "heurist.mainMenu", {
                     $(that.document).trigger(top.HAPI4.Event.LOGOUT);
                     that._refresh();
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );

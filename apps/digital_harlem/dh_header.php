@@ -83,12 +83,12 @@
                         if($row["ord"]>0){
 ?>
                             <div class="menubutton"><a class="menuitem" href="javascript:void(0)"
-                                onClick="{ top.HEURIST4.util.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');}"><?=$row["title"]?></a></div>
+                                onClick="{ top.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');}"><?=$row["title"]?></a></div>
 <?php
                         }else{
 ?>
 <script>
-      top.HEURIST4.util.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
+      top.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');
 </script>
 <?php
                         }

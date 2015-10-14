@@ -392,7 +392,7 @@ function hRecordSet(initdata) {
         if(idx>-1){
             return record[idx];
         }else{
-            return record[fldname]?record[fldname]:null; //return null;
+            return top.HEURIST4.util.isnull(record[fldname])?null:record[fldname]; //return null;
         }
     }
     

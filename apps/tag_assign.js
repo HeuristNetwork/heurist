@@ -115,7 +115,7 @@ $.widget( "heurist.tag_assign", {
                                 top.HAPI4.currentUser.usr_Tags[val] = response.data[val];
                                 that._renderTags();
                             }else{
-                                top.HEURIST4.util.showMsgErr(response);
+                                top.HEURIST4.msg.showMsgErr(response);
                             }
                     });
                 }
@@ -432,7 +432,7 @@ $.widget( "heurist.tag_assign", {
         var request = {ids: tagIDs.join(',')};
         var that = this;
 
-        top.HEURIST4.util.showMsgDlg(top.HR("Delete? Please confirm"), function(){
+        top.HEURIST4.msg.showMsgDlg(top.HR("Delete? Please confirm"), function(){
 
             top.HAPI4.RecordMgr.tag_delete(request,
                 function(response){
@@ -446,7 +446,7 @@ $.widget( "heurist.tag_assign", {
                         });
 
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
                 }
 
@@ -534,7 +534,7 @@ $.widget( "heurist.tag_assign", {
                     allFields.removeClass( "ui-state-error" );
 
                     var message = $dlg.find('.messages');
-                    var bValid = top.HEURIST4.util.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
+                    var bValid = top.HEURIST4.msg.checkLength( $dlg.find('#tag_Text'), "Name", message, 2, 25 );
 
                     if(bValid){
 
@@ -686,7 +686,7 @@ $.widget( "heurist.tag_assign", {
                     if(response.status == top.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
             });
 

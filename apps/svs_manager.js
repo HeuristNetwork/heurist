@@ -267,7 +267,7 @@ $.widget( "heurist.svs_manager", {
         if(!svs) return;
         var that = this;
 
-        top.HEURIST4.util.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
+        top.HEURIST4.msg.showMsgDlg(top.HR("Delete? Please confirm"),  function(){
             top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -278,7 +278,7 @@ $.widget( "heurist.svs_manager", {
                         delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
                 }
 

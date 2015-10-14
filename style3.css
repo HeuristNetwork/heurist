@@ -764,3 +764,8 @@ div > .svs-contextmenu {
 .mandatory > label{
     color:red;
 }
+
+.loading{
+    /*background-color:rgb(255,0,0) !important;*/
+    background: url('assets/loading-animation-white.gif') no-repeat center center !important;
+}

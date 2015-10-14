@@ -160,10 +160,10 @@ $.widget( "heurist.profile_edit", {
                             if(that.options.edit_data && that.options.edit_data['ugr_ID']==that.options.ugr_ID){
                                 that._fromDataToUI();
                             }else{
-                                top.HEURIST4.util.showMsgErr("Unexpected user data obtained from server");
+                                top.HEURIST4.msg.showMsgErr("Unexpected user data obtained from server");
                             }
                         }else{
-                            top.HEURIST4.util.showMsgErr(response);
+                            top.HEURIST4.msg.showMsgErr(response);
                         }
                     }
                 );
@@ -229,17 +229,17 @@ $.widget( "heurist.profile_edit", {
             // validate email 
             // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
             var email = this.edit_form.find("#ugr_eMail");
-            var bValid = top.HEURIST4.util.checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i );
+            var bValid = top.HEURIST4.msg.checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i );
             if(!bValid){
                 err_text = err_text + ', '+top.HR('Wrong email format');
             }
 
             // validate login
             var login = this.edit_form.find("#ugr_Name");
-            if(!top.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
+            if(!top.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+top.HR('Wrong user name format');   // "Username may consist of a-z, 0-9, _, @, begin with a letter." 
             }else{
-                var ss = top.HEURIST4.util.checkLength2( login, "user name", 3, 16 );
+                var ss = top.HEURIST4.msg.checkLength2( login, "user name", 3, 16 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -252,10 +252,10 @@ $.widget( "heurist.profile_edit", {
                 err_text = err_text + ', '+top.HR(' Passwords are different');
                 password.addClass( "ui-state-error" );
             }else  if(password.val()!=''){
-                if(!top.HEURIST4.util.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
+                if(!top.HEURIST4.msg.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
                     err_text = err_text + ', '+top.HR('Wrong password format');
                 }else{
-                    var ss = top.HEURIST4.util.checkLength2( password, "password", 3, 16 );
+                    var ss = top.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
                     if(ss!=''){
                         err_text = err_text + ', '+ss;
                     }
@@ -296,21 +296,21 @@ $.widget( "heurist.profile_edit", {
                         if(that.options.isdialog){
                             that.edit_form.dialog("close");
                             if(that.options.isregistration){
-                                top.HEURIST4.util.showMsgDlgUrl("apps/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                top.HEURIST4.msg.showMsgDlgUrl("apps/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
                             }else{
-                                top.HEURIST4.util.showMsgDlg("User information has been saved successfully");
+                                top.HEURIST4.msg.showMsgDlg("User information has been saved successfully");
                             }
 
                         }
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
                 }
             );
 
 
         }else{       
-            top.HEURIST4.util.showMsgErr(err_text);
+            top.HEURIST4.msg.showMsgErr(err_text);
             /*var message = $dlg.find('.messages');
             message.html(err_text).addClass( "ui-state-highlight" );
             setTimeout(function() {

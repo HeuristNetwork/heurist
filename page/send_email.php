@@ -365,7 +365,7 @@ if(isset($_POST['data'])) {
                         email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
                         data.emails.push(email);
                     }else{
-                         top.HEURIST4.util.showMsgErr("Define email field. It is mandatory");
+                         top.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
                          return;
                     }
                 }
@@ -378,9 +378,9 @@ if(isset($_POST['data'])) {
                 console.log("Data to send", data);
                 $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
                     console.log("Posted data, response: ", response);
-                    top.HEURIST4.util.showMsgDlg(response);  
+                    top.HEURIST4.msg.showMsgDlg(response);  
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    top.HEURIST4.util.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
+                    top.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);
                 });
 
             }

@@ -663,14 +663,14 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
             if (ispwdreminder){
                 var pwd = $rdiv.attr('pwd');
-                top.HEURIST4.util.showMsgDlg(pwd, null, "Password reminder", $target);
+                top.HEURIST4.msg.showMsgDlg(pwd, null, "Password reminder", $target);
                 return;
             }else{
                 var isview = ($target.parents('.rec_view_link').length>0); //this is edit click
                 if(isview){
                     var url = top.HAPI4.basePathOld + "records/view/renderRecordData.php?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
                     
-                    top.HEURIST4.util.showDialog(url, { width: 600, height: 500 });
+                    top.HEURIST4.msg.showDialog(url, { width: 600, height: 500 });
                     return;
                 }
             }
@@ -1119,7 +1119,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
                                 }
 
                             }else{
-                                top.HEURIST4.util.showMsgErr(response);
+                                top.HEURIST4.msg.showMsgErr(response);
                             }
                             
                         });

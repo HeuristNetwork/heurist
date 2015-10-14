@@ -623,7 +623,7 @@ $.widget( "heurist.search_faceted", {
                     
                     this.doReset();
                 }else{
-                    top.HEURIST4.util.showMsgErr('Define at least one search criterion');
+                    top.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                 }
                 return;
             }else if(!this.options.ispreview){
@@ -1265,7 +1265,7 @@ $.widget( "heurist.search_faceted", {
                     this._recalculateFacets( facet_index );
 
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
                 
                 

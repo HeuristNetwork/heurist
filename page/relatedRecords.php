@@ -145,7 +145,7 @@
                 }
 
                 if(remove_on_levels_above){
-                    top.HEURIST4.util.showMsgDlg('You remove the last rule per level. All rules for dependent levels will be removed also. Please confirm',  _onDelete);
+                    top.HEURIST4.msg.showMsgDlg('You remove the last rule per level. All rules for dependent levels will be removed also. Please confirm',  _onDelete);
                 }else{
                     _onDelete();
                 }

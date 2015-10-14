@@ -901,6 +901,35 @@ console.log('tileloaded 2');
     //
     function _showSelection( isreset ){
 
+            //select items on timeline
+            if(vis_timeline){
+                vis_timeline.setSelection( selection );
+            }
+            
+            if(selection && selection.length>0){
+                
+                var lastRecID = selection[selection.length-1];
+                var lastSelectedItem = null;
+                
+                tmap.each(function(dataset){   
+                    dataset.each(function(item){ //loop trough all items
+
+                        if(lastRecID==item.opts.recid){
+                            lastSelectedItem = item; 
+                            return false;
+                        }
+                    });
+                    if(lastSelectedItem != null) return false;
+                });
+                
+                //find selected item in the dataset
+                if(lastSelectedItem)
+                    _showPopupInfo.call(lastSelectedItem);
+            }
+    }
+
+    function _showSelection2( isreset ){
+
         var lastSelectedItem = null;
         var items_to_update = [];       //current item to be deleted
         var items_to_update_data = [];  // items to be added (replacement for previous)

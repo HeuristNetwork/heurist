@@ -139,7 +139,7 @@ $.widget( "heurist.tag_rating", {
                     if(response.status == top.HAPI4.ResponseStatus.OK){
                         that.element.hide();
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
             });
 

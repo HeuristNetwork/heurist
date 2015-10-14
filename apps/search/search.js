@@ -499,7 +499,7 @@ $.widget( "heurist.search", {
                     if($.isFunction($('body').pagination)){
                         that._initPagination();
                     }else{
-                        top.HEURIST4.util.showMsgErr('Widget pagination not loaded!');
+                        top.HEURIST4.msg.showMsgErr('Widget pagination not loaded!');
                     }
                 });
             }
@@ -536,7 +536,7 @@ $.widget( "heurist.search", {
                             top.HAPI4.SystemMgr.save_prefs({'search_limit': newlimit},
                                 function(response){
                                     if(response.status != top.HAPI4.ResponseStatus.OK){
-                                        top.HEURIST4.util.showMsgErr(response);
+                                        top.HEURIST4.msg.showMsgErr(response);
                                     }
                                 }
                             );
@@ -668,7 +668,7 @@ $.widget( "heurist.search", {
                 }
                 var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                Hul.showDialog(url, { width:740, height:540, callback:
+                top.HEURIST4.msg.showDialog(url, { width:740, height:540, callback:
                     function(res){
                         if(!Hul.isempty(res)) {
                                 that.input_search.val(res);
@@ -1077,7 +1077,7 @@ $.widget( "heurist.search", {
 
         var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
-        Hul.showDialog(url, { height:550, width:700,
+        top.HEURIST4.msg.showDialog(url, { height:550, width:700,
                     callback:function(responce) {
 /*
                 var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
@@ -1103,7 +1103,7 @@ $.widget( "heurist.search", {
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
-        Hul.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
+        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
 
     }
 
@@ -1142,7 +1142,7 @@ $.widget( "heurist.search", {
                 if($.isFunction($('body').profile_edit)){
                     that._doRegister();
                 }else{
-                    top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
+                    top.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
                 }
             });
         }

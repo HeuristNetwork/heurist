@@ -94,6 +94,7 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>
+        <script type="text/javascript" src="js/utils_msg.js"></script>
         <!-- script type="text/javascript" src="js/utils_ajax.js"></script -->
         <script type="text/javascript" src="js/recordset.js"></script>
         <script type="text/javascript" src="js/hapi.js"></script>
@@ -256,7 +257,7 @@ if(@$_REQUEST['db']){
 
                                 }else{  // failed to load database structure
 
-                                    top.HEURIST4.util.redirectToError(response.message);
+                                    top.HEURIST4.msg.redirectToError(response.message);
                                 }
                             });
 
@@ -264,7 +265,7 @@ if(@$_REQUEST['db']){
 
                         }else{  // Failed to initialise system
 
-                            //top.HEURIST4.util.redirectToError
+                            //top.HEURIST4.msg.redirectToError
                             alert("Cannot initialize system, please consult Heurist developers");
                         }
                 });

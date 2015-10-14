@@ -153,7 +153,7 @@ $.widget( "heurist.rec_viewer", {
                                 }
 
                             }else{
-                                top.HEURIST4.util.showMsgErr(response);
+                                top.HEURIST4.msg.showMsgErr(response);
                             }
                     });
 
@@ -178,7 +178,7 @@ $.widget( "heurist.rec_viewer", {
                     }
 
                     }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                     }
                     });
                     */

@@ -136,7 +136,7 @@ $.widget( "heurist.dh_search", {
                                             
                                             
                         }else{
-                            top.HEURIST4.util.showMsgErr(response);
+                            top.HEURIST4.msg.showMsgErr(response);
                         }
                         });
     
@@ -242,7 +242,7 @@ $.widget( "heurist.dh_search", {
                 }
                 if(!facet_params || !Hul.isArray(facet_params.facets) || facet_params['version']!=2){
                     // Do something about the exception here
-                    Hul.showMsgDlg(top.HR('Can not init this search. Corrupted parameters. Please contact support team'), null, "Error");
+                    top.HEURIST4.msg.showMsgDlg(top.HR('Can not init this search. Corrupted parameters. Please contact support team'), null, "Error");
                     return;
                 }
 
@@ -324,7 +324,7 @@ $.widget( "heurist.dh_search", {
         if(this._currentRequest==null) return;
         //if result > 1000 warning message and exit
         if( this._currentRequest.total_count>2000){
-            top.HEURIST4.util.showMsgErr(this._currentRequest.total_count
+            top.HEURIST4.msg.showMsgErr(this._currentRequest.total_count
             + ' records have been retrieved. This is more than can be comfortably plotted on a Google map. '
             + 'Please narrow down your selection in order to create a useful map');
             return;
@@ -347,12 +347,12 @@ $.widget( "heurist.dh_search", {
                });
            }
             
-           var $dlg = top.HEURIST4.util.showMsgDlg(this.dlgcont, 
+           var $dlg = top.HEURIST4.msg.showMsgDlg(this.dlgcont, 
                    [
                     {text:'Add Layer', click:function(){
                         var layer_name = $dlg.find("#dh_layer_name").val();
                         if(Hul.isempty(layer_name)){
-                            //top.HEURIST4.util.showMsgErr
+                            //top.HEURIST4.msg.showMsgErr
                         }else{
                             
                             var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
@@ -390,7 +390,7 @@ $.widget( "heurist.dh_search", {
                    ]
            , 'New map layer');
             
-           //top.HEURIST4.util.showMsgErr('Define name of layer');
+           //top.HEURIST4.msg.showMsgErr('Define name of layer');
         
     }
     

@@ -149,7 +149,7 @@ $.widget( "heurist.search_faceted_wiz", {
             beforeClose: function( event, ui ) { 
                             if(event && event.currentTarget){ 
                                 var that_dlg = this;
-                                top.HEURIST4.util.showMsgDlg(top.HR("Cancel? Please confirm"),
+                                top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
                                         function(){ $( that_dlg ).dialog( "close" ); });  
                                 return false;        
                             }
@@ -165,7 +165,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }},
                 /*{text:top.HR('Close'), click: function() {
                     var that_dlg = this;
-                    top.HEURIST4.util.showMsgDlg(top.HR("Cancel? Please confirm"),
+                    top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
                         function(){ $( that_dlg ).dialog( "close" ); });
                 }}*/
             ]
@@ -334,10 +334,10 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
-                var bValid = top.HEURIST4.util.checkLength( svs_name, "Name", message, 3, 25 );
+                var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
                 if(!bValid){
                         svs_name.focus();
-                        //top.HEURIST4.util.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
+                        //top.HEURIST4.msg.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
                         //setTimeout(function(){svs_name.focus();},2200);
                         return;
                 }else{
@@ -376,7 +376,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
                 //mandatory
                 if(!top.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
-                    top.HEURIST4.util.showMsgDlg(top.HR("Select record type"));
+                    top.HEURIST4.msg.showMsgDlg(top.HR("Select record type"));
 
                     this.step = (this.options.params.isadvanced)?1:0;
                     return;
@@ -619,7 +619,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
                 
-                Hul.showDialog(url, { width:1200, height:600, callback: 
+                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
                                ele_rules.val( JSON.stringify(res.rules) ); //assign new rules    
@@ -852,7 +852,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         
 
                     }else{
-                        top.HEURIST4.util.redirectToError(response.message);
+                        top.HEURIST4.msg.redirectToError(response.message);
                     }
                 });
 
@@ -1018,7 +1018,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var allFields = $dlg.find('input');
         allFields.removeClass( "ui-state-error" );
 
-        var bValid = top.HEURIST4.util.checkLength( svs_name, "Name", message, 3, 25 );
+        var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
         if(!bValid){
             this._showStep(0);
             return false;
@@ -1074,7 +1074,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     that.element.dialog("close");
 
                 }else{
-                    top.HEURIST4.util.redirectToError(response.message);
+                    top.HEURIST4.msg.redirectToError(response.message);
                 }
             }
 

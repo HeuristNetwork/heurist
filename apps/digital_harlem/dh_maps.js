@@ -60,7 +60,7 @@ $.widget( "heurist.dh_maps", {
                                 that._resultset = new hRecordSet(response.data);
                             }else{
                                 that._resultset = null;
-                                top.HEURIST4.util.showMsgErr(response);
+                                top.HEURIST4.msg.showMsgErr(response);
                             }
                             
                             that._refresh();

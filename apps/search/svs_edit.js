@@ -179,7 +179,7 @@ function hSvsEdit(args) {
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
 
-                Hul.showDialog(url, { width:1200, height:600, callback:
+                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, callback:
                     function(res){
                         if(!Hul.isempty(res)) {
                             
@@ -218,7 +218,7 @@ function hSvsEdit(args) {
         if(parseInt(svsID)>0){
             var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
             if(Hul.isnull(svs)){
-                Hul.showMsgDlg(top.HR('Cannot initialise edit for this saved search. '
+                top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise edit for this saved search. '
                     +'It does not belong to your group'), null, "Error");
                 return;
             }
@@ -240,7 +240,7 @@ function hSvsEdit(args) {
                     }
                     catch (err) {
                         // TODo something about the exception here
-                        Hul.showMsgDlg(top.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove this search.'), null, "Error");
+                        top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove this search.'), null, "Error");
                         return;
                     }
                 }
@@ -304,12 +304,12 @@ function hSvsEdit(args) {
 
                     allFields.removeClass( "ui-state-error" );
 
-                    var bValid = Hul.checkLength( svs_name, "Name", message, 3, 30 );
+                    var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
 
                     if(bValid){
 
-                        var bOk = Hul.checkLength( svs_query, "Query", null, 1 );
-                        if(!bOk) bOk = Hul.checkLength( svs_rules, "Rules", null, 1 );
+                        var bOk = top.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
+                        if(!bOk) bOk = top.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
                         if(!bOk){
                                 message.text("Define query, rules or both.");
                                 message.addClass( "ui-state-highlight" );

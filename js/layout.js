@@ -846,7 +846,7 @@ function hLayout(args) {
         var layout = layoutGetById(layoutid);
 
         if(layout==null){
-            top.HEURIST4.util.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
+            top.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
             if(layoutid!='H4Default') layout = layoutGetById('H4Default');
             if(layout==null){
                 return;

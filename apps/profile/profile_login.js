@@ -49,14 +49,14 @@ function doLogin(isforsed){
 
                     if(isreset){
                         var rusername = $dlg.find('#reset_username');
-                        if(top.HEURIST4.util.checkLength( rusername, "username", message, 1, 0 ))
+                        if(top.HEURIST4.msg.checkLength( rusername, "username", message, 1, 0 ))
                         {
                             top.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
                                     $dlg.dialog( "close" );
-                                    top.HEURIST4.util.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
+                                    top.HEURIST4.msg.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
                                 }else{
-                                    top.HEURIST4.util.showMsgErr(response);
+                                    top.HEURIST4.msg.showMsgErr(response);
                                 }
                             });
                         }
@@ -66,8 +66,8 @@ function doLogin(isforsed){
                         var password = $dlg.find('#password');
                         var session_type = $dlg.find('input[name="session_type"]');
 
-                        var bValid = top.HEURIST4.util.checkLength( username, "username", message, 1 )
-                        && top.HEURIST4.util.checkLength( password, "password", message, 1 );         //3,63
+                        var bValid = top.HEURIST4.msg.checkLength( username, "username", message, 1 )
+                        && top.HEURIST4.msg.checkLength( password, "password", message, 1 );         //3,63
 
                         if ( bValid ) {
 
@@ -87,7 +87,7 @@ function doLogin(isforsed){
                                         message.addClass( "ui-state-highlight" );
                                         message.text(response.message);
                                     }else {
-                                        top.HEURIST4.util.showMsgErr(response);
+                                        top.HEURIST4.msg.showMsgErr(response);
                                     }
                                 }
 
@@ -183,7 +183,7 @@ function doRegister(){
                 if($.isFunction($('body').profile_edit)){
                     doRegister();
                 }else{
-                    top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
+                    top.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
                 }        
             });          
         }

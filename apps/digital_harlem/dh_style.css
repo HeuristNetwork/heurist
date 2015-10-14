@@ -181,7 +181,7 @@ div.infowindow{
   min-width: 250px;
 }
 div.infowindow-map{
-  max-width: 350px;
+  max-width: 400px;
 }
 
 div.infowindow h3 {
@@ -227,4 +227,8 @@ div.infowindow a {
 
 div.infowindow a:hover {
       text-decoration: underline;
+}
+
+.loading{
+    background: rgba(255, 255, 255, 1)  url('../../assets/loading-animation-white.gif') no-repeat center center !important;
 }

@@ -226,7 +226,7 @@ $.widget( "heurist.connections", {
                     var data = that._parseData(recordset.getRecords(), response.data);
                     that._doVisualize(data);
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
                 
                 that.option("recordset", recordset); //hRecordSet

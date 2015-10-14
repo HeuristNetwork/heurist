@@ -237,7 +237,7 @@ $.widget( "heurist.resultListMenu", {
                 }
                 var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
                 
-                Hul.showDialog(url, { callback: 
+                top.HEURIST4.msg.showDialog(url, { callback: 
                     function(res){
                         if(!Hul.isempty(res)) {
                                 that.reloadSearch(res);
@@ -370,9 +370,9 @@ $.widget( "heurist.resultListMenu", {
                 if(!Hul.isnull(context)){
 
                     if(context.problem){
-                        Hul.showMsgErr(context.problem);
+                        top.HEURIST4.msg.showMsgErr(context.problem);
                     }else if(context.none){
-                        Hul.showMsgFlash(context.none);
+                        top.HEURIST4.msg.showMsgFlash(context.none);
                     }else if(context.execute){
                         var fname = context.execute.shift();
                         var args = context.execute;
@@ -392,10 +392,10 @@ $.widget( "heurist.resultListMenu", {
                         //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
                     }else if(context.ok){
                         
-                        Hul.showMsgFlash(context.ok);
+                        top.HEURIST4.msg.showMsgFlash(context.ok);
                         that.reloadSearch();
                         
-                        /*Hul.showMsgDlg(context.ok+
+                        /*top.HEURIST4.msg.showMsgDlg(context.ok+
                         "<br><br>Information changes will be visible on re-run the current search."+
                         "<br>Reloading will reset filters and selection."+
                         "<br>'Yes' to re-run, 'No' to leave display as-is", 
@@ -452,10 +452,10 @@ $.widget( "heurist.resultListMenu", {
         }
 
         if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
-            Hul.showMsgDlg(msg);
+            top.HEURIST4.msg.showMsgDlg(msg);
             return null;
         }else if (limit>0 && recIDs_list.length > limit) {
-            Hul.showMsgDlg("The number of selected records is above the limit in "+limit);   
+            top.HEURIST4.msg.showMsgDlg("The number of selected records is above the limit in "+limit);   
         }else{            
             return recIDs_list;
         }
@@ -489,7 +489,7 @@ $.widget( "heurist.resultListMenu", {
         var hasRecordsNotBkmkd = false;
         if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
             //nothing selected
-            Hul.showMsgDlg("Select at least one record to add tags");
+            top.HEURIST4.msg.showMsgDlg("Select at least one record to add tags");
             return;
         }else if (recIDs_list.length > bkmkIDs_list.length) {
             // at least one unbookmarked record selected
@@ -498,7 +498,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/tags/updateTagsSearchPopup.php?show-remove?db=" + top.HAPI4.database + (recID?"&recid="+recID:"");
         
-        Hul.showDialog(url, { callback:
+        top.HEURIST4.msg.showDialog(url, { callback:
          
                         function(add, tags) {//options
                             if (! tags) { //no tags added
@@ -533,7 +533,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/tags/editUsergroupTagsPopup.html?db=" + top.HAPI4.database;
         
-        Hul.showDialog(url, { 
+        top.HEURIST4.msg.showDialog(url, { 
                         width: 800,
                         callback: function(add, wgTag_ids) {//options
                             if (! wgTag_ids) return;
@@ -585,7 +585,7 @@ $.widget( "heurist.resultListMenu", {
         // Open URL
         var url = top.HAPI4.basePath+ "page/send_email.php?db=" + top.HAPI4.database;
         top.HEURIST.user.selectedRecordIds = ids;
-        Hul.showDialog(url, { width:500, height:600 });
+        top.HEURIST4.msg.showDialog(url, { width:500, height:600 });
         
     },
 
@@ -601,13 +601,13 @@ $.widget( "heurist.resultListMenu", {
         }
 
         if (bkmkIDs_list.length == 0) {
-            Hul.showMsgDlg(this.getBookmarkMessage("to set ratings"));
+            top.HEURIST4.msg.showMsgDlg(this.getBookmarkMessage("to set ratings"));
             return;
         }
 
         var url = top.HAPI4.basePathOld+ "search/actions/setRatingsPopup.php?db=" + top.HAPI4.database;
 
-        Hul.showDialog(url, { 
+        top.HEURIST4.msg.showDialog(url, { 
                         width:250, height:220,
                         callback: function(value) {//options
                             if(Number(value)>=0){
@@ -640,7 +640,7 @@ $.widget( "heurist.resultListMenu", {
         var sMsg = "";
 
         if (bkmkIDs_list.length == 0) {
-            Hul.showMsgDlg("Select at least one bookmark to delete");
+            top.HEURIST4.msg.showMsgDlg("Select at least one bookmark to delete");
             return;
         }else if (bkmkIDs_list.length == 1) {
             sMsg = "Do you want to delete one bookmark?<br>(this ONLY removes the bookmark from your resources,<br>it does not delete the record entry)";
@@ -648,7 +648,7 @@ $.widget( "heurist.resultListMenu", {
             sMsg = "Do you want to delete " + bkmkIDs_list.length + " bookmarks?<br>(this ONLY removes the bookmarks from your resources,<br>it does not delete the record entries)";
         }
         
-        Hul.showMsgDlg(sMsg, function(){
+        top.HEURIST4.msg.showMsgDlg(sMsg, function(){
             that.executeAction( "delete_bookmark", {bkmk_ids: bkmkIDs_list} );    
         })
     },
@@ -664,7 +664,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld+ "records/permissions/setRecordOwnership.html?db=" + top.HAPI4.database;
         
-        Hul.showDialog(url, { height:300, width:650, 
+        top.HEURIST4.msg.showDialog(url, { height:300, width:650, 
                     callback:function(wg, viewable, hidden, pending) {
                         if (wg === undefined) return;
 
@@ -765,7 +765,7 @@ $.widget( "heurist.resultListMenu", {
     collectionOnUpdate: function(that, results) {
         if(!Hul.isnull(results)){
             if(results.status == top.HAPI4.ResponseStatus.UNKNOWN_ERROR){
-                Hul.showMsgErr(results.message);        
+                top.HEURIST4.msg.showMsgErr(results.message);        
             }else{
                 that._collection = Hul.isempty(results.ids)?[]:results.ids;
                 that.collectionRender();
@@ -796,7 +796,7 @@ $.widget( "heurist.resultListMenu", {
         var that = this;        
         var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
         
-        Hul.showDialog(url, { 
+        top.HEURIST4.msg.showDialog(url, { 
                     onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
                             var ele = frame.contentDocument.getElementById("ids");
                             if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
@@ -819,7 +819,7 @@ $.widget( "heurist.resultListMenu", {
         recIDs_list = recIDs_list.join(",");
         var url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?h4=1&db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
         
-        Hul.showDialog(url, {height:230, title: top.HR('Notification')} );
+        top.HEURIST4.msg.showDialog(url, {height:230, title: top.HR('Notification')} );
     },
         
     
@@ -839,7 +839,7 @@ $.widget( "heurist.resultListMenu", {
         
         var url = top.HAPI4.basePathOld + "search/actions/setRelationshipsPopup.html?db=" + top.HAPI4.database;
         
-        Hul.showDialog(url, { 
+        top.HEURIST4.msg.showDialog(url, { 
                     onpopupload: function(frame){
                             var ele = frame.contentDocument.getElementById("record-count");
                             if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
@@ -860,14 +860,14 @@ $.widget( "heurist.resultListMenu", {
         
         var recIDs_list = this.getSelectionIds(null);
         if(Hul.isempty(recIDs_list) || recIDs_list.length<2){
-            Hul.showMsgDlg("Select at least two records to identify/merge duplicate records");
+            top.HEURIST4.msg.showMsgDlg("Select at least two records to identify/merge duplicate records");
             return;
         }
 
         var that = this;        
         var url = top.HAPI4.basePathOld + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + top.HAPI4.database;
         
-        Hul.showDialog(url, { 
+        top.HEURIST4.msg.showDialog(url, { 
                     callback: function(context) {
                               that.reloadSearch();                                
                         }
@@ -882,7 +882,7 @@ $.widget( "heurist.resultListMenu", {
         
         var recIDs_all = top.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
-            Hul.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+            top.HEURIST4.msg.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
             return;
         }
         var recIDs_sel = this.getSelectionIds();
@@ -903,14 +903,14 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
         
-        Hul.showDialog(url);
+        top.HEURIST4.msg.showDialog(url);
     },
 
     replaceDetailPopup: function() {
         
         var recIDs_all = top.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
-            Hul.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+            top.HEURIST4.msg.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
             return;
         }
         var recIDs_sel = this.getSelectionIds();
@@ -931,14 +931,14 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
         
-        Hul.showDialog(url);
+        top.HEURIST4.msg.showDialog(url);
     },
 
     deleteDetailPopup: function() {
         
         var recIDs_all = top.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
-            Hul.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
+            top.HEURIST4.msg.showMsgDlg("No results found. Please run a query with at least one result record. You can use selction to direct your change.");
             return;
         }
         var recIDs_sel = this.getSelectionIds();
@@ -959,7 +959,7 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
         
-        Hul.showDialog(url);
+        top.HEURIST4.msg.showDialog(url);
     },
         
     

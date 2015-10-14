@@ -84,11 +84,13 @@
         <script type="text/javascript" src="../js/bubble.js"></script>
         
         <!-- minimum set of required set - @todo load it dynamically for standalone case -->                                       
+<!--  remove this comment to run mapping.php as standalone
         <script type="text/javascript" src="../js/search_minimal.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
+        <script type="text/javascript" src="../js/utils_msg.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
-
+-->
 
         <style>
             #helper p, #helper h2, #helper h4{
@@ -196,7 +198,7 @@
 
                                 onMapInit();
                             }else{
-                                top.HEURIST4.util.showMsgErr('Can not obtain database definitions');
+                                top.HEURIST4.msg.showMsgErr('Can not obtain database definitions');
                             }
                         });
                     }else{
@@ -204,7 +206,7 @@
                     }
 
                 }else{
-                    top.HEURIST4.util.showMsgErr('Can not init HAPI');
+                    top.HEURIST4.msg.showMsgErr('Can not init HAPI');
                 }
             }
 
@@ -266,7 +268,7 @@
                                 mapping.load(mapdataset);
 
                             }else{
-                                top.HEURIST4.util.showMsgErr(response);
+                                top.HEURIST4.msg.showMsgErr(response);
                             }
                         }
                     );
@@ -474,7 +476,7 @@
 
                  var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
                  if(query=='?'){
-                     Hul.showMsgDlg("Define query and perform search");
+                     top.HEURIST4.msg.showMsgDlg("Define query and perform search");
                  }else{
                      query = query + '&a=1&depth=1&db='+top.HAPI4.database;
                      var url_kml = top.HAPI4.basePathOld+"export/xml/kml.php" + query;
@@ -495,11 +497,11 @@
                 if(parseInt(rt)>0){
                     window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
                 }else{
-                    top.HEURIST4.util.showMsgDlg(
+                    top.HEURIST4.msg.showMsgDlg(
                         "The required record type "+rt+" has not been defined.<br><br>"+
                         "Please download from the H3ReferenceSet database using Database > Import Structure.",
-                        {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = top.HEURIST4.util.getMsgDlg(); $dlg.dialog( "close" ) },
-                         'Close':function() { var $dlg = top.HEURIST4.util.getMsgDlg(); $dlg.dialog( "close" ) }
+                        {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) },
+                         'Close':function() { var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) }
                         }
                         , "Missing record type"
                     );

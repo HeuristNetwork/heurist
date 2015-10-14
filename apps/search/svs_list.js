@@ -659,7 +659,7 @@ $.widget( "heurist.svs_list", {
         
             if(node.folder){
                 if(node.countChildren()>0){
-                    Hul.showMsgDlg('Can not delete non-empty folder. Delete dependent entries first.',null,top.HR('Warning'));
+                    top.HEURIST4.msg.showMsgDlg('Can not delete non-empty folder. Delete dependent entries first.',null,top.HR('Warning'));
                 }else{
                     __removeNode();
                 }
@@ -1049,7 +1049,7 @@ $.widget( "heurist.svs_list", {
                 }
                 if(!facet_params || !Hul.isArray(facet_params.facets)){
                     // Do something about the exception here
-                    Hul.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters. Remove this search'), null, "Error");
+                    top.HEURIST4.msg.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters. Remove this search'), null, "Error");
                     return;
                 }
 
@@ -1075,7 +1075,7 @@ $.widget( "heurist.svs_list", {
                     
                 }else{
                 
-                    Hul.showMsgErr("This faceted search is old version. "
+                    top.HEURIST4.msg.showMsgErr("This faceted search is old version. "
                     +"We apologise for this error which is due to changes in the format of saved searches "
                     +"required to support new features, and the costs of providing backward compatibility "
                     +"for a relatively small user-base.")    
@@ -1095,7 +1095,7 @@ $.widget( "heurist.svs_list", {
                     
                     //target is required 
                     if(! top.HAPI4.SearchMgr.doApplyRules( this, request.rules ) ){
-                        Hul.showMsgFlash(top.HR('Rule sets require an initial search result as a starting point.'),
+                        top.HEURIST4.msg.showMsgFlash(top.HR('Rule sets require an initial search result as a starting point.'),
                              3000, top.HR('Warning'), ele);
                     }
                     
@@ -1119,7 +1119,7 @@ $.widget( "heurist.svs_list", {
         var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
         if(!svs) return;
 
-        Hul.showMsgDlg(top.HR("Delete '"+ svsTitle  +"'? Please confirm"),  function(){
+        top.HEURIST4.msg.showMsgDlg(top.HR("Delete '"+ svsTitle  +"'? Please confirm"),  function(){
 
             top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
@@ -1131,7 +1131,7 @@ $.widget( "heurist.svs_list", {
                         delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        Hul.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
                 }
 
@@ -1237,7 +1237,7 @@ $.widget( "heurist.svs_list", {
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
         
-        Hul.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
+        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
             
     }
 

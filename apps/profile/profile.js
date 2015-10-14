@@ -390,7 +390,7 @@ $.widget( "heurist.profile", {
     if(response.status == top.HAPI4.ResponseStatus.OK){
     alert(response.data);
     }else{
-    top.HEURIST4.util.showMsgErr(response);
+    top.HEURIST4.msg.showMsgErr(response);
     }
     }
     );
@@ -409,7 +409,7 @@ $.widget( "heurist.profile", {
                     $(that.document).trigger(top.HAPI4.Event.LOGOUT);
                     that._refresh();
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );
@@ -441,14 +441,14 @@ $.widget( "heurist.profile", {
 
                     if(isreset){
                         var rusername = $dlg.find('#reset_username');
-                        if(top.HEURIST4.util.checkLength( rusername, "username", message, 1, 0 ))
+                        if(top.HEURIST4.msg.checkLength( rusername, "username", message, 1, 0 ))
                         {
                             top.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
                                     $dlg.dialog( "close" );
-                                    top.HEURIST4.util.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
+                                    top.HEURIST4.msg.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
                                 }else{
-                                    top.HEURIST4.util.showMsgErr(response);
+                                    top.HEURIST4.msg.showMsgErr(response);
                                 }
                             });
                         }
@@ -458,8 +458,8 @@ $.widget( "heurist.profile", {
                         var password = $dlg.find('#password');
                         var session_type = $dlg.find('input[name="session_type"]');
 
-                        var bValid = top.HEURIST4.util.checkLength( username, "username", message, 3, 16 )
-                        && top.HEURIST4.util.checkLength( password, "password", message, 3, 16 );
+                        var bValid = top.HEURIST4.msg.checkLength( username, "username", message, 3, 16 )
+                        && top.HEURIST4.msg.checkLength( password, "password", message, 3, 16 );
 
                         if ( bValid ) {
 
@@ -556,7 +556,7 @@ $.widget( "heurist.profile", {
                 if($.isFunction($('body').profile_edit)){
                     that.editProfile();
                 }else{
-                    top.HEURIST4.util.showMsgErr('Widget profile edit not loaded!');
+                    top.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
                 }
             });
         }
@@ -634,7 +634,7 @@ $.widget( "heurist.profile", {
                             $dlg.dialog( "close" );
 
                             if(ask_reload){
-                                top.HEURIST4.util.showMsgDlg('Reload page to apply new settings?',
+                                top.HEURIST4.msg.showMsgDlg('Reload page to apply new settings?',
                                     function(){
                                         window.location.reload();
                                     }, 'Confirmation');

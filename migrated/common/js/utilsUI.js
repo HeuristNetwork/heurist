@@ -467,7 +467,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             return top.HEURIST.util.popupWindow(parentWindow, options);
             
         }else{
-            top.HEURIST4.util.showDialog(url, options);
+            top.HEURIST4.msg.showDialog(url, options);
         }
     },
 
@@ -489,7 +489,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
             return top.HEURIST.util.popupWindow(parentWindow, options);
         }else{
-            return top.HEURIST4.util.showElementAsDialog(options);
+            return top.HEURIST4.msg.showElementAsDialog(options);
         }
     },
     /**
@@ -514,7 +514,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             top.HEURIST.util.popupWindow(parentWindow, options);
             return null;
         }else{
-            return top.HEURIST4.util.showElementAsDialog(options);
+            return top.HEURIST4.msg.showElementAsDialog(options);
         }
     },
 

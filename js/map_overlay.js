@@ -223,7 +223,7 @@ function loadMapDocument(doc) {
 
     //show info popup
     if(!top.HEURIST4.util.isempty( doc['description']) ){
-        top.HEURIST4.util.showMsgDlg(doc['description'], null,doc['title'], null, true);
+        top.HEURIST4.msg.showMsgDlg(doc['description'], null,doc['title'], null, true);
     }
 
     // Bounds

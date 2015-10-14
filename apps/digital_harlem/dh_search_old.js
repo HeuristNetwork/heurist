@@ -394,7 +394,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                         var isform_empty = this._fillQuery(query, _input_fields, 0);
                         
                         if(isform_empty){
-                            top.HEURIST4.util.showMsgErr('Define at least one search criterion');
+                            top.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                             return;
                         }
                         
@@ -412,7 +412,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                                             that._currenttype  = content_id;
                                             that._resultset = new hRecordSet(response.data);
                                         }else{
-                                            top.HEURIST4.util.showMsgErr(response);
+                                            top.HEURIST4.msg.showMsgErr(response);
                                             return;
                                         }
                                     
@@ -622,7 +622,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
                     that._recalculateFacets(svs_id, facet_index);
 
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
                 
                 
@@ -660,7 +660,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
     _onAddLayer: function(){
        
         if(top.HEURIST4.util.isempty(this.res_name.val() )){
-           top.HEURIST4.util.showMsgErr('Define name of layer');
+           top.HEURIST4.msg.showMsgErr('Define name of layer');
            return;
         }
         
