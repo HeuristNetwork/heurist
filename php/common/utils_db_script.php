@@ -1,6 +1,6 @@
 <?php
 /**
-* filename: explanation
+* filename: Executes SQL script
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

@@ -79,9 +79,9 @@
         <!-- Mapping -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
-        <script type="text/javascript" src="../js/mapping.js"></script>
-        <script type="text/javascript" src="../js/map_overlay.js"></script>
-        <script type="text/javascript" src="../js/bubble.js"></script>
+        <script type="text/javascript" src="map.js"></script>
+        <script type="text/javascript" src="map_overlay.js"></script>
+        <script type="text/javascript" src="../apps/bubble.js"></script>
         
         <!-- minimum set of required set - @todo load it dynamically for standalone case -->                                       
 <!--  remove this comment to run mapping.php as standalone

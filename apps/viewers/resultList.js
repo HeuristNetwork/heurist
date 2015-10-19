@@ -378,6 +378,9 @@ $.widget( "heurist.resultList", {
     },
 
 
+    //
+    // not used
+    //
     _initTagMenu: function() {
 
         this.menu_tags = $('<div>')
@@ -619,7 +622,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             text:false})
         .click(function( event ) {
             event.preventDefault();
-            window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+            window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);*/
 

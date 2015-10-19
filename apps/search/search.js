@@ -492,6 +492,7 @@ $.widget( "heurist.search", {
         });
 
         if(this.options.has_paginator){
+            /* EXEREMENTAL - not used anymore
             if($.isFunction($('body').pagination)){
                 this._initPagination();
             }else{
@@ -503,6 +504,7 @@ $.widget( "heurist.search", {
                     }
                 });
             }
+            */
         }else{
 
 
@@ -616,12 +618,14 @@ $.widget( "heurist.search", {
 
     }, //end _create
 
+    /* EXEREMENTAL
     _initPagination: function(){
         this.div_paginator = $('<span>')
         .css('display', 'inline-block')
         .appendTo( this.div_search )
         .pagination();
     },
+    */
 
     _setOption: function( key, value ) {
         this._super( key, value );

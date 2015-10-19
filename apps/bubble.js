@@ -1,6 +1,6 @@
 
 /**
-* filename: explanation
+* Bubble popup. This widget is used in mapping to show popup on timeline
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

@@ -24,7 +24,7 @@ function hEditing() {
     var _className = "Editing",
     _version   = "0.4";
 
-    var $container = null,  //html to have edit form
+    var $container = null,  //html element to contain edit form
     recdata = null,     //hRecordSet
     recID = null,
     rectypeID = null,

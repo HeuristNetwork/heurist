@@ -1,6 +1,6 @@
 /**
 * app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for /page/mapping.php
+* This widget acts as a wrapper for /page/map.php
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -54,7 +54,7 @@ $.widget( "heurist.app_timemap", {
 
         this.mapframe = $( "<iframe>" )
         .attr('id', 'map-frame')
-        //.attr('src', 'php/mapping.php?db='+top.HAPI4.database)
+        //.attr('src', 'php/map.php?db='+top.HAPI4.database)
         .appendTo( this.framecontent );
           
           
@@ -142,7 +142,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap()
             }else {
-                var url = top.HAPI4.basePath + '/page/mapping.php?db='+top.HAPI4.database;
+                var url = top.HAPI4.basePath + '/page/map.php?db='+top.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
@@ -204,7 +204,7 @@ $.widget( "heurist.app_timemap", {
             return;
         }
 
-        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see js/mapping.js
+        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see page/map.js
     }
 
 
@@ -239,7 +239,7 @@ $.widget( "heurist.app_timemap", {
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
-            mapping.loadMapDocumentById(recId);  //see js/mapping.js
+            mapping.loadMapDocumentById(recId);  //see page/map.js
         }
     }
 
@@ -250,14 +250,14 @@ $.widget( "heurist.app_timemap", {
     , addQueryLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
-            mapping.addQueryLayer(params);  //see js/mapping.js
+            mapping.addQueryLayer(params);  //see page/map.js
         }
     }
 
     , addRecordsetLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
-            mapping.addRecordsetLayer(params);  //see js/mapping.js
+            mapping.addRecordsetLayer(params);  //see page/map.js
         }
     }
 

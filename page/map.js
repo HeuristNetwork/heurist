@@ -207,7 +207,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 dataset.timeenabled = _mapdata[0].timeenabled;
                 dataset.loadItems(_mapdata[0].options.items);
                 dataset.each(function(item){
-                    item.opts.openInfoWindow = _onItemSelection;
+                    item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
                 });
                 
                 dataset.hide();
@@ -246,6 +246,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
     }
     
+    // get unix timestamp from vis
     function _getUnixTs(item, field, ds){
 
         var item_id = 0;
@@ -271,6 +272,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     }
     
     //called once on first timeline load
+    // it inits buttons on timeline toolbar
+    //
     function _initVisTimelineToolbar(){
         
         /**
@@ -629,7 +632,7 @@ console.log('tileloaded 2');
                         _showSelection(false);
                     }
                     
-                    console.log('after map init COMPLETED');                    
+                    console.log('MAP INIT COMPLETED');                    
                     
                 });          
                 
@@ -684,7 +687,9 @@ console.log('tileloaded 2');
             
     }
     
-    
+    //
+    // adds draw button and init them for google map DrawingManager
+    //
     function _initDrawListeners(){
         
             var shift_draw = false;
@@ -1258,7 +1263,7 @@ ed_html +
                         }, text:false})
                      .click(function( event ) {
                 event.preventDefault();
-                //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+                //window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
                 window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
                     });
             }

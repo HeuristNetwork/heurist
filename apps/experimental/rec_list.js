@@ -435,7 +435,7 @@ $.widget( "heurist.rec_list", {
             text:false})
         .click(function( event ) {
             event.preventDefault();
-            window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+            window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);
 

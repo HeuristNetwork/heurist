@@ -29,7 +29,7 @@
 *  name - title
 *  widgetname - name of jquery widget (init function)
 *  script - link to jquery widget file
-*  misize - array width,height
+*  minsize - array width,height
 *  size   - array width,height
 *  isframe - widget or link will be loaded in iframe
 *  url - link to be loaded (if not widget)
@@ -38,17 +38,17 @@
 */
 
 var cfg_widgets = [
-    {id:'ha01', name:'Databases', widgetname:'about', script:'apps/about.js', minsize:[200,200], size:[300,300], isframe:false },
-    {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
 
     {id:'h4_search', name:'Search', widgetname:'search', script:'apps/search/search.js'},
 
     {id:'ha_search_tree', name:'Saved searches', widgetname:'svs_list', script:'apps/search/svs_list.js'},
-    {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
-    {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
 
 
     /* experimental - widgets for future implementation
+    {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
+    {id:'ha01', name:'About', widgetname:'about', script:'apps/about.js', minsize:[200,200], size:[300,300], isframe:false },
+    {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
+    {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
     {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'apps/exp/rec_list.js'},
     {id:'ha31', name:'Record', widgetname:'rec_viewer', script:'apps/rec_viewer.js'},
     {id:'ha32', name:'Media', title:'Record media viewer', url:'apps/rec_media.php'},
@@ -62,12 +62,11 @@ var cfg_widgets = [
     */
 
     {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'apps/topmenu/mainMenu.js'},
-    {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/search/resultList.js'},
+    {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/viewers/resultList.js'},
     {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'h3 ext', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
 
     {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},  // map in iframe
-    {id:'h4_map', name:'Map', widgetname:'map', script:'apps/viewers/map.js'},
     {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'apps/viewers/staticPage.js'},
 
     {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},

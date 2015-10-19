@@ -95,7 +95,7 @@
                 }
     
                 $("#visualize").visualize({
-                    data: data,
+                    data: data,             
                     getData: function(data) { return getData(data); },
                     getLineLength: function(record) { return getLineLength(record); },
                     

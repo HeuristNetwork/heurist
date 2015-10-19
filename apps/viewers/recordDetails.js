@@ -1,7 +1,7 @@
 /**
 * View data for one record: loads data progressively in order shared, private, relationships, links
 * 
-* Requires apps/rec_actions.js (must be preloaded)
+* NO Requires apps/rec_actions.js (must be preloaded)
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -39,10 +39,12 @@ $.widget( "heurist.recordDetails", {
         .hide();
 
         if(false){
+            /* EXEREMENTAL
             this.action_buttons = $('<div>')
             .css('display','inline-block')
             .rec_actions({actionbuttons: "tags,share,more"})
             .appendTo(this.div_toolbar);
+            */
         }
 
         this.btn_edit = $( "<button>", {text: top.HR('edit')} )
@@ -88,7 +90,7 @@ $.widget( "heurist.recordDetails", {
                 that.options.recID = _recID;
                 that.options.recdata = _recdata;
                 that._refresh();
-                if(that.action_buttons) that.action_buttons.rec_actions('option','record_ids', (_recID!=null)?[_recID]:[] );
+                //TEMP if(that.action_buttons) that.action_buttons.rec_actions('option','record_ids', (_recID!=null)?[_recID]:[] );
 
 
                 //that.options("recID", _recID);
@@ -191,7 +193,7 @@ $.widget( "heurist.recordDetails", {
                     if($.isFunction($('body').editing_input)){
                     this._renderHeader();
                     }else{
-                    $.getScript(top.HAPI4.basePath+'js/editing_input.js', function(){ 
+                    $.getScript(top.HAPI4.basePath+'apps/editing/editing_input.js', function(){ 
                     $.getScript(top.HAPI4.basePath+'apps/rec_search.js',
                     function(){ 
                     $.getScript(top.HAPI4.basePath+'apps/rec_relation.js',

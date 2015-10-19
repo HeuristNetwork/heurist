@@ -588,9 +588,6 @@ function hLayout(args) {
             }else if(app.widgetname=='app_timemap'){
                 //DEBUG
                 widget = $content.app_timemap( options );
-            }else if(app.widgetname=='svs_manager'){
-                    //DEBUG
-                    widget = $content.svs_manager( options ); //options
             }else if(app.widgetname=='svs_list'){
                     //DEBUG
                     widget = $content.svs_list( options ); //options

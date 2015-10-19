@@ -24,12 +24,16 @@
     require_once (dirname(__FILE__).'/../common/db_files.php');
 
     $system = new System();
-    if($system->init(@$_REQUEST['db']) ){
+    $db = @$_REQUEST['db'];
+    
+    if($db){
 
         //@todo - allow Obfuscated id only    
 
         $fileid = @$_REQUEST['thumb'];
         if($fileid){
+            $system->initPathConstants($db);
+            
             $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
             if(file_exists($thumbfile)){
                 downloadFile('image/png', $thumbfile);
@@ -41,6 +45,8 @@
             }
         }else if(@$_REQUEST['id']) {
 
+            $system->init($db);
+            
             $fileid = @$_REQUEST['id'];
             //find 
             $listpaths = fileGetPath_URL_Type($system, $fileid);

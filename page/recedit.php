@@ -48,13 +48,13 @@
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
         <!-- @todo load this 4 scripts dynamically -->
-        <script type="text/javascript" src="../apps/search.js"></script>
-        <script type="text/javascript" src="../apps/rec_list.js"></script>
-        <script type="text/javascript" src="../apps/rec_search.js"></script>
-        <script type="text/javascript" src="../apps/rec_relation.js"></script>
+        <script type="text/javascript" src="../apps/search/search.js"></script>
+        <!-- script type="text/javascript" src="../apps/rec_list.js"></script -->
+        <script type="text/javascript" src="../apps/editing/rec_search.js"></script>
+        <script type="text/javascript" src="../apps/editing/rec_relation.js"></script>
+        <script type="text/javascript" src="../apps/editing/editing_input.js"></script>
 
-        <script type="text/javascript" src="../js/editing2.js"></script>
-        <script type="text/javascript" src="../js/editing_input.js"></script>
+        <script type="text/javascript" src="editing.js"></script>
 
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>

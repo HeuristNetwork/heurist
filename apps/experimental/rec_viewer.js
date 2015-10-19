@@ -189,7 +189,7 @@ $.widget( "heurist.rec_viewer", {
                     if($.isFunction($('body').editing_input)){
                     this._renderHeader();
                     }else{
-                    $.getScript(top.HAPI4.basePath+'js/editing_input.js', function(){ 
+                    $.getScript(top.HAPI4.basePath+'apps/editing/editing_input.js', function(){ 
                     $.getScript(top.HAPI4.basePath+'apps/rec_search.js',
                     function(){ 
                     $.getScript(top.HAPI4.basePath+'apps/rec_relation.js',

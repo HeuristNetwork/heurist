@@ -3,18 +3,19 @@ if (!top.HEURIST4){
 }
 if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     
+    EMPTY_MESSAGE:("Server returns nothing. Either server not accessible or script is corrupted."
+                +" Please try later and if issue persists please consult your system administrator "
+                +" or contact development team"),    
+    
     showMsgErr: function(response){
-        var msg;
+        var msg = "";
         if(typeof response === "string"){
             msg = response;
         }else{
-            msg = ""; //response.status;
-            if(response.message){
-                msg = msg + '<br>' + response.message;
+            if(top.HEURIST.util.isempty(response.message)){
+                msg = top.HEURIST4.msg.EMPTY_MESSAGE;   
             }else{
-                msg = "Server returns nothing. Either server not accessible or script is corrupted."
-                +" Please try later and if issue persists please consult your system administrator "
-                +" or contact development team";   
+                msg = response.message;
             }
 
             if(response.sysmsg){
@@ -43,6 +44,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         +"database eg. missing stored procedures, functions, triggers, or there may be an "
                         +"error in our code (in which case we need to know so we can fix it";
             }
+        }
+        if(top.HEURIST.util.isempty(msg)){
+                msg = top.HEURIST4.msg.EMPTY_MESSAGE;   
         }
 
         top.HEURIST4.msg.showMsgDlg(msg, null, "Error");

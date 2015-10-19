@@ -1,7 +1,10 @@
 <?php
 
-    /**
-    * Standalone search for related recprds. It may be used separately or wihin widget in iframe (for example in recordListExt )
+    /**  
+    * NOT USED - the idea was to retieve related records dynamically with the help of ruleBuilder widget
+    * 
+    * 
+    * Standalone search for related records. It may be used separately or wihin widget in iframe (for example in recordListExt )
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

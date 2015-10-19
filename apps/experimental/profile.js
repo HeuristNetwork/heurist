@@ -1,4 +1,5 @@
 /**
+* Central access point/menu 
 * If not logged in: Login button
 * If logged in:     Addd New Record, Profile and Options button with drop down menus
 *
@@ -236,7 +237,7 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').search_faceted_wiz)){ //already loaded
                         showSearchFacetedWizard();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/ssearch/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
                     }
                 }else if(action == "menu-user-svs"){
                     if($.isFunction($('body').svs_manager)){ //already loaded
@@ -248,7 +249,7 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').file_manager)){ //already loaded
                         showManageFiles();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/file_manager.js', function(){ showManageFiles(); } );
+                        $.getScript(top.HAPI4.basePath+'apps/profile/file_manager.js', function(){ showManageFiles(); } );
                     }
                 }
 
@@ -301,7 +302,7 @@ $.widget( "heurist.profile", {
                 .position({my: "right top", at: "right bottom", of: that.btn_record });
                 $( document ).one( "click", function() { that.select_rectype.hide(); });
                 return false;
-                //window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database, "_blank");
+                //window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database, "_blank");
             }
         });
         this._on( this.select_rectype, {
@@ -316,7 +317,7 @@ $.widget( "heurist.profile", {
                 top.HEURIST4.editing.add(recordtype);
 
                 /* open in new window
-                window.open(top.HAPI4.basePath + "php/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
+                window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
                 */
             }
         });

@@ -142,11 +142,12 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="apps/profile/profile_login.js"></script>
         <script type="text/javascript" src="apps/viewers/resultListMenu.js"></script>
-        <script type="text/javascript" src="apps/rec_actions.js"></script>
-        <script type="text/javascript" src="apps/rec_search.js"></script>
-        <script type="text/javascript" src="apps/rec_relation.js"></script>
-        <script type="text/javascript" src="js/editing_input.js"></script>
-        <script type="text/javascript" src="js/editing.js"></script>
+        <!-- todo: load dynamically
+        <script type="text/javascript" src="apps/editing/rec_search.js"></script>
+        <script type="text/javascript" src="apps/editing/rec_relation.js"></script>
+        <script type="text/javascript" src="apps/editing/editing_input.js"></script> 
+         -->
+        <!-- script type="text/javascript" src="page/editing.js"></script -->
 
         <!-- move to profile.js dynamic load -->
         <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
