@@ -22,21 +22,29 @@
     require_once(dirname(__FILE__)."/System.php");
 
     $system = new System();
-    $isSystemInited = $system->init(@$_REQUEST['db'], false);
+    $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 
-    if( !$isSystemInited ){  //can not init system (apparently connection to DB is wrong)
+    if( !$isSystemInited ){  //can not init system (apparently connection to Server is wrong)
         $err = $system->getError();
         $error_msg = @$err['message'];
     }else if (@$_REQUEST['msg']){
         $error_msg = $_REQUEST['msg'];
     }
     
+    $list =  mysql__getdatabases4($system->get_mysqli());
+    if(count($list)<1){
+        //reditrect to create database
+        header('Location: ' . HEURIST_BASE_URL . 'migrated/admin/setup/dbcreate/createNewDB.php');
+        return;
+    }
     
 ?>
 <html>
     <head>
         <title><?=HEURIST_TITLE?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        
+        <link rel=icon href="../favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../style3.css">
@@ -59,15 +67,11 @@
 
     if($isSystemInited){
 ?>
-            
-            
             <div style="padding: 0.5em;">Please select a database from the list</div>
             <div style="overflow-y:auto;display: inline-block;width:100%;height:80%">
 
                 <ul class="db-list">
                     <?php
-                        $list =  mysql__getdatabases4($system->get_mysqli());
-
                         /* DEBUG for($i=0;$i<100;$i++) {
                         array_push($list, "database".$i);
                         }*/

@@ -28,12 +28,15 @@
 */
 
 define('NO_DB_ALLOWED',1);
+define('SKIP_VERSIONCHECK2',1);
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
+$blankServer = (HEURIST_DBNAME==''); //@todo check exxistense of other databases
+
 // must be logged in anyway to define the master user for the database
-if (!is_logged_in()) {
+if (!($blankServer || is_logged_in())) {
     $spec_case = "";
     if(HEURIST_DBNAME=='Heurist_Sandpit'){
         //special case - do not show database name
@@ -44,26 +47,135 @@ if (!is_logged_in()) {
     return;
 }
 
+
 // clean up string for use in SQL query
 function prepareDbName(){
     $db_name = substr(get_user_username(),0,5);
     $db_name = preg_replace("/[^A-Za-z0-9_\$]/", "", $db_name);
     return $db_name;
 }
+
+function errorOut($msg){
+    print '<p class="error ui-state-error"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
+    .$msg.'<p>';
+}
 ?>
 <html>
     <head>
         <title>Create New Heurist Database</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        
+<?php
+    if($blankServer){
+?>
+        <link rel=icon href="../../../../favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="../../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../../../style3.css">
+        <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../../localization.js"></script>
+        <script type="text/javascript" src="../../../../js/utils.js"></script>
+        <script type="text/javascript" src="../../../../js/utils_msg.js"></script>
+        <script type="text/javascript" src="../../../../js/hapi.js"></script>
+
+        <script type="text/javascript" src="../../../../apps/profile/profile_edit.js"></script>
+        
+        <script type="text/javascript">
+$(document).ready(function() {
+
+    if($("#createDBForm").length>0){
+        top.HAPI4 = new hAPI(null);
+        var prefs = top.HAPI4.get_prefs();
+        //loads localization
+        top.HR = top.HAPI4.setLocale(prefs['layout_language']);
+        
+        <?php if(!$passwordForDatabaseCreation)
+        {
+            echo 'doRegister();';    
+        }  
+        ?>
+        
+        
+        $("#btnRegister").button({label:'Define Database Administrator'}).on('click', doRegister);
+        $("#div_register").show();
+        $("#div_create").hide();
+    }  
+});
+
+
+var profile_edit_dialog = null;
+
+function onRegisterDialogClose(){
+    var edit_date = profile_edit_dialog.profile_edit('option','edit_data');
+    
+    var frm = $("#dbForm");
+    for (var fld_name in edit_date) {
+        if (edit_date.hasOwnProperty(fld_name)) {
+                var fld = frm.find('#'+fld_name);
+                if(fld.length>0){
+                    fld.val( edit_date[fld_name] );
+                }else{
+                    $('<input>', {id:fld_name, type:'hidden', name:fld_name, value:edit_date[fld_name]} ).appendTo(frm);
+                }
+        }
+    }
+
+    $("#div_register").hide();
+    $("#div_create").show();
+    setUserPartOfName();
+}
+
+function doRegister(event){
+    
+        top.HEURIST4.util.stopEvent(event);
+        
+        if($.isFunction($('body').profile_edit)){
+
+            if(profile_edit_dialog==null){
+                profile_edit_dialog = $('#heurist-profile-dialog');
+                if(profile_edit_dialog.length<1){
+                    profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );               
+                }
+                profile_edit_dialog.profile_edit({'ugr_ID': -1, needclear:false, callback:onRegisterDialogClose  });
+            }else{
+                profile_edit_dialog.profile_edit('open');
+            }
+            
+
+        }else{
+            $.getScript(top.HAPI4.basePath+'apps/profile/profile_edit.js', function() {
+                if($.isFunction($('body').profile_edit)){
+                    doRegister();
+                }else{
+                    top.HEURIST4.msg.showMsgErr('Widget "Profile edit" can not be loaded!');
+                }        
+            });          
+        }
+        
+}
+        
+        </script>
+<?php        
+    }else{
+?>        
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+<?php
+    }
+?>
+        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
 
         <style>
             .detailType {width:180px !important}
+             h2 {padding:10px}
+             .error {
+                width:90%;
+                margin:auto;
+                margin-top:10px;
+                padding:10px;   
+             }
         </style>
 
         <script>
@@ -102,7 +214,7 @@ function prepareDbName(){
                 }
             }
 
-
+            //allow only alphnumeric characters for db name
             function onKeyPress(event){
 
                 event = event || window.event;
@@ -121,7 +233,7 @@ function prepareDbName(){
                 return true;
             }
 
-
+            // assign user name as part of db name
             function setUserPartOfName(){
                 var ele = document.getElementById("uname");
                 if(ele.value==""){
@@ -171,6 +283,9 @@ function prepareDbName(){
                 return true;
             }
 
+            //
+            // get list of all registered databases
+            //
             var is_db_got = false;
             function getRegisteredDatabases(){
 
@@ -218,7 +333,7 @@ function prepareDbName(){
 
                         }
                         if(s==''){
-                            s = '<p class="error">Cannot access Heurist database index<p>';
+                            s = '<p class="error ui-state-error">Cannot access Heurist database index<p>';
                         }
                         ddiv.innerHTML = s;
                     },
@@ -236,17 +351,25 @@ function prepareDbName(){
         </script>
     </head>
 
-    <body class="popup">
+        <?php 
+            if($blankServer){
+                echo '<body style="padding:45px">';
+                echo '<div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">';
+                echo '<div class="logo" style="background-color:#2e3e50;width:100%"></div>';
+            }else{
+                echo '<body class="popup">';
+                echo (@$_REQUEST['popup']=='1'?'':'<div class="banner"><h2>Create New Database</h2></div>');
+            }
+        ?>
 
-        <?php echo (@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Create New Database</h2></div>") ?>
-
-        <div id="page-inner" style="overflow:auto">
+        <div id="page-inner" style="overflow:auto;padding:10px">
             <div id="loading" style="display:none">
                 <img alt="loading ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>
             </div>
 
             <?php
+            
             $newDBName = "";
             // Used by buildCrosswalks to detemine whether to get data from coreDefinitions.txt (for new basic database)
             // or by querying an existing Heurist database using getDBStructureAsSQL (for crosswalk or use of database as template)
@@ -255,15 +378,15 @@ function prepareDbName(){
             global $errorCreatingTables; // Set to true by buildCrosswalks if error occurred
             global $done; // Prevents the makeDatabase() script from running twice
             $done = false; // redundant
-            $isCreateNew = true;
+            $isDefineNewDatabase = true;
 
-            if(isset($_POST['dbname'])) {
-                $isCreateNew = false;
-                $isTemplateDB = ($_POST['dbtype']=='1');
+            if(isset($_REQUEST['dbname'])) {   //name of new database
+                $isDefineNewDatabase = false;
+                $isTemplateDB = ($_REQUEST['dbtype']=='1');
 
                 /* TODO: verify that database name is unique - currently rather ugly error trap
                 $list = mysql__getdatabases();
-                $dbname = $_POST['uname']."_".$_POST['dbname'];
+                $dbname = $_REQUEST['uname']."_".$_REQUEST['dbname'];
                 if(array_key_exists($dbname, $list)){
                 echo "<h3>Database '".$dbname."' already exists. Choose different name</h3>";
                 }else{
@@ -284,29 +407,30 @@ function prepareDbName(){
 
             print '<script type="text/javascript">hideProgress();</script>';
 
-            if($isCreateNew){
+            if($isDefineNewDatabase){
 ?>
 
                 <h2>Creating new database on server</h2>
                 <br />
 
                 <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
-                    <h3>Enter the password set by your system administrator for new database creation:</h3>
+                    <label class="labelBold">Enter the password set by your system administrator for new database creation:</label>
                     <input type="password" maxlength="64" size="25" id="pwd">
                     <input type="button" onclick="challengeForDB()" value="OK" style="font-weight: bold;" >
                 </div>
 
 
                 <div id="createDBForm" style="<?='display:'.($passwordForDatabaseCreation==''?'block':'none')?>;padding-top:5px;">
-                    <form action="createNewDB.php?db=<?= HEURIST_DBNAME ?>&popup=<?=@$_REQUEST['popup']?>"
-                        method="POST" name="NewDBName" onsubmit="return onBeforeSubmit()">
+                    <form action="createNewDB.php"
+                        method="POST" id="dbForm" onsubmit="return onBeforeSubmit()">
 
                         <input type="hidden" id="url_template" name="url_template">
-
+                        <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>">
+                        <input type="hidden" name="popup" value="<?php echo @$_REQUEST['popup']?'1':''; ?>">
                         
-                        <div style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
+                        <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:10px;">
                             <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
-                                class="labelBold">Standard starter database</label>
+                                class="labelBold" style="padding-left: 2em;">Standard starter database</label>
                             <div style="padding-left: 38px;padding-bottom:10px">
                                 Gives an uncluttered database with essential record types, fields,
                                 terms and relationships, including bibliographic and spatial entities.<br />
@@ -316,7 +440,7 @@ function prepareDbName(){
                             <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
 
                             <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
-                                class="labelBold" >Use a registered database as template</label>
+                                class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
                             <div style="padding-left: 38px;">
                                 Use a database registered with the Heurist Network as a template.
                                 Copies record types, fields, terms and relationships from the database selected.<br />
@@ -340,19 +464,34 @@ function prepareDbName(){
                             </div>
                         </div>
 
-                        <h3 style="margin-left: 38px">Enter a name for the new database</h3>
-                        <div style="margin-left: 60px; margin-top: 10px;">
-                            <!-- user name used as prefix -->
-                            <i>no spaces or punctuation other than underscore)</i><br />&nbsp;<br />
-                            <b><?= HEURIST_DB_PREFIX ?>
-                                <input type="text" maxlength="30" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
-                                    style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
-                            <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
-                            <input type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
-                            <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
-                            databases so that they are easily identified and appear together in the list of databases.<p></p>
+                        <div id="div_create">
+                            <h3 style="margin-left: 38px">Enter a name for the new database</h3>
+                            <div style="margin-left: 60px; margin-top: 10px;">
+                                <!-- user name used as prefix -->
+                                <i>no spaces or punctuation other than underscore)</i><br />&nbsp;<br />
+                                <b><?= HEURIST_DB_PREFIX ?>
+                                    <input type="text" maxlength="30" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
+                                        style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
+                                <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
+                                <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
+                                <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
+                                databases so that they are easily identified and appear together in the list of databases.</p>
+                            </div>
+                        
                         </div>
                     </form>
+                    
+                        <div id="div_register" style="display: none;">
+                             <!-- h3 style="margin-left: 38px">Define Database Administrator</h3 -->
+                             <div style="margin-left: 60px; margin-top: 10px;">
+                                <button id="btnRegister" style="font-weight: bold;" />
+                             </div>
+                             <div style="padding-left: 38px; margin-top: 10px; margin-bottom: 20px;">
+                                You are going to create your first database on this server. Please define the user who will
+                                be database owner and administrator
+                            </div>
+                        </div>
+                    
                 </div> <!-- createDBForm -->
 <?php
             }
@@ -362,6 +501,8 @@ function prepareDbName(){
                 return strtolower($item);
             }
 
+            // rollback - delete database
+            //
             function cleanupNewDB($dbname){
                 db_drop($dbname);
             }
@@ -393,15 +534,19 @@ function prepareDbName(){
                 }
                 return false;
             }
+            
+            function getUsrField($name){
+                return @$_REQUEST[$name]?mysql_real_escape_string($_REQUEST[$name]):'';
+            }
 
             function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
 
-                global $newDBName, $isNewDB, $done, $isCreateNew, $isTemplateDB, $errorCreatingTables;
+                global $newDBName, $isNewDB, $done, $isDefineNewDatabase, $isTemplateDB, $errorCreatingTables;
 
                 $error = false;
                 $warning=false;
 
-                if (isset($_POST['dbname'])) {
+                if (isset($_REQUEST['dbname'])) {
 
                     // Check that there is a current administrative user who can be made the owner of the new database
                     $message = "MySQL username and password have not been set in configIni.php ".
@@ -421,17 +566,17 @@ function prepareDbName(){
 
 
                     // Create a new blank database
-                    $newDBName = trim($_POST['uname']).'_';
+                    $newDBName = trim($_REQUEST['uname']).'_';
 
                     if ($newDBName == '_') {$newDBName='';}; // don't double up underscore if no user prefix
-                    $newDBName = $newDBName . trim($_POST['dbname']);
+                    $newDBName = $newDBName . trim($_REQUEST['dbname']);
                     $newname = HEURIST_DB_PREFIX . $newDBName; // all databases have common prefix then user prefix
 
                     $list = mysql__getdatabases();
                     $list = array_map("arraytolower", $list);
                     if(in_array(strtolower($newDBName), $list)){
-                        echo ("<p class='error'>Error: database '".$newname."' already exists. Choose different name<br/></p>");
-                        $isCreateNew = true;
+                        errorOut ('Error: database "'.$newname.'" already exists. Choose different name');
+                        $isDefineNewDatabase = true;
                         return false;
                     }
 
@@ -441,9 +586,11 @@ function prepareDbName(){
                     //debug print $reg_url."</br>";
 
 if(true){ //DEBUG: set to false to avoid real database creation
+                    // this is global variable that is used in buildCrosswalks.php
                     $templateFileName = "NOT DEFINED";
                     $templateFoldersContent = "NOT DEFINED";
 
+                    
                     if($reg_url){
 
                             $nouse_proxy = true;
@@ -466,23 +613,27 @@ if(true){ //DEBUG: set to false to avoid real database creation
                                 }
                             }
                             if($resval){
-                                echo ("<p class='error'>Error importing core definitions from template database "
-                                        ." for database $newname<br>");
-                                echo ( $resval );
-                                echo ("<br>Please check whether this database is valid; consult Heurist support if needed</p>");
+                                errorOut ('Error importing core definitions from template database for database $newname<br>'
+                                .$resval
+                                .'<br>Please check whether this database is valid; consult Heurist support if needed');
                                 return false;
                             }
 
-                        //save data into file
-                        if(defined('HEURIST_SETTING_DIR')){
-
-                              $templateFileName = HEURIST_SETTING_DIR . get_user_id() . '_dbtemplate.txt';
-                              $res = file_put_contents ( $templateFileName, $data );
-                              if(!$res){
-                                echo ("<p class='error'>Error: cannot save definitions from template database into local file.");
-                                echo ("Please verify that folder ".HEURIST_SETTING_DIR." is writeable</p>");
+                            //save data into file
+                            if(defined('HEURIST_SETTING_DIR')){
+                                $templateFileName = HEURIST_SETTING_DIR . get_user_id() . '_dbtemplate.txt';
+                            }else{
+                                $templateFileName = HEURIST_UPLOAD_ROOT . '0_dbtemplate.txt';
+                            }    
+                              
+                            $res = file_put_contents ( $templateFileName, $data );
+                            if(!$res){
+                                errorOut('Error: cannot save definitions from template database into local file.'
+                                    .' Please verify that folder '
+                                    .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
+                                    .' is writeable');
                                 return false;
-                             }
+                            }
 
                             //download content of some folder from template database
 
@@ -490,37 +641,43 @@ if(true){ //DEBUG: set to false to avoid real database creation
                             $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
 
                             if($data){
+                                if(defined('HEURIST_SETTING_DIR')){
+                                    $templateFoldersContent = HEURIST_SETTING_DIR . get_user_id() . '_dbfolders.zip';
+                                }else{
+                                    $templateFoldersContent = HEURIST_UPLOAD_ROOT . '0_dbfolders.zip';
+                                }
 
-                                $templateFoldersContent = HEURIST_SETTING_DIR . get_user_id() . '_dbfolders.zip';
                                 $res = file_put_contents ( $templateFoldersContent, $data );
                                 if(!$res){
-                                    echo ("<p class='error'>Warning: cannot save content of settting folders from template database into local file.");
-                                    echo ("Please verify that folder ".HEURIST_SETTING_DIR." is writeable</p>");
+                                    errorOut ('Warning: cannot save content of settting folders from template database into local file. '
+                                    .' Please verify that folder '
+                                    .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
+                                    .' is writeable');
                                     return false;
                                 }
                             }else{
-                                    echo ("<p class='error'>Warning: server does not return the content of settting folders from template database.");
-                                    echo ("Please verify that zip extension on remote server is installed and upload folder is writeable</p>");
+                                    errorOut ('Warning: server does not return the content of settting folders from template database. '
+                                    .'Please verify that zip extension on remote server is installed and upload folder is writeable');
                                     return false;
                             }
 
-                        }
+                        
 
 
                     }else if($isTemplateDB){
-                                echo ("<p class='error'> Wrong parameters: Template database is not defined.</p>");
+                                errorOut ('Wrong parameters: Template database is not defined.');
                                 return false;
                     }else{
                         $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
                     }
 
                     if(!file_exists($templateFileName)){
-                                echo ("<p class='error'>Error: definitions file ".$templateFileName."not found</p>");
+                                errorOut('Error: definitions file '.$templateFileName.' not found');
                                 return false;
                     }
 
                     if(!createDatabaseEmpty($newDBName)){
-                        $isCreateNew = true;
+                        $isDefineNewDatabase = true;
                         return false;
                     }
 
@@ -533,10 +690,10 @@ if(true){ //DEBUG: set to false to avoid real database creation
 
                     // errorCreatingTables is set to true by buildCrosswalks if an error occurred
                     if($errorCreatingTables) {
-                        echo ("<p class='error'>Error importing core definitions from ".
-                            ($isTemplateDB?"template database":"coreDefinitions.txt").
-                            " for database $newname<br>");
-                        echo ("Please check whether this file or database is valid; consult Heurist support if needed</p>");
+                        errorOut('Error importing core definitions from '
+                            .($isTemplateDB?"template database":"coreDefinitions.txt")
+                            .' for database '.$newname.'<br>'
+                            .'Please check whether this file or database is valid; consult Heurist support if needed');
                         cleanupNewDB($newname);
                         return false;
                     }
@@ -544,27 +701,33 @@ if(true){ //DEBUG: set to false to avoid real database creation
                     // Get and clean information for the user creating the database
                     if(!is_logged_in()) {
                         $longName = "";
-                        $firstName = $_REQUEST['ugr_FirstName'];
-                        $lastName = $_REQUEST['ugr_LastName'];
-                        $eMail = $_REQUEST['ugr_eMail'];
-                        $name = $_REQUEST['ugr_Name'];
-                        $password = $_REQUEST['ugr_Password'];
-                        $department = '';
-                        $organisation = '';
-                        $city = '';
-                        $state = '';
-                        $postcode = '';
-                        $interests = '';
+                        
+                        $firstName = getUsrField('ugr_FirstName');
+                        $lastName = getUsrField('ugr_LastName');
+                        $eMail = getUsrField('ugr_eMail');
+                        $name = getUsrField('ugr_Name');
+                        $password = getUsrField('ugr_Password');
+                        $department = getUsrField('ugr_Department');
+                        $organisation = getUsrField('ugr_Organisation');
+                        $city = getUsrField('ugr_City');
+                        $state = getUsrField('ugr_State');
+                        $postcode = getUsrField('ugr_Postcode');
+                        $interests = getUsrField('ugr_Interests');
 
+                        $ugr_IncomingEmailAddresses = getUsrField('ugr_IncomingEmailAddresses');
+                        $ugr_TargetEmailAddresses = getUsrField('ugr_TargetEmailAddresses');
+                        $ugr_URLs = getUsrField('ugr_URLs');
+                        
                         $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
                         $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
                         $password = crypt($password, $salt);
 
                     }else{
                         mysql_connection_insert(DATABASE);
-                        $query = mysql_query("SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, " .
-                            "ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests FROM sysUGrps WHERE ugr_ID=".
-                            get_user_id());
+                        $query = mysql_query('SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, '
+                         .'ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests, '
+                         .'ugr_IncomingEmailAddresses, ugr_TargetEmailAddresses, ugr_URLs '
+                         .'FROM sysUGrps WHERE ugr_ID='.get_user_id());
                         $details = mysql_fetch_row($query);
                         $longName = mysql_real_escape_string($details[0]);
                         $firstName = mysql_real_escape_string($details[1]);
@@ -578,6 +741,10 @@ if(true){ //DEBUG: set to false to avoid real database creation
                         $state = mysql_real_escape_string($details[9]);
                         $postcode = mysql_real_escape_string($details[10]);
                         $interests = mysql_real_escape_string($details[11]);
+                        $ugr_IncomingEmailAddresses = mysql_real_escape_string($details[12]);
+                        $ugr_TargetEmailAddresses = mysql_real_escape_string($details[13]);
+                        $ugr_URLs = mysql_real_escape_string($details[14]);
+                        
                     }
 
                     //	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
@@ -594,19 +761,24 @@ if(true){ //DEBUG: set to false to avoid real database creation
                     mysql_connection_insert($newname);
 
                     // Make the current user the owner and admin of the new database
-                    mysql_query('UPDATE sysUGrps SET ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
+                    mysql_query('UPDATE sysUGrps SET ugr_Enabled="Y", ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
                         ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
                         ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
                         ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
+                        ugr_IncomingEmailAddresses="'.$ugr_IncomingEmailAddresses.'",  
+                        ugr_TargetEmailAddresses="'.$ugr_TargetEmailAddresses.'",  
+                        ugr_URLs="'.$ugr_URLs.'",   
                         ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                     // TODO: error check, although this is unlikely to fail
 
-}
+} //DEBUG
 
                     echo "<h2>Congratulations, your new database '$newDBName' has been created</h2>";
 
-                    echo "<p><strong>Admin username:</strong> ".$name."<br />";
-                    echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
+                    if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
+                        echo "<p><strong>Admin username:</strong> ".$name."<br />";
+                        echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
+                    }
 
                     echo "<p>Click here to log in to your new database: <p style=\"padding-left:6em\"><b><a href=\"#\"".
                     " title=\"\" onclick=\"closeDialog('".$newDBName."'); return false;\">".
@@ -625,6 +797,9 @@ if(true){ //DEBUG: set to false to avoid real database creation
                 } // isset
 
             } //makedatabase
+            if($blankServer){
+                echo '</div>';
+            }            
 ?>
         </div>
     </body>

@@ -26,9 +26,12 @@ $.widget( "heurist.profile_edit", {
 
         ugr_ID:0,
         edit_data: {},
-        isregistration: false    
+        isregistration: false,
 
+        needclear: true, //clear input everytime for registration
+        
         // callbacks
+        callback:null
     },
 
     // the widget's constructor
@@ -58,7 +61,7 @@ $.widget( "heurist.profile_edit", {
 
             var that = this;
 
-            this.edit_form.load("apps/profile/profile_edit.html?t="+(new Date().getTime()), 
+            this.edit_form.load(top.HAPI4.basePath+"apps/profile/profile_edit.html?t="+(new Date().getTime()), 
                 function(){
 
                     //find all labels and apply localization
@@ -74,9 +77,11 @@ $.widget( "heurist.profile_edit", {
                     }
 
                     that.options.isregistration = !(Number(that.options.ugr_ID)>0 || top.HAPI4.is_admin());
-                    if(that.options.isregistration){
+                    if(that.options.isregistration && top.HAPI4.sysinfo.dbowner_name){
                         $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI4.sysinfo.dbowner_name+'  '+
                             '<a href="mailto:'+top.HAPI4.sysinfo.dbowner_email+'">'+top.HAPI4.sysinfo.dbowner_email+'</a>');
+                    }else{
+                        $("#contactDetails").html('');
                     }
 
                     if(that.options.isdialog){
@@ -94,7 +99,9 @@ $.widget( "heurist.profile_edit", {
                                 }}
                             ],
                             close: function() {
-                                allFields.val( "" ).removeClass( "ui-state-error" );
+                                if(that.options.needclear){
+                                    allFields.val( "" ).removeClass( "ui-state-error" );
+                                }
                             },
                             open: function(){
                                 enable_register(!that.options.isregistration);
@@ -139,6 +146,7 @@ $.widget( "heurist.profile_edit", {
     _fromDataToUI: function(){
 
         var allFields = this.edit_form.find('input, textarea');
+        
         allFields.val( "" ).removeClass( "ui-state-error" );
 
         /*if(this.options.ugr_ID == top.HAPI4.currentUser.ugr_ID){
@@ -232,14 +240,14 @@ $.widget( "heurist.profile_edit", {
             var bValid = top.HEURIST4.msg.checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i );
             if(!bValid){
                 err_text = err_text + ', '+top.HR('Wrong email format');
-            }
+            }                                                         
 
             // validate login
             var login = this.edit_form.find("#ugr_Name");
             if(!top.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+top.HR('Wrong user name format');   // "Username may consist of a-z, 0-9, _, @, begin with a letter." 
             }else{
-                var ss = top.HEURIST4.msg.checkLength2( login, "user name", 3, 16 );
+                var ss = top.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -288,26 +296,33 @@ $.widget( "heurist.profile_edit", {
             that.options.edit_data['ugr_Type'] = 'user';
             that.options.edit_data['ugr_IsModelUser'] = (that.options.edit_data['ugr_IsModelUser']=='y')?1:0;
 
-            var that = this;
-            top.HAPI4.SystemMgr.user_save( that.options.edit_data,
-                function(response){
-                    var  success = (response.status == top.HAPI4.ResponseStatus.OK);
-                    if(success){
-                        if(that.options.isdialog){
-                            that.edit_form.dialog("close");
-                            if(that.options.isregistration){
-                                top.HEURIST4.msg.showMsgDlgUrl("apps/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
-                            }else{
-                                top.HEURIST4.msg.showMsgDlg("User information has been saved successfully");
+            if( !top.HEURIST4.util.isnull(that.options.callback) && $.isFunction(that.options.callback) ){
+                
+                that.edit_form.dialog("close");
+                that.options.callback.call(that);
+                
+            }else{
+            
+                top.HAPI4.SystemMgr.user_save( that.options.edit_data,
+                    function(response){
+                        var  success = (response.status == top.HAPI4.ResponseStatus.OK);
+                        if(success){
+                            if(that.options.isdialog){
+                                that.edit_form.dialog("close");
+                                if(that.options.isregistration){
+                                    top.HEURIST4.msg.showMsgDlgUrl("apps/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                }else{
+                                    top.HEURIST4.msg.showMsgDlg("User information has been saved successfully");
+                                }
+
                             }
-
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
                         }
-                    }else{
-                        top.HEURIST4.msg.showMsgErr(response);
                     }
-                }
-            );
-
+                );
+            
+            }
 
         }else{       
             top.HEURIST4.msg.showMsgErr(err_text);
@@ -318,6 +333,10 @@ $.widget( "heurist.profile_edit", {
             }, 500 );*/
         }
 
+    },
+    
+    open:function(){
+        this.edit_form.dialog("open");
     }
 
 

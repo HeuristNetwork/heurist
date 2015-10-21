@@ -1654,6 +1654,7 @@ CREATE TABLE `sysUGrps` (
   `ugr_URLs` varchar(2000) DEFAULT NULL COMMENT 'URL(s) of group or personal website(s), comma separated',
   `ugr_FlagJT` int(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Flag to enable in Jobtrack/Worktrack application',
   `ugr_Modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
+  `ugr_NavigationTree` text default NULL COMMENT 'JSON array that describes treeview for filters',
   PRIMARY KEY (`ugr_ID`),
   UNIQUE KEY `ugr_Name` (`ugr_Name`),
   UNIQUE KEY `ugr_eMail` (`ugr_eMail`)

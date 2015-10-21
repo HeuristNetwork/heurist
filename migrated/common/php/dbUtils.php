@@ -550,7 +550,7 @@
 
         if(recurse_copy( HEURIST_DIR."admin/setup/rectype-icons", $uploadPath."/rectype-icons" )){
             add_index_html($uploadPath."/rectype-icons"); // index file to block directory browsing
-            add_index_html($uploadPath."/rectype_icons/thumb");
+            //add_index_html($uploadPath."/rectype_icons/thumb");
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
             $warnings = 1;

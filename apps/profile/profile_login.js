@@ -183,7 +183,7 @@ function doRegister(){
                 if($.isFunction($('body').profile_edit)){
                     doRegister();
                 }else{
-                    top.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
+                    top.HEURIST4.msg.showMsgErr('Widget "Pprofile edit" can not be loaded!');
                 }        
             });          
         }

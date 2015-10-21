@@ -51,7 +51,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         // 
-        var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page)\/.*)|(index.*))/, "");
+        var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page|migrated)\/.*)|(index.*))/, "");
         that.basePath = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL = that.basePath + 'php/common/rt_icon.php?db='+_database+'&id=';
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
@@ -74,11 +74,17 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
             that.LayoutMgr = new hLayout();
         }
+        if(typeof hSearchMinimal !== 'undefined' && $.isFunction(hSearchMinimal)){
+            that.SearchMgr = new hSearchMinimal();
+        }
+        
         
         /*if(_currentUser){
         that.currentUser = _currentUser;
         }else{}*/
 
+        if(that.database){
+        
         // Get current user if logged in, and global database settings
         that.SystemMgr.sys_info(
             function(response){
@@ -95,6 +101,10 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             }
         );
+        
+        }else if(_oninit){
+            _oninit( false );
+        }
 
     }
 
@@ -753,7 +763,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         
         //@todo - assign it later since we may have different search managers - incremental, partial...
         //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result
-        SearchMgr: new hSearchMinimal(), //class that responsible for search and incremental loading of result
+        SearchMgr: null, //class that responsible for search and incremental loading of result
         
         LayoutMgr: null,
 

@@ -2,6 +2,8 @@
 *  Various utility functions
 * 
 * @todo - split to generic utilities and UI utilities
+* @todo - split utilities for hapi and load them dynamically from hapi
+* 
 * @see editing_input.js
 * 
 * @package     Heurist academic knowledge management system

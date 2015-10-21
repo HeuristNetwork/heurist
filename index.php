@@ -99,7 +99,6 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="js/recordset.js"></script>
         <script type="text/javascript" src="js/hapi.js"></script>
         <script type="text/javascript" src="js/layout.js"></script>
-        <!--<script type="text/javascript" src="js/search_incremental.js"></script>-->
         <script type="text/javascript" src="js/search_minimal.js"></script>
         <script type="text/javascript" src="apps/digital_harlem/dh_search_minimal.js"></script>
         <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
@@ -109,10 +108,10 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="migrated/common/js/temporalObjectLibrary.js"></script>
 
         <!-- DOCUMENTATION TODO: explain this -->
-        <!-- these scripts are loaded explicitely - for debug purposes -->
+        <!-- these scripts are loaded explicitely - for debug purposes
         <script type="text/javascript" src="apps/file_manager.js"></script>
+        <script type="text/javascript" src="apps/svs_manager.js"></script>  -->
         <script type="text/javascript" src="apps/viewers/recordListExt.js"></script>
-        <script type="text/javascript" src="apps/svs_manager.js"></script>
         <script type="text/javascript" src="apps/search/search_faceted.js"></script>
         <script type="text/javascript" src="apps/search/search_faceted_wiz.js"></script>
         <script type="text/javascript" src="apps/viewers/app_timemap.js"></script>
@@ -127,7 +126,7 @@ if(@$_REQUEST['db']){
 
 
         <!-- DOCUMENTATION TODO: What are these, why are they commented out -->
-        <!--
+        <!-- these widgets are loaded dynamically, but for debug they should be loaded explicitely
         <script type="text/javascript" src="apps/profile/profile.js"></script>
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
