@@ -581,7 +581,14 @@ var TemporalPopup = (function () {
                         
                         var tocalendar = togregorian ?$.calendars.instance('gregorian') :calendar;
                         if(noNeedConvert(value._calendar, tocalendar)){
-                            newval = togregorian ?$inpt.val():value;    
+                            if(togregorian){
+                                newval = $inpt.val();
+                            }else{
+                                //newval = togregorian ?$inpt.val():value;    
+                                newval = value; 
+                                newval._calendar.local.name = tocalendar.local.name;   
+                                newval._calendar.name  = tocalendar.local.name;
+                            }
                         }else{
                             try{
                                 var jd = value._calendar.toJD(Number(value.year()), Number(value.month()), Number(value.day()));

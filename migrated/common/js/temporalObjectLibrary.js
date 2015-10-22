@@ -1760,7 +1760,9 @@ function formatGregJulian(val, isneed){
 
             var tDate = TDate.parse(val);
             var isbce = (tDate.getYear()<0);
-            return tDate.getDay()+' '+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            var day = Number(tDate.getDay());
+            var res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            return  res.trim();
             //toString('d MMM yyyy') - misses space!
             //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
 
@@ -1785,6 +1787,8 @@ function temporalToHumanReadableString(inputStr) {
         if (str.match(/CL2=([^\|]+)/) && cldname!='gregorian') {
             cld = str.match(/CL2=([^\|]+)/)[1] + ' '+
                   str.match(/CLD=([^\|]+)/)[1];
+
+            if(cld.indexOf('null')>=0) cld = cld.substr(4); //some dates were saved in wrong format - fix it
         }
 
         var isgj = (cldname=='gregorian' || cldname=='julian');

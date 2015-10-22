@@ -44,6 +44,7 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
             
             if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
                 $cld = $tDate["CL2"]." ".$tDate["CLD"];
+                if(strpos($cld,'null')!==false) $cld = substr($cld,4); //some dates were saved in wrong format - fix it
             }
             
             $is_greg_or_julian = ((!@$tDate["CLD"]) || 
