@@ -1916,14 +1916,16 @@ function doImport($mysqli, $imp_session, $params){
                                 //verify WKT
                                 $geoType = null;
                                 //get WKT type
-                                if(strpos($r_value,'POINT(')!==false){
+                                if(strpos($r_value,'POINT')!==false){
                                     $geoType = "p";
-                                }else if(strpos($r_value,'LINESTRING(')!==false){
+                                }else if(strpos($r_value,'LINESTRING')!==false){
                                     $geoType = "l";
-                                }else if(strpos($r_value,'POLYGON(')!==false){
+                                }else if(strpos($r_value,'POLYGON')!==false){
                                     $geoType = "pl";
                                 }
 
+//error_log("  ".$geoType."   ".$r_value);                                
+                                
                                 if($geoType){
                                     $value = $geoType." ".$r_value;
                                 }else{
