@@ -32,7 +32,7 @@ function hSearchMinimalDigitalHarlem() {
 
         _owner_doc = null,
         _owner_element_id = null;
-         
+        
     /**
     * Initialization
     */
@@ -43,16 +43,27 @@ function hSearchMinimalDigitalHarlem() {
     function _doSearchWithCallback( request, callback ){
 
         request.getrelrecs = 1;
-        request.detail = '5,6,7,9,10,11,28,74';  //@todo - take codes from magic numbers
+        request.detail = 'detail'; //'5,6,7,9,10,11,28,74';  //@todo - take codes from magic numbers
 
+        top.HEURIST4._time_debug = new Date().getTime() / 1000;
+        
+console.log('Start search');
+        
         top.HAPI4.RecordMgr.search(request,
             function(response) {
                 if(response.status != top.HAPI4.ResponseStatus.OK){
+                    callback( null );
                     top.HEURIST4.msg.showMsgErr(response);
                     return;
                 }
 
+console.log('get result '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug ) );
+                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+                
                 var final_recordset = _prepareResultSet( new hRecordSet(response.data) );
+
+console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+                top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
                 callback( final_recordset );
                 
@@ -255,19 +266,21 @@ function hSearchMinimalDigitalHarlem() {
                                             
                                 }else{
                                     //3b. this is address->event->person
-                                    var personID = rels2[i]['related'];
-                                    var rel_person = records[ personID ];
-                                    
-                                    recordset.setFld(record, 'rec_Info', 
-                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
-                                            personID+"&addrID="+recID+"&eventID="+eventID );
-                                            
-                                    //add links for this person 
-                                    if(!links[ personID ]){
-                                        links[ personID ] = {primary:[], secondary:[]};
-                                    }
-                                    //events are always secondary for person links (primary is residency)
-                                    links[ personID ].secondary.push( recID );
+                                    for(j=0; j<rels2.length; j++){
+                                        var personID = rels2[j]['related'];
+                                        var rel_person = records[ personID ];
+                                        
+                                        recordset.setFld(record, 'rec_Info', 
+                                        top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                                personID+"&addrID="+recID+"&eventID="+eventID );
+                                                
+                                        //add links for this person 
+                                        if(!links[ personID ]){
+                                            links[ personID ] = {primary:[], secondary:[]};
+                                        }
+                                        //events are always secondary for person links (primary is residency)
+                                        links[ personID ].secondary.push( recID );
+                                    }//for persons
                                 }
                                 
                             }else if(rels[i]['relrt'] == RT_PERSON){
@@ -316,6 +329,10 @@ function hSearchMinimalDigitalHarlem() {
             if(r2end){
                 return (r1start == r2start) || (r1start > r2start ? r1start <= r2end : r2start <= r1end);
             }else{
+                if(!r1end || r1end == r1start){
+                    r1end = r1start + ' 24:00';
+                    r1start = r1start + ' 00:00';
+                }
                 return (r2start>=r1start && r2start<=r1end);
             }
         }        

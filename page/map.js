@@ -200,6 +200,11 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 if(!dataset){ //already exists with such name
                    dataset = tmap.createDataset(dataset_name);
                 }
+                
+                if(top.HEURIST4._time_debug)    
+console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+                    
                     
                 dataset.clear();
 
@@ -212,8 +217,15 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 
                 dataset.hide();
                 dataset.show();
+
+console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+                top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
                 _loadVisTimeline(_mapdata[0]);
+
+console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+
                 
                 //tmap.showDatasets();
                 _updateLayout();
@@ -1118,9 +1130,9 @@ console.log('tileloaded 2');
                 ds = item.dataset,
                 placemark = item.placemark,
                 show_bubble_on_map = false;
-                
+                                                              //text-align:right;
             show_bubble_on_map = (item.getType() != "" && placemark.api!=null);
-            var bubble_header = '<div style="width:100%;text-align:right;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
+            var bubble_header = '<div style="width:99%;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
             var ed_html =  '';
             var popupURL = null;
                 

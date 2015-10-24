@@ -48,15 +48,24 @@ $.widget( "heurist.dh_search", {
 
         this.search_list = $( "<div>" ).css({'height':'100%', 'padding':'40px'}).appendTo( this.element );
         
-        this.search_pane  = $( "<div>" ).css({'height':'100%' }).appendTo( this.element ).hide();
+        this.search_pane  = $( "<div>" ).css({'height'
+        :'100%' }).appendTo( this.element ).hide();
         
-        this.res_div = $('<div>').css({'margin-botton':'1em', 'font-size':'0.9em','padding':'10px','text-align':'center'}).appendTo(this.search_pane).hide();
+        this.res_div = $('<div>')
+                .css({'margin-botton':'1em', 'font-size':'0.9em','padding':'10px','text-align':'center'})
+                .appendTo(this.search_pane).hide();
         this.res_lbl = $('<label>').css('padding','0.4em').appendTo(this.res_div);
         //this.res_name = $('<input>').appendTo(this.res_div);
         this.res_btn_add = $('<button>', {text:top.HR('Add To Map')})
             .button({icons:{primary:'ui-icon-circle-plus'}})
             .on("click", function(event){ that._onAddLayer(); } )
             .appendTo(this.res_div);
+
+        this.res_div_progress = $('<div>')
+                    .css({'height':'60px',
+                        'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center' })
+                    .appendTo(this.search_pane).hide();
+
     
         //this.res_div_input =  $('<div>', {id:'res_div_input'}).appendTo(this.res_div).hide();
         //this.res_name = $('<input>').appendTo(this.res_div_input);
@@ -229,7 +238,7 @@ $.widget( "heurist.dh_search", {
         
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
-        //switch to Map Tab
+        //switch to result List Tab
         top.HAPI4.LayoutMgr.putAppOnTop('resultList');
         
         if(this.usr_SavedSearch[svsID][3]){  //_ISFACETED
@@ -333,6 +342,7 @@ $.widget( "heurist.dh_search", {
            var that = this;
            
            if(this.dlgcont==null){
+               //define content add layer dialog
                
                this.dlgcont = $('<label>What would you like to call<br>the new map layer:</label>'
                + '<br><br><input id="dh_layer_name" type="text">'
@@ -354,10 +364,18 @@ $.widget( "heurist.dh_search", {
                         if(Hul.isempty(layer_name)){
                             //top.HEURIST4.msg.showMsgErr
                         }else{
+
+                            $('.cp-color-picker').hide();
+                            $dlg.dialog( "close" );
+                            that.res_div.hide();
                             
                             var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
                             if(app && app.widget){
 
+                                // show progress div
+                                that.res_div_progress.show();
+                                // switch to map tab
+                                top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
                                 
                                 // 2. search rules (applyRules) with relationship records
                                 // 3. search details for timemap (9,10,11,28) event type (74) and relationships (5,6,7)
@@ -369,18 +387,16 @@ $.widget( "heurist.dh_search", {
                                 var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1),
                                      title: layer_name,
                                      query: request,
-                                     color: $dlg.find("#dh_layer_color").css('background-color') 
+                                     color: $dlg.find("#dh_layer_color").css('background-color'),
+                                     callback: function(){
+                                         that.res_div_progress.hide();
+                                     }
                                 };                 
                                 
                                 $(app.widget).app_timemap('addQueryLayer', params);
                                 //remove current search layer
                                 //@todo
                             }
-                                        
-                            
-                            $('.cp-color-picker').hide();
-                            $dlg.dialog( "close" );
-                            that.res_div.hide();
                         }
                         
                     }},

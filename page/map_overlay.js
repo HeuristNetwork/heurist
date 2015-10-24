@@ -167,14 +167,25 @@ function _addLegendEntryForLayer(layerid, on_top){
         $("#legend .content").append(legenditem);
     };
 
-    $('<div class="svs-contextmenu ui-icon ui-icon-close"></div>')
+    $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+layerid+'"></div>')
     .click(function(event){ 
-             //$(event.target) ); 
+             //delete layer from map  
+             var layerid = $(this).prop("layerid");
+             var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
+             overlay.removeOverlay();
+             
              top.HEURIST4.util.stopEvent(event); return false;})
     .appendTo(legenditem);
-    $('<div class="svs-contextmenu ui-icon ui-icon-pencil"></div>')
+    $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+layerid+'"></div>')
     .click(function(event){ 
-             //$(event.target) ); 
+             
+             var layerid = $(this).prop("layerid");
+             var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
+             
+             if(overlays['editProperties']){
+                overlays.editProperties();
+             }
+             
              top.HEURIST4.util.stopEvent(event); return false;})
     .appendTo(legenditem);
 
@@ -495,7 +506,7 @@ function addGeoJsonToMap(data, index) {
 
 /**
 * Adds a query layer to the map
-* @param source Source object
+* @param source - parameters Source object
 * if index < 0 it does not belong to current map document
 */
 function addQueryLayer(source, index) {
@@ -527,9 +538,14 @@ function addQueryLayer(source, index) {
         // Retrieve records for this request
         top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset ){
             
-            source.recordset = recordset;
-            source.recordset.setMapEnabled( true );
-            addRecordsetLayer(source, index);
+            if(recordset!=null){
+                source.recordset = recordset;
+                source.recordset.setMapEnabled( true );
+                addRecordsetLayer(source, index);
+            }
+            if( source.callback && $.isFunction(source.callback) ){
+                   source.callback();     
+            }
             
         });
         
@@ -621,10 +637,10 @@ function addRecordsetLayer(source, index) {
                 visible:true,
                 setVisibility: function(checked) {
                     this.visible = checked;
-                    mapping.showDataset(mapdata[0].id, checked);
+                    mapping.showDataset(this.id, checked); //mapdata[0].id
                 },
                 removeOverlay: function(){
-                    mapping.deleteDataset(mapdata[0].id);
+                    mapping.deleteDataset( this.id ); //mapdata[0].id);
                 }
                };
                if(index>=0){  //this layer belong to map document

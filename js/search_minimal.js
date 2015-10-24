@@ -45,6 +45,7 @@ function hSearchMinimal() {
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     callback( hRecordSet(response.data) );
                 }else{
+                    callback( null );
                     top.HEURIST4.util.showMsgErr(response);
                 }
             }
