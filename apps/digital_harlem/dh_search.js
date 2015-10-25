@@ -347,13 +347,18 @@ $.widget( "heurist.dh_search", {
                this.dlgcont = $('<label>What would you like to call<br>the new map layer:</label>'
                + '<br><br><input id="dh_layer_name" type="text">'
                + '<br><br><label>Color:</label>'
-               + '<br><br><input id="dh_layer_color" value="#FF0000" style="background-color:#f00">');           
+               + '<br><br><input id="dh_layer_color" value="rgb(255, 0, 0)" style="background-color:#f00">');           
                
                (this.dlgcont.find('#dh_layer_color')).colorPicker({
-                   color:'#f00',
-                   opacity:false,
-                   valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
-                   cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}'
+                   //color:'#f00',
+                   opacity: false,
+                   //valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
+                   cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}',
+                   renderCallback: function($elm, toggled){
+                        if($elm && !toggled){
+                            $(this.$UI).hide();
+                        }
+                   }                   
                });
            }
             

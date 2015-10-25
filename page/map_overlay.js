@@ -134,7 +134,7 @@ function removeOverlays() {
 }
 
 /**
-* Empties the legend
+* Empties the legend  - remove overlays for map document, manually added overlays remain
 */
 function _emptyLegend() {
     $("#legend .content").empty();
@@ -170,16 +170,18 @@ function _addLegendEntryForLayer(layerid, on_top){
     $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+layerid+'"></div>')
     .click(function(event){ 
              //delete layer from map  
-             var layerid = $(this).prop("layerid");
+             var layerid = $(this).attr("layerid");
              var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
              overlay.removeOverlay();
+             
+             $("#legend .content").find('#'+layerid).remove();
              
              top.HEURIST4.util.stopEvent(event); return false;})
     .appendTo(legenditem);
     $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+layerid+'"></div>')
     .click(function(event){ 
              
-             var layerid = $(this).prop("layerid");
+             var layerid = $(this).attr("layerid");
              var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
              
              if(overlays['editProperties']){
