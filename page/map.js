@@ -32,7 +32,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     timelinediv_id = null,
     
     basePath = '',
-    //mapdata = [],
+    all_mapdata = {}, //array of all datasets
     selection = [], //array of selected record ids
     mylayout;
 
@@ -45,10 +45,11 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     keepMinDate = null,
     keepMaxDate = null,
     keepMinMaxDate = true,
-    keppTimelineIconBottomPos = 0,
     
     _onSelectEventListener,
     _startup_mapdocument,
+    
+    _curr_layout = null,
     
     // TimeMap theme
     customTheme = new TimeMapTheme({
@@ -106,24 +107,24 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     }
     
     function _isEmptyDataset(_mapdata){
-        return (!top.HEURIST4.util.isArrayNotEmpty(_mapdata) ||  (_mapdata[0].mapenabled==0 && _mapdata[0].timeenabled==0));
+        return (top.HEURIST4.util.isnull(_mapdata) ||  (_mapdata['mapenabled']==0 && _mapdata['timeenabled']==0));
     }
     
     /**
-    * show/hide timeline
+    * show/hide panels map and timeline
     */
     function _updateLayout(){
         
         var ismap = false, istime = false;
         
-        tmap.each(function(dataset){   
+        
+        $.each(all_mapdata, function(dataset_id, _mapdata){
             
-            if(dataset.mapenabled > 0){
-                ismap = true;
-            }
-            if(dataset.timeenabled > 0){
-                istime = true;
-            }
+            ismap = ismap || (_mapdata.mapenabled>0);
+            istime = istime || (_mapdata.timeenabled>0);
+            
+            return !(ismap && istime);
+            
         });
         
         /*
@@ -144,13 +145,15 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             //$(".ui-layout-resizer-south").css('height',0);
             //mylayout.sizePane('south','100%');
         }*/
-        
+        var new_layout = ((ismap?'1':'0') + (istime?'1':'0'));
 
+        if(_curr_layout != new_layout){
+        
             //mylayout.changeOption('center','minSize',300);
             //$(".ui-layout-resizer-south").css('height',7);
             
-            var th = $('#mapping').height(); 
-            th = Math.floor(th*0.2);
+            var tha = $('#mapping').height(); 
+            var th = Math.floor(tha*0.2);
             th = th>200?200:th;
 
             $(".ui-layout-north").show();
@@ -162,15 +165,22 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 mylayout.hide('south');
             }else {
                 mylayout.show('south', true);   
-                mylayout.sizePane('south', th);
-                
+                if(ismap){
+                    mylayout.sizePane('south', th);
+                }else{
+                    mylayout.sizePane('south', tha-40);
+                }
+            }
+            if(ismap){
+               $('#map_empty_message').hide();
+               $('#map').show();
+            }else{
+               $('#map').hide();
+               $('#map_empty_message').show();
             }
             
-            setTimeout(_updateTimeline, 1000);
-    
-// _updateTimeline();
-         
-        
+            _curr_layout = new_layout;
+        }    
         return true;
         
     }
@@ -185,32 +195,34 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         
         var res = false;
         
-        if(top.HEURIST4.util.isArrayNotEmpty(_mapdata)){
+        if(!top.HEURIST4.util.isnull(_mapdata)){
         
-            var dataset_name = _mapdata[0].id;
-            var dataset = tmap.datasets[dataset_name];
+            var dataset_id = _mapdata.id;
+            var dataset = tmap.datasets[dataset_id];
+            
+            top.HEURIST4._time_debug = new Date().getTime() / 1000;
             
             if(_isEmptyDataset(_mapdata)){ //show/hide panels
             
-                if(dataset)
-                    tmap.deleteDataset(dataset_name);
+                _deleteDataset( dataset_id );
             
             }else{
             
                 if(!dataset){ //already exists with such name
-                   dataset = tmap.createDataset(dataset_name);
+                   dataset = tmap.createDataset(dataset_id);
                 }
+                all_mapdata[dataset_id] = _mapdata;  //keep
                 
-                if(top.HEURIST4._time_debug)    
+                _updateLayout();   //show hide panels
+                
 console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
                     
                     
                 dataset.clear();
 
-                dataset.mapenabled = _mapdata[0].mapenabled;
-                dataset.timeenabled = _mapdata[0].timeenabled;
-                dataset.loadItems(_mapdata[0].options.items);
+                dataset.loadItems(_mapdata.options.items);
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
                 });
@@ -221,37 +233,49 @@ console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_d
 console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
-                _loadVisTimeline(_mapdata[0]);
+                
+                res = true;
+            }
+            
+            //reload timeline content    
+            _loadVisTimeline();
 
 console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
-                
-                //tmap.showDatasets();
-                _updateLayout();
-                
-                res = true;
-            }
+            
         }
         return res;
     }
 
-    function _deleteDataset(dataset_name){
-            var dataset = tmap.datasets[dataset_name];
+    function _deleteDataset(dataset_id){
+            var dataset = tmap.datasets[dataset_id];
             if(dataset){
-                 tmap.deleteDataset(dataset_name);
-                 _updateLayout();    
+                 tmap.deleteDataset(dataset_id);
             }
+            if(all_mapdata[dataset_id]){
+                       
+                     var was_timeenabled = (all_mapdata[dataset_id].timeenabled>0);   
+                
+                     delete all_mapdata[dataset_id];
+                     //all_mapdata[dataset_id] = undefined;
+                     
+                     if(was_timeenabled){
+                         //reload timeline
+                         _loadVisTimeline();
+                     }
+                     
+                     _updateLayout();
+            }   
     }
     
-    
-    function _showDataset(dataset_name, is_show){
-        var dataset = tmap.datasets[dataset_name];
+    function _showDataset(dataset_id, is_show){
+        var dataset = tmap.datasets[dataset_id];
         if(dataset){
             if(is_show){
-                tmap.showDataset(dataset_name);
+                tmap.showDataset(dataset_id);
             }else{
-                tmap.hideDataset(dataset_name);
+                tmap.hideDataset(dataset_id);
             }
             
         }
@@ -433,10 +457,11 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             
             
             
-        var menu_label_settings = $('<ul><li id="tlm0"><a href="#"><span/>Full label</a></li>'
+        var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span/>Full label</a></li>'
                         +'<li id="tlm1"><a href="#"><span class="ui-icon ui-icon-check"/>Truncate to bar</a></li>'
                         +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
-                        +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li></ul>') 
+                        +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
+                        +'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li></ul>') 
         .zIndex(9999)
         .addClass('menu-or-popup')
         .css({'position':   'absolute', 'padding':'2px'})
@@ -458,8 +483,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                     contents.css({'width': spinner.spinner('value')+'em'});                    
                 }
                 
-                vis_timeline.setOptions({'label_in_bar':(mode==1)}); //, 'label_width': ((mode==0)?'0':'10em') });
-                vis_timeline.setOptions({'margin':1});
+                vis_timeline.setOptions({'label_in_bar':(mode==1), 'margin':1,  'stack':(mode!=4)});
                 
                 if(mode==2){
                     spinner.show();
@@ -467,7 +491,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                     spinner.hide();
                 }
                 
-                if(mode==3){
+                if(mode>=3){
                     contents.find("span").hide();
                 }else{
                     contents.find("span").show();
@@ -525,11 +549,31 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
     }
     
     //init visjs timeline
-    function _loadVisTimeline( mapdata ){
-                
-        if(mapdata && mapdata.timeline){
+    function _loadVisTimeline(){
+              
+        var timeline_data = [],
+            timeline_groups = [];
         
-        var items = new vis.DataSet( mapdata.timeline.items ); //options.items );
+        $.each(all_mapdata, function(dataset_id, _mapdata){
+            
+            if(_mapdata.timeline.items.length>0){
+                timeline_data = timeline_data.concat( _mapdata.timeline.items );
+            }
+            
+            timeline_groups.push({ id:dataset_id, content: _mapdata.title});
+            
+        });      
+                
+        if(timeline_data){
+            
+        var groups = new vis.DataSet( timeline_groups );
+        var items = new vis.DataSet( timeline_data ); //options.items );
+        
+        var is_stack = true;//(timeline_groups.length<2 && timeline_data.length<250);
+        
+ console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+       
         
         if(vis_timeline==null){
             var ele = document.getElementById(timelinediv_id);
@@ -538,12 +582,13 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                            orientation:'both', //scale on top and bottom
                            selectable:true, multiselect:true, 
                            zoomMax:31536000000*500000,
+                           stack:is_stack,
                            margin:1,
                            minHeight: $(ele).height()
                            };
                         //31536000000 - year
             // Create a Timeline
-            vis_timeline = new vis.Timeline(ele, items, options);        
+            vis_timeline = new vis.Timeline(ele, null, options);        
             //on select listener
             vis_timeline.on('select', function(params){
                 selection = params.items;
@@ -566,20 +611,28 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             _initVisTimelineToolbar();
             
         }else{
-            vis_timeline.setItems(items);
-            //vis_timeline.redraw();
-            vis_timeline.fit(); //short way
+            //vis_timeline.setOptions({'stack':is_stack});            
+        }
+            
+        vis_timeline.setGroups(groups);
+        vis_timeline.setItems(items);            
+        vis_timeline.fit(); //short way
+
+        if(!is_stack){
+            $(".vis-item-content").find("span").hide();
+            //$.find('#vis_timeline_toolbar li').removeClass('ui-icon-check');
+            //$.find('#vis_timeline_toolbar li #tlm4').addClass('ui-icon-check');
         }
         
-        //if(mapdata.timeenabled>0)
-        //    vis_timeline.setVisibleChartRange(mapdata.timeline.start, mapdata.timeline.end);
+        //if(_mapdata.timeenabled>0)
+        //    vis_timeline.setVisibleChartRange(_mapdata.timeline.start, _mapdata.timeline.end);
         }
     }
     
 
     function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
         
-            function __onDataLoaded(_tmap){
+            function __onDataLoaded(_tmap){  //this function is called only once after map initialization
                 tmap = _tmap;
 
 //console.log('after map init');                    
@@ -638,10 +691,11 @@ console.log('tileloaded 2');
                 
                     if(_callback){
                         _callback.call();
-                    }else{
-                        _updateLayout();
+                    }else{ //not used - to remove
+                        
+                        //ART 20151026  _updateLayout();
                         //highlight selection
-                        _showSelection(false);
+                        //ART 20151026  _showSelection(false);
                     }
                     
                     console.log('MAP INIT COMPLETED');                    
@@ -654,7 +708,7 @@ console.log('tileloaded 2');
         if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
         _startup_mapdocument = __startup_mapdocument;
         
-        //mapdata = _mapdata || [];
+        //_mapdata = _mapdata || [];
         selection = _selection || [];
         
         //timemap is already inited
@@ -668,7 +722,7 @@ console.log('tileloaded 2');
                 if(_callback){
                     _callback.call();
                 }else{
-                    _updateLayout();
+                    //ART 20151026  _updateLayout();
                     //highlight selection
                     _showSelection(false);
                 }
@@ -749,8 +803,8 @@ console.log('tileloaded 2');
 
                     //$('#bounds').html(lastBounds.toString());
 
-                    //mapdata[0].options.items[0].options.recid
-                    //mapdata[0].options.items[3].placemarks[0].polyline .lat .lon
+                    //_mapdata.options.items[0].options.recid
+                    //_mapdata.options.items[3].placemarks[0].polyline .lat .lon
                     
                     
                     //new google.maps.LatLng(25.774252, -80.190262),
@@ -1281,232 +1335,6 @@ ed_html +
             }
 
     }
-    
-    function _renderTimelineZoom(){
-        
-        return; //ART 14072015
-        
-        // Zoomline div styling
-        var $div = $("#timeline-zoom");
-        if ($div.length > 0) { return; } //already defined
-
-        $div = $("<div>").css({
-            'position': 'absolute',
-            'top': '16px',
-            'left': '3px',
-            'z-index': '2000',
-            'width': '20px',
-            'visibility': 'visible'}).appendTo( $("#"+timelinediv_id) );
-
-        var zoom, x;
-
-        /*
-        * internal
-        */
-        zoom = function (zoomIn) {
-
-            var band = tmap.timeline.getBand(0);
-            x = ($(tmap.tElement).width() / 2) - band.getViewOffset();
-
-            if (!band._zoomSteps) {
-                band._zoomSteps = timeZoomSteps;
-            }
-
-            //artem: timelne 1.2 has some problems with zoom - so we took it from v2.0
-
-            ether_zoom = function(_band, ether, zoomIn) {
-                var netIntervalChange = 0;
-                var currentZoomIndex = _band._zoomIndex;
-                var newZoomIndex = currentZoomIndex;
-
-                if (zoomIn && (currentZoomIndex > 0)) {
-                    newZoomIndex = currentZoomIndex - 1;
-                }
-
-                if (!zoomIn && (currentZoomIndex < (_band._zoomSteps.length - 1))) {
-                    newZoomIndex = currentZoomIndex + 1;
-                }
-
-                _band._zoomIndex = newZoomIndex;
-                ether._interval  = Timeline.DateTime.gregorianUnitLengths[_band._zoomSteps[newZoomIndex].unit];
-                ether._pixelsPerInterval = _band._zoomSteps[newZoomIndex].pixelsPerInterval;
-                netIntervalChange = _band._zoomSteps[newZoomIndex].unit -
-                _band._zoomSteps[currentZoomIndex].unit;
-                return netIntervalChange;
-            };
-
-            // zoom disabled
-            // shift the x value by our offset
-            x += band._viewOffset;
-
-            var zoomDate = band._ether.pixelOffsetToDate(x);
-            var netIntervalChange = ether_zoom(band, band.getEther(), zoomIn);
-            if (netIntervalChange != 0) {
-                band._etherPainter._unit += netIntervalChange;
-            }
-
-            // shift our zoom date to the far left
-            band._moveEther(Math.round(-band._ether.dateToPixelOffset(zoomDate)));
-            // then shift it back to where the mouse was
-            band._moveEther(x);
-
-
-            /*
-            band.zoom(zoomIn, x);*/
-            tmap.timeline.paint();
-        }; //end internal zoom function
-
-        // Controls
-        $( "<div>", {title:'Zoom In'} )
-        .button({icons: {
-            primary: "ui-icon-zoomin"
-            },text:false})
-        .click(function () {
-            zoom(true);
-        })
-        .appendTo($div);
-        $( "<div>", {title:'Show All'} )
-        .button({icons: {
-            primary: "ui-icon-carat-2-e-w"
-            },text:false})
-        .click(function () {
-            _zoomTimeLineToAll();
-        })
-        .appendTo($div);
-        $( "<div>", {title:'Zoom Out'} )
-        .button({icons: {
-            primary: "ui-icon-zoomout"
-            },text:false})
-        .click(function () {
-            zoom(false);
-        })
-        .appendTo($div);
-
-
-        //save last known interval to restore it on case of window resize
-        function __keepTimelineInterval(){
-            if(keepMinMaxDate){
-                var band = tmap.timeline.getBand(0);
-                keepMinDate = band.getMinVisibleDate();
-                keepMaxDate = band.getMaxVisibleDate();// getCenterVisibleDate()
-            }
-        }
-
-        tmap.timeline.autoWidth = false;
-        tmap.timeline.getBand(0).addOnScrollListener(  __keepTimelineInterval );
-    }
-
-    /**
-    *
-    */
-    function _zoomTimeLineToAll(){
-        
-        return; //ART 14072015
-        
-        //$("#timeline").css("height", "99%");
-        
-        // Time mid point
-        function __timeMidPoint(start, end) {
-            var d, diff;
-            d = new Date();
-            diff = end.getTime() - start.getTime();
-            d.setTime(start.getTime() + diff/2);
-            return d;
-        }
-        
-        // Find time scale
-        function __findTimeScale(start, end, scales, timelineWidth) {
-            var diff, span, unitLength, intervals, i;
-            s = new Date();
-            e = new Date();
-            diff = end.getTime() - start.getTime();
-            span = diff * 1.1;    // pad by 5% each end
-            for (i = 0; i < scales.length; ++i) {
-                unitLength = Timeline.DateTime.gregorianUnitLengths[scales[i].unit];
-                intervals = timelineWidth / scales[i].pixelsPerInterval;
-                if (span / unitLength <= intervals) {
-                    return i;
-                }
-            }
-            return i;
-        }
-        
-        // Change scale
-        function __changeScale(bandIndex, zoomIndex) {
-
-            if(zoomIndex<0) {
-                zoomIndex=0;
-            } else if (zoomIndex>=timeZoomSteps.length){
-                zoomIndex = timeZoomSteps.length-1;
-            }
-            var band, interval;
-            band = tmap.timeline.getBand(bandIndex);
-
-            if(band){
-                interval = timeZoomSteps[zoomIndex].unit;
-                band._zoomIndex = zoomIndex;
-                band.getEther()._pixelsPerInterval = timeZoomSteps[zoomIndex].pixelsPerInterval;
-                band.getEther()._interval = Timeline.DateTime.gregorianUnitLengths[interval];
-                band.getEtherPainter()._unit = interval;
-            }
-
-        }
-
-        var start, end, zoomIndex, eventSource, d = new Date();
-        eventSource = tmap.timeline.getBand(0).getEventSource();
-
-        if (eventSource.getCount() > 0) {
-            start = eventSource.getEarliestDate();
-            end = eventSource.getLatestDate();
-            d = __timeMidPoint(start, end);
-
-            zoomIndex = __findTimeScale(start, end, timeZoomSteps, ($(tmap.tElement).width()));
-
-            //changeScale(1, zoomIndex, tm); //WAS + zoomIndex+3
-            __changeScale(0, zoomIndex);
-        }
-        tmap.timeline.getBand(0).setCenterVisibleDate(d);
-        tmap.timeline.layout();
-        
-        //fix bug with height of band
-        _timeLineFixHeightBug();
-    }
-
-    function _updateTimeline(){
-          _renderTimelineZoom();
-          keppTimelineIconBottomPos = -1;
-          _zoomTimeLineToAll();
-    }
-
-    function _timeLineFixHeightBug(){
-        return; //ART 14072015
-                
-                //fix bug in timeline-2.3.0 - adjust height of timeline-band-0
-                var timeline = $("#"+timelinediv_id);
-                var tlband0 = timeline.find("#timeline-band-0");
-                var highest = 0;
-                
-                if(keppTimelineIconBottomPos>=0){
-                    highest = keppTimelineIconBottomPos;
-                }else{
-                    var icons = tlband0.find('.timeline-band-layer-inner').find('.timeline-event-icon');
-                
-                    //find the most bottom icon
-                    var ids = icons.map(function() {
-                        return $(this).position().top; //parseInt(, 10);
-                        }).get();
-                
-                    highest =  Math.max.apply(Math, ids) + 26;
-                }
-                
-                highest = Math.max(timeline.height(), highest);
-                tlband0.css('height', highest+'px');
-                
-    }
-    
-    
-    
-    
 
     /**
     *  Keeps timeline zoom 
@@ -1603,7 +1431,7 @@ ed_html +
             _load(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback);
         },
         
-        // mapdata - recordset converted to timemap dataset
+        // _mapdata - recordset converted to timemap dataset
         addDataset: function(_mapdata){
             return _addDataset(_mapdata);
         },

@@ -96,6 +96,7 @@ function hRecordSet(initdata) {
             
         var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');    
         if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
+        MAXITEMS = 2000;
             
         dataset_name = dataset_name || "main";
          
@@ -205,16 +206,16 @@ function hRecordSet(initdata) {
                 tot++;
         }}
 
-        var dataset = [
+        var dataset = 
             {
                 id: dataset_name, 
+                title: dataset_name, 
                 type: "basic",
                 timeenabled: timeenabled,
                 mapenabled: mapenabled,
                 options: { items: aitems },
                 timeline:{ items:titems } //, start: min_date  ,end: max_date  }
-            }
-        ];
+            };
 
         return dataset;
     }//end _toTimemap

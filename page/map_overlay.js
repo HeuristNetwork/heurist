@@ -236,7 +236,7 @@ function loadMapDocument(doc) {
 
     //show info popup
     if(!top.HEURIST4.util.isempty( doc['description']) ){
-        top.HEURIST4.msg.showMsgDlg(doc['description'], null,doc['title'], null, true);
+        top.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, true);
     }
 
     // Bounds
@@ -287,6 +287,8 @@ function addLayerOverlay(bounds, layer, index) {
         $("#legend .content").append("<label style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked> "
           +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" align="top" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + source.rectypeID+'.png&quot;);">&nbsp;'
           +layer.title+"</label>");
+          
+        source.title = layer.title;
 
         /** MAP IMAGE FILE (TILED) */
         if(source.rectypeID == map_image_file_tiled) {
@@ -565,7 +567,7 @@ function addQueryLayer(source, index) {
                     addRecordsetLayer(source, index);
 
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );*/
@@ -617,7 +619,7 @@ function addRecordsetLayer(source, index) {
                                 addRecordsetLayer(source, index);
 
                             }else{
-                                top.HEURIST4.util.showMsgErr(response);
+                                top.HEURIST4.msg.showMsgErr(response);
                             }
                         }
                     );
@@ -628,7 +630,11 @@ function addRecordsetLayer(source, index) {
                 }
                 
                 mapdata = recset.toTimemap(source.id, null, source.color);
+                
+                mapdata.id = source.id;
+                mapdata.title = source['title']?source['title']:mapdata.id;
             }
+            
 
             //mapping.load(mapdata);
             if (mapping.addDataset(mapdata)){
@@ -639,10 +645,10 @@ function addRecordsetLayer(source, index) {
                 visible:true,
                 setVisibility: function(checked) {
                     this.visible = checked;
-                    mapping.showDataset(this.id, checked); //mapdata[0].id
+                    mapping.showDataset(this.id, checked); //mapdata.id
                 },
                 removeOverlay: function(){
-                    mapping.deleteDataset( this.id ); //mapdata[0].id);
+                    mapping.deleteDataset( this.id ); //mapdata.id);
                 }
                };
                if(index>=0){  //this layer belong to map document
@@ -654,13 +660,13 @@ function addRecordsetLayer(source, index) {
 
                     var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');
                     if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
-
+                    MAXITEMS = 2000;
                     var sMsg = '';
-                    if(mapdata[0].mapenabled > MAXITEMS){
-                           sMsg = mapdata[0].mapenabled +' records to display on this map';
+                    if(mapdata.mapenabled > MAXITEMS){
+                           sMsg = mapdata.mapenabled +' records to display on this map';
                     }
-                    if(mapdata[0].timeenabled > MAXITEMS){
-                           sMsg = (sMsg?' and ':'') + mapdata[0].timeenabled +' records to display on timeline';
+                    if(mapdata.timeenabled > MAXITEMS){
+                           sMsg = (sMsg?' and ':'') + mapdata.timeenabled +' records to display on timeline';
                     }
                     if(sMsg!=''){
 
@@ -688,7 +694,7 @@ function addRecordsetLayer(source, index) {
                     _initLegend();
 
                     if(sMsg!=''){
-                        setTimeout(function(){top.HEURIST4.util.showMsgErr(sMsg);}, 1000);
+                        setTimeout(function(){top.HEURIST4.msg.showMsgErr(sMsg);}, 1000);
 
                     }
 

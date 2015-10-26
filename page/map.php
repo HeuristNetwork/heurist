@@ -84,7 +84,7 @@
         <script type="text/javascript" src="../apps/bubble.js"></script>
         
         <!-- minimum set of required set - @todo load it dynamically for standalone case -->                                       
-<!--  remove this comment to run mapping.php as standalone
+<!--  remove this comment to run map.php as standalone
         <script type="text/javascript" src="../js/search_minimal.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
@@ -253,7 +253,7 @@
                 
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
                 //t:26 f:85:3313  f:1:building
-                // Perform database query if possible (for standalone mode - when mapping.php is separate page)
+                // Perform database query if possible (for standalone mode - when map.php is separate page)
                 if( !top.HEURIST4.util.isempty(q) )
                 {
                     top.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
@@ -262,7 +262,7 @@
                                 console.log("onMapInit response");
                                 console.log(response);
 
-                                // Show info on map
+                                // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                                 var recset = new hRecordSet(response.data);
                                 var mapdataset = recset.toTimemap();
                                 mapping.load(mapdataset);
@@ -451,7 +451,7 @@
 
                  var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
                  query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
-                 var url = top.HAPI4.basePath+'page/mapping.php' + query;
+                 var url = top.HAPI4.basePath+'page/map.php' + query;
 
                  //document.getElementById("linkTimeline").href = url;
 
@@ -521,6 +521,7 @@
             <!-- Map -->
             <div class="ui-layout-center">
                 <div id="map" style="width:100%; height:100%">Mapping</div>
+                <div id="map_empty_message" style="width:100%; height:100%;display: none;">There are no spatial objects to plot on map</div>
             </div>
 
             <!-- Toolbar -->
@@ -558,7 +559,7 @@
                     <option>Embed Map Code</option>         style="position: fixed; right: 40"
                 </select>-->
 
-                <!-- Legend -->
+                <!-- Legend overlay -->
                 <div id="legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; display:none;">
                     <span style="font-size: 1.25em">Legend</span>
                     <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
