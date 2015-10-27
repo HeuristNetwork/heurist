@@ -25,10 +25,11 @@
 // rename legend to map_legend
 
 HeuristOverlay.prototype = new google.maps.OverlayView();
-var map;
+var map; //google map
 var data;
 var overlays = {};             //layer in current map document
 var overlays_not_in_doc = {};  //main layer(current query) and layers add by user manually
+var loadingbar = null;
 
 /**
 * Adds a map overlay to the given map.
@@ -538,9 +539,27 @@ function addQueryLayer(source, index) {
         //request['getrelrecs'] = 1;  //return all related records including relationship records
         request['detail'] = 'timemap';
         request['limit'] = 2000;
+        
+        if(loadingbar==null){
+            if(!map){
+                map = mapping.getNativeMap();
+            }
+            var image = top.HAPI4.basePath+'assets/loading_bar.gif';
+            loadingbar = new google.maps.Marker({
+                    icon: image,
+                    optimized: false
+                });            
+        }
+        if(loadingbar){
+            loadingbar.setMap(map);
+            loadingbar.setPosition(map.getCenter());
+        } 
+        
 
         // Retrieve records for this request
-        top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset ){
+        top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
+
+            if(loadingbar)  loadingbar.setMap(null);
             
             if(recordset!=null){
                 source.recordset = recordset;
@@ -548,7 +567,7 @@ function addQueryLayer(source, index) {
                 addRecordsetLayer(source, index);
             }
             if( source.callback && $.isFunction(source.callback) ){
-                   source.callback();     
+                   source.callback( recordset, original_recordset);     
             }
             
         });

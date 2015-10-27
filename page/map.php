@@ -46,6 +46,9 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+        <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+        <meta content="telephone=no" name="format-detection">
+        
         <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
         <!-- Styles
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->

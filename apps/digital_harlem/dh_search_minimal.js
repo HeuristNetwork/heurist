@@ -60,12 +60,13 @@ console.log('Start search');
 console.log('get result '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug ) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
-                var final_recordset = _prepareResultSet( new hRecordSet(response.data) );
+                var original_recordset = new hRecordSet(response.data);
+                var final_recordset = _prepareResultSet( original_recordset );
 
 console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
-                callback( final_recordset );
+                callback( final_recordset, original_recordset );
                 
                 // 7. trigger creation of the separate tab t display result set
                 //@todo - change to special DH events
@@ -93,8 +94,54 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
     //              and record id from main request (person or event)
     // 6. final resultset: exclude all recordtypes but addresses
     // 7. trigger creation of the separate tab t display result set
-    //   
+    //  
+    
+    //this version of search  
     function _doSearch( originator, request ){
+    
+            var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+            if(app && app.widget){
+
+                if(originator && !top.HEURIST4.util.isnull(originator.document)){
+                    $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
+                }
+                
+                // show progress div
+                //that.res_div_progress.show();
+                
+                // switch to map tab
+                top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+                
+
+                //add new layer with given name
+                var params = {id:'main',
+                     title: 'Current query',
+                     query: request,
+                     color: 'rgb(255,0,0)', //'#ff0000',
+                     callback: function( final_recordset, original_recordset ){
+                         //that.res_div_progress.hide();
+                         if(originator && !top.HEURIST4.util.isnull(originator.document) ) { // && recordset.length()>0){
+                                $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]); //global app event  
+                         
+                         
+                                 var app2 = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
+                                 if(app2 && app2.widget){
+                                    $(app2.widget).resultList('updateResultSet', final_recordset);
+                                 }
+                         
+                         }
+                     }
+                };                 
+                
+                $(app.widget).app_timemap('addQueryLayer', params);  //it will call  _doSearchWithCallback
+            }
+        
+    
+    }
+     
+    // this version searches main query only (without rules and relationships) and then updateResultSet in dh_search.js 
+    // Ian does not want it
+    function _doSearch_2steps( originator, request ){
         
             if(request==null) return;
 

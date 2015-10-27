@@ -239,7 +239,7 @@ $.widget( "heurist.dh_search", {
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
 
         //switch to result List Tab
-        top.HAPI4.LayoutMgr.putAppOnTop('resultList');
+        //top.HAPI4.LayoutMgr.putAppOnTop('resultList');
         
         if(this.usr_SavedSearch[svsID][3]){  //_ISFACETED
                 var facet_params = null;
@@ -291,7 +291,7 @@ $.widget( "heurist.dh_search", {
     },
     
     //
-    // this is public methid, it is called on search complete
+    // this is public methid, it is called on search complete - see dh_search_minimal._doSearch
     //
     updateResultSet: function( recordset, request ){
                 

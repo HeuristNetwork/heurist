@@ -600,9 +600,16 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                 if (e.stopPropagation) e.stopPropagation();
                 e.preventDefault();
                 if($(e.target).hasClass('vis-item vis-dot vis-selected')) return;
+                
+                //remove dataset prefixes
+                $.each(selection,function(idx, itemid){
+                    var k = itemid.indexOf('-');
+                    if(k>0)
+                        selection[idx] = itemid.substring(k+1);
+                });
 
                 $( document ).bubble( "option", "content", "" );
-                _showSelection(true); //show selction on map
+                _showSelection(true, true); //show selction on map
                 _onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
@@ -970,11 +977,23 @@ console.log('tileloaded 2');
     //
     // isreset - true - remove previous selection
     //
-    function _showSelection( isreset ){
+    function _showSelection( isreset, fromtimeline ){
 
             //select items on timeline
-            if(vis_timeline){
-                vis_timeline.setSelection( selection );
+            if(!fromtimeline && vis_timeline){
+
+                var selection_vis = [];
+                
+                $.each(all_mapdata, function(dataset_id, _mapdata){
+                   if(_mapdata.timeenabled>0) {
+                        $.each(_mapdata.timeline.items, function(idx, titem){
+                           if(selection.indexOf(titem.recID)>=0){
+                                selection_vis.push( titem.id );
+                           }
+                        });
+                   }
+                });
+                vis_timeline.setSelection( selection_vis );
             }
             
             if(selection && selection.length>0){
@@ -999,6 +1018,9 @@ console.log('tileloaded 2');
             }
     }
 
+    //
+    // old version with highlight on map - need to implement in different way
+    //
     function _showSelection2( isreset ){
 
         var lastSelectedItem = null;
@@ -1251,7 +1273,7 @@ ed_html +
                         vis_timeline.moveTo(stime);
                 }
                 var ele = $("#"+timelinediv_id);
-                marker = ele.find("[data-id="+item.opts.recid +"]");
+                marker = ele.find("[data-id="+ds.id+'-'+item.opts.recid +"]");
                 //horizontal scroll
                 if(marker) ele.scrollTop( marker.position().top );
             }
@@ -1482,6 +1504,10 @@ ed_html +
             if(vis_timeline){
                   vis_timeline.setOptions( {minHeight: $("#"+timelinediv_id).height()} ); 
             }
+        },
+        
+        getNativeMap: function(){
+             return (tmap)?tmap.getNativeMap():null;
         }
     }
 
