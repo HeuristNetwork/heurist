@@ -22,30 +22,33 @@
 //ARTEM:   @todo JJ calls server side directly - need to fix - use hapi!!!!!
 //
 // move all these methods into hMapping class or create new one
-// rename legend to map_legend
+// rename div legend to map_legend
 
-HeuristOverlay.prototype = new google.maps.OverlayView();
-var map; //google map
-var data;
-var overlays = {};             //layer in current map document
-var overlays_not_in_doc = {};  //main layer(current query) and layers add by user manually
-var loadingbar = null;
 
 /**
-* Adds a map overlay to the given map.
-* Performs an API call which contains data, which will be drawed upon selection
+*  This class responsible for all interaction with UI and map object 
 */
-function loadMapDocuments(_map, _startup_mapdocument) {
-    map = _map;
-    map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('legend'));
+function hMappingControls( mapping, startup_mapdocument_id ) {
+    var _className = "MappingControls",
+    _version   = "0.4";
 
-    // Legend collapse listener
-    $("#collapse").click(function(e) {
-        $(this).text() == "-" ? $(this).text("+") : $(this).text("-");  // Update text to + or -
-        $("#legend .content").toggle(400);
-    });
+    var mapping; //parent container
+    
+    
+    var map; //google map
+    var data;           
+    var overlays = {};             // layers in current map document
+    var overlays_not_in_doc = {};  // main layers(current query) and layers added by user/manually
+    var loadingbar = null;         // progress bar - overlay on map 
+    var $dlg_edit_layer = null;
 
-    // Load Map Documents & Map Layers
+/**
+* Performs an API call which contains data - all map documents/layer/dataset related info.
+* The list of map documents will be loaded into selector
+*/
+function _loadMapDocuments(startup_mapdocument) {
+
+    // Load Map Documents & Map Layers       @TODO - change it to HAPI method!!!!
     var api = top.HAPI4.basePath + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
 //console.log("API call URL: " + api);
     $.getJSON(api, function(_data) {
@@ -55,111 +58,148 @@ function loadMapDocuments(_map, _startup_mapdocument) {
 
         // Have any map documents been defined?
         if(data.length > 0) {
-            fillMapDocumentsDropDown();
-        }
-        if(_startup_mapdocument > 0){
-            loadMapDocumentById(_startup_mapdocument);
+            
+            // Show options in dropdown
+            var ele = $("#map-doc-select");
+            ele.empty();
+            ele.append("<option value='-1'>"+(data.length>0?'select...':'none available')+"</option>");
+            for(var i = 0; i < data.length; i++) {
+                ele.append("<option value='"+data[i].id+"'>"+data[i].title+"</option>"); //["+data[i].id+"]
+            }
+
+            // select listener - load map documents
+            ele.change(function(e) {
+                var map_document_id = Number($(this).val());
+                _loadMapDocumentById( map_document_id );
+            });
+            
+            if(startup_mapdocument > 0){
+                _loadMapDocumentById(startup_mapdocument);
+            }
         }
     }).fail(function( jqxhr, textStatus, error ) {
         var msg = "Map Document API call failed: " + textStatus + ", " + error;
         console.log(msg);
-        alert(msg);
+        top.HEURIST4.msg.showMsgErr(msg);
     });
 }
 
-/**
-* Adds options to the dropdown
-*  assign listener for dropdown
-*/
-function fillMapDocumentsDropDown() {
-    // Show options in dropdown
-
-    var ele = $("#map-doc-select");
-
-    ele.empty();
-    ele.append("<option value='-1'>"+(data.length>0?'select...':'none available')+"</option>");
-
-    for(var i = 0; i < data.length; i++) {
-        ele.append("<option value='"+data[i].id+"'>"+data[i].title+"</option>"); //["+data[i].id+"]
-    }
-
-    // select listener - load map documents
-    ele.change(function(e) {
+//
+//
+//
+function _loadMapDocumentById(mapdocument_id) {
+    
         // Clean old data
-        removeOverlays();
-        _emptyLegend();
-
-        // Show overlays for the selected option
+        _removeMapDocumentOverlays();
+        
+        //find mapdoc data
         var index = -1;
-        var map_document_id = Number($(this).val()); //prop("value");
+        if(mapdocument_id>0)
         for(var i=0;i<data.length;i++){
-            if(map_document_id==data[i].id){
+            if(mapdocument_id==data[i].id){
                 index = i;
                 break;
             }
         }
 
+        var btnMapEdit = $("#btnMapEdit");
+        if(index >= 0) {
+            var doc = data[index];
+            //show info popup
+            if(!top.HEURIST4.util.isempty( doc['description']) ){
+                top.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, true);
+            }
 
-        if(index >= 0 && index < data.length) {
-            // Show overlay for selected Map Document
-            loadMapDocument(data[index]);
-            $("#btnMapEdit").button( "enable" );
-            $("#btnMapEdit").attr('title',"Edit current map "+data[index].title+" - add or remove map layers, change settings");
+            // Zoom to Bounds
+            var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
+            var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
+            var bounds = new google.maps.LatLngBounds(swBound, neBound);
+            
+            map.fitBounds(bounds);
+
+            // Map document layers
+            var overlay_index = 1;
+            if(doc.layers.length > 0) {
+                for(var i = 0; i < doc.layers.length; i++) {
+                    _addLayerOverlay(bounds, doc.layers[i], overlay_index);
+                    overlay_index++;
+                }
+            }
+            // Top layer - artem: JJ made it wrong
+            //_addLayerOverlay(bounds, doc.toplayer, index);
+            
+            _initLegendListeners();
+            
+            btnMapEdit.button( "enable" );
+            btnMapEdit.attr('title',"Edit current map "+doc.title+" - add or remove map layers, change settings");
         }else{
-            $("#btnMapEdit").button( "disable" );
-            $("#btnMapEdit").attr('title','');
+            btnMapEdit.button( "disable" );
+            btnMapEdit.attr('title','');
         }
 
-        _initLegend();
-    });
+        //update ui
+        var mapdocs = $("#map-doc-select");
+        mapdocs.val(mapdocument_id);
 }
 
 /**
 * Removes all overlays that are in map document (layers added manually remain in the legend and on map)
+* it is invoked on map document load only
 */
-function removeOverlays() {
-    for(var property in overlays) {
-        if (overlays.hasOwnProperty(property) && overlays[property] !== undefined) {
+function _removeMapDocumentOverlays() {
+    
+    var legend_content = $("#legend .content");
+    
+    for(var idx in overlays) {
+        if (overlays.hasOwnProperty(idx) && overlays[idx] !== undefined) {
             try {
-                overlays[property].setVisibility(false);
-                if(overlays[property]['removeOverlay']){
-                    overlays[property].removeOverlay();
+                overlays[idx].setVisibility(false);
+                if(overlays[idx]['removeOverlay']){
+                    overlays[idx].removeOverlay();
                 }
+                legend_content.find('#md-'+idx).remove();
             } catch(err) {
                 console.log(err);
             }
-            delete overlays[property];
+            delete overlays[idx];
         }
     }
     overlays = {};
 }
 
-/**
-* Empties the legend  - remove overlays for map document, manually added overlays remain
-*/
-function _emptyLegend() {
-    $("#legend .content").empty();
-
-    //add list of layers that are not in map document
-    for(var layerid in overlays_not_in_doc) {
-        if (overlays_not_in_doc.hasOwnProperty(layerid) && overlays_not_in_doc[layerid] !== undefined) {
-            _addLegendEntryForLayer(layerid);
-        }
-    }
+function _removeLegendEntryForLayer(idx){
+    
 }
 
-function _addLegendEntryForLayer(layerid, on_top){
+//
+//
+//
+function _addLegendEntryForLayer(overlay_idx, title, icon, on_top){
 
-    var overlay = overlays_not_in_doc[layerid];
+    var overlay = null,
+        legendid,
+        ismapdoc = false;
+        
+    if(overlay_idx>0){
+        legendid = 'md-'+overlay_idx;
+        overlay = overlays[overlay_idx];
+        ismapdoc = true;
+    }else{
+        legendid = overlay_idx;
+        overlay = overlays_not_in_doc[overlay_idx];
+    }
+    if(!overlay) return;
 
-    var legenditem = $("<div style='display:block;padding:2px;' id='"
-            +layerid+"'><input type='checkbox' style='margin-right:5px' value='"
-            +layerid+"' "
-            +(overlay.visible?"checked='checked'>":">")
-            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'
-            +'" align="top" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + mappable_query +'.png&quot;);">'
-    +overlay.title
-            +"</div>");
+    
+    var legenditem = $('<div style="display:block;padding:2px;" id="'
+            + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
+            + overlay_idx+'" '
+            + (overlay.visible?'checked="checked">':'>')
+            + '<img src="'+top.HAPI4.basePath+'assets/16x16.gif"'
+            + ' align="top" class="rt-icon" '     
+            + ((icon)?('style="background-image: url('+icon+');"'):'')+'>'
+            + title
+            + '</div>');
             
             
     if(on_top){
@@ -167,127 +207,78 @@ function _addLegendEntryForLayer(layerid, on_top){
     }else{
         $("#legend .content").append(legenditem);
     };
+    
+    legenditem.find("input").change(_showHideLayer);
 
-    $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+layerid+'"></div>')
-    .click(function(event){ 
-             //delete layer from map  
-             var layerid = $(this).attr("layerid");
-             var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
-             overlay.removeOverlay();
-             
-             $("#legend .content").find('#'+layerid).remove();
-             
-             top.HEURIST4.util.stopEvent(event); return false;})
-    .appendTo(legenditem);
-    $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+layerid+'"></div>')
-    .click(function(event){ 
-             
-             var layerid = $(this).attr("layerid");
-             var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
-             
-             if(overlays['editProperties']){
-                overlays.editProperties();
-             }
-             
-             top.HEURIST4.util.stopEvent(event); return false;})
-    .appendTo(legenditem);
+    if(!ismapdoc){
+    
+        $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
+        .click(function(event){ 
+                 //delete layer from map  
+                 var overlay_idx = $(this).attr("layerid");
+                 var overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
+                 overlay.removeOverlay();
+                 
+                 $("#legend .content").find('#'+overlay_idx).remove();
+                 
+                 top.HEURIST4.util.stopEvent(event); return false;})
+        .appendTo(legenditem);
+        $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+overlay_idx+'"></div>')
+        .click(function(event){ 
+                 
+                 var overlay_idx = $(this).attr("layerid");
+                 var overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
+                 
+                 if(overlay['editProperties']){
+                    overlay.editProperties();
+                 }
+                 
+                 top.HEURIST4.util.stopEvent(event); return false;})
+        .appendTo(legenditem);
+    
+    }
 
-}
+}      
 
-
-
+//
+//
+//
 function _showHideLayer(event){
-                // Hide or display the layer
-                var layerid = $(this).prop("value");
-                var checked = $(this).prop("checked");
+        // Hide or display the layer
+        var overlay_idx = $(this).prop("value");
+        var checked = $(this).prop("checked");
 
-                // Update overlay
-                var overlay = overlays[layerid] ?overlays[layerid] :overlays_not_in_doc[layerid];  //overlays[index]
-                if(overlay){
-                    overlay.setVisibility(checked);
-                    overlay.visible = checked;
-                }
+        // Update overlay
+        var overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
+        if(overlay){
+            overlay.setVisibility(checked);
+            overlay.visible = checked;
+        }
 }
 
 //
 // assign listeners for checkboxes
 //
-function _initLegend() {
-
+function _initLegendListeners() {
         if(Object.keys(overlays_not_in_doc).length + Object.keys(overlays).length>0){
-            // Listen to checkbox changes
-            $("#legend input").change(_showHideLayer);
             $("#legend").show();
         }else{
             $("#legend").hide();
         }
 }
 
-function loadMapDocumentById(recId) {
-        var mapdocs = $("#map-doc-select");
-        mapdocs.val(recId).change();
-}
-
-
-/**
-* Adds overlays for a Map Document
-* @param doc A map document
-*/
-function loadMapDocument(doc) {
-
-    //show info popup
-    if(!top.HEURIST4.util.isempty( doc['description']) ){
-        top.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, true);
-    }
-
-    // Bounds
-    var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
-    var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
-    var bounds = new google.maps.LatLngBounds(swBound, neBound);
-
-    // Map document overlay
-    addMapDocumentOverlay(bounds, doc);
-    map.fitBounds(bounds);
-
-    // Map document layers
-    var index = 0;
-    if(doc.layers.length > 0) {
-        for(var i = 0; i < doc.layers.length; i++) {
-            addLayerOverlay(bounds, doc.layers[i], index);
-            index++;
-        }
-    }
-
-    // Top layer - artem: JJ made it wrong
-    addLayerOverlay(bounds, doc.toplayer, index);
-}
-
-/**
-* Adds an overlay for the Map Document object
-* @param doc Map Document object
-*/
-function addMapDocumentOverlay(bounds, doc) {
-    //var overlay = new HeuristOverlay(bounds, doc.thumbnail, map);
-    //overlays.push(overlay);
-}
-
 /**
 * Adds an overlay for the Layer object
 * @param layer Layer object
 */
-function addLayerOverlay(bounds, layer, index) {
-    console.log("addLayerOverlay");
+function _addLayerOverlay(bounds, layer, index) {
+    console.log("_addLayerOverlay");
     console.log(layer);
 
     // Determine way of displaying
     if(layer !== undefined && layer.dataSource !== undefined) {
         var source = layer.dataSource;
         console.log(source);
-
-        // Append to legend   ["+layer.id+"]
-        $("#legend .content").append("<label style='display:block;padding:2px;'><input type='checkbox' style='margin-right:5px' value='"+index+"' checked> "
-          +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" align="top" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + source.rectypeID+'.png&quot;);">&nbsp;'
-          +layer.title+"</label>");
           
         source.title = layer.title;
 
@@ -313,10 +304,13 @@ function addLayerOverlay(bounds, layer, index) {
             addShapeLayer(source, index);
 
         /* MAPPABLE QUERY */
-        }else if(source.rectypeID == mappable_query) {
+        }else if(source.rectypeID == RT_MAPABLE_QUERY) {
             console.log("MAPPABLE QUERY");
-            addQueryLayer(source, index);
+            _addQueryLayer(source, index);
         }
+        
+        _addLegendEntryForLayer(index, layer.title, top.HAPI4.iconBaseURL + source.rectypeID + '.png');
+        
     }
 }
 
@@ -367,7 +361,7 @@ function addTiledMapImageLayer(source, bounds, index) {
 
      }
 
-    overlays[index] = overlay;
+     overlays[index] = overlay;
 }
 
 
@@ -514,7 +508,7 @@ function addGeoJsonToMap(data, index) {
 * @param source - parameters Source object
 * if index < 0 it does not belong to current map document
 */
-function addQueryLayer(source, index) {
+function _addQueryLayer(source, index) {
      // Query
     if(source.query !== undefined) {
         //console.log("Query: " + source.query);
@@ -541,9 +535,6 @@ function addQueryLayer(source, index) {
         request['limit'] = 2000;
         
         if(loadingbar==null){
-            if(!map){
-                map = mapping.getNativeMap();
-            }
             var image = top.HAPI4.basePath+'assets/loading_bar.gif';
             loadingbar = new google.maps.Marker({
                     icon: image,
@@ -564,10 +555,10 @@ function addQueryLayer(source, index) {
             if(recordset!=null){
                 source.recordset = recordset;
                 source.recordset.setMapEnabled( true );
-                addRecordsetLayer(source, index);
+                _addRecordsetLayer(source, index);
             }
             if( source.callback && $.isFunction(source.callback) ){
-                   source.callback( recordset, original_recordset);     
+                   source.callback( recordset, original_recordset );     
             }
             
         });
@@ -583,7 +574,7 @@ function addQueryLayer(source, index) {
                     source.recordset = hRecordSet(response.data);
                     source.recordset.setMapEnabled( true );
                     
-                    addRecordsetLayer(source, index);
+                    _addRecordsetLayer(source, index);
 
                 }else{
                     top.HEURIST4.msg.showMsgErr(response);
@@ -598,8 +589,10 @@ function addQueryLayer(source, index) {
 /**
 *  if recordset has property mapenabled = true, convert recordset to timemap and vis_timeline formats 
 *  if mapenabled = false the request to server side is performed for first 1000 map/time enabled records
+* 
+* @todo - unite with mapping.addDataset
 */
-function addRecordsetLayer(source, index) {
+function _addRecordsetLayer(source, index) {
 
             // Show info on map
             var mapdata = null;
@@ -625,7 +618,7 @@ function addRecordsetLayer(source, index) {
                                     w: curr_request.w};
                     }
                     
-                    addQueryLayer( source, index );
+                    _addQueryLayer( source, index );
                            
                     // Retrieve records for this request
                     /*
@@ -635,7 +628,7 @@ function addRecordsetLayer(source, index) {
 
                                 source.recordset = hRecordSet(response.data);
                                 source.recordset.setMapEnabled( true );
-                                addRecordsetLayer(source, index);
+                                _addRecordsetLayer(source, index);
 
                             }else{
                                 top.HEURIST4.msg.showMsgErr(response);
@@ -659,20 +652,28 @@ function addRecordsetLayer(source, index) {
             if (mapping.addDataset(mapdata)){
 
                var overlay = {
-                id: source.id,
-                title: source['title'],
-                visible:true,
-                setVisibility: function(checked) {
-                    this.visible = checked;
-                    mapping.showDataset(this.id, checked); //mapdata.id
-                },
-                removeOverlay: function(){
-                    mapping.deleteDataset( this.id ); //mapdata.id);
-                }
+                    id: source.id,
+                    title: source['title'],
+                    visible:true,
+                    setVisibility: function(checked) {
+                        this.visible = checked;
+                        mapping.showDataset(this.id, checked); //mapdata.id
+                    },
+                    removeOverlay: function(){
+                        mapping.deleteDataset( this.id ); //mapdata.id);
+                    },
+                    editProperties: function(){
+                        _editLayerProperties( this.id );    
+                        
+                        //overlay.title = 
+                        //color
+                        
+                    }
                };
                if(index>=0){  //this layer belong to map document
                     overlays[index] = overlay;
-
+                    
+                    _addLegendEntryForLayer(index, source.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png', false );
                }else{ // this layer is explicitely (by user) added
                     //index = 'A'+Math.floor((Math.random() * 10000) + 1);
                     //overlays_not_in_doc[index] = overlay;
@@ -709,15 +710,16 @@ function addRecordsetLayer(source, index) {
                     var legenditem = $("#legend .content").find('#'+source.id);
                     if(legenditem.length>0) legenditem.remove();
 
-                    _addLegendEntryForLayer(source.id, true);
-                    _initLegend();
-
                     if(sMsg!=''){
-                        setTimeout(function(){top.HEURIST4.msg.showMsgErr(sMsg);}, 1000);
-
+                       setTimeout(function(){top.HEURIST4.msg.showMsgErr(sMsg);}, 1000);
                     }
 
+                    _addLegendEntryForLayer(source.id, source.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png', true );
                }
+               
+               
+               _initLegendListeners();
+
             }else{  //dataset is empty or failed to add - remove from legend
                if(index<0 && overlays_not_in_doc[source.id]){
 
@@ -734,21 +736,79 @@ function addRecordsetLayer(source, index) {
                         console.log(err);
                     }
                     delete overlays_not_in_doc[source.id];
-                    _initLegend();
+                    _initLegendListeners();
                }
             }
 }
 
+//open dialog and edit layer/dataset properties - name and color
+function _editLayerProperties( dataset_id ){
+    
+       if($dlg_edit_layer==null){
+               function __doSave(){   //save search
+                    
+                    var layer_name = $dlg_edit_layer.find("#layer_name");
+                    var message = $dlg_edit_layer.find('.messages');
+                    
+                    var bValid = top.HEURIST4.msg.checkLength( layer_name, "Name", message, 3, 30 );
+                    
+                    if(bValid){
+                        $dlg_edit_layer.dialog("close");    
+                    }
 
-/** Data types
- *  @TODO - get it from magic number constants defined on server side
- */
+               }               
+                // login dialog definition
+                $dlg_edit_layer = $('#layer-edit-dialog').dialog({
+                    autoOpen: false,
+                    //height: 300,
+                    width: 450,
+                    modal: true,
+                    resizable: false,
+                    title: top.HR('Define Layer'),
+                    //buttons: arr_buttons,
+                    buttons: [
+                        {text:top.HR('Save'), click: __doSave},
+                        {text:top.HR('Cancel'), click: function() {
+                            $( this ).dialog( "close" );
+                        }}
+                    ],
+                    close: function() {
+                        //allFields.val( "" ).removeClass( "ui-state-error" );
+                    },
+                    open: function() {
+                        
+                        $dlg_edit_layer.find("#layer_name").val('');
+                        $dlg_edit_layer.find(".messages").removeClass( "ui-state-highlight" ).text('');
+                    }
+                });
+                
+               $dlg_edit_layer.find("#layer_color").colorPicker({
+                   //color:'#f00',
+                   opacity: false,
+                   //valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
+                   cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}',
+                   renderCallback: function($elm, toggled){
+                        if($elm && !toggled){
+                            $(this.$UI).hide();
+                        }
+                   }                   
+               }); 
+               
+       }       
+       $dlg_edit_layer.dialog("open");    
+    
+}
+
+// Data types
+//  @TODO - get it from magic number constants defined on server side
+//
 var map_image_file_tiled = 17; //11;
 var map_image_file_untiled = 1018;
 var kml_file = 21; //1014;
 var shape_file = 1017;
-var mappable_query = 24; //1021;
+var RT_MAPABLE_QUERY = 24; //1021;
 
+HeuristOverlay.prototype = new google.maps.OverlayView();
 /**
 * HeuristOverlay constructor
 * - bounds
@@ -826,3 +886,47 @@ HeuristOverlay.prototype.onRemove = function() {
     this.div_.parentNode.removeChild(this.div_);
     this.div_ = null;
 };
+
+
+
+    /**
+    * Initialization
+    */
+    function _init(_mapping, startup_mapdocument_id) {
+
+        mapping = _mapping;
+        map = _mapping.getNativeMap();
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('legend'));
+        // Legend collapse listener
+        $("#collapse").click(function(e) {
+            $(this).text() == "-" ? $(this).text("+") : $(this).text("-");  // Update text to + or -
+            $("#legend .content").toggle(400);
+        });
+        
+        _loadMapDocuments(startup_mapdocument_id);
+        
+    }
+
+    //public members
+    var that = {
+        getClass: function () {return _className;},
+        isA: function (strClass) {return (strClass === _className);},
+        getVersion: function () {return _version;},
+        
+        loadMapDocumentById: function(mapdocument_id){
+            _loadMapDocumentById(mapdocument_id);    
+        },
+        
+        addQueryLayer: function(params){
+             _addQueryLayer(params, -1);   
+        },
+        
+        addRecordsetLayer: function(params){
+             _addRecordsetLayer(params, -1);
+        },
+        
+    }
+
+    _init( mapping, startup_mapdocument_id );
+    return that;  //returns object
+}

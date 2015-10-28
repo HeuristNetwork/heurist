@@ -79,6 +79,8 @@
         <script type="text/javascript" src="../ext/shapefile/shapefile.js"></script>
         <script type="text/javascript" src="../ext/shapefile/dbf.js"></script>
         
+        <script type="text/javascript" src="../ext/js/jqColorPicker.min.js"></script>        
+        
         <!-- Mapping -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
@@ -585,6 +587,20 @@
         </div>
 
         <div id="helper" title="Mapping Overview">
+        </div>
+        
+        <div id="layer-edit-dialog"  style="display:none">
+            <fieldset>
+                <div>
+                    <div class="header"><label for="layer_name">What would you like to call<br>the new map layer:</label></div>
+                    <input type="text" id="layer_name" class="text ui-widget-content ui-corner-all" />
+                </div>
+                <div>
+                    <div class="header"><label for="layer_color">Color:</label></div>
+                    <input id="layer_color" value="rgb(255, 0, 0)" style="background-color:#f00">        
+                </div>
+            </fieldset>
+            <div class="messages">1</div>
         </div>
     </body>
 </html>

@@ -511,6 +511,9 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
                 return $emptyres;
     },
 
+    //
+    //  div for not loaded record
+    //
     _renderRecord_html_stub: function(recID){
     
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" >'
@@ -558,7 +561,11 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
         var recTitle = top.HEURIST4.util.htmlEscape(fld('rec_Title'));
-
+        var recIcon = fld('rec_Icon');
+        if(!recIcon) recIcon = rectypeID;
+        recIcon = top.HAPI4.iconBaseURL + recIcon + '.png';
+        
+        
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
@@ -589,7 +596,8 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
             + html_thumb
             + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'
+            +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);">'
             +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
             +     html_owner
             +     html_pwdrem
@@ -601,7 +609,9 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             + '</div>'
-            + '<div title="Click to view record" class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+            + '<div title="Click to view record" '
+            + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+            + '   role="button" aria-disabled="false">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
             + '</div>'
             + '</div>';
@@ -671,9 +681,15 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             }else{
                 var isview = ($target.parents('.rec_view_link').length>0); //this is edit click
                 if(isview){
-                    var url = top.HAPI4.basePathOld + "records/view/renderRecordData.php?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
                     
-                    top.HEURIST4.msg.showDialog(url, { width: 600, height: 500 });
+                    var recInfoUrl = (this.currentRecordset)
+                                        ?this.currentRecordset.fld( this.currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' )
+                                        :null;
+                    if( !recInfoUrl ){
+                        recInfoUrl = top.HAPI4.basePathOld + "records/view/renderRecordData.php?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
+                    }
+                    
+                    top.HEURIST4.msg.showDialog(recInfoUrl, { width: 600, height: 500 });
                     return;
                 }
             }

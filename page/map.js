@@ -31,13 +31,15 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     var mapdiv_id = null,
     timelinediv_id = null,
     
-    basePath = '',
-    all_mapdata = {}, //array of all datasets
-    selection = [], //array of selected record ids
-    mylayout;
+    basePath = '', //@todo remove
+    
+    all_mapdata = {}, // array of all datasets
+    selection = [],   // array of selected record ids
+    mylayout,         // layout object that contains map and timeline 
+    _curr_layout = null; // keep current layout sets to avoid redundant update
 
     var tmap = null,  // timemap object
-    vis_timeline = null, // timeline object
+    vis_timeline = null, // vis timeline object
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,  
 
@@ -49,8 +51,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     _onSelectEventListener,
     _startup_mapdocument,
     
-    _curr_layout = null,
-    
     // TimeMap theme
     customTheme = new TimeMapTheme({
             "color": "#0000FF",  //for lines and polygones
@@ -59,37 +59,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
             "iconSize": [25,25],
             "iconShadow": null,
             "iconAnchor":[9,17]
-    }),
-
-    timeZoomSteps =  window["Timeline"]?[
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.DAY },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.DAY },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.DAY },
-        { pixelsPerInterval: 400,  unit: Timeline.DateTime.MONTH },
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.MONTH },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.MONTH },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.MONTH },
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.YEAR },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.YEAR },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.YEAR },
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.DECADE },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.DECADE },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.DECADE },
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.CENTURY },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.CENTURY },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.CENTURY },
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.MILLENNIUM },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.MILLENNIUM },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.MILLENNIUM }/*,
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.EPOCH },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.EPOCH },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.EPOCH },
-        { pixelsPerInterval: 200,  unit: Timeline.DateTime.ERA },
-        { pixelsPerInterval: 100,  unit: Timeline.DateTime.ERA },
-        { pixelsPerInterval:  50,  unit: Timeline.DateTime.ERA }*/
-    ]:[],
-
-    customMapTypes = [];
+    });
 
 
     /**
@@ -171,7 +141,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                     mylayout.sizePane('south', tha-40);
                 }
             }
-            if(ismap){
+            if(ismap || !istime){
                $('#map_empty_message').hide();
                $('#map').show();
             }else{
@@ -691,7 +661,8 @@ console.log('tileloaded 2');
                         nativemap.fitBounds(bounds);
                     } 
 
-                    loadMapDocuments(nativemap, _startup_mapdocument); //loading the list of map documents see map_overlay.js
+                    // loading the list of map documents  see map_overlay.js
+                    that.map_control = new hMappingControls(that, _startup_mapdocument);
 
                     $("#map-settingup-message").hide();
                     $(".map-inited").show();
@@ -719,12 +690,12 @@ console.log('tileloaded 2');
         selection = _selection || [];
         
         //timemap is already inited
-        if(tmap && tmap.datasets){ 
+        if(that.map_control!=null){ 
             
                 $( document ).bubble('closeAll');  //close all popups      
                 
-                if(_startup_mapdocument)
-                    loadMapDocumentById(_startup_mapdocument);
+                if(_startup_mapdocument>0)
+                    that.map_control.loadMapDocumentById(_startup_mapdocument);    //see map_overlay.js
         
                 if(_callback){
                     _callback.call();
@@ -1021,7 +992,7 @@ console.log('tileloaded 2');
     //
     // old version with highlight on map - need to implement in different way
     //
-    function _showSelection2( isreset ){
+    function _showSelection_old( isreset ){
 
         var lastSelectedItem = null;
         var items_to_update = [];       //current item to be deleted
@@ -1471,24 +1442,6 @@ ed_html +
              _showSelection( true );
         },
         
-        // add layer to map 
-        addQueryLayer: function(params){
-            addQueryLayer(params, -1);    //see map_overlay.js
-        },
-
-        // add layer to map 
-        addRecordsetLayer: function(params){
-            addRecordsetLayer(params, -1);    //see map_overlay.js
-        },
-        
-        loadMapDocumentById: function(recId){
-            //_loadMapDocumentById(recId);
-            var mapdocs = $("#map-doc-select");
-            mapdocs.val(recId).change();
-            
-        },
-        
-        
         onWinResize: function(){
             _onWinResize();
             if(tmap && tmap.map){ //fix google map bug
@@ -1508,7 +1461,12 @@ ed_html +
         
         getNativeMap: function(){
              return (tmap)?tmap.getNativeMap():null;
-        }
+        },
+        
+        //@todo - separate this functionality to different classes
+        map_control: null,    //controls layers on map - add/edit/remove
+        map_selection: null,  //@todo working with selection - search within selected area, highlight and popup info
+        map_timeline: null,   //@todo vis timeline functionality
     }
 
     _init(_map, _timeline, _basePath, _mylayout);

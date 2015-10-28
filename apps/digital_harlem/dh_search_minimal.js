@@ -216,7 +216,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
     
         
     var DH_RECORDTYPE = 13,
-        DH_LINKS = 9999999;
+        DH_LINKS = 9999999;  //special record type 
         
         
     // 5. assign to address records  date, title, eventtype (from event) or date, title, role from place role
@@ -340,9 +340,11 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
 
                                 recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                                 recordset.setFld(record, 'rec_Icon',     'term'+relation_type );
-                                recordset.setFld(record, 'rec_Info', 
-                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
-                                                            recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID);
+                                
+                                var recInfoUrl = top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                                            recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
+                                recordset.setFld(record, 'rec_Info', recInfoUrl);
+                                recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
                                                             
                                 recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
                                 recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
@@ -406,11 +408,15 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                     }
                     
                     if(vertices.length>1){
-                        // add new record to result set
+                        // add path shape to first pathAddr (start parade for example)
+                        var pathAddr = res_records[ path[0].recID ];
+                        recordset.setFld(pathAddr, 'rec_Shape', [{polyline:vertices}] );
+                        /* old way
                         var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:vertices} };
                         res_records[linkID] = newrec;
                         res_orders.push(linkID);
                         linkID++;
+                        */
                         continue;
                     }
                 }
@@ -426,6 +432,8 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
 
                     if(pnt1==null) continue;
                     
+                    var shapes = [];
+                    
                     for(j=0; j<links[recID].secondary.length; j++){ 
                         
                         secAddr = res_records[ links[recID].secondary[j] ]; //record id
@@ -437,15 +445,20 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                             wkt      = recordset.fld(secAddr, 'dtl_Geo');
                             var pnt2     = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
                             if(pnt2!=null){
-                                // add new record to result set
+                                shapes.push( {polyline:[ pnt1.point, pnt2.point ]} );
+                                
+                                /* old way  add new record to result set
                                 var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:[ pnt1.point, pnt2.point ]} };
                                 res_records[linkID] = newrec;
                                 res_orders.push(linkID);
                                 linkID++;
+                                */
                             }
                         }
                     }
                     
+                    if(shapes.length>0)
+                        recordset.setFld(mainAddr, 'rec_Shape', shapes );
                 }
             }
         }

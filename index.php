@@ -93,7 +93,6 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
         <!-- script type="text/javascript" src="ext/js/moment.min.js"></script -->
         <script type="text/javascript" src="ext/js/date.format.js"></script>
-        <script type="text/javascript" src="ext/js/jqColorPicker.min.js"></script>        
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>

@@ -238,8 +238,8 @@ $.widget( "heurist.app_timemap", {
 
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
-        if(mapping){
-            mapping.loadMapDocumentById(recId);  //see page/map.js
+        if(mapping && mapping.map_control){
+            mapping.map_control.loadMapDocumentById(recId);  //see page/map.js
         }
     }
 
@@ -249,15 +249,15 @@ $.widget( "heurist.app_timemap", {
     */
     , addQueryLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
-        if(mapping){
-            mapping.addQueryLayer(params);  //see page/map.js
+        if(mapping && mapping.map_control){
+            mapping.map_control.addQueryLayer(params);  //see page/map.js
         }
     }
 
     , addRecordsetLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
-        if(mapping){
-            mapping.addRecordsetLayer(params);  //see page/map.js
+        if(mapping && mapping.map_control){
+            mapping.map_control.addRecordsetLayer(params);  //see page/map.js
         }
     }
 

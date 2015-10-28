@@ -41,7 +41,6 @@ function hRecordSet(initdata) {
     rectypes = [],      // unique list of record types
     structures = null,  //record structure definitions for all rectypes in this record set
     relationship = null; //relationship records within this recordset
-
     
     var _progress = null,
         _isMapEnabled = false,
@@ -120,7 +119,7 @@ function hRecordSet(initdata) {
                 type        = _getFieldValue(record, 'dtl_GeoType'),  //take first part of dtl_Geo field - "p wkt"
                 wkt         = _getFieldValue(record, 'dtl_Geo'),  
                 recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
-                recShape    = _getFieldValue(record, 'rec_Shape'),
+                recShape    = _getFieldValue(record, 'rec_Shape'),  //additional shapes
                 
                 
                 iconId      = _getFieldValue(record, 'rec_Icon');  //used if icon differ from rectype icon
@@ -141,7 +140,8 @@ function hRecordSet(initdata) {
                             titem = {
                                 id: dataset_name+'-'+recID, //unique id
                                 group: dataset_name,
-                                content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
+                                content: '<img src="'+top.HAPI4.iconBaseURL + iconId + 
+                                           '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
                                 title: recName,
                                 start: dres[0],
                                 recID:recID
@@ -160,7 +160,12 @@ function hRecordSet(initdata) {
                     //}
                 }
                 
-                shape = (recShape) ?recShape :top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                var shapes = (recShape)?recShape:[];
+                
+                var main_shape = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                if(main_shape){ //main shape
+                    shapes.push(main_shape);
+                }
                 
                         item = {
                             title: recName,
@@ -195,10 +200,10 @@ function hRecordSet(initdata) {
                             }
                         };  
                                           
-                if(shape){
+                if(shapes.length>0){
                     if(mapenabled<MAXITEMS){
-                        item.placemarks.push(shape);
-                        item.options.places = [shape];
+                        item.placemarks = shapes;
+                        item.options.places = shapes;
                     }
                     mapenabled++;
                 }
@@ -206,7 +211,8 @@ function hRecordSet(initdata) {
 
                 tot++;
         }}
-
+      
+        
         var dataset = 
             {
                 id: dataset_name, 
