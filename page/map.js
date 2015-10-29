@@ -1,9 +1,11 @@
 /**
-* Class to work with OS Timemap,js. It allows initialization of mapping and timeline controls and fills data for these controls
+* Class to work with OS Timemap.js and Vis timeline. 
+* It allows initialization of mapping and timeline controls and fills data for these controls
 * 
 * @param _map - id of map element container 
 * @param _timeline - id of timeline element
 * @param _basePath - need to specify path to timemap assets (images)
+* #param mylayout - layout object that contains map and timeline
 * @returns {Object}
 * @see editing_input.js
 * 
@@ -49,7 +51,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     keepMinMaxDate = true,
     
     _onSelectEventListener,
-    _startup_mapdocument,
     
     // TimeMap theme
     customTheme = new TimeMapTheme({
@@ -68,7 +69,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     function _init(_map, _timeline, _basePath, _mylayout) {
         mapdiv_id = _map;
         timelinediv_id = _timeline;
-        basePath = _basePath;
+        basePath = _basePath; //redundant
         mylayout = _mylayout;
 
         /*if(_mapdata){
@@ -168,7 +169,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
         if(!top.HEURIST4.util.isnull(_mapdata)){
         
             var dataset_id = _mapdata.id;
-            var dataset = tmap.datasets[dataset_id];
             
             top.HEURIST4._time_debug = new Date().getTime() / 1000;
             
@@ -177,10 +177,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
                 _deleteDataset( dataset_id );
             
             }else{
-            
-                if(!dataset){ //already exists with such name
-                   dataset = tmap.createDataset(dataset_id);
-                }
+                
                 all_mapdata[dataset_id] = _mapdata;  //keep
                 
                 _updateLayout();   //show hide panels
@@ -188,17 +185,9 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
 console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
+                                        
+                _reloadDataset( dataset_id );
                     
-                    
-                dataset.clear();
-
-                dataset.loadItems(_mapdata.options.items);
-                dataset.each(function(item){
-                    item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
-                });
-                
-                dataset.hide();
-                dataset.show();
 
 console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
@@ -218,14 +207,72 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
         return res;
     }
 
+    //
+    //
+    //
+    function _getDataset( dataset_id ){                
+        return all_mapdata[dataset_id];
+    }
+    
+    function _changeDatasetColor( dataset_id, new_color, updateOnMap ){                
+            
+            var mapdata = _getDataset( dataset_id ); 
+            
+            if(mapdata['color']!=new_color){
+               
+                for (var i=0; i<mapdata.options.items.length; i++){
+                    mapdata.options.items[i].options.icon =  
+                        top.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+new_color;
+                }
+                
+                mapdata['color'] = new_color;
+                
+                if(updateOnMap){
+                    _reloadDataset(dataset_id);
+                }
+            }    
+    }
+    
+    //
+    //
+    //
+    function _reloadDataset(dataset_id){
+        
+                var dataset = tmap.datasets[dataset_id];
+                if(!dataset){ //already exists with such name
+                    dataset = tmap.createDataset(dataset_id);
+                }else{
+                    dataset.clear();
+                }
+                
+                var mapdata = _getDataset(dataset_id);
+
+                dataset.loadItems(mapdata.options.items);
+                dataset.each(function(item){
+                    item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
+                });
+                
+                dataset.hide();
+                dataset.show();
+    }
+      
+    //
+    //
+    //  
     function _deleteDataset(dataset_id){
+        
+            // remove from map
             var dataset = tmap.datasets[dataset_id];
             if(dataset){
                  tmap.deleteDataset(dataset_id);
             }
-            if(all_mapdata[dataset_id]){
+            
+            var mapdata = _getDataset(dataset_id);
+            
+            //remove from storage and reload timeline
+            if(mapdata){
                        
-                     var was_timeenabled = (all_mapdata[dataset_id].timeenabled>0);   
+                     var was_timeenabled = (mapdata.timeenabled>0);   
                 
                      delete all_mapdata[dataset_id];
                      //all_mapdata[dataset_id] = undefined;
@@ -239,6 +286,9 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             }   
     }
     
+    //
+    //
+    //
     function _showDataset(dataset_id, is_show){
         var dataset = tmap.datasets[dataset_id];
         if(dataset){
@@ -247,9 +297,13 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             }else{
                 tmap.hideDataset(dataset_id);
             }
-            
         }
-        
+        var mapdata = _getDataset(dataset_id);
+        mapdata.visible = is_show;
+        //remove from storage and reload timeline
+        if(mapdata && mapdata.timeenabled>0){
+            _loadVisTimeline();             
+        }
     }
     
     // get unix timestamp from vis
@@ -428,8 +482,8 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             
             
         var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span/>Full label</a></li>'
-                        +'<li id="tlm1"><a href="#"><span class="ui-icon ui-icon-check"/>Truncate to bar</a></li>'
-                        +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
+                        +'<li id="tlm1"><a href="#"><span/>Truncate to bar</a></li>'
+                        +'<li id="tlm2"><a href="#"><span class="ui-icon ui-icon-check"/>Fixed length</a></li>'
                         +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
                         +'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li></ul>') 
         .zIndex(9999)
@@ -453,7 +507,10 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                     contents.css({'width': spinner.spinner('value')+'em'});                    
                 }
                 
-                vis_timeline.setOptions({'label_in_bar':(mode==1), 'margin':1,  'stack':(mode!=4)});
+                $('div .vis-item-overflow').css('overflow',(mode===1)?'hidden':'visible');
+                
+                //'label_in_bar':(mode==1), 
+                vis_timeline.setOptions({'margin':1,  'stack':(mode!=4)});
                 
                 if(mode==2){
                     spinner.show();
@@ -504,7 +561,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                     
                 }
               }
-            }).css('width','2em').hide();            
+            }).css('width','2em');//rre.hide();            
             
         /*   
         $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
@@ -524,14 +581,14 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
         var timeline_data = [],
             timeline_groups = [];
         
-        $.each(all_mapdata, function(dataset_id, _mapdata){
+        $.each(all_mapdata, function(dataset_id, mapdata){
             
-            if(_mapdata.timeline.items.length>0){
-                timeline_data = timeline_data.concat( _mapdata.timeline.items );
+            if(mapdata.visible && mapdata.timeline.items.length>0){
+
+                timeline_data = timeline_data.concat( mapdata.timeline.items );
+                timeline_groups.push({ id:dataset_id, content: mapdata.title});
+                
             }
-            
-            timeline_groups.push({ id:dataset_id, content: _mapdata.title});
-            
         });      
                 
         if(timeline_data){
@@ -564,23 +621,23 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                 selection = params.items;
                 if(selection && selection.length>0){
                     
-                var e = params.event;
-                                            //div.vis-item.vis-dot.vis-selected.vis-readonly
-                e.cancelBubble = true;
-                if (e.stopPropagation) e.stopPropagation();
-                e.preventDefault();
-                if($(e.target).hasClass('vis-item vis-dot vis-selected')) return;
-                
-                //remove dataset prefixes
-                $.each(selection,function(idx, itemid){
-                    var k = itemid.indexOf('-');
-                    if(k>0)
-                        selection[idx] = itemid.substring(k+1);
-                });
+                    var e = params.event;
+                                                //div.vis-item.vis-dot.vis-selected.vis-readonly
+                    e.cancelBubble = true;
+                    if (e.stopPropagation) e.stopPropagation();
+                    e.preventDefault();
+                    if($(e.target).hasClass('vis-item vis-dot vis-selected')) return;
+                    
+                    //remove dataset prefixes
+                    $.each(selection,function(idx, itemid){
+                        var k = itemid.indexOf('-');
+                        if(k>0)
+                            selection[idx] = itemid.substring(k+1);
+                    });
 
-                $( document ).bubble( "option", "content", "" );
-                _showSelection(true, true); //show selction on map
-                _onSelectEventListener.call(that, selection); //trigger global selection event
+                    $( document ).bubble( "option", "content", "" );
+                    _showSelection(true, true); //show selction on map
+                    _onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
             
@@ -600,6 +657,8 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             //$.find('#vis_timeline_toolbar li').removeClass('ui-icon-check');
             //$.find('#vis_timeline_toolbar li #tlm4').addClass('ui-icon-check');
         }
+        
+        //$(".vis-item-content").css('margin-left',0);
         
         //if(_mapdata.timeenabled>0)
         //    vis_timeline.setVisibleChartRange(_mapdata.timeline.start, _mapdata.timeline.end);
@@ -654,7 +713,7 @@ console.log('tileloaded 2');
                     if(false && dataset.mapenabled>0){
                         tmap.datasets.main.hide();
                         tmap.datasets.main.show();
-                    }else if (!_startup_mapdocument) { //zoom to whole world
+                    }else if (!__startup_mapdocument) { //zoom to whole world
                         var swBound = new google.maps.LatLng(-40, -120);
                         var neBound = new google.maps.LatLng(70, 120);
                         var bounds = new google.maps.LatLngBounds(swBound, neBound); 
@@ -662,7 +721,7 @@ console.log('tileloaded 2');
                     } 
 
                     // loading the list of map documents  see map_overlay.js
-                    that.map_control = new hMappingControls(that, _startup_mapdocument);
+                    that.map_control = new hMappingControls(that, __startup_mapdocument);
 
                     $("#map-settingup-message").hide();
                     $(".map-inited").show();
@@ -684,7 +743,6 @@ console.log('tileloaded 2');
         
         //asign 2 global for mapping - on select listener and startup map document
         if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
-        _startup_mapdocument = __startup_mapdocument;
         
         //_mapdata = _mapdata || [];
         selection = _selection || [];
@@ -694,8 +752,8 @@ console.log('tileloaded 2');
             
                 $( document ).bubble('closeAll');  //close all popups      
                 
-                if(_startup_mapdocument>0)
-                    that.map_control.loadMapDocumentById(_startup_mapdocument);    //see map_overlay.js
+                if(__startup_mapdocument>0) 
+                    that.map_control.loadMapDocumentById(__startup_mapdocument);    //see map_overlay.js
         
                 if(_callback){
                     _callback.call();
@@ -1422,6 +1480,14 @@ ed_html +
 
         load: function(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback){
             _load(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback);
+        },
+
+        getDataset: function ( dataset_id ){                
+            return _getDataset( dataset_id );
+        },
+        
+        changeDatasetColor: function ( dataset_id, new_color, updateOnMap ){                
+            _changeDatasetColor( dataset_id, new_color, updateOnMap )
         },
         
         // _mapdata - recordset converted to timemap dataset

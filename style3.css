@@ -773,3 +773,11 @@ div > .svs-contextmenu {
 .labelBold{
     font-weight:bold;
 }
+
+.vis-item.vis-item-content{
+    padding:0px;
+    margin-left:0;
+}
+.vis-item.vis-dot{
+    display:none;
+}

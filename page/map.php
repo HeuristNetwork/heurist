@@ -592,7 +592,8 @@
         <div id="layer-edit-dialog"  style="display:none">
             <fieldset>
                 <div>
-                    <div class="header"><label for="layer_name">What would you like to call<br>the new map layer:</label></div>
+                    <!-- What would you like to call<br>the new map layer -->
+                    <div class="header"><label for="layer_name">Name of map layer:</label></div>
                     <input type="text" id="layer_name" class="text ui-widget-content ui-corner-all" />
                 </div>
                 <div>

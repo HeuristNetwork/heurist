@@ -98,6 +98,7 @@ function hRecordSet(initdata) {
         MAXITEMS = 2000;
             
         dataset_name = dataset_name || "main";
+        iconColor = iconColor || '#f00';
          
         var tot = 0;
         
@@ -184,7 +185,7 @@ function hRecordSet(initdata) {
                                 title: recName,
                                 
                                 eventIconImage: iconId + 'm.png',
-                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+(iconColor?iconColor:'#f00'),
+                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+iconColor,
                                 
                                 start: (startDate || ''),
                                 end: (endDate && endDate!=startDate)?endDate:'',
@@ -219,6 +220,8 @@ function hRecordSet(initdata) {
                 title: dataset_name, 
                 type: "basic",
                 timeenabled: timeenabled,
+                color: iconColor,
+                visible: true, 
                 mapenabled: mapenabled,
                 options: { items: aitems },
                 timeline:{ items:titems } //, start: min_date  ,end: max_date  }

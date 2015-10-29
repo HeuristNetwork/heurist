@@ -44,14 +44,13 @@
         $color_new = explode(',',$clr);
         
     }else{
-        $color_new = array(255, 0, 0);    
+        $color_new = null; //array(255, 0, 0);    
     }
     
     $filename = HEURIST_ICON_DIR . $rectype_id;
   
 //error_log($filename);
     
-    //
 
 //print $filename;    
     if(file_exists($filename)){
@@ -120,6 +119,7 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     
     $alpha = 0;
 
+    
     if(substr($rectype_id,-5,5) == "m.png") {
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(200,200,200);   //gray
@@ -133,23 +133,30 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     }else{
         $rectype_id = substr($rectype_id, 0, -4);
         $filename2 = $path . $rectype_id . ".png";
+        $bg_color = array(200,200,200);   //gray
+        $alpha = 127; //0-127
         
-        if(file_exists($filename2)){
+        /*if(file_exists($filename2)){
             download_file($filename2);
-        }
-        return;
+            return;
+        }*/
     }
     
-    $filename = $path . $rectype_id . ".png";
-    
+    $filename = $path . $rectype_id . ".png"; //original
     
 //error_log("load ".file_exists($filename)."  ".$filename);
 //error_log($filename2);
-    if(!file_exists($filename)){
+    if(!file_exists($filename)){  //if term icon does not exist - take default icon
         $filename = HEURIST_ICON_DIR . "3.png";
     }
     
     if(file_exists($filename)){
+        
+        if($color_new==null){
+            download_file($filename);
+            return;
+        }
+        
         
         /*if($alpha==127){
             download_file($filename);
