@@ -127,7 +127,7 @@ if (array_key_exists('mode', $_REQUEST)) {
         </a>
 
         <!-- Quicklinks section - top right -->
-        <div id="quicklinks" style="top:10px;right:135px">
+        <div id="quicklinks" style="top:10px;right:135px;z-index: 200000;">
             <ul id=quicklink-cell>
                 <li id="reportBug" class="button white">
                     <a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 400,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;"

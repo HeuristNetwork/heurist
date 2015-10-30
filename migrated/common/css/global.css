@@ -729,7 +729,7 @@ optgroup {font-style: normal;font-weight:bold; background-color: #ECF1FB;padding
 option {padding-left:15px;background-color: #FFF;}
 
 /***** tab bar + quick links*****/
-#quicklinks {position: absolute;right: 5px;top: 0;z-index: 200000;}
+#quicklinks {position: absolute;right: 5px;top: 0;}
 #quicklink-cell {vertical-align: top;text-align: right;color: #666;font-size:2ex;clear:both;right:10px;top:20px;}
 div#tabbar {z-index:9;clear:left;margin:0;vertical-align:bottom;position:relative;display:block;}
 div#tabbar {height:20px;background-color:#999;margin:0;background-image: url(../images/backgrounds/black_gradient.png);background-repeat: repeat-x;clear:both; white-space:nowrap;}
