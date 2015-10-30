@@ -1,12 +1,11 @@
 
-Directory:	migrated/admin/
+Directory:	apps/viewers
 
-Overview:
+Overview:   Resultset menu and viewers (listing, record view, map, connections etc)
 
-This directory contains all the code from Heurist Vsn 3 used by Heurist Vsn 4. The Heurist 3 directory structure is maintained within this directory.
-The code has been pruned of unused files and modified where needed to work within H4
+Notes:      See also other forms of output, including cstom (Smarty) reports, which are in the H3 codebase under /migrated or /export
 
-Updated: 	18th October 2015
+Updated: 	18 Oct 2015
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 

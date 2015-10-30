@@ -1,14 +1,13 @@
 
-Directory:	migrated/admin/
+Directory:    /php/sync
 
-Overview:
+Overview:       Database synchronisation functions
 
-This directory contains all the code from Heurist Vsn 3 used by Heurist Vsn 4. The Heurist 3 directory structure is maintained within this directory.
-The code has been pruned of unused files and modified where needed to work within H4
+Notes:
 
-Updated: 	18th October 2015
+Updated:     18 Oct 2015
 
-------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system

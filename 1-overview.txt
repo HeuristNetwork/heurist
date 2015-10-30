@@ -24,6 +24,7 @@ INSTALLATION: please move the two files " parentDirectory_ ... " to the parent d
 
 Updated:     22 Sep 2015
 
+-------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system

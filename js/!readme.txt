@@ -8,6 +8,7 @@ hRecordSet - record set container/manipulation
 editing_input.js - input control widget
 utils.js - set of utilty functions
 
+----------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system

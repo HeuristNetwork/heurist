@@ -1,14 +1,13 @@
 
-Directory:	migrated/admin/
+Directory:    /page/visualize
 
-Overview:
+Overview:   Connection diagram visualisation - shows current resultset as a network of linked records
 
-This directory contains all the code from Heurist Vsn 3 used by Heurist Vsn 4. The Heurist 3 directory structure is maintained within this directory.
-The code has been pruned of unused files and modified where needed to work within H4
+Notes:
 
-Updated: 	18th October 2015
+Updated:     18 Oct 2015
 
-------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system
@@ -17,7 +16,7 @@ Updated: 	18th October 2015
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @version     4.0
 */
 
 /*

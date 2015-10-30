@@ -8,9 +8,9 @@
 ---------------------------------------------------------------------
 
 
-Directory:	/common
+Directory:	/migrated/common
 
-Overview:	Shared code and resources of general utility across multiple program area
+Overview:	Heurist vsn 3 shared code and resources of general utility across multiple program area
 
 Notes:
 
