@@ -310,11 +310,13 @@ which is one step too many and has been removed from design by Ian in approx 201
                 $eltID ="bd:".$dtlID;
 
                 $val = @$_POST[$eltName][$eltID];
+                
                 if (! $bdInputHandler->inputOK($val,$dtyID,$rtyID)) {
                     continue;	// faulty input ... ignore
                 }
-
+                
                 $toadd = $bdInputHandler->convertPostToMysql($val);
+                
                 if ($toadd==null) continue;
 
                 $recDetailUpdates[$dtlID] = $toadd;
@@ -794,7 +796,7 @@ which is one step too many and has been removed from design by Ian in approx 201
     }
     class BibDetailGeographicInput extends BibDetailInput {
         function convertPostToMysql($postVal) {
-            if (preg_match("/^(p(?= point)|r(?= polygon)|[c](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
+            if (preg_match("/^(p(?= point)|r(?= polygon)|[c](?= linestring)|[l](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
                 return array("dtl_Value" => $matches[1], "dtl_Geo" => array("geomfromtext(\"" . $matches[2] . "\")"));
             } else
                 return array();
