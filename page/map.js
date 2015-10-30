@@ -223,6 +223,11 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                 for (var i=0; i<mapdata.options.items.length; i++){
                     mapdata.options.items[i].options.icon =  
                         top.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+new_color;
+                        
+                    mapdata.options.items[i].options.color = new_color;
+                    mapdata.options.items[i].options.lineColor = new_color;
+                    mapdata.options.items[i].options.fillColor = new_color;
+                        
                 }
                 
                 mapdata['color'] = new_color;
@@ -239,14 +244,23 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
     function _reloadDataset(dataset_id){
         
                 var dataset = tmap.datasets[dataset_id];
-                if(!dataset){ //already exists with such name
-                    dataset = tmap.createDataset(dataset_id);
-                }else{
-                    dataset.clear();
-                }
                 
                 var mapdata = _getDataset(dataset_id);
 
+                /*var datasetTheme = new TimeMapTheme({ 
+                    color: mapdata['color'],
+                    lineColor: mapdata['color'],
+                    fillColor: mapdata['color']
+                });*/
+                
+                if(!dataset){ //already exists with such name
+                    dataset = tmap.createDataset(dataset_id);
+                    //dataset.opts.theme = datasetTheme;
+                }else{
+                    dataset.clear();
+                    //dataset.changeTheme(datasetTheme)
+                }
+                
                 dataset.loadItems(mapdata.options.items);
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection

@@ -187,6 +187,11 @@ function hRecordSet(initdata) {
                                 eventIconImage: iconId + 'm.png',
                                 icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+iconColor,
                                 
+                                //color on dataset level works once only - timemap bug
+                                color: iconColor,
+                                lineColor: iconColor,
+                                fillColor: iconColor,
+                                
                                 start: (startDate || ''),
                                 end: (endDate && endDate!=startDate)?endDate:'',
                                 

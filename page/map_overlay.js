@@ -439,7 +439,12 @@ function addKMLLayer(source, index) {
         }else{
             kmlLayer.setMap(null);
         }
-    }
+    };
+    
+    kmlLayer.removeOverlay = function(){
+                kmlLayer.setMap(null);
+            };
+    
 
     overlays[index] = kmlLayer;
 
@@ -498,8 +503,10 @@ function addGeoJsonToMap(data, index) {
                 map.data.remove(features[i]);
             }
         }
-    }
-
+    };
+    data.removeOverlay = function() {
+            this.setVisibility(false);
+    };
     overlays[index] = data;
 }
 
@@ -762,12 +769,17 @@ function _removeOverlayById( overlay_id ){
     }
 }
 
-var edit_mapdata;
+var edit_mapdata, edit_callback;
 
 //open dialog and edit layer/dataset properties - name and color
-function _editLayerProperties( dataset_id ){
+function _editLayerProperties( dataset_id, callback ){
     
        edit_mapdata = mapping.getDataset( dataset_id );
+       edit_callback = callback;
+       if( !top.HEURIST4.util.isempty(dataset_id) && top.HEURIST4.util.isnull(edit_mapdata) ){
+           if (edit_callback) edit_callback(false);
+           return;
+       }
     
        function __doSave(){   //save search
             
@@ -843,7 +855,8 @@ function _editLayerProperties( dataset_id ){
                     mapping.changeDatasetColor( mapdata.id, new_color, true );
                 }
                 
-                $dlg_edit_layer.dialog("close");    
+                $dlg_edit_layer.dialog("close"); 
+                if (edit_callback) edit_callback(true);
             }
 
        }  
@@ -875,6 +888,7 @@ function _editLayerProperties( dataset_id ){
                             __doSave();   
                         }},
                         {text:top.HR('Cancel'), click: function() {
+                            if (edit_callback) edit_callback(false);
                             $( this ).dialog( "close" );
                         }}
                     ],
@@ -1029,6 +1043,10 @@ HeuristOverlay.prototype.onRemove = function() {
         addRecordsetLayer: function(params){
              _addRecordsetLayer(params, -1);
         },
+        
+        editLayerProperties: function( dataset_id, callback ){
+            _editLayerProperties( dataset_id, callback );
+        }
         
     }
 

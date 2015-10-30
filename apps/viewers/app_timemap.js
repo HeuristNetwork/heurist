@@ -250,14 +250,21 @@ $.widget( "heurist.app_timemap", {
     , addQueryLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
-            mapping.map_control.addQueryLayer(params);  //see page/map.js
+            mapping.map_control.addQueryLayer(params);
         }
     }
 
     , addRecordsetLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
-            mapping.map_control.addRecordsetLayer(params);  //see page/map.js
+            mapping.map_control.addRecordsetLayer(params);
+        }
+    }
+    
+    , editLayerProperties: function( dataset_id, callback ){
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping && mapping.map_control){
+            mapping.map_control.editLayerProperties(dataset_id, callback);
         }
     }
 

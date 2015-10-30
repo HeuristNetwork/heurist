@@ -96,7 +96,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
     // 7. trigger creation of the separate tab t display result set
     //  
     
-    //this version of search  
+    //this version of search  is IN USE
     function _doSearch( originator, request ){
     
             var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
@@ -105,9 +105,6 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                 if(originator && !top.HEURIST4.util.isnull(originator.document)){
                     $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
                 }
-                
-                // show progress div
-                //that.res_div_progress.show();
                 
                 // switch to map tab
                 top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
@@ -121,13 +118,20 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                      callback: function( final_recordset, original_recordset ){
                          //that.res_div_progress.hide();
                          if(originator && !top.HEURIST4.util.isnull(originator.document) ) { // && recordset.length()>0){
-                                $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]); //global app event  
+                                //global app event - in dh faceted search listens it
+                                $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]); 
                          
-                         
-                                 var app2 = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
+                                //call dh_search to show add button
+                                 var app1 = top.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
+                                 if(app1 && app1.widget){
+                                    $(app1.widget).dh_search('updateResultSet', final_recordset);
+                                 }
+                            
+                                /*call result list to fill with results
+                                 var app2 = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');
                                  if(app2 && app2.widget){
                                     $(app2.widget).resultList('updateResultSet', final_recordset);
-                                 }
+                                 }*/
                          
                          }
                      }

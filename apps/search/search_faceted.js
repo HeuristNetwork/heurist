@@ -632,7 +632,9 @@ $.widget( "heurist.search_faceted", {
                 //@todo this.btn_save.show(); 
             }
             
-            
+            var div_facets = this.facets_list.find(".facets");
+            if(div_facets.length>0)  div_facets.empty();
+
             
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             this._current_query = query;

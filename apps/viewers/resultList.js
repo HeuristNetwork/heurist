@@ -246,7 +246,7 @@ $.widget( "heurist.resultList", {
 
                             that._clearAllRecordDivs();
                             
-                            if(data.q!=''){
+                            if(!top.HEURIST4.util.isempty(data.q)){
                                 that.loadanimation(true);
                                 that._renderProgress();
                             }else{
