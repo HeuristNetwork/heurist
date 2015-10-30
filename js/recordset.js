@@ -41,7 +41,6 @@ function hRecordSet(initdata) {
     rectypes = [],      // unique list of record types
     structures = null,  //record structure definitions for all rectypes in this record set
     relationship = null; //relationship records within this recordset
-
     
     var _progress = null,
         _isMapEnabled = false,
@@ -96,8 +95,10 @@ function hRecordSet(initdata) {
             
         var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');    
         if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
+        MAXITEMS = 2000;
             
         dataset_name = dataset_name || "main";
+        iconColor = iconColor || '#f00';
          
         var tot = 0;
         
@@ -119,7 +120,7 @@ function hRecordSet(initdata) {
                 type        = _getFieldValue(record, 'dtl_GeoType'),  //take first part of dtl_Geo field - "p wkt"
                 wkt         = _getFieldValue(record, 'dtl_Geo'),  
                 recThumb    = _getFieldValue(record, 'rec_ThumbnailURL'),
-                recShape    = _getFieldValue(record, 'rec_Shape'),
+                recShape    = _getFieldValue(record, 'rec_Shape'),  //additional shapes
                 
                 
                 iconId      = _getFieldValue(record, 'rec_Icon');  //used if icon differ from rectype icon
@@ -138,11 +139,13 @@ function hRecordSet(initdata) {
                         if(timeenabled<MAXITEMS){
                      
                             titem = {
-                                id: recID,
+                                id: dataset_name+'-'+recID, //unique id
                                 group: dataset_name,
-                                content: '<img src="'+top.HAPI4.iconBaseURL + iconId + '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
+                                content: '<img src="'+top.HAPI4.iconBaseURL + iconId + 
+                                           '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
                                 title: recName,
                                 start: dres[0],
+                                recID:recID
                             }
                             if(dres[1] && dres[0]!=dres[1]){
                                 titem['end'] = dres[1];
@@ -158,7 +161,12 @@ function hRecordSet(initdata) {
                     //}
                 }
                 
-                shape = (recShape) ?recShape :top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                var shapes = (recShape)?recShape:[];
+                
+                var main_shape = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                if(main_shape){ //main shape
+                    shapes.push(main_shape);
+                }
                 
                         item = {
                             title: recName,
@@ -177,7 +185,7 @@ function hRecordSet(initdata) {
                                 title: recName,
                                 
                                 eventIconImage: iconId + 'm.png',
-                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+(iconColor?iconColor:'#f00'),
+                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+iconColor,
                                 
                                 start: (startDate || ''),
                                 end: (endDate && endDate!=startDate)?endDate:'',
@@ -193,10 +201,10 @@ function hRecordSet(initdata) {
                             }
                         };  
                                           
-                if(shape){
+                if(shapes.length>0){
                     if(mapenabled<MAXITEMS){
-                        item.placemarks.push(shape);
-                        item.options.places = [shape];
+                        item.placemarks = shapes;
+                        item.options.places = shapes;
                     }
                     mapenabled++;
                 }
@@ -204,17 +212,20 @@ function hRecordSet(initdata) {
 
                 tot++;
         }}
-
-        var dataset = [
+      
+        
+        var dataset = 
             {
                 id: dataset_name, 
+                title: dataset_name, 
                 type: "basic",
                 timeenabled: timeenabled,
+                color: iconColor,
+                visible: true, 
                 mapenabled: mapenabled,
                 options: { items: aitems },
                 timeline:{ items:titems } //, start: min_date  ,end: max_date  }
-            }
-        ];
+            };
 
         return dataset;
     }//end _toTimemap

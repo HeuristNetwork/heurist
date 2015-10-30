@@ -60,12 +60,13 @@ console.log('Start search');
 console.log('get result '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug ) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
-                var final_recordset = _prepareResultSet( new hRecordSet(response.data) );
+                var original_recordset = new hRecordSet(response.data);
+                var final_recordset = _prepareResultSet( original_recordset );
 
 console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
                 
-                callback( final_recordset );
+                callback( final_recordset, original_recordset );
                 
                 // 7. trigger creation of the separate tab t display result set
                 //@todo - change to special DH events
@@ -93,8 +94,54 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
     //              and record id from main request (person or event)
     // 6. final resultset: exclude all recordtypes but addresses
     // 7. trigger creation of the separate tab t display result set
-    //   
+    //  
+    
+    //this version of search  
     function _doSearch( originator, request ){
+    
+            var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+            if(app && app.widget){
+
+                if(originator && !top.HEURIST4.util.isnull(originator.document)){
+                    $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
+                }
+                
+                // show progress div
+                //that.res_div_progress.show();
+                
+                // switch to map tab
+                top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
+                
+
+                //add new layer with given name
+                var params = {id:'main',
+                     title: 'Current query',
+                     query: request,
+                     color: 'rgb(255,0,0)', //'#ff0000',
+                     callback: function( final_recordset, original_recordset ){
+                         //that.res_div_progress.hide();
+                         if(originator && !top.HEURIST4.util.isnull(originator.document) ) { // && recordset.length()>0){
+                                $(originator.document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]); //global app event  
+                         
+                         
+                                 var app2 = top.HAPI4.LayoutMgr.appGetWidgetByName('resultList');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
+                                 if(app2 && app2.widget){
+                                    $(app2.widget).resultList('updateResultSet', final_recordset);
+                                 }
+                         
+                         }
+                     }
+                };                 
+                
+                $(app.widget).app_timemap('addQueryLayer', params);  //it will call  _doSearchWithCallback
+            }
+        
+    
+    }
+     
+    // this version searches main query only (without rules and relationships) and then updateResultSet in dh_search.js 
+    // Ian does not want it
+    function _doSearch_2steps( originator, request ){
         
             if(request==null) return;
 
@@ -169,7 +216,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
     
         
     var DH_RECORDTYPE = 13,
-        DH_LINKS = 9999999;
+        DH_LINKS = 9999999;  //special record type 
         
         
     // 5. assign to address records  date, title, eventtype (from event) or date, title, role from place role
@@ -293,9 +340,11 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
 
                                 recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                                 recordset.setFld(record, 'rec_Icon',     'term'+relation_type );
-                                recordset.setFld(record, 'rec_Info', 
-                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
-                                                            recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID);
+                                
+                                var recInfoUrl = top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                                            recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
+                                recordset.setFld(record, 'rec_Info', recInfoUrl);
+                                recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');
                                                             
                                 recordset.setFld(record, 'rec_Title',  recordset.fld(relrec, 'rec_Title') );
                                 recordset.setFld(record, DT_STARTDATE, recordset.fld(relrec, 'dtl_StartDate' ) );
@@ -359,11 +408,15 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                     }
                     
                     if(vertices.length>1){
-                        // add new record to result set
+                        // add path shape to first pathAddr (start parade for example)
+                        var pathAddr = res_records[ path[0].recID ];
+                        recordset.setFld(pathAddr, 'rec_Shape', [{polyline:vertices}] );
+                        /* old way
                         var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:vertices} };
                         res_records[linkID] = newrec;
                         res_orders.push(linkID);
                         linkID++;
+                        */
                         continue;
                     }
                 }
@@ -379,6 +432,8 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
 
                     if(pnt1==null) continue;
                     
+                    var shapes = [];
+                    
                     for(j=0; j<links[recID].secondary.length; j++){ 
                         
                         secAddr = res_records[ links[recID].secondary[j] ]; //record id
@@ -390,15 +445,20 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                             wkt      = recordset.fld(secAddr, 'dtl_Geo');
                             var pnt2     = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
                             if(pnt2!=null){
-                                // add new record to result set
+                                shapes.push( {polyline:[ pnt1.point, pnt2.point ]} );
+                                
+                                /* old way  add new record to result set
                                 var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:[ pnt1.point, pnt2.point ]} };
                                 res_records[linkID] = newrec;
                                 res_orders.push(linkID);
                                 linkID++;
+                                */
                             }
                         }
                     }
                     
+                    if(shapes.length>0)
+                        recordset.setFld(mainAddr, 'rec_Shape', shapes );
                 }
             }
         }

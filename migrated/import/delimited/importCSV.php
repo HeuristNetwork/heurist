@@ -1250,7 +1250,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
     $counts = "";
     $mapping = array();
     for ($i = 0; $i < $len; $i++) {
-        $query = $query."`field_".$i."` ".(in_array($i, $preproc['memos'])?" text, ":" varchar(300), " ) ;
+        $query = $query."`field_".$i."` ".(in_array($i, $preproc['memos'])?" mediumtext, ":" varchar(300), " ) ;
         $columns = $columns."field_".$i.",";
         $counts = $counts."count(distinct field_".$i."),";
         //array_push($mapping,0);

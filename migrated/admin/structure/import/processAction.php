@@ -203,7 +203,7 @@ function importDetailType($importDty) {
 		if(mysql_num_rows($dtyGroup) == 0) {
 			mysql_query("INSERT INTO ".$targetDBName.".defDetailTypeGroups ".
 						"(dtg_Name,dtg_Order, dtg_Description) ".
-						"VALUES ('Imported', '999',".
+						"VALUES ('Imported', '255',".
 								" 'This group contains all detailtypes that were imported from external databases')");
 			// Write the insert action to $logEntry, and set $error to true if one occurred
 			if(mysql_error()) {

@@ -46,6 +46,9 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+        <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+        <meta content="telephone=no" name="format-detection">
+        
         <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
         <!-- Styles
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
@@ -76,6 +79,8 @@
         <script type="text/javascript" src="../ext/shapefile/shapefile.js"></script>
         <script type="text/javascript" src="../ext/shapefile/dbf.js"></script>
         
+        <script type="text/javascript" src="../ext/js/jqColorPicker.min.js"></script>        
+        
         <!-- Mapping -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
@@ -84,7 +89,7 @@
         <script type="text/javascript" src="../apps/bubble.js"></script>
         
         <!-- minimum set of required set - @todo load it dynamically for standalone case -->                                       
-<!--  remove this comment to run mapping.php as standalone
+<!--  remove this comment to run map.php as standalone
         <script type="text/javascript" src="../js/search_minimal.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
@@ -253,7 +258,7 @@
                 
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
                 //t:26 f:85:3313  f:1:building
-                // Perform database query if possible (for standalone mode - when mapping.php is separate page)
+                // Perform database query if possible (for standalone mode - when map.php is separate page)
                 if( !top.HEURIST4.util.isempty(q) )
                 {
                     top.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
@@ -262,7 +267,7 @@
                                 console.log("onMapInit response");
                                 console.log(response);
 
-                                // Show info on map
+                                // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                                 var recset = new hRecordSet(response.data);
                                 var mapdataset = recset.toTimemap();
                                 mapping.load(mapdataset);
@@ -451,7 +456,7 @@
 
                  var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
                  query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
-                 var url = top.HAPI4.basePath+'page/mapping.php' + query;
+                 var url = top.HAPI4.basePath+'page/map.php' + query;
 
                  //document.getElementById("linkTimeline").href = url;
 
@@ -521,6 +526,7 @@
             <!-- Map -->
             <div class="ui-layout-center">
                 <div id="map" style="width:100%; height:100%">Mapping</div>
+                <div id="map_empty_message" style="width:100%; height:100%;display: none;">There are no spatial objects to plot on map</div>
             </div>
 
             <!-- Toolbar -->
@@ -558,7 +564,7 @@
                     <option>Embed Map Code</option>         style="position: fixed; right: 40"
                 </select>-->
 
-                <!-- Legend -->
+                <!-- Legend overlay -->
                 <div id="legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; display:none;">
                     <span style="font-size: 1.25em">Legend</span>
                     <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
@@ -581,6 +587,21 @@
         </div>
 
         <div id="helper" title="Mapping Overview">
+        </div>
+        
+        <div id="layer-edit-dialog"  style="display:none">
+            <fieldset>
+                <div>
+                    <!-- What would you like to call<br>the new map layer -->
+                    <div class="header"><label for="layer_name">Name of map layer:</label></div>
+                    <input type="text" id="layer_name" class="text ui-widget-content ui-corner-all" />
+                </div>
+                <div>
+                    <div class="header"><label for="layer_color">Color:</label></div>
+                    <input id="layer_color" value="rgb(255, 0, 0)" style="background-color:#f00">        
+                </div>
+            </fieldset>
+            <div class="messages">1</div>
         </div>
     </body>
 </html>

@@ -1228,9 +1228,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             if (req.readyState != 4) return;
             if (req.status != 200 && req.status != 304) {
                 if (req.status == 404) {
-                    alert('H-Util HTTP error file not found' + req.status + " " +file);
+                    top.HEURIST.util.showError('H-Util HTTP error file not found' + req.status + " " +file);
                 }else if (req.status){
-                    alert('H-Util HTTP error ' + req.status);
+                    top.HEURIST.util.showError('H-Util HTTP error ' + req.status);
                 }
                 return;
             }
@@ -1349,7 +1349,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 top.HEURIST.detailTypes = context.detailTypes;
                 top.HEURIST.terms = context.terms;
 
-                alert("Database structure definitions in memory have been refreshed. You may need to reload pages to see changes.");
+                top.HEURIST.util.showError("Database structure definitions in memory have been refreshed. You may need to reload pages to see changes.");
             }
         }
 
@@ -1955,7 +1955,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else if (msg.toLowerCase().indexOf("error")<0){
             msg = "An unknown error occurred: " + msg;
         }
-        alert(msg);
+        if(top.HEURIST4 && top.HEURIST4.msg){
+            top.HEURIST4.msg.showMsgErr(msg);
+        }else{
+            alert(msg);    
+        }
     },
 
 

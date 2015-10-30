@@ -684,7 +684,7 @@ function DetailTypeEditor() {
         }
         if(swarn!=""){
             if(isShowWarn) {
-                alert(swarn);
+                top.HEURIST.util.showError(swarn);
             }
             Dom.get("dty_Name").focus();
             _updatedFields = [];
@@ -693,7 +693,7 @@ function DetailTypeEditor() {
 
         if(Dom.get("dty_HelpText").value==="") {
             if(isShowWarn) {
-                alert("Help text is mandatory field");
+                top.HEURIST.util.showError("Help text is mandatory field");
             }
             Dom.get("dty_HelpText").focus();
             _updatedFields = [];
@@ -704,7 +704,7 @@ function DetailTypeEditor() {
             var dd = Dom.get("dty_JsonTermIDTree").value;
             if( dd==="" || dd==="{}" ) {
                 if(isShowWarn) {
-                    alert("For an enum field types you msut select at least one term. Please click 'Change vocabulary'");
+                    top.HEURIST.util.showError("For an enum field types you msut select at least one term. Please click 'Change vocabulary'");
                 }
                 _updatedFields = [];
                 return "mandatory";
@@ -713,7 +713,7 @@ function DetailTypeEditor() {
         var val = Dom.get("dty_Type").value;
         if(Hul.isempty(val)){
             if(isShowWarn) {
-                alert("Data Type is madatory field");
+                top.HEURIST.util.showError("Data Type is madatory field");
             }
             Dom.get("dty_Type").focus();
             _updatedFields = [];
@@ -838,7 +838,7 @@ function DetailTypeEditor() {
 
         //prevent setting outdated types for new field type
         if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
-            alert('You selected an outdated type. It is not allowed anymore');
+            top.HEURIST.util.showError('You selected an outdated type. It is not allowed anymore');
             if(that.keepType){
                 el.value = that.keepType;
             }else{

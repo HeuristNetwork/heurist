@@ -44,6 +44,6 @@ function BaseClass(args) {
 
     }
 
-    _init(args);
+    _init( args );
     return that;  //returns object
 }

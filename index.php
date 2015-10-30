@@ -50,6 +50,9 @@ if(@$_REQUEST['db']){
         <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+        <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
+        <meta content="telephone=no" name="format-detection">
+        
         <link rel=icon href="favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
@@ -90,7 +93,6 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.min.js"></script>
         <!-- script type="text/javascript" src="ext/js/moment.min.js"></script -->
         <script type="text/javascript" src="ext/js/date.format.js"></script>
-        <script type="text/javascript" src="ext/js/jqColorPicker.min.js"></script>        
 
         <script type="text/javascript" src="localization.js"></script>
         <script type="text/javascript" src="js/utils.js"></script>
