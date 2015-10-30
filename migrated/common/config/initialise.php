@@ -226,13 +226,14 @@ define('HEURIST_DB_PREFIX', (@$_REQUEST['prefix'] ? $_REQUEST['prefix'] : $dbPre
 //database name prefix which is added to db=name to compose the mysql dbname used in queries, normally hdb_
 
 
-//test db connect valid db
+//test db connections working
 $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbAdminUsername, $dbAdminPassword)
-or returnErrorMsgPage(1, "Unable to connect to database server with readwrite account, please set passwords in configIni.php. MySQL error: " .
-    mysql_error());
+or returnErrorMsgPage(1, "Unable to connect to MySQL database server (using read-write account). Please ask system administrator to check that the database server / MySQL are running.".
+    "<br>&nbsp;<br>On a new system, check that web server has access to the db server (for tiered systems), MySQL access rights are correctly set, and set passwords in heuristConfigIni.php.".
+    "<br>&nbsp;<br>MySQL error: " .mysql_error());
+// this will only occur in isolation if the readonly password is mis-set, and generally only on new setups, so no need to give full explanation
 $db = mysql_connect(HEURIST_DBSERVER_NAME, $dbReadonlyUsername, $dbReadonlyPassword)
-or returnErrorMsgPage(1, "Unable to connect to database server with readonly account, please set passwords in configIni.php. MySQL error: " .
-    mysql_error());
+or returnErrorMsgPage(1, "Unable to connect to MySQL database server (using read-only account). Check MySQL read-only user and password in heuristConfigIni.php, and MySQL access rights for this user.<br>");
 
 
 //-------------------------------------------------------------------------- PATHS AND URLS ---------
@@ -253,8 +254,8 @@ if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultR
 
     if (!defined('HEURIST_UPLOAD_ROOT')){ //fatal error - storage folder is not defined
         returnErrorMsgPage(1, "Cannot access root filestore directory <b>". $defaultRootFileUploadPath .
-            "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), ".
-            "or it is not writeable by PHP (check permissions).</p>");
+            "</b><p>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
+            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
     }
 
     if(!isset($defaultRootFileUploadURL) || $defaultRootFileUploadURL==null || $defaultRootFileUploadURL==""){

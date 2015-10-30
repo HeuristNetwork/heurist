@@ -20,7 +20,6 @@
 
    //@todo - reimplement using Singleton pattern
 
-    //require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
     require_once (dirname(__FILE__).'/common/utils_db.php');
@@ -42,6 +41,8 @@
     * HEURIST_THUMB_DIR
     * HEURIST_FILESTORE_DIR
     */
+
+
     class System {
         /*
         const INVALID_REQUEST = "invalid";    // The Request provided was invalid.
@@ -63,6 +64,8 @@
         //private $guest_User = array('ugr_ID'=>0,'ugr_FullName'=>'Guest');
         private $current_User = null;
         private $system_settings = null;
+
+
 
         /**
         * Read configuration parameters from config file
@@ -111,7 +114,9 @@
                     //@todo  - test upload and thumb folder exist and writeable
                     if(!$this->initPathConstants()){
                         $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).");
+                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
+                            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
+
                         return false;
                     }
 
@@ -128,9 +133,11 @@
 
         }
 
-        // NOTE by Artem: all this stuff with magic numbers are placed here by JJ by mistake - 
+
+
+        // NOTE by Artem: all this stuff with magic numbers are placed here by JJ by mistake -
         // there is no reason to resolve all these constants on every request
-        
+
         /**
         * Defines all constants
         */
@@ -147,6 +154,8 @@
                 $this->defineDTLocalMagic($str, $id[1], $id[0]);
             }
         }
+
+
 
         /**
         * bind Magic Number Constants to their local id
@@ -165,6 +174,8 @@
             }
         }
 
+
+
         /**
         * lookup local id for a given rectype concept id pair
         * @global    type description of global variable usage in a function
@@ -177,7 +188,7 @@
             global $talkToSysAdmin;
             static $RTIDs;
             if (!$RTIDs) {
-                $res = $this->mysqli->query('select rty_ID as localID, 
+                $res = $this->mysqli->query('select rty_ID as localID,
                 rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
                 if (!$res) {
                     echo "Unable to build internal record-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
@@ -196,6 +207,8 @@
             return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID] : null);
         }
 
+
+
         /**
         * bind Magic Number Constants to their local id
         * @param    string [$defString] define string
@@ -212,6 +225,8 @@
                 // define($defString, $dtID);
             }
         }
+
+
 
         /**
         * lookup local id for a given detailtype concept id pair
@@ -243,6 +258,7 @@
         }
 
 
+
         public function initPathConstants($dbname=null){
 
             global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
@@ -253,7 +269,6 @@
                     $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
                     if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 
-//error_log("root=".$documentRoot."   install=".$install_path);
             if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
 
 
@@ -314,8 +329,6 @@
             $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
             $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 
-//error_log("script ".@$_SERVER["SCRIPT_NAME"]);
-
             if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
                 $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
             }
@@ -367,6 +380,8 @@
             return $install_path;
         }
 
+
+
         /**
         * return list of errors
         */
@@ -381,6 +396,8 @@
             $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
             return $this->errors;
         }
+
+
 
         /**
         * Returns all info for current user and some sys config parameters
@@ -411,7 +428,6 @@
 
             return $res;
         }
-
 
         /**
         * Get current user info
@@ -484,7 +500,7 @@
         }
 
         /**
-        * Returns true if current user id databse owner admin or admin of given group (depends on context)
+        * Returns true if current user is database owner admin or admin of given group (depends on context)
         *
         * @param mixed $contx - databasde or group
         * @param mixed $ug - group ID
@@ -508,6 +524,8 @@
             }
         }
 
+
+
         /**
         * Get database connection object
         */
@@ -515,12 +533,15 @@
             return $this->mysqli;
         }
 
+
         /**
         * Get full name of database
         */
         public function dbname_full(){
             return $this->dbname_full;
         }
+
+
 
         /**
         * Restore session by cookie id, or start new session
@@ -601,6 +622,7 @@
         }
 
 
+
         /**
         * Find user by name and password and keeps user info in current_User and in session
         *
@@ -616,9 +638,6 @@
 
                 //db_users
                 $user = user_getByField($this->mysqli, 'ugr_Name', $username);
-
-
-                //DEBUG error_log($user['ugr_Enabled'].">>>=".crypt($password, $user['ugr_Password'])."   ".$user['ugr_Password']);
 
                 if($user){
 
@@ -694,6 +713,8 @@
             }
         }
 
+
+
         /**
         * Clears cookie and destroy session and current_User info
         */
@@ -708,6 +729,8 @@
             */
             return true;
         }
+
+
 
         /**
         * Loads system settings (default values) from sysIdentification
