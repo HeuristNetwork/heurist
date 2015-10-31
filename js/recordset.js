@@ -243,16 +243,14 @@ function hRecordSet(initdata) {
                             // for VISJS timeline
                             function __forVis(dt){
                                 if(dt){
-                                    var res = dt.toString("yyyy-MM-ddTHH:mm:ssz");
-                                    /*if(res.indexOf("-",1)<0){
-                                        res = res+"-01-01";
-                                        if(res.indexOf("-")==0){
-                                            //res = res 
-                                        }
-                                    }*/
+                                    var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
+                                    if(res.indexOf('-')==0){ //BCE
+                                        res = res.substring(1);
+                                        res = '-'+('000000'+res).substring(res.length);
+                                    }
                                     return res;
                                 }else{
-                                    return "";
+                                    return '';
                                 }
                                 
                             }    

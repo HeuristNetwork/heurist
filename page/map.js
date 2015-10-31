@@ -1000,7 +1000,7 @@ console.log('tileloaded 2');
     //    
     // Add clicked marker to array of selected
     //
-    // item.opts.openInfoWindow -> _onItemSelection  -> _showSelection (highlight marker) -> _showPopupInfo
+    // (timemap)item.opts.openInfoWindow -> _onItemSelection  -> _showSelection (highlight marker) -> _showPopupInfo
     //
     function _onItemSelection(  ){
         //that - hMapping
@@ -1358,7 +1358,7 @@ ed_html +
                     $( document ).bubble( "option", "content", html );
                     
                     //marker.scrollIntoView();
-                    setTimeout(function(){ $( marker ).click();}, 500);
+                    //setTimeout(function(){ $( marker ).click();}, 500);
                     
                 }else if(item.event){    //reference to Simile timeline event   - NOT USED
                     
