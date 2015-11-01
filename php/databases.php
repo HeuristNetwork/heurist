@@ -2,7 +2,7 @@
 
     /**
     * Produces the page - list of available databases
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -30,24 +30,24 @@
     }else if (@$_REQUEST['msg']){
         $error_msg = $_REQUEST['msg'];
     }
-    
+
     $list =  mysql__getdatabases4($system->get_mysqli());
     if(count($list)<1){
         //reditrect to create database
         header('Location: ' . HEURIST_BASE_URL . 'migrated/admin/setup/dbcreate/createNewDB.php');
         return;
     }
-    
+
 ?>
 <html>
     <head>
         <title><?=HEURIST_TITLE?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        
+
         <link rel=icon href="../favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../style3.css">
+        <link rel="stylesheet" type="text/css" href="../h4styles.css">
 
         <script type="text/javascript">
         </script>
@@ -57,7 +57,7 @@
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
-            
+
 <?php
     if(isset($error_msg)){
             echo '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">';
@@ -83,11 +83,11 @@
                 </ul>
 
             </div>
-            
+
 <?php
     }
 ?>
-            
+
 
         </div>
     </body>

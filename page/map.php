@@ -48,11 +48,11 @@
 
         <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
         <meta content="telephone=no" name="format-detection">
-        
+
         <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
         <!-- Styles
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
-        <link rel="stylesheet" type="text/css" href="../style3.css" />
+        <link rel="stylesheet" type="text/css" href="../h4styles.css" />
 
         <!-- jQuery -->
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
@@ -78,17 +78,17 @@
         <script type="text/javascript" src="../ext/shapefile/stream.js"></script>
         <script type="text/javascript" src="../ext/shapefile/shapefile.js"></script>
         <script type="text/javascript" src="../ext/shapefile/dbf.js"></script>
-        
-        <script type="text/javascript" src="../ext/js/jqColorPicker.min.js"></script>        
-        
+
+        <script type="text/javascript" src="../ext/js/jqColorPicker.min.js"></script>
+
         <!-- Mapping -->
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
         <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
         <script type="text/javascript" src="map.js"></script>
         <script type="text/javascript" src="map_overlay.js"></script>
         <script type="text/javascript" src="../apps/bubble.js"></script>
-        
-        <!-- minimum set of required set - @todo load it dynamically for standalone case -->                                       
+
+        <!-- minimum set of required set - @todo load it dynamically for standalone case -->
 <!--  remove this comment to run map.php as standalone
         <script type="text/javascript" src="../js/search_minimal.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
@@ -156,7 +156,7 @@
             $(document).ready(function() {
                 if(!top.HAPI4){
                     //load minimum set of required scripts
-                    
+
                     // In case of standalone page
                     top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onHapiInit);//, < ?=json_encode($system->getCurrentUser())? > );
                 }else{
@@ -166,7 +166,7 @@
             });
 
             function loadStyles(){
-                
+
                     var prefs = top.HAPI4.get_prefs();
                     if(!top.HR){
                         //loads localization
@@ -180,13 +180,13 @@
                         cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
                     }
                     $("head").append(cssLink);
-                    
+
                     if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){ //digital harlem - @todo move style to layout
                          $("head").append($('<link rel="stylesheet" type="text/css" href="../apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
                     }
-                
+
             }
-            
+
             // Callback function on hAPI initialization
             function onHapiInit(success)
             {
@@ -255,7 +255,7 @@
                 // Mapping data
                 var mapdata = [];
                 mapping = new hMapping("map", "timeline", top.HAPI4.basePath, mylayout);
-                
+
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
                 //t:26 f:85:3313  f:1:building
                 // Perform database query if possible (for standalone mode - when map.php is separate page)
@@ -280,10 +280,10 @@
                 } else {
                     mapping.load();//load empty map
                 }
-                
+
                 //init popup for timeline  ART14072015
                 $( document ).bubble({
-                            items: ".timeline-event-icon" //deprecated since 
+                            items: ".timeline-event-icon" //deprecated since
                 });
                 $( document ).bubble({
                             items: ".vis-item,.vis-item-overflow"
@@ -588,7 +588,7 @@
 
         <div id="helper" title="Mapping Overview">
         </div>
-        
+
         <div id="layer-edit-dialog"  style="display:none">
             <fieldset>
                 <div>
@@ -598,7 +598,7 @@
                 </div>
                 <div>
                     <div class="header"><label for="layer_color">Color:</label></div>
-                    <input id="layer_color" value="rgb(255, 0, 0)" style="background-color:#f00">        
+                    <input id="layer_color" value="rgb(255, 0, 0)" style="background-color:#f00">
                 </div>
             </fieldset>
             <div class="messages">1</div>

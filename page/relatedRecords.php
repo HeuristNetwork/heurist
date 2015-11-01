@@ -1,9 +1,9 @@
 <?php
 
-    /**  
+    /**
     * NOT USED - the idea was to retieve related records dynamically with the help of ruleBuilder widget
-    * 
-    * 
+    *
+    *
     * Standalone search for related records. It may be used separately or wihin widget in iframe (for example in recordListExt )
     *
     * @package     Heurist academic knowledge management system
@@ -45,7 +45,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../style3.css">
+        <link rel="stylesheet" type="text/css" href="../h4styles.css">
 
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>

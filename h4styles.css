@@ -1,3 +1,23 @@
+/**
+* h4styles.css : global stylesheet for Heurist Vsn 4
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 * {
     -moz-box-sizing: border-box;
 }
@@ -91,7 +111,7 @@ body {
 }
 
 #layout_panes{
-    /*position:relative; 
+    /*position:relative;
     background-color: red;*/
     height: 100%;
     width: 100%;
@@ -159,7 +179,7 @@ fieldset > div > input.text, fieldset > div > select.text{
     margin-bottom: 0.5em;
 }
 
-fieldset > div > .header, 
+fieldset > div > .header,
 fieldset > div > .header_narrow{
     display:table-cell;
     text-align:right;
@@ -347,7 +367,7 @@ div .selected, div .selected:hover{
     border-color: #62A7F8;
 }
 
-div .selected_last{             
+div .selected_last{
     border: 2px solid #62A7F8 !important;
 }
 
@@ -358,8 +378,8 @@ div .selected_last{
 }
 
 .recordDiv .rec_owner{
-    display: none; 
-    vertical-align: top; 
+    display: none;
+    vertical-align: top;
 }
 
 .recordDiv .recTypeThumb {
@@ -610,7 +630,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     /*
     margin:1em 0;
     padding:.5em 10px;
-    background:#71b5e9 url(bg_tags.gif) repeat-x;*/        
+    background:#71b5e9 url(bg_tags.gif) repeat-x;*/
     }
 .tagsCloud li{
     margin:0;
@@ -621,11 +641,11 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .tagsCloud li a{
     /*text-decoration:none;
     color:#fff;*/
-    padding:0 2px;    
+    padding:0 2px;
     }
-.tagsCloud li a:hover{    
+.tagsCloud li a:hover{
     /*color:#cff400;*/
-    }        
+    }
 
 .tag1{font-size:0.8em;}
 .tag2{font-size:0.9em;}
@@ -650,10 +670,10 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .horizontalmenu {
     border:none !important;
     background:none;
-    padding:0;    
+    padding:0;
 }
 .ui-menu{
-    z-index: 9999999 !important; 
+    z-index: 9999999 !important;
 }
 .horizontalmenu > .ui-menu-item {
     display: inline-block;
@@ -661,14 +681,14 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     width: auto;
 }
 
-/* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon 
-     Remove the jQuery UI Icon 
-     Remove the jQuery UI Text Indent 
-     Bump it up - jQuery UI is -8px  
-      
+/* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
+     Remove the jQuery UI Icon
+     Remove the jQuery UI Text Indent
+     Bump it up - jQuery UI is -8px
+
      Bump it - jQuery UI is -8px
-     Allow use of icon-large to be properly aligned       
-*/     
+     Allow use of icon-large to be properly aligned
+*/
 .ui-icon[class*=" icon-"] {
     background: none repeat scroll 0 0 transparent;
     text-indent: 0;
@@ -687,7 +707,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 .fancytree-title{
    margin:0 !important;
-   padding: 0 !important;   
+   padding: 0 !important;
 }
 .fancytree-edit-input{
    min-width: 12em !important;
@@ -718,8 +738,8 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     font-style:italic;
 }
 .svs-acordeon{
-    border-bottom: #8ea9b9 1px solid;  
-    font-size: 0.97em;  
+    border-bottom: #8ea9b9 1px solid;
+    font-size: 0.97em;
 }
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;
@@ -727,14 +747,14 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 
 .svs-acordeon-group{
     padding-top:1em;
-    font-size: 1em;  
+    font-size: 1em;
     font-weight:bold;
 }
 
 .svs-contextmenu{
-    
+
 }
-    
+
 ul > li:hover > .svs-contextmenu, div:hover > .svs-contextmenu {
     display: inline-block;
 }
@@ -758,7 +778,7 @@ div > .svs-contextmenu {
 }*/
 .div-table-cell{
     display: table-cell;
-    vertical-align: middle;    
+    vertical-align: middle;
 }
 
 .mandatory > label{

@@ -42,7 +42,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../style3.css">
+        <link rel="stylesheet" type="text/css" href="../h4styles.css">
 
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
@@ -90,10 +90,10 @@
             </div>
 
             <div style="position:absolute;width:99%;top:2em;bottom:4em;overflow-y:auto" id="level1">
-            
+
                 <div id="div_add_level" style="padding-top:1em;"><button id="btn_add_level1">Add New Rule</button></div>
             </div>
-            
+
 
             <!-- Slide-in help text - displays at start by default, can be closed and reopened -->
             <div id="helper" title="Rules and Rule sets">
@@ -130,7 +130,7 @@
 
 
             <div style="position:absolute;width:99%;height:2em;bottom:10px; text-align:right">
-                
+
                 <button id="btn_save">Save Rule Set</button>
                 <!-- <button id="btn_apply">Apply Rules</button> -->
                 <button id="btn_help">Help</button>

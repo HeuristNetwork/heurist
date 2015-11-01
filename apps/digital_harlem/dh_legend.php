@@ -25,8 +25,8 @@
     define('PLACE_ICON', 4326);
     define('PERSON_ROLE', 3306);
     define('EVENT_TYPE', 3297);
-                       
-    
+
+
     $statistics = "";
     $system = new System();
     // connect to given database
@@ -36,7 +36,7 @@
 /*
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../style3.css">
+<link rel="stylesheet" type="text/css" href="../../h4styles.css">
 </head>
 <body>
 </body>

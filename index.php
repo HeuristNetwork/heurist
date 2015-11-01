@@ -52,7 +52,7 @@ if(@$_REQUEST['db']){
 
         <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
         <meta content="telephone=no" name="format-detection">
-        
+
         <link rel=icon href="favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
@@ -146,7 +146,7 @@ if(@$_REQUEST['db']){
         <!-- todo: load dynamically
         <script type="text/javascript" src="apps/editing/rec_search.js"></script>
         <script type="text/javascript" src="apps/editing/rec_relation.js"></script>
-        <script type="text/javascript" src="apps/editing/editing_input.js"></script> 
+        <script type="text/javascript" src="apps/editing/editing_input.js"></script>
          -->
         <!-- script type="text/javascript" src="page/editing.js"></script -->
 
@@ -192,7 +192,7 @@ if(@$_REQUEST['db']){
 
                             //add theme link to html header
                             $("head").append(cssLink);
-                            $("head").append($('<link rel="stylesheet" type="text/css" href="style3.css?t='+(new Date().getTime())+'">'));
+                            $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
 
                             //top.HAPI4.database+'. HEURIST_TITLE
                             window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
@@ -228,7 +228,7 @@ if(@$_REQUEST['db']){
                                     }
 
                                     top.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
-                                    
+
                                     top.HAPI4.LayoutMgr.appInitAll(layoutid, "#layout_panes");
 
                                     //perform search in the case that parameter "q" is defined
