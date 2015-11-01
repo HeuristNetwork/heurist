@@ -33,7 +33,7 @@
 	require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 	require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
     require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-	require_once("encodePolyline.php");
+	//require_once("encodePolyline.php");
 
 	/**
 	* Returns array of mapobjects

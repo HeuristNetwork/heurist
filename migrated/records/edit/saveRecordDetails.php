@@ -249,6 +249,7 @@ which is one step too many and has been removed from design by Ian in approx 201
     * @param int $recID
     */
     function updateRecord($recID, $rtyID = null) {
+        
         // Update the given record.
         // This is non-trivial: so that the versioning stuff (achive_*) works properly
         // we need to separate this into updates, inserts and deletes.
@@ -277,6 +278,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         // Get the existing records details and compare them to the incoming data
         $recDetails = getRecordDetails($recID);
 
+        
 // find UPDATES - everything that is in current record and has a post value is treated as an update
         $recDetailUpdates = array();
         foreach ($recDetails as $dtyID => $dtlIDs) {
@@ -334,7 +336,7 @@ which is one step too many and has been removed from design by Ian in approx 201
                 unset($recDetails[$dtyID][$dtlID]);	// remove data from local reflection of the database
             }
         }
-
+ 
 // find DELETES
         // Anything left in recDetails now represents recDetails rows that need to be deleted
 
@@ -350,8 +352,8 @@ which is one step too many and has been removed from design by Ian in approx 201
         // Try to insert anything left in POST as new recDetails rows
         $bibDetailInserts = array();
 
-
         foreach ($_POST as $eltName => $bds) {
+            
             // if not properly formatted or empty or an empty array then skip it
             if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;
 
@@ -377,7 +379,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         //  - $recDetailUpdates: an assoc. array of dtl_ID => column values to be updated in recDetails
         //  - $bibDetailInserts: an array of column values to be inserted into recDetails
         //  - $bibDetailDeletes: an array of dtl_ID values corresponding to rows to be deleted from recDetails
-
+        
         // Commence versioning ...
         mysql_query("start transaction");
 
@@ -802,7 +804,7 @@ which is one step too many and has been removed from design by Ian in approx 201
                 return array();
         }
         function inputOK($postVal, $dtyID, $rtyID) {
-            if (! preg_match("/^(p point|r polygon|[cl] linestring)\\(?\\(([-0-9.+, ]+?)\\)\\)?$/i", $postVal, $matches)) {
+            if (! preg_match("/^(p point|r polygon|cl linestring|l linestring)\\(?\\(([-0-9.+, ]+?)\\)\\)?$/i", $postVal, $matches)) {
                 if (! preg_match("/^(pl polygon)\\(\\(([-0-9.+, ]+?)\\)(?:,\\([-0-9.+, ]+?\\))?\\)$/i", $postVal, $matches)) {
                     return false;	// illegal value
                 }
@@ -810,9 +812,14 @@ which is one step too many and has been removed from design by Ian in approx 201
 
             $type = strtolower($matches[1]);
             $pointString = $matches[2];
-
-            $FLOAT = '-?[0-9]+(?:\\.[0-9]*)?'; // ensure that we have a list of float pairs  xx.xxxxx yy.yyyyyy, x.xx y.yy, etc
-            return preg_match("/^$FLOAT $FLOAT(?:,$FLOAT $FLOAT)*$/", $pointString);
+            
+            if(strlen($pointString)<10000){ //otherwise verification takes tooooo long time
+                $FLOAT = '-?[0-9]+(?:\\.[0-9]*)?'; // ensure that we have a list of float pairs  xx.xxxxx yy.yyyyyy, x.xx y.yy, etc
+                $ret = preg_match("/^$FLOAT $FLOAT(?:,$FLOAT $FLOAT)*$/", $pointString);
+            }else{
+                $ret = true;
+            }
+            return $ret;
         }
     }
 

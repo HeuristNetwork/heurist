@@ -3049,24 +3049,29 @@ if (! top.HEURIST.edit) {
                 return;
             }
 
-            HAPI.PJ.store("gigitiser_geo_object", input.value, {
+            /*HAPI.PJ.store("gigitiser_geo_object", input.value, {
                 height: 550,
                 width: 780,
                 callback: function(_, _, response) {
+                }
+            });*/
 
-                    var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
+                    var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html";
+                     //+ (response.success ? "edit" : encodeURIComponent(input.value))
                     top.HEURIST.util.popupURL(
                         windowRef,
                         sURL,
-                        { callback: function(type, value)
+                        {   onpopupload: function( frame ){
+                                if(frame &&  frame.contentWindow)
+                                 frame.contentWindow.loadParameters( input.value );
+                            },
+                            callback: function(type, value)
                             {
                                 thisRef.setGeo(newDiv, value? (type+" "+value) : "");
                                 top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                             }
                         }
                     );
-                }
-            });
 
         }; // editLink.onclick
 
