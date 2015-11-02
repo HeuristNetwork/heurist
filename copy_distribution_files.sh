@@ -7,6 +7,7 @@
 # @link        http://HeuristNetwork.org
 # @copyright   (C) 2005-2015 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+# @author      Artem Osmakov     <osmakov@gmail.com>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 # @version     4.0
 
@@ -23,7 +24,7 @@ if [ -z $1 ]
 
 # copy_distribution_files.sh
 # --------------------------
-# This file copies all necessary Heurist vsn 3 distribution files and support files from the current directory
+# This file copies all necessary Heurist vsn 4 distribution files and support files from the current directory
 # (any Heurist h4-xx program directory) to a temporary directory in the h4-build directory in /var/www/html/HEURIST.
 # Make sure the current directory is the up-to-date version you want to package.
 # The script is set up for the HeuristScholar server and may require modification for other directory layouts
@@ -59,14 +60,15 @@ cp -r *.* /var/www/html/HEURIST/h4-build/$1
 # Remember to add any new directories here
 cp -r apps /var/www/html/HEURIST/h4-build/$1
 cp -r assets /var/www/html/HEURIST/h4-build/$1
-cp -r help /var/www/html/HEURIST/h4-build/$1
+cp -r context_help /var/www/html/HEURIST/h4-build/$1
+cp -r documentation_and_templates /var/www/html/HEURIST/h4-build/$1
 cp -r js /var/www/html/HEURIST/h4-build/$1
 cp -r migrated /var/www/html/HEURIST/h4-build/$1
 cp -r page /var/www/html/HEURIST/h4-build/$1
 cp -r php /var/www/html/HEURIST/h4-build/$1
 
 # remove any superfluous files - add others as appropriate
-rm -f /var/www/html/HEURIST/h4-build/$1/*.sh
+# add here as required ...
 
 # Now zip it all up as a tarball for distribution on the Heurist web site
 
@@ -80,18 +82,17 @@ rm -rf /var/www/html/HEURIST/h4-build/$1/
 echo
 ls -alt /var/www/html/HEURIST/h4-build
 
-
 echo
 echo Copying installer and update shellscripts from root of current instance
+echo The installer and update scripts are accessed directly to download and install tarballs
 cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-
+cp migrated/installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
 echo
-echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, exemplars and help
+echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, and help
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h4/
-tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ exemplars/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
 chown -R www-data:www-data /var/www/html/HEURIST/DISTRIBUTION
@@ -102,7 +103,7 @@ echo ---------------------------------------------------------------------------
 echo
 echo "Now complete distribution (if code ready) with:"
 echo
-echo "    cp /var/www/html/HEURIST/h4-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION"
+echo "    sudo cp /var/www/html/HEURIST/h4-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION"
 echo
 echo DO NOT CHANGE THE NAME of the tar.bz2 file - it extracts to a folder of this name
 echo and the installation is dependant on the filename parameter to find this folder

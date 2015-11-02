@@ -73,7 +73,7 @@ $2 mkdir HEURIST
 $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 
 echo -e "Fetching Heurist code from Heurist.sydney.edu.au"
-$2 wget http://heurist.sydney.edu.au/html/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm $1.tar.bz2
 # this will fail if h4 already exists, use update script in this case
@@ -95,18 +95,18 @@ $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.t
 $2 tar -xjf help.tar.bz2
 $2 rm help.tar.bz2
 
-$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/exemplars.tar.bz2
-$2 tar -xjf exemplars.tar.bz2
-$2 rm exemplars.tar.bz2
-
 cd /var/www/html/HEURIST/h4
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
+
+# I plan to move migrated functions back to root level soon, Nov 15, in order to make a more coherent
+# structure. These simlinks will avoid problems with existing installations not having them
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 
 # "migrated" directory within h4 contains h3 functions not yet or partially converted to h4
 cd migrated
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/exemplars exemplars
 
 echo "Heurist unpacked"
 
@@ -141,14 +141,14 @@ $2 chown -R www-data:www-data /var/www/html/HEURIST/
 $2 chmod -R 775  /var/www/html/HEURIST/
 $2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
-# Simlink Heurist root as heurist and codebase as h4 from the root web directory
+# Simlink codebase as both heurist and h4 from the root web directory
 # do both /var/www and /var/www/html for good measure
 cd /var/www
 $2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/ heurist
+$2 ln -s /var/www/html/HEURIST/h4/ heurist
 cd /var/www/html
 $2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/ heurist
+$2 ln -s /var/www/html/HEURIST/h4/ heurist
 
 # TODO: NEED TO ADD .htaccess file to the filestore
 
@@ -158,11 +158,12 @@ echo -e "\n\n\n\n\n\n"
 
 echo "---- Heurist Vsn 4 installed in /var/www/html/HEURIST/h4 -------------------------------------------"
 echo
-echo "NOTE:"
-echo
 echo "There is normally limited space on /var/www, so you may wish to move HEURIST_FILESTORE from"
 echo "its current location - /var/www/html/HEURIST/HEURIST_FILESTORE - to a location with plenty "
 echo "of space allocated, such as /srv or /data, and add a simlink to this location in /var/www/html/HEURIST "
+echo
+echo "Heurist switchboard will be accessible at http://serveraddress/HEURIST"
+echo "Heurist Vsn 4 will be accessible at http://serveraddress/heurist or http://serveraddress/h4"
 echo
 echo "CONFIGURATION:"
 echo
@@ -172,5 +173,5 @@ echo "You can do this by pasting the following at the command line - you may nee
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to heurist on your web site eg. myserver.com/heurist"
+echo "Then run Heurist by navigating to Heurist on your web site at http://serveraddress/heurist"
 echo

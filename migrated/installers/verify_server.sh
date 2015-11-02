@@ -2,6 +2,9 @@
 
 # verify_server.sh: Verifies packages etc. on Ubuntu/Debian server
 
+# Note: This file is referenced in the installation instructions on HeuristNetwork.org
+#       do not move, rename or delete
+
 # Note: this file retrieved from old distribution on 16 sep 2015, may need updating
 
 # @package     Heurist academic knowledge management system

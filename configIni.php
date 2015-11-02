@@ -11,9 +11,8 @@
 * @copyright   (C) 2005-2015 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @author      Tom Murtagh, Kim Jackson, Stephen White
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
+* @version     4
 */
 
 /*
@@ -31,7 +30,7 @@
 WARNING:
 
 Setting any of the values in the configIni.php file overrides the
-values set in ../heuristConfigIni.php for that instance of Heurist.
+values set in ../heuristConfigIni.php FOR THAT INSTANCE ONLY of Heurist.
 All other instances will use the value set in ../heuristConfigIni.php
 
 WE THEREFORE RECOMMEND NOT CHANGING ANYTHING IN THIS FILE
@@ -47,18 +46,23 @@ by an experienced sysadmin for very unusual server setups
 Setting up the server to support multiple code versions
 -------------------------------------------------------
 
+Note: This is done automatically by the installation routies in install_heurist.sh
+
 Move the file parentDirectory_heuristConfigIni.php to the parent directory of the codebase
 rename to heuristConfigIni.php and enter MySQL passwords, paths and other config settings there.
 This allows Heurist instances to exist as multiple codebases on a single server and avoids
 the need for duplication of information or the accidental distribution of passwords etc.
 if one of these codebases is used as a code source.
 
+Also move parentDirectory.index.html - the Heurist 'switchboard' to the parent directory and rename index.html
+
 --------------------------------------------------------------------------------------------
 */
 
-// *** DO NOT CHANGE VERSION NUMBER ***
+// *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.1.0"; // sets current program version number, determined by Heurist development lead
+$version = "4.1.1"; // sets current program version number, determined by Heurist development lead
+// Vsn 4.1.1 02 Nov 2015
 // Vsn 4.1.0 15 sep 2015
 // 3.2.0 alpha 8th July 2014, beta 21st July 2014
 // 3.3.0 beta 11th Nov 2014
