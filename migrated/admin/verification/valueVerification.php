@@ -98,7 +98,7 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
 
         //ids
         $allowed_terms = getAllowedTerms($defs, $defs_nonsel, $dtyID);
-
+                
         //get labels
         if(is_array($allowed_terms)){
             $allowed_terms = getTermLabels($allowed_terms);

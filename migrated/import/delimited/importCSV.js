@@ -40,7 +40,7 @@ function init() {
 
     var allowed = Object.keys(top.HEURIST.detailTypes.lookups);
     allowed.splice(allowed.indexOf("separator"),1);
-    allowed.splice(allowed.indexOf("relmarker"),1);
+    //allowed.splice(allowed.indexOf("relmarker"),1);
     allowed.splice(allowed.indexOf("file"),1);
     allowed.splice(allowed.indexOf("geo"),1);
     //

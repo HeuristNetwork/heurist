@@ -1413,8 +1413,18 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
             foreach($values as $idx=>$r_value){
                 $r_value2 = trim_lower_accent($r_value);
                 if($r_value2!=""){
-
-                    $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                    
+                    $is_termid = false;
+                    if(ctype_digit($r_value2)){
+                        $is_termid = isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
+                    }
+                    
+                    if($is_termid){
+                        $term_id = $r_value;
+                    }else{
+                        $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                    }
+                    
                     if (!$term_id)
                     {//not found
                         $is_error = true;
@@ -1888,9 +1898,18 @@ function doImport($mysqli, $imp_session, $params){
                             if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
 
                                 $r_value = trim_lower_accent($r_value);
-
+                                
                                 if($r_value!=""){
-                                    $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
+                                    
+                                    if(ctype_digit($r_value) 
+                                            && isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
+                                                
+                                            $value = $r_value;
+                                    }
+                                    
+                                    if($value == null){
+                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
+                                    }
                                 }
 
                                 /* OLD WAY
