@@ -625,7 +625,10 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                            zoomMax:31536000000*500000,
                            stack:is_stack,
                            margin:1,
-                           minHeight: $(ele).height()
+                           minHeight: $(ele).height(),
+                           order: function(a, b){
+                               return a.start<b.start?-1:1;
+                           }
                            };
                         //31536000000 - year
             // Create a Timeline

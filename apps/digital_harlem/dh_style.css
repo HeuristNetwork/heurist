@@ -182,6 +182,8 @@ div.infowindow{
 }
 div.infowindow-map{
   max-width: 400px;
+  min-height: 180px !important;
+  overflow: hidden;
 }
 
 div.infowindow h3 {

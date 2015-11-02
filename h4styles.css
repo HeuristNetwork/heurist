@@ -61,7 +61,6 @@ body {
 }
 
 .ui-layout-content {
-    /*background-color: gray;*/
     overflow:hidden !important;
     height: 100%;
     width: 100%;
@@ -75,7 +74,6 @@ body {
 
 /* layout toggler icon from jquery ui */
 .ui-layout-toggler {
-    /* background-color: #FFF; */
     opacity:        .60;
     filter: alpha(opacity=60); /* IE 8,9 */
 }
@@ -111,8 +109,6 @@ body {
 }
 
 #layout_panes{
-    /*position:relative;
-    background-color: red;*/
     height: 100%;
     width: 100%;
 }
@@ -605,7 +601,6 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     width:95%;
     display:inline-block;
     cursor: pointer;
-    /*color:#515151;*/
 }
 .saved-search .name:hover{
     text-decoration:underline;
@@ -786,7 +781,6 @@ div > .svs-contextmenu {
 }
 
 .loading{
-    /*background-color:rgb(255,0,0) !important;*/
     background: url('assets/loading-animation-white.gif') no-repeat center center !important;
 }
 

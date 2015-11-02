@@ -189,7 +189,7 @@
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
 
         <p><b><?php echo $person_role;?></b></p>
-        <p>At this address: <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
+        <p><b>At</b>: <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
         <p><?php echo $comment;?></p>
         <p><?php echo $date_out;?></p>
         <?php echo $moredetailLink; ?>        

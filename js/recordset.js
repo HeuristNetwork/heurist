@@ -141,8 +141,10 @@ function hRecordSet(initdata) {
                             titem = {
                                 id: dataset_name+'-'+recID, //unique id
                                 group: dataset_name,
-                                content: '<img src="'+top.HAPI4.iconBaseURL + iconId + 
-                                           '.png"  align="absmiddle"/>&nbsp;<span>'+recName+'</span>',
+                                content: 
+                                '<img src="'+top.HAPI4.iconBaseURL + iconId + 
+                                           '.png"  align="absmiddle" style="padding-right:3px;"/>&nbsp;<span>'+recName+'</span>',
+                                //'<span>'+recName+'</span>',
                                 title: recName,
                                 start: dres[0],
                                 recID:recID

@@ -69,7 +69,8 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
      if(!event || content=="") return; //==undefined   
         
      var w = 220, h = 152;   
-        
+     
+     //copy from google map    
 content =     
 '<div style="cursor: default; width: '+w+'px; height: '+h+'px;>'  //position: absolute; left: 428px; top: 249px; z-index: 249;"
     +'<div style="position: absolute; left: 0px; top: 0px;">'
