@@ -42,6 +42,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
     var tmap = null,  // timemap object
     vis_timeline = null, // vis timeline object
+    vis_timeline_range = null,
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,  
 
@@ -345,10 +346,89 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
         return NaN;
     }
     
+    function _timelineZoomToAll(){
+            if(vis_timeline_range==null){
+                vis_timeline_range = vis_timeline.getDataRangeArtem();
+            }
+            //var range = vis_timeline.getItemRange(); //@todo calculate once
+            _timelineZoomToRange( vis_timeline_range );
+    }
+
+    function _timelineZoomToRange(range){
+
+            var min = new Date(range.min).getTime(),
+                max = new Date(range.max).getTime();
+            var delta = 0;
+
+            if(range['nofit']==undefined){
+            var interval = max-min;
+            var YEAR = 31536000000;
+            var DAY = 86400000;
+
+            var yearmax = (new Date(range.max)).getFullYear(); 
+            var dt = range['omax'];
+            var dta = [];
+            if(dt!=undefined){
+                dta = dt.split('-');
+                if(dta.length>0)
+                    yearmax = Number(dta[0]);
+            }
+
+            
+            if(interval < 1000){ //single date
+                    //detect detalization 
+                    if(dta.length>2){
+                        interval = DAY;
+                    }else if(dta.length>1){
+                        interval = DAY*90;
+                    }else{
+                        interval = YEAR;
+                    }
+            }
+            
+            if(interval < DAY){  // day  - zoom to 4 days
+                delta = DAY*2;
+            }else if(interval < DAY*30) {
+                delta = DAY*10;
+            }else if(interval < DAY*90) { // month - zoom to year
+                delta = YEAR/2;
+            }else if(interval < YEAR) { // year - zoom to 5
+                delta = YEAR*2;
+            }else if(interval < YEAR*2){
+                delta = YEAR*5;
+            }else if(interval < YEAR*50){
+            
+                //zoom depend on epoch
+                //var yearmax = (new Date(range.max)).getFullYear();
+                if(yearmax<0){
+                    delta = interval*1.5;
+                }else if(yearmax<1500){
+                    delta = interval;
+                }else{
+                    delta = interval*0.5;
+                }
+                
+            }else  if(interval < YEAR*2000){
+                delta = interval*0.1;
+            }else{
+                delta = interval*0.05;
+            }
+
+            }
+                //this.range.setRange(range.min, range.max, animation);
+                vis_timeline.setWindow({
+                    start: min-delta,
+                    end: max+delta
+                });        
+    }      
+    
+    
     //called once on first timeline load
     // it inits buttons on timeline toolbar
     //
     function _initVisTimelineToolbar(){
+        
+        
         
         /**
          * Zoom the timeline a given percentage in or out
@@ -366,92 +446,40 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
     //console.log('set2: '+(new Date(range.start.valueOf() - interval * percentage))+' '+(new Date(range.end.valueOf()   + interval * percentage)));        
         }  
         
-        function __timelineGetEnd(ds){
+        function __timelineZoomToSelection(){
 
-            if(!ds) ds = vis_timeline.itemsData;
-            
-            var item1 = ds.max('end');
-            var item2 = ds.max('start');
-            var end1 = _getUnixTs(item1, 'end', ds);
-            var end2 = _getUnixTs(item2, 'start', ds);
-                
-            return isNaN(end1)?end2:Math.max(end1, end2);
+                    var sels = vis_timeline.getSelection();
+                    if(sels && sels['length']>0){
+                           var range = vis_timeline.getDataRangeArtem(new vis.DataSet(vis_timeline.itemsData.get(sels)));
+                           _timelineZoomToRange(range);
+                    }
         }
+              
+        function __timelineMoveToLeft(){
+
+            var range2 = vis_timeline.getWindow();
+            var interval = range2.end - range2.start;
+            
+            if(vis_timeline_range==null){
+                    vis_timeline_range = vis_timeline.getDataRangeArtem();
+            }
+            
+            _timelineZoomToRange({min:vis_timeline_range.min.getTime(), max:vis_timeline_range.min.getTime()+interval, nofit:true})    
+        }      
+
+        function __timelineMoveToRight(){
+
+            var range2 = vis_timeline.getWindow();
+            var interval = range2.end - range2.start;
+            var delta = interval*0.1;
+            if(vis_timeline_range==null){
+                    vis_timeline_range = vis_timeline.getDataRangeArtem();
+            }
+            
+            _timelineZoomToRange({min:vis_timeline_range.max.getTime()-interval+delta, max:vis_timeline_range.max.getTime()+delta, nofit:true})    
+        }      
+
         
-        function __timelineZoomAll(ds){
-            
-            if(!ds){
-                vis_timeline.fit(); //short way
-                return;
-            }
-            
-            if(!ds) ds = vis_timeline.itemsData;
-            
-            //moment = timeline.itemsData.get(item['id'],{fields: ['start'], type: { start: 'Moment' }});        
-            var start = _getUnixTs(ds.min('start'), 'start', ds);
-            var end = __timelineGetEnd(ds);
-            
-            var interval = (end - start);
-            
-            if(isNaN(end) || end-start<1000){
-                interval = 1000*60*60*24; //one day            
-                end = start;
-            }else{
-                interval = interval*0.2;
-            }
-            
-            vis_timeline.setWindow({
-                start: start - interval,
-                end: end + interval
-            });        
-        }
-
-        function __timelineZoomSelection(){
-            
-            var sels = vis_timeline.getSelection();
-            if(sels && sels['length']>0){
-                   //vis_timeline.focus(sels); //short way - not work proprely
-                   //return;
-                
-                   var ds = new vis.DataSet(vis_timeline.itemsData.get(sels));
-                   __timelineZoomAll(ds);
-            }
-            
-        }
-        
-        function __timelineMoveTo(dest){
-
-            var start = _getUnixTs(vis_timeline.itemsData.min('start'), 'start');
-            var end = __timelineGetEnd();
-            
-            var time = (dest=='end') ?end:start;
-            
-            var range = vis_timeline.getWindow();
-            var interval = range.end - range.start;
-            
-            var delta = interval*0.05;
-
-            if(isNaN(end) || end-start<1000){//single date
-
-                interval = interval/2;
-                
-                vis_timeline.setWindow({
-                    start: start - interval,
-                    end:   start + interval
-                });
-                
-            }else if(dest=='end'){
-                vis_timeline.setWindow({
-                    start: time + delta - interval,
-                    end:   time + delta
-                });
-            }else{
-                vis_timeline.setWindow({
-                    start: time - delta,
-                    end:   time - delta + interval
-                });
-            }
-        }
         function __timelineShowLabels(){
             if($("#btn_timeline_labels").is(':checked')){
                 $(".vis-item-content").find("span").show();
@@ -475,22 +503,22 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
             },text:false, label:top.HR("Zoom to All")})
-            .click(function(){ __timelineZoomAll(); })
+            .click(function(){ _timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
             },text:false, label:top.HR("Zoom to selection")})
-            .click(function(){ __timelineZoomSelection(); })
+            .click(function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
             },text:false, label:top.HR("Move to Start")})
-            .click(function(){ __timelineMoveTo("start"); })
+            .click(function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
             },text:false, label:top.HR("Move to End")})
-            .click(function(){ __timelineMoveTo("end"); })
+            .click(function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
             
             
@@ -665,9 +693,11 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             //vis_timeline.setOptions({'stack':is_stack});            
         }
             
+        vis_timeline_range = null;    
         vis_timeline.setGroups(groups);
-        vis_timeline.setItems(items);            
-        vis_timeline.fit(); //short way
+        vis_timeline.setItems(items);
+        _timelineZoomToAll();            
+        //vis_timeline.fit(); //short way
 
         if(!is_stack){
             $(".vis-item-content").find("span").hide();
@@ -1321,7 +1351,7 @@ ed_html +
                 var ele = $("#"+timelinediv_id);
                 marker = ele.find("[data-id="+ds.id+'-'+item.opts.recid +"]");
                 //horizontal scroll
-                if(marker) ele.scrollTop( marker.position().top );
+                if(marker && marker.position()) ele.scrollTop( marker.position().top );
             }
             
             // open window on MAP
