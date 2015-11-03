@@ -1,16 +1,16 @@
 <?php
 
-    /** 
+    /**
     * CRUD for User/Groups (sysUGrps) and User Preferences (from SESSION)
-    * 
+    *
     * user_ - prefix for functions
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -44,7 +44,7 @@
 
     /**
     * List of user preferences and their default values
-    * 
+    *
     * @var mixed
     */
     $prefs = array(
@@ -59,7 +59,7 @@
 
 
     /**
-    * Get user/group by field value 
+    * Get user/group by field value
     *
     * @param mixed $ugr_Name - user name
     */
@@ -88,7 +88,7 @@
 
     /**
     * get db owner user or specific field of this user
-    * 
+    *
     * @param mixed $field
     * @return mixed
     */
@@ -109,7 +109,7 @@
 
     /**
     * put your comment there...
-    * 
+    *
     * @param mixed $system
     * @param mixed $ugr_Name
     */
@@ -156,7 +156,7 @@
 
     /**
     * Update the last login datetime
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $ugr_ID - user ID
     */
@@ -261,7 +261,7 @@
         $ret = false;
 
         if($system->is_admin() && $recID>0){
-            $res = mysql__select_array($system->get_mysqli(), 
+            $res = mysql__select_array($system->get_mysqli(),
                 "select ugr_Type, ugr_Enabled, ugr_LoginCount from sysUGrps  where ugr_ID=".$recID);
             $ret = ($row[0]=="user" && $row[1]=="n" && $row[2]==0);
         }
@@ -292,7 +292,7 @@
 
                 $mysqli = $system->get_mysqli();
 
-                $res = mysql__select_value($mysqli, 
+                $res = mysql__select_value($mysqli,
                     "select ugr_ID from sysUGrps  where ugr_Name='"
                     .$mysqli->real_escape_string( $record['ugr_Enabled'])."' or ugr_eMail='"
                     .$mysqli->real_escape_string($record['ugr_eMail'])."'");
@@ -302,12 +302,12 @@
                 }
 
                 $is_approvement = false;
-                //encrypt password            
+                //encrypt password
                 $tmp_password = null;
                 if($rectype=='user'){
 
 
-                    if(@$record['ugr_Password'] && $record['ugr_Password']!=''){ 
+                    if(@$record['ugr_Password'] && $record['ugr_Password']!=''){
                         $tmp_password = $record['ugr_Password'];
                         $record['ugr_Password'] = hash_it($tmp_password);
                     }else{
@@ -345,7 +345,7 @@
                 }else{
                     $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
                 }
-            }else{   
+            }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 'Operation denied. Not enough rights');
             }
 
@@ -449,11 +449,12 @@
             }
 
             // point them to the home page
+            // This is confusing for the user who has a specific database, and the URL is wrong b/c it goes to an H3 address which doesn't exist ...
             //$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."?db=".HEURIST_DBNAME." with the username: " . $ugr_Name;
 
             //give them a pointer to the search page for the database
-            $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at".
-            HEURIST_BASE_URL."?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
+            $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at ".
+            HEURIST_BASE_URL."?db=".HEURIST_DBNAME. "\n"."\n\nwith the username: " . $ugr_Name;
 
 
             if($tmp_password!=null){
@@ -461,15 +462,15 @@
                 "\n\nTo change your password go to My Profile -> My User Info in the top right menu";
             }
 
-            $email_text = $email_text."\n\nWe recommend visiting the Help ".
-            "pages, which provides comprehensive overviews and step-by-step instructions for using Heurist.";
+            $email_text = $email_text."\n\nWe recommend visiting http://HeuristNetwork.org and the online Help ".
+            "pages, which provide comprehensive overviews and step-by-step instructions for using Heurist.";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
             sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
 
-        } 
-    }  // sendApprovalEmail    
+        }
+    }  // sendApprovalEmail
 
     function generate_passwd ($length = 8) {
         $passwd = '';

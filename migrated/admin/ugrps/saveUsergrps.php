@@ -475,7 +475,7 @@ function sendApprovalEmail($recID, $tmp_password){
 
             // point them to the home page.
             // TODO: this is inelegant b/c HEURIST_BASE_URL points to eg. /var/ww/html/HEURIST/h4 not to /var/www/html/HEURIST
-            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."../index.html and create yourself a database with the username: " . $ugr_Name;
+            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL_V4."/index.html and create yourself a database with the username: " . $ugr_Name;
 
             //give them a pointer to the search page for the database.
             // Removed Ian 9/10/15 - you don't want them creating data in the sandpit
