@@ -163,11 +163,12 @@ function _removeMapDocumentOverlays() {
 //
 //
 //
-function _addLegendEntryForLayer(overlay_idx, title, icon, ontop){
+function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
 
     var overlay = null,
         legendid,
         ismapdoc = (overlay_idx>0);
+        
         
     if (ismapdoc) {
         legendid = 'md-'+overlay_idx;
@@ -178,14 +179,16 @@ function _addLegendEntryForLayer(overlay_idx, title, icon, ontop){
     }
     if(!overlay) return;
 
-    
     var legenditem = $('<div style="display:block;padding:2px;" id="'
             + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
             + overlay_idx+'" id="chbox-'+legendid+'" '
             + (overlay.visible?'checked="checked">':'>')
-            + '<img src="'+top.HAPI4.basePath+'assets/16x16.gif"'
-            + ' align="top" class="rt-icon" '     
-            + ((icon)?('style="background-image: url('+icon+');"'):'')+'>'
+            + ((ismapdoc)
+            ? ('<img src="'+top.HAPI4.basePath+'assets/16x16.gif"'
+                + ' align="top" class="rt-icon" '     
+                + ((icon)?('style="background-image: url('+icon+');"'):'')+'>')
+            : ('<div style="display:inline-block;border:6px solid '+icon_or_color+'" />')
+            )
             + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
             + '</label></div>');
             
@@ -732,7 +735,8 @@ function _addRecordsetLayer(source, index) {
                        setTimeout(function(){top.HEURIST4.msg.showMsgErr(sMsg);}, 1000);
                     }
 
-                    _addLegendEntryForLayer(source.id, source.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png', true );
+                    //top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png'
+                    _addLegendEntryForLayer(source.id, source.title, mapdata.color, true );
                }
                
                
@@ -851,6 +855,9 @@ function _editLayerProperties( dataset_id, callback ){
                         $("#legend .content").find('#'+mapdata.id+' label').html(new_title);
                         //$('#timeline > div > div.vis-panel.vis-left > div.vis-content > div > div:nth-child(2) > div
                         $('#timeline div[data-groupid="'+mapdata.id+'"]').html(new_title);
+                    }
+                    if(mapdata.color!=new_color){
+                        $("#legend .content").find('#'+mapdata.id+'>div').css('border-color',new_color);
                     }
                     mapping.changeDatasetColor( mapdata.id, new_color, true );
                 }

@@ -98,7 +98,7 @@ function hRecordSet(initdata) {
         MAXITEMS = 2000;
             
         dataset_name = dataset_name || "main";
-        iconColor = iconColor || '#f00';
+        iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';
          
         var tot = 0;
         
