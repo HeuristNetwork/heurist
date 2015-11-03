@@ -107,6 +107,7 @@
             .vis-item{
                 background-color:lightgray;
             }
+            /*
             .vis-item-overflow{
                 position:absolute;
             }
@@ -128,7 +129,9 @@
             .vis-item.vis-selected{
                 background-color:#bee4f8 !important;
             }
-            .vis-time-axis.vis-foreground{
+            */
+
+            .vis-panel.vis-left, .vis-time-axis.vis-foreground{
                 background-color:#DDDDDD;
             }
             .vis-item-content{

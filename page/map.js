@@ -348,16 +348,16 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
     
     function _timelineZoomToAll(){
             if(vis_timeline_range==null){
-                vis_timeline_range = vis_timeline.getDataRangeArtem();
+                vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
             //var range = vis_timeline.getItemRange(); //@todo calculate once
             _timelineZoomToRange( vis_timeline_range );
     }
 
     function _timelineZoomToRange(range){
-
-            var min = new Date(range.min).getTime(),
-                max = new Date(range.max).getTime();
+        
+            var min = vis_timeline.getDate(range.min), // new Date(range.min).getTime(),
+                max = vis_timeline.getDate(range.max); //new Date(range.max).getTime();
             var delta = 0;
 
             if(range['nofit']==undefined){
@@ -450,7 +450,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
 
                     var sels = vis_timeline.getSelection();
                     if(sels && sels['length']>0){
-                           var range = vis_timeline.getDataRangeArtem(new vis.DataSet(vis_timeline.itemsData.get(sels)));
+                           var range = vis_timeline.getDataRangeHeurist(new vis.DataSet(vis_timeline.itemsData.get(sels)));
                            _timelineZoomToRange(range);
                     }
         }
@@ -461,7 +461,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             var interval = range2.end - range2.start;
             
             if(vis_timeline_range==null){
-                    vis_timeline_range = vis_timeline.getDataRangeArtem();
+                    vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
             
             _timelineZoomToRange({min:vis_timeline_range.min.getTime(), max:vis_timeline_range.min.getTime()+interval, nofit:true})    
@@ -473,7 +473,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
             var interval = range2.end - range2.start;
             var delta = interval*0.1;
             if(vis_timeline_range==null){
-                    vis_timeline_range = vis_timeline.getDataRangeArtem();
+                    vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
             
             _timelineZoomToRange({min:vis_timeline_range.max.getTime()-interval+delta, max:vis_timeline_range.max.getTime()+delta, nofit:true})    
