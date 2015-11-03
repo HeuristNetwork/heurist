@@ -1924,10 +1924,17 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 
 			// related values are given as well; enums is an array of string-string pairs
 			// enum(trmID,trmLabel,[invID, invLabel])
-			if (top.HEURIST && typeof top.HEURIST.terms != "undefined"){
-				ciIndex = top.HEURIST.terms.fieldNamesToIndex['trm_ConceptID'];
-				enumLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
-				relLookup = top.HEURIST.terms.termsByDomainLookup['relation'];
+            var terms = null;
+            if (top.HEURIST && typeof top.HEURIST.terms != "undefined"){
+                terms = top.HEURIST.terms;
+            }else if (top.HEURIST4 && typeof top.HEURIST4.terms != "undefined") {
+                terms = top.HEURIST4.terms;
+            }
+            
+			if (terms != null){
+				ciIndex = terms.fieldNamesToIndex['trm_ConceptID'];
+				enumLookup = terms.termsByDomainLookup['enum'];
+				relLookup = terms.termsByDomainLookup['relation'];
 
 				for (i=0; i < enums.length; ++i) {
 					_enums.push(enums[i][1]);
@@ -1973,8 +1980,10 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 		return _constrainedRecTypeID;
 	};
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
-	this.getIdForEnumerationValue = function(value) { return (isNaN(value) ? _termsMap[("" + value).toLowerCase()]  ||  null :
-																			(_enumsMap[value] ? value : null)); };
+	this.getIdForEnumerationValue = function(value) { 
+            return (isNaN(value) ? _termsMap[("" + value).toLowerCase()]  ||  null :
+																			(_enumsMap[value] ? value : null)); 
+    };
 	this.getEnumerationValueFromId = function(id) { return (isNaN(id) ? (_enumsMap[("" + id).toLowerCase()] || null) :
 																			(_enumsMap[id] || null)); };
 
