@@ -39,7 +39,7 @@
                 downloadFile('image/png', $thumbfile);
             }else{
                 //@todo - change to the same script in h4
-                $thumb_url = HEURIST_BASE_URL_OLD."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$fileid;
+                $thumb_url = HEURIST_BASE_URL_V3."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$fileid;
                 header("Location: ".$thumb_url);
                 exit();
             }

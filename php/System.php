@@ -423,7 +423,7 @@
                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
-                    "basePathOld"=>HEURIST_BASE_URL_OLD)
+                    "basePathOld"=>HEURIST_BASE_URL_V3)
             );
 
             return $res;

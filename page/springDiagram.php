@@ -34,7 +34,7 @@
         <title>Spring Diagram</title>
 
         <!-- Css4 -->
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_OLD?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
         <!-- link rel="stylesheet" type="text/css" href="../../../common/css/global.css" -->
         <style>
             body, html {

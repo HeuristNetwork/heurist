@@ -418,7 +418,7 @@
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below to review further details and approve the registration:\n".
-            HEURIST_BASE_URL_OLD."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+            HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 

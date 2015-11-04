@@ -299,9 +299,9 @@ if(@$_REQUEST['db']){
 
 
         <!-- These are old H3 stuff - needed to support existing features in popups -->
-        <script>top.installDirFromH4="<?=HEURIST_BASE_URL_OLD?>";</script>
-        <script src="<?=HEURIST_BASE_URL_OLD?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL_OLD?>common/php/displayPreferences.php"></script>
+        <script>top.installDirFromH4="<?=HEURIST_BASE_URL_V3?>";</script>
+        <script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL_V3?>common/php/displayPreferences.php"></script>
 
         <!-- TODO: H4 currently not using Magic Numbers, but should be using them -->
         <!-- <script src="../../common/php/getMagicNumbers.php"></script> -->
