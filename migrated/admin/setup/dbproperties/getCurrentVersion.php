@@ -128,7 +128,7 @@ function checkVersionOnMainServer($version_in_session)
         //send request to main server at HEURIST_INDEX_BASE_URL
         // Heurist_Master_Index is the refernece standard for current database version
         // TODO: Maybe this should be changed to Heurist_Sandpit?
-        $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
+        $url = HEURIST_INDEX_BASE_URL . "migrated/admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
 
         $rawdata = loadRemoteURLContentWithRange($url, null, true, 5);
 
