@@ -104,9 +104,6 @@
             .ui-map-document { background-image: url('../assets/267.png') !important;}
             .ui-map-layer { background-image: url('../assets/268.png') !important;}
 
-            .vis-item{
-                background-color:lightgray;
-            }
             /*
             .vis-item-overflow{
                 position:absolute;
@@ -140,6 +137,10 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            .vis-item-bbox{
+                background-color:lightgray;
+            }
+            
         </style>
 
         <!-- Initializing -->
