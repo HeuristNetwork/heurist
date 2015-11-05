@@ -389,6 +389,7 @@ $.widget( "heurist.mainMenu", {
 
                 if(ele.hasClass('h3link')){
                     href = window.HAPI4.basePathOld + href;
+                    //h3link class on menus implies location of h3 code
                 }
 
                 ele.attr('href', href);
