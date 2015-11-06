@@ -303,7 +303,7 @@ function hLayout(args) {
     function _initLayoutGridster(){
 
             if(!$.isFunction($('body').gridster)){
-                $.getScript(top.HAPI4.basePath+'ext/gridster/jquery.gridster.js', initLayoutGridster );
+                $.getScript(top.HAPI4.basePathV4+'ext/gridster/jquery.gridster.js', initLayoutGridster );
                 return;
             }
 

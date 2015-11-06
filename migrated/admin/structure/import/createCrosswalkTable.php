@@ -29,7 +29,7 @@
         print '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
         print "<link rel=stylesheet href='../../../common/css/global.css'></head>"
         ."<body><div class=wrap><div id=errorMsg><span>You do not have sufficient privileges to access this page</span>"
-        ."<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME
+        ."<p><a href=".HEURIST_BASE_URL_V3."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME
         ." target='_top'>Log out</a></p></div></div></body></html>";
         return;
     }
@@ -223,7 +223,7 @@
                 echo "var rectypeStructures = ".json_format($rectypeStructures,true). ";\n";
                 echo 'var tempDBName = "'.$tempDBName.'";'. "\n";
                 echo 'var sourceDBName = "'.$source_db_name.'";'. "\n";
-                echo 'var URLBase = "'.HEURIST_BASE_URL.'";'. "\n";
+                echo 'var URLBase = "'.HEURIST_BASE_URL_V3.'";'. "\n";
                 echo 'var importTargetDBName = "'.HEURIST_DBNAME.'";'. "\n";
                 echo 'var importTargetDBFullName = "'.DATABASE.'";'. "\n";
                 echo "var rectypeGroups = ".json_format($rectypeGroups,true). ";\n";
@@ -859,7 +859,7 @@
                         dropped = true;
 
                         top.HEURIST.util.popupURL(top,
-                            "<?=HEURIST_BASE_URL?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
+                            "<?=HEURIST_BASE_URL_V3?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
                                 "close-on-blur": true,
                                 "no-resize": true,
                                 //"no-close": true,
@@ -870,7 +870,7 @@
                                 callback: function(context) {
 
                                     if(redirect) {
-                                        window.location = "<?=HEURIST_BASE_URL?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+                                        window.location = "<?=HEURIST_BASE_URL_V3?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
                                     }
                                 }
                         });

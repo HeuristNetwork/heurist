@@ -28,7 +28,7 @@ var Heurist = {
 w: 370,
 h: 240,
 
-uriBase: "<?= HEURIST_BASE_URL ?>",
+uriBase: "<?= HEURIST_BASE_URL_V3 ?>",
 uriHost: "<?= HEURIST_SERVER_URL ?>/",
 database:"<?=HEURIST_DBNAME?>",
 init: function () {

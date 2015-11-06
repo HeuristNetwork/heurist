@@ -39,7 +39,7 @@
     $trg_min = intval($trg_ver[1]);
 
     if($src_maj==$trg_maj && $src_min == $trg_min){
-        header('Location: ' . HEURIST_BASE_URL);
+        header('Location: ' . HEURIST_BASE_URL_V3);
         exit();
     }
 ?>
@@ -95,7 +95,7 @@
                         }
 
                         if($upgrade_success){
-                            print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".HEURIST_DBNAME."'>Return to main page</a></p>";
+                            print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL_V3."?db=".HEURIST_DBNAME."'>Return to main page</a></p>";
                         }
 
                     }else{
@@ -200,13 +200,13 @@
                         ?>
                         <p style='font-weight:bold'>You must be logged in as database owner to upgrade the database structure</p>
                         <p>
-                            <a href="<?=HEURIST_BASE_URL?>common/connect/login.php?logout=1&amp;db=<?=HEURIST_DBNAME?>">Log in as database owner</a>
+                            <a href="<?=HEURIST_BASE_URL_V3?>common/connect/login.php?logout=1&amp;db=<?=HEURIST_DBNAME?>">Log in as database owner</a>
                         </p>
                         <?php
                         }
                     }
                 ?>
-                <a href="<?=HEURIST_BASE_URL?>common/connect/selectDatabase.php?$msg=Select database">Select different database</a>
+                <a href="<?=HEURIST_BASE_URL_V3?>common/connect/selectDatabase.php?$msg=Select database">Select different database</a>
             </div>
         </div>
     </body>

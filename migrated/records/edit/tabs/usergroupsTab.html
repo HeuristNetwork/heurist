@@ -72,7 +72,7 @@
       <div id="admin-wgTags"><br><a href="#" onclick="{showEditWgTagsDialog(); return false;}"> Click here </a> to add/delete tags for workgroups (administrators only). </div>
 
 <script>
-	document.write('<form id=wgtag-form method=post jsonAction="'+top.HEURIST.basePath+'records/tags/updateRecordTagLinks.php" action="'+top.HEURIST.basePath+'records/tags/updateRecordTagLinks.php"></form>');
+	document.write('<form id=wgtag-form method=post jsonAction="'+top.HEURIST.baseURL_V3+'records/tags/updateRecordTagLinks.php" action="'+top.HEURIST.baseURL_V3+'records/tags/updateRecordTagLinks.php"></form>');
 </script>
 <script src="../../tags/usergroupTagEditorLibrary.js"></script>
 <script>
@@ -83,7 +83,7 @@ function showEditWgTagsDialog(){
 
 	var database = (top.HEURIST.database.name || top.HEURIST.parameters.db);
 
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php?popup=yes"+(database ? "&db="+database : ""), { callback: function(tags) {
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "admin/ugrps/editGroupTags.php?popup=yes"+(database ? "&db="+database : ""), { callback: function(tags) {
 		if (tags){
 
 			var _updateTags = function(context){
@@ -98,7 +98,7 @@ function showEditWgTagsDialog(){
 					}
 			}
 
-			var baseurl = top.HEURIST.basePath + "records/tags/reloadUsergroupTags.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "records/tags/reloadUsergroupTags.php";
 			var callback = _updateTags;
 			var params = "db="+database;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);

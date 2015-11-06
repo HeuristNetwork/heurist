@@ -45,7 +45,7 @@ if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - re
         $reg_url =  $reg_url.'&named=1';    
     }
 
-error_log( HEURIST_BASE_URL );
+error_log( HEURIST_BASE_URL_V3 );
 error_log("getg list ".$reg_url);
     
     //get json array of registered databases

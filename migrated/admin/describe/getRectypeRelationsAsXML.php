@@ -155,7 +155,7 @@
     // File headers to explain what the listing represents and for version checking
     print "\n<Relationships>";
     print "\n\n<!--Heurist Definitions Exchange File, generated: ".date("d M Y @ H:i")."-->";
-    print "\n<HeuristBaseURL>" . HEURIST_BASE_URL. "</HeuristBaseURL>";
+    print "\n<HeuristBaseURL>" . HEURIST_BASE_URL_V3. "</HeuristBaseURL>";
     print "\n<HeuristDBName>" . HEURIST_DBNAME . "</HeuristDBName>";
     print "\n<HeuristProgVersion>".HEURIST_VERSION."</HeuristProgVersion>";
     print "\n<HeuristDBVersion>".HEURIST_DBVERSION."</HeuristDBVersion>";

@@ -265,7 +265,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                         recordset.setFld(record, 'rec_Icon', 'term4326' );
                         recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                         recordset.setFld(record, 'rec_Info', 
-                            top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+recID);
+                            top.HAPI4.basePathV4 + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+recID);
                         
                     }else{
                     
@@ -290,7 +290,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                                 if(rels2.length<1){
                                     //3a. this is event->address 
                                     recordset.setFld(record, 'rec_Info', 
-                                    top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database
+                                    top.HAPI4.basePathV4 + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database
                                             +"&recID="+eventID+"&addrID="+recID);
                                      
                                     //add links for this person 
@@ -322,7 +322,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                                         var rel_person = records[ personID ];
                                         
                                         recordset.setFld(record, 'rec_Info', 
-                                        top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                        top.HAPI4.basePathV4 + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
                                                 personID+"&addrID="+recID+"&eventID="+eventID );
                                                 
                                         //add links for this person 
@@ -345,7 +345,7 @@ console.log('prepared '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debu
                                 recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
                                 recordset.setFld(record, 'rec_Icon',     'term'+relation_type );
                                 
-                                var recInfoUrl = top.HAPI4.basePath + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
+                                var recInfoUrl = top.HAPI4.basePathV4 + "apps/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
                                                             recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
                                 recordset.setFld(record, 'rec_Info', recInfoUrl);
                                 recordset.setFld(record, 'rec_InfoFull', recInfoUrl+'&full=1');

@@ -1258,7 +1258,7 @@ function getRecTypeUsageCount() {
 *               "nameLookup" => {transformName => [transRecID,...], ...},
 *               "byID" => {transRecID => {property => val,...},...}}
 * @return    object transform information structured for interface use
-* @uses      HEURIST_BASE_URL
+* @uses      HEURIST_BASE_URL_V3
 * @uses      HEURIST_DBNAME
 * @uses      get_user_id()
 */
@@ -1306,7 +1306,7 @@ function getTransformsByOwnerGroup() {
     $res = mysql_query($query);
     while ($row = mysql_fetch_assoc($res)) {
         $transRecID = $row['rec_ID'];
-        $uri = (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID'] : null));
+        $uri = (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? HEURIST_BASE_URL_V3 . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID'] : null));
         if (!$uri) {
             continue;
         }
@@ -1326,7 +1326,7 @@ function getTransformsByOwnerGroup() {
 * tools = {"byTransform" => {transRecID => [toolRecID,...], ...},
 *          "byID" => {toolRecID => {property => val,...},...}}
 * @return    object tool information lookup by toolRecID and transRecID
-* @uses      HEURIST_BASE_URL
+* @uses      HEURIST_BASE_URL_V3
 * @uses      HEURIST_DBNAME
 * @uses      get_user_id()
 */
@@ -1375,7 +1375,7 @@ function getToolsByTransform() {
         $toolRecID = $row['rec_ID'];
         $tools["byId"][$toolRecID] = array("name" => $row['name'],
             "recID" => $row['rec_ID'],
-            "img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_BASE_URL . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID']) : null)),
+            "img" => (@$row['uri'] ? $row['uri'] : (@$row['fileID'] ? (HEURIST_BASE_URL_V3 . "records/files/downloadFile.php?db=" . HEURIST_DBNAME . "&ulf_ID=" . $row['fileID']) : null)),
             "colour" => $row['colour'],
             "dt" => $row['dt'],
             "rt" => $row['rt'],

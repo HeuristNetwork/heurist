@@ -26,7 +26,7 @@
     if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap>".
     "<div id=errorMsg><span>You must be logged in as system administrator to add or change user groups</span>".
-    "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
+    "<p><a href=".HEURIST_BASE_URL_V3."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
     " target='_top'>Log out</a></p></div></div></body></html>";
     return;
     }

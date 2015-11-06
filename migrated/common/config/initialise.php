@@ -81,8 +81,8 @@ HEURIST_CURRENT_URL  - current url
 //toremove HEURIST_SERVER_ROOT_DIR - server root         eg. /var/www/html/             @todo - remove
 HEURIST_DIR          - full path to heurist    /var/www/html/h4/
 
-HEURIST_BASE_URL     - full url     http://heuristscholar.org:80/h4/        @todo - rename to HEURIST_URL
-HEURIST_SITE_PATH    - /h4/       (@todo - replace to HEURIST_BASE_URL)
+HEURIST_BASE_URL_V3     - full url     http://heuristscholar.org:80/h4/        @todo - rename to HEURIST_URL
+HEURIST_SITE_PATH    - /h4/       (used only in this file to make other constants)
 
 HEURIST_UPLOAD_ROOT      - path to root filestore folder
 HEURIST_UPLOAD_ROOT_URL  - url to root filestore folder    (used in this file only)
@@ -156,7 +156,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 }
 
 define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // eg. /h4/
-define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h4/
+define('HEURIST_BASE_URL_V3', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h4/
 
 
 //get H4 base URL
@@ -792,17 +792,17 @@ function returnErrorMsgPage($critical, $msg = null) {
         $msg2 = "<p>&nbsp;Heurist initialisation error<p> ".$msg?$msg:"".
         " <p><i>Please consult your system administrator for help, or email: info - a t - heuristscholar.org </i></p>";
         $msg2 = rawurlencode($msg2);
-        $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
+        $redirect = HEURIST_BASE_URL_V3 . "common/html/msgErrorMsg.html?msg=" . $msg2;
 
     } else if ($critical == 2) { //database not defined or cannot connect to it
-        $redirect = HEURIST_BASE_URL . "common/connect/selectDatabase.php";
+        $redirect = HEURIST_BASE_URL_V3 . "common/connect/selectDatabase.php";
         if ($msg) {
             $redirect.= "?msg=" . rawurlencode($msg);
         }
 
     } else if ($critical == 3) { // db required upgrade
 
-        $redirect = HEURIST_BASE_URL . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
+        $redirect = HEURIST_BASE_URL_V3 . "admin/setup/dbupgrade/upgradeDatabase.php?db=".HEURIST_DBNAME;
 
     } else {
         // gets to here if database not specified properly. This is an error if the system is set up properly, but not at
@@ -813,7 +813,7 @@ function returnErrorMsgPage($critical, $msg = null) {
             $msg2 = "<p>&nbsp;Cannot open database, but cause of error unknown.<p><br><br>".$msg?$msg:"".
             "<p><br><br><i>Please consult your system administrator for help, or email: info - a t - heuristscholar.org </i></p>";
             $msg2 = rawurlencode($msg2);
-            $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
+            $redirect = HEURIST_BASE_URL_V3 . "common/html/msgErrorMsg.html?msg=" . $msg2;
         }
     }
 

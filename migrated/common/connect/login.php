@@ -48,8 +48,8 @@ $last_uri = urldecode(@$_REQUEST['last_uri']);
 if (! $last_uri) {
     if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
         $last_uri = $_SERVER['HTTP_REFERER'];
-    }else if (defined('HEURIST_BASE_URL')) {
-        $last_uri = HEURIST_BASE_URL.'?db=' . HEURIST_DBNAME;
+    }else if (defined('HEURIST_BASE_URL_V3')) {
+        $last_uri = HEURIST_BASE_URL_V3.'?db=' . HEURIST_DBNAME;
     }
 }
 
@@ -183,11 +183,11 @@ if(!$needRegistration){
     <head>
         <title>Heurist Login</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel=icon href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
-        <link rel="shortcut icon" href='<?=HEURIST_SITE_PATH?>favicon.ico' type=image/x-icon>
+        <link rel=icon href='<?=HEURIST_BASE_URL_V3?>favicon.ico' type=image/x-icon>
+        <link rel="shortcut icon" href='<?=HEURIST_BASE_URL_V3?>favicon.ico' type=image/x-icon>
 
-        <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
-        <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/login.css'>
+        <link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/global.css'>
+        <link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/login.css'>
 
 
 
@@ -369,7 +369,7 @@ if(!$needRegistration){
                             <tr><td>
                                     <p>You are currently logged-in as <b><?= get_user_name() ?> (<?= get_user_username() ?>)</b></p>
 
-                                    <p><b><a href="<?=HEURIST_BASE_URL?>">Heurist home</a></b></p>
+                                    <p><b><a href="<?=HEURIST_BASE_URL_V3?>">Heurist home</a></b></p>
 
                                     <?php
                                     if ($last_uri)

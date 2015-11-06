@@ -85,7 +85,7 @@ if ($recID ){ // check access first
     }
 }
 
-saveRecordHML(HEURIST_BASE_URL."export/xml/flathml.php?ver=1&a=1&f=1&pubonly=1&".
+saveRecordHML(HEURIST_BASE_URL_V3."export/xml/flathml.php?ver=1&a=1&f=1&pubonly=1&".
     "depth=$depth&hinclude=$hinclude&w=all&q=$q&db=".HEURIST_DBNAME.
     (@$_REQUEST['outputFilename'] ? "&filename=".$_REQUEST['outputFilename'] :"").
     ($outFullName && @$_REQUEST['debug']? "&pathfilename=".$outFullName :""));

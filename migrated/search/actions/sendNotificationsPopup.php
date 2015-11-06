@@ -60,7 +60,7 @@
 ?>
 <html>
 	<head>
-		<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 		<title>Share records</title>

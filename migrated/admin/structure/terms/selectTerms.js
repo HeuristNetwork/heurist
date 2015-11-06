@@ -287,7 +287,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
             // 3. sends data to server
             var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = null; //_updateResult;
             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -784,7 +784,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 
 	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-	Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&db="+db+"&domain="+_datatype,
+	Hul.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?popup=1&db="+db+"&domain="+_datatype,
 		{
 		"close-on-blur": false,
 		"no-resize": false,
@@ -821,7 +821,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 							_treesInit();
 				}
 
-				top.HEURIST.util.sendRequest(top.HEURIST.basePath+"common/php/loadCommonInfo.php", callback, null);
+				top.HEURIST.util.sendRequest(top.HEURIST.baseURL_V3+"common/php/loadCommonInfo.php", callback, null);
 */
 
 			}

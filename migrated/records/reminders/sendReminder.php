@@ -41,7 +41,7 @@ function sendReminderEmail($reminder, $USERS_DATABASE, $HOST, $BASE_URL) {
 		$dbName = substr(HEURIST_DBNAME, strlen(HEURIST_DB_PREFIX));
 	}
 	if ($HOST === NULL) $HOST = HOST;
-	if ($BASE_URL === NULL) $BASE_URL = HEURIST_BASE_URL;
+	if ($BASE_URL === NULL) $BASE_URL = HEURIST_BASE_URL_V3;
 
 	$recipients = array();
 	if (@$reminder['rem_ToEmail']) {

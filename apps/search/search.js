@@ -57,7 +57,7 @@ $.widget( "heurist.search", {
 
         
         /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js                           
-            $.getScript(top.HAPI4.basePath+'js/search_incremental.js', function(){ that._create(); } );
+            $.getScript(top.HAPI4.basePathV4+'js/search_incremental.js', function(){ that._create(); } );
             return;
         }*/
         this.element.css({'height':'100%', 'min-width':'1100px'}).addClass('ui-heurist-header1');
@@ -183,7 +183,7 @@ $.widget( "heurist.search", {
         */
 
         var link = $('<a>',{href:'#'})
-            .html('<img src="'+top.HAPI4.basePath+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
+            .html('<img src="'+top.HAPI4.basePathV4+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
             .css('padding-right','1em')
             .appendTo(this.div_search_header);
             this._on( link, {  click: function(){
@@ -427,14 +427,14 @@ $.widget( "heurist.search", {
 
 
                 var link = $('<a>',{href:'#'})
-                .html('<img src="'+top.HAPI4.basePath+'assets/magicwand.png" width="20" title="'+
+                .html('<img src="'+top.HAPI4.basePathV4+'assets/magicwand.png" width="20" title="'+
                         top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
                 .css({'padding-right':'1em','padding-left':'1em'})
                 .appendTo( this.div_buttons );
                 this._on( link, {  click: this.showSearchAssistant });
 
                 link = $('<a>',{href:'#'})
-                .html('<img src="'+top.HAPI4.basePath+'assets/savefloppy.png" width="20" title="'+
+                .html('<img src="'+top.HAPI4.basePathV4+'assets/savefloppy.png" width="20" title="'+
                         top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
                 .css('padding-right','1em')
                 .appendTo( this.div_buttons );
@@ -496,7 +496,7 @@ $.widget( "heurist.search", {
             if($.isFunction($('body').pagination)){
                 this._initPagination();
             }else{
-                $.getScript(top.HAPI4.basePath+'apps/pagination.js', function() {
+                $.getScript(top.HAPI4.basePathV4+'apps/pagination.js', function() {
                     if($.isFunction($('body').pagination)){
                         that._initPagination();
                     }else{
@@ -670,7 +670,7 @@ $.widget( "heurist.search", {
                 if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
                     q ="&q=" + encodeURIComponent(this.query_request.q);
                 }
-                var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+                var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
                 top.HEURIST4.msg.showDialog(url, { width:740, height:540, callback:
                     function(res){
@@ -1079,12 +1079,12 @@ $.widget( "heurist.search", {
     , _addNewRecord: function(){
 
 
-        var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, { height:550, width:700,
                     callback:function(responce) {
 /*
-                var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
+                var sURL = top.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
                     sURL,
                     function(responce){
@@ -1102,7 +1102,7 @@ $.widget( "heurist.search", {
 
     , _showDbSummary: function(){
 
-        var url = top.HAPI4.basePath+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV4+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
 
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -1117,7 +1117,7 @@ $.widget( "heurist.search", {
             doLogin(this.options.isloginforced);
         }else{
             //var that = this;
-            $.getScript(top.HAPI4.basePath+'apps/profile/profile_login.js', this._doLogin );
+            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_login.js', this._doLogin );
         }
 
 
@@ -1127,7 +1127,7 @@ $.widget( "heurist.search", {
 
         if(false && !$.isFunction(doLogin)){  // already loaded in index.php
             //var that = this;
-            $.getScript(top.HAPI4.basePath+'apps/profile/profile_login.js', this._doRegister );
+            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_login.js', this._doRegister );
         }else{
             doRegister();
         }
@@ -1142,7 +1142,7 @@ $.widget( "heurist.search", {
 
         }else{
             var that = this;
-            $.getScript(top.HAPI4.basePath+'apps/profile/profile_edit.js', function() {
+            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
                 if($.isFunction($('body').profile_edit)){
                     that._doRegister();
                 }else{

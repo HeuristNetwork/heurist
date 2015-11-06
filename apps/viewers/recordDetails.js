@@ -193,10 +193,10 @@ $.widget( "heurist.recordDetails", {
                     if($.isFunction($('body').editing_input)){
                     this._renderHeader();
                     }else{
-                    $.getScript(top.HAPI4.basePath+'apps/editing/editing_input.js', function(){ 
-                    $.getScript(top.HAPI4.basePath+'apps/rec_search.js',
+                    $.getScript(top.HAPI4.basePathV4+'apps/editing/editing_input.js', function(){ 
+                    $.getScript(top.HAPI4.basePathV4+'apps/rec_search.js',
                     function(){ 
-                    $.getScript(top.HAPI4.basePath+'apps/rec_relation.js',
+                    $.getScript(top.HAPI4.basePathV4+'apps/rec_relation.js',
                     function(){ 
                     that._renderHeader(); 
                     });
@@ -305,9 +305,9 @@ $.widget( "heurist.recordDetails", {
                     // <a href="images/large/01.jpg"><img src="images/thumbnails/01.jpg" alt="First" title="The first image" /></a>
                     // <a href="http://dynamic.xkcd.com/random/comic/?width=880" target="yoxview"><img src="../images/items/thumbnails/xkcd.jpg" alt="XKCD" title="Random XKCD comic" /></a>
 
-                    var $alink = $("<a>",{href: top.HAPI4.basePath+'file.php?db=' + top.HAPI4.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
+                    var $alink = $("<a>",{href: top.HAPI4.basePathV4+'file.php?db=' + top.HAPI4.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
                     .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
-                    $("<img>", {src: top.HAPI4.basePath+'file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
+                    $("<img>", {src: top.HAPI4.basePathV4+'file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
 
 
                 }
@@ -354,7 +354,7 @@ $.widget( "heurist.recordDetails", {
 
         $('<div>')
         .append( $('<img>',{
-            src:  top.HAPI4.basePath+'assets/16x16.gif',
+            src:  top.HAPI4.basePathV4+'assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
             })
             .css({'background-image':'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))

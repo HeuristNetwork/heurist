@@ -86,7 +86,7 @@
                         $list = mysql__getdatabases(false);
                         $i = 0;
                         foreach ($list as $name) {
-                            print("<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>");
+                            print("<li><a href='".HEURIST_BASE_URL_V3."?db=$name'>$name</a></li>");
                             $i++;
                         }
 
@@ -103,7 +103,7 @@
                                 print "<h2>Initialisation: $sandpitDB database created</h2>";
                                 print "<br />This database is required to allow initial login and to manage registration of new users";
                                 print "<br />These will allow the owner to login and approve new registrations on the $sandpitDB database";
-                                print "<br /><br /><input type='button' onclick='{location.href=\"".HEURIST_BASE_URL
+                                print "<br /><br /><input type='button' onclick='{location.href=\"".HEURIST_BASE_URL_V3
                                         ."/common/connect/login.php?db=$sandpitDB\"}' value='Proceed to registration form'/>";
                             } else {
                                 print "<p color='red'>Unable to create sample database $sandpitDB</p><p>Please contact Heurist developers for help</p>";

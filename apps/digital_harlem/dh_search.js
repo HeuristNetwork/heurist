@@ -63,7 +63,7 @@ $.widget( "heurist.dh_search", {
 
         this.res_div_progress = $('<div>')
                     .css({'height':'60px',
-                        'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center' })
+                        'background':'url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center' })
                     .appendTo(this.search_pane).hide();
 
     

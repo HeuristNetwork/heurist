@@ -76,7 +76,7 @@
         
 
         // request for server side
-        var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+        var baseurl = "<?=HEURIST_BASE_URL_V3?>admin/setup/dbproperties/getRegisteredDBs.php";
         var params = "db="+top.HEURIST.database.name+"&named=1&exclude="+top.HEURIST.database.id; //HEURIST_DBNAME, HEURIST_DBID
         top.HEURIST.util.getJsonData(baseurl,
             // fillRegisteredDatabasesTable
@@ -122,7 +122,7 @@
                     
                 }
                 
-                if ($.isEmptyObject()) {
+                if ($.isEmptyObject( registeredDBs )) {
                     top.HEURIST.util.showError('Error: Cannot access index service<br>'+
                         'Please verify that your proxy settings are not blocking access');
                 }else{

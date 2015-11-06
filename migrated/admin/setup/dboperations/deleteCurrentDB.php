@@ -44,7 +44,7 @@
 
     if ($dbname=='Heurist_Sandpit') {// we require a valid DB incase the user deletes all DBs
         print "<p>Deletion of Heurist_Sandpit is not supported through this interface as it is required for initial user registration.</p>";
-        //"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=Heurist_Sandpit' >Return to Heurist</a>";
+        //"<p><a href='".HEURIST_BASE_URL_V3."admin/adminMenu.php?db=Heurist_Sandpit' >Return to Heurist</a>";
         return;
     }
 
@@ -96,7 +96,7 @@
                     <h2>Database <b><?=$dbname?></b> has been deleted</h2>
                     <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>deleted_databases.</p>
                     <p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>
-                    <p><a href='#' onclick='{top.location.href="<?=HEURIST_BASE_URL?>index.php" }' >Return to Heurist</a></p>
+                    <p><a href='#' onclick='{top.location.href="<?=HEURIST_BASE_URL_V3?>index.php" }' >Return to Heurist</a></p>
 <?php
                 }
             }

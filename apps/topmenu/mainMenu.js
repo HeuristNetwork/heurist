@@ -72,7 +72,7 @@ $.widget( "heurist.mainMenu", {
         $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
                         'background-position': 'left center',
                         'background-repeat': 'no-repeat',
-                        'background-image': 'url("'+top.HAPI4.basePath+'assets/database.png")' }).text(top.HAPI4.database).appendTo( this.div_dbname );
+                        'background-image': 'url("'+top.HAPI4.basePathV4+'assets/database.png")' }).text(top.HAPI4.database).appendTo( this.div_dbname );
         //'font-style':'italic'
         //$("<div>").css({'font-size':'0.8em'}).text("v"+top.HAPI4.sysinfo.version).appendTo( this.div_dbname );
 
@@ -139,7 +139,7 @@ $.widget( "heurist.mainMenu", {
             .appendTo( this.div_BottomRow )
             .button()
             .click(function( event ) {
-                var url = top.HAPI4.basePathOld + "admin/adminMenu.php?db=" + top.HAPI4.database;
+                var url = top.HAPI4.basePathV3 + "admin/adminMenu.php?db=" + top.HAPI4.database;
                 window.open(url, "_blank");
             });
         }
@@ -283,7 +283,7 @@ $.widget( "heurist.mainMenu", {
          if(name=='Database_lo'){
             link = $('<a>',{
                 text: 'Open database',
-                href: top.HAPI4.basePathOld + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' + top.HAPI4.database,
+                href: top.HAPI4.basePathV3 + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' + top.HAPI4.database,
                 target: '_blank'
             });
 
@@ -388,7 +388,7 @@ $.widget( "heurist.mainMenu", {
                 href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + top.HAPI4.database;
 
                 if(ele.hasClass('h3link')){
-                    href = window.HAPI4.basePathOld + href;
+                    href = window.HAPI4.basePathV3 + href;
                     //h3link class on menus implies location of h3 code
                 }
 
@@ -442,12 +442,12 @@ $.widget( "heurist.mainMenu", {
     _addNewRecord: function(){
 
 
-        var url = top.HAPI4.basePathOld+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, { height:550, width:700,
                     callback:function(responce) {
-/*
-                var sURL = top.HEURIST.basePath + "common/php/reloadCommonInfo.php";
+
+                var sURL = top.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
                     sURL,
                     function(responce){
@@ -523,7 +523,7 @@ $.widget( "heurist.mainMenu", {
 
         if(q!=''){
 
-            var url = top.HAPI4.basePathOld + "export/xml/flathml.php?"+
+            var url = top.HAPI4.basePathV3 + "export/xml/flathml.php?"+
                         "w=all"+
                         "&a=1"+
                         "&depth="+depth +
@@ -565,7 +565,7 @@ $.widget( "heurist.mainMenu", {
         }
 
         if(q!=''){
-            var url = top.HAPI4.basePathOld + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + top.HAPI4.database;
+            var url = top.HAPI4.basePathV3 + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + top.HAPI4.database;
             window.open(url, '_blank');
         }
 
@@ -591,7 +591,7 @@ $.widget( "heurist.mainMenu", {
                     }
 
 
-                    var url = top.HAPI4.basePathOld + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + top.HAPI4.database + mode + rules;
+                    var url = top.HAPI4.basePathV3 + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + top.HAPI4.database + mode + rules;
                     window.open(url, '_blank');
             }
         }

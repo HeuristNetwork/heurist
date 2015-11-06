@@ -228,7 +228,7 @@
         }
 		//return $url;
 	}else{
-		header('Location: '.HEURIST_SITE_PATH.'common/images/notfound.png');
+		header('Location: '.HEURIST_BASE_URL_V3.'common/images/notfound.png');
 		//print "noting found";
 	}
 ?>

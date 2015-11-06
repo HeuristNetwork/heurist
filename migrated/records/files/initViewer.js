@@ -305,7 +305,7 @@ function showViewer(container, url_and_cfg, _recordID, sTypeDef){
  			container.style.bottom = 22;
 
  			viewerObject = null;
-			viewer.toolbarImages = top.HEURIST.baseURL+"external/js/simple_js_viewer/images/toolbar";
+			viewer.toolbarImages = top.HEURIST.baseURL_V3+"external/js/simple_js_viewer/images/toolbar";
 			viewer.onload =  viewer.toolbar;
 			image_digitizer_container = document.getElementById('image_digitizer_container');
 			if(image_digitizer_container){

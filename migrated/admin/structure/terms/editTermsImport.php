@@ -58,9 +58,9 @@
     <head>
         <title>Import list of terms into current branch</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/admin.css">
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }

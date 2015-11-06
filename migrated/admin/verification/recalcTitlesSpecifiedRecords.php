@@ -35,7 +35,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
 }
 
@@ -160,7 +160,7 @@ foreach ($recs as $rec_id => $rec) {
     else
         print '<li>' . htmlspecialchars($new_title) . '<br>'  . htmlspecialchars($rec['rec_Title']) . '';
 
-    print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
+    print ' <a target=_blank href="'.HEURIST_BASE_URL_V3.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 
     if ($rec_id % $step_uiupdate == 0) {
         ob_flush();

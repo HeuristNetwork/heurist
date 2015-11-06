@@ -34,7 +34,7 @@
     require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
     if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+        header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
     }
 
@@ -327,7 +327,7 @@
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
-                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/'
+                    url: '<?=HEURIST_BASE_URL_V3?>external/jquery-file-upload/server/php/'
                 });
                 // Enable iframe cross-domain access via redirect option:
                 $('#fileupload').fileupload(
@@ -335,7 +335,7 @@
                     'redirect',
                     window.location.href.replace(
                         /\/[^\/]*$/,
-                        '<?=HEURIST_BASE_URL?>external/jquery-file-upload/cors/result.html?%s'
+                        '<?=HEURIST_BASE_URL_V3?>external/jquery-file-upload/cors/result.html?%s'
                     )
                 );
 

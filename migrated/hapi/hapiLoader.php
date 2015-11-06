@@ -54,7 +54,7 @@ require_once(dirname(__FILE__).'/../common/config/initialise.php');
 
 define("DEVEL_VERSION", "03");
 define("STABLE_VERSION", "03");
-define("HAPI_HOME" /* makes ME laugh */, HEURIST_BASE_URL."hapi/");
+define("HAPI_HOME" /* makes ME laugh */, HEURIST_BASE_URL_V3."hapi/");
 
 
 header("Content-type: text/javascript");
@@ -78,8 +78,7 @@ if (@$_REQUEST["inclGeo"]) {
 /* The key will be set once the javascript files are loaded */
 //var HeuristApiKey = "<?= addslashes(@$_REQUEST["key"]) ?>";
 var HeuristInstance = "<?= addslashes($instance) ?>";
-var HeuristBaseURL = "<?= addslashes(HEURIST_BASE_URL) ?>";
-var HeuristSitePath = "<?= addslashes(HEURIST_SITE_PATH) ?>";
+var HeuristBaseURL = "<?= addslashes(HEURIST_BASE_URL_V3) ?>";
 var HeuristIconURL = "<?= addslashes(HEURIST_ICON_URL) ?>";
 /* Load the necessary JS files from <?= HAPI_HOME ?> */
 (function() {

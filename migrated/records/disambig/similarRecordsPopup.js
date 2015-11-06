@@ -95,7 +95,7 @@ function _popupDisambiguation(matches, continueAction) {
 			var a = nobr.appendChild(document.createElement("a"));
 				a.href = "#";
 				a.onclick = function(bibID) { return function() {
-					top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?recID=" + bibID);
+					top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 + "records/edit/formEditRecordPopup.html?recID=" + bibID);
 					return false;
 				} }(match.id);
 				a.appendChild(document.createTextNode("view / edit details"));

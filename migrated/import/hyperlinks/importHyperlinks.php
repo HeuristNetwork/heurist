@@ -45,7 +45,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
 //require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -286,9 +286,9 @@ if (@$urls) {
 	<title>Import Hyperlinks</title>
 
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-  	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-   	<!-- link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css" -->
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+  	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/edit.css">
+   	<!-- link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/admin.css" -->
 
     <style type="text/css">
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
@@ -303,16 +303,16 @@ if (@$urls) {
 
 <body class="popup" width=600 height=400 style="margin:10px;">
 
-<script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/js/utilsUI.js"></script>
+<script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js"></script>
+<script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsUI.js"></script>
 <script type="text/javascript">
-	top.HEURIST.baseURL="<?=HEURIST_SITE_PATH?>";
+	top.HEURIST.baseURL_V3="<?=HEURIST_BASE_URL_V3?>";
     top.HEURIST.baseURL_V4="<?=HEURIST_BASE_URL_V4?>";
 </script>
 <script src="importHyperlinks.js"></script>
-<script src="<?=HEURIST_SITE_PATH?>common/php/displayPreferences.php"></script>
+<script src="<?=HEURIST_BASE_URL_V3?>common/php/displayPreferences.php"></script>
 <script>
-//top.HEURIST.loadScript("<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php?db=<?=HEURIST_DBNAME?>");
+//top.HEURIST.loadScript("<?=HEURIST_BASE_URL_V3?>common/php/loadUserInfo.php?db=<?=HEURIST_DBNAME?>");
 </script>
 
 <?php //this frame is needed for title lookup ?>
@@ -379,7 +379,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button" onClick="top.HEURIST.util.popupURL(top, '<?=HEURIST_SITE_PATH?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
+  <input type="button" onClick="top.HEURIST.util.popupURL(top, '<?=HEURIST_BASE_URL_V3?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
 <br />
 We recommend bookmarking a few links at a time.<br />The list is reloaded after each addition and after change of settings.
 

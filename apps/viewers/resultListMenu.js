@@ -37,7 +37,7 @@ $.widget( "heurist.resultListMenu", {
 
         var that = this;
 
-        this._collectionURL = top.HAPI4.basePathOld + "search/saved/manageCollection.php";
+        this._collectionURL = top.HAPI4.basePathV3 + "search/saved/manageCollection.php";
         
         this.element
         .css('font-size', '0.9em')
@@ -235,7 +235,7 @@ $.widget( "heurist.resultListMenu", {
                 if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
                     q ="&q=" + encodeURIComponent(this._query_request.q);
                 }
-                var url = top.HAPI4.basePathOld+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+                var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
                 
                 top.HEURIST4.msg.showDialog(url, { callback: 
                     function(res){
@@ -408,7 +408,7 @@ $.widget( "heurist.resultListMenu", {
             }
                                                              //encodeURIComponent(JSON.stringify(_data))
             var str = JSON.stringify(_data);
-            var baseurl = top.HAPI4.basePathOld + "search/actions/actionHandler.php";   //h3 action handler
+            var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //h3 action handler
             
             /* it can not prase reponse properly
             var request = {db:top.HAPI4.database, data: str, action: action }
@@ -496,7 +496,7 @@ $.widget( "heurist.resultListMenu", {
             hasRecordsNotBkmkd = true;
         }
         
-        var url = top.HAPI4.basePathOld+ "records/tags/updateTagsSearchPopup.php?show-remove?db=" + top.HAPI4.database + (recID?"&recid="+recID:"");
+        var url = top.HAPI4.basePathV3+ "records/tags/updateTagsSearchPopup.php?show-remove?db=" + top.HAPI4.database + (recID?"&recid="+recID:"");
         
         top.HEURIST4.msg.showDialog(url, { callback:
          
@@ -531,7 +531,7 @@ $.widget( "heurist.resultListMenu", {
         
         this.convertGroupsForH3();
         
-        var url = top.HAPI4.basePathOld+ "records/tags/editUsergroupTagsPopup.html?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3+ "records/tags/editUsergroupTagsPopup.html?db=" + top.HAPI4.database;
         
         top.HEURIST4.msg.showDialog(url, { 
                         width: 800,
@@ -583,8 +583,8 @@ $.widget( "heurist.resultListMenu", {
         }
         
         // Open URL
-        var url = top.HAPI4.basePath+ "page/send_email.php?db=" + top.HAPI4.database;
-        top.HEURIST.user.selectedRecordIds = ids;
+        var url = top.HAPI4.basePathV4+ "page/send_email.php?db=" + top.HAPI4.database;
+        top.HAPI4.selectedRecordIds = ids;  //the only place it is assigned
         top.HEURIST4.msg.showDialog(url, { width:500, height:600 });
         
     },
@@ -605,7 +605,7 @@ $.widget( "heurist.resultListMenu", {
             return;
         }
 
-        var url = top.HAPI4.basePathOld+ "search/actions/setRatingsPopup.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3+ "search/actions/setRatingsPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, { 
                         width:250, height:220,
@@ -662,7 +662,7 @@ $.widget( "heurist.resultListMenu", {
             
         this.convertGroupsForH3();
         
-        var url = top.HAPI4.basePathOld+ "records/permissions/setRecordOwnership.html?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3+ "records/permissions/setRecordOwnership.html?db=" + top.HAPI4.database;
         
         top.HEURIST4.msg.showDialog(url, { height:300, width:650, 
                     callback:function(wg, viewable, hidden, pending) {
@@ -694,7 +694,7 @@ $.widget( "heurist.resultListMenu", {
         if(this._selection!=null){
             var recIDs_list = this._selection.getIds();    
             if (recIDs_list.length > 0) {
-                var url = top.HAPI4.basePath + "?db=" + top.HAPI4.database + "&q=ids:"+recIDs_list.join(',');        
+                var url = top.HAPI4.basePathV4 + "?db=" + top.HAPI4.database + "&q=ids:"+recIDs_list.join(',');        
                 window.open(url, "_blank");
             }
         }
@@ -738,7 +738,7 @@ $.widget( "heurist.resultListMenu", {
         if(!Hul.isempty(this._collection)){
       
             if(true){      
-                var url = top.HAPI4.basePath + "?db=" + top.HAPI4.database + "&q=ids:"+this._collection.join(',');        
+                var url = top.HAPI4.basePathV4 + "?db=" + top.HAPI4.database + "&q=ids:"+this._collection.join(',');        
                 window.open(url, "_blank");
             }else{
                 this._query_request.w = 'all';
@@ -794,7 +794,7 @@ $.widget( "heurist.resultListMenu", {
         if(Hul.isempty(recIDs_list)) return;
         
         var that = this;        
-        var url = top.HAPI4.basePathOld+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
         
         top.HEURIST4.msg.showDialog(url, { 
                     onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
@@ -817,7 +817,7 @@ $.widget( "heurist.resultListMenu", {
         if(Hul.isempty(recIDs_list)) return;
 
         recIDs_list = recIDs_list.join(",");
-        var url = top.HAPI4.basePathOld+ "search/actions/sendNotificationsPopup.php?h4=1&db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
+        var url = top.HAPI4.basePathV3+ "search/actions/sendNotificationsPopup.php?h4=1&db=" + top.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
         
         top.HEURIST4.msg.showDialog(url, {height:230, title: top.HR('Notification')} );
     },
@@ -833,11 +833,11 @@ $.widget( "heurist.resultListMenu", {
         var that = this;        
         
         if(!top.HEURIST.rectypes){
-            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addRelationshipsPopup(); } );
+            $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addRelationshipsPopup(); } );
             return
         }
         
-        var url = top.HAPI4.basePathOld + "search/actions/setRelationshipsPopup.html?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3 + "search/actions/setRelationshipsPopup.html?db=" + top.HAPI4.database;
         
         top.HEURIST4.msg.showDialog(url, { 
                     onpopupload: function(frame){
@@ -865,7 +865,7 @@ $.widget( "heurist.resultListMenu", {
         }
 
         var that = this;        
-        var url = top.HAPI4.basePathOld + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV3 + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + top.HAPI4.database;
         
         top.HEURIST4.msg.showDialog(url, { 
                     callback: function(context) {
@@ -890,11 +890,11 @@ $.widget( "heurist.resultListMenu", {
         var that = this;   
         
         if(!top.HEURIST.rectypes){
-            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addDetailPopup(); } );
+            $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addDetailPopup(); } );
             return
         }
              
-        var url = top.HAPI4.basePathOld+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database ;
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database ;
 
         //substitutes
         top.HEURIST.search4 = {};
@@ -918,11 +918,11 @@ $.widget( "heurist.resultListMenu", {
         var that = this;   
         
         if(!top.HEURIST.rectypes){
-            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.replaceDetailPopup(); } );
+            $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.replaceDetailPopup(); } );
             return
         }
              
-        var url = top.HAPI4.basePathOld+ "search/actions/replaceDetailPopup.html?db=" + top.HAPI4.database ;
+        var url = top.HAPI4.basePathV3+ "search/actions/replaceDetailPopup.html?db=" + top.HAPI4.database ;
 
         //substitutes
         top.HEURIST.search4 = {};
@@ -946,11 +946,11 @@ $.widget( "heurist.resultListMenu", {
         var that = this;   
         
         if(!top.HEURIST.rectypes){
-            $.getScript(top.HAPI4.basePathOld + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.deleteDetailPopup(); } );
+            $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.deleteDetailPopup(); } );
             return
         }
              
-        var url = top.HAPI4.basePathOld+ "search/actions/deleteDetailPopup.html?db=" + top.HAPI4.database ;
+        var url = top.HAPI4.basePathV3+ "search/actions/deleteDetailPopup.html?db=" + top.HAPI4.database ;
 
         //substitutes
         top.HEURIST.search4 = {};

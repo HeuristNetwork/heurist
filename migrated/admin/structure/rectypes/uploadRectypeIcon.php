@@ -85,9 +85,9 @@
 
         <title>Choose record type icon<?=(($mode==3)?"":" for ".$rt_id." : ".htmlspecialchars($rt_name))?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/admin.css">
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }
@@ -186,7 +186,7 @@
                 //$path_parts['filename'] )); - does not work for nonlatin names
                 $name = substr($filename, 0, -4);
                 print '<div style="display:inline-block;padding:4px;width:40px;">';
-                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_SITE_PATH.'admin/'.$lib_path.$filename.'"/></a></div>';
+                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_BASE_URL_V3.'admin/'.$lib_path.$filename.'"/></a></div>';
                 //array_push($results, array( 'filename'=>$filename, 'name'=>$name));
             }
         }

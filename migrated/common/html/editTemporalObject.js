@@ -64,7 +64,7 @@ function calendarPopup(buttonElt) {
 	popupOptions.x = buttonPos.x + 8 - 120;
 	popupOptions.y = buttonPos.y + 8 - 80;
 
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/calendarTemplate.html#"+
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "common/html/calendarTemplate.html#"+
 		document.getElementById("simpleDate").value, popupOptions);
 */
 

@@ -82,7 +82,7 @@ if (!@$_REQUEST['method']) {
 
 if (!is_logged_in() && @$_REQUEST['method'] != "saveUser") {
     //ARTEM
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
 }
 header('Content-type: text/javascript');
@@ -439,7 +439,7 @@ function sendNewUserInfoEmail($recID){
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below to review further details and approve the registration:\n".
-            HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+            HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
             $email_title = 'User Registration for '.$ugr_FullName.' '.$ugr_eMail;
 
@@ -474,7 +474,7 @@ function sendApprovalEmail($recID, $tmp_password){
             }
 
             // point them to the home page.
-            // TODO: this is inelegant b/c HEURIST_BASE_URL points to eg. /var/ww/html/HEURIST/h4 not to /var/www/html/HEURIST
+            // TODO: this is inelegant b/c HEURIST_BASE_URL_V3 points to eg. /var/ww/html/HEURIST/h4 not to /var/www/html/HEURIST
             $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL_V4."/index.html and create yourself a database with the username: " . $ugr_Name;
 
             //give them a pointer to the search page for the database.

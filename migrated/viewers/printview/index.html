@@ -133,7 +133,7 @@
       var resultsPerPage = 50;
       var pageCount = 0;
       var hBase = window.location.protocol + "//" + window.location.host +
-      (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+      (top && top.HEURIST && top.HEURIST.baseURL_V3? top.HEURIST.baseURL_V3 : window.location.pathname.match(/^\/[^\/]+\//));
       var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name :
         (location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]: ""));
 
@@ -283,7 +283,7 @@
           showRelatedLink.innerHTML = "Loading related records";
           parentDiv.className += " show";
 
-          var xmlRecDepth1 = loadXMLDocFromFile(top.HEURIST.baseURL+
+          var xmlRecDepth1 = loadXMLDocFromFile(top.HEURIST.baseURL_V3+
             "export/xml/flathml.php?q=ids:"+recID+"&depth=1&woot=1"+
             (top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:""));
           if (!xmlRecDepth1) {
@@ -344,7 +344,7 @@
             if (!pageXMLs[page]){ //load pageXML now
               var pageQuery = query;
               pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (page-1)*resultsPerPage);
-              var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
+              var url = top.HEURIST.baseURL_V3+ "export/xml/flathml.php" + pageQuery;
               var errorMsg = "Error loading " + url + " using XMLHttpRequest";
               pageXMLs[page] = loadXMLDocFromFile(url);
             }
@@ -373,7 +373,7 @@
             if (!pageXMLs[page]){ //load pageXML now
               var pageQuery = query;
               pageQuery = pageQuery.replace(/limit=[^#&=]*/,"limit=" + resultsPerPage).replace(/offset=[^#&=]*/,"offset=" + (page-1)*resultsPerPage);
-              var url = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
+              var url = top.HEURIST.baseURL_V3+ "export/xml/flathml.php" + pageQuery;
               var errorMsg = "Error loading " + url + " using XMLHttpRequest";
               pageXMLs[page] = loadXMLDocFromFile(url);
             }
@@ -436,7 +436,7 @@
             (selFilter.length > 0 &&  selFilter[1] != "" ? "&" + selFilter[1] : "") +
             ($("#expandColl").attr("checked") ? "&expandColl=1" : "") +
             (top.HEURIST.database.name? "&db=" + top.HEURIST.database.name:"");
-            curQueryURL = top.HEURIST.baseURL+ "export/xml/flathml.php" + pageQuery;
+            curQueryURL = top.HEURIST.baseURL_V3+ "export/xml/flathml.php" + pageQuery;
             var errorMsg = "Error loading " + curQueryURL + " using XMLHttpRequest";
             clearAndDisplayLoading();
             xml = loadXMLDocFromFile(curQueryURL);
@@ -554,11 +554,11 @@
               var transID = top.HEURIST.transforms.nameLookup[style];
               var uri = encodeURIComponent(top.HEURIST.transforms.byID[transID].uri);
               if (uri) {
-                xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + uri);
+                xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL_V3 + "viewers/printview/loadXSLTemplate.php?db="+database+"&style=" + uri);
               }
             }else{
               if (styles && styles[style] && styles[style][0]){
-                xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL + "viewers/printview/loadXSLTemplate.php?db="
+                xsls[style]=loadXMLDocFromFile(top.HEURIST.baseURL_V3 + "viewers/printview/loadXSLTemplate.php?db="
                                                     +database+"&style=" + styles[style][0]);
               }
             }
@@ -743,7 +743,7 @@
         " Word:" + annoStruct.addr.endWord)+ " ?"; */
         var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(top.HEURIST.magicNumbers['RT_ANNOTATION']);
 
-        top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
+        top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?rectype='+
           top.HEURIST.magicNumbers['RT_ANNOTATION']+
           '&addr='+annoStruct.addr.startElems.join(",") +":"+
           annoStruct.addr.startWord +":"+
@@ -775,7 +775,7 @@
         if (!annoID) {
           return;
         }
-        top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/edit/formEditRecordPopup.html?recID='+annoID ,
+        top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/edit/formEditRecordPopup.html?recID='+annoID ,
           {	width: 800,
             height: 600,
             callback: function(title, bd) {

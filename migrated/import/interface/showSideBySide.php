@@ -75,7 +75,7 @@ while (count($bib_ids_to_fetch) > 0) {
 <html>
  <head>
   <title>HEURIST - compare resources</title>
-  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+  <link rel=stylesheet href="<?=HEURIST_BASE_URL_V3?>common/css/heurist.css">
 
  <script>
   var bibs = <?= json_format($bib_data) ?>;
@@ -84,8 +84,8 @@ while (count($bib_ids_to_fetch) > 0) {
  </head>
  <body>
 
-  <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
-  <script src="<?=HEURIST_SITE_PATH?>common/php/loadCommonInfo.php"></script>
+  <script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js"></script>
+  <script src="<?=HEURIST_BASE_URL_V3?>common/php/loadCommonInfo.php"></script>
   <script src="showSideBySide.js"></script>
 
  <style>

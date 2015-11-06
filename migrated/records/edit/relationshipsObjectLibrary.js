@@ -70,7 +70,7 @@ if (!top.Relationship) {
 		deleteTd.className = "delete";
 		deleteTd.style.paddingLeft = '4px';
 		deleteTd.title = "Delete this relationship";
-		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/cross.png";
+		deleteTd.appendChild(this.document.createElement("img")).src = top.HEURIST.baseURL_V3 + "common/images/cross.png";
 		deleteTd.onclick = function() {
 			thisRef.remove();
 
@@ -82,14 +82,14 @@ if (!top.Relationship) {
 		var editTd = this.tr.appendChild(this.document.createElement("div"));
 		editTd.className = "edit";
 		editTd.title = "Edit this relationship";
-		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
+		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.baseURL_V3 + "common/images/edit-pencil.png";
 		editTd.onclick = function() {
 			thisRef.edit();
 		};
 		editTd = this.tr.appendChild(this.document.createElement("div"));
 		editTd.className = "edit";
 		editTd.title = "Edit related record";
-		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.basePath + "common/images/edit-pencil.png";
+		editTd.appendChild(this.document.createElement("img")).src = top.HEURIST.baseURL_V3 + "common/images/edit-pencil.png";
 		editTd.onclick = function() {
 			thisRef.editRelatedRecord();
 		};
@@ -97,7 +97,7 @@ if (!top.Relationship) {
         
         editTd = this.tr.appendChild(this.document.createElement("div"));
         var ViewRec = editTd.appendChild(this.document.createElement("img"));
-        ViewRec.src = top.HEURIST.basePath +"common/images/magglass_15x14.gif";
+        ViewRec.src = top.HEURIST.baseURL_V3 +"common/images/magglass_15x14.gif";
         ViewRec.className = "view-resource";
         ViewRec.title = "View the record linked via this relation";
 
@@ -107,7 +107,7 @@ if (!top.Relationship) {
             
             if( recID && !isNaN(Number(recID)) ){
                 
-                var url = top.HEURIST.basePath +"records/view/renderRecordData.php?recID=" + recID  +
+                var url = top.HEURIST.baseURL_V3 +"records/view/renderRecordData.php?recID=" + recID  +
                         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
                 
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
@@ -163,7 +163,7 @@ if (!top.Relationship) {
         var _calendarViewer = top.HEURIST.edit.calendarViewer;
 		var thisRef = this;
 		var _db =  (top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:""));
-		top.HEURIST.util.popupURL(window, top.HEURIST.basePath + "records/edit/formEditRecordPopup.html?recID="+this.relationshipRec.relnID +
+		top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 + "records/edit/formEditRecordPopup.html?recID="+this.relationshipRec.relnID +
 			"&db="+_db,
 		{	width: 940,
 		 	height: 640,
@@ -171,7 +171,7 @@ if (!top.Relationship) {
 
 				if (newDetails) {
 
-					var sURL  = top.HEURIST.basePath + "common/php/loadRecordData.php";
+					var sURL  = top.HEURIST.baseURL_V3 + "common/php/loadRecordData.php";
 
 					top.HEURIST.util.getJsonData(sURL,
 						function(responce){
@@ -217,7 +217,7 @@ if (!top.Relationship) {
 		var _db =  (top.HEURIST.parameters.db?top.HEURIST.parameters.db : (top.HEURIST.database.name? top.HEURIST.database.name:""));
 
 		if( thisRef.relationshipRec.relatedRec.recID ){
-				window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + thisRef.relationshipRec.relatedRec.recID + "&db="+_db);
+				window.open(top.HEURIST.baseURL_V3 +"records/edit/editRecord.html?recID=" + thisRef.relationshipRec.relatedRec.recID + "&db="+_db);
 		} //"&caller=" + encodeURIComponent(textElt.id) +
 
 		return false;
@@ -501,16 +501,16 @@ if (!top.Relationship) {
 			isvisible = (isvisible=="true");
 		}
 		opt.style.display = (isvisible)?"block":"none";
-		optionalLinkImg.src = top.HEURIST.basePath +"common/images/"+((isvisible)?"tdown":"tright")+".gif";
+		optionalLinkImg.src = top.HEURIST.baseURL_V3 +"common/images/"+((isvisible)?"tdown":"tright")+".gif";
 
 		optionalLink.onclick = function(opt)
 					{ return function() {
 							if(opt.style.display == "block"){
-								optionalLinkImg.src = top.HEURIST.basePath +"common/images/tright.gif";
+								optionalLinkImg.src = top.HEURIST.baseURL_V3 +"common/images/tright.gif";
 								opt.style.display = "none";
 							}else{
 								opt.style.display = "block";
-								optionalLinkImg.src = top.HEURIST.basePath +"common/images/tdown.gif";
+								optionalLinkImg.src = top.HEURIST.baseURL_V3 +"common/images/tdown.gif";
 							}
 							top.HEURIST.util.setDisplayPreference("relationship-optional-fields", (opt.style.display == "block"));
 
@@ -604,7 +604,7 @@ if (!top.Relationship) {
             return;
         }
 
-		var fakeForm = { action: top.HEURIST.basePath +"records/relationships/saveRelationships.php",
+		var fakeForm = { action: top.HEURIST.baseURL_V3 +"records/relationships/saveRelationships.php",
 			elements: [
 			{ name: "recID", value: this.manager.recID},
 			{ name: "save-mode", value: "new" },
@@ -926,7 +926,7 @@ if (!top.Relationship) {
 		a.style.padding = "3px 6px 3px 0px";
 
 		var addImg = a.appendChild(document.createElement("img"));
-		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
+		addImg.src = top.HEURIST.baseURL_V3 +"common/images/add-record-small.png";
 		addImg.className = "add_records_img";
 		if (needAddToAggregation && this.relationships.length > 0) {
 			addImg.title = "Add another relationship";
@@ -988,7 +988,7 @@ if (!top.Relationship) {
 
 		/* this really doesn't belong here - was intended to be in form title bar
 		addImg = a.appendChild(document.createElement("img"));
-		addImg.src = top.HEURIST.basePath +"common/images/add-record-small.png";
+		addImg.src = top.HEURIST.baseURL_V3 +"common/images/add-record-small.png";
 		addImg.className = "add_records_img";
 		addImg.title = "Add relationship to Aggregation";
 		a.appendChild(document.createTextNode("Add to Aggregation"));

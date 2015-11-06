@@ -43,7 +43,7 @@ if (! $r) return;
 
 if ($u) {
 	if (! is_logged_in()  ||  $u != get_user_id()) {
-		header("Location: " . HEURIST_BASE_URL . "common/connect/login.php?logout=1");
+		header("Location: " . HEURIST_BASE_URL_V3 . "common/connect/login.php?logout=1");
 		return;
 	}
 }

@@ -46,12 +46,12 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <link rel=stylesheet href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+        <link rel=stylesheet href="<?=HEURIST_BASE_URL_V3?>common/css/edit.css">
+        <link rel=stylesheet href="<?=HEURIST_BASE_URL_V3?>common/css/admin.css">
         <title>Add new record</title>
 
-        <script src="<?=HEURIST_SITE_PATH?>external/jquery/jquery.js"></script>
+        <script src="<?=HEURIST_BASE_URL_V3?>external/jquery/jquery.js"></script>
 
         <script>
             //		rt, wg_id,vis, kwd, tags, restrict Access;
@@ -121,7 +121,7 @@
 
 
             function update_link() {
-                var base = "<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>";
+                var base = "<?= HEURIST_BASE_URL_V3?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>";
                 var link = base + compute_args();
 
                 var tags = $("#add-link-tags").val();
@@ -255,7 +255,7 @@
                 }
 
 
-                window.open('<?= HEURIST_BASE_URL?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='+rt + extra_parms);
+                window.open('<?= HEURIST_BASE_URL_V3?>records/add/addRecord.php?addref=1&db=<?=HEURIST_DBNAME?>&rec_rectype='+rt + extra_parms);
 
             }
 

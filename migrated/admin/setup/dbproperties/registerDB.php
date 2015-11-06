@@ -77,7 +77,7 @@
         print '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
         print "<link rel=stylesheet href='../../../common/css/global.css'></head>".
         "<body><div class=wrap><div id=errorMsg><span>$sError</span>".
-        "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
+        "<p><a href=".HEURIST_BASE_URL_V3."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
         " target='_top'>Log out</a></p></div></div></body></html>";
         return;
     }
@@ -209,7 +209,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword,
                     $usrName, $usrFirstName, $usrLastName, $dbDescription;
 
-                    $serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
+                    $serverURL = HEURIST_BASE_URL_V3 . "?db=" . $heuristDBname;
 
                     $usrEmail = rawurlencode($usrEmail);
                     $usrName = rawurlencode($usrName);

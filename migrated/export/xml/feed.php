@@ -55,7 +55,7 @@ if($isAtom){
     ?>
     <feed xmlns="http://www.w3.org/2005/Atom" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/">
     <title>HEURIST Search results</title>
-    <link href="<?=htmlspecialchars(HEURIST_BASE_URL)?>"/>
+    <link href="<?=htmlspecialchars(HEURIST_BASE_URL_V3)?>"/>
     <subtitle><?=$explanation?></subtitle>
     <updated><?=date("r")?></updated>
     <copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
@@ -79,7 +79,7 @@ if($isAtom){
     <rss version="2.0" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
     <title>HEURIST Search results</title>
-    <link><?=htmlspecialchars(HEURIST_BASE_URL)?></link>
+    <link><?=htmlspecialchars(HEURIST_BASE_URL_V3)?></link>
     <description><?=$explanation?></description>
     <language>en-gb</language>
     <pubDate><?=date("r")?></pubDate>
@@ -112,7 +112,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     //$_REQUEST['idonly'] = 1;
     //$_REQUEST['vo'] = 'h3';
     //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-    $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3";  //call h4
+    $url = HEURIST_BASE_URL_V3."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3";  //call h4
     $reclist = loadRemoteURLContent($url);
     $reclist = json_decode($reclist, true);
 
@@ -182,8 +182,8 @@ if ($reccount>0)
         $thubURL = getThumbnailURL($row[0]);
 
 
-        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-        $uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL_V3."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $uid = HEURIST_BASE_URL_V3."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
         //HEURIST_BASE_URL_V4."?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
         //$uid = $uniq_id;
         $uniq_id++;

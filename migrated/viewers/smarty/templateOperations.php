@@ -31,7 +31,7 @@
     $mode = $_REQUEST['mode'];
 
     if (! is_logged_in() && ! $mode=='serve') { // OK to serve tempalte files without login
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+        header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
         //header('Content-type: text/html; charset=utf-8');
         return;
     }

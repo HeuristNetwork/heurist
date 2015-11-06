@@ -111,13 +111,13 @@ $.widget( "heurist.profile", {
                 }else if(action == "menu-options-help"){
                     window.open(top.HAPI4.sysinfo.help, '_blank');
                 }else if(action == "menu-options-db-design"){
-                    window.open(top.HAPI4.basePathOld+'admin/adminMenu.php?db='+top.HAPI4.database, '_blank');
+                    window.open(top.HAPI4.basePathV3+'admin/adminMenu.php?db='+top.HAPI4.database, '_blank');
                 }else if(action == "menu-options-db-summary"){
 
                     if($.isFunction($('body').rectype_manager)){ //already loaded
                         showManageRecordTypes();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/rectype_manager.js', function(){ showManageRecordTypes(); } );
+                        $.getScript(top.HAPI4.basePathV4+'apps/rectype_manager.js', function(){ showManageRecordTypes(); } );
                     }
 
                 }else if(action == "menu-options-import-faims"){
@@ -231,25 +231,25 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').tag_manager)){ //already loaded
                         showManageTags();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/tag_manager.js', function(){ showManageTags(); } );
+                        $.getScript(top.HAPI4.basePathV4+'apps/tag_manager.js', function(){ showManageTags(); } );
                     }
                 }else if(action == "menu-user-faceted"){
                     if($.isFunction($('body').search_faceted_wiz)){ //already loaded
                         showSearchFacetedWizard();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/ssearch/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
+                        $.getScript(top.HAPI4.basePathV4+'apps/ssearch/search_faceted_wiz.js', function(){ showSearchFacetedWizard(); } );
                     }
                 }else if(action == "menu-user-svs"){
                     if($.isFunction($('body').svs_manager)){ //already loaded
                         showManageSavedSearches();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/svs_manager.js', function(){ showManageSavedSearches(); } );
+                        $.getScript(top.HAPI4.basePathV4+'apps/svs_manager.js', function(){ showManageSavedSearches(); } );
                     }
                 }else if(action == "menu-user-files"){
                     if($.isFunction($('body').file_manager)){ //already loaded
                         showManageFiles();
                     }else{
-                        $.getScript(top.HAPI4.basePath+'apps/profile/file_manager.js', function(){ showManageFiles(); } );
+                        $.getScript(top.HAPI4.basePathV4+'apps/profile/file_manager.js', function(){ showManageFiles(); } );
                     }
                 }
 
@@ -302,7 +302,7 @@ $.widget( "heurist.profile", {
                 .position({my: "right top", at: "right bottom", of: that.btn_record });
                 $( document ).one( "click", function() { that.select_rectype.hide(); });
                 return false;
-                //window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database, "_blank");
+                //window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database, "_blank");
             }
         });
         this._on( this.select_rectype, {
@@ -317,7 +317,7 @@ $.widget( "heurist.profile", {
                 top.HEURIST4.editing.add(recordtype);
 
                 /* open in new window
-                window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
+                window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
                 */
             }
         });
@@ -425,7 +425,7 @@ $.widget( "heurist.profile", {
             var $dlg = this.login_dialog;
 
             //load login dialogue
-            $dlg.load(top.HAPI4.basePath + "apps/profile/profile_login.html?t="+(new Date().getTime()), function(){
+            $dlg.load(top.HAPI4.basePathV4 + "apps/profile/profile_login.html?t="+(new Date().getTime()), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
@@ -553,7 +553,7 @@ $.widget( "heurist.profile", {
 
         }else{
             var that = this;
-            $.getScript(top.HAPI4.basePath+'apps/profile_edit.js', function() {
+            $.getScript(top.HAPI4.basePathV4+'apps/profile_edit.js', function() {
                 if($.isFunction($('body').profile_edit)){
                     that.editProfile();
                 }else{

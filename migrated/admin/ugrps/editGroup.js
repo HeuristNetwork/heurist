@@ -300,7 +300,7 @@ function GroupEditor() {
 		if(!Hul.isempty(str)) {
 
 			// 3. sends data to server
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
 			var callback = _updateResult;
 			var params = "method=saveGroup&db=" + _db + "&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);

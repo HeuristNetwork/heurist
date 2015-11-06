@@ -73,7 +73,7 @@ if (@$_REQUEST['inputFilename']){// get a saved XML file
         }
     }
 }else if (@$_REQUEST['q']) {//get input file from service call for query.
-    $inputFilename = HEURIST_BASE_URL."export/xml/flathml.php?ver=1&f=1".
+    $inputFilename = HEURIST_BASE_URL_V3."export/xml/flathml.php?ver=1&f=1".
     (@$_REQUEST['depth'] ? "&depth=".$_REQUEST['depth']:"").
     (@$_REQUEST['hinclude'] ? "&hinclude=".$_REQUEST['hinclude']:"").
     (@$_REQUEST['layout'] ? "&layout=".$_REQUEST['layout']:"").
@@ -169,7 +169,7 @@ function saveTransformOutput($recHMLFilename, $styleFilename, $outputFilename = 
     $xslProc = new XSLTProcessor();
     $xslProc->importStylesheet($xslDoc);
     // set up common parameters for stylesheets.
-    $xslProc->setParameter('','hbaseURL',HEURIST_BASE_URL);
+    $xslProc->setParameter('','hbaseURL',HEURIST_BASE_URL_V3);
     $xslProc->setParameter('','dbName',HEURIST_DBNAME);
     $xslProc->setParameter('','dbID',HEURIST_DBID);
     $xslProc->setParameter('','transform',$styleFilename);

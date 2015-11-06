@@ -81,7 +81,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	                if ($valid) {
 		                //print "ok\n";
 	                } else {
-                        print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
+                        print "<tr><td><a target=_blank href='".HEURIST_BASE_URL_V3."records/woot/woot.html?db=".HEURIST_DBNAME."w=";
 		                print $woot["woot_Title"] . "'>";
                         print $woot["woot_Title"];
                         print "</a></td>\n";

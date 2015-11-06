@@ -39,7 +39,7 @@ if (! is_logged_in()) return;
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
 <title>Set ratings</title>
 
 <script type="text/javascript">

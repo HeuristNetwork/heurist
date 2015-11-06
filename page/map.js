@@ -33,8 +33,6 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     var mapdiv_id = null,
     timelinediv_id = null,
     
-    basePath = '', //@todo remove
-    
     all_mapdata = {}, // array of all datasets
     selection = [],   // array of selected record ids
     mylayout,         // layout object that contains map and timeline 
@@ -57,7 +55,7 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     customTheme = new TimeMapTheme({
             "color": "#0000FF",  //for lines and polygones
             "lineColor": "#0000FF",
-            "icon": basePath + "assets/star-red.png",
+            //"icon": "assets/star-red.png",
             "iconSize": [25,25],
             "iconShadow": null,
             "iconAnchor":[9,17]
@@ -66,11 +64,11 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
 
     /**
     * Initialization
+    * _basePath - redundant
     */
     function _init(_map, _timeline, _basePath, _mylayout) {
         mapdiv_id = _map;
         timelinediv_id = _timeline;
-        basePath = _basePath; //redundant
         mylayout = _mylayout;
 
         /*if(_mapdata){
@@ -826,7 +824,7 @@ console.log('tileloaded 2');
                 options: {
                     mapZoom: defaultZoom,
                     theme: customTheme,
-                    eventIconPath: top.HAPI4.iconBaseURL //basePath + "ext/timemap.js/2.0.1/images/"
+                    eventIconPath: top.HAPI4.iconBaseURL 
                 }
                 , dataLoadedFunction: __onDataLoaded
                 }, tmap);
@@ -1313,14 +1311,14 @@ console.log('tileloaded 2');
 
                 ed_html = bubble_header                
             +   '<div style="display:inline-block;">'
-            +     '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
-            +     '<img src="'+top.HAPI4.basePath+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
+            +     '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+top.HAPI4.iconBaseURL + rectypeID+'.png&quot;);">'
+            +     '<img src="'+top.HAPI4.basePathV4+'assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'                
             +   '</div>'
             +  ((top.HAPI4.currentUser.ugr_ID>0)?
                 '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" >'
               /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" '
             + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-            //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathOld+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+            //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathV3+'edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
             +   '</div>':'')            
             + '</div>';
@@ -1427,8 +1425,8 @@ ed_html +
                         }, text:false})
                      .click(function( event ) {
                 event.preventDefault();
-                //window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
-                window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                //window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+                window.open(top.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
                     });
             }
 

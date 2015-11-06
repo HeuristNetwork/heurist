@@ -107,7 +107,7 @@ if($_POST["rectype"] == RT_BUG_REPORT){
     array_push($ext_info, "    Browser information: ".$_SERVER['HTTP_USER_AGENT']);
     //add current heurist information into message
     //add current heurist information into message
-    array_push($ext_info, "   Heurist codebase: ".HEURIST_BASE_URL);
+    array_push($ext_info, "   Heurist codebase: ".HEURIST_BASE_URL_V3);
     array_push($ext_info, "   Heurist version: ".HEURIST_VERSION);
     array_push($ext_info, "   Heurist dbversion: ".HEURIST_DBVERSION);
     array_push($ext_info, "   Heurist database: ". DATABASE);

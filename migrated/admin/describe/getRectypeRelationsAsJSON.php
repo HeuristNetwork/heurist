@@ -154,7 +154,7 @@
     
     // OBJECT
     $object = new stdClass();
-    $object->HeuristBaseURL     = HEURIST_BASE_URL;
+    $object->HeuristBaseURL     = HEURIST_BASE_URL_V3;
     $object->HeuristDBName      = HEURIST_DBNAME;
     $object->HeuristProgVersion = HEURIST_VERSION;
     $object->HeuristDBVersion   = HEURIST_DBVERSION;

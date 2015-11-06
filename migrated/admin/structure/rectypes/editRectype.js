@@ -89,7 +89,7 @@ function _upload_icon(mode) {
         if(mode==3){
             if(context){
                var img = document.getElementById('imgIcon2');
-               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/16px/" + context;
+               img.src = top.HEURIST.baseURL_V3 + "admin/setup/iconLibrary/16px/" + context;
                img.width = 16;
                img.height = 16;
             }
@@ -104,7 +104,7 @@ function _upload_icon(mode) {
             if(context){
                _rectype_icon = context;
                var img = document.getElementById('imgThumb2');
-               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/64px/" + context;
+               img.src = top.HEURIST.baseURL_V3 + "admin/setup/iconLibrary/64px/" + context;
                img.width = 64;
                img.height = 64;
             }
@@ -116,7 +116,7 @@ function _upload_icon(mode) {
     }
 
 
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
+    var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
 
     Hul.popupURL(top, sURL, {
             "close-on-blur": false,
@@ -398,7 +398,7 @@ function updateRectypeOnServer_continue()
     }else if(str != null) {
 
         // TODO: Change base URL
-        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
         var callback = updateResult;
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
@@ -480,7 +480,7 @@ var updateResult = function(context) {
  */
 function editRecStructure()
 {
-    Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
+    Hul.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
             "close-on-blur": false,
             "no-resize": false,
             height: 480,
@@ -644,7 +644,7 @@ function testTitleMask()
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -671,7 +671,7 @@ function _onEditMask(){
 
     var maskvalue = document.getElementById("rty_TitleMask").value;
 
-    Hul.popupURL(top, top.HEURIST.basePath +
+    Hul.popupURL(top, top.HEURIST.baseURL_V3 +
         "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
         {
             "close-on-blur": false,
@@ -726,7 +726,7 @@ function _onEditMask(){
         return that;
 };
 /*var structureFrame = document.getElementById("structureFrame");
-var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
+var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
 structureFrame.src = URL;
 */
 

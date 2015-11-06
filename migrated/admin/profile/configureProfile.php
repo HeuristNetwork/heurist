@@ -36,7 +36,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -246,7 +246,7 @@ while ($row = mysql_fetch_row($res)) {
         '<tr>
          <td nowrap>
           <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
-          <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
+          <img src="'.HEURIST_BASE_URL_V3.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
           <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
          </td>
          <td nowrap>' . $row[2] . '</td>

@@ -50,7 +50,7 @@ require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 if (! defined("USING-XSS")) {
     function outputAsRedirect($text) {
         $val = base64_encode($text);
-        header("Location: ".HEURIST_BASE_URL."/#data=" . $val);
+        header("Location: ".HEURIST_BASE_URL_V3."/#data=" . $val);
         return "";
     }
     ob_start("outputAsRedirect");

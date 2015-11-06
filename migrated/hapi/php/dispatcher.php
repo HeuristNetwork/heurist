@@ -130,7 +130,7 @@ return;
 }
 */
 
-$baseURL = HEURIST_BASE_URL;
+$baseURL = HEURIST_BASE_URL_V3;
 //$baseURL = $auth["hl_location"];
 
 //define_constants($auth["hl_instance"]);

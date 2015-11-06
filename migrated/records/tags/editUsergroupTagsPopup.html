@@ -141,7 +141,7 @@ function editTags(){
 
 	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
 
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + url + database,
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + url + database,
 		{ callback:
 			function(tags) {
 
@@ -159,7 +159,7 @@ function editTags(){
 							}
 					}
 
-					var baseurl = top.HEURIST.basePath + "records/tags/reloadUsergroupTags.php";
+					var baseurl = top.HEURIST.baseURL_V3 + "records/tags/reloadUsergroupTags.php";
 					var callback = _updateTags;
 					var params = "db="+database;
 					top.HEURIST.util.getJsonData(baseurl, callback, params);

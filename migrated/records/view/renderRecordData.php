@@ -77,7 +77,7 @@ $rec_id = intval(@$_REQUEST['recID']);
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
     <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 	<!-- <script src="../../external/jquery/jquery-1.6.min.js"></script> -->
     
@@ -344,7 +344,7 @@ function print_private_details($bib) {
 					$grp_kwd = $grp.'\\\\'.$kwd;
 					$label = 'Tag "'.$grp_kwd.'"';
 					if (preg_match('/\\s/', $grp_kwd)) $grp_kwd = '"'.$grp_kwd.'"';
-					print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_SITE_PATH.'common/images/magglass_12x11.gif"></a>';
+					print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_BASE_URL_V3.'common/images/magglass_12x11.gif"></a>';
 				}
 	?>
 	</div>
@@ -378,7 +378,7 @@ function print_private_details($bib) {
 				$tag = $tags[$i];
 				$label = 'Tag "'.$tag.'"';
 				if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
-				print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_SITE_PATH.'common/images/magglass_12x11.gif"></a>';
+				print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_BASE_URL_V3.'common/images/magglass_12x11.gif"></a>';
 			}
 			if (count($tags)) {
 				print "<br>\n";
@@ -421,7 +421,7 @@ function print_private_details($bib) {
 			if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
 				array_push($thumbs, array(
 					'url' => $bd['val'],
-					'thumb' => HEURIST_SITE_PATH.'common/php/resizeImage.php?db='.HEURIST_DBNAME.'&file_url='.$bd['val']
+					'thumb' => HEURIST_BASE_URL_V3.'common/php/resizeImage.php?db='.HEURIST_DBNAME.'&file_url='.$bd['val']
 				));
 			}
 
@@ -446,7 +446,7 @@ function print_private_details($bib) {
 
 				$res = mysql_query('select rec_Title from Records where rec_ID='.intval($bd['val']));
 				$row = mysql_fetch_row($res);
-				$bd['val'] = '<a target="_new" href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
+				$bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL_V3.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['val'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
 			}
 			else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
 
@@ -488,11 +488,11 @@ function print_private_details($bib) {
 				$res = mysql_query('select * from recUploadedFiles left join defFileExtToMimetype on ulf_MimeExt = fxm_Extension where ulf_ID='.intval($bd['dtl_UploadedFileID']));
 				$file = mysql_fetch_assoc($res);
 				if ($file) {
-					$img_url = HEURIST_SITE_PATH.'records/files/downloadFile.php/'.$file['ulf_OrigFileName'].'?db='.HEURIST_DBNAME.'&ulf_ID='.$file['ulf_ObfuscatedFileID'];
+					$img_url = HEURIST_BASE_URL_V3.'records/files/downloadFile.php/'.$file['ulf_OrigFileName'].'?db='.HEURIST_DBNAME.'&ulf_ID='.$file['ulf_ObfuscatedFileID'];
 					if ($file['fxm_MimeType'] == 'image/jpeg'  ||  $file['fxm_MimeType'] == 'image/gif'  ||  $file['fxm_MimeType'] == 'image/png') {
 						array_push($thumbs, array(
-							'url' => HEURIST_SITE_PATH.'records/files/downloadFile.php?ulf_ID='.$file['ulf_ObfuscatedFileID'],
-							'thumb' => HEURIST_SITE_PATH.'common/php/resizeImage.php?ulf_ID='.$file['ulf_ObfuscatedFileID']
+							'url' => HEURIST_BASE_URL_V3.'records/files/downloadFile.php?ulf_ID='.$file['ulf_ObfuscatedFileID'],
+							'thumb' => HEURIST_BASE_URL_V3.'common/php/resizeImage.php?ulf_ID='.$file['ulf_ObfuscatedFileID']
 						));
 					}
 					$bd['val'] = '<a target="_surf" href="'.htmlspecialchars($img_url).'" class="external-link">'.htmlspecialchars($file['ulf_OrigFileName']).'</a> [' .htmlspecialchars($file['ulf_FileSizeKB']) . 'kB]';
@@ -532,7 +532,7 @@ function print_private_details($bib) {
 						$bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
                                                  " Y ".round($minY,7).", ".round($maxY,7);
 
-                     $geoimage = "<img class='geo-image' src='".HEURIST_SITE_PATH."common/images/geo.gif' onmouseout='{mapViewer.hide();}' "
+                     $geoimage = "<img class='geo-image' src='".HEURIST_BASE_URL_V3."common/images/geo.gif' onmouseout='{mapViewer.hide();}' "
                             ."onmouseover='{mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}'>&nbsp;";
 
                      $bd['val'] = $geoimage.$bd['val'];
@@ -579,8 +579,8 @@ function print_private_details($bib) {
 
 <div class=detailRow><div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div></div>
 <div class=detailRow><div class=detailType>Cite as</div><div class=detail><a target=_blank class="external-link"
-    href="<?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
-          <?= HEURIST_BASE_URL ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div></div></div>
+    href="<?= HEURIST_BASE_URL_V3 ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">
+          <?= HEURIST_BASE_URL_V3 ?>resolver.php?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?></a></div></div></div>
 <?php
 }
 
@@ -590,7 +590,7 @@ function print_other_tags($bib) {
 <div class="detailRow">
 	<div class="detailType">Tags</div>
 	<div class="detail">
-		<a target="_new" href="<?=HEURIST_SITE_PATH?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a>
+		<a target="_new" href="<?=HEURIST_BASE_URL_V3?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a>
 	</div>
 </div>
 <?php
@@ -646,7 +646,7 @@ function print_relation_details($bib) {
 		}
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_BASE_URL_V3.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -674,7 +674,7 @@ function print_relation_details($bib) {
 		}
 		print '<div class=detail>';
 		if (@$bd['RelatedRecID']) {
-			print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+			print '<a target=_new href="'.HEURIST_BASE_URL_V3.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
 		} else {
 			print htmlspecialchars($bd['Title']);
 		}
@@ -720,8 +720,8 @@ global $relRT,$ACCESSABLE_OWNER_IDS;
 		print '<div class=detailRow>';
 		print '<div class=detailType>'.$lbl.'</div>';
 		print '<div class=detail>';
-		print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_SITE_PATH.'common/images/16x16.gif">&nbsp;';
-		print '<a target=_new href="'.HEURIST_SITE_PATH.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+		print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL_V3.'common/images/16x16.gif">&nbsp;';
+		print '<a target=_new href="'.HEURIST_BASE_URL_V3.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
         
         $lbl = '';
@@ -820,7 +820,7 @@ function print_woot_precis($woot,$bib) {
 	}
 ?>
 
-  <div><a target=_blank href="<?=HEURIST_SITE_PATH?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>&w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
+  <div><a target=_blank href="<?=HEURIST_BASE_URL_V3?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>&w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
 </div>
 </div>
 <?php

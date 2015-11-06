@@ -39,12 +39,12 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
 if (is_modeluser()) {
-//	header('Location: ' . HEURIST_BASE_URL . 'legacy/popup_usercopy.php');	//FIXME: no popup_usercopy.php
+//	header('Location: ' . HEURIST_BASE_URL_V3 . 'legacy/popup_usercopy.php');	//FIXME: no popup_usercopy.php
 	return;
 }
 
@@ -61,7 +61,7 @@ if (@$_REQUEST['submit']) $updated = update_my_settings();
     <head>
      <title>Update settings from model user</title>
      <meta http-equiv="content-type" content="text/html; charset=utf-8">
-     <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+     <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
     <style type="text/css">
     <!--
     table.normal {margin:10px 0}

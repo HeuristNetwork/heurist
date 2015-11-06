@@ -392,13 +392,13 @@ $.widget( "heurist.file_manager", {
                 if(obf_recID){
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css({ 'background-image':'url('+ top.HAPI4.basePath+'/file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
+                    .css({ 'background-image':'url('+ top.HAPI4.basePathV4+'/file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID + ')', 'opacity': 1 })
                     .appendTo($recdiv);
                 }else{
                     //@todo - thumbnail and icons for all mediatype
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css('background-image', 'url('+ top.HAPI4.basePath + 'assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)') 
+                    .css('background-image', 'url('+ top.HAPI4.basePathV4 + 'assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)') 
                     .appendTo($recdiv);
                 }
 

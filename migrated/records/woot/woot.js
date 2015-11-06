@@ -44,7 +44,7 @@ HAPI.WootException = HWootException;
 
 HAPI.WOOT = function() {
 	var _xssWebPrefix = (window.HeuristBaseURL ? window.HeuristBaseURL :
-							(window.HEURIST && window.HEURIST.baseURL ? HEURIST.baseURL :
+							(window.HEURIST && window.HEURIST.baseURL_V3 ? HEURIST.baseURL_V3 :
 								(window.HAPI && window.HAPI.XHR.defaultURLPrefix))) + "records/woot/php/wootDispatcher.php?";
 
 	function Woot(id, title, version, creatorId, permissions, chunks) {

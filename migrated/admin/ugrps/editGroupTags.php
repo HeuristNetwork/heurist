@@ -38,7 +38,7 @@ require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL);
+	header('Location: ' . HEURIST_BASE_URL_V3);
 	return;
 }
 
@@ -50,9 +50,9 @@ mysql_connection_select(DATABASE);
          <title>Workgroup Tags</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <link rel="stylesheet" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+        <link rel="stylesheet" href="<?=HEURIST_BASE_URL_V3?>common/css/edit.css">
+        <link rel="stylesheet" href="<?=HEURIST_BASE_URL_V3?>common/css/admin.css">
         
         <style type="text/css">
             .tbox { border: 1px solid black; margin: 1px; }

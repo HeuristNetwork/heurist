@@ -437,7 +437,7 @@
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
-                Hul.popupURL(this, top.HEURIST.basePath + 'viewers/smarty/repMenu.html?template_file='+template_file,
+                Hul.popupURL(this, top.HEURIST.baseURL_V3 + 'viewers/smarty/repMenu.html?template_file='+template_file,
                      { callback: function(filename){
                                     if(!Hul.isnull(filename)) {
                                         window.showReps.onPublish( filename )
@@ -446,7 +446,7 @@
                      } );
 
                 /* OLD WAY
-                var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
+                var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
                 window.showReps.getQuery() + '&publish=1&debug=0&template='+template_file;
 
                 window.prompt (
@@ -646,15 +646,15 @@
             }
 
             if(!top.HEURIST.rectypes){
-                top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php")
+                top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadCommonInfo.php")
             }
 
             YAHOO.util.Event.addListener(window, "load", loadHandler );
 
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            $.getScript( top.HEURIST.basePath+"common/php/loadUserInfo.php?db="+_db, loadUserInfoHandler);
+            $.getScript( top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php?db="+_db, loadUserInfoHandler);
             //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );
-            //top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadUserInfo.php");
+            //top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php");
 
 
             $(function () {

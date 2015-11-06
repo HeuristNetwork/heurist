@@ -163,7 +163,7 @@ if (@$_REQUEST['ulf_ID']){
 	sendRequest: function(url,callback,postData) {
 		// if we don't have a fully formed or root URL then prepend the base path
 		if ( !(url.match(/^http:/) || url.match(/^https:/))  &&  ! url.match(/^\//))
-			url = HRST.basePath + url;
+			url = HRST.baseURL_V3 + url;
 		var file = url;
 		var req = HRST.util.createXMLHTTPObject();
 		if (!req) return;

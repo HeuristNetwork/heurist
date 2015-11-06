@@ -587,7 +587,7 @@ function EditTerms() {
 
                         //alert(str);
 
-                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                         var callback = _updateResult;
                         var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
                         Hul.getJsonData(baseurl, callback, params);
@@ -920,7 +920,7 @@ function EditTerms() {
             };
 
             //
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
             Hul.getJsonData(baseurl, callback, params);
@@ -980,7 +980,7 @@ function EditTerms() {
                     Dom.get('deleteMessage').style.display = "none";
                 }
 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                 var callback = __updateAfterDelete;
                 var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
                 Hul.getJsonData(baseurl, callback, params);
@@ -1009,7 +1009,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.basePath +
+        var url = top.HEURIST.baseURL_V3 +
             "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
@@ -1061,7 +1061,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.basePath +
+        var url = top.HEURIST.baseURL_V3 +
             "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
@@ -1185,7 +1185,7 @@ function EditTerms() {
 
             var term_id = (isRoot)?0:_currentNode.data.id;
 
-            var sURL = top.HEURIST.baseURL + "admin/structure/terms/editTermsImport.php?db="+ _db +
+            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
             "&parent="+term_id+
             "&domain="+_currentDomain;
 
@@ -1394,7 +1394,7 @@ function EditTerms() {
         var disTerms = deftype[fi.dty_TermIDTreeNonSelectableIDs];
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        Hul.popupURL(top, top.HEURIST.basePath +
+        Hul.popupURL(top, top.HEURIST.baseURL_V3 +
             "admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
             {
                 "close-on-blur": false,
@@ -1449,7 +1449,7 @@ function EditTerms() {
 
                         if(!Hul.isnull(str)) {
 
-                            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                             var callback = _updateResult;
                             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
                             Hul.getJsonData(baseurl, callback, params);

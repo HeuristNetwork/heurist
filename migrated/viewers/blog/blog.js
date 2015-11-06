@@ -29,8 +29,8 @@
 */
 
 
-var basePath = (top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath :
-				(opener && opener.HEURIST && opener.HEURIST.basePath? opener.HEURIST.basePath :
+var basePath = (top && top.HEURIST && top.HEURIST.baseURL_V3? top.HEURIST.baseURL_V3 :
+				(opener && opener.HEURIST && opener.HEURIST.baseURL_V3? opener.HEURIST.baseURL_V3 :
 				(window.location.pathname.match(/^\/[^\/]+\//) ? window.location.pathname.match(/^\/[^\/]+\//)[0] : "/")));
 var hBase = window.location.protocol + "//" + window.location.host + basePath;
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name :
@@ -408,7 +408,7 @@ BlogEntry: function(record, parentElement, isNew) {
 			newDiv.appendChild(input);
 
 		var geoImg = document.createElement("img");
-				geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
+				geoImg.src = top.HEURIST.baseURL_V3+"common/images/16x16.gif";
 				geoImg.className = "geo-image";
 				if(geovalue){
 					geoImg.onmouseover= function(event) { mapViewer.showAtStatic(event, that.record.getID()); };  //{ mapViewer.showAt(e, geovalue); };
@@ -1056,7 +1056,7 @@ showEditWgTagsDialog: function(){
 
 	var windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
 
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "admin/ugrps/editGroupTags.php?popup=yes"+(database ? "&db="+database : ""), { callback: function(tags) {
+	top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "admin/ugrps/editGroupTags.php?popup=yes"+(database ? "&db="+database : ""), { callback: function(tags) {
 		if (tags){
 
 			var _updateHAPI = function(context){
@@ -1070,7 +1070,7 @@ showEditWgTagsDialog: function(){
 					}
 			}
 
-			var baseurl = top.HEURIST.basePath + "hapi/php/loadHapiUserInfo.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "hapi/php/loadHapiUserInfo.php";
 			var callback = _updateHAPI;
 			var params = "db="+database+'&raw=1';
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -1112,7 +1112,7 @@ fillWgTags: function($select){
 /* ART
 showEditTagDialog: function(){
 
-	top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
+	top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
 		if (tags)
 			$input = $(".entry-edit-tags-input", this.$table); {
 			$input.val(tags);

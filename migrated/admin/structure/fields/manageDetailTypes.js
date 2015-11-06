@@ -519,7 +519,7 @@ function DetailTypeManager() {
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+							var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteDT&db="+db+"&dtyID=" + dty_ID;
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -706,7 +706,7 @@ function DetailTypeManager() {
 	//
 	function _editRecStructure(rty_ID) {
 
-		var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+		var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
 		//this.location.replace(URL);
 
 		var dim = Hul.innerDimensions(this.window);
@@ -820,7 +820,7 @@ function DetailTypeManager() {
 			//_updateResult(""); //debug
 			//return;//debug
 
-			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 			var callback = _updateResult;
 			var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -972,7 +972,7 @@ function DetailTypeManager() {
 
 		if(_needToSaveFirst()) { return; }
 
-		var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
+		var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
 		if(dty_ID>0){
 			url = url + "&detailTypeID="+dty_ID; //existing
 		}else{
@@ -1099,7 +1099,7 @@ function DetailTypeManager() {
 		//alert(str);
 
 		if(!Hul.isnull(str)) {
-			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 			var callback = _updateOnSaveGroup;
 			var params = "method=saveDTG&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1149,7 +1149,7 @@ function DetailTypeManager() {
 		var str = YAHOO.lang.JSON.stringify(orec);
 
 		if(!Hul.isnull(str)) {
-			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 			var callback = null;//_updateOnSaveGroup;
 			var params = "method=saveDTG&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1207,7 +1207,7 @@ function DetailTypeManager() {
 				ind = _getIndexByGroupId(grpID);
 				if(ind>=0){
 
-					var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+					var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 					var callback = _updateAfterDeleteGroup;
 					var params = "method=deleteDTG&db="+db+"&dtgID=" + grpID;
 					top.HEURIST.util.getJsonData(baseurl, callback, params);

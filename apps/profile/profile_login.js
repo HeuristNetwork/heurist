@@ -32,7 +32,7 @@ function doLogin(isforsed){
             var $dlg = login_dialog;
 
             //load login dialogue
-            $dlg.load(top.HAPI4.basePath + "apps/profile/profile_login.html", function(){  //?t="+(new Date().getTime())
+            $dlg.load(top.HAPI4.basePathV4 + "apps/profile/profile_login.html", function(){  //?t="+(new Date().getTime())
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
@@ -137,7 +137,7 @@ function doLogin(isforsed){
                         allFields.val( "" ).removeClass( "ui-state-error" );
                         if( isforsed && !top.HAPI4.is_logged() ){
                             //redirect to select database
-                            window.location  = window.HAPI4.basePath + "php/databases.php";
+                            window.location  = window.HAPI4.basePathV4 + "php/databases.php";
                         }
                     },
                     open: function() {
@@ -179,7 +179,7 @@ function doRegister(){
             profile_edit_dialog.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
 
         }else{
-            $.getScript(top.HAPI4.basePath+'apps/profile/profile_edit.js', function() {
+            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
                 if($.isFunction($('body').profile_edit)){
                     doRegister();
                 }else{

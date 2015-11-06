@@ -258,7 +258,7 @@
 
                 // Mapping data
                 var mapdata = [];
-                mapping = new hMapping("map", "timeline", top.HAPI4.basePath, mylayout);
+                mapping = new hMapping("map", "timeline", top.HAPI4.basePathV4, mylayout);
 
                 var q = '<?=@$_REQUEST['q']?$_REQUEST['q']:""?>';
                 //t:26 f:85:3313  f:1:building
@@ -460,7 +460,7 @@
 
                  var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
                  query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
-                 var url = top.HAPI4.basePath+'page/map.php' + query;
+                 var url = top.HAPI4.basePathV4+'page/map.php' + query;
 
                  //document.getElementById("linkTimeline").href = url;
 
@@ -488,7 +488,7 @@
                      top.HEURIST4.msg.showMsgDlg("Define query and perform search");
                  }else{
                      query = query + '&a=1&depth=1&db='+top.HAPI4.database;
-                     var url_kml = top.HAPI4.basePathOld+"export/xml/kml.php" + query;
+                     var url_kml = top.HAPI4.basePathV3+"export/xml/kml.php" + query;
 
                      var win = window.open(url_kml, "_new");
                  }
@@ -497,14 +497,14 @@
             function mapEdit(){
                 var recID = $("#map-doc-select").val();
                 if(recID>0){
-                    window.open(top.HAPI4.basePathOld + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
+                    window.open(top.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
                 }
             }
             function addNewRecord(rt){
 
 
                 if(parseInt(rt)>0){
-                    window.open(top.HAPI4.basePathOld + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
+                    window.open(top.HAPI4.basePathV3 + 'records/add/addRecord.php?addref=1&db='+top.HAPI4.database+'&rec_rectype='+rt);
                 }else{
                     top.HEURIST4.msg.showMsgDlg(
                         "The required record type "+rt+" has not been defined.<br><br>"+

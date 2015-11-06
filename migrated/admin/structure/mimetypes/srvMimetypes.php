@@ -46,7 +46,7 @@
 	}
 
 	if (!is_logged_in()) {
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 

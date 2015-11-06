@@ -198,9 +198,8 @@ if(@$_REQUEST['db']){
                             window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
 
                             // OLD H3 stuff
-                            window.HEURIST.baseURL  = window.HAPI4.basePathOld;
-                            window.HEURIST.basePath = window.HAPI4.basePathOld;
-                            window.HEURIST.loadScript(window.HAPI4.basePathOld+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
+                            window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
+                            window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                             window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                             window.HEURIST.database = {  name: window.HAPI4.database };
 

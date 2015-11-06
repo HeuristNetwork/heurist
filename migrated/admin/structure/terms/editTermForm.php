@@ -31,7 +31,7 @@
         print "<link rel=stylesheet href='../../../common/css/global.css'></head>".
         "<body><div class=wrap><div id=errorMsg>".
         "<span>You must be logged in as system administrator to modify database structure</span>".
-        "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
+        "<p><a href=".HEURIST_BASE_URL_V3."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
         " target='_top'>Log out</a></p></div></div></body></html>";
         return;
     }
@@ -125,7 +125,7 @@
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
-                top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
                     "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&domain=<?=$_REQUEST['domain'] ?>&db=<?=$_REQUEST['db'] ?>",
                     {
                         "close-on-blur": false,

@@ -81,7 +81,7 @@ global $recID, $outputFilename;
 	$xslProc = new XSLTProcessor();
 	$xslProc->importStylesheet($xslDoc);
 // set up common parameters for stylesheets.
-//	$xslProc->setParameter('','hbaseURL',HEURIST_BASE_URL);
+//	$xslProc->setParameter('','hbaseURL',HEURIST_BASE_URL_V3);
 //	$xslProc->setParameter('','dbName',HEURIST_DBNAME);
 //	$xslProc->setParameter('','dbID',HEURIST_DBID);
 	$xslProc->setParameter('','standalone','1');

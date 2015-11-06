@@ -35,7 +35,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
@@ -51,9 +51,9 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
      <head>
           <title>My Profile. Manage Reminders</title>
           <meta http-equiv="content-type" content="text/html; charset=utf-8">
-          <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-          <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-          <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+          <link rel="icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
+          <link rel="shortcut icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
+          <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
           
           <style>
                div#page { padding: 10px; }
@@ -124,8 +124,8 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
 					                ($row["username"] ? $row["username"] : $row["rem_ToEmail"]);
                 ?>
                     <tr>
-                     <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.png"></a></td>
-                     <td><a href="<?=HEURIST_SITE_PATH?>records/edit/editRecord.html?recID=<?= $row["rem_RecID"] ?>&db=<?= HEURIST_DBNAME?>#personal" target="_blank"><b><?= $row["rec_Title"] ?></b></a></td>
+                     <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_BASE_URL_V3?>common/images/cross.png"></a></td>
+                     <td><a href="<?=HEURIST_BASE_URL_V3?>records/edit/editRecord.html?recID=<?= $row["rem_RecID"] ?>&db=<?= HEURIST_DBNAME?>#personal" target="_blank"><b><?= $row["rec_Title"] ?></b></a></td>
                      <td><b><?= $recipient ?></b></td>
                      <td><b><?= $row["rem_Freq"] ?></b> from <b><?= $row["rem_StartDate"] ?></b></td>
                      <td><?= $row["rem_Message"] ?></td>

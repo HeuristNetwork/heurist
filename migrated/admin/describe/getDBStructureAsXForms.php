@@ -42,7 +42,7 @@ if (mysql_error()) {
 	die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 }
 if (!is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db=' . HEURIST_DBNAME);
 	return;
 }                
 
@@ -99,7 +99,7 @@ if (!array_key_exists("mode", $_REQUEST) || $_REQUEST['mode'] != "export") {
 
 			function _onSelectRectype()
 			{
-				var URL = top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=resource&ids="+document.getElementById("rectypes").value+"&db=<?=HEURIST_DBNAME?>";
+				var URL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=resource&ids="+document.getElementById("rectypes").value+"&db=<?=HEURIST_DBNAME?>";
 
 				top.HEURIST.util.popupURL(top, URL, {
 						"close-on-blur": false,

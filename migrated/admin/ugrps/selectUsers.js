@@ -130,7 +130,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 		Dom.get("dbOwnerInfo").style.display = (filter_group==top.HEURIST.grpDbOwners)?"block":"none";
 
-		var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
+		var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
 		var callback = _updateUserList;
 		var params = "method=searchuser&db=" + _db +
 							"&nogrpID=" + filter_nogroup +
@@ -575,7 +575,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
-					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+					var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
 					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&oldrole=" + oldValue+
 								"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
@@ -713,7 +713,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 			filterByGroup = Dom.get('inputFilterByGroup');
 
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
 			var callback = _updateGroupList;
 			var params = "method=searchgroup&db=" + _db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);

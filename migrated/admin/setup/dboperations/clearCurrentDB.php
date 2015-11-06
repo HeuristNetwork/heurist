@@ -240,7 +240,7 @@
                 
                 if (!$res) {
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
-                    print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
+                    print "<p><a href=".HEURIST_BASE_URL_V3."?db=$dbname>Return to Heurist</a></p>";
                 } else {
                     // Remove from Elasticsearch
                     print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
@@ -248,7 +248,7 @@
                     
                     print "<br/><br/>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
-                    //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to the database home page</a></p>";
+                    //print "<p><a href=".HEURIST_BASE_URL_V3."?db=$dbname>Return to the database home page</a></p>";
                 }
             }
         }

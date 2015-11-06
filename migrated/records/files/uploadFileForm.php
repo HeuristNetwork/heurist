@@ -52,7 +52,7 @@ if (@$bibID  &&  @$bdtID) {
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+    <link rel=stylesheet href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
 </head>    
 <body style="padding: 0; margin: 0;">
 <form method=post enctype=multipart/form-data style="display: inline; padding: 0; margin: 0;">

@@ -319,7 +319,7 @@ function UserEditor() {
 
 				if(_isRegistration){
 					//reload page with reg success message
-					window.location.replace(top.HEURIST.baseURL + "admin/ugrps/msgRegistrationSuccess.html")
+					window.location.replace(top.HEURIST.baseURL_V3 + "admin/ugrps/msgRegistrationSuccess.html")
 				}else{
 					// this alert is a pain  alert("User with ID " + report + " was succesfully "+ss);
                     window.close(context); //send back new HEURIST strcuture
@@ -371,7 +371,7 @@ function UserEditor() {
 		if(str !== null) {
 
 			// 3. sends data to server
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
 			var callback = _updateResult;
 			var params = "method=saveUser&db=" + _db + "&data=" + encodeURIComponent(str);
 			if(!Hul.isnull(_groupID)){

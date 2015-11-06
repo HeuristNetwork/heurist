@@ -37,12 +37,12 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-/*****DEBUG****///error_log("in saveFile baseURL = ".HEURIST_BASE_URL );
+/*****DEBUG****///error_log("in saveFile baseURL = ".HEURIST_BASE_URL_V3 );
 /*
 if (! defined("USING-XSS")) {
 	function outputAsRedirect($text) {
 		$val = base64_encode($text);
-		header("Location: ".HEURIST_BASE_URL."/#data=" . $val);
+		header("Location: ".HEURIST_BASE_URL_V3."/#data=" . $val);
 		return "";
 	}
 	ob_start("outputAsRedirect");

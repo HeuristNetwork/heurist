@@ -403,7 +403,7 @@ $.widget( "heurist.rec_list", {
 
         //record type icon
         $('<img>',{
-            src:  top.HAPI4.basePath+'assets/16x16.gif',
+            src:  top.HAPI4.basePathV4+'assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
         })
         //!!! .addClass('rtf')
@@ -412,7 +412,7 @@ $.widget( "heurist.rec_list", {
 
         //bookmark icon - asterics
         $('<img>',{
-            src:  top.HAPI4.basePath+'assets/13x13.gif'
+            src:  top.HAPI4.basePathV4+'assets/13x13.gif'
         })
         .addClass(fld('bkm_ID')?'bookmarked':'unbookmarked')
         .appendTo($iconsdiv);
@@ -435,23 +435,23 @@ $.widget( "heurist.rec_list", {
             text:false})
         .click(function( event ) {
             event.preventDefault();
-            window.open(top.HAPI4.basePath + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+            window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);
 
 
         /*
         var editLinkIcon = "<div id='rec_edit_link' class='logged-in-only'><a href='"+
-        top.HEURIST4.basePath+ "records/edit/editRecord.html?sid=" +
+        top.HAPI4.basePathV4+ "records/edit/editRecord.html?sid=" +
         top.HEURIST4.search.results.querySid + "&recID="+ res[2] +
         (top.HEURIST4.database && top.HEURIST4.database.name ? '&db=' + top.HEURIST4.database.name : '');
 
         if (top.HEURIST4.user && res[6] && (top.HEURIST4.user.isInWorkgroup(res[6])|| res[6] == top.HEURIST4.get_user_id()) || res[6] == 0) {
         editLinkIcon += "' target='_blank' title='Click to edit record'><img src='"+
-        top.HEURIST4.basePath + "common/images/edit-pencil.png'/></a></div>";
+        top.HAPI4.basePathV4 + "common/images/edit-pencil.png'/></a></div>";
         }else{
         editLinkIcon += "' target='_blank' title='Click to edit record extras only'><img src='"+
-        top.HEURIST4.basePath + "common/images/edit-pencil-no.png'/></a></div>";
+        top.HAPI4.basePathV4 + "common/images/edit-pencil-no.png'/></a></div>";
         }
         */
 
@@ -523,7 +523,7 @@ $.widget( "heurist.rec_list", {
     
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }

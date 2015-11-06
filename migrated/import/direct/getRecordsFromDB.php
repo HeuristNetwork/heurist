@@ -249,7 +249,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 				}else{
 
 
-					header('Location: ' . HEURIST_BASE_URL . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
+					header('Location: ' . HEURIST_BASE_URL_V3 . 'import/direct/getRecordsFromDB.php?loginerror=1&db='.HEURIST_DBNAME);
 					exit;
 				}
 				mysql_connection_overwrite(DATABASE);

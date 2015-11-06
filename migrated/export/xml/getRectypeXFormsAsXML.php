@@ -25,7 +25,7 @@
  * @package     Heurist academic knowledge management system
  * @subpackage  XForms
  * @uses        HEURIST_DBNAME
- * @uses        HEURIST_BASE_URL
+ * @uses        HEURIST_BASE_URL_V3
  */
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
@@ -36,7 +36,7 @@ if (mysql_error()) {
 	die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 }
 if (!is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db=' . HEURIST_DBNAME);
 	return;
 }
 $rtyID = (@$_REQUEST['rtyID'] ? $_REQUEST['rtyID'] : null);

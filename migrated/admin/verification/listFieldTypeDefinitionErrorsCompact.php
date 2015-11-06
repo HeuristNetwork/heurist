@@ -104,7 +104,7 @@
 
                     var str = JSON.stringify(dt);
 
-                    var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
+                    var baseurl = top.HEURIST.baseURL_V3 + "admin/verification/repairFieldTypes.php";
                     var callback = _callback;
                     var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
                     top.HEURIST.util.getJsonData(baseurl, callback, params);

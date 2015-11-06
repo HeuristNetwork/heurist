@@ -78,8 +78,7 @@
 	print "top.HEURIST.database.name = " . json_format(HEURIST_DBNAME) . ";\n";
 	print "top.HEURIST.database.sessionPrefix = " . json_format(HEURIST_SESSION_DB_PREFIX) . ";\n";
     print "top.HEURIST.database.version = ". json_format(HEURIST_DBVERSION) . ";\n";
-	print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
-	print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_BASE_URL) . ";\n";
+	print "if (!top.HEURIST.baseURL_V3) top.HEURIST.baseURL_V3 = ".json_format(HEURIST_BASE_URL_V3) . ";\n";
     print "if (!top.HEURIST.baseURL_V4) top.HEURIST.baseURL_V4 = ".json_format(HEURIST_BASE_URL_V4) . ";\n";
 	print "if (!top.HEURIST.iconDir) top.HEURIST.iconDir = ".json_format(HEURIST_ICON_DIR) . ";\n";
 	print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = ".json_format(HEURIST_ICON_URL) . ";\n";

@@ -288,7 +288,7 @@ function hSearchIncremental() {
         }
 
         //it may be json
-        if(!top.HEURIST.util.isempty(rules_tree) && !$.isArray(rules_tree)){
+        if(!top.HEURIST4.util.isempty(rules_tree) && !$.isArray(rules_tree)){
              rules_tree = $.parseJSON(rules_tree);
         }
 
@@ -365,7 +365,7 @@ function hSearchIncremental() {
                     _prepareRules( rules ); //indexes are rest inside this function
 
                     //if rules were applied before - need to remove all records except original set and re-render
-                    if(!top.HEURIST.util.isempty(_rules) && _rules[0].results.length>0){
+                    if(!top.HEURIST4.util.isempty(_rules) && _rules[0].results.length>0){
 
                          //keep json (to possitble save as saved searches)
                          that.query_request.rules = rules;
@@ -399,7 +399,7 @@ function hSearchIncremental() {
                             _searchCompleted( false );
                          }
                          
-                    } else if(!top.HEURIST.util.isempty(_rules)){
+                    } else if(!top.HEURIST4.util.isempty(_rules)){
                         return false;
                     }
                 }

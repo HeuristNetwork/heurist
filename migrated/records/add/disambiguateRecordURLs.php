@@ -36,12 +36,12 @@
   require_once(dirname(__FILE__).'/../disambig/testSimilarURLs.php');
 
   if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
   }
 
   if (! $_REQUEST['bkmk_url']) {
-    header('Location: '.HEURIST_BASE_URL.'records/add/addRecordPopup.php?db='.HEURIST_DBNAME);
+    header('Location: '.HEURIST_BASE_URL_V3.'records/add/addRecordPopup.php?db='.HEURIST_DBNAME);
     return;
   }
 
@@ -55,10 +55,10 @@
   <head>
     <title>Heurist - Add bookmark (disambiguation)</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-    <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/disambiguate.css'>
-    <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+    <link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/disambiguate.css'>
+    <link rel="icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
   </head>
   <body>
     <a id=home-link href='../../'>
@@ -265,15 +265,15 @@
           ?>
         </form>
       </div>
-      <div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100-check.gif');" id="popupProtector"></div>
+      <div style="position: absolute; display: none; background: url('<?=HEURIST_BASE_URL_V3?>common/images/100x100-check.gif');" id="popupProtector"></div>
       <div style="background-color: #600000; border: 0px; margin: 0px; padding: 10px; overflow: hidden; display: none; position: absolute; text-align: center;" id="url_checker">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" style="font-size: 12px;">
           <tr>
             <td style="color: white; font-weight: bold;">Previewing bookmark</td>
-            <td style="width: 150px; text-align: right;"><a style="text-decoration: none; color: white;" onClick="endCheckURL(); return false;" href='<?=HEURIST_BASE_URL?>common/html/blank.html'>[close this window]</a></td>
+            <td style="width: 150px; text-align: right;"><a style="text-decoration: none; color: white;" onClick="endCheckURL(); return false;" href='<?=HEURIST_BASE_URL_V3?>common/html/blank.html'>[close this window]</a></td>
           </tr>
           <tr>
-            <td colspan="2"><iframe style="border: 0px; margin: 0px; padding: 0px; background-color: white;" frameBorder="0" name="uc_frame" id="uc_frame_obj" src='<?=HEURIST_BASE_URL?>common/html/blank.html'></iframe></td>
+            <td colspan="2"><iframe style="border: 0px; margin: 0px; padding: 0px; background-color: white;" frameBorder="0" name="uc_frame" id="uc_frame_obj" src='<?=HEURIST_BASE_URL_V3?>common/html/blank.html'></iframe></td>
           </tr>
         </table>
       </div>

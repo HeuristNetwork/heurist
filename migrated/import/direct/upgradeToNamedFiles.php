@@ -39,11 +39,11 @@
 	require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
 	if (! is_logged_in()) {
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+		header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 		return;
 	}
 	if (! is_admin()) {
-		print "<html><body><p>Requires database owner privilege (admin of the owners group)</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
+		print "<html><body><p>Requires database owner privilege (admin of the owners group)</p><p><a href=".HEURIST_BASE_URL_V3.">Return to Heurist</a></p></body></html>";
 		return;
 	}
 ?>

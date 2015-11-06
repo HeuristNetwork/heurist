@@ -39,7 +39,7 @@ if (! top.HEURIST4.ajax) top.HEURIST4.ajax = {
     sendRequest: function(url,callback,postData) {
         // if we don't have a fully formed or root URL then prepend the base path
         if (! url.match(/^http:/)  &&  ! url.match(/^\//))
-            url = top.HAPI4.basePath + url;
+            url = top.HAPI4.basePathV4 + url;
         var file = url;
         var req = top.HEURIST4.ajax.createXMLHTTPObject();
         if (!req) return;

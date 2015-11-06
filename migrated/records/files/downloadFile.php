@@ -92,7 +92,7 @@
 
       $annot_edit = ($isannotation_editor)?'&annedit=yes':'';
 
-      $text = '<iframe '.$size.' src="'.HEURIST_BASE_URL.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].$annot_edit.'&db='.$_REQUEST['db'].'" frameborder="0"></iframe>';
+      $text = '<iframe '.$size.' src="'.HEURIST_BASE_URL_V3.'records/files/mediaViewer.php?ulf_ID='.$_REQUEST['ulf_ID'].$annot_edit.'&db='.$_REQUEST['db'].'" frameborder="0"></iframe>';
 
       print $text;
     }

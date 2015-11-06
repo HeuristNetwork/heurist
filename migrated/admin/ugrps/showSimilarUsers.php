@@ -35,7 +35,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
 }
 
@@ -45,8 +45,8 @@ if (! is_logged_in()) {
         <title>Find similar users</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+        <link rel="icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
     </head>
@@ -152,7 +152,7 @@ if (! is_logged_in()) {
 
 	                $i = 0;
 	                while ($row = mysql_fetch_assoc($res)) {
-		                echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?db='.HEURIST_DBNAME.'&Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
+		                echo ' <tr'. (++$i > 10 ? ' style="display: none;"' : '') .'><td><a href="'.HEURIST_BASE_URL_V3.'admin/ugrps/viewUserDetails.php?db='.HEURIST_DBNAME.'&Id='.$row['bkm_UGrpID'].'" title="View user profile for '.$row['name'].'">'.$row['name']."</a>&nbsp;&nbsp;&nbsp;&nbsp;</td>\n";
 		                echo '     <td><a target="_top" href="'.HEURIST_BASE_URL_V4.'?db='.HEURIST_DBNAME.'&w=bookmark&q=user:%22'.$row['name'].'%22" title="Search for records that you and '.$row['name'].' share"><b>'.$row['freq']."</b> records in common</a></td></tr>\n";
 	                }
                 }

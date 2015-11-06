@@ -248,7 +248,7 @@ if (@$ARGV) {	// commandline actuation
 	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	if (!is_logged_in()) { // check if the record being retrieved is a single non-protected record
 		if (!single_record_retrieval($_REQUEST['q'])) {
-			header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+			header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
 			return;
 		}
 	}

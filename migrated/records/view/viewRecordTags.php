@@ -37,7 +37,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/t1000/t1000.php');
 
 if (!is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php');
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php');
 	return;
 }
 /*****DEBUG****///error_log(print_r($LOOKUPS, 1));
@@ -133,7 +133,7 @@ if ($tags) {
 			if ($i++ == 3) {
 				$kwd_list .= '   <span class="collapsed"><span class="hide_on_collapse">'."\n";
 			}
-			$kwd_list .= '   <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].
+			$kwd_list .= '   <a href="'.HEURIST_BASE_URL_V3.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].
 									'" style="white-space:nowrap;" title="View user profile for '.
 									$row['bkmk_user'].'">'.$row['bkmk_user']."</a>&nbsp;\n";
 		}
@@ -174,7 +174,7 @@ if (mysql_num_rows($res)) {
 		if ($i++ == 3) {
 			$body->global_vars['other-users'] .= ' <span class="collapsed"><span class="hide_on_collapse">'."\n";
 		}
-		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_SITE_PATH.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'" style="white-space:nowrap;">'.$row['bkmk_user']."</a>&nbsp;\n";
+		$body->global_vars['other-users'] .= ' <a href="'.HEURIST_BASE_URL_V3.'admin/ugrps/viewUserDetails.php?Id='.$row['ugr_ID'].'" title="View user profile for '.$row['bkmk_user'].'" style="white-space:nowrap;">'.$row['bkmk_user']."</a>&nbsp;\n";
 	}
 	if ($i > 3) {
 		$body->global_vars['other-users'] .= ' </span>'."\n";

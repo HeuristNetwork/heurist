@@ -304,7 +304,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			}
 		}//end callback
 
-		var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
+		var baseurl = top.HEURIST.baseURL_V3 + "records/files/imageAnnotation.php";
 		var callback = _updateList;
 		var params = "recid="+_recordID+"&db="+_db;
 		top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -342,7 +342,7 @@ function ImageAnnotation(imageviewer, _recID) {
 				}
 			}
 
-			var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "records/files/imageAnnotation.php";
 			var callback = _updateAnnList;
 			var params = "listrt=1&db="+_db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -379,7 +379,7 @@ function ImageAnnotation(imageviewer, _recID) {
 				div.style.borderWidth = "0px";
 				div.style.borderStyle = "none";
 				div.style.borderRadius = 0;
-				div.style.backgroundImage = "url("+top.HEURIST.basePath+"common/images/cross-red.png)";
+				div.style.backgroundImage = "url("+top.HEURIST.baseURL_V3+"common/images/cross-red.png)";
 				div.style.backgroundRepeat = "no-repeat";
 				div.style.backgroundPosition = "center left";
 			}
@@ -475,7 +475,7 @@ function ImageAnnotation(imageviewer, _recID) {
 				//delete annotation record as well
 
 
-				var baseurl = top.HEURIST.baseURL + "records/files/imageAnnotation.php";
+				var baseurl = top.HEURIST.baseURL_V3 + "records/files/imageAnnotation.php";
 				var callback = _afterDelete;
 				var params = "delete=1&recid="+recid+"&db="+_db;
 				top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -509,12 +509,12 @@ function ImageAnnotation(imageviewer, _recID) {
 		var recImageTitle = 'todo: name of file';
 
 			if(Number(marker[6])>0){
-					window.open(top.HEURIST.basePath+"/records/edit/editRecord.html?recID="+marker[6]+"&db="+_db,"_blank");
+					window.open(top.HEURIST.baseURL_V3+"/records/edit/editRecord.html?recID="+marker[6]+"&db="+_db,"_blank");
 			}else if(_recordID>0){
 
 				var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(rectype);
 
-				top.HEURIST.util.popupURL(window, top.HEURIST.basePath +'records/add/formAddRecordPopup.html?rectype='+
+				top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?rectype='+
 							rectype+ //top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']+
 										'&addr='+marker[0]+":"+marker[1]+":"+marker[2]+":"+marker[3]+
 										'&trgRecID='+_recordID +

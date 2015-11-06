@@ -278,7 +278,7 @@ $.widget( "heurist.rectype_manager", {
 
             //record type icon
             $('<img>',{
-                src:  top.HAPI4.basePath+'assets/16x16.gif'
+                src:  top.HAPI4.basePathV4+'assets/16x16.gif'
             })
             .css('background-image', 'url('+ top.HAPI4.iconBaseURL + entryID + '.png)')
             .appendTo($iconsdiv);

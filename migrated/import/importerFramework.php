@@ -145,19 +145,19 @@ function print_common_header($fileName) {
 
             <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-            <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-            <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+            <link rel="icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
+            <link rel="shortcut icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
 
-            <link rel=stylesheet href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
+            <link rel=stylesheet href='<?=HEURIST_BASE_URL_V3?>common/css/global.css'>
 
             <script src=displayImportProgress.js></script>
         </head>
         <body class="popup" width="640" height="480">
-            <script src='<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js'></script>
+            <script src='<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js'></script>
             <script>
-                if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_SITE_PATH?>common/php/loadUserInfo.php', true);
+                if (! top.HEURIST.user) top.HEURIST.loadScript('<?=HEURIST_BASE_URL_V3?>common/php/loadUserInfo.php', true);
             </script>
-            <script src='<?=HEURIST_SITE_PATH?>records/tags/autocompleteTags.js'></script>
+            <script src='<?=HEURIST_BASE_URL_V3?>records/tags/autocompleteTags.js'></script>
 
             <?php	if (defined('use_alt_db')) {	?>
                 <div style="color: red; padding: 10px; font-weight: bold;">Warning: using alternative database</div>
@@ -227,11 +227,11 @@ function mode_file_selection() {
             if ($frm == "BIB") {
                 ?>
                 Currently, support is limited to EndNote REFER and Zotero formats.<br>
-                <a href="<?=HEURIST_SITE_PATH?>import/interface/listRequiredElements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
+                <a href="<?=HEURIST_BASE_URL_V3?>import/interface/listRequiredElements.php" target=_new>Show tag definitions</a> for supported REFER record formats.<br>
                 <?php
             }else if ($frm == "GEO") {
                 ?>
-                Currently, support is limited to <a href='<?=HEURIST_SITE_PATH?>context_help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
+                Currently, support is limited to <a href='<?=HEURIST_BASE_URL_V3?>context_help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
                 <?php
             }
         }

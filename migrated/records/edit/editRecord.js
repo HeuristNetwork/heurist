@@ -388,7 +388,7 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.edit.modules.personal.disabledFunction = null;
 
                 // add the bookmark, patch the record structure, and view the personal tab
-                top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/addBookmark.php?recID="
+                top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3 + "records/bookmarks/addBookmark.php?recID="
                     + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
                         for (var i in vals) {
                             top.HEURIST.edit.record[i] = vals[i];
@@ -513,7 +513,7 @@ if (! top.HEURIST.edit) {
                 personalWindow.tagCheckDone = true;
 
                 if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
-                    top.HEURIST.util.popupURL(top, top.HEURIST.basePath
+                    top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3
                         + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { callback: function(tags) {
                             if (tags) {
                                 personalWindow.document.getElementById("tags").value = tags;
@@ -1067,7 +1067,7 @@ if (! top.HEURIST.edit) {
             var thisRef = this;
             var element = fileInput.parentNode;
             //call thumbnail maker
-            top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
+            top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3 + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
                 function(vals) {
                     top.HEURIST.edit.fileInputURLsaved.call(thisRef, element, vals);
             });
@@ -1706,7 +1706,7 @@ if (! top.HEURIST.edit) {
                     popupOptions.y = 0;
                 }
 
-                top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/editTemporalObject.html?"
+                top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "common/html/editTemporalObject.html?"
                     + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
             }
 
@@ -1785,7 +1785,7 @@ if (! top.HEURIST.edit) {
 
         if (this.repeatable) {
             var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
-            dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
+            dupImg.src = top.HEURIST.baseURL_V3 + "common/images/duplicate.gif";
             dupImg.className = "duplicator";
             dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + " value";
             top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
@@ -1926,7 +1926,7 @@ if (! top.HEURIST.edit) {
                 var span = this.document.createElement("span");
                 span.style.paddingLeft = "20px";
                 span.style.lineHeight = "16px";
-                span.style.backgroundImage = "url("+top.HEURIST.basePath+"common/images/external_link_16x16.gif)";
+                span.style.backgroundImage = "url("+top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif)";
                 span.style.backgroundRepeat = "no-repeat";
                 span.style.backgroundPosition = "center left";
                 span.appendChild(this.document.createTextNode("look up"));
@@ -2292,7 +2292,7 @@ if (! top.HEURIST.edit) {
         newDiv.appendChild(hiddenElt);    // have to do this AFTER the type is set
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Remove this record pointer";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2304,27 +2304,27 @@ if (! top.HEURIST.edit) {
         });
 
         var editImg = newDiv.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
+        editImg.src = top.HEURIST.baseURL_V3 +"common/images/edit-pencil.png";
         editImg.className = "edit-resource";
         editImg.title = "Edit this record (opens in a new tab)";
 
         top.HEURIST.registerEvent(editImg, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-                window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
+                window.open(top.HEURIST.baseURL_V3 +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
                     (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
             }
         });
 
         // TO DO: We really want this record view popping up in a popup window rather than a new tab
         var ViewRec = newDiv.appendChild(this.document.createElement("img"));
-        ViewRec.src = top.HEURIST.basePath +"common/images/magglass_15x14.gif";
+        ViewRec.src = top.HEURIST.baseURL_V3 +"common/images/magglass_15x14.gif";
         ViewRec.className = "view-resource";
         ViewRec.title = "View the record linked via this pointer field (opens in a new tab)";
 
         top.HEURIST.registerEvent(ViewRec, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
 
-                var url = top.HEURIST.basePath +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
+                var url = top.HEURIST.baseURL_V3 +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
                         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
 
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
@@ -2362,7 +2362,7 @@ if (! top.HEURIST.edit) {
         var thisRef = this;
 
         if (! searchValue) searchValue = element.textElt.value;
-        var url = top.HEURIST.basePath+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
+        var url = top.HEURIST.baseURL_V3+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
         if (top.HEURIST.edit.record)
             url += "&target_recordtype="+top.HEURIST.edit.record.rectypeID;
@@ -2594,7 +2594,7 @@ if (! top.HEURIST.edit) {
         urlSpan.style.cursor = "pointer";
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
         var viewRec = urlSpan.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+        editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
 
@@ -2637,7 +2637,7 @@ if (! top.HEURIST.edit) {
                     type="relation";
                 }
 
-                top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
                     "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
@@ -2654,7 +2654,7 @@ if (! top.HEURIST.edit) {
                 );
 
             }else{
-                top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
                     "admin/structure/terms/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
                     {//options
                         "close-on-blur": false,
@@ -2771,7 +2771,7 @@ if (! top.HEURIST.edit) {
             var link = inputDiv.appendChild(this.document.createElement("a"));
             if (bdValue.file.nonce) {
                 //not used anymore   @todo - remove
-                link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+                link.href = top.HEURIST.baseURL_V3+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
                 "?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+
                 (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
             } else if (bdValue.file.URL) {
@@ -2783,7 +2783,7 @@ if (! top.HEURIST.edit) {
             link.appendChild(this.document.createTextNode(bdValue.file.origName));    //saw TODO: add a title to this which is the bdValue.file.description
 
             var linkImg = link.appendChild(this.document.createElement("img"));
-            linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
+            linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
             linkImg.className = "link-image";
 
             var fileSizeSpan = inputDiv.appendChild(this.document.createElement("span"));
@@ -2791,7 +2791,7 @@ if (! top.HEURIST.edit) {
             fileSizeSpan.appendChild(this.document.createTextNode("[" + bdValue.file.fileSize + "]"));
 
             var removeImg = inputDiv.appendChild(this.document.createElement("img"));
-            removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+            removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
             removeImg.className = "delete-file";
             removeImg.title = "Remove this file";
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2809,7 +2809,7 @@ if (! top.HEURIST.edit) {
         } else {
             if (top.HEURIST.browser.isEarlyWebkit) {    // old way of doing things
                 var newIframe = this.document.createElement("iframe");
-                newIframe.src = top.HEURIST.basePath+"records/files/uploadFileForm.php?recID="
+                newIframe.src = top.HEURIST.baseURL_V3+"records/files/uploadFileForm.php?recID="
                 + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
                 newIframe.frameBorder = 0;
                 newIframe.style.width = "90%";
@@ -3029,7 +3029,7 @@ if (! top.HEURIST.edit) {
         newDiv.input = input;
 
         var geoImg = this.document.createElement("img");
-        geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
+        geoImg.src = top.HEURIST.baseURL_V3+"common/images/16x16.gif";
         geoImg.className = "geo-image";
         geoImg.onmouseout = function(e) { mapViewer.hide(); };
 
@@ -3056,7 +3056,7 @@ if (! top.HEURIST.edit) {
                 }
             });*/
 
-                    var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html";
+                    var sURL = top.HEURIST.baseURL_V3+"records/edit/digitizer/index.html";
                      //+ (response.success ? "edit" : encodeURIComponent(input.value))
                     top.HEURIST.util.popupURL(
                         windowRef,
@@ -3079,7 +3079,7 @@ if (! top.HEURIST.edit) {
         editSpan.appendChild(editLink);
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
         newDiv.removeImg = removeImg;
         removeImg.className = "delete-geo";
         removeImg.title = "Remove this geographic object";
@@ -3220,7 +3220,7 @@ if (! top.HEURIST.edit) {
     */
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = function(cmd, relID) {
         if (cmd == "delete") {
-            var fakeForm = { action: top.HEURIST.basePath+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
+            var fakeForm = { action: top.HEURIST.baseURL_V3+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
                 elements: [ { name: "delete[]", value: relID },
                     { name: "recID", value: this.recID } ] };
             var thisRef = this;
@@ -3319,7 +3319,7 @@ if (! top.HEURIST.edit) {
         }
 
         var removeImg = this.reminderDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/cross.png";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/cross.png";
         removeImg.title = "Remove this reminder";
         var thisRef = this;
         removeImg.onclick = function() { if (confirm("Remove this reminder?")) thisRef.remove(); };
@@ -3336,7 +3336,7 @@ if (! top.HEURIST.edit) {
     */
     top.HEURIST.edit.Reminder.prototype.remove = function() {
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        var fakeForm = { action: top.HEURIST.basePath+"records/reminders/saveReminder.php",
+        var fakeForm = { action: top.HEURIST.baseURL_V3+"records/reminders/saveReminder.php",
             elements: [ { name: "rem_ID", value: this.reminderID },
                 { name: "recID", value: windowRef.parent.HEURIST.edit.record.bibID },
                 { name: "save-mode", value: "delete" } ] };
@@ -3689,7 +3689,7 @@ if (! top.HEURIST.edit) {
             urlOutput.href = defaultValue;
 
             var linkImg = urlOutput.appendChild(this.document.createElement("img"));
-            linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
+            linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
             linkImg.className = "link-image";
             if(!displayValue) displayValue =  defaultValue;
             displayValue = (displayValue.length>60)? displayValue.substr(0, 60)+'...':displayValue;
@@ -3705,11 +3705,11 @@ if (! top.HEURIST.edit) {
                 urlSpan.style.color = "blue";
                 urlSpan.style.cursor = "pointer";
                 var editImg = urlSpan.appendChild(this.document.createElement("img"));
-                editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+                editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
                 urlSpan.appendChild(editImg);
                 urlSpan.appendChild(this.document.createTextNode("edit"));
                 var viewRec = urlSpan.appendChild(this.document.createElement("img"));
-                viewRec.src = top.HEURIST.basePath+"common/images/magglass_15x14.gif";
+                viewRec.src = top.HEURIST.baseURL_V3+"common/images/magglass_15x14.gif";
                 urlSpan.appendChild(viewRec);
                 urlSpan.appendChild(this.document.createTextNode("view"));
 
@@ -3782,7 +3782,7 @@ if (! top.HEURIST.edit) {
 
         var valueVisible = "";
         var valueHidden = "";
-        var thumbUrl = top.HEURIST.basePath+"common/images/icon_file.jpg";
+        var thumbUrl = top.HEURIST.baseURL_V3+"common/images/icon_file.jpg";
 
         if(bdValue){
             if(bdValue.file){
@@ -3870,7 +3870,7 @@ if (! top.HEURIST.edit) {
 
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Clear";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -3905,7 +3905,7 @@ if (! top.HEURIST.edit) {
             recID = "&recid="+top.HEURIST.edit.record.bibID;
         }
 
-        var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
+        var url = top.HEURIST.baseURL_V3+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
         /*if (element.input.constrainrectype){
         url += "&t="+element.input.constrainrectype;
         }*/

@@ -106,7 +106,7 @@
 			// different databases eg. there are lots of johnsons, which will cause insert statement to fail as ugr_Name is unique.
 			if($res) { 	// New user created successfully
 				$indexdb_user_id = mysql_insert_id();
-				header('Location: ' . HEURIST_BASE_URL . '/common/connect/login.php?db=' . HEURIST_DBNAME . (isset($last_uri) ? '&last_uri=' . urlencode($last_uri) : '')); // TODO: Change to HEURIST_BASE_URL
+				header('Location: ' . HEURIST_BASE_URL_V3 . '/common/connect/login.php?db=' . HEURIST_DBNAME . (isset($last_uri) ? '&last_uri=' . urlencode($last_uri) : '')); // TODO: Change to HEURIST_BASE_URL_V3
 			} else { // Unable to create the new user
 				$error = "Unable to write new user in Heurist master index database\n" .
                     "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";

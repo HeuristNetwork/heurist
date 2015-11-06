@@ -384,7 +384,7 @@ function save_report_output2($tpl_source){
 			$rps_recid = @$gparams['rps_id'];
 			if($rps_recid){
 
-				$link = HEURIST_BASE_URL."viewers/smarty/updateReportOutput.php?db=".HEURIST_DBNAME."&publish=3&id=".$rps_recid;
+				$link = HEURIST_BASE_URL_V3."viewers/smarty/updateReportOutput.php?db=".HEURIST_DBNAME."&publish=3&id=".$rps_recid;
 ?>
 <p style="font-size: 14px;">You may view the content of report by click hyperlinks below:<br />
 HTML: <a href="<?=$link?>" target="_blank" style="font-weight: bold;"><?=$link?></a><br />
@@ -393,7 +393,7 @@ Javascript: <a href="<?=$link?>&mode=js" target="_blank" style="font-weight: bol
 			}
 
 // code for insert of dynamic report output - duplication of functionality in repMenu.html
-			$surl = HEURIST_BASE_URL."viewers/smarty/showReps.php?db=".HEURIST_DBNAME.
+			$surl = HEURIST_BASE_URL_V3."viewers/smarty/showReps.php?db=".HEURIST_DBNAME.
 						"&ver=".$gparams['ver']."&w=".$gparams['w']."&q=".$gparams['q'].
 						"&publish=1&debug=0&template=".$gparams['template'];
                         
@@ -1183,7 +1183,7 @@ function smarty_function_wrap($params, &$smarty)
 						$res = '<a href="http://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank">'.$label."</a>";
 					}else{
 						$recid = $value['recid'];
-						$url = HEURIST_SITE_PATH."viewers/map/showMapUrl.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
+						$url = HEURIST_BASE_URL_V3."viewers/map/showMapUrl.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
 						return "<img src=\"".$url."\" ".$size."/>";
 					}
 				}

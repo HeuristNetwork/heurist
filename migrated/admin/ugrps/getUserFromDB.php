@@ -125,7 +125,7 @@
                         print "<p>MySQL returns: ".$err;
                         print "<p><b>Sorry, Problem writing user # $userID from the source database $sourcedb ".
                         "into the current database.</b><br />This may be because the selected user is already a user ".
-                        "in the current database<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".
+                        "in the current database<p><a href=".HEURIST_BASE_URL_V3."admin/ugrps/getUserFromDB.php?db=".
                         HEURIST_DBNAME."&sourcedbname=$sourcedbname&mode=2>Add another user from the selected database</a>";
                     } else {
                         /* IJ: 19-Sep-12 Don't make imported users members of the Database Managers group - too risky.
@@ -138,16 +138,16 @@
                         if (!$res1) {
                         print "<p>MySQL returns: ".$err;
                         print "<p><b>Sorry, Unable to allocate the new user to a group - please set maually</b>".
-                        "<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME.
+                        "<p><a href=".HEURIST_BASE_URL_V3."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME.
                         "&sourcedbname=$sourcedbname&mode=2>Add another</a>";
                         } else {
                         print "<p><b>New user allocated as a member of the 'Database Managers' group (# 1) - edit group allocation as required".
-                        "<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME.
+                        "<p><a href=".HEURIST_BASE_URL_V3."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME.
                         "&sourcedbname=$sourcedbname&mode=2>Add another</a>";
                         }
                         */
                         print "<p><b>Note: New user was not allocated as a member of any group. Edit group allocation as required".
-                        "<p><a href=".HEURIST_BASE_URL."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME.
+                        "<p><a href=".HEURIST_BASE_URL_V3."admin/ugrps/getUserFromDB.php?db=".HEURIST_DBNAME.
                         "&sourcedbname=$sourcedbname&mode=2>Add another</a>";
                     }
                 }

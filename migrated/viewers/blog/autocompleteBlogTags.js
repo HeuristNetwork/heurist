@@ -776,13 +776,13 @@ top.HEURIST.showConfirmNewTag = function(tag) {
 	var confirmOption = confirmImg.appendChild(this.document.createElement("div"));
 		confirmOption.style.top = "2px";
 		confirmOption.style.color = "#fff";
-		confirmOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL+"common/images/tick-grey.gif'></div>Confirm New Tag";
+		confirmOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL_V3+"common/images/tick-grey.gif'></div>Confirm New Tag";
 		confirmOption.className = "option";
 		confirmOption.onmousedown = function() { top.HEURIST.autocompleteConfirm.call(that); return false; };
 	var changeOption = confirmImg.appendChild(this.document.createElement("div"));
 		changeOption.style.top = "14px";
 		changeOption.style.color = "#fff";
-		changeOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL+"common/images/cross.png'></div>Change Tag";
+		changeOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL_V3+"common/images/cross.png'></div>Change Tag";
 		changeOption.className = "option";
 		changeOption.onmousedown = function() { top.HEURIST.autocompleteChange.call(that); return false; };
 

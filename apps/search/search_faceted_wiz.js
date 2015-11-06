@@ -614,7 +614,7 @@ $.widget( "heurist.search_faceted_wiz", {
         
                var that = this;
                 
-                var url = top.HAPI4.basePath+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+                var url = top.HAPI4.basePathV4+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
                 if(!Hul.isnull(ele_rules)){
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
@@ -1088,10 +1088,10 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){
-        $.getScript(top.HAPI4.basePath+'apps/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(top.HAPI4.basePathV4+'apps/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(top.HAPI4.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(top.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
         
     }else{
 

@@ -45,12 +45,12 @@ foreach (array_keys($instances) as $instance) {
 }
 
 if (count($user_instances) == 0) {
-	header("Location: ".HEURIST_BASE_URL."common/connect/login.php?last_uri=".HEURIST_BASE_URL."hapi/key.php");
+	header("Location: ".HEURIST_BASE_URL_V3."common/connect/login.php?last_uri=".HEURIST_BASE_URL_V3."hapi/key.php");
 }
 
 if (count($user_instances) == 1  &&  $user_instances[0] == ""  &&
 	$_SESSION["heurist"]["user_access"][$instances[""]["admingroup"]] != "admin") {
-	header("Location: ".HEURIST_BASE_URL."common/connect/login.php?last_uri=".HEURIST_BASE_URL."hapi/key.php");
+	header("Location: ".HEURIST_BASE_URL_V3."common/connect/login.php?last_uri=".HEURIST_BASE_URL_V3."hapi/key.php");
 }
 
 ?>
@@ -137,4 +137,4 @@ if (mysql_num_rows($res) > 0) {
   <p>This key is valid for all URLs in this directory:</p>
   <pre><?= $url ?></pre>
   <p>To load the Heurist API, you can use:</p>
-  <pre>&lt;script src=http:<?=HEURIST_BASE_URL?>/hapi/load.php?<?= $instance ? "db=$instance&amp;" : "" ?>key=<?=$key?>&gt;&lt;/script&gt;</pre>
+  <pre>&lt;script src=http:<?=HEURIST_BASE_URL_V3?>/hapi/load.php?<?= $instance ? "db=$instance&amp;" : "" ?>key=<?=$key?>&gt;&lt;/script&gt;</pre>

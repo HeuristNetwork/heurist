@@ -96,9 +96,9 @@ window.HEURIST.edit = {
 			var db = (window.HEURIST.parameters["db"] || "");
 
 			if(form.setAttribute){
-			 	form.setAttribute("jsonAction", top.HEURIST.basePath+'export/email/emailRecordDetails.php?db='+db);
+			 	form.setAttribute("jsonAction", top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db);
 			}
-			form.action = top.HEURIST.basePath+'export/email/emailRecordDetails.php?db='+db;
+			form.action = top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db;
 
 			if (form.onsubmit  &&  ! form.onsubmit()) {
 				return;	// submit failed ... up to the individual form handlers to display messages
@@ -119,7 +119,7 @@ window.HEURIST.edit = {
 
 	if(!top.HEURIST.edit){
 		//for admin part - editRecord.js is not loaded initially
-		top.HEURIST.loadScript(top.HEURIST.basePath+"records/edit/editRecord.js");		// edit-specific HEURIST functions
+		top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"records/edit/editRecord.js");		// edit-specific HEURIST functions
 	}
 
 

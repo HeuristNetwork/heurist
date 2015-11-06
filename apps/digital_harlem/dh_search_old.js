@@ -649,7 +649,7 @@ select f:89 where {qa:[ {"t":"16"}, {"linked_to:90":[{"t":"12"}, {"relatedfrom:9
     loadanimation: function(show){
         if(show){
             //this.tab_control.hide();
-            this.res_div.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+            this.res_div.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.res_div.css('background','none');
             //this.tab_control.show();

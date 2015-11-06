@@ -40,7 +40,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 
 if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
 }
 
@@ -52,8 +52,8 @@ include_once 'classEmailProcessor.php';
 
 function returnErrorMsgPage2($msg) {
     $msg2= "<p>&nbsp;<h2>Email configuration error</h2></p><p>".$msg."</p><p><i>Please edit the system configuration (DBAdmin > Database > Advanced Properties) or user configuration ( DBAdmin > Access > Users)</i></p>";
-    header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
-    // echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
+    header("Location: ".HEURIST_BASE_URL_V3."common/html/msgErrorMsg.html?msg=$msg2");
+    // echo "location.replace(\"".HEURIST_BASE_URL_V3."common/html/msgErrorMsg.html?msg=$msg2\");";
 } // returnErrorMsgPage2
 
 

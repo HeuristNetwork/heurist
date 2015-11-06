@@ -38,7 +38,7 @@ $.widget( "heurist.staticPage", {
         this.div_content = $('<div>')  //.css('overflow','auto')
                    /*.css({
                         position:'absolute', top:(this.options.title==''?0:'2.5em'), bottom:0, left:0, right:0,
-                        'background':'url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center'})*/
+                        'background':'url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center'})*/
                    .appendTo( this.element );
                    
         this.element.on("myOnShowEvent", function(event){
@@ -61,7 +61,7 @@ $.widget( "heurist.staticPage", {
 /*    
     _setOption: function( key, value ) {
         if(key=='url'){
-            value = top.HAPI4.basePathOld + value;
+            value = top.HAPI4.basePathV3 + value;
         }else if (key=='title'){
              var id = this.element.attr('id');
              $(".header"+id).html(value);
@@ -87,7 +87,7 @@ $.widget( "heurist.staticPage", {
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
             if(this.options.url.indexOf('http')<0){
-                this.options.url = top.HAPI4.basePath +  this.options.url.replace("[dbname]",  top.HAPI4.database);
+                this.options.url = top.HAPI4.basePathV4 +  this.options.url.replace("[dbname]",  top.HAPI4.database);
                 
                 //var that=this;
                 $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
@@ -117,7 +117,7 @@ $.widget( "heurist.staticPage", {
     
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }

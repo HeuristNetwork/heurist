@@ -240,12 +240,12 @@ function ShowMap() {
 
 					shape = {polygon:shape};
 				}else if(geoobj.type === "kmlfile"){
-					var url1 = HRST.basePath;
+					var url1 = HRST.baseURL_V3;
 					url1 += "records/files/downloadFile.php?db=" + HRST.database.name + "&ulf_ID="+geoobj.fileid;
 					kmls.push(url1);
 
 				}else if(geoobj.type === "kml"){ //kml content is stored as field value
-					var url2 = HRST.basePath;
+					var url2 = HRST.baseURL_V3;
 					url2 += "viewers/map/getKMLfromRecord.php?db=" + HRST.database.name + "&recID="+geoobj.recid;
 					kmls.push(url2);
 				}else if(geoobj.type === "none"){
@@ -426,9 +426,9 @@ function ShowMap() {
 					if(currentSearchQuery)
 					{
 						if(dest=="earth"){
-							url = HRST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
+							url = HRST.baseURL_V3+"export/xml/kml.php?" + currentSearchQuery;
 						}else{
-							url = HRST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
+							url = HRST.baseURL_V3+"viewers/map/showMapS.html?" + currentSearchQuery;
 						}
 						window.open(url, '_blank');
 					}
@@ -485,7 +485,7 @@ function ShowMap() {
 		if(currentQuery!=newQuery){ //newQuery!=null &&
 			currentQuery = newQuery;
 
-			var baseurl = HRST.basePath + "viewers/map/showMap.php";
+			var baseurl = HRST.baseURL_V3 + "viewers/map/showMap.php";
 			var callback = _updateMap;
 			var params =  currentQuery;
 			if(params!=null){
@@ -523,7 +523,7 @@ function ShowMap() {
 				geoobj = context.geoObjects[ind];
 				if(geoobj.type === "kmlfile"){
 
-					var url = HRST.baseURL;
+					var url = HRST.baseURL_V3;
 					url += "records/files/downloadFile.php?db=" + HRST.database.name + "&ulf_ID="+geoobj.fileid;
 					geoobj.url = url;
 
@@ -658,7 +658,7 @@ function ShowMap() {
 	function _load_layers(mode) {
             //return; //ARTEM
 
-			var baseurl = HRST.basePath + "viewers/map/showMap.php";
+			var baseurl = HRST.baseURL_V3 + "viewers/map/showMap.php";
 			var callback = _updateLayersList;
 			var params =  "ver=1&limit=25&layers="+mode+"&db="+HRST.database.name;
 			Hul.getJsonData(baseurl, callback, params);
@@ -694,7 +694,7 @@ function ShowMap() {
 		},
 
 		baseURL:  function (){
-			return HRST.basePath;
+			return HRST.baseURL_V3;
 		},
 
 		getQuery: function(){

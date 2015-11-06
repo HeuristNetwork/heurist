@@ -282,7 +282,7 @@ function isForAdminOnly($message="", $redirect=true)
 {
 
     if ($redirect && !is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+        header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
         return;
     }
 
@@ -301,7 +301,7 @@ function isForAdminOnly($message="", $redirect=true)
                     <div id=errorMsg>
                         <span>You must be logged in as database owner <?=$message ?></span>
                         <p>
-                            <a href="<?=HEURIST_BASE_URL?>common/connect/login.php?logout=1&db=<?=HEURIST_DBNAME?>" target="_top">Log out / log in again</a>
+                            <a href="<?=HEURIST_BASE_URL_V3?>common/connect/login.php?logout=1&db=<?=HEURIST_DBNAME?>" target="_top">Log out / log in again</a>
                         </p>
                     </div>
                 </div>

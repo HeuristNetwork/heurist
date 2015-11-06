@@ -28,8 +28,8 @@ require_once (dirname(__FILE__) . '/../common/connect/applyCredentials.php');
 // However /common/etc. and ../common/etc. - both of which are correct paths and work with phpEd - cause the admin menu to hang.
 
 if (!is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
-    //HEURIST_BASE_URL.'admin/adminMenu.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
+    //HEURIST_BASE_URL_V3.'admin/adminMenu.php?db='.HEURIST_DBNAME);
     return;
 }
 
@@ -99,9 +99,9 @@ if (array_key_exists('mode', $_REQUEST)) {
         <script type="text/javascript">
             function loadContent(url){
                 var recordFrame = document.getElementById("adminFrame");
-                recordFrame.src = top.HEURIST.basePath+"common/html/msgLoading.html";
+                recordFrame.src = top.HEURIST.baseURL_V3+"common/html/msgLoading.html";
                 setTimeout(function(){
-                    recordFrame.src = top.HEURIST.basePath+"admin/"+url;
+                    recordFrame.src = top.HEURIST.baseURL_V3+"admin/"+url;
                     },500);
                 return false;
             }; // end loadContent

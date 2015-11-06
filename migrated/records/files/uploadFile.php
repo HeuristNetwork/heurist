@@ -727,12 +727,12 @@
                 $res["thumbURL"] = HEURIST_THUMB_URL.$thumbnail_file;
             }else{
                 $res["thumbURL"] =
-                HEURIST_BASE_URL."common/php/resizeImage.php?".
+                HEURIST_BASE_URL_V3."common/php/resizeImage.php?".
                 (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
             }
 
 
-            $downloadURL = HEURIST_BASE_URL."records/files/downloadFile.php/".$origName."?".
+            $downloadURL = HEURIST_BASE_URL_V3."records/files/downloadFile.php/".$origName."?".
             (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
 
             if($res["remoteURL"]!=null || $res["prefsource"]=="external") {
@@ -849,7 +849,7 @@
                 if(file_exists(HEURIST_THUMB_DIR.$thumbnail_file)){
                     $thumb_url = HEURIST_THUMB_URL.$thumbnail_file;
                 }else{
-                    $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
+                    $thumb_url = HEURIST_BASE_URL_V3."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$file['ulf_ObfuscatedFileID'];
                 }
             }
         }
@@ -872,7 +872,7 @@
             if ($res && mysql_num_rows($res) == 1) {
                 $dRow = mysql_fetch_assoc($res);
                 if ( $fullUrlDT &&  $dRow['dtl_DetailTypeID'] == $fullUrlDT) {
-                    $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".HEURIST_DBNAME."&file_url=".htmlspecialchars($dRow['dtl_Value']);
+                    $thumb_url = HEURIST_BASE_URL_V3."common/php/resizeImage.php?db=".HEURIST_DBNAME."&file_url=".htmlspecialchars($dRow['dtl_Value']);
                 }else{
                     $thumb_url = "".htmlspecialchars(addslashes($row['dtl_Value']));
                 }

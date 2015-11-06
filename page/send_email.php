@@ -161,7 +161,7 @@ if(isset($_POST['data'])) {
         var definitions; // Record type field definitions
         var rectype_index = 4; // Record type index in object
         var type_index = 23; // Field type index in object
-        var ids = top.HEURIST.user.selectedRecordIds; // Selected record ID's
+        var ids =  top.HAPI4.selectedRecordIds; // Selected record ID's
         var records = top.HAPI4.currentRecordset.getSubSetByIds(ids).getRecords(); // Array of record objects
         var record; // First record in the list, used to determine the Record Types
 

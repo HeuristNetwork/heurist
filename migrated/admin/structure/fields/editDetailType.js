@@ -421,7 +421,7 @@ function DetailTypeEditor() {
         var el_sel = Dom.get("selVocab");
         if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
 
-            Hul.popupURL(top, top.HEURIST.basePath +
+            Hul.popupURL(top, top.HEURIST.baseURL_V3 +
                 "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
                 {
                     "close-on-blur": false,
@@ -446,7 +446,7 @@ function DetailTypeEditor() {
 
         }else{ //select terms (advanced)
 
-            Hul.popupURL(top, top.HEURIST.basePath +
+            Hul.popupURL(top, top.HEURIST.baseURL_V3 +
                 "admin/structure/terms/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
                 {
                     "close-on-blur": false,
@@ -494,9 +494,9 @@ function DetailTypeEditor() {
             }
 
             if(args) {
-                URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
+                URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
             } else {
-                URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
+                URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
             }
 
             Hul.popupURL(top, URL, {
@@ -625,7 +625,7 @@ function DetailTypeEditor() {
 
             var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
             var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
-            var warningImg = "<img src='" + top.HEURIST.basePath + "common/images/url_warning.png'>";
+            var warningImg = "<img src='" + top.HEURIST.baseURL_V3 + "common/images/url_warning.png'>";
 
             if(iusage > 0) {
 
@@ -813,7 +813,7 @@ function DetailTypeEditor() {
         if(str !== null) {
 
             // 3. sends data to server
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveDT&db="+_db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -975,7 +975,7 @@ function DetailTypeEditor() {
             var el_sel = Dom.get("selVocab");
             var vocab_id =  el_sel.value>0?el_sel.value:'';
 
-            top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": false,

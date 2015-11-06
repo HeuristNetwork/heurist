@@ -163,7 +163,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                 if( confirm(msg) ) {
 
                     $.ajax({
-                        url: top.HEURIST.basePath+'import/delimited/importCSV.php',
+                        url: top.HEURIST.baseURL_V3+'import/delimited/importCSV.php',
                         type: "POST",
                         data: {clearsession: session_id, db:currentDb},
                         dataType: "json",

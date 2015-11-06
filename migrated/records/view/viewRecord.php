@@ -65,10 +65,10 @@ if (@$_REQUEST['bkmk_id']) {
 require_once(dirname(__FILE__).'/testPermissions.php');
 if (! canViewRecord($rec_id)) {
     
-//    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL));
+//    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL));
 //    return;
     
-	header('Location: ' . HEURIST_BASE_URL . 'common/html/msgAccessDenied.html?'.$rec_id);
+	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/html/msgAccessDenied.html?'.$rec_id);
 	return;
 }
 
@@ -86,17 +86,17 @@ $rec_title = $row['rec_Title'];
 <head>
 	<title>HEURIST - View record</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-	<link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+	<link rel="icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="<?=HEURIST_BASE_URL_V3?>favicon.ico" type="image/x-icon">
 
-	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
 </head>
 
 <body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?> class="popup">
 	<div><h2>Record details</h2></div>
 	<div>
 	<h3><?= htmlspecialchars($rec_title) ?></h3>
-	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_BASE_URL_V3?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 	</div>
 </body>
 </html>

@@ -37,7 +37,7 @@
 // Code to run on the reference server to return the current program and database versions
 
     if($is_check){ // check is set to 1 when this is called to contact the Heurist reference server.
-                   // If HEURIST_INDEX_BASE_URL==HEURIST_BASE_URL, this script is running on the reference server
+                   // If HEURIST_INDEX_BASE_URL==HEURIST_BASE_URL_V3, this script is running on the reference server
         //return current db and code versions
         echo HEURIST_VERSION."|".HEURIST_DBVERSION;
         exit();

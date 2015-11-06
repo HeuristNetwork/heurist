@@ -62,7 +62,7 @@ var recIDs, rtyID, dtyID, sValue, rValue, sFileID, rFileID, sWkt, rWkt;
 var scopeSelect,fieldSelect,fieldScopeCB,inputDiv,statusDiv;
 var resultSetIDs, selectedResultSetIDs, allSelectedIDs, resultSetTypes, recCnt , rtyIDs = [];
 var hBase = window.location.protocol + "//" + window.location.host +
-			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+			(top && top.HEURIST && top.HEURIST.baseURL_V3? top.HEURIST.baseURL_V3 : window.location.pathname.match(/^\/[^\/]+\//));
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 
 function init () {

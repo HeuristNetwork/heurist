@@ -395,7 +395,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../../common/images/cro
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+							var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteRTC&db="+db + _currentPair +
 																	"&trmID=" + oRecord.getData("trm_id");
@@ -568,7 +568,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../../common/images/cro
 
 
 			// 2. sends data to server
-			var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 			var callback = _updateAfterSave;
 			var params = "method=saveRTC&db="+db + currPair + "&data=" + encodeURIComponent(str);
 			Hul.getJsonData(baseurl, callback, params);
@@ -667,7 +667,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../../common/images/cro
 			allTerms = allTerms+ '}';
 		}
 
-		Hul.popupURL(top, top.HEURIST.basePath +
+		Hul.popupURL(top, top.HEURIST.baseURL_V3 +
 			"admin/structure/terms/selectTerms.html?datatype=relationtype&all="+allTerms+"&selonly=1&db="+db,
 			{
 			"close-on-blur": false,

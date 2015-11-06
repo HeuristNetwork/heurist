@@ -248,7 +248,7 @@ function cloneDatabase($targetdbname) {
 
     // Success!
     echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
-    print "<p>Please go to the <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$targetdbname.
+    print "<p>Please go to the <a href='".HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".$targetdbname.
     "' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
 
 } // straightCopyNewDatabase

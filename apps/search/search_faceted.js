@@ -672,7 +672,7 @@ $.widget( "heurist.search_faceted", {
                 var div_facets = this.facets_list.find(".facets");
                 if(div_facets.length>0)
                     div_facets.empty()
-                    .css('background','url('+top.HAPI4.basePath+'assets/loading-animation-white20.gif) no-repeat center center');
+                    .css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white20.gif) no-repeat center center');
         }
         
         var that = this;

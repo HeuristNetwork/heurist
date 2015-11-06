@@ -156,18 +156,18 @@ $.widget( "heurist.svs_list", {
         }else if (!this.helper_btm) {
 
             //old
-            /* var t1 = '<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">'
+            /* var t1 = '<p><img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">'
             +'This is a faceted search. It allows the user to drill-down into the database on a set of pre-selected database fields.</p>'
-            +'<p><img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">'
+            +'<p><img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);">'
             +'This is a search with addition of a Rule Set. The initial search is expanded to a larger set of records by following a set of rules specifying which pointers and relationships to follow.'
             +'</p>'; */
 
             //new
             var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
-            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);vertical-align:middle">'
+            +'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);vertical-align:middle">'
             +'&nbsp;Faceted search</div>'
             +'<div style="font-style:italic;" title="Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)">'
-            +'<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
+            +'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
             +'&nbsp;Search with rules</div>';        
 
             this.helper_btm = $( '<div>'+t1+'</div>' )
@@ -243,14 +243,14 @@ $.widget( "heurist.svs_list", {
         
         //verify that all required libraries have been loaded
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js                           
-            $.getScript(top.HAPI4.basePath+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
+            $.getScript(top.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
             return;
         }else if(!islogged){   
         
             top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();         
             
         }else if(!$.ui.fancytree._extensions["dnd"]){
-        //    $.getScript(top.HAPI4.basePath+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
+        //    $.getScript(top.HAPI4.basePathV4+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
             alert('drag-n-drop extension for tree not loaded')
             return;
         }else if(!top.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded - load from file [user_id]_svstree.json
@@ -527,12 +527,12 @@ $.widget( "heurist.svs_list", {
                     //vertical-align:top;
                     
                     //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
-                    //s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
+                    //s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">';
               }else{ 
                   if(node.data.isrules){
-                        s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-share-alt.png&quot;);">';
+                        s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);">';
                   }else if(node.data.isfaceted){
-                        s = '<img src="'+top.HAPI4.basePath+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePath+'assets/fa-cubes.png&quot;);">';
+                        s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">';
                   }
                   if(s==''){
                         $span.find("> span.fancytree-title").text(node.title);
@@ -1204,7 +1204,7 @@ $.widget( "heurist.svs_list", {
             this.edit_dialog.show( mode, groupID, svsID, squery, callback );
                 
         }else{
-            $.getScript(top.HAPI4.basePath+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
+            $.getScript(top.HAPI4.basePathV4+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
     
     },
@@ -1232,7 +1232,7 @@ $.widget( "heurist.svs_list", {
     
     , _showDbSummary: function(){
         
-        var url = top.HAPI4.basePath+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV4+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
         
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};

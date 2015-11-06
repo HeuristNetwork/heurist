@@ -65,7 +65,7 @@ print "<html><head>";
 print '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
 print "</head><body>\n";
 print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<br>\n";
-print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
+print "-- Installation = " . HEURIST_BASE_URL_V3. "<br>\n";
 print "-- Database = " . HEURIST_DBNAME . "<br>\n";
 print "-- Program Version: ".HEURIST_VERSION."<br>\n";
 print "-- Database Version: ".HEURIST_DBVERSION; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
@@ -352,7 +352,7 @@ print "<p>&nbsp;<p>&nbsp;<p>";
 if (!$includeUgrps) {return;}
 
 if (! is_admin()) {
-    print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
+    print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_BASE_URL_V3.">Return to Heurist</a></p></body></html>";
     return;
 }
 // ------------------------------------------------------------------------------------------

@@ -39,7 +39,7 @@ require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Legend & Reference Types</title>
-<link rel="stylesheet" type="text/css" href= "<?=HEURIST_SITE_PATH?>common/css/global.css">
+<link rel="stylesheet" type="text/css" href= "<?=HEURIST_BASE_URL_V3?>common/css/global.css">
 <style type=text/css>
 	div { line-height: 22px; border-bottom:1px solid #DDD;}
 	div.column{ vertical-align: top;width:250px; position: absolute;top:0; border: none; }
@@ -53,12 +53,12 @@ require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 
 <div class="column left">
 	<h3>Search list icons </h3>
-	<div><img src="<?=HEURIST_SITE_PATH?>common/images/logo_rss_feed.png" height=12 width=12>&nbsp;Add live bookmark</div>
+	<div><img src="<?=HEURIST_BASE_URL_V3?>common/images/logo_rss_feed.png" height=12 width=12>&nbsp;Add live bookmark</div>
     <!-- <div><img src="../../pix/home_favourite.gif">&nbsp;Favourite search</div> -->
-    <div><img src="<?=HEURIST_SITE_PATH?>common/images/edit-pencil.png">&nbsp;Edit the reference</div>
-    <div><img src="<?=HEURIST_SITE_PATH?>common/images/follow_links_16x16.gif">&nbsp;Detail/tools</div>
+    <div><img src="<?=HEURIST_BASE_URL_V3?>common/images/edit-pencil.png">&nbsp;Edit the reference</div>
+    <div><img src="<?=HEURIST_BASE_URL_V3?>common/images/follow_links_16x16.gif">&nbsp;Detail/tools</div>
     <!-- <div><img src="../external_link_16x16.gif">&nbsp;Open in new window</div> -->
-    <div><img src="<?=HEURIST_SITE_PATH?>common/images/key.gif">&nbsp;Password reminder</div>
+    <div><img src="<?=HEURIST_BASE_URL_V3?>common/images/key.gif">&nbsp;Password reminder</div>
 </div>
 <div class="column right">
      <h3>Reference types</h3>
@@ -72,7 +72,7 @@ require_once("dbMySqlWrappers.php");
      	<table><tr>
      	<td width="24px" align="right"><font color="#CCC"><?= $row[0] ?>&nbsp;</font></td>
      	<td width="24px" align="center">
-     		<img class="rft" style="background-image:url(<?=HEURIST_ICON_URL.$row[0].".png)"?>" src="<?=HEURIST_SITE_PATH.'common/images/16x16.gif'?>">
+     		<img class="rft" style="background-image:url(<?=HEURIST_ICON_URL.$row[0].".png)"?>" src="<?=HEURIST_BASE_URL_V3.'common/images/16x16.gif'?>">
      	</td>
      	<td><?= htmlspecialchars($row[1]) ?></td>
      	</tr></table>

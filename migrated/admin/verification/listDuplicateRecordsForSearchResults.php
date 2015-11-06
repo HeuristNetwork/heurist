@@ -66,8 +66,8 @@
 		<head>
 			<title>Heurist duplicate records for search results set</title>
             <meta http-equiv="content-type" content="text/html; charset=utf-8">
-			<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
-			<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
+			<link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/global.css'>
+			<link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/publish.css'>
 
 			<style type="text/css">
 				.banner h2{padding:5px 10px; display: table-cell; vertical-align: middle;}
@@ -185,8 +185,8 @@
 	<head>
 		<title>Heurist duplicate records for search results set</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/global.css'>
-		<link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/publish.css'>
+		<link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/global.css'>
+		<link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL_V3?>common/css/publish.css'>
 
 		<style type="text/css">
 			.banner h2{padding:5px 10px; display: table-cell; vertical-align: middle;}
@@ -287,15 +287,15 @@
 						'" value="' . $diffHash . '">&nbsp;&nbsp;';
 						print $rectype . ' &nbsp;&nbsp;&nbsp;&nbsp;';
 						print '<input type="button" value="&nbsp;not dupes&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-						print '<a onClick=top.HEURIST.search.popupLink("'.HEURIST_BASE_URL.'admin/verification/combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])).'","small")>merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-						print '<a title="View in new search window" target="_new" href="'.HEURIST_BASE_URL_V4.'?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'"><img src="'.HEURIST_BASE_URL.'common/images/jump.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;';
+						print '<a onClick=top.HEURIST.search.popupLink("'.HEURIST_BASE_URL_V3.'admin/verification/combineDuplicateRecords.php?bib_ids=' . join(',', array_keys($bibs[$key])).'","small")>merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+						print '<a title="View in new search window" target="_new" href="'.HEURIST_BASE_URL_V4.'?q=ids:'.join(",",array_keys($bibs[$key])).'&db='.HEURIST_DBNAME.'"><img src="'.HEURIST_BASE_URL_V3.'common/images/jump.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;';
 						print '</div>';
 						print '<ul>';
 						foreach ($bibs[$key] as $rec_id => $vals) {
 							$res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
 							$row = mysql_fetch_assoc($res);
 							print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
-							'<a target="_new" href="'.HEURIST_BASE_URL.'records/view/viewRecord.php?saneopen=1&recID='.$rec_id.'&db='.HEURIST_DBNAME.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
+							'<a target="_new" href="'.HEURIST_BASE_URL_V3.'records/view/viewRecord.php?saneopen=1&recID='.$rec_id.'&db='.HEURIST_DBNAME.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
 							if ($row['rec_URL'])
 							print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.$row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
 							print '</li>';

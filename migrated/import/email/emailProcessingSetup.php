@@ -33,7 +33,7 @@
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
     return;
 }
 
@@ -57,7 +57,7 @@ if(!is_admin()){
 		var URL = "";
 
 		if(userID>0) {
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>&recID="+userID;
+			URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=<?=HEURIST_DBNAME?>&recID="+userID;
 		}
 		else {
 			return;

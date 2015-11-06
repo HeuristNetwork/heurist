@@ -35,13 +35,13 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 
 if (!is_logged_in()) {
-	header('Location: '.HEURIST_BASE_URL.'common/connect/login.php?db='.HEURIST_DBNAME);
+	header('Location: '.HEURIST_BASE_URL_V3.'common/connect/login.php?db='.HEURIST_DBNAME);
 	return;
 }
 
 mysql_connection_overwrite(DATABASE);
 
-$refurl = HEURIST_BASE_URL."admin/ugrps/showSimilarUsers.php?db=".HEURIST_DBNAME;
+$refurl = HEURIST_BASE_URL_V3."admin/ugrps/showSimilarUsers.php?db=".HEURIST_DBNAME;
 
 $sortby = (array_key_exists('sort',$_REQUEST) && $_REQUEST['sort'] == 'alpha' ? 'alpha' : 'freq');
 $ugr_ID = $_REQUEST['Id'];

@@ -194,7 +194,7 @@ function ShowReps() {
     * loads list of templates
     */
     function _reload_templates(){
-        var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
         var callback = _updateTemplatesList;
         Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
     }
@@ -246,7 +246,7 @@ function ShowReps() {
 
         _showLimitWarning();
 
-        var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
         var squery = null;
         
         if(_currentRecordset!=null){
@@ -420,7 +420,7 @@ function ShowReps() {
         if(Hul.isnull(squery)){
             alert('Please select some records in search results');
         }else{
-            var baseurl = top.HEURIST.basePath + "common/php/recordTypeTree.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
             Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
         }
     }
@@ -481,7 +481,7 @@ function ShowReps() {
             _initEditorMode(template_file, context);
         }
 
-        var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
 
         _originalFileName = template_file;
 
@@ -506,7 +506,7 @@ function ShowReps() {
 
         if(Number(top.HEURIST.database.id)>0){
 
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php";
 
             var squery = 'db='+_db+'&mode=serve&dir=0&template='+template_file;
 
@@ -539,7 +539,7 @@ function ShowReps() {
 
         if(mode>0){
 
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/templateOperations.php",
+            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/templateOperations.php",
             squery = 'db='+_db+'&mode=',
             template_file = null;
 
@@ -679,7 +679,7 @@ function ShowReps() {
 
             var squery;
 
-            var baseurl = top.HEURIST.basePath + "viewers/smarty/showReps.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
 
             if(_currentRecordset!=null){
                 squery =  'db='+_db+'&recordset='+JSON.stringify(_currentRecordset);
@@ -1678,7 +1678,7 @@ function ShowReps() {
 
         if(q==null) return;
 
-        var url = top.HEURIST.basePath + "export/publish/manageReports.html?"+q+"&db="+_db;
+        var url = top.HEURIST.baseURL_V3 + "export/publish/manageReports.html?"+q+"&db="+_db;
 
         var dim = Hul.innerDimensions(top);
 
@@ -1826,7 +1826,7 @@ function ShowReps() {
         },
 
         baseURL:  function (){
-            return top.HEURIST.basePath;
+            return top.HEURIST.baseURL_V3;
         },
 
         originalFileName:  function (val){

@@ -277,7 +277,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 									(numMarkers < 7 ? 32 : 40)))+iconHeight;
 
 		function getURLforRecords(Records,recType){
-			var url = top.HEURIST.baseURL;
+			var url = top.HEURIST.baseURL_V3;
 			if (Records.length == 1 && Records[0]['thumb_file_id']){
 				//get thumb
 				url += "common/php/resize_image.php?db=" + top.HEURIST.database.name + "&amp;file_id=" + Records[0]['thumb_file_id'];

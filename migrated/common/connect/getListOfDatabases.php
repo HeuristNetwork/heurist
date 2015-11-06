@@ -61,7 +61,7 @@ if(@$_REQUEST['popup']=="1"){
 if(@$_REQUEST['v']=="4"){
     $url = "../../../";
 }else{
-    $url = HEURIST_BASE_URL;
+    $url = HEURIST_BASE_URL_V3;
 }
 
 	$email = null;

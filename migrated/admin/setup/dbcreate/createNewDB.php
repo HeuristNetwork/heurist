@@ -42,7 +42,7 @@ if (!($blankServer || is_logged_in())) {
         //special case - do not show database name
         $spec_case = "&register=1";
     }
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.$spec_case.
+    header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME.$spec_case.
         '&last_uri='.urlencode(HEURIST_CURRENT_URL) );
     return;
 }
@@ -143,7 +143,7 @@ function doRegister(event){
 
 
         }else{
-            $.getScript(top.HAPI4.basePath+'apps/profile/profile_edit.js', function() {
+            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
                 if($.isFunction($('body').profile_edit)){
                     doRegister();
                 }else{
@@ -293,7 +293,7 @@ function doRegister(event){
                 is_db_got = true;
 
                 // request for server side
-                var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+                var baseurl = "<?=HEURIST_BASE_URL_V3?>admin/setup/dbproperties/getRegisteredDBs.php";
                 var params = "db=<?=HEURIST_DBNAME?>";   // &named=1&excluded=dbid
                 top.HEURIST.util.getJsonData(baseurl,
                     // fillRegisteredDatabasesTable

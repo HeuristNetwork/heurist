@@ -87,7 +87,7 @@ $lexer = new Lexer($template);
 
 $body = new BodyScope($lexer);
 
-$body->global_vars['hBase'] = HEURIST_BASE_URL;
+$body->global_vars['hBase'] = HEURIST_BASE_URL_V3;
 $body->global_vars['dbname'] = HEURIST_DBNAME;
 
 if ($search_type == BOOKMARK) $body->global_vars['search-type'] = 'bookmark';

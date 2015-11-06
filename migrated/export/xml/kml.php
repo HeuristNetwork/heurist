@@ -124,7 +124,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             //$_REQUEST['idonly'] = 1;
             //$_REQUEST['vo'] = 'h3';
             //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-            $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
+            $url = HEURIST_BASE_URL_V3."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
             $reclist = loadRemoteURLContent($url);
             $reclist = json_decode($reclist, true);
 
@@ -244,7 +244,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                     print "<NetworkLink>";
                     print "<name>".$file_data[2]."</name>";
                     print "<Link id=\"".$file_data[0]."\">";
-                    print "<href>".HEURIST_BASE_URL."export/xml/kml.php?id=".$file_data[0]."</href>";
+                    print "<href>".HEURIST_BASE_URL_V3."export/xml/kml.php?id=".$file_data[0]."</href>";
                     print "</Link>";
                     print "</NetworkLink>";
                 }

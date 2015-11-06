@@ -558,8 +558,8 @@ if (! window.HEURIST_WINDOW_ID) {
 
 top.HEURIST.parseParams.apply(window);
 
-if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/utilsUI.js", true);
-//if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/loadGroupInfo.js", true);//saw  moved to util
+if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/js/utilsUI.js", true);
+//if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/js/loadGroupInfo.js", true);//saw  moved to util
 
 if (window != top) {
     /* Invoke  autosizeAllElements()  when the window loads or is resized */

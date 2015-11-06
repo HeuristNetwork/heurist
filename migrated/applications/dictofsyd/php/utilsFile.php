@@ -156,13 +156,13 @@ function get_uploaded_file_info_internal($fileID)
                 $res["thumbURL"] = HEURIST_THUMB_URL.$thumbnail_file;
             }else{
                 $res["thumbURL"] = $_pre."php/getMedia.php?id=".$res["nonce"]."&thumb=1";
-                //HEURIST_BASE_URL."common/php/resizeImage.php?".(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
+                //HEURIST_BASE_URL_V3."common/php/resizeImage.php?".(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
             }
 
             $downloadURL = $_pre."php/getMedia.php?id=".$res["nonce"];
 
             //$origName = urlencode($res["origName"]);
-            //HEURIST_BASE_URL."records/files/downloadFile.php/".$origName."?".(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
+            //HEURIST_BASE_URL_V3."records/files/downloadFile.php/".$origName."?".(defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$res["nonce"];
 
             if($res["remoteURL"]!=null || $res["prefsource"]=="external") {
                 $res["URL"] = $res["remoteURL"];

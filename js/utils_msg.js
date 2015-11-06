@@ -12,7 +12,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         if(typeof response === "string"){
             msg = response;
         }else{
-            if(top.HEURIST.util.isempty(response.message)){
+            if(top.HEURIST4.util.isempty(response.message)){
                 msg = top.HEURIST4.msg.EMPTY_MESSAGE;   
             }else{
                 msg = response.message;
@@ -45,7 +45,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         +"error in our code (in which case we need to know so we can fix it";
             }
         }
-        if(top.HEURIST.util.isempty(msg)){
+        if(top.HEURIST4.util.isempty(msg)){
                 msg = top.HEURIST4.msg.EMPTY_MESSAGE;   
         }
 

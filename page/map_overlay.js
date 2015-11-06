@@ -49,7 +49,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 function _loadMapDocuments(startup_mapdocument) {
 
     // Load Map Documents & Map Layers       @TODO - change it to HAPI method!!!!
-    var api = top.HAPI4.basePath + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
+    var api = top.HAPI4.basePathV4 + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
 //console.log("API call URL: " + api);
     $.getJSON(api, function(_data) {
         data = _data;
@@ -184,7 +184,7 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
             + overlay_idx+'" id="chbox-'+legendid+'" '
             + (overlay.visible?'checked="checked">':'>')
             + ((ismapdoc)
-            ? ('<img src="'+top.HAPI4.basePath+'assets/16x16.gif"'
+            ? ('<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif"'
                 + ' align="top" class="rt-icon" '     
                 + ((icon)?('style="background-image: url('+icon+');"'):'')+'>')
             : ('<div style="display:inline-block;border:6px solid '+icon_or_color+'" />')
@@ -547,7 +547,7 @@ function _addQueryLayer(source, index) {
         request['limit'] = 2000;
         
         if(loadingbar==null){
-            var image = top.HAPI4.basePath+'assets/loading_bar.gif';
+            var image = top.HAPI4.basePathV4+'assets/loading_bar.gif';
             loadingbar = new google.maps.Marker({
                     icon: image,
                     optimized: false
@@ -753,7 +753,7 @@ function _removeOverlayById( overlay_id ){
 
     var ismapdoc = (overlay_id>0);
     var overlay = ismapdoc ?overlays[overlay_id] :overlays_not_in_doc[overlay_id];
-    if(!top.HEURIST.util.isnull(overlay)){
+    if(!top.HEURIST4.util.isnull(overlay)){
         try {
             $("#legend .content").find('#'+((ismapdoc)?'md-':'')+overlay_id).remove();
 

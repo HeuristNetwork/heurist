@@ -127,7 +127,7 @@ if(!$system->init(@$_REQUEST['db']) ){
             function onrowclick(rt_ID, innewtab){
                 var query = "w=all&ver=1&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
-                    window.open(top.HAPI4.basePath+"?"+query, "_blank");
+                    window.open(top.HAPI4.basePathV4+"?"+query, "_blank");
                     return false;
                 }else{
                     console.log("SEARCH");
