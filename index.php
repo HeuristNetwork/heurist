@@ -58,16 +58,12 @@ if(@$_REQUEST['db']){
 
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
 
-        <!-- Provides wide variety of icons as font, used eg. for facet search icon. Vsn 2 -->
-        <link rel="stylesheet" type="text/css" href="ext/font-awesome/css/font-awesome.min.css" />
-        <!-- Later version of font-awesome, but have not got it to work -->
-        <!-- <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" /> -->
-
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
+        <link rel="stylesheet" type="text/css" href="ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
              number of widgets. Currently it is commented out of the code in layout_default.js -->

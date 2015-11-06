@@ -49,7 +49,8 @@
         <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
         <meta content="telephone=no" name="format-detection">
 
-        <link rel="stylesheet" type="text/css" href="../ext/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        
         <!-- Styles
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
         <link rel="stylesheet" type="text/css" href="../h4styles.css" />
@@ -318,17 +319,12 @@
                 $("#btnExportKML").button().click(exportKML);
 
                 $("#btnPrint").button({text:false, icons: {
-                            primary: "icon-print"
+                            primary: "ui-icon-print"
                  }})
                  .click(mapping.printMap);
 
                 $("#btnEmbed").button({text:false, icons: {
-                            primary: "icon-gear"
-                 }})
-                 .click(showEmbedDialog);
-
-                $("#btnEmbed").button({text:false, icons: {
-                            primary: "icon-gear"
+                            primary: "ui-icon-gear"
                  }})
                  .click(showEmbedDialog);
 
@@ -432,7 +428,7 @@
 
                 btn_datasets = $("#btnMapDataSource").button({text:false,
                         icons: {
-                            primary: "icon-reorder",
+                            primary: "ui-icon-bars",  //icon-reorder
                             secondary: "ui-icon-triangle-1-s"}});
 
                 btn_datasets.click( function(e) {

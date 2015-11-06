@@ -164,10 +164,12 @@ $.widget( "heurist.svs_list", {
 
             //new
             var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
-            +'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);vertical-align:middle">'
-            +'&nbsp;Faceted search</div>'
+            //+'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);vertical-align:middle">'
+            +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+            +'&nbsp;Faceted search</div>'        
             +'<div style="font-style:italic;" title="Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)">'
-            +'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
+            //+'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
+            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;Search with rules</div>';        
 
             this.helper_btm = $( '<div>'+t1+'</div>' )
@@ -530,9 +532,11 @@ $.widget( "heurist.svs_list", {
                     //s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">';
               }else{ 
                   if(node.data.isrules){
-                        s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);">';
+                        //s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);">';
+                        s = '<span class="ui-icon ui-icon-shuffle" style="float:right;font-size:1em" title="rules" ></span>';
                   }else if(node.data.isfaceted){
-                        s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">';
+                        //s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">';
+                        s = '<span class="ui-icon ui-icon-box" style="float:right;font-size:1em" title="faceted" ></span>';
                   }
                   if(s==''){
                         $span.find("> span.fancytree-title").text(node.title);

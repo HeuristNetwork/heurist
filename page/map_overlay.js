@@ -186,7 +186,7 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
             + ((ismapdoc)
             ? ('<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif"'
                 + ' align="top" class="rt-icon" '     
-                + ((icon)?('style="background-image: url('+icon+');"'):'')+'>')
+                + ( (ismapdoc)?('style="background-image: url('+icon_or_color+');"'):'')+'>')
             : ('<div style="display:inline-block;border:6px solid '+icon_or_color+'" />')
             )
             + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title

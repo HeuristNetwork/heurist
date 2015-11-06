@@ -164,9 +164,9 @@ $.widget( "heurist.resultList", {
         })
         .appendTo( this.div_toolbar );
 
-        $('#list_layout_list').button({icons: {primary: "icon-list"}, text:false});
-        $('#list_layout_icons').button({icons: {primary: "icon-th"}, text:false});
-        $('#list_layout_thumbs').button({icons: {primary: "icon-th-large"}, text:false});
+        $('#list_layout_list').button({icons: {primary: "ui-icon-list"}, text:false}); //icon-list
+        $('#list_layout_icons').button({icons: {primary: "ui-icon-view-icons-b"}, text:false}); //icon-th
+        $('#list_layout_thumbs').button({icons: {primary: "ui-icon-view-icons"}, text:false});  //icon-th-large
 
         //----------------------
                                                                                     //,'min-width':'10em'

@@ -75,7 +75,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
         -->
-        <link rel="stylesheet" type="text/css" href="../../../ext/font-awesome/css/font-awesome.min.css" />
+        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
@@ -125,29 +125,6 @@
             .insert-intree{
                 display:none;
             }
-
-            /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
-                 Remove the jQuery UI Icon
-                 Remove the jQuery UI Text Indent
-                 Bump it up - jQuery UI is -8px
-
-                 Bump it - jQuery UI is -8px
-                 Allow use of icon-large to be properly aligned
-            */
-            .ui-icon[class*=" icon-"] {
-                background: none repeat scroll 0 0 transparent;
-                text-indent: 0;
-                margin-top: -0.5em;
-            }
-
-            .ui-button-icon-only .ui-icon[class*=" icon-"] {
-                /*margin-left: -7px;*/
-            }
-            .ui-icon.icon-large {
-                margin-top: -0.75em;
-            }
-
-
         </style>
         <script type="text/javascript">
             var showReps, isEditorVisible=false;
@@ -292,7 +269,7 @@
 
                     <span id="recordCount"></span>
                 </div>
-                <button id="btnRepPrint2" style="position: absolute; right: 40px; top:2px;">Print</button>
+                <button id="btnRepPrint2" style="position: absolute; right: 40px; top:4px;">Print</button>
 
                 <!-- <div id="btnRepPrint2" onclick="onPrint()"  class="button"
                     style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
@@ -576,12 +553,12 @@
                 //setupMCE();
 
                 $("#btnRepPrint2").button({text:false, icons: {
-                            primary: "icon-print"
+                            primary: "ui-icon-print"
                  }})
                  .click(onPrint);
 
                 $("#btnRepMenu2").button({text:false, icons: {
-                            primary: "icon-gear"
+                            primary: "ui-icon-gear"
                  }});
 
 

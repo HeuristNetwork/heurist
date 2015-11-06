@@ -584,6 +584,7 @@ console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._tim
                 return false;
                 
             })
+            .css({width:'5em'})
             .appendTo(toolbar);
             
         var spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
