@@ -79,7 +79,7 @@
 
     // 1. get database url by looking it up from teh Heusit Master index using database registered ID
 
-    $reg_url =   HEURIST_INDEX_BASE_URL  . "migrated/admin/setup/dbproperties/getDatabaseURL.php" . "?db=Heurist_Master_Index&id=".$database_id;
+    $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getDatabaseURL.php" . "?db=Heurist_Master_Index&id=".$database_id;
     $data = loadRemoteURLContent($reg_url);
     if (!$data) {
         error_exit("Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".

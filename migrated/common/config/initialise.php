@@ -178,7 +178,7 @@ define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h4/
 
 // Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 // DO NOT CHANGE THIS URL
-define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4/");
+define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4/migrated/");
 
 //-------------------------------------------------------------------------- MEMCACHE AND PROXY
 

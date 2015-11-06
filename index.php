@@ -107,7 +107,7 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="apps/topmenu/help_tips.js"></script>
 
-        <script type="text/javascript" src="migrated/common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL_V3; ?>common/js/temporalObjectLibrary.js"></script>
 
         <!-- DOCUMENTATION TODO: explain this -->
         <!-- these scripts are loaded explicitely - for debug purposes

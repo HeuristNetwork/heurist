@@ -31,8 +31,8 @@
     require_once (dirname(__FILE__).'/compose_sql_new.php');
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_searchfacets.php');
-
-    require_once (dirname(__FILE__).'/../../migrated/common/php/Temporal.php');
+                               
+    require_once ( dirname(__FILE__).'../../../migrated/common/php/Temporal.php');
     
     /**
     * Find minimal and maximal values for given detail type and record type

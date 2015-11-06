@@ -258,15 +258,13 @@ function doRegister(event){
                     }else{
                         var reginfo = registeredDBs[bd_reg_idx];
 
-                        //@todo - IMPORTANT! it works for old registration only. for new ones "/migrated" should to be addded
-
                         regurl = reginfo[1];
                         if(regurl=='http://heurist.sydney.edu.au/h3/'){
-                            regurl = 'http://heurist.sydney.edu.au/h4/migrated/';
+                            regurl = 'http://heurist.sydney.edu.au/h4/';
                         }
 
                         //url + script + db
-                        ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?db='+reginfo[2];
+                        ele.value = regurl + 'migrated/admin/describe/getDBStructureAsSQL.php?db='+reginfo[2];
                     }
 
                 }else{

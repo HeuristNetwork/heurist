@@ -54,10 +54,10 @@ if (! top.HEURIST) {
          */
         VERSION: "*.*.*",
 
-        basePath: installDir,
+        baseURL_V3: installDir,
 /**
  * bookmarklet code snippet to launch an applet for Heurist bookmarking from the browser.
- * @todo needs to change to be relative to the installed version's INSTALL_DIR  can use basePath
+ * @todo needs to change to be relative to the installed version's INSTALL_DIR  can use baseURL_V3
  */
         bookmarkletCode: "(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=h+'import/bookmarklet/bookmarkletPopup.php?db=;d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h+'records/add/addRecord.php?db=&t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
 /**

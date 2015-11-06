@@ -446,7 +446,7 @@ $.widget( "heurist.mainMenu", {
 
         top.HEURIST4.msg.showDialog(url, { height:550, width:700,
                     callback:function(responce) {
-
+/*
                 var sURL = top.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
                     sURL,

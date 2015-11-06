@@ -175,16 +175,6 @@
 		global $source_db_id;
 		if(!isset($_REQUEST["dbID"]) || $_REQUEST["dbID"] == 0) {
 
-			// TODO: THIS SHOULD NOT HAPPEN, would be better to issue a warning and exit
-			// TODO: check that this points at the correct reference database
-			/*
-            $source_db_id = '2'; //MAGIC NUMBER - ID of Heurist_Core_Definitions db in Heurist_System_Index database
-			$source_db_name = 'Heurist_Core_Definitions';
-			$source_db_prefix = 'hdb_';
-			$source_url = "http://heurist.sydney.edu.au/h4/migrated/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
-			// parameters were ?prefix=hdb_&db=Heurist_Core_Definitions";
-            */
-
             unlockDatabase();
             die("Request for database structure to import does not specify a database - please advise the Heurist team through a bug report");
 
@@ -197,15 +187,11 @@
             $regurl = $_REQUEST['dbURL'];
             
             if($regurl=='http://heurist.sydney.edu.au/h3/'){  //change the registered url on our server to new one
-                 $regurl = 'http://heurist.sydney.edu.au/h4/migrated/';
+                 $regurl = 'http://heurist.sydney.edu.au/h4/';
             }
             
             // This is the correct URL for vsn 3.1.8 and above, March 2014
-            $source_url_new = $regurl."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
-
-            // TODO: this is a fudge to access  old standard server 3.1.7 and before, prior to March 2014
-            $source_url = $regurl."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
-
+            $source_url_new = $regurl."migrated/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
         }
 
 		$data = loadRemoteURLContent($source_url_new, 60); // try new  path

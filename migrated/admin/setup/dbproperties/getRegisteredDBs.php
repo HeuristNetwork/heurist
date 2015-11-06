@@ -40,7 +40,7 @@ $is_named = (@$_REQUEST['named']==1); //return assosiated array
 if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
 
 
-    $reg_url =  HEURIST_INDEX_BASE_URL . "migrated/admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
+    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
     if($is_named){
         $reg_url =  $reg_url.'&named=1';    
     }

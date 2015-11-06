@@ -46,7 +46,7 @@ function hSearchMinimal() {
                     callback( hRecordSet(response.data) );
                 }else{
                     callback( null );
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );
@@ -117,7 +117,7 @@ function hSearchMinimal() {
 
             }else{
 
-                top.HEURIST4.util.showMsgErr(response);
+                top.HEURIST4.msg.showMsgErr(response);
 
                 if(!top.HEURIST4.util.isnull(_owner_doc)){ 
                     $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   

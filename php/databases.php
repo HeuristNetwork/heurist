@@ -34,7 +34,7 @@
     $list =  mysql__getdatabases4($system->get_mysqli());
     if(count($list)<1){
         //reditrect to create database
-        header('Location: ' . HEURIST_BASE_URL . 'migrated/admin/setup/dbcreate/createNewDB.php');
+        header('Location: ' . HEURIST_BASE_URL_V3 . 'admin/setup/dbcreate/createNewDB.php');
         return;
     }
 

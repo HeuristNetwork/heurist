@@ -64,7 +64,7 @@
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
         <!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
-        <script type="text/javascript" src="../migrated/common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL_V3; ?>common/js/temporalObjectLibrary.js"></script>
         <script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
         <link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
 

@@ -161,11 +161,11 @@ function makeFullTimeMap(Record $record){
 				</div>
 
 				<script type="text/javascript">
-					<?=$layers ?>
-					<?=$datasets ?>
+					<?php echo $layers; ?>
+					<?php echo $datasets; ?>
 
 				var mapdata = {
-					<?=($record->getDet(DT_GEO,'geo')?'focus: "'.$record->getDet(DT_GEO,'geo').'",':'') ?>
+					<?php echo ($record->getDet(DT_GEO,'geo')?'focus: "'.$record->getDet(DT_GEO,'geo').'",':''); ?>
 					timemap: datasets,
 					layers: layers,
 					count_mapobjects: <?=$cnt_geo ?>
