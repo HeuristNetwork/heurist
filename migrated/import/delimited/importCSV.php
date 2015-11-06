@@ -492,33 +492,42 @@ if(is_array($imp_session)){
         </div>
 
         <hr width="100%" />
+        
+        <div  style="padding-bottom:10px">
+        
+            <input type="button"
+                value="&lt;&lt; Back to start" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
+                style="margin-right: 10px; margin-left:20px;"
+                title="Return to the upload screen to select a new delimited file to upload to the server for processing">
+            <?php if(@$_REQUEST["import_id"]){ ?>
+                <input type="button"
+                        value="Download data to file"
+                        onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
+                        title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
+                <div class="help" style="float:right;min-width:300px">
+                    <span class="help">
+                        Note: Data is retained between sessions until cleared
+                    </span>
+                <input type="button"
+                    value="Clear uploaded file" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
+                    title="Clear the data for this uploaded file from the server">
+                </div>
+            <?php } ?>
+        </div>
 
         <div class="help">
             If the spreadsheet data is complex, this function will allow you to progressively import columns which identify
             subsidiary entities (record types) such as place, organisation, collection, series, artist etc. The first step
             is to match key fields and create new records from unmatched rows. This will create a new column ending in ID.
             This can be used as the key field to import additional columns. Once all subsidiary entities have been matched
-            and imported, you can import the primary entity type represented by the table.
+            and imported, you can import the primary entity type represented by the table.<br>
+            If a record type is not shown in the pulldown, check the 'Show' column in Database &gt; Manage Structure.
             <br/><br/>
         </div>
 
         <div class="input-line">
             <div class="header"><label for="sa_rectype" style="color:red">Select record type</label></div>
             <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:290px"></select>
-
-            <input type="button"
-                value="New upload" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
-                style="margin-right: 10px; margin-left:20px;"
-                title="Return to the upload screen to select a new delimited file to upload to the server for processing">
-            <?php if(@$_REQUEST["import_id"]){ ?>
-                <input type="button"
-                    value="Clear data" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
-                    title="Clear the data for this uploaded file from the server">
-                <input type="button"
-                    value="Download data to file"
-                    onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
-                    title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
-                <?php } ?>
         </div>
 
         <?php
@@ -532,9 +541,6 @@ if(is_array($imp_session)){
         <input type="hidden" value="<?=$sa_mode?>" name="sa_mode" id="sa_mode"/>
 
         <b>Rows in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
-        <div class="help" style="float:right;width:300px;text-align:right;margin-right: 20px;">
-            Note: Data is retained between sessions until cleared
-        </div>
 
         <br /><br /><br />
 
