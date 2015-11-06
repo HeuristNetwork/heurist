@@ -43,9 +43,6 @@
 	require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
-	mysql_connection_insert("hdb_Heurist_Master_Index"); // hard-coded master index for the Heurist constellation
-                                                  // database is located at HeuristScholar.org and accessed via .../h3 version
-
 	$indexdb_user_id = 0; // Flags problem if not reset
 	$returnData = ''; // String returned to caller, contains dbID or 0, and error message (if any)
 
@@ -65,7 +62,13 @@
 	if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirstName || !$usrLastName || !$usrPassword) { // error in one or more parameters
 		$returnData = '0,Bad parameters passed';
 		echo $returnData;
+        return;
 	}
+    
+    if(strpos($serverURL, '//localhost')>0 ||  strpos($serverURL, '//127.0.0.1')>0){
+        echo '0,Impossible to register database from local server '.$serverURL;
+        return;
+    }
 
 	// was used for random password, no longer needed
 	function genRandomString() {
@@ -87,7 +90,10 @@
     // By allocating users on the database based on email address we can allow them to edit their own registrations
     // but they can't touch anyone else's
 
-	// Find the registering user in the index database, make them the owner of the new record
+    mysql_connection_insert("hdb_Heurist_Master_Index"); // hard-coded master index for the Heurist constellation
+                                                  // database is located at HeuristScholar.org and accessed via .../h3 version
+
+    // Find the registering user in the index database, make them the owner of the new record
 	$usrEmail = strtolower(trim($usrEmail));
 	$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_eMail)='".$usrEmail."'");
 	$indexdb_user_id = null;

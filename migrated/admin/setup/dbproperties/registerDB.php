@@ -34,8 +34,9 @@
 
     $sError = null;
 
-    /*  WHY HAS THIS BEEN COMMENTED OUT ??????
-    $user_id = get_user_id();
+    $user_id = get_user_id(); 
+
+    /*  WHY HAS THIS BEEN COMMENTED OUT ?????? - 
     // User must be system administrator or admin of the owners group for this database
     if (!is_admin()) {
     $sError = "You must be logged in as system administrator to register a database";
@@ -98,11 +99,19 @@
     <script type="text/javascript">
         function hideRegistrationForm() {
             document.getElementById("registerDBForm").style.display = "none";
-    } </script>
+        } 
+    </script>
 
     <!-- Database registration form -->
 
     <body class="popup">
+<?php
+    if(strpos(HEURIST_BASE_URL_V4, '//localhost')>0 ||  strpos(HEURIST_BASE_URL_V4, '//127.0.0.1')>0){
+        echo '<p class="error">Impossible to register database running on local server '.HEURIST_BASE_URL_V4.'</p></body></html>';
+        exit();
+    }
+?>    
+    
         <div class="banner"><h2>Register Database with Heurist Master Index at HeuristScholar.org</h2></div>
         <div id="page-inner" style="overflow:auto">
             <h3>Registration</h3>
@@ -130,6 +139,8 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
             </div>
 
             <?php
+            
+            
 
                 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID ".
                     "from sysIdentification where 1");
@@ -209,7 +220,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     global $dbID, $dbName, $ownerGrpID, $indexdb_user_id, $usrEmail, $usrPassword,
                     $usrName, $usrFirstName, $usrLastName, $dbDescription;
 
-                    $serverURL = HEURIST_BASE_URL_V3 . "?db=" . $heuristDBname;
+                    $serverURL = HEURIST_BASE_URL_V4 . "?db=" . $heuristDBname;
 
                     $usrEmail = rawurlencode($usrEmail);
                     $usrName = rawurlencode($usrName);
@@ -237,11 +248,15 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
 
                     if ($dbID == 0) { // Unable to allocate a new database identifier
                         $decodedData = explode(',', $data);
-                        $errorMsg = $decodedData[0];
-                        error_log ('registerDB.php had a problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
-                        $msg = "Problem allocating a database identifier from the Heurist master index, " .
-                        "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
-                        " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                        
+                        if(count($decodedData)>0){
+                            $msg = $decodedData[1];
+                        }else{
+                            error_log ('registerDB.php had a problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
+                            $msg = "Problem allocating a database identifier from the Heurist master index, " .
+                            "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
+                            " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                        }
                         echo $msg . "<br />";
                         return;
                     }
