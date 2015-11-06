@@ -1349,7 +1349,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 top.HEURIST.detailTypes = context.detailTypes;
                 top.HEURIST.terms = context.terms;
 
-                top.HEURIST.util.showError("Database structure definitions in memory have been refreshed. You may need to reload pages to see changes.");
+                var sMsg = 'Database structure definitions in memory have been refreshed. '+
+                        'You may need to reload pages to see changes.';
+                if(top.HEURIST4){
+                    top.HEURIST4.msg.showMsgDlg(sMsg);
+                }else{
+                    alert(sMsg);
+                }
             }
         }
 

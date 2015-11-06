@@ -408,6 +408,8 @@ $.widget( "heurist.mainMenu", {
           var p = false;
           if(action == "menu-profile-preferences"){
                 this._editPreferences(); p=true;
+          }else if(action == "menu-database-refresh"){
+                this._refreshLists(); p=true;
           }else if(action == "menu-export-hml-0"){
                 this.exportHML(true,false,false); p=true;
           }else if(action == "menu-export-hml-1"){ //selected
@@ -597,6 +599,28 @@ $.widget( "heurist.mainMenu", {
         }
     },
 
+    /**
+    * Reload database structure image on client side
+    */
+    _refreshLists: function(){
+        
+            top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    top.HEURIST4.rectypes = response.data.rectypes;
+                    top.HEURIST4.terms = response.data.terms;
+                    top.HEURIST4.detailtypes = response.data.detailtypes;
+                    
+                    if(top.HEURIST && top.HEURIST.rectypes){
+                        top.HEURIST.util.reloadStrcuture();
+                    }else{
+                        top.HEURIST4.msg.showMsgDlg('Database structure definitions in memory have been refreshed.<br>'+
+                            'You may need to reload pages to see changes.');    
+                    }
+                    
+                }
+            });
+        
+    },
 
     /**
     * Open Edit Preferences dialog (@todo? move into separate file?)
