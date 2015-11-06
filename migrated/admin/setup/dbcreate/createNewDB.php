@@ -161,7 +161,6 @@ function doRegister(event){
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
 <?php
     }
 ?>
@@ -302,7 +301,7 @@ function doRegister(event){
 
                         registeredDBs = responce;
                         var ddiv = document.getElementById('registered_dbs');
-                        var s = '', regurl;
+                        var s = '';
 
                         if(!top.HEURIST.util.isnull(responce)){
 
@@ -613,7 +612,7 @@ if(true){ //DEBUG: set to false to avoid real database creation
                                 }
                             }
                             if($resval){
-                                errorOut ('Error importing core definitions from template database for database $newname<br>'
+                                errorOut ("Error importing core definitions from template database for database $newname<br>"
                                 .$resval
                                 .'<br>Please check whether this database is valid; consult Heurist support if needed');
                                 return false;

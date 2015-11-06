@@ -194,15 +194,24 @@
 			$source_db_name = $_REQUEST["dbName"];
 			$source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 
+            $regurl = $_REQUEST['dbURL'];
+            
+            if($regurl=='http://heurist.sydney.edu.au/h3/'){  //change the registered url on our server to new one
+                 $regurl = 'http://heurist.sydney.edu.au/h4/migrated/';
+            }
+            
             // This is the correct URL for vsn 3.1.8 and above, March 2014
-            $source_url_new = $_REQUEST["dbURL"]."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+            $source_url_new = $regurl."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 
             // TODO: this is a fudge to access  old standard server 3.1.7 and before, prior to March 2014
-            $source_url = $_REQUEST["dbURL"]."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+            $source_url = $regurl."admin/structure/getDBStructure.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
 
         }
 
-		$data = loadRemoteURLContent($source_url_new); // try new  path
+		$data = loadRemoteURLContent($source_url_new, 60); // try new  path
+        
+//print $source_url_new.' >>> '.$data;         
+        
 		if (!$data || substr($data, 0, 6) == "unable") { // new path didn't work
             $data = loadRemoteURLContent($source_url); // try old path
             if (!$data || substr($data, 0, 6) == "unable") { // old path didn't work

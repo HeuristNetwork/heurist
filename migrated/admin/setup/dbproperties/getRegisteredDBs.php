@@ -3,10 +3,6 @@
 /**
 * getRegisteredDBs.php
 * Returns all databases and their URLs that are registered in the master Heurist index server,
-* SIDE ONLY. ONLY ALLOW IN HEURISTSCHOLAR.ORG index database
-*
-* NOTE: A similar but much shorter file appears in migrated/structure/import/getRegisteredDBs.php
-*       One file was copied from the other as indicated by identical comments in the header and at the end
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -36,11 +32,22 @@ require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
+$registeredDBs = array();
+
+$is_named = (@$_REQUEST['named']==1); //return assosiated array
+
 
 if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
 
-    $reg_url =  HEURIST_INDEX_BASE_URL . "migrated/admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
 
+    $reg_url =  HEURIST_INDEX_BASE_URL . "migrated/admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
+    if($is_named){
+        $reg_url =  $reg_url.'&named=1';    
+    }
+
+error_log( HEURIST_BASE_URL );
+error_log("getg list ".$reg_url);
+    
     //get json array of registered databases
     $data = loadRemoteURLContent($reg_url, true); //without proxy
 
@@ -63,17 +70,16 @@ if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - re
 
     mysql_connection_select("hdb_Heurist_Master_Index");
 
-    $is_named = (@$_REQUEST['named']==1); //return assiated array
     //except specified databases
-    if(@$_REQUEST['id']){
-        $exclude = explode(",",$_REQUEST['id']);
+    if(@$_REQUEST['exclude']){
+        $exclude = explode(",",$_REQUEST['exclude']);
     }else{
         $exclude = array();
     }
 
     // Return all registered databases as a json string
     $res = mysql_query("select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22");
-    $registeredDBs = array();
+
     while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
 
         if(!array_search( $registeredDB['rec_ID'], $exclude )){
@@ -92,9 +98,9 @@ if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - re
 
                 $dbID = $registeredDB['rec_ID'];
                 $dbURL = $splittedURL[0];
-                preg_match("/db=([^&]*).*$/", $rawURL,$match);
+                preg_match("/db=([^&]*).*$/", $rawURL, $match);
                 $dbName = $match[1];
-                if (preg_match("/prefix=([^&]*).*$/", $rawURL,$match)){
+                if (preg_match("/prefix=([^&]*).*$/", $rawURL, $match)){
                     $dbPrefix = $match[1];
                 }else{
                     unset($dbPrefix);

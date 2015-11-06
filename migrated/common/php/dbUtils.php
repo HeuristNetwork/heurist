@@ -574,8 +574,8 @@
             $warnings = 1;
         }
         
-        if(recurse_copy( HEURIST_DIR."../documentation", $uploadPath."/documentation" )){
-            add_index_html($uploadPath."/documentation"); // index file to block directory browsing
+        if(recurse_copy( HEURIST_DIR."../documentation_and_templates", $uploadPath."/documentation_and_templates" )){
+            add_index_html($uploadPath."/documentation_and_templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy documentation folder to $uploadPath<br>");
             $warnings = 1;
