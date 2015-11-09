@@ -845,6 +845,24 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
     }
     return $offspring;
 }
+function getTermListAll($termDomain) {
+        $terms = array();
+        $res = mysql_query('SELECT * FROM defTerms 
+            where (trm_Domain="'.$termDomain.'") and (trm_ParentTermId=0 or trm_ParentTermId is NULL)');
+            
+        if ($res && mysql_num_rows($res)) { //child nodes exist
+            while ($row = mysql_fetch_assoc($res)) { // for each child node
+                array_push($terms, $row['trm_ID']);
+                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
+                    $terms = array_merge($terms, getTermOffspringList( $row['trm_ID'] ));
+                }
+            }
+        }else{
+            error_log('>>>>'.mysql_error());
+        }
+        return $terms;
+}
+
 function getTermLabels($termIDs) {
     $labels = array();
     if ($termIDs) {

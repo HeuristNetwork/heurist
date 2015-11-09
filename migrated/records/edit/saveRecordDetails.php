@@ -147,6 +147,7 @@
         static $rtFieldDefs = null;  // constraints in recstrucutre (min max values)
         static $dtyIDDefs = null;    // constraints in field definition   (terms and rectype pointers)  STATIC!!!! - stupidity?
         if (!is_numeric($id) || !is_numeric($dtyID)) return false;
+
         if (!$dtyIDDefs) {
             $dtyIDDefs = array();
             $res = mysql_query("select dty_ID, dty_Type, dty_JsonTermIDTree,dty_TermIDTreeNonSelectableIDs,dty_PtrTargetRectypeIDs".
@@ -154,7 +155,11 @@
                                " where dty_Type in ('enum','relationtype','resource')");
             while ($res && $row = mysql_fetch_row($res)) {
                 //use first element as index
-                if ( $row[1] === 'enum' || $row[1] === 'relationtype') {
+                if ( $dtyID == DT_RELATION_TYPE ) { //$row[1] === 'relationtype' ){
+                    
+                    $dtyIDDefs[$dtyID] = getTermListAll('relation');
+                    
+                } else if ( $row[1] === 'enum') {
                     //create term Id list and term list.
                     $terms = getTermsFromFormat($row[2]);
                     if (($cntTrm = count($terms)) > 0) {

@@ -39,25 +39,36 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     $allowed_terms = null;
 
     if($dtyID==null || !@$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
-        $terms = getTermsFromFormat($defs);
-        if (($cntTrm = count($terms)) > 0) {
-            if ($cntTrm == 1) {  //vocabulary
-                $terms = getTermOffspringList($terms[0]);
-
-            }else{
-                $nonTerms = getTermsFromFormat($defs_nonsel);
-                if (count($nonTerms) > 0) {
-                    $terms = array_diff($terms, $nonTerms);
-                }
-            }
-            if (count($terms)<1) {
-                $allowed_terms = "all";
-            }else{
-                $allowed_terms = $terms;
-            }
-
-            if($dtyID!=null){ //keep for future use
+    
+        if ( $dtyID == DT_RELATION_TYPE) {
+                //get all root terms (vocabs)
+                $allowed_terms = getTermListAll('relation');
                 $dtyIDDefs[$dtyID] = $allowed_terms;
+                
+        } else {
+            
+            $terms = getTermsFromFormat($defs);
+            if (($cntTrm = count($terms)) > 0) {
+                
+                if ($cntTrm == 1) {  //vocabulary
+                    $terms = getTermOffspringList($terms[0]);
+
+                }else{
+                    $nonTerms = getTermsFromFormat($defs_nonsel);
+                    if (count($nonTerms) > 0) {
+                        $terms = array_diff($terms, $nonTerms);
+                    }
+                }
+                if (count($terms)<1) {
+                    $allowed_terms = "all";
+                }else{
+                    $allowed_terms = $terms;
+                }
+
+                if($dtyID!=null){ //keep for future use
+                    $dtyIDDefs[$dtyID] = $allowed_terms;
+                }
+                
             }
         }
     }else{
@@ -160,7 +171,8 @@ function getTermsFromFormat($formattedStringOfTermIDs){
         if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
             return array();
         }
-
+        
+        
         if (strpos($formattedStringOfTermIDs,"{")!== false) {
             $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
             if (strrpos($temp,":") == strlen($temp)-1) {
