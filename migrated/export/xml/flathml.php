@@ -1374,7 +1374,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     //$_REQUEST['idonly'] = 1;
     //$_REQUEST['vo'] = 'h3';
     //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-    $url = HEURIST_BASE_URL_V4."php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3";    //call h4
+    $url = HEURIST_BASE_URL_V4."php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3&needall=1";    //call h4
     if($PUBONLY){
         $url = $url."&publiconly=1";
     }

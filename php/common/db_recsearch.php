@@ -701,7 +701,13 @@ if(@$params['debug']) echo $query."<br>";
                 $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }
             
-            $chunk_size = ($is_ids_only && @$params['needall']) ? PHP_INT_MAX  :3001;
+            if($is_ids_only && @$params['needall']){
+                $chunk_size = PHP_INT_MAX;
+                $aquery["limit"] = '';
+            }else{
+                $chunk_size =  3001;    
+            }
+            
             
             if(!isset($aquery["where"]) || trim($aquery["where"])===''){
                 return $system->addError(HEURIST_DB_ERROR, "Invalid search request. Query can not be composed", null);
@@ -711,8 +717,7 @@ if(@$params['debug']) echo $query."<br>";
         
         }
 
-//DEBUG 
-//error_log("Q: ".$query);            
+//DEBUG error_log("Q: ".$is_ids_only.'   '.@$params['needall'].' '.$query);            
         
         $res = $mysqli->query($query);
         if (!$res){
