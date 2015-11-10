@@ -47,6 +47,10 @@
 
     if (! is_logged_in()) return;
 
+    $rtFieldDefs = null;  // constraints in recstrucutre (min max values)
+    $dtyIDDefs = null;    // constraints in field definition   (terms and rectype pointers)  STATIC!!!! - stupidity?
+    
+    
     mysql_connection_overwrite(DATABASE);
     mysql_query('set @logged_in_user_id = ' . get_user_id());
 
@@ -144,15 +148,17 @@
     * @param mixed $rtyID - rectype id
     */
     function isValidID($id, $dtyID, $rtyID = null) {
-        static $rtFieldDefs = null;  // constraints in recstrucutre (min max values)
-        static $dtyIDDefs = null;    // constraints in field definition   (terms and rectype pointers)  STATIC!!!! - stupidity?
+        
         if (!is_numeric($id) || !is_numeric($dtyID)) return false;
 
-        if (!$dtyIDDefs) {
+        if (!@$dtyIDDefs){
             $dtyIDDefs = array();
+        }
+        
+        if (!@$dtyIDDefs[$dtyID]) {
             $res = mysql_query("select dty_ID, dty_Type, dty_JsonTermIDTree,dty_TermIDTreeNonSelectableIDs,dty_PtrTargetRectypeIDs".
                                " from defDetailTypes".
-                               " where dty_Type in ('enum','relationtype','resource')");
+                               " where dty_ID=$dtyID and dty_Type in ('enum','relationtype','resource')");
             while ($res && $row = mysql_fetch_row($res)) {
                 //use first element as index
                 if ( $dtyID == DT_RELATION_TYPE ) { //$row[1] === 'relationtype' ){
