@@ -493,8 +493,12 @@ function sendApprovalEmail($recID, $tmp_password){
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
-            sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
-            sendEmail($dbowner_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+            if(@$dbowner_Email){
+                sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+                sendEmail($dbowner_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+            }else{
+                error_log('DB owner email is not defined! Impossible to send registration email');
+            }
 
         }
 
