@@ -123,7 +123,7 @@
                     $this->login_verify(); //load user info from session
 
                     //consts
-                    $this->defineConstants();
+                    $this->defineConstants();    //@todo - we do not need to init all constans for every system init - call it as separate method
                 }
 
 

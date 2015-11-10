@@ -5,7 +5,7 @@
     * 
     * recordSearchMinMax - Find minimal and maximal values for given detail type and record type
     * recordSearchFacets
-    * recordSearchRealted
+    * recordSearchRelated
     * recordSearch
     * 
     * @package     Heurist academic knowledge management system
@@ -254,7 +254,7 @@ if(@$params['debug']) echo $query."<br>";
     * 
     * @return array of direct and reverse links (record id, relation type (termid), detail id)
     */
-    function recordSearchRealted($system, $ids){
+    function recordSearchRelated($system, $ids){
         
         if(!@$ids){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
@@ -322,7 +322,7 @@ if(@$params['debug']) echo $query."<br>";
     //
     // returns only first relationship type ID for 2 given records
     //
-    function recordGetRealtionshipType($system, $sourceID, $targetID ){
+    function recordGetRelationshipType($system, $sourceID, $targetID ){
 
         $mysqli = $system->get_mysqli();
         
@@ -344,7 +344,7 @@ if(@$params['debug']) echo $query."<br>";
     //
     // returns relationship records(s) for given source and target records
     //
-    function recordGetRealtionship($system, $sourceID, $targetID ){
+    function recordGetRelationship($system, $sourceID, $targetID ){
         
         $mysqli = $system->get_mysqli();
         
@@ -485,9 +485,7 @@ if(@$params['debug']) echo $query."<br>";
         }else{
             $currUserID = 0;
             $params['w'] = 'all';
-        }
-        
-        
+        }        
         
         
         if ( @$params['topids'] ){ //if topids are defined we use them as starting point for following rule query
@@ -717,7 +715,7 @@ if(@$params['debug']) echo $query."<br>";
         
         }
 
-//DEBUG error_log("Q: ".$is_ids_only.'   '.@$params['needall'].' '.$query);            
+//DEBUG  error_log("Q: ".$is_ids_only.'   user='.print_r($currentUser, true).'   Q='.$query);            
         
         $res = $mysqli->query($query);
         if (!$res){

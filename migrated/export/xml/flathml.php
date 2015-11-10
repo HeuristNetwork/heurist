@@ -367,6 +367,9 @@ $ACCESSABLE_OWNER_IDS = mysql__select_array(
     'sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID='
     . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
 
+    
+//error_log('owner_ids:'.print_r($ACCESSABLE_OWNER_IDS, true));    
+    
 if (is_logged_in()) {
     array_push($ACCESSABLE_OWNER_IDS, get_user_id());
     if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
@@ -796,6 +799,8 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
 
     openTag('record', array('depth' => $depth,
         'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'),
+        'visnote' => ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
+                 : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') ),
         'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
 
     if (isset($dbID) && ($dbID != 0)) {
@@ -1371,15 +1376,69 @@ if (@$_REQUEST['pathfilename']) {
 
 if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
-    //$_REQUEST['idonly'] = 1;
-    //$_REQUEST['vo'] = 'h3';
-    //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-    $url = HEURIST_BASE_URL_V4."php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3&needall=1";    //call h4
+    $url = HEURIST_BASE_URL_V4."php/api/record_search.php";
+
+    $url = $url.'?'.$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3&needall=1";    //call h4
     if($PUBONLY){
         $url = $url."&publiconly=1";
     }
+    
+    /*
     $result = loadRemoteURLContent($url);
     $result = json_decode($result, true);
+    
+    $_REQUEST['detail'] = 'ids';
+    $_REQUEST['vo'] = 'h3';
+    $_REQUEST['needall'] = 1;
+    if($PUBONLY){
+        $_REQUEST['publiconly']=1;
+    }                                              
+    */
+    
+    $hostname = HEURIST_DOMAIN;
+
+    $headers[] = "GET ".$url." HTTP/1.1";
+    $headers[] = "Host: ".$hostname;
+    $headers[] = "Accept-language: en";
+    
+    $cookies = array();
+    foreach ($_COOKIE as $id=>$val){
+        array_push($cookies, $id.'='.$val );
+    }
+    $headers[] = "Cookie: ".implode($cookies,';').';';
+    $headers[] = "";
+
+    $CRLF = "\r\n";
+    $remote = fsockopen($hostname, 80, $errno, $errstr, 5);
+    // a pinch of error handling here
+    fwrite($remote, implode($CRLF, $headers).$CRLF);
+    $response = '';
+    while ( ! feof($remote))
+    {
+        // Get 1K from buffer
+        $response .= fread($remote, 1024);
+    }
+    fclose($remote);    
+
+    // split the headers and the body
+    $response = preg_split("|(?:\r?\n){2}|m", $response, 2);
+    if(!isset($response[1])) $response[1] = "";
+
+    $result = json_decode($response[1], true);
+    
+    /*
+    $r = new HttpRequest($url, HttpRequest::METH_GET);
+    $r->addCookies($_COOKIE);
+    $r->addQueryData($_REQUEST);
+    try {
+        $result = $r->getResponseBody(); //send()->getBody();
+        $result = json_decode($result, true);
+    } catch (HttpException $ex) {
+        echo $ex;
+        exit();
+    }
+    */
+
 
 }else{
     $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
