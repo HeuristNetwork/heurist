@@ -1395,8 +1395,9 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     }                                              
     */
     
-    $hostname = HEURIST_DOMAIN;
-
+    $hostname = '127.0.0.1'; //HEURIST_DOMAIN;
+    $url = str_replace(HEURIST_DOMAIN, $hostname, $url);
+    
     $headers[] = "GET ".$url." HTTP/1.1";
     $headers[] = "Host: ".$hostname;
     $headers[] = "Accept-language: en";
@@ -1410,21 +1411,26 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
     $CRLF = "\r\n";
     $remote = fsockopen($hostname, 80, $errno, $errstr, 5);
-    // a pinch of error handling here
-    fwrite($remote, implode($CRLF, $headers).$CRLF);
-    $response = '';
-    while ( ! feof($remote))
-    {
-        // Get 1K from buffer
-        $response .= fread($remote, 1024);
+    if($remote===false){
+       $result = array();
+       error_log('Can not open socket '.$hostname.'  Error# '.$errno.'   '.$errstr);
+    }else{
+        // a pinch of error handling here
+        fwrite($remote, implode($CRLF, $headers).$CRLF);
+        $response = '';
+        while ( ! feof($remote))
+        {
+            // Get 10K from buffer
+            $response .= fread($remote, 10240);
+        }
+        fclose($remote);    
+
+        // split the headers and the body
+        $response = preg_split("|(?:\r?\n){2}|m", $response, 2);
+        if(!isset($response[1])) $response[1] = "";
+
+        $result = json_decode($response[1], true);
     }
-    fclose($remote);    
-
-    // split the headers and the body
-    $response = preg_split("|(?:\r?\n){2}|m", $response, 2);
-    if(!isset($response[1])) $response[1] = "";
-
-    $result = json_decode($response[1], true);
     
     /*
     $r = new HttpRequest($url, HttpRequest::METH_GET);
