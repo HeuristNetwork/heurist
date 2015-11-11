@@ -22,7 +22,7 @@
 
 -->
 
-<p>After creating a new database, please use the following menu entries (you can return to this page to review the steps): </p>
+<p>After creating a new database, please use the links: </p>
 <div class="detailRow">
     <div class="detailType" style="width: 180px !important;">Database &gt; <u>Manage structure</u></div>
     <div class="detail">Modify the record types and fields describing them, and add new record types, fields and terms</div>

@@ -35,7 +35,7 @@ function loadRemoteURLContent($url, $timeout=10) {
     if (defined("HEURIST_HTTP_PROXY")) {
         curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
     }
-
+    
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
 

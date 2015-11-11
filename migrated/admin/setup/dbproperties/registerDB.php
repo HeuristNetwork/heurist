@@ -221,6 +221,7 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     $usrName, $usrFirstName, $usrLastName, $dbDescription;
 
                     $serverURL = HEURIST_BASE_URL_V4 . "?db=" . $heuristDBname;
+                    $serverURL = substr($serverURL,4); //to avoid conversion path to localhost if masterindex on the same server
 
                     $usrEmail = rawurlencode($usrEmail);
                     $usrName = rawurlencode($usrName);
@@ -236,6 +237,8 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                     "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
 
                     $data = loadRemoteURLContent($reg_url);
+                    
+                    
                     if (!$data) {
                         die("Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />".
                             "URL requested: <a href='$reg_url'>$reg_url</a>");
