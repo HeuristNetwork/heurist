@@ -548,14 +548,20 @@ if(is_array($imp_session)){
             <tr>
                 <td>
                     <span class="matching">
-                        <span id="btnStartMatch" style="display: none">
-                            <input type="button" value="Match data against records in database"
-                                onclick="doMatching()" style="font-weight: bold;">
+                        <span>
+                            <input type="button" value="Skip Match"
+                                onclick='{$( "#tabs_actions" ).tabs( "option", "active", 1 );}' style="font-weight: bold;">
+
+                        </span>
+                        <span>
+                            <input type="button" value="Match data against records in database &gt;&gt;"
+                                disabled=disabled  id="btnStartMatch" 
+                                onclick="doMatching()" style="font-weight: bold;color:#CCC">
 
                         </span>
                     </span>
                     <span class="importing" id="divPreviousBtn">
-                        <input type="button" value="<< Match again" style="font-weight: bold;"
+                        <input type="button" value="&lt;&lt; BACK: Match again" style="font-weight: bold;"
                             title="Go to initial (Matching) step" onclick='$( "#tabs_actions" ).tabs( "option", "active", 0 );' >
                     </span>
                 </td>
@@ -566,6 +572,8 @@ if(is_array($imp_session)){
                 //
 
                 $validationRes = @$imp_session['validation'];
+                $cnt_update = 0;
+                $cnt_insert = 0;
                 if($validationRes){
                     $cnt_error   = intval(@$validationRes['count_error']);
                     $show_err    = ($cnt_error>0)?"<a href='#' onclick='showRecords(\"error\")'>show</a>" :"&nbsp;";
@@ -586,8 +594,9 @@ if(is_array($imp_session)){
                     if($cnt_insert>0){
                         $show_insert = "<a href='#' onclick='showRecords(\"insert\")' title='show rows to be inserted as new records'>show</a>";
                         $download_insert= "<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>"
-                        ." &nbsp;&nbsp; <input type=\"checkbox\" title=\"Do not insert new records. Do update only\" "
-                        ." onclick=\"{document.getElementById('ignore_insert').value=this.checked?1:0; }\"> ignore ";
+                        .' &nbsp;&nbsp; <input type="checkbox" id="ignore_insert" '
+                        .' onclick="{document.getElementById(\'ignore_insert\').value=this.checked?1:0; }">' 
+                        .'<label for="ignore_insert" title="Do not insert new records. Do update only">ignore</label>';
                     }else{
                         $show_insert = "&nbsp;";
                         $download_insert= "&nbsp;";
@@ -662,14 +671,14 @@ if(is_array($imp_session)){
                     <span class="importing">
                         <?php
                         //($cnt_update>0 && $cnt_insert>0)?"Create/Update":($cnt_insert>0?"Create":"Update")
-                        if($sa_mode==1 && $validationRes){  ?>
+                        if($cnt_update+$cnt_insert>0){  ?>
                             <span class="analized2">
-                                <input type="button" value="Create/Update records"
+                                <input type="button" value="NEXT: Create/Update records &gt;&gt;"
                                     onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
-                            <?php } ?>
+                        <?php } ?>
                         <span class="importing analized3">
                             <input  id="btnStartImport" type="submit"
-                                value="Prepare insert/update >>" style="disabled:disabled;font-weight: bold;">
+                                value="NEXT: Prepare insert/update &gt;&gt;" style="disabled:disabled;font-weight: bold;">
                         </span></span>
                 </td>
             </tr>

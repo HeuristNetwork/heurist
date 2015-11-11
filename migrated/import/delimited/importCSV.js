@@ -95,7 +95,9 @@ function init() {
             $(this).parent().hide();
         });
 
-        $('#btnStartMatch').hide();
+        //$('#btnStartMatch').hide();
+        $('#btnStartMatch').attr("disabled", "disabled");
+        $('#btnStartMatch').css('color','#CCC');
         $('#btnStartImport').attr("disabled", "disabled");// .hide();
         $('#btnStartImport').css('color','#CCC');
 
@@ -275,6 +277,7 @@ function init() {
     $( "#tabs_actions" ).tabs({active: form_vals.sa_mode, activate: function(event, ui){
         showUpdMode(ui.newTab.index());
     } });
+    $( "#tabs_actions ul.ui-tabs-nav" ).hide();
 
 
     if(form_vals.auto_switch_to_import==1){
@@ -531,11 +534,20 @@ function onFtSelect2(ind){
             isok  = isok && ($('select[id="'+this.id.substr(2)+'"]').val()!="");
         });
     }
+    
+    if(isok){
+        $('#btnStartMatch').removeAttr("disabled"); //.show();
+        $('#btnStartMatch').css('color','#666');
+    }else{
+        $('#btnStartMatch').attr("disabled", "disabled");
+        $('#btnStartMatch').css('color','#CCC');
+    }
+    /*
     if(isok){
         $('#btnStartMatch').show();
     }else{
         $('#btnStartMatch').hide();
-    }
+    }*/
 
     /*
     if($('select[id^="sa_keyfield_"][value!=""]').length>0){
@@ -639,7 +651,7 @@ function showRecords(divname){
     $('div[id="main_'+divname+'"]').show();
 
     if(divname=='error'){
-        if($( "#tabs_records" ).length>0){
+            if($( "#tabs_records" ).length>0){
             $( "#tabs_records" ).tabs();
         }
     }

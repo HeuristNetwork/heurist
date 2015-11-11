@@ -538,11 +538,13 @@ a#dbSearch-link #dbname:hover {padding-right:10px; background-color:RGBA(100,100
 	color: #666;
 	cursor: pointer !important;
 	font-weight:bold !important;
-	background-color:transparent !important;
+	/*
+    background-color:transparent !important;
+    border-radius:3px !important;
+    -moz-border-radius:3px !important;
+    -webkit-border-radius:3px !important ;
+    */
 	border:1px solid RGBA(0,0,0,0.2) !important;
-	-moz-border-radius:3px !important;
-	-webkit-border-radius:3px !important ;
-	border-radius:3px !important;
 	padding:0 3px;
 	height:20px !important ;
 	line-height:19px !important;
