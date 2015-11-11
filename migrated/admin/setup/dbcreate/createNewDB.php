@@ -161,6 +161,8 @@ function doRegister(event){
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="../../../../h4styles.css">
+        <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 <?php
     }
 ?>
@@ -289,6 +291,10 @@ function doRegister(event){
                 //only once
                 if(is_db_got) return;
                 is_db_got = true;
+                
+                var ddiv = $('#registered_dbs');
+                ddiv.show();
+                ddiv.height('40px');
 
                 // request for server side
                 var baseurl = "<?=HEURIST_BASE_URL_V3?>admin/setup/dbproperties/getRegisteredDBs.php";
@@ -307,12 +313,15 @@ function doRegister(event){
                                 if(idx){
 
                                     //regurl = responce[idx][0]
+                                    var bgcolor = (idx % 2 == 0)?'#EDF5FF':'#FFF';
 
-                                    s = s + '<div style="display:table-row">'
+                                    s = s + '<div style="display:table-row;padding-left: 38px;background-color:'+bgcolor+'">'
                                     +'<div style="width:50px;display:table-cell"><input type="radio" name="dbreg" value="'+idx+'" id="rbdb'+idx+'"/></div>'
                                     +'<div style="width:50px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][0]+'</label></div>'
-                                    +'<div style="width:300px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][2]+'</label></div>'
-                                    +'<div style="width:900px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][1]+'</label></div></div>';
+                                    +'<div style="width:300px;display:table-cell">'
+                                        +'<label for="rbdb'+idx+'" '+(Number(responce[idx][0])<1000?'style="font-weight:bold;"':'')+'>'+responce[idx][2]+'</label></div>'
+                                    +'<div style="max-width:<?php echo (@$_REQUEST['popup']=='1'?'190':'400') ?>px;display:table-cell" class="truncate" >'
+                                        +'<label for="rbdb'+idx+'" title="'+responce[idx][3]+'">'+responce[idx][3]+'</label></div></div>';
                                 }
                             }
 
@@ -333,6 +342,7 @@ function doRegister(event){
                             s = '<p class="error ui-state-error">Cannot access Heurist database index<p>';
                         }
                         ddiv.innerHTML = s;
+                        $(ddiv).height('300px');
                     },
                 params);
             }
@@ -359,7 +369,7 @@ function doRegister(event){
             }
         ?>
 
-        <div id="page-inner" style="overflow:auto;padding:10px">
+        <div id="page-inner" style="overflow:auto;<?php echo (@$_REQUEST['popup']=='1'?'top:10px;':'') ?>">
             <div id="loading" style="display:none">
                 <img alt="loading ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>
@@ -407,8 +417,7 @@ function doRegister(event){
             if($isDefineNewDatabase){
 ?>
 
-                <h2>Creating new database on server</h2>
-                <br />
+                <h2 style="padding:0 0 0 10px;">Creating new database on server</h2>
 
                 <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
                     <label class="labelBold">Enter the password set by your system administrator for new database creation:</label>
@@ -425,10 +434,10 @@ function doRegister(event){
                         <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>">
                         <input type="hidden" name="popup" value="<?php echo @$_REQUEST['popup']?'1':''; ?>">
 
-                        <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:10px;">
+                        <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:2px;">
                             <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
                                 class="labelBold" style="padding-left: 2em;">Standard starter database</label>
-                            <div style="padding-left: 38px;padding-bottom:10px">
+                            <div style="padding-left: 38px;padding-bottom:10px;width:620px">
                                 Gives an uncluttered database with essential record types, fields,
                                 terms and relationships, including bibliographic and spatial entities.<br />
                                 Recommended for most new databases unless you wish to copy a particular template (next option).
@@ -438,24 +447,25 @@ function doRegister(event){
 
                             <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
                                 class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
-                            <div style="padding-left: 38px;">
+                            <div style="padding-left: 38px;width:620px">
                                 Use a database registered with the Heurist Network as a template.
-                                Copies record types, fields, terms and relationships from the database selected.<br />
+                                Copies record types, fields, terms and relationships from the database selected. 
                                 Databases with an ID &lt; 1000 are curated by the Heurist team and include templates
                                 for the HuNI and FAIMS infrastructure projects,
-                                <br />as well as community servers maintained by other research groups.
+                                as well as community servers maintained by other research groups.
                             </div>
 
-                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;padding-left: 38px;margin-top: 30px; background-color:lightgray">
-                                <!-- DATABASE TEMPLATES NOT YET IMPLEMENTED -->
+                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;margin-top:10px;max-width:<?php echo (@$_REQUEST['popup']=='1'?'620':'720') ?>px;
+                              background:url(../../../../assets/loading-animation-white.gif) no-repeat center center;">
+                                <!-- list of registered DATABASEs  -->
                             </div>
-                            <!-- TO DO: NEED TO DISPLAY A DROPDOWN LIST OF DATABASES HERE, OR A BROWSE LIST WITH FILTER -->
 
-                             <div style="padding-left: 38px; margin-top: 30px; margin-bottom: 20px;">
+                             <div id="nextSteps"
+                                style="padding-left: 38px; wdith:620px;display:none">
                                 <div><b>Suggested next steps</b></div>
                                 <div>
-                                <br />After the database is created, we suggest visiting Database &gt; Import Structure and Database &gt; Annotated Templates to download
-                                <br />pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
+                                <br />After the database is created, we suggest visiting Database &gt; Acquire from databases and Database > Acquire from templates
+                                to download pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
                                 <br />New databases are created on the current server. You will become the owner and administrator of the new database.
                                 </div>
                             </div>
@@ -465,7 +475,7 @@ function doRegister(event){
                             <h3 style="margin-left: 38px">Enter a name for the new database</h3>
                             <div style="margin-left: 60px; margin-top: 10px;">
                                 <!-- user name used as prefix -->
-                                <i>no spaces or punctuation other than underscore)</i><br />&nbsp;<br />
+                                <i>no spaces or punctuation other than underscore</i><br />&nbsp;<br />
                                 <b><?= HEURIST_DB_PREFIX ?>
                                     <input type="text" maxlength="30" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
                                         style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
@@ -581,8 +591,9 @@ function doRegister(event){
                     $reg_url = @$_REQUEST['url_template'];
 
                     //debug print $reg_url."</br>";
+                    $name = '';
 
-if(true){ //DEBUG: set to false to avoid real database creation
+if(false){ //DEBUG: set to false to avoid real database creation
                     // this is global variable that is used in buildCrosswalks.php
                     $templateFileName = "NOT DEFINED";
                     $templateFoldersContent = "NOT DEFINED";
@@ -770,7 +781,7 @@ if(true){ //DEBUG: set to false to avoid real database creation
 
 } //DEBUG
 
-                    echo "<h2>Congratulations, your new database '$newDBName' has been created</h2>";
+                    echo "<h2 style='padding:0 0 10px 0'>Congratulations, your new database '$newDBName' has been created</h2>";
 
                     if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
                         echo "<p><strong>Admin username:</strong> ".$name."<br />";

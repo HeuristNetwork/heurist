@@ -262,6 +262,8 @@
 
     <body class="popup yui-skin-sam" style="overflow: auto;">
 
+        <script src="../../../common/php/loadCommonInfo.php"></script>
+    
         <div class="banner"><h2>Import structural definitions into current database</h2></div>
         <div id="page-inner" style="overflow:auto">
 

@@ -75,7 +75,8 @@ if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - re
     }
 
     // Return all registered databases as a json string
-    $res = mysql_query("select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22");
+    $res = mysql_query('select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version '
+    .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22');
 
     while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
 
