@@ -46,8 +46,6 @@
 	$indexdb_user_id = 0; // Flags problem if not reset
 	$returnData = ''; // String returned to caller, contains dbID or 0, and error message (if any)
 
-//error_log(print_r($_REQUEST,true));    
-    
 	// Get parameters passed from registration request
 	// @ preceding $_REQUEST avoids errors, sets Null if parameter missing
 	$serverURL = $_REQUEST["serverURL"];
@@ -122,7 +120,6 @@
 			} else { // Unable to create the new user
 				$error = "Unable to write new user in Heurist master index database\n" .
                     "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
-				error_log($error);
                 $returnData = $dbID . "," . $error;
 				echo $returnData; // if you can't set up user it isn't worth trying to register the database''
 			}

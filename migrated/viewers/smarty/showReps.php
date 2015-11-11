@@ -110,12 +110,8 @@ function executeSmartyTemplate($params){
 		$params["limit"] = $limit; //force limit
 	}
 
-//debug error_log(print_r($params, true));
-
     if(@$params['recordset']){ //we already have the list of record ids
 
-//debug error_log($params['recordset']);        
-    
         $qresult = json_decode($params['recordset'], true);
     
     }else if(@$params['h4']==1){ //search with h4 search engine
@@ -127,18 +123,14 @@ function executeSmartyTemplate($params){
     
 
         $url = HEURIST_BASE_URL_V4."php/api/record_search.php?".$url."&detail=ids&vo=h3";
-//debug error_log($url);        
         $result = loadRemoteURLContent($url);
         $qresult = json_decode($result, true);
 
-//debug error_log(print_r($qresult, true));
         
     }else{
 	    $qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
     }
     
-/*****DEBUG****///error_log(print_r($params,true));
-/*****DEBUG****///error_log(print_r($qresult,true));
 
 	if( !$qresult || ( !array_key_exists('recIDs',$qresult) && !array_key_exists('records',$qresult) ) ||  $qresult['resultCount']==0 ){
 		if($publishmode>0){
@@ -228,8 +220,6 @@ function executeSmartyTemplate($params){
 
 	if($template_body)
 	{	//execute template from string - modified temoplate in editor
-/*****DEBUG****///error_log(">>>".$template_body."<<<");
-/*****DEBUG****///error_log(">>>>>>>".$replevel."<<<<<<");
 
 		//error report level: 1 notices, 2 all, 3 debug mode
 		$replevel = (array_key_exists('replevel',$params) ?$params['replevel']:0);
@@ -475,13 +465,10 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 		$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
 		$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
-/*****DEBUG****///error_log("RElation constants=".$relRT."  ".$relSrcDT."    ".$relTrgDT);
-
 		$record = array();
 		$recTypeID = null;
 
 
-/*****DEBUG****///error_log("REC=".print_r($rec, true));
 		$record["recOrder"] = $order;
 
 		//loop for all record properties
@@ -625,13 +612,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
     $rt_structure = null;
     $issingle = true;
 
-
-/*****DEBUG****///	if($dtKey==9){
-/*****DEBUG****///error_log("KEY=".$dtKey."   NAME=".$dtNames[$dtKey]);
-/*****DEBUG****///error_log("dtValue=".print_r($dtValue, true));
-/*****DEBUG****///	}
-
-
 	if($dtKey<1 || $dtNames[$dtKey]){
 
 		if($dtKey<1){
@@ -639,8 +619,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
             $dtname = "Relationship";
             $issingle = false;
             $dtDef = "dummy";
-/*****DEBUG****///error_log("111>>>>>".print_r($dtValue, true));
-/*****DEBUG****///error_log("222>>>>>".$recTypeID);
 
 		}else{
 			$rt_structure = $rtStructs['typedefs'][$recTypeID]['dtFields'];
@@ -754,10 +732,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 					//original value keeps the whole 'file' array
 					array_push($origvalues, $value['file']);
 
-					//$dtname2 = $dtname."_originalvalue";
-					//$arres = array_merge($arres, array($dtname2=>$value['file']));
-/*****DEBUG****///error_log(">>>>>".$dtname2."= ".print_r($value['file'],true));
-
 				}
 
 				if(strlen($res)==0){
@@ -768,37 +742,12 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 				}
 
 			break;
-/* NOT USED ANYMORE
-			case 'urlinclude':
-				//
-				$res = "";
-				$arres = array();
-
-				foreach ($dtValue as $key => $value){
-					if(strlen($res)>0) $res = $res.", ";
-
-					$arr = explode('|', $value);
-					$res = $res.$arr[0];
-
-					//original value keeps source and type
-					$dtname2 = $dtname."_originalvalue";
-					$arres = array_merge($arres, array($dtname2=>$value));
-				}
-				if(strlen($res)==0){
-					$res = null;
-				}else{
-					$res = array_merge($arres, array($dtname=>$res));
-				}
-
-			break;
-*/
 
 			case 'geo':
 
 				$res = "";
 				$arres = array();
 				foreach ($dtValue as $key => $value){
-/*****DEBUG****///error_log("GEO=>>>>".print_r($value, true));
 
 						//original value keeps whole geo array
 						$dtname2 = $dtname."_originalvalue";
@@ -836,8 +785,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 			case 'relmarker':
 			case 'resource': // link to another record type
 
-//error_log("dtValue>>>>>".print_r($dtValue,true));
-//break;            
             
 				//@todo - parsing will depend on depth level
 				// if there are not mentions about this record type in template (based on obtained array of variables)
@@ -847,7 +794,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 				$res = array();
 				$rectypeID = null;
 				$prevID = null;
-/*****DEBUG****///error_log("dtValue>>>>>".print_r($dtValue,true));
 				$order_sub = 0;
 
 				foreach ($dtValue as $key => $value){
@@ -858,7 +804,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 						//this is record ID
 						if(array_key_exists('RelatedRecID',$value)){
 							$recordID = $value['RelatedRecID']['rec_ID'];
-/*****DEBUG****///error_log(">>>>value=".print_r($value, true));
 						}else{
 							$recordID = $value['id'];
 						}
@@ -886,15 +831,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
 							    if($rectypeID==null && @$res0['recRecTypeID']){
 								    $rectypeID = $res0['recRecTypeID'];
-								    /* TEMP DEBUG
-								    if(array_key_exists($rectypeID, $rtNames))
-								    {
-									    $pointerIDs = ($dtKey<1) ?"" :$dtDef[ $dty_fi['dty_PtrTargetRectypeIDs'] ];
-									    $isunconstrained = ($pointerIDs=="");
-    if($isunconstrained){
-    /*****DEBUG****///error_log($dt_label.">>>>>>>");
-    /*}
-								    }            */
 							    }
 
 							    //add relationship specific variables
@@ -913,8 +849,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 									    if(array_key_exists('EndDate', $value)){
 										    $res0["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
 									    }
-
-    /*****DEBUG****///error_log(">>>>RECID=".$recordID." >>>>>".print_r($res0, true));
 							    }
 
                                 $loaded_recs[$recordID] = $res0;
@@ -940,13 +874,6 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
                     
                     if(@$dtname){
-                        /* ART 2013-012-09                    
-					    $recordTypeName = $dt_label;
-					    $recordTypeName = getVariableNameForSmarty($recordTypeName, false);
-					    $res = array( $recordTypeName."s" =>$res, $recordTypeName =>$res[0] );
-                        */
-
-//error_log(">>>>>>".$dtKey ."   ".$dtname."   ".$issingle);
                         
                         if($issingle){
                             $res = array( $dtname =>$res[0] );    
@@ -1045,7 +972,6 @@ function smarty_function_wrap($params, &$smarty)
 
 	if($params['var']){
 
-/*****DEBUG****///error_log("WRAP>>>>".print_r($params,true));
 
 		if(array_key_exists('dt',$params)){
 			$dt = $params['dt'];
@@ -1101,10 +1027,6 @@ function smarty_function_wrap($params, &$smarty)
 		}else if($dt=="file"){
 			//insert image or link
 			$values = $params['var'];
-
-
-//!!!!!
-/*****DEBUG****///error_log("WARP VALUE>>>>".$mode."  ".print_r($values,true));
 
 			$sres = "";
 
@@ -1190,58 +1112,6 @@ function smarty_function_wrap($params, &$smarty)
 			}
 			return $res;
 		}
-		/*
-
-		NOT USED ANYMORE
-
-
-		else if($dt=="urlinclude") {
-			//insert image or youtube if appropriate
-			$value = $params['var'];
-			//get url, source and type
-			$acfg = explode('|', $value);
-			$url = $acfg[0];
-
-
-			if(count($acfg)<3){
-	   			$oType = detectSourceAndType($url);
-	   			$url_type = $oType[0];
-	   			$url_source = $oType[1];
-	   		}else{
-	   			$url_source = $acfg[1];
-	   			$url_type = $acfg[2];
-	   		}
-
-/*****DEBUG****///error_log(">>>>>>>>".$value."  type=".$url_type."  source=".$url_source);
-/*
-			if($url_type == "Image"){
-
-				return "<img src='".$url."' width='300px'/>";
-
-			}else if ($url_type == "Text/HTML"){
-				//load file and return its value as string
-
-
-			}else if ($url_type == "Video"){
-
-				if($url_source == "Youtube"){
-					$size = "";
-					if($width=="" && $height==""){
-						$size = "width='420' height='345'";
-					}else {
-						if($width!=""){
-							$size = "width='".$width."'";
-						}
-						if($height!=""){
-							$size = $size." height='".$height."'";
-						}
-					}
-
-					return linkifyYouTubeURLs($url, $size);
-				}
-			}
-
-		}*/
 		else{
 			if($label!="") $label = $label.": ";
     		return $label.$params['var'].'<br/>';

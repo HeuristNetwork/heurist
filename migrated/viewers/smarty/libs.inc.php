@@ -31,8 +31,6 @@
     require_once(SMARTY_DIR.'Smarty.class.php');
     require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 
-    /*****DEBUG****///error_log(">>>>".HEURIST_SERVER_ROOT_DIR.HEURIST_BASE_URL_V3.'viewers/smarty/templates/');
-
     $smarty = new Smarty();
 
     //check folder existance and create new folders if they missed
@@ -62,7 +60,6 @@
     $smarty->compile_dir  = HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/';
     $smarty->cache_dir    = HEURIST_SMARTY_TEMPLATES_DIR.'cache/';
 
-    /*****DEBUG****///error_log(">>>>>".HEURIST_SMARTY_TEMPLATES_DIR);
 
     $smarty->registerResource("string", array("str_get_template",
         "str_get_timestamp",

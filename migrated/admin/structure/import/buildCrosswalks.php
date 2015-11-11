@@ -129,7 +129,6 @@
 			// error log says supplied argument is not a valid MySQL result resources
 			@$row = mysql_fetch_array($res);
 			if ( @$row && $row[0] != 0 && $row[0] != get_user_id()){
-				error_log("row = ".print_r($row,true));
 				echo "Definitions are already being modified or SQL failure on lock check.";
 				header('Location: ' . HEURIST_BASE_URL_V3 . 'common/html/msgLockedByAdmin.html'); // put up informative failure message
 				die("Definitions are already being modified.<p> If this is not the case, you will need to remove the locks on the database.<br>Use Utilities > Clear database locks (administrators only)");

@@ -93,8 +93,6 @@
                                 
                             }
                                  
-//$def['children'][$idx]['title'] = $det['title'].$def['children'][$idx]['code'];                    
-//error_log($det['title']);        
                             if(is_array(@$det['children'])){
                                    $def['children'][$idx] = __assignCodes($def['children'][$idx]);
                             }
@@ -225,8 +223,6 @@
         
             if(is_numeric($recTypeId) && $recTypeId!=$rt_ID){
          
-//error_log($recTypeId); //print_r($dbs_rtStructs, true)
-//continue;
                 
                 $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
                 
@@ -240,7 +236,6 @@
                                 //verify that selected record type is in this constaint
                                 if(count($constraints)>0 && in_array($rt_ID, $constraints) && !@$arr_rectypes[$recTypeId] ){
                                     
-                                    //error_log(">>>".in_array($rt_ID, $constraints)."<<  ".$rt_ID."  ".print_r($constraints, true));
                                     
                                     $arr_rectypes[$recTypeId] = $dtID;
                                 }
@@ -248,8 +243,6 @@
                 }
             }
         }
-        
-//        if(count($arr_rectypes)>0) error_log("rev for ".$rt_ID."  ".print_r($arr_rectypes, true));
         
         return  $arr_rectypes;
         
@@ -283,7 +276,6 @@
         $pref = "";
         //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
         //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
-        //error_log("1>>>".$mode."  ".$detailType."  ".$dt_label);
 
         switch ($detailType) {
             /* @TODO
@@ -371,15 +363,12 @@
                 break;
 
             default:
-                //error_log("2>>>".$mode."  ".$detailType."  ".$dt_label."   ".($detailType=='float'));            
                 if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
                 {
-                    //error_log("!!!!!!!!!");                    
                     $res = array();
                 }
         }//end switch
 
-        //error_log("3>>>>".is_array($res)."<  ".$detailType."  ".$dt_label);
         if(is_array($res)){
 
             if(!@$res['code']) $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)

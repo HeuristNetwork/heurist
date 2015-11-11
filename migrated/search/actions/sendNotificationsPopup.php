@@ -39,8 +39,6 @@
 
 	mysql_connection_select(DATABASE);
 
-	/*****DEBUG****///error_log("request is ".print_r($_REQUEST,true)); //>>>>DEBUG
-
 	if (@$_REQUEST['send_notification']) {
 		$notification_sent_message = handle_notification();
 		$success = preg_match('/^Notification email sent/', $notification_sent_message);
@@ -180,11 +178,9 @@
 
 	function handle_notification() {
 		function getInt($strInt){
-			/*****DEBUG****///error_log("str = ".preg_replace("/[\"']/","",$strInt)." val =". intval($strInt));
 			return intval(preg_replace("/[\"']/","",$strInt));
 		}
 		$bib_ids = array_map("getInt", explode(',', $_REQUEST['bib_ids']));
-		/*****DEBUG****///error_log("bibids = ".print_r($bib_ids,true));
 		if (! count($bib_ids)){
 			return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
 		}

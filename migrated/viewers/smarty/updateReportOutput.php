@@ -71,7 +71,7 @@ if($rps_ID==0){
 	//load one
 	$res = mysql_query("select * from usrReportSchedule where rps_ID=".$rps_ID);
 	if(mysql_error()){
-		error_log("ERROR=".mysql_error());
+/*****DEBUG****///error_log("ERROR=".mysql_error());
 	}else{
 		$row = mysql_fetch_assoc($res);
 		if($row){
@@ -111,7 +111,6 @@ function doReport($row){
 
 		$path_parts = pathinfo($outputfile);
 		$ext = array_key_exists('extension',$path_parts)?$path_parts['extension']:null;
-/*****DEBUG****///error_log("EXT=".$ext);
 
 		if ($ext == null) {
 

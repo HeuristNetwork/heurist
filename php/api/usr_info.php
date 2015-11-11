@@ -90,7 +90,7 @@
             } else if ($action=="usr_get" && is_numeric(@$_REQUEST['UGrpID'])) {
 
                 $ugrID = $_REQUEST['UGrpID'];
-                //error_log("KUKU ".$_REQUEST['UGrpID']);            
+
                 if($system->is_admin2($ugrID)){
                     $res = user_getById($system->get_mysqli(), $ugrID); 
                     if(is_array($res)){

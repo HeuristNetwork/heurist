@@ -25,13 +25,6 @@
     require_once (dirname(__FILE__).'/../common/utils_db.php');
     //require_once (dirname(__FILE__).'/../common/utils_db_script.php');
 
-    /* DEBUG
-    $_REQUEST['db'] = 'dos_3';
-    $_REQUEST['q'] = 'manly';
-    */
-
-//error_log("recSearch ".print_r($_REQUEST, true));
-     
     /*
      parameters
      

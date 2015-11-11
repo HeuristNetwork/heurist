@@ -133,15 +133,6 @@
 
         $supinfo = $isfull?", tag_Text, tag_Description, tag_Modified ":"";
 
-        /*    
-        $query = "SELECT tag_ID ".$supinfo.", count(*) as tag_Usage"
-        ." FROM usrTags, usrRecTagLinks WHERE rtl_TagID = tag_ID "
-        ." and tag_UGrpID=".$ugrID
-        ." and rtl_RecID in (".implode(",", $recIDs).")"
-        ." group by tag_ID".$supinfo;
-        error_log(">>>".print_r($recIDs,true)."<<<");    
-        */            
-
         if(is_string($recIDs) && $recIDs!=""){
             $recIDs = explode(",", $recIDs);
         }
@@ -158,7 +149,6 @@
         .") group by tag_UGrpID, tag_ID".$supinfo
         ." order by tag_UGrpID";            
 
-        //error_log(">>>".$query);
 
         $res = $mysqli->query($query);
 
@@ -300,12 +290,10 @@
 
                 $res = $mysqli->query($query);
 
-                //error_log(">>>".$query);
 
                 $res = $mysqli->query($query);
                 if($res){
                     $cnt = $mysqli->affected_rows;
-                    //error_log(">>>".$cnt);                
                     //delete old ones
                     $res = tagDelete($system, $tag_ids, $ugrID);
                     if(is_numeric($res) && $res>0){

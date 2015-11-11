@@ -103,8 +103,6 @@
     //
     function recordSearchFacets($system, $params){
 
-// error_log(">>".print_r($params, true));
-
         //for error message
         $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":""; 
         
@@ -125,12 +123,10 @@
             if(!@$params['q']){
                 return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Facet query search request. Missed query parameter");
             }
-//error_log(print_r($params['q'], true));            
 
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
 
-//error_log("WHERE=".$qclauses["where"]);            
             
             $select_field  = "";
             $detail_link   = "";
@@ -213,9 +209,6 @@
             //            
 //DEBUG 
 if(@$params['debug']) echo $query."<br>";            
-            //
-//
-//error_log("COUNT >>>".$query);
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -272,7 +265,6 @@ if(@$params['debug']) echo $query."<br>";
         $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
             .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
        
-//error_log("1>>>".$query);
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -293,7 +285,6 @@ if(@$params['debug']) echo $query."<br>";
         $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
             .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
 
-//error_log("2>>>".$query);
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -313,7 +304,6 @@ if(@$params['debug']) echo $query."<br>";
         $response = array("status"=>HEURIST_OK,
                      "data"=> array("direct"=>$direct, "reverse"=>$reverse));
                      
-//error_log(print_r($response, true));
 
         return $response;                     
         
@@ -352,7 +342,6 @@ if(@$params['debug']) echo $query."<br>";
         $query = 'SELECT rl_RelationID FROM recLinks '
             .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
        
-//error_log("1>>>".$query);
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -517,9 +506,6 @@ if(@$params['debug']) echo $query."<br>";
                 $rules_tree = json_decode($params['rules'], true);
             }
 
-//DEBUG
-//error_log("RULES: ".print_r($rules_tree, true));
-            
             $flat_rules = array();
             $flat_rules[0] = array();
             
@@ -641,7 +627,7 @@ if(@$params['debug']) echo $query."<br>";
                         
                     }else{
                         //@todo terminate execution and return error
-                        error_log("ERROR ".print_r($response, true));
+/*****DEBUG****///error_log("ERROR ".print_r($response, true));
                     }
                     
                     $k = $k + 3000;
@@ -658,9 +644,6 @@ if(@$params['debug']) echo $query."<br>";
                                           "recIDs" => implode(",", $fin_result['data']['records']) );
             }
             
-//error_log("RES = ".print_r($fin_result, true));                            
-//error_log("RES ".print_r(($fin_result['data']['records']), true));   
-
             //@todo - assign if size less than 3000? only
             $fin_result['data']['mainset'] = $flat_rules[0]['results'];
                              
@@ -715,7 +698,7 @@ if(@$params['debug']) echo $query."<br>";
         
         }
 
-//DEBUG  error_log("Q: ".$is_ids_only.'   user='.print_r($currentUser, true).'   Q='.$query);            
+/*****DEBUG****///error_log("Q: ".$is_ids_only.'   user='.print_r($currentUser, true).'   Q='.$query);            
         
         $res = $mysqli->query($query);
         if (!$res){
@@ -815,8 +798,6 @@ if(@$params['debug']) echo $query."<br>";
                                 
                             }
                             
-//error_log( $detail_query );                            
-                            
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query( $detail_query );
                                 
@@ -886,8 +867,6 @@ if(@$params['debug']) echo $query."<br>";
 
         }
         
-//debug error_log("response=".print_r($response,true));        
-
         return $response;
 
     }

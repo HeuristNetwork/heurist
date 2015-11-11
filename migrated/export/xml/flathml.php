@@ -368,8 +368,6 @@ $ACCESSABLE_OWNER_IDS = mysql__select_array(
     . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
 
     
-//error_log('owner_ids:'.print_r($ACCESSABLE_OWNER_IDS, true));    
-    
 if (is_logged_in()) {
     array_push($ACCESSABLE_OWNER_IDS, get_user_id());
     if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
@@ -1333,7 +1331,7 @@ function check($text) {
     foreach ($invalidChars as $charCode) {
         //$pattern = "". chr($charCode);
         if (strpos($text, $charCode)) {
-            error_log("found invalid char ");
+/*****DEBUG****///error_log("found invalid char ");
             return false;
         }
     }
@@ -1413,7 +1411,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     $remote = fsockopen($hostname, 80, $errno, $errstr, 5);
     if($remote===false){
        $result = array();
-       error_log('Can not open socket '.$hostname.'  Error# '.$errno.'   '.$errstr);
+/*****DEBUG****///error_log('Can not open socket '.$hostname.'  Error# '.$errno.'   '.$errstr);
     }else{
         // a pinch of error handling here
         fwrite($remote, implode($CRLF, $headers).$CRLF);

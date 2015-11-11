@@ -172,7 +172,6 @@ class KMLBuilder {
 
 		if ($coordCount > 3) {	// multiple coordinates -- draw a polygon
 			if ($closed) {
-/*****DEBUG****///			error_log(print_r($parentElem, 1));
 				$elem = $parentElem->addChild('Polygon');
 				$elem->outerBoundaryIs->LinearRing->coordinates = $coordinates;
 				foreach ($innerCoords as $coords) {

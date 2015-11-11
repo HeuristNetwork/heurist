@@ -42,7 +42,6 @@ if (preg_match("/(http:\/\/|\/)/", $style)) {
     return;
     
     /*****DEBUG****/
-    //error_log("style is ".print_r($style,true));
     $handle = fopen($style, "rb");
     $contents = stream_get_contents($handle);
     fclose($handle);

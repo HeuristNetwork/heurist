@@ -42,7 +42,7 @@
     $mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
     if ($mode!=3 && !$rt_id) { // no ID set, hopefully this should not occur
-        error_log("uploadRectypeIcon.php called without a record type ID set");
+/*****DEBUG****///error_log("uploadRectypeIcon.php called without a record type ID set");
         return;
     }
     $rt_name = @$_REQUEST['rty_Name'];

@@ -181,7 +181,7 @@ function checkVersionOnMainServer($version_in_session)
                     //save current date of check
                     $version_in_session = date("Y-m-d")."|".$current_version[0];
                     if(!saveAsFile($version_in_session, $fname)){
-                                error_log("Can't write file ".$fname);
+/*****DEBUG****///error_log("Can't write file ".$fname);
                     }
                     return $version_in_session;
                 }
@@ -191,7 +191,7 @@ function checkVersionOnMainServer($version_in_session)
         //can not access server or it returns invalid data - check next 24 hr
         $version_in_session = date("Y-m-d")."|unknown";
         if(!saveAsFile($version_in_session, $fname)){
-                    error_log("Can't write file ".$fname);
+/*****DEBUG****///error_log("Can't write file ".$fname);
         }
         return $version_in_session;
 

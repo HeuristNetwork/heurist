@@ -195,8 +195,6 @@ print json_format($rv);
 
 if(@$db){
     $db->close();
-}else{
-    error_log("saveUserGrps.php: attempting to close connection which is already closed!");
 }
 
 exit();
@@ -497,7 +495,7 @@ function sendApprovalEmail($recID, $tmp_password){
                 sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
                 sendEmail($dbowner_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
             }else{
-                error_log('DB owner email is not defined! Impossible to send registration email');
+/*****DEBUG****///error_log('DB owner email is not defined! Impossible to send registration email');
             }
 
         }

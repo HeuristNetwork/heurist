@@ -39,16 +39,13 @@
   function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=20) {
       
     if(!function_exists("curl_init"))  {
-//DEBUG error_log(" CURL is not installed!!!");
+/*****DEBUG****///error_log(" CURL is not installed!!!");
         return false;
     }
     
     if(strpos($url, HEURIST_SERVER_URL)===0){
         $url= str_replace(HEURIST_SERVER_URL,'http://localhost',$url);
     }
-      
-      
-//DEBUG error_log(" CURL ".$url);      
       
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
@@ -71,17 +68,14 @@
           curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
       }
     }
-//DEBUG error_log(" url = ". $url);
-
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
-//DEBUG error_log(" data = ". $data);
 
     $error = curl_error($ch);
     if ($error) {
       $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
       //echo "$error ($code)" . " url = ". $url;
-      error_log("CAN NOT LOAD DATA FROM REMOTE URL. Error code: $error ($code)" . " url = ". $url);
+/*****DEBUG****///error_log("CAN NOT LOAD DATA FROM REMOTE URL. Error code: $error ($code)" . " url = ". $url);
       curl_close($ch);
       return false;
     } else {
@@ -158,8 +152,6 @@
    * @param mixed $filename
    */
   function downloadFile($mimeType, $filename){
-    /*****DEBUG****///error_log(">>>>>".$mimeType."   ".$filename);
-
     /*
 
     if($mimeType!="video/mp4"){
@@ -199,8 +191,6 @@
           
                 readfile($filename);                      
   
-//$res = @
-//error_log(">>>".$res.'   '.$mimeType.'   '.filesize($filename));        
         }
     
   }

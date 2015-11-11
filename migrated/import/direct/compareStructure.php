@@ -482,11 +482,8 @@
 			* @param mixed $message
 			*/
 			function jsonError($message) {
-
 				//mysql_query("rollback");
-				error_log("ERROR :".$message);
-
-				//$rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
+/*****DEBUG****///error_log("ERROR :".$message);
 			}
 
 			/**

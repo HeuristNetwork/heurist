@@ -858,7 +858,7 @@ class HeuristReferEntry extends HeuristForeignEntry {
 
 		$refer_type = strtolower($this->_type);
 		if (! @$refer_to_heurist_type_map[$refer_type]) {
-			error_log("Invalid REFER type: " . $this->_type);
+/*****DEBUG****///error_log("Invalid REFER type: " . $this->_type);
 			return NULL;	// FIXME: probably store an error message somewhere
 		}
 		$heurist_rectypes = $refer_to_heurist_type_map[$refer_type];
@@ -897,7 +897,10 @@ class HeuristReferEntry extends HeuristForeignEntry {
 						$heurist_tag = substr($heurist_tag, 1);
 					}
 
-					if (! $entry) { error_log('refer-to-heurist mapping inconsistency'); continue; }
+					if (! $entry) { 
+/*****DEBUG****///error_log('refer-to-heurist mapping inconsistency'); 
+                        continue; 
+                    }
 
 					// FIXME: need to put in a fuzzy matching lovey-dovey thing here to recognise ANY enum type, not just THESIS TYPE
 					if ($heurist_tag == '243')//MAGIC NUMBER

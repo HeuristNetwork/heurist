@@ -264,14 +264,12 @@
                 array_push( $personal_data, '"'.$id.'":'.json_encode($treedata) );
             }else if(in_array($id, $ugr_groups)){
                 //check date of modification 
-//error_log($id.">>>".json_encode($treedata));
                 mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>$id, 'ugr_NavigationTree'=>json_encode($treedata) ));
             }
         }
 
         if(count($personal_data)>0){
             
-//error_log("personal >>>".implode(',', $personal_data) );
                 mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', 
                    array( 'ugr_ID'=>$ugrID, 'ugr_NavigationTree'=>implode(',', $personal_data)));
         }

@@ -171,9 +171,6 @@
       */
     }else{
 
-      /*****DEBUG****///error_log(">>>>mineTYPE=".$filedata['mimeType']);
-      /*****DEBUG****///error_log(">>>>filename=".$filename);
-
       // set the mime type, set to binary if mime type unknown
       downloadFile($filedata['mimeType'], $filename);
 
@@ -186,7 +183,6 @@
       downloadViaProxy(HEURIST_FILESTORE_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
 
     }else{
-      /*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);
       /* Redirect browser */
       //header('HTTP/1.1 201 Created', true, 201);
       //if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
@@ -253,9 +249,6 @@
       '<iframe '.$size.' src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
       $text);
 
-    //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>'
-    //'<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
-    /*****DEBUG****///error_log(">>>".$text."<<<<");
     return $text;
   }
 

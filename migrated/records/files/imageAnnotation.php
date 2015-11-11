@@ -44,8 +44,6 @@
 
 	$res = array();
 
-	/*****DEBUG****///error_log(">>>>>".print_r($_REQUEST, true));
-
 	if (array_key_exists('url',$_REQUEST)) {
 		$res = getAnnotationsByUrl($_REQUEST['url']);
 	}else if (array_key_exists('recid', $_REQUEST)) {
@@ -105,7 +103,7 @@
 			$result = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
 
 			if(!array_key_exists('records',$result) ||  $result['resultCount']==0 ){
-				/*****DEBUG****///error_log("EMPTY");
+/*****DEBUG****///error_log("EMPTY");
 			}
 		}
 		return $result;
@@ -132,7 +130,6 @@
 	function deleteAnnotationById($rec_id){
 
 		$res = deleteRecord($rec_id);
-		/*****DEBUG****///error_log(">>>>".print_r($res, true));
 		if( array_key_exists("error", $res) ){
 			mysql_query("rollback");
 		}else{

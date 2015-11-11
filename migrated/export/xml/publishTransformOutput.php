@@ -195,7 +195,7 @@ function returnXMLSuccessMsgPage($msg) {
     if (@$verbose) {
         die("<html><body><success>$msg</success></body></html>");
     }else{
-        error_log("successful transform ".$msg);
+/*****DEBUG****///error_log("successful transform ".$msg);
     }
 }
 function returnXMLErrorMsgPage($msg) {
@@ -203,5 +203,5 @@ function returnXMLErrorMsgPage($msg) {
     if (@$verbose) {
         die("<?xml version='1.0' encoding='UTF-8'?>\n<error>$msg</error>");
     }
-    error_log("error in transform ".$msg);
+/*****DEBUG****///error_log("error in transform ".$msg);
 }

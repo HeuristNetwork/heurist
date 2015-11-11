@@ -49,7 +49,6 @@
   */
   function add_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
-    //error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['val'] || @$data['geo'] || @$data['ulfID']))){
@@ -76,7 +75,6 @@
       $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-    //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
     $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
                               'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
                               'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
@@ -88,11 +86,9 @@
     }else{
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
-    //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
     $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
     $rtyLimits = mysql__select_assoc("defRecStructure","rst_RecTypeID","rst_MaxValues","rst_DetailTypeID = $dtyID and rst_RecTypeID in (".join(",",$rtyIDs).")");
-    //error_log("rectypeLimits ".print_r($rtyLimits,true). " ".mysql_error());
 
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_DetailTypeID'  => $dtyID,
@@ -123,7 +119,6 @@
                 
       $res = mysql_query($query);
       $row = mysql_fetch_row($res);
-      //error_log("recID $recID - detailcount ".print_r($row,true). " ".mysql_error());
       
       if (!array_key_exists($row[0],$rtyLimits)) {
           array_push($undefinedFieldsRecIDs, $recID);
@@ -194,7 +189,6 @@
   
   function replace_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
-    //error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && @$data['sVal'] && @$data['rVal'] )){
@@ -221,7 +215,6 @@
       $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-    //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
     $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
                               'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
                               'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
@@ -232,7 +225,6 @@
     }else{
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
-    //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
     $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
 
@@ -276,7 +268,6 @@
       //update the details
       $recDetailWasUpdated = false;
       while ($row = mysql_fetch_row($res)) {
-      //error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
         $dtlID = @$row[0];
         if ($partialReplace) {// need to replace sVal with rVal
           $dtlVal = @$row[1];
@@ -285,7 +276,6 @@
           $newVal = $data['rVal'];
         }
         mysql_query("update recDetails set dtl_Value = '$newVal' where dtl_ID = $dtlID");
-        //error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
         if (mysql_error()) {
           $detailErrorCnt++;
           $updateErrors[$recID] = "MySQL error finding base field $dtyName for record ($recID): ". mysql_error();
@@ -345,7 +335,6 @@
 
   function delete_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
-    //error_log("data ".print_r($data,true));
 
     $result = array();
     if (!((@$data['recIDs'] || @$data['rtyID']) && @$data['dtyID'] && (@$data['sVal'] || @$data['rAll']) )){
@@ -372,7 +361,6 @@
       $totalRecTypeCnt = mysql_num_rows(mysql_query("select * from Records where rec_RecTypeID = $rtyID"));
       $inAccessableRecCnt = $totalRecTypeCnt - count($recIDs);
     }
-    //error_log("recIDs ".print_r($recIDs,true). " ".mysql_error());
     $result['count'] = array('passed'=> ($passedRecIDCnt?$passedRecIDCnt:0),
                               'rtyRecs'=> (@$totalRecTypeCnt?$totalRecTypeCnt:0),
                               'noAccess'=> (@$inAccessibleRecCnt?$inAccessibleRecCnt:0));
@@ -384,7 +372,6 @@
       $rtyIDs = mysql__select_array('Records','distinct(rec_RecTypeID)',"rec_ID in (".join(",",$recIDs).")");
     }
 
-    //error_log("rectypes ".print_r($rtyIDs,true). " ".mysql_error());
     $dtyID = $data['dtyID'];
     $dtyName = (@$data['dtyName'] ? "'".$data['dtyName']."'" : "(".$data['dtyID'].")");
 
@@ -428,10 +415,8 @@
       $errorDtlIDs = array();
       $mysqlErrorDtl = array();
       while ($row = mysql_fetch_row($res)) {
-      //error_log("recID $recID - matching detail info ".print_r($row,true). " ".mysql_error($res));
         $dtlID = @$row[0];
         mysql_query("delete from recDetails where dtl_RecID = $recID and dtl_ID = $dtlID");
-        //error_log("dtlID $dtlID - updating with $newVal ".mysql_error());
         if (mysql_error() || ! mysql_affected_rows()) {
           $detailErrorCnt++;
           array_push($errorDtlIDs, $dtlID);
@@ -504,7 +489,6 @@
     while ($row = mysql_fetch_assoc($res)) {
       $recs[$row['rec_ID']] = $row;
     }
-    /*****DEBUG****///error_log(print_r($recs,true));
     $masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
 
     foreach ($recIDs as $recID) {
@@ -728,7 +712,6 @@
     } else {
 
       if(isset($bkmk_ids)){ //fresh bookmarks
-        //error_log(">>>>".print_r($bkmk_ids, true));
         $result['execute'] = array('addRemoveTagsPopup', true, $rec_ids , $bkmk_ids);
       }else{
         $rec_ids = null;
@@ -969,7 +952,7 @@
           $query = "insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag_name) . "\", " . $userid . ")";
           mysql_query($query);
           if (mysql_error()) {
-            error_log(">>>> Erorr adding tag ".mysql_error());
+/*****DEBUG****///error_log(">>>> Erorr adding tag ".mysql_error());
           }else{
             // saw TODO: add error coding here
             array_push($tag_ids, mysql_insert_id());

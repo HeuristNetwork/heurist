@@ -858,7 +858,7 @@ function getTermListAll($termDomain) {
                 }
             }
         }else{
-            error_log('>>>>'.mysql_error());
+/*****DEBUG****///error_log('getTermListAll:>>>>'.mysql_error());
         }
         return $terms;
 }
@@ -947,7 +947,7 @@ function getRectypeDef($rtID) {
         //it stores as cocept codes - need to convert it to human readable string
         $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
     }else{
-        error_log('getRectypeDef: record type not found '.$rtID.'  '.mysql_error());
+/*****DEBUG****///error_log('getRectypeDef: record type not found '.$rtID.'  '.mysql_error());
     }
 
     return $rtDef;

@@ -72,8 +72,6 @@ function recordSearchMinMax($mysqli, $params){
 
         //@todo - current user constraints
 
-//error_log(">>>>".@$_REQUEST['db']."<<<<<<".  $query);
-
         $res = $mysqli->query($query);
         if (!$res){
             $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
@@ -126,14 +124,6 @@ function recordSearchDistictPointers($mysqli, $params){
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
                         .$params['dt']." and dtl_RecID in (select rec_ID ".$where." ) order by rec_Title";
         
-//error_log("<<<<<<".  $query);
-        
-        //dtl_RecID
-
-        //@todo - current user constraints
-
-//error_log(">>>>".@$_REQUEST['db']."<<<<<<".  $query);
-
         $res = $mysqli->query($query);
         if (!$res){
             $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
@@ -214,21 +204,6 @@ function getCrossTab($mysqli, $params){
     $where_1 = substr($where,0,$pos);
     $where_2 = substr($where,$pos+7);
 
-//    error_log("Q=".@$params['q']);
-//DEBUG error_log(@$params['q'].">>>>".$where_1);
-//DEBUG error_log("2>>>".$where_2);
-/*
-
-from Records TOPBIBLIO left join usrBookmarks TOPBKMK on bkm_recID=rec_ID and bkm_UGrpID=1000 where (rec_OwnerUGrpID=1000 or not rec_NonOwnerVisibility="hidden"
-or rec_OwnerUGrpID in (1,0)) and not rec_FlagTemporary  order by rec_Title = "", rec_Title
-
-from Records TOPBIBLIO left join usrBookmarks TOPBKMK on bkm_recID=rec_ID and bkm_UGrpID=1000 where (rec_OwnerUGrpID=1000 or not rec_NonOwnerVisibility="hidden" or
-rec_OwnerUGrpID in (1,0)) and ((exists (select * from recDetails rd left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID left join Records link on rd.dtl_Value=link.rec_ID left join
- defTerms trm on trm.trm_Label  like '%all%' where rd.dtl_RecID=TOPBIBLIO.rec_ID  and if(rdt.dty_Type = "resource" AND 1, link.rec_Title  like '%all%', if(rdt.dty_Type in ("enum","relationtype"), rd
-.dtl_Value = trm.trm_ID, rd.dtl_Value  like '%all%')) and rd.dtl_DetailTypeID = 4) and rec_RecTypeID = 15)) and not rec_FlagTemporary  order by rec_Title = "", rec_Title
-*/
-
-
 $query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$where_1;
 
 $query = $query." left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".$params['dt_row'];
@@ -282,8 +257,6 @@ if($dt_col){
         $query = $query.", d1.dtl_Value";
     }
 }
-
-//DEBUG error_log(">>>".$query);
 
         $res = $mysqli->query($query);
         if (!$res){

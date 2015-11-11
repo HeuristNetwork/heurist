@@ -232,7 +232,6 @@ function rollRecordBack ($rec_id, $changes) {
 
 	mysql_query("update Records set rec_Modified = now() where rec_ID = $rec_id");
 	if (mysql_error()) {
-		error_log("rollback recmodified: ".mysql_error());
 		mysql_query("rollback");
 		return false;
 	}
@@ -249,7 +248,6 @@ function rollRecordBack ($rec_id, $changes) {
 			and dtl_ID = $rd_id
 		");
 		if (mysql_error()) {
-			error_log("rollback updates: ".mysql_error());
 			mysql_query("rollback");
 			return false;
 		}
@@ -266,7 +264,6 @@ function rollRecordBack ($rec_id, $changes) {
 			values ($rec_id, $rd_type, $rd_val, $rd_file_id, $rd_geo)
 		");
 		if (mysql_error()) {
-			error_log("rollback inserts: ".mysql_error());
 			mysql_query("rollback");
 			return false;
 		}
@@ -275,7 +272,6 @@ function rollRecordBack ($rec_id, $changes) {
 	foreach ($changes["deletes"] as $ard_id) {
 		mysql_query("delete from recDetails where dtl_ID = $ard_id");
 		if (mysql_error()) {
-			error_log("rollback deletes: "mysql_error());
 			mysql_query("rollback");
 			return false;
 		}
@@ -296,7 +292,6 @@ function rollRecordBack ($rec_id, $changes) {
 				mysql_query("set @suppress_update_trigger := 1");
 				mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $rec_id");
 				if (mysql_error()) {
-					error_log("rollback title update: ".mysql_error());
 					mysql_query("rollback");
 					mysql_query("set @suppress_update_trigger := NULL");
 					return false;

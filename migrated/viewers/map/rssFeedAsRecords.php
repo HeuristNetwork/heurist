@@ -107,7 +107,6 @@ class RssSearch{
 	}
 	$this->fetchIndex = 0;
 	$this->itemCnt = count($this->items);
-/*****DEBUG****///	error_log("in readFeed with title = ".$this->title." and item count of ".$this->itemCnt);
   }
 
   /**

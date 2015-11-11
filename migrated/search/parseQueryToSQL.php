@@ -77,7 +77,6 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 	preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
 	$preProcessedQuery = "";
 	$connectors=array(":",">","<","=",",");
-/*****DEBUG****///error_log("parse query matches = ".print_r($matches,true));
 	foreach ($matches[0] as $queryPart) {
 		//if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
 		//necessary since we want double quotes to allow all characters
@@ -90,8 +89,6 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 		//reconstruct the string
 		$addSpace = $preProcessedQuery != "" && !in_array($preProcessedQuery[strlen($preProcessedQuery)-1],$connectors) && !in_array($queryPart[0],$connectors);
 		$preProcessedQuery .= ($addSpace ? " ":"").$queryPart;
-/*****DEBUG****///error_log("query part = ".print_r($queryPart[0],true));
-/*****DEBUG****///error_log("preprocessed query = ".print_r($preProcessedQuery,true));
 	}
 	$query = new Query($search_type, $preProcessedQuery, $publicOnly);
 	$query->addWorkgroupRestriction($wg_ids);
@@ -132,7 +129,6 @@ function parse_query($search_type, $text, $sort_order='', $wg_ids=NULL, $publicO
 			}
 		}
 	}
-/*****DEBUG****///error_log("QUERY after parse ".print_r($q,true));
 	return $q;
 }
 
@@ -157,7 +153,6 @@ class Query {
 
         // Find any 'vt:' phrases in the query, and pull them out.
         while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
-/*****DEBUG****///error_log("Create query obj ".print_r($matches, 1)."   ".substr($matches[2],3));
             $this->addVisibilityTypeRestriction(substr($matches[2],3));
             $text = preg_replace('/\bvt:\S+/i', '', $text); 
             //$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
@@ -166,15 +161,12 @@ class Query {
 		// Find any 'sortby:' phrases in the query, and pull them out.
 		// "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
 		while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
-/*****DEBUG****///error_log("Create query obj ".print_r($matches, 1));
 			$this->addSortPhrase($matches[2]);
 			$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
 		}
-/*****DEBUG****///error_log("Create query obj text after processing sortby ".print_r($text, 1));
 
 		// According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
 		$or_texts = preg_split('/\\b *OR *\\b/i', $text);
-/*****DEBUG****///error_log("Create query obj text after processing or's ".print_r($or_texts, 1));
 		for ($i=0; $i < count($or_texts); ++$i)
 			if ($or_texts[$i]) $this->addOrLimb($or_texts[$i]);	// NO LONGER collapse uppercase -> lowercase ... let's wait till PHP understands UTF-8 (mysql match ignores case anyway)
 	}
@@ -246,7 +238,6 @@ class Query {
 			if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
 			$where_clause .= 'not rec_FlagTemporary ';
 		}
-/*****DEBUG****///error_log("query obj  - ".print_r($this,true));
 		array_push($this->workgroups,0); // be sure to include the generic everybody workgroup
         
         if(is_bool($this->recVisibilityType)){   //old way - in case vt param is not specified
@@ -823,7 +814,6 @@ class FieldPredicate extends Predicate {
 
 	function makeSQL() {
 		$not = ($this->parent->negate)? 'not ' : '';
-/*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true)." type = ".print_r($this->field_type,true));
 
         $isnumericvalue = is_numeric($this->value);
 		$match_value = $isnumericvalue? floatval($this->value) : '"' . mysql_real_escape_string($this->value) . '"';
@@ -1316,19 +1306,16 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$q_bits = explode('&&', $parms['qq']);
 		if ($parms['q']) array_push($q_bits, $parms['q']);
 */
-//error_log("params = ".print_r($parms,true));
 		$qq = @$parms['qq'];
 		if ($parms['q']) {
 			if ($qq) $qq .= ' && ' . $parms['q'];
 			else $qq = $parms['q'];
 		}
 		$q_bits = preg_split('/&&|\\bAND\\b/i', $qq);
-//error_log("qbits = ".print_r($q_bits,true));
 		$where_clause = '';
 		$q_clauses = array();
 		foreach ($q_bits as $q_bit) {
 			$q = parse_query($search_type, $q_bit, @$parms['s'], $wg_ids, $publicOnly);
-//error_log("parsed q for qbits = ".print_r($q,true));
 			// for each qbit if there is owner/vis followed by clause followed by order by, capture it for and'ing
 			preg_match('/.*?where [(]rec_OwnerUGrpID=[-0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in \\([0-9,]*\\))?[)] and (.*?) order by/s', $q, $matches);
 			if ($matches[1]) {
@@ -1339,12 +1326,10 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$where_clause = join(' and ', $q_clauses);
 		// check last qbits for form of owner/vis prefix and order by suffix, then capture and add them
 		if (preg_match('/(.*?where [(]rec_OwnerUGrpID=[0-9]* or (?:rec_NonOwnerVisibility="public"|not rec_NonOwnerVisibility="hidden")(?: or rec_OwnerUGrpID in [(][0-9,]*[)])?[)] and ).*?( order by.*)$/s', $q, $matches))
-//error_log("where_clauses matches for q = ".print_r($matches,true));
 			$query .= $matches[1] . $where_clause . $matches[2];
 	}
 
 	if(array_key_exists("l",$parms) || array_key_exists("limit",$parms)){
-/*****DEBUG****///error_log("params".print_r($parms,true));
 		if (array_key_exists("l", $parms)) {
 			$limit = intval(@$parms["l"]);
 			unset($parms["l"]);
@@ -1370,7 +1355,6 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 		$query .=  (@$limit? " limit $limit" : "") . (@$offset? " offset $offset " : "");
 	}
 
-/*****DEBUG****/// error_log("request to query returns ".print_r($query,true));
 	return $query;
 }
 

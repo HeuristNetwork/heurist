@@ -73,7 +73,7 @@ function mysql__select_array3($mysqli, $query, $withindex=true) {
             $res->close();
 
         }else{
-            error_log("ERROR: ".$mysqli->error);
+/*****DEBUG****///error_log("ERROR: ".$mysqli->error);
         }
     }
     return $result;
@@ -1943,8 +1943,6 @@ function doImport($mysqli, $imp_session, $params){
                                     $geoType = "pl";
                                 }
 
-//error_log("  ".$geoType."   ".$r_value);                                
-                                
                                 if($geoType){
                                     $value = $geoType." ".$r_value;
                                 }else{

@@ -63,7 +63,7 @@
         }
 
         if($res){ //error
-            error_log($res);
+/*****DEBUG****///error_log("MAIL :".$res);
         }else{
             $res = "ok";
         }

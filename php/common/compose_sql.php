@@ -79,7 +79,6 @@
         $query = get_sql_query_clauses($db, $params, $currentUser=null);
 
         $res_query =  $select_clause.$query["from"]." WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
-        /*****DEBUG****///error_log("request to query returns ".print_r($res_query,true));
         return $res_query;
     }
     /**
@@ -213,7 +212,6 @@
         $offset = get_offset($params);
 
         
-///error_log("WHERE ".$where_clause);        
         // 7. COMPOSE QUERY  ------------------------------------------------------------------------------------------------
         return array("from"=>$query->from_clause, "where"=>$where_clause, "sort"=>$query->sort_clause, "limit"=>" LIMIT $limit", "offset"=>($offset>0? " OFFSET $offset " : ""));
 
@@ -264,7 +262,6 @@
         preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
         $preProcessedQuery = "";
         $connectors=array(":",">","<","=",",");
-        /*****DEBUG****///error_log("parse query matches = ".print_r($matches,true));
         foreach ($matches[0] as $queryPart) {
             //if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
             //necessary since we want double quotes to allow all characters
@@ -277,8 +274,6 @@
             //reconstruct the string
             $addSpace = $preProcessedQuery != "" && !in_array($preProcessedQuery[strlen($preProcessedQuery)-1],$connectors) && !in_array($queryPart[0],$connectors);
             $preProcessedQuery .= ($addSpace ? " ":"").$queryPart;
-            /*****DEBUG****///error_log("query part = ".print_r($queryPart[0],true));
-            /*****DEBUG****///error_log("preprocessed query = ".print_r($preProcessedQuery,true));
         }
 
         $query = new Query($search_domain, $preProcessedQuery, $currUserID, $parentquery);
@@ -366,11 +361,10 @@
             // Find any 'sortby:' phrases in the query, and pull them out.
             // "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
             while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
-                /*****DEBUG****///error_log("Create query obj ".print_r($matches, 1));
+
                 $this->addSortPhrase($matches[2]);
                 $text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
             }
-            /*****DEBUG****///error_log("Create query obj text after processing sortby ".print_r($text, 1));
 
             // Search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
             if(preg_match('/&&|\\bAND\\b/i', $text)){
@@ -381,7 +375,7 @@
             foreach ($q_bits as $q_bit) {
                 $this->addTopLimb($q_bit);
             }        
-            /*****DEBUG****///error_log("Create query obj text after processing and/or ".print_r($this->top_limbs, true));
+
         }
 
         function addTopLimb($text) {
@@ -437,7 +431,6 @@
             sort($and_clauses);
             $this->where_clause = join(' and ', $and_clauses);        
 
-            //error_log(">>> ". $this->where_clause);
 
             //SORT
             $sort_clause = '';
@@ -490,7 +483,7 @@
             if (preg_match_all('/(?:[^"( ]+|["(][^")]*[")])+(?= |$)/', $text, $matches)) {
 
                 $and_texts = $matches[0];
-                //csv import error_log("DEBUG2>>>>> ".print_r($and_texts,true));
+
                 for ($i=0; $i < count($and_texts); ++$i){
                     $str = $and_texts[$i];
                     if ($str) {
@@ -894,13 +887,6 @@
                 //loop up to top-most parent "Query"
                 while ($c  &&  strtolower(get_class($c)) != 'query') {
                     $c = &$c->parent;
-                    /*if(!is_object($c)){
-    error_log(">>>>>2NOT OBJECT ".print_r($c, true));
-    error_log("2IN >>>>>".get_class($this));
-                        return null;
-                    }else{
-    error_log(get_class($c)."    ".(strtolower(get_class($c)) != 'query'));
-                    }*/
                 }
                     
 
@@ -1136,8 +1122,6 @@
             preg_match('/\((.+?)(?:\((.+)\))?\)/', $this->value, $matches);
             if(count($matches)>0 && $matches[0]==$this->value){
 
-                //error_log("matches = ".print_r($matches,true));        
-
                 $this->nests = array();
                 for ($k=1; $k < count($matches); ++$k) {
 
@@ -1166,7 +1150,7 @@
 
         function makeSQL() {
             $not = ($this->parent->negate)? 'not ' : '';
-            /*****DEBUG****///error_log("FieldPred MakeSql value = ".print_r($this->value,true));
+
 
             if($this->nests){  //special case nested query for resources
 
@@ -1323,8 +1307,6 @@
 
                 }
 
-
-                //error_log("BBB>>>".$resq);            
                 return $resq;
             } //end special case nested query for resources
 
@@ -1648,8 +1630,6 @@
                 
                 $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
-//error_log("select: ".$select);                
-                
             }else{
                $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
             }
@@ -1724,8 +1704,6 @@
                 $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
                 
                 $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
-
-//error_log("select: ".$select);                
                 
             }else{
                $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
@@ -1805,7 +1783,6 @@
                 
                 $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
-//error_log("select: ".$select);                
                 
             }else{
                 
@@ -1885,7 +1862,6 @@
                 
                 $select = $select.$query["from"].', '.$add_from.' WHERE '.$query["where"].' and '.$add_where.' '.$query["sort"].$query["limit"].$query["offset"].')';
 
-//error_log("select: ".$select);                
                 
             }else{
                 
@@ -1976,9 +1952,6 @@
 
             
             $select = '(' . $select1 . ' OR ' .$select2. ')';
-            //$select = $select1;
-
-//error_log("select: ".$select);                
             
             return $select; 
         }        

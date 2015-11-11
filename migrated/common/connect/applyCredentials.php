@@ -83,7 +83,6 @@ function _is_logged_in() {
 
 if (!_is_logged_in()  &&  defined("BYPASS_LOGIN")) {
     // bypass all security!
-    error_log("bypassing security");
     function get_user_id() { return 0; } // login in as guest
     function get_user_name() { return ''; }
     function get_user_username() { return ''; }

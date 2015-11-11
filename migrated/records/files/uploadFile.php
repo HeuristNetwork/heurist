@@ -63,7 +63,6 @@
         if (! is_logged_in()) return "Not logged in";
 
         if ($size <= 0  ||  $error) {
-            error_log("size is $size, error is $error");
             return "File size recognized as 0. Either file size more than php upload_max_filesize or file is corrupted. Error: $error";
         }
 
@@ -113,7 +112,6 @@
         );
 
         if (! $res) {
-            error_log("error inserting file upload info: " . mysql_error());
             $uploadFileError = "Error inserting file upload info into database";
             return $uploadFileError;
         }
@@ -819,7 +817,6 @@
         $res = mysql_query($squery);
         $row = mysql_fetch_assoc($res);
         $rtyID = $row["rec_RecTypeID"];
-        //error_log("rectype is ".print_r($rtyID,true));
         $thumb_url = "";
         // 223  Thumbnail
         // 222  Logo image

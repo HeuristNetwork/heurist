@@ -38,8 +38,6 @@ mysql_connection_select(DATABASE);
 
 $tags = null;
 
-//error_log(">>>>>".$_REQUEST['recid']);
-
 if(@$_REQUEST['recid']){
 
 	$rec_ID = $_REQUEST['recid'];

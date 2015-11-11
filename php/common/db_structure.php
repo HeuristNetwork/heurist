@@ -394,22 +394,17 @@
         if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
             return $terms;
         }
-        /*****DEBUG****///error_log(" enter attach $contIndex, $childIndex, ".print_r($terms,true));
         if (array_key_exists($childIndex, $terms)) {//check for
             if (count($terms[$childIndex])) {
                 foreach ($terms[$childIndex] as $gChildID => $n) {
                     if ($gChildID != null) {
                         $terms = __attachChild($childIndex, $gChildID, $terms);//depth first recursion
-                        /*****DEBUG****/// error_log(" after recurse $childIndex, $gChildID, ".print_r($terms,true));
                     }
                 }
             }
-            /*****DEBUG****///error_log(" attaching ".print_r($terms[$childIndex],true));
-            /*****DEBUG****///error_log(" to ".print_r($terms[$parentIndex],true));
             $terms[$parentIndex][$childIndex] = $terms[$childIndex];
             unset($terms[$childIndex]);
         }
-        /*****DEBUG****/// error_log(" exit attach $contIndex, $childIndex, ".print_r($terms,true));
         return $terms;
     }
 

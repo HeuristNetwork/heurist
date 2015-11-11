@@ -1700,14 +1700,6 @@ function merge_biblio($master_bib_id, $slave_bib_id) {
     // Here we just determine whether such data exists,
     // this is to prevent false deltas in the archive tables.
 
-    /*
-    if ($master_bib_id == 44) { error_log(str_replace("\n", " ", '
-    select '.$master_bib_id.', S.dtl_DetailTypeID, S.dtl_Value, 2
-    from recDetails S
-    left join recDetails M on S.dtl_DetailTypeID=M.dtl_DetailTypeID and S.dtl_ValShortened=M.dtl_ValShortened and M.dtl_RecID='.$master_bib_id.'
-    left join defDetailTypes on dty_ID=S.dtl_DetailTypeID
-    where S.dtl_RecID='.$slave_bib_id.' and M.dtl_RecID is null and (dty_Type != "resource" or S.dtl_DetailTypeID=158)')); }//MAGIC NUMBER
-    */
 
     $new_bd_query = '
     select '.$master_bib_id.', S.dtl_DetailTypeID, S.dtl_Value, 2

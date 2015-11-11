@@ -56,7 +56,6 @@
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 	$query = REQUEST_to_query("select $cols ", $search_type);
 
-	/*****DEBUG****///error_log($query);
 	$res = mysql_query($query);
 	print mysql_error();
 
@@ -106,7 +105,6 @@
 	$geoObjects = array();
 	$geoBibIDs = array();
 	$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
-	/*****DEBUG****///error_log(mysql_error());
 	while ($val = mysql_fetch_row($res)) {
 		// get the bounding box
 		if (preg_match("/POLYGON\\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $val[3], $matches)) {

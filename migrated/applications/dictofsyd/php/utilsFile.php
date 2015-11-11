@@ -58,7 +58,6 @@ function loadRemoteURLContentWithRange($url, $range) {
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
         //echo "$error ($code)" . " url = ". $url;
-        error_log("$error ($code)" . " url = ". $url);
         curl_close($ch);
         return false;
     } else {

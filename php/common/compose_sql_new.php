@@ -139,8 +139,6 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     } else {                // all records entries
         $search_domain = "a";
     }    
-
-//error_log( print_r(@$params['q'], true) );
     
     if(is_array(@$params['q'])){
         $query_json = $params['q']; 
@@ -148,7 +146,6 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $query_json = json_decode(@$params['q'], true);
     }
     
-//error_log( print_r($query_json, true) );
     
     $query = new HQuery( "0", $query_json, $search_domain, $currUserID );
     $query->makeSQL();
@@ -684,7 +681,6 @@ class HPredicate {
         if($this->query){
             $this->query->makeSQL();
             if($this->query->where_clause && trim($this->query->where_clause)!=""){
-//error_log(">>>>".$this->query->where_clause."<<<<");
                 $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
             }else{
                 return null;

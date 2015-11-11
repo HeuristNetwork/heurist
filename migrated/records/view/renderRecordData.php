@@ -458,9 +458,6 @@ function print_private_details($bib) {
 					$filedata = $filedata['file'];
 					$remoteSrc = $filedata['remoteSource'];
 
-
-//error_log("playerURL=".@$filedata['playerURL']."   ".$filedata['URL']);
-                    
 					//add to thumbnail list
 					$isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
 					if (is_image($filedata) || $isplayer)
@@ -635,7 +632,6 @@ function print_relation_details($bib) {
     }
     $relatedRecID = $bd['RelatedRecID']['rec_ID'];
     if (count(mysql__select_array("Records","rec_ID","rec_ID = $relatedRecID and $accessCondition")) == 0) { //related is not accessable
-    error_log("condition = $accessCondition with related = ".print_r($bd,true));
       continue;
     }
 
@@ -698,8 +694,7 @@ global $relRT,$ACCESSABLE_OWNER_IDS;
 	             'and rec_RecTypeID != '.$relRT.' '.
                'and '.(count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
                (is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
-  //error_log("in renderRecData with query link = $query");
-  $res = mysql_query($query);
+    $res = mysql_query($query);
 
 	if (mysql_num_rows($res) <= 0) return;
 ?>

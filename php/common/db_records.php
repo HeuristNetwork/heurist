@@ -806,19 +806,16 @@
         }
 
         if (strpos($formattedStringOfTermIDs,"{")!== false) {
-            /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
             if (strrpos($temp,":") == strlen($temp)-1) {
                 $temp = substr($temp,0, strlen($temp)-1);
             }
             $termIDs = explode(":",$temp);
         } else {
-            /*****DEBUG****///error_log( "term array string = ". $formattedStringOfTermIDs);
             $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
             $termIDs = explode(",",$temp);
         }
         // Validate termIDs
-        /*****DEBUG****///error_log( "term IDS = ". print_r($termIDs,true));
 
         $TL = $terms['termsByDomainLookup'][$domain];
 

@@ -430,7 +430,7 @@ function saveAttachments($files_arr, $email){
                 fclose($file);
 
             }else{
-                error_log("error inserting file upload info: " . $file_id);
+/*****DEBUG****///error_log("error inserting file upload info: " . $file_id);
                 return 0;
             }
 

@@ -219,7 +219,6 @@
 			$url = $url.$poly_all;
 		}
 
-/*****DEBUG****///error_log(">>>>>".$url);
         if(@$_REQUEST['debug']){
             print '<div>'.strlen($url)."</div>";
             print $url;

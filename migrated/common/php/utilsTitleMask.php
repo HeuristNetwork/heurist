@@ -561,13 +561,10 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
 
         if($mode==1 && isset($fields_correspondence)){  //special case
-            //error_log( "RT=".$rt." original=".$parent_field_name );    //AAAA
             $parent_field_name = replaceInCaseOfImport($parent_field_name);
         }//special case
 
         $rdt_id = _titlemask__get_dt_field($rt, $parent_field_name, $mode);
-
-        //if(isset($fields_correspondence)) error_log( $parent_field_name."=>".$rdt_id );    //AAAA
 
         if($rdt_id){
 

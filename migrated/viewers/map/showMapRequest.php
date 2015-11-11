@@ -89,9 +89,6 @@
 	$cols = "rec_ID as bibID, rec_RecTypeID as rectype, rec_Title as title, rec_URL as URL";
 	$query = REQUEST_to_query("select $cols ", $search_type, $request);
 
-/*****DEBUG****///error_log("query=".$query);
-
-/*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>".$search_type."<<<<<<".$query);
 	$res = mysql_query($query);
 	if (mysql_error()) {
 		print mysql_error();
@@ -148,8 +145,6 @@
 		" left join recDetails j on j.dtl_RecID=rec_ID and j.dtl_DetailTypeID=".(defined('DT_SHOW_IN_MAP_BG_LIST')?DT_SHOW_IN_MAP_BG_LIST:"0").
 		" where rec_ID=$bibID";
 
-//*****DEBUG****//error_log(">>>>>>QUERY=".$squery);
-
 		$res = mysql_query($squery);
 		$row = mysql_fetch_row($res);
 		if($row)
@@ -172,7 +167,6 @@
 				array_push($imageLayers, $row[4]);
 			}
 			$kml_path =  getKmlFilePath($row[3]); //DT_FILE_RESOURCE
-	//*****DEBUG****//error_log(">>>>>>".$row[3]."=".$kml_path);
 	// removed by SAW as DT_KML_FILE changed from a file base type to blocktext
 	//		if($kml_path==null){
 	//			$kml_path =  getKmlFilePath($row[6]); //DT_KML_FILE
@@ -192,7 +186,7 @@
 	// Find the records that actually have any geographic data to plot
 	$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
 if(mysql_error()) {
-	error_log("ERROR in ShowMap=".mysql_error());
+/*****DEBUG****///error_log("ERROR in ShowMap=".mysql_error());
 }
 	if($res){
 		while ($val = mysql_fetch_row($res)) {
@@ -207,13 +201,6 @@ if(mysql_error()) {
 				array_push($geoObjects, $geoobj);
 				$geoBibIDs[$val[0]] = $val[0];
 			}
-
-
-
-/*****DEBUG****///error_log("ADDED1:".is_string($val[0])."    ".$geoBibIDs[$val[0]]);
-/*****DEBUG****///error_log("1>>>>>>".$geoBibIDs[$val[0]]);
-/*****DEBUG****///error_log("2>>>>>>".$geoBibIDs["97025"]);
-/*****DEBUG****///error_log("3>>>>>>".$geoBibIDs[$bibID]);
 		}
 	}
 	}//$bibIDs!=null
@@ -233,7 +220,6 @@ if(mysql_error()) {
 	if($bibIDs && count($bibIDs)>0){
 		$squery = "select rec_ID  from Records
 							 where rec_ID in (" . join(",", $bibIDs) . ") and rec_RecTypeID=$imagelayerRT";
-/*****DEBUG****///error_log($squery);
 		$res = mysql_query($squery);
 		if($res){
 			while ($val = mysql_fetch_row($res)) {
@@ -263,9 +249,8 @@ if(mysql_error()) {
 		" left join recDetails g on g.dtl_RecID=rec_ID and g.dtl_DetailTypeID=".(defined('DT_ALTERNATE_NAME')?DT_ALTERNATE_NAME:"0").
 		" left join recDetails j on j.dtl_RecID=rec_ID and j.dtl_DetailTypeID=".(defined('DT_SHOW_IN_MAP_BG_LIST')?DT_SHOW_IN_MAP_BG_LIST:"0").
 		" where rec_ID in (" . join(",", $imageLayers) . ")";
-/*****DEBUG****///error_log("IMAGELAYERS>>>>>>>>".$squery);
+
 		$res = mysql_query($squery);
-/*****DEBUG****///error_log(mysql_error());
 		while ($rec = mysql_fetch_assoc($res)) {
 
 			//find the extent for image layer
@@ -359,7 +344,6 @@ if(mysql_error()) {
 		while ($val = mysql_fetch_row($res)) {
 			if ($val[1] || $val[2]) {
 				$timeObjects[$val[0]] = array($val[1], $val[2]);
-/*****DEBUG****///error_log("XXXX>>>>>> ". $val[0]."  ".$val[1]."  ".$val[2] );
 			}
 		}
 	}
@@ -446,17 +430,12 @@ if(mysql_error()) {
 	foreach ($bibIDs as $bibID) { //loop for all records
 		//	$bibID = ""+$bibID;
 
-		/*****DEBUG****///error_log("2>>>>>>".$geoBibIDs["97025"]);
-		/*****DEBUG****///error_log("3>>>>>>".$bibID."    ".$geoBibIDs[$bibID]."   time=".array_key_exists($bibID, $timeObjects) );
-
 		$isNotGeoLoc = !@$geoBibIDs[$bibID];
 
 		if((!$isNotGeoLoc) || array_key_exists($bibID, $timeObjects) ){
-			/*****DEBUG****///error_log(">>>>>".$bibID."=".$geoBibIDs[$bibID]."<<<<<<".(!@$geoBibIDs[$bibID])."<<<<<<");
 
 			$geoRecords[$bibID] = $records[$bibID];
 			if($isNotGeoLoc){
-				/*****DEBUG****///error_log(">>>>>PUSH EMPTY");
 				//no geo data - only timedata
 				array_push($geoObjects, array("bibID" => $bibID, "type" => "none")); //empty georeference
 				$geoBibIDs[$bibID] = $bibID;

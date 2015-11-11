@@ -49,9 +49,6 @@
     
     $filename = HEURIST_ICON_DIR . $rectype_id;
   
-//error_log($filename);
-    
-
 //print $filename;    
     if(file_exists($filename)){
         download_file($filename);
@@ -144,8 +141,6 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     
     $filename = $path . $rectype_id . ".png"; //original
     
-//error_log("load ".file_exists($filename)."  ".$filename);
-//error_log($filename2);
     if(!file_exists($filename)){  //if term icon does not exist - take default icon
         $filename = HEURIST_ICON_DIR . "3.png";
     }
@@ -226,7 +221,6 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         // output
         header("Content-type: image/png");
         
-//error_log("ke");        
         imagepng($img);        
         //imagepng($img, $filename2);   //save to file     
         

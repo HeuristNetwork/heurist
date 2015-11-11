@@ -295,7 +295,7 @@ function mysql__lookup($query) {
     /*	*/
     $res = mysql_query($query);
     if (!$res) {
-        error_log('mysql__lookup: ' . mysql_error());
+/*****DEBUG****///error_log('mysql__lookup: ' . mysql_error());
         return NULL;
     }
     $lookup = array();
@@ -436,7 +436,7 @@ function get_dbowner_email()
     if($row){
         return $row[0];
     }
-    error_log("email for dbowner was not found");
+/*****DEBUG****///error_log("email for dbowner was not found");
     return null;
 }
 
@@ -460,7 +460,7 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
             if ($result == "") {
                 $result = $mysqli->affected_rows;
             } else {
-                error_log(">>> MySQL Error code " . $mysqli->error);
+/*****DEBUG****///error_log(">>> MySQL Error code " . $mysqli->error);
             }
         }
     } else { //prepared query

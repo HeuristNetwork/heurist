@@ -73,7 +73,7 @@ function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8
     }
     
     if($res){ //error
-        error_log($res);
+/*****DEBUG****///error_log($res);
     }else{
         $res = "ok";        
     }

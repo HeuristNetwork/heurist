@@ -548,8 +548,6 @@
         */
         private function start_my_session(){
 
-            //DEBUG error_log($_SERVER['PHP_SELF']." Start session Cooook:".@$_COOKIE['heurist-sessionid']);
-
             if (@$_COOKIE['heurist-sessionid']) {
                 session_id($_COOKIE['heurist-sessionid']);
                 session_cache_limiter('none');
@@ -596,8 +594,6 @@
 
             $islogged = ($userID != null);
             if($islogged){
-
-                //DEBUG error_log($_SERVER['PHP_SELF']." login_verify>>>".print_r(@$_SESSION[$this->dbname_full]['ugr_Preferences'],true)  );
 
                 if(!@$_SESSION[$this->dbname_full]['ugr_Groups']){
                     $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
@@ -665,7 +661,7 @@
                         }
                         $cres = setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_SERVER_NAME);
                         if(!$cres){
-                            error_log("Cookie no SAVED");
+/*****DEBUG****///error_log("Cookie no SAVED");
                         }
 
                         //update login time in database

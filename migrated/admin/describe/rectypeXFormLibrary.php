@@ -138,7 +138,6 @@ function buildform($rt_id) {
 		$relnLookup = $terms['termsByDomainLookup']['relation'];
 	}
 	if (!array_key_exists($rt_id, $rectypes['typedefs'])) {
-		error_log("rectypes " . print_r($rectypes['typedefs'][$rt_id], true));
 		return array(null, null, null, null, "Rectype# $rt_id not found");
 	}
 

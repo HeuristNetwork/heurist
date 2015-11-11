@@ -73,14 +73,11 @@
         $noCache = (@$args["nocache"]==1);
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
-		/*****DEBUG****///
-//error_log(print_r($args, true));        
-//error_log("QUERY in getSearchResults:".$query);
 
 		$res = mysql_query($query);
 
 		if (mysql_error()) {
-			error_log("queryError in getSearchResults -".mysql_error());
+/*****DEBUG****///error_log("queryError in getSearchResults -".mysql_error());
 		}
 		$fres = mysql_query('select found_rows()');
 		$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
@@ -97,7 +94,7 @@
 			while ($row = mysql_fetch_assoc($res)) {
 
 				if (mysql_error()) {
-					error_log("2.queryError in getSearchResults -".mysql_error());
+/*****DEBUG****///error_log("2.queryError in getSearchResults -".mysql_error());
 				}
 
                 if($noCache){
@@ -128,17 +125,13 @@
 		$resrcDT = (defined('DT_RESOURCE')?DT_RESOURCE:0);
 		$expRecIDs = array();
 		foreach ( $recIDs as $recID ){
-			/*****DEBUG****///error_log("recID ".print_r($recID,true));
 			$rectype = mysql__select_array("Records","rec_RecTypeID","rec_ID = $recID");
-			/*****DEBUG****///error_log("rectype ($colRT) ".print_r($rectype,true));
 			$rectype = intval($rectype[0]);
 			if ($rectype == $colRT) { // collection rec so get query string and expand it and list all ptr recIDs
 				$qryStr = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $qStrDT and dtl_RecID = $recID");
-				/*****DEBUG****///error_log("query String ".print_r($qryStr,true));
 				if (count($qryStr) > 0) {
 					// get recIDs only for query. and add them to expanded recs
 					$loadResult = loadSearch(array("q"=>$qryStr[0]),true,true,$publicOnly);
-					/*****DEBUG****///error_log("loadResult ".print_r($loadResult,true));
 					if (array_key_exists("recordCount",$loadResult) && $loadResult["recordCount"] > 0){
 						foreach (explode(",",$loadResult["recIDs"]) as $resRecID) {
 							if (!in_array($resRecID,$expRecIDs)){
@@ -149,7 +142,6 @@
 				}
 				//add any colected record pointers
 				$collRecIDs = mysql__select_array("recDetails","dtl_Value","dtl_DetailTypeID = $resrcDT and dtl_RecID = $recID");
-				/*****DEBUG****///error_log("recID list ".print_r($collRecIDs,true));
 				foreach ($collRecIDs as $collRecID) {
 					if (!in_array($collRecID,$expRecIDs)){
 						array_push($expRecIDs,$collRecID);
@@ -277,7 +269,7 @@
 			// skip all invalid value
 			if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
 				(($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
-				error_log("found INVALID detail in rec $rd[rec_ID] dtl $rd[dtl_ID] dty $rd[dtl_DetailTypeID] with value = $rd[dtl_Value]");
+/*****DEBUG****///error_log("found INVALID detail in rec $rd[rec_ID] dtl $rd[dtl_ID] dty $rd[dtl_DetailTypeID] with value = $rd[dtl_Value]");
 				continue;
 			}
 

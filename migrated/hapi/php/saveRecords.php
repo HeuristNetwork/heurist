@@ -152,11 +152,8 @@ if (count($retitleRecs) > 0) {
         $type = $mask["rty_ID"];
         $mask = $mask["rty_TitleMask"];
 
-        error_log("title mask ".$id."   ".$mask);
-
         $new_title = fill_title_mask($mask, $id, $type);
 
-        error_log($new_title);
         if ($new_title) {
             mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($new_title) . "' where rec_ID = $id");
         }

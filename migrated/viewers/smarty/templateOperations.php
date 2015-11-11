@@ -123,7 +123,6 @@
             if(array_key_exists('extension', $path_parts))
             {
                 $ext = strtolower($path_parts['extension']);
-                /*****DEBUG****///error_log(">>>>".$path_parts['filename']."<<<<<");//."    ".$filename.indexOf("_")."<<<<");
 
                 $ind = strpos($filename,"_");
                 $isnot_temp = (!(is_numeric($ind) && $ind==0));
@@ -137,8 +136,6 @@
             }
         }
         header("Content-type: text/javascript");
-        //header('Content-type: text/html; charset=utf-8');
-        /*****DEBUG****/// error_log(">>>>>>>>>>>>>".print_r($results, true));
 
         print json_format( $results, true );
     }

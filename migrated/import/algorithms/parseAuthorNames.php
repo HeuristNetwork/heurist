@@ -115,7 +115,6 @@ function parseName($allnames) {
 
 		} else {
 			array_push($parsed_names, array('full name' => $name, 'questionable' => $name));
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 			continue;
 		}
 
@@ -168,7 +167,6 @@ function checkNames($allnames, $force_authors=0) {
 
 		if (preg_match('/\\b(?:university|dept|department|national|of|for)\\b|[()]/i', $name)) {
 			array_push($errors, '"'.$name.'" doesn\'t look like a person\'s name.  Put the name in "double quotes" to force import.');
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 			continue;
 		}
 
@@ -178,7 +176,6 @@ function checkNames($allnames, $force_authors=0) {
 		if (strpos($name, ' ') === FALSE  &&  ! $force_authors) {
 			// single word name? realllllly?
 			array_push($errors, '"'.$name.'" doesn\'t look like a person\'s name.  Put the name in "double quotes" to force import.');
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 			continue;
 		}
 
@@ -203,7 +200,6 @@ function checkNames($allnames, $force_authors=0) {
 
 		} else {
 			array_push($errors, '"'.$name.'" doesn\'t look like a person\'s name.  Put the name in "double quotes" to force import.');
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 		}
 	}
 

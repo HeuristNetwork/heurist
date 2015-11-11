@@ -255,7 +255,6 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                         if(count($decodedData)>0){
                             $msg = $decodedData[1];
                         }else{
-                            error_log ('registerDB.php had a problem allocating a database identifier from the Heurist index, dbID. Error: '.$data);
                             $msg = "Problem allocating a database identifier from the Heurist master index, " .
                             "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
                             " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
@@ -320,8 +319,6 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                             if ($result == 1) {
                                 echo "<div class=wrap><div id=errorMsg>Unable to set all values for originating DB information for ".DATABASE.
                                 " - one of the update queries failed</div></div>";
-                                error_log ('Unable to set all values for originating DB information for ".DATABASE.
-                                " - one of the update queries failed');
                             }
                         ?>
                         <script> // automatically call Heurist_Master_Index metadata edit form for this database
@@ -329,7 +326,6 @@ onkeyup="{ var len=event.target.value.length; document.getElementById('btnSubmit
                         </script>
                         <?php
                         } else {
-                            error_log ('Unable to write database identification record, dbID is '.$dbID);
                             $msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>".
                             "this database might be incorrectly set up<br />".
                             "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice</div></div>";

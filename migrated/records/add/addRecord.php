@@ -310,7 +310,7 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
         // TODO: why isn't there some action if ther's a MySQL error other than writing to the error log?
 
-        if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
+/*****DEBUG****///if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
 
         $rec_id = mysql_insert_id();
 
@@ -362,7 +362,7 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
                                     'rec_FlagTemporary' => (@$_REQUEST['bkmrk_bkmk_title'])?0:1 ));
 
 
-        if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
+/*****DEBUG****///if (mysql_error()) error_log("error ADD RECORD ".mysql_error());
 
 	$rec_id = mysql_insert_id();
 	if (@$_REQUEST['bkmrk_bkmk_title']) {
@@ -539,7 +539,7 @@ function insert_woot_content($rec_id, $content) {
 	array_push($woot["chunks"], $new_chunk);
 
 	$result = saveWoot($woot);
-	if (! $result["success"]) error_log("Save woot: ".$result["errorType"]);
+/*****DEBUG****///if (! $result["success"]) error_log("Save woot: ".$result["errorType"]);
 }
 
 function check_rectype_exist($rt) {

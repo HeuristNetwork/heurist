@@ -84,11 +84,11 @@ if (count(@$deletions) > 0) {
 		foreach ($deletions as $del_recID) {
 			/* one delete query per rec_ID, this way the archive_bib* versioning stuff works */
 			mysql_query("update Records set rec_Modified=now() where rec_ID = $del_recID");
-/*****DEBUG****///error_log("in delete code $del_recID ");
+
 			mysql_query("delete from recDetails where dtl_RecID = $del_recID");
-/*****DEBUG****///error_log("in deleted details for record $del_recID ".mysql_error());
+
 			mysql_query("delete from Records where rec_ID = $del_recID");
-/*****DEBUG****///error_log("in deleted delete record $del_recID ".mysql_error());
+
 			if (mysql_error()) {
 				print "(" . json_format(array("error" => slash(mysql_error()))) . ")";
 				return;
@@ -152,7 +152,6 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 
 	$relnRecID = mysql_insert_id();
 	$res = null;
-/*****DEBUG****///error_log("defines title=".DT_NAME.", prim = ".DT_PRIMARY_RESOURCE);
 	if ($relnRecID > 0 &&  defined('DT_NAME') &&
 				defined('DT_RELATION_TYPE') &&
 				defined('DT_TARGET_RESOURCE') &&
@@ -170,9 +169,7 @@ function saveRelationship($recID, $relTermID, $trgRecID, $interpRecID, $title, $
 			$query .= ", ($relnRecID, ".DT_START_DATE.", '" . mysql_real_escape_string($start_date) . "')";
 		if ($end_date && defined('DT_END_DATE'))
 			$query .= ", ($relnRecID, ".DT_END_DATE.", '" . mysql_real_escape_string($end_date) . "')";
-/*****DEBUG****///error_log(" rel save query = $query");
 		$res = mysql_query($query);
-/*****DEBUG****///error_log("res = $res  error " .mysql_error());
 	}
 
 	if (mysql_error()) {

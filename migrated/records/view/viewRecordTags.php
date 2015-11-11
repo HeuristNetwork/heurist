@@ -40,7 +40,6 @@ if (!is_logged_in()) {
 	header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php');
 	return;
 }
-/*****DEBUG****///error_log(print_r($LOOKUPS, 1));
 
 mysql_connection_overwrite(DATABASE);
 $template = file_get_contents('viewRecordTags.html');
@@ -64,9 +63,6 @@ if (@$_REQUEST['bkmk_id']) {
 	$bib = mysql_fetch_assoc($res);
 	$_REQUEST['bkmk_id'] = $bkmk['bkm_ID'];
 }
-/*****DEBUG****///error_log("bookmark is ".print_r($bkmk,true));
-/*****DEBUG****///error_log("record is ".print_r($bib,true));
-
 $_REQUEST['bkm_ID'] = $_REQUEST['bkmk_id'];
 
 $lexer = new Lexer($template);
@@ -87,27 +83,6 @@ $tags = mysql__select_assoc('usrRecTagLinks left join usrTags on rtl_TagID=tag_I
 								' group by tag_Text'.
 								' order by kcount desc, tag_Text');
 
-/*
-$res = mysql_query('select concat(ugr_FirstName," ",ugr_LastName) as bkmk_user, tag_Text
-					from usrBookmarks
-					left join usrRecTagLinks on bkm_RecID=rtl_RecID
-					left join usrTags on rtl_TagID=tag_ID
-					left join '.USERS_DATABASE.'.sysUGrps usr on bkm_UGrpID=usr.ugr_ID
-					where bkm_recID='.$bib['rec_ID'].' and rtl_ID is not null order by bkmk_user, tag_Text');
-
-$user_tags = array();
-while ($row = mysql_fetch_assoc($res)) {
-	$bkmk_user = $row['bkmk_user'];
-	$kwd_name = $row['tag_Text'];
-
-	if ($user_tags[$bkmk_user])
-		array_push($user_tags[$bkmk_user], $kwd_name);
-	else
-		$user_tags[$bkmk_user] = array($kwd_name);
-}
-*/
-/*****DEBUG****///error_log("tags are ".print_r($tags,true));
-/*****DEBUG****///error_log("kwds are ".print_r($my_kwds,true));
 
 if ($tags) {
 	$kwd_list = '';
@@ -148,7 +123,6 @@ if ($tags) {
 } else {
 	$kwd_list = '<tr><td>(no matching tags)</td></tr>';
 }
-/*****DEBUG****///error_log("kwdlist is ".print_r($kwd_list,true));
 
 $body->global_vars['tag-list'] = $kwd_list;
 

@@ -91,14 +91,10 @@ $key = @$_REQUEST["key"];
 require_once(dirname(__FILE__)."/../../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../../common/php/dbMySqlWrappers.php");
 
-/*****DEBUG****/// error_log(print_r($auth, 1));
 $baseURL = HEURIST_BASE_URL_V3;
 //$baseURL = $auth["hl_location"];
 
 //define_constants($auth["hl_instance"]);
-
-/*****DEBUG****/// error_log(" woot xss baseURL = ".$baseURL." Heurist base = ".HEURIST_BASE_URL_V3);
-
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";
