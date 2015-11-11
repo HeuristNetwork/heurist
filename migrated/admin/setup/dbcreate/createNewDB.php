@@ -593,7 +593,7 @@ function doRegister(event){
                     //debug print $reg_url."</br>";
                     $name = '';
 
-if(false){ //DEBUG: set to false to avoid real database creation
+if(true){ //DEBUG: set to false to avoid real database creation
                     // this is global variable that is used in buildCrosswalks.php
                     $templateFileName = "NOT DEFINED";
                     $templateFoldersContent = "NOT DEFINED";

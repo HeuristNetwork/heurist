@@ -642,13 +642,38 @@ function onUpdateModeSet(event){
     }
 }
 
+var currDialog = null;
+
 //
 // Show error, matched or new records
 //
 function showRecords(divname){
 
-    $('div[id^="main_"]').hide();
-    $('div[id="main_'+divname+'"]').show();
+    if (divname=='mapping'){
+        if(currDialog!=null){
+            currDialog.dialog('close');
+        }
+    }else{
+        
+        var $dlg = $('div[id="main_'+divname+'"]');
+                        
+        $dlg.dialog({
+                            autoOpen: false,
+                            height: 550,
+                            width: 800,
+                            modal: true,
+                            resizable: false,
+                            draggable: false,
+                            title: 'Import delimited'
+                    });
+        
+        
+        $dlg.dialog('open');
+        currDialog = $dlg;
+    }
+    
+    //$('div[id^="main_"]').hide();
+    //$('div[id="main_'+divname+'"]').show();
 
     if(divname=='error'){
             if($( "#tabs_records" ).length>0){

@@ -65,8 +65,9 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <title>Normalising importer for comma or tab delimited text files</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <link rel="stylesheet" href="../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css"> <!-- use h4 -->
 
         <link rel=stylesheet href="../../common/css/global.css" media="all">
@@ -109,8 +110,8 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                 height:3em;
             }
             div.analized, div.analized2{
-                background-color:#DDD;
-                border:black solid 1px;
+                /*background-color:#DDD;*/
+                border:gray solid 1px;
                 display:inline-block;
                 padding:5px;
                 min-width:250px;
@@ -482,7 +483,7 @@ if(is_array($imp_session)){
 
     <div id="main_mapping"<?=$mode_import_result?>>
 
-        <h4>Step 2: Matching and inserting/updating records</h4>
+        <h4 id="headerStep2">Step 2: Matching and inserting/updating records. File: <?php echo $imp_session['import_file'];?></h4>
 
         <div style="position:absolute;right:25px;top:10px;">
 
@@ -544,7 +545,12 @@ if(is_array($imp_session)){
 
         <br /><br /><br />
 
-        <table style="vertical-align:middle;">
+        <table style="vertical-align:middle;border:solid blue 2px;background-color:#EDF5FF;padding:5px" class="ui-corner-all">
+            <tr>
+            <td colspan="3">
+                <b>Actions</b>(make selections in table below before clicking)
+            </td>
+            </tr>
             <tr>
                 <td>
                     <span class="matching">

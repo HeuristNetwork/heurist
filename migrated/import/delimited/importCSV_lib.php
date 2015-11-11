@@ -563,8 +563,8 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             $field_name = "field_".$index;
 
             $mapped_fields[$field_name] = $field_type;
-
-            if($field_type=="url"){  //$field_type=="id" || $field_type=="scratchpad"){
+            
+            if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
                 array_push($select_query_update_where, "rec_".$field_type."=?");
 
             }else if(is_numeric($field_type)){
@@ -2483,6 +2483,7 @@ function get_import_session($mysqli, $import_id){
 
         $session = json_decode($res[0], true);
         $session["import_id"] = $import_id;
+        $session["import_file"] = $res[1];
         if(!@$session["import_table"]){ //backward capability
             $session["import_table"] = $res[1];
         }
@@ -2689,7 +2690,8 @@ function renderRecords($type, $imp_session){
             foreach($mapped_fields as $field_name=>$dt_id) {
                 if($field_name==$checked_field){
                     $err_col = $m;
-                    $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
+                    $dttype = $detDefs[$dt_id]['commonFields'][$idx_dt_type];
+                    $is_enum = ($dttype=="enum" || $dttype=='relationtype');
                     break;
                 }
                 $m++;
@@ -2807,7 +2809,7 @@ function renderRecordsError($imp_session){
         foreach($tabs as $rec_tab){
             $colname = @$imp_session['columns'][substr($rec_tab['field_checked'],6)];
 
-            print '<li><a href="#rec__'.$k.'" style="color:red">'.$colname.'<br><span style="font-size:0.7em">'.$rec_tab['short_message'].'</span></a></li>';
+            print '<li><a href="#rec__'.$k.'" style="color:red">'.$colname.'<br><span style="font-size:0.7em">'.@$rec_tab['short_message'].'</span></a></li>';
             $k++;
         }
         print '</ul>';
@@ -2871,9 +2873,11 @@ function renderRecordsError($imp_session){
             $err_col = 0;
             $m = 1;
             foreach($mapped_fields as $field_name=>$dt_id) {
-                if($field_name==$checked_field){
+                if($field_name==$checked_field && @$detDefs[$dt_id]){
                     $err_col = $m;
-                    $is_enum = ($detDefs[$dt_id]['commonFields'][$idx_dt_type]=="enum");
+
+                    $dttype = $detDefs[$dt_id]['commonFields'][$idx_dt_type];
+                    $is_enum = ($dttype=='enum' || $dttype=='relationtype');
                     break;
                 }
                 $m++;
