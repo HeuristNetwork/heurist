@@ -130,41 +130,28 @@ $.widget( "heurist.search", {
 
 
         // Search functions container
-        //'height':'100%',
-        this.div_search   = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_search_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element );
+        //'height':'100%', 'float':'left'
+        this.div_search   = $('<div>').css({ 'padding-left':sz_search_padding, 'min-width':sz_search}).appendTo( this.element );
 
         // Loading progress bar, initially hidden
         this.div_progress = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_search_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element ).hide();
 
-        // Add record button
-        if(this.options.btn_visible_newrecord){
-            this.btn_add_record = $( "<button>", {
-                text: top.HR("Add Record")
-            })
-            .css('width','160px')
-            .addClass('logged-in-only')
-            .addClass('ui-heurist-btn-header1')
-            .appendTo(
-                  $('<span>')
-                        .css({'padding':'1.8em 6em 0 3em','float':'left'}) //,'display':'inline-block'  'width':this.options.leftmargin,
-                        .appendTo( this.element )
-            )
-            .button({icons: {
-                primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
-            }})
-            .click( function(){ that._addNewRecord(); });
-
-        } // add record button
-
-
+        
+        //header-label     
         this.div_search_header = $('<div>')
         .addClass('div-table-cell')
-        //.css('padding-top','0.4em')
         .appendTo( this.div_search );
-
         $( "<label>" ).text(top.HR("Filter criteria"))
         .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
+
+        var link = $('<a>',{href:'#'})
+            .html('<img src="'+top.HAPI4.basePathV4+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
+            .css('padding-right','1em')
+            .appendTo(this.div_search_header);
+            this._on( link, {  click: function(){
+                window.open('context_help/advanced_search.html','_blank');
+            } });
 
 
         /*
@@ -182,21 +169,14 @@ $.widget( "heurist.search", {
             });
         */
 
-        var link = $('<a>',{href:'#'})
-            .html('<img src="'+top.HAPI4.basePathV4+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
-            .css('padding-right','1em')
-            .appendTo(this.div_search_header);
-            this._on( link, {  click: function(){
-                window.open('context_help/advanced_search.html','_blank');
-            } });
-
-
+        //
+        
         this.div_search_input = $('<div>')
             .addClass('div-table-cell')
             .appendTo( this.div_search );
 
         this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )
-        .css({'margin-right':'0.2em', 'max-width':sz_input, 'width':sz_input, 'height':'1.4em' }) //,  , 'width':'30%', 'max-width':'500px'})
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
 
@@ -212,7 +192,7 @@ $.widget( "heurist.search", {
                 if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
                         //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
                        if($this.outerHeight()<25){
-                            that.div_search.css('padding-top','1.8em');
+                            //aaa  that.div_search.css('padding-top','1.8em');
                             $this.height(23);
                        }else{
                             if($this.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
@@ -222,7 +202,7 @@ $.widget( "heurist.search", {
                                 //parseFloat(that.div_search.css('padding-top'))
                                 pt =  (that.element.height() - $this.height())/2 - menu_h;
                             }
-                            that.div_search.css('padding-top', pt );
+                            //aaa that.div_search.css('padding-top', pt );
                        }
                 }
                 // set new height/width
@@ -331,8 +311,32 @@ $.widget( "heurist.search", {
         });
 
         //set input search textarea same height as button
-        this.input_search.height( this.btn_search_as_guest.height() - 2 );
+        //this.input_search.height( '2.5em' );//this.btn_search_as_guest.height() - 2 );
 
+        
+        // Add record button
+        if(this.options.btn_visible_newrecord){
+            
+            this.div_add_record = $('<div>')
+                .addClass('div-table-cell  logged-in-only')
+                .css('padding-left','1em')
+                .appendTo( this.div_search );
+            
+            this.btn_add_record = $( "<button>", {
+                text: top.HR("Add Record")
+            })
+            .css('width','160px')
+            //.addClass('logged-in-only')
+            .addClass('ui-heurist-btn-header1')
+            .appendTo( this.div_add_record )
+            .button({icons: {
+                primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
+            }})
+            .click( function(){ that._addNewRecord(); });
+
+        } // add record button
+        
+        
 
         //
         // search function links below filter expression field
@@ -422,7 +426,6 @@ $.widget( "heurist.search", {
 
                 this.div_buttons = $('<div>')
                     .addClass('div-table-cell logged-in-only')
-                    //.css({'padding-top':'0.4em'})
                     .insertBefore( this.div_search_stop );
 
 
@@ -486,6 +489,8 @@ $.widget( "heurist.search", {
             keypress: function(e){
                 var code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
+                    top.HEURIST4.util.stopEvent(e);
+                    e.preventDefault();
                     that._doSearch();
                 }
             }
@@ -606,7 +611,6 @@ $.widget( "heurist.search", {
 
         this._refresh();
 
-
         /* search on load
         if(!top.HEURIST4.util.isnull(top.HEURIST4.query_request)){
               this.input_search.val(top.HEURIST4.query_request.q);
@@ -653,6 +657,8 @@ $.widget( "heurist.search", {
                 this._doLogin();
             }
         }
+        
+        $(this.element).find('.div-table-cell').height( $(this.element).height() );
 
         this.btn_search_as_user.button( "option", "label", top.HR(this._getSearchDomainLabel(this.options.search_domain)));
 
