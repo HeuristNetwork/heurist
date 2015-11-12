@@ -110,6 +110,9 @@ function init() {
 
         //id field
         if(rectype){
+            $('#btnSkipMatch').removeAttr("disabled");
+            $('#btnSkipMatch').css('color','#666');
+            
             $("#div_idfield").show();
             $('input[id^="cbsa_dt_"]').parent().show();
             $('input[id^="cbsa_keyfield_"]').parent().show();
@@ -177,6 +180,8 @@ function init() {
 
         }else{
             $("#div_idfield").hide();
+            $('#btnSkipMatch').attr("disabled", "disabled");
+            $('#btnSkipMatch').css('color','#CCC');
         }
         $(".analized2").hide();  //hide after rectype change
         if ($("#divPreviousBtn").is(":visible")) $(".analized3").show();
