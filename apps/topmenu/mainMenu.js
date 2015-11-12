@@ -288,7 +288,12 @@ $.widget( "heurist.mainMenu", {
             });
 
             this._on(link, {
-                    click: that._onPopupLink
+                    click: 
+                    function(event){
+                        $(menu).hide()
+                        that._onPopupLink(event);
+                    }
+                    //that._onPopupLink
                 });
         }else{
             link = $('<a>',{
@@ -394,8 +399,14 @@ $.widget( "heurist.mainMenu", {
 
                 ele.attr('href', href);
                 that._on(ele, {
-                    click: that._onPopupLink
-                    //function(event){ }
+                    click: 
+                    //that._onPopupLink
+                    function(event){
+                        $(menu).hide()
+                        that._onPopupLink(event);
+                    }
+                    
+                    //
                 });
             }
         });
