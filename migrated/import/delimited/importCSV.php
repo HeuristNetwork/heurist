@@ -481,15 +481,15 @@ if(is_array($imp_session)){
     <input type="hidden" id="csv_enclosure" name="csv_enclosure" value="<?=@$imp_session["csv_enclosure"]?>">
     <input type="hidden" id="csv_mvsep" name="csv_mvsep" value="<?=@$imp_session["csv_mvsep"]?>">
 
+
+    <!-- ----------------- STEP 2: DISPLAY FIELDS FOR MATCHING -------------- -->
+
     <div id="main_mapping"<?=$mode_import_result?>>
 
-        <h4 id="headerStep2">Step 2: Matching and inserting/updating records. File: <?php echo $imp_session['import_file'];?></h4>
+        <h4 id="headerStep2">Step 2: Matching and inserting/updating records</h4>
 
         <div style="position:absolute;right:25px;top:10px;">
-
-            Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importing-data">
-                HeuristNetwork.org/archive/importing-data</a> for a detailed explanation and examples of record import.
-
+                File: <?php echo $imp_session['import_file'];?>
         </div>
 
         <hr width="100%" />
@@ -518,12 +518,16 @@ if(is_array($imp_session)){
         </div>
 
         <div class="help">
-            If the spreadsheet data is complex, this function will allow you to progressively import sets of columns which identify
-            subsidiary entities (record types) such as places, organisations, collections, series, artists etc. <br />&nbsp;<br />
-            <b>Workflow:</b><br />
-            &nbsp;&nbsp;&nbsp;1: Choose a record type and match one or more key fields in order to <br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. identify rows which belong to existing records (sets record ID value);<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. create new records from unmatched rows (creates new record ID value). <br />
+
+            Please visit <a target="_blank" href="http://HeuristNetwork.org/archive/importing-data">
+                <b>HeuristNetwork.org/archive/importing-data</b></a> for an overview explanation and examples of record import. <br />
+                If the spreadsheet data is complex, this function will allow you to progressively import sets of columns which identify subsidiary entities (record types) such as places, organisations, collections, series, artists etc.
+
+            <br />&nbsp;<br />
+            <b>Workflow:</b><br /><br />
+            &nbsp;&nbsp;&nbsp;1: Choose a record type and match one or more key fields in order to: <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. identify rows which belong to existing records (sets record ID value);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. create new records from unmatched rows (creates new record ID value). <br />
             &nbsp;&nbsp;&nbsp;2: The record ID value is used to import values in additional columns into the appropriate records.<br />
             &nbsp;&nbsp;&nbsp;3: The record ID column(s) subsequently supply value(s) for appropriate pointer fields in importing additional record types.<br />
             <br/>
@@ -1143,9 +1147,9 @@ if(is_array($imp_session)){
             <tr>
                 <td align="right">Date format:</td>
                 <td><select name="csv_dateformat">
-                    <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
+                        <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
                     &nbsp;&nbsp;<span class=help>Also supports ISO yyyy-mm-dd (and optional hh:mm:ss)
-                    and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827</span></td>
+                        and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827</span></td>
             </tr>
 
             <tr>
