@@ -483,7 +483,7 @@ if(is_array($imp_session)){
 
     <div id="main_mapping"<?=$mode_import_result?>>
 
-        <h4 id="headerStep2">Step 2: Matching and inserting/updating records. File: <?php echo $imp_session['import_file'];?></h4>
+        <h4 id="headerStep2">Step 2: Matching and inserting/updating records</h4>
 
         <div style="position:absolute;right:25px;top:10px;">
 
@@ -999,7 +999,18 @@ if(is_array($imp_session)){
 
     <script type="text/javascript">
 
-        $( function(){ $("#div-progress").hide(); });
+        $( function(){ 
+                $("#div-progress").hide(); 
+                
+                //change title in parent dialog
+                var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
+                if( reference_to_parent_dialog ){
+                    var ele = parent.document.getElementById(reference_to_parent_dialog);
+                    $(ele.parentElement).find('.ui-dialog-title').text( 'Import delimited text (csv, tsv)' );
+                    //dialog( "option", "title", 'Import delimited text (csv, tsv)');
+                }
+                
+        });
 
         //
         // submit form on new file upload

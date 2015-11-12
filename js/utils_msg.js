@@ -327,11 +327,12 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 //.appendTo( that.document.find('body') )
                 
                 //create new div for dialogue with $(this).uniqueId();                 
-                var $dlg = $('<div>').addClass('loading').appendTo( $(opener.document).find('body') );
-                var $dosframe = $( "<iframe>").css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+                var $dlg = $('<div>').addClass('loading').appendTo( $(opener.document).find('body') ).uniqueId();
+                var $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
+                            .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                 $dosframe.hide();
 
-                //on close event listener
+                //on close event listener - invoke callback function if defined
                 $dosframe[0].close = function() {
                     var rval = true;
                     var closeCallback = options['callback'];
@@ -350,6 +351,8 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 $dosframe.on('load', function(){
                         $dosframe.show();
                         var content = $dosframe[0].contentWindow;
+                        //content.document.reference_to_parent_dialog = $dlg.attr('id');
+                        //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
                         if(!options["title"]){
                             $dlg.dialog( "option", "title", content.document.title );
                         }
