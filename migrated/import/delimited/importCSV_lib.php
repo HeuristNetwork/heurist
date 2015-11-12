@@ -563,7 +563,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
             $field_name = "field_".$index;
 
             $mapped_fields[$field_name] = $field_type;
-            
+
             if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
                 array_push($select_query_update_where, "rec_".$field_type."=?");
 
@@ -1413,18 +1413,18 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
             foreach($values as $idx=>$r_value){
                 $r_value2 = trim_lower_accent($r_value);
                 if($r_value2!=""){
-                    
+
                     $is_termid = false;
                     if(ctype_digit($r_value2)){
                         $is_termid = isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
                     }
-                    
+
                     if($is_termid){
                         $term_id = $r_value;
                     }else{
                         $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                     }
-                    
+
                     if (!$term_id)
                     {//not found
                         $is_error = true;
@@ -1898,15 +1898,15 @@ function doImport($mysqli, $imp_session, $params){
                             if(($fieldtype_type == "enum" || $fieldtype_type == "relationtype")){
 
                                 $r_value = trim_lower_accent($r_value);
-                                
+
                                 if($r_value!=""){
-                                    
-                                    if(ctype_digit($r_value) 
+
+                                    if(ctype_digit($r_value)
                                             && isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
-                                                
+
                                             $value = $r_value;
                                     }
-                                    
+
                                     if($value == null){
                                         $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
                                     }
@@ -2545,7 +2545,7 @@ function renderWarnings($imp_session){
 
         print $line."<br />";
     }
-    print '<br /><br /><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">';
+    print '<br /><br /><input type="button" value="Close popup" onClick="showRecords(\'mapping\');">';
 }
 
 //
@@ -2556,7 +2556,7 @@ function renderDisambiguation($type, $imp_session){
     $records = $imp_session['validation']['disambiguation'];
 
     if(count($records)>25)
-        print '<br/><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');"><br/><br/>';
+        print '<br/><input type="button" value="Close popup" onClick="showRecords(\'mapping\');"><br/><br/>';
 
     print '<div>The following rows match with multiple records. This may be due to the existence of duplicate records in your database,'.
     ' but you may not have chosen all the fields required to correctly disambiguate the incoming rows'.
@@ -2589,7 +2589,7 @@ function renderDisambiguation($type, $imp_session){
     print '<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records if you have used '.
     'an incomplete set of fields for matching.</div>';
     print '<div>Click "Continue" to assign IDs</div><br/>';
-    print '<input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">'.
+    print '<input type="button" value="Close popup" onClick="showRecords(\'mapping\');">'.
     '&nbsp;&nbsp;<input type="button" value="Continue" onClick="doMatching()">';
 
 }
@@ -2661,7 +2661,7 @@ function renderRecords($type, $imp_session){
         }
 
         if(count($records)>25)
-            print '<br/><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');"><br/><br/>';
+            print '<br/><input type="button" value="Close popup" onClick="showRecords(\'mapping\');"><br/><br/>';
 
 
         //all this code only for small asterics
@@ -2788,7 +2788,7 @@ function renderRecords($type, $imp_session){
         print '</div>';
     }
 
-    print '<br /><br /><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');">';
+    print '<br /><br /><input type="button" value="Close popup" onClick="showRecords(\'mapping\');">';
 
 }
 
@@ -2846,7 +2846,7 @@ function renderRecordsError($imp_session){
         $is_missed = (strpos($rec_tab['err_message'], 'a value must be supplied')>0);
 
         if(count($records)>25)
-            print '<br/><input type="button" value="Back to previous screen" onClick="showRecords(\'mapping\');"><br/><br/>';
+            print '<br/><input type="button" value="Close popup" onClick="showRecords(\'mapping\');"><br/><br/>';
 
 
         //all this code only for small asterics

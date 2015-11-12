@@ -65,7 +65,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <title>Normalising importer for comma or tab delimited text files</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        
+
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <link rel="stylesheet" href="../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css"> <!-- use h4 -->
@@ -454,7 +454,7 @@ if(is_array($imp_session)){
                         $res = doImport($mysqli, $imp_session, $_REQUEST);
                         ?>
                     </div>
-                    <br /><br /><input type="button" value="Back to previous screen" onClick="{showRecords('mapping');}">
+                    <br /><br /><input type="button" value="Close popup" onClick="{showRecords('mapping');}">
                 </div><!-- main_import_result -->
                 <?php
             }
@@ -493,42 +493,40 @@ if(is_array($imp_session)){
         </div>
 
         <hr width="100%" />
-        
+        <br />
+
         <div  style="padding-bottom:10px">
-        
+
             <input type="button"
                 value="&lt;&lt; Back to start" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
                 style="margin-right: 10px; margin-left:20px;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
             <?php if(@$_REQUEST["import_id"]){ ?>
                 <input type="button"
-                        value="Download data to file"
-                        onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
-                        title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
+                    value="Download data to file"
+                    onclick="window.open('importCSV.php/import.csv?db=<?=HEURIST_DBNAME?>&getsession=<?=@$_REQUEST["import_id"]?>','_blank')"
+                    title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
                 <div class="help" style="float:right;min-width:300px">
                     <span class="help">
                         Note: Data is retained between sessions until cleared
                     </span>
-                <input type="button"
-                    value="Clear uploaded file" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
-                    title="Clear the data for this uploaded file from the server">
+                    <input type="button"
+                        value="Clear uploaded file" onclick="doClearSession(<?=@$_REQUEST["import_id"]?>)" style="margin-right: 10px;"
+                        title="Clear the data for this uploaded file from the server">
                 </div>
-            <?php } ?>
+                <?php } ?>
         </div>
 
         <div class="help">
-            If the spreadsheet data is complex, this function will allow you to progressively import columns which identify
-            subsidiary entities (record types) such as place, organisation, collection, series, artist etc. The first step
-            is to match key fields and create new records from unmatched rows. This will create a new column ending in ID.
-            This can be used as the key field to import additional columns. Once all subsidiary entities have been matched
-            and imported, you can import the primary entity type represented by the table.<br>
-            If a record type is not shown in the pulldown, check the 'Show' column in Database &gt; Manage Structure.
-            <br/><br/>
-        </div>
-
-        <div class="input-line">
-            <div class="header"><label for="sa_rectype" style="color:red">Select record type</label></div>
-            <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:290px"></select>
+            If the spreadsheet data is complex, this function will allow you to progressively import sets of columns which identify
+            subsidiary entities (record types) such as places, organisations, collections, series, artists etc. <br />&nbsp;<br />
+            <b>Workflow:</b><br />
+            &nbsp;&nbsp;&nbsp;1: Choose a record type and match one or more key fields in order to <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. identify rows which belong to existing records (sets record ID value);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. create new records from unmatched rows (creates new record ID value). <br />
+            &nbsp;&nbsp;&nbsp;2: The record ID value is used to import values in additional columns into the appropriate records.<br />
+            &nbsp;&nbsp;&nbsp;3: The record ID column(s) subsequently supply value(s) for appropriate pointer fields in importing additional record types.<br />
+            <br/>
         </div>
 
         <?php
@@ -543,25 +541,35 @@ if(is_array($imp_session)){
 
         <b>Rows in memory: <?=$imp_session['reccount']?>&nbsp;&nbsp;Fields:&nbsp;<?=$len?></b>
 
-        <br /><br /><br />
+        <br /><br />
+
+
+        <!-- ACTIONS box -->
 
         <table style="vertical-align:middle;border:solid blue 2px;background-color:#EDF5FF;padding:5px" class="ui-corner-all">
             <tr>
-            <td colspan="3">
-                <b>Actions</b>(make selections in table below before clicking)
-            </td>
+                <td colspan="3" style ="font-size: 0.75em;">
+                    <b>Actions</b> &nbsp; (make selections below before clicking)
+                </td>
             </tr>
+
             <tr>
+                <td colspan="3">
+                    &nbsp;
+                </td>
+            </tr>
+
+            <tr style="margin-top: 15px; margin-bottom: 20px;;">
                 <td>
                     <span class="matching">
                         <span>
-                            <input type="button" value="Skip Match"
+                            <input type="button" value="Import as new (skip matching)"
                                 onclick='{$( "#tabs_actions" ).tabs( "option", "active", 1 );}' style="font-weight: bold;">
 
                         </span>
                         <span>
-                            <input type="button" value="Match data against records in database &gt;&gt;"
-                                disabled=disabled  id="btnStartMatch" 
+                            <input type="button" value="Match against existing records &gt;&gt;"
+                                disabled=disabled  id="btnStartMatch"
                                 onclick="doMatching()" style="font-weight: bold;color:#CCC">
 
                         </span>
@@ -601,7 +609,7 @@ if(is_array($imp_session)){
                         $show_insert = "<a href='#' onclick='showRecords(\"insert\")' title='show rows to be inserted as new records'>show</a>";
                         $download_insert= "<a href='#' onclick='window.open(\"".$url."1\" ,\"_blank\")'>download</a>"
                         .' &nbsp;&nbsp; <input type="checkbox" id="ignore_insert" '
-                        .' onclick="{document.getElementById(\'ignore_insert\').value=this.checked?1:0; }">' 
+                        .' onclick="{document.getElementById(\'ignore_insert\').value=this.checked?1:0; }">'
                         .'<label for="ignore_insert" title="Do not insert new records. Do update only">ignore</label>';
                     }else{
                         $show_insert = "&nbsp;";
@@ -681,16 +689,36 @@ if(is_array($imp_session)){
                             <span class="analized2">
                                 <input type="button" value="NEXT: Create/Update records &gt;&gt;"
                                     onclick="doDatabaseUpdate(<?=$cnt_insert_nonexist_id?>, <?=$cnt_error?>)" style="font-weight: bold;"></span>
-                        <?php } ?>
+                            <?php } ?>
                         <span class="importing analized3">
                             <input  id="btnStartImport" type="submit"
                                 value="NEXT: Prepare insert/update &gt;&gt;" style="disabled:disabled;font-weight: bold;">
                         </span></span>
                 </td>
             </tr>
-        </table>
+
+            <tr>
+                <td colspan="3">
+                    &nbsp;
+                </td>
+            </tr>
+
+        </table> <!-- End of ACTIONS box -->
 
         <br />
+
+
+        <!-- SELECT RECORD TYPE TO IMPORT -->
+        <div class="input-line" style="margin-top: 15px; margin-bottom: 5px;">
+            <div class="header"><label for="sa_rectype" style="color:red">Select record type&nbsp;</label></div>
+            <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" style="min-width:150px"></select>
+            <span class="help">
+                &nbsp;&nbsp;&nbsp;&nbsp; If a record type is not shown in the pulldown, check the 'Show' column in Database &gt; Manage Structure
+            </span>
+        </div>
+
+
+        <!--IMPORT STEPS -->
 
         <div id="tabs_actions">
             <ul>
@@ -792,7 +820,7 @@ if(is_array($imp_session)){
                         }
                         ?>
                     </select>
-                    <span class=help>
+                    <span class="help">
                         Choose the column containing the record identifier for the records to be inserted / updated
                     </span>
                 </div>
@@ -1033,6 +1061,7 @@ if(is_array($imp_session)){
         The process can be repeated on the file to extract multiple entities from different columns and replace them with record IDs which can be<br />
         used in a subsequent insertion or update of records.
         <br /><br />
+        The first line MUST contain column labels. Do it for your own sanity!<br />
         Data rows must occupy a single line of data terminated with a CRLF (Windows) or an LF (Unix/Mac).<br />
         Linefeeds within memo fields should be represented by CR only. Fields should be separated by tab or comma.<br />
         Quotes may exist within unquoted fields, but within quoted fields they should be preceded by a backslash ( \" ).<br />
@@ -1043,7 +1072,7 @@ if(is_array($imp_session)){
         <br/><br/>
         Please visit the page on <a href="http://heuristnetwork.org/10-tips-for-using-heurist/importing-data/importing-delimited-text-files        "
             target="_blank">Importing delimited text files</a> on the Heurist network site for tips on sucessful import.
-        <br/><br/>
+        <br/>
     </div>
 
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
@@ -1052,54 +1081,90 @@ if(is_array($imp_session)){
 
         <table width="100%">
             <tr>
-                <td align="right"><label>Upload new CSV file:</label></td><td><input type="file" name="import_file"></td>
-            </tr>
-            <tr><td align="center">OR</td>
-
-            </tr>
-            <tr><td></td><td></td></tr>
-            <tr><td align="right"><label>Select previously uploaded file:</label></td><td>
-                    <select name="import_id" id="import_id" onchange="doSelectSession()"><?=get_list_import_sessions()?></select>
-                </td></tr>
-
-            <tr><td>&nbsp;</td></tr>
-            <tr>
-                <td></td>
-                <td align="left">
-                    <input type="button" value="Clear all files" style="margin-right: 10px;"
-                        onclick="doClearSession('all')">
-                    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 30px;">
-                    <input type="button" value="Continue" style="font-weight: bold; margin-right: 100px;" onclick="doUpload()">
+                <td align="right"><label>Select previously uploaded file:</label></td>
+                <td><select name="import_id" id="import_id" onchange="doSelectSession()"><?=get_list_import_sessions()?></select>
+                    <input type="button" value="Clear all files" style="margin-right: 10px;" onclick="doClearSession('all')">
                 </td>
             </tr>
 
-            <tr height:40px;><td>&nbsp;</td></tr>
-            <tr><td colspan=2><hr/></td></tr>
-            <tr><td>&nbsp;</td></tr>
+            <tr>
+                <td align="right">OR</td>
+            </tr>
 
-            <tr><td align="right">Field separator:</td><td>
-                <select name="csv_delimiter"><option value="," selected>comma</option><option value="tab">tab</option></select></td></tr>
-            <tr><td align="right">Line separator:</td><td>
+            <tr>
+                <td></td><td></td>
+            </tr>
+
+            <tr>
+                <td align="right"><label>Upload new CSV/TSV file:</label></td>
+                <td><input type="file" name="import_file"></td>
+            </tr>
+
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+
+            <tr>
+                <td colspan=2><hr/></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+
+            <tr>
+                <td align="right">Field separator:</td>
+                <td><select name="csv_delimiter"><option value="," selected>comma</option><option value="tab">tab</option></select></td>
+            </tr>
+            <tr>
+                <td align="right">Line separator:</td>
+                <td>
                     <select name="csv_linebreak">
                         <option selected value="auto">Auto detect</option>
                         <option value="\r\n">Windows</option>
                         <option value="\n">Unix</option>
                         <option value="\r">Mac</option>
                     </select>
-                </td></tr>
-            <tr><td align="right">Fields enclosed in:</td><td>
-                <select name="csv_enclosure"><option selected value='2'>"</option><option value="1">'</option></select></td></tr>
-            <tr><td align="right">Multivalue separator:</td><td><select name="csv_mvsep">
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Fields enclosed in:</td>
+                <td><select name="csv_enclosure"><option selected value='2'>"</option><option value="1">'</option></select></td>
+            </tr>
+            <tr>
+                <td align="right">Multivalue separator:</td>
+                <td><select name="csv_mvsep">
                         <option value="|" selected>|</option>
                         <option value=";">;</option>
                         <option value=":">:</option>
                         <option value="/">/</option>
                         <!-- option value=",">,</option -->
-                    </select></td></tr>
-            <tr><td align="right">Date format:</td><td><select name="csv_dateformat">
-                <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select></td></tr>
-            <tr><td></td><td>Also supports ISO yyyy-mm-dd (and optional hh:mm:ss)
-                <br />and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827</td></tr>
+                    </select></td>
+            </tr>
+            <tr>
+                <td align="right">Date format:</td>
+                <td><select name="csv_dateformat">
+                    <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
+                    &nbsp;&nbsp;<span class=help>Also supports ISO yyyy-mm-dd (and optional hh:mm:ss)
+                    and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827</span></td>
+            </tr>
+
+            <tr>
+                <td colspan=2><hr/></td>
+            </tr>
+
+            <tr height:40px;>
+                <td>&nbsp;</td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td align="left">
+                    <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 30px;">
+                    <input type="button" value="Continue" style="font-weight: bold; margin-right: 100px;" onclick="doUpload()">
+                </td>
+            </tr>
+
+
 
         </table>
     </form>
