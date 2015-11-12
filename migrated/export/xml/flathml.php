@@ -790,16 +790,25 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
     // using separare files per record
     // TODO: no error checking on success so silent failure if directory non-writable
     // beware: File is closed in outputRecords function
+    $recAttr = array();
+    
     if($intofile){
         $hunifile = fopen( HEURIST_HML_DIR.$record['rec_ID'].".xml", 'w');
         output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
+        
+        //add attributes
+        $recAttr['xmlns'] = 'http://heuristnetwork.org';
+        $recAttr['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
+        $recAttr['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_record.xsd';
     }
 
-    openTag('record', array('depth' => $depth,
-        'visibility' => ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable'),
-        'visnote' => ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
-                 : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') ),
-        'selected' => (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no')));
+        $recAttr['depth'] = $depth;
+        $recAttr['visibility'] = ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable');
+        $recAttr['visnote'] = ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
+                 : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') );
+        $recAttr['selected'] = (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no');
+    
+    openTag('record', $recAttr);
 
     if (isset($dbID) && ($dbID != 0)) {
         output( "<dbID>".$dbID."</dbID>\n");
@@ -1360,6 +1369,10 @@ if (@$_REQUEST['mode'] != '1') { //not include
 
 $hmlAttrs = array();
 
+    $hmlAttrs['xmlns'] = 'http://heuristnetwork.org';
+    $hmlAttrs['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
+    $hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_hml.xsd';
+
 if ($USEXINCLUDE) {
     $hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';
 }
@@ -1384,13 +1397,6 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     /*
     $result = loadRemoteURLContent($url);
     $result = json_decode($result, true);
-    
-    $_REQUEST['detail'] = 'ids';
-    $_REQUEST['vo'] = 'h3';
-    $_REQUEST['needall'] = 1;
-    if($PUBONLY){
-        $_REQUEST['publiconly']=1;
-    }                                              
     */
     
     $hostname = '127.0.0.1'; //HEURIST_DOMAIN;
@@ -1430,7 +1436,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
         $result = json_decode($response[1], true);
     }
     
-    /*
+    /* it requires pecl http
     $r = new HttpRequest($url, HttpRequest::METH_GET);
     $r->addCookies($_COOKIE);
     $r->addQueryData($_REQUEST);
