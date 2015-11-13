@@ -711,6 +711,10 @@ function outputRecords($result) {
     if (array_key_exists('expandColl', $_REQUEST)) {
         $rec_ids = expandCollections($rec_ids);
     }
+    
+    if(count($rec_ids)>1000){
+        set_time_limit( 30 * count($rec_ids) % 1000 );
+    }
 
     foreach ($rec_ids as $recID) {
         $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
@@ -1424,8 +1428,8 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
         $response = '';
         while ( ! feof($remote))
         {
-            // Get 10K from buffer
-            $response .= fread($remote, 10240);
+            // Get 100K from buffer
+            $response .= fread($remote, 102400);
         }
         fclose($remote);    
 
