@@ -6,8 +6,12 @@
     INSTALLATION: Move this file to the parent directory in which your Heurist instances are
     installed ( normally /var/www/html/HEURIST ) and rename to index.html
 
+    IMPORTANT: This file points at the Heurist start page index.php, at createNewDatabase.php
+               and at the global stylesheet using hardcode " h4 " path, so this MUST exist on the server.
+               It will not use upgrade versions such as h4.1.2.alpha until one of these
+               versions is renamed to just h4 (eg. by creating an h4 simlink in /var/www/html/HEURIST).
     /**
-    * Home page for Heurist application, allows registration on sandpit, new or browse existing databases,
+    * Home page for Heurist application, allows registration, new or browse existing databases,
     * links to Heurist Network site. Assumes production version of Heurist will be installed in ./h4
     *
     * @package     Heurist academic knowledge management system
@@ -55,21 +59,16 @@
         <div id=page style="padding: 20px;">
 
             <div id='loginDiv'>
-                <h1>Heurist Academic Knowledge Management System</h1>
+                <h1>Heurist Academic Knowledge Management System< Vsn 4/h1>
                 <p>Open Source collaborative web database software for recording and publishing richly interlinked research data integrated
-                    with web bookmarking, bibliographic functions, mapping and timelines</p>
+                    with web bookmarking, bibliographic functions, network visualisation, mapping and timelines</p>
 
                 <div class="separator_row"></div>
+
                 <div class="options">
-                    <div class="buttons"><button onclick="location.href='h4/migrated/admin/ugrps/editUser.html?db=Heurist_Sandpit'">Register as user</button></div>
-                    <div class="description">A simple one minute registration allows you to use Heurist on this server
-                        (if enabled by the administrator)</div>
-                </div>
-                <div class="options">
-                    <div class="buttons"><button onclick="location.href='h4/migrated/admin/setup/dbcreate/createNewDB.php?db=Heurist_Sandpit'">
-                        Create your own database <br>(must register first)</button></div>
-                    <div class="description">Create your first database. Subsequent databases can be created with New Database
-                        from within an existing database. You become the owner of the new databases created.</div>
+                    <div class="buttons"><button onclick="location.href='h4/migrated/admin/setup/dbcreate/createNewDB.php'">
+                        Create your own database</button></div>
+                    <div class="description">Create your first database. Subsequent databases can be created from within Heurist using New Database. You become the owner of the new databases created.</div>
                 </div>
                 <div class="separator_row"></div>
 
@@ -126,10 +125,11 @@
 
             </div>
 
-            <div class="resource" style="padding:3px; margin-top:10px">
+            <div class="resource" style="padding:0px; margin-top:0px; margin-bottom: 20px;">
                 <p>When installing Heurist on another system, you may replace this introductory page with your own,
                 but please leave the following acknowledgement:<br>
-                <strong>Powered by Heurist (C) 2005 - 2015 The University of Sydney.
+                <strong>Powered by <img src="h4/favicon.ico" alt="Heurist Academic Knowledge Management System">
+                Heurist (C) 2005 - 2015 The University of Sydney.
                 See <a href="http://HeuristNetwork.org">HeuristNetwork.org</a> </strong>
             </div>
 
