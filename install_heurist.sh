@@ -26,11 +26,11 @@ echo
 if [ -z $1 ]
    then
       echo -e "\n\n"
-      echo "Please supply version eg. h4.x.x-alpha or h4-alpha, h4-beta (this MUST exist as a tar.bz2 file "
+      echo "Please supply version eg. h4.x.x.alpha (this MUST exist as a tar.bz2 file "
       echo "on Heurist.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
       echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
       echo
-      echo "       ./install_heurist.sh h4.0.0-beta sudo"
+      echo "       ./install_heurist.sh h4.0.0.beta sudo"
       exit
    fi
 
@@ -58,8 +58,6 @@ echo
 
 echo "Changing to /var/www/html and creating html (if required) and HEURIST directory"
 
-# apache on Ubuntu used to install at /var/www, now it installs at /var/www/html
-
 # ensure html directory exists - if this is not apache web root, Heurist will be installed but
 # not accessible at the web root address so we make simlinks.
 
@@ -72,41 +70,54 @@ cd /var/www/html
 $2 mkdir HEURIST
 $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT
 
+# download source to temp directory
+cd /var/www/html/HEURIST
+$2 mkdir temp
+cd /var/www/html/HEURIST/temp
 echo -e "Fetching Heurist code from Heurist.sydney.edu.au"
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
-$2 rm $1.tar.bz2
-# this will fail if h4 already exists, use update script in this case
-$2 mkdir /var/www/html/HEURIST/h4
-$2 cp -R $1/* /var/www/html/HEURIST/h4/
+$2 rm -f $1.tar.bz2
+
+# this will fail if h4.x.x.xxx already exists, use update script in this case
+$2 mkdir /var/www/html/HEURIST/$1
+$2 cp -R $1/* /var/www/html/HEURIST/$1/
 $2 rm -rf $1
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 $2 tar -xjf external.tar.bz2
-$2 rm external.tar.bz2
+$2 rm -f external.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
 $2 tar -xjf external_h4.tar.bz2
-$2 rm external_h4.tar.bz2
+$2 rm -f external_h4.tar.bz2
 
 $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
-$2 rm help.tar.bz2
+$2 rm -f help.tar.bz2
 
-cd /var/www/html/HEURIST/h4
+cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
 
-# I plan to move migrated functions back to root level soon, Nov 15, in order to make a more coherent
+# I plan to move migrated functions back to root level soon, Nov 2015, in order to make a more coherent
 # structure. These simlinks will avoid problems with existing installations not having them
+cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 
 # "migrated" directory within h4 contains h3 functions not yet or partially converted to h4
-cd migrated
+cd /var/www/html/HEURIST/$1/migrated
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+
+# simlink in web root to this version of h4
+cd /var/www/html
+$2 ln -s /var/www/html/HEURIST/$1 $1
+
+# Note: this install does not update heuristConfigIni.php to avoid overwriting h3 configuration
+#       TODO: This needs updating so that it does update it if there is no previous installation of h3
 
 echo "Heurist unpacked"
 

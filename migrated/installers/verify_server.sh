@@ -24,7 +24,7 @@
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
 
 echo
-echo "----------------------- Checking server for installed packages ---------------------------"
+echo "----------------------- Checking server for installed packages Ubuntu/Debian ---------------------------"
 echo
 echo
 
@@ -83,14 +83,10 @@ echo "checking for: libapache2-mod-php5"
 if ! dpkg -s libapache2-mod-php5 > /dev/null; then
         echo "libapache2-mod-php5 not found."
         exit 1
+fi
 
-echo -e "\n\n\n\n\n"
+echo "Checks completed. Errors, if any, are reported above."
+
 echo
-echo "---- FINISHED -------------------------------------------"
-echo
-echo "If it gets to here, all expected packages are installed"
-echo
-echo
-echo
-echo
-echo
+
+
