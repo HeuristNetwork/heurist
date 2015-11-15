@@ -288,7 +288,7 @@ $.widget( "heurist.mainMenu", {
             });
 
             this._on(link, {
-                    click: 
+                    click:
                     function(event){
                         $(menu).hide()
                         that._onPopupLink(event);
@@ -399,13 +399,13 @@ $.widget( "heurist.mainMenu", {
 
                 ele.attr('href', href);
                 that._on(ele, {
-                    click: 
+                    click:
                     //that._onPopupLink
                     function(event){
                         $(menu).hide()
                         that._onPopupLink(event);
                     }
-                    
+
                     //
                 });
             }
@@ -457,7 +457,7 @@ $.widget( "heurist.mainMenu", {
 
         var url = top.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
-        top.HEURIST4.msg.showDialog(url, { height:550, width:700,
+        top.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
                     callback:function(responce) {
 /*
                 var sURL = top.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
@@ -614,23 +614,23 @@ $.widget( "heurist.mainMenu", {
     * Reload database structure image on client side
     */
     _refreshLists: function(){
-        
+
             top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                 if(response.status == top.HAPI4.ResponseStatus.OK){
                     top.HEURIST4.rectypes = response.data.rectypes;
                     top.HEURIST4.terms = response.data.terms;
                     top.HEURIST4.detailtypes = response.data.detailtypes;
-                    
+
                     if(top.HEURIST && top.HEURIST.rectypes){
                         top.HEURIST.util.reloadStrcuture();
                     }else{
                         top.HEURIST4.msg.showMsgDlg('Database structure definitions in memory have been refreshed.<br>'+
-                            'You may need to reload pages to see changes.');    
+                            'You may need to reload pages to see changes.');
                     }
-                    
+
                 }
             });
-        
+
     },
 
     /**

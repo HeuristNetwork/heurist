@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* This function adds a new value for a specific field to the set of records selected
 *
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
@@ -69,7 +69,7 @@ var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database
 
 function init () {
   top.HEURIST.edit.calendarViewer = calendarViewer;
-  
+
   if(top.HEURIST.search){
     resultSetIDs = top.HEURIST.search.results.infoByDepth[0].recIDs; //all records
     selectedResultSetIDs = top.HEURIST.search.getLevelSelectedRecIDs(0).get(); //selected in zero level
@@ -81,7 +81,7 @@ function init () {
     allSelectedIDs = top.HEURIST.search4.recids_sel;
     resultSetTypes = top.HEURIST.search4.rectypes;
   }
-  
+
   inputDiv = document.getElementById("inputDiv");
   statusDiv = document.getElementById("statusDiv");
   scopeSelect = document.getElementById("scope-select");
@@ -130,7 +130,7 @@ function fillScope(){
 function getRecType(recID){
      if(top.HEURIST.search){
         return top.HEURIST.search.results.recSet[recID].record[4];
-     }else{ 
+     }else{
         var record = top.HAPI4.currentRecordset.getById(recID) ;
         return top.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
      }
@@ -344,23 +344,26 @@ function save() {
   }else{
     top.HEURIST.search4.executeAction( "add_detail", _data, cbSave );
   }
-  
+
 //alert("the value is "+ value + "wkt = " + wkt);
 
 }
 
 
   </script>
-   <p>This function adds a new value for a specified field to each record. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).</p>
+   <p>This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).</p>
 
    <div id="uiControls">
      <div style="padding-top: 5px;"><label for="scope-select">Add value to: </label><select id="scope-select"></select></div>
      <div style="padding-top: 5px; padding-left: 5px;"><label for="field-select">Select Field: </label><select id="field-select"></select></div>
      <div id="inputDiv"><label for="value">Value: </label><input  type="text" id="value"/></div>
    </div>
-   <input type="button" value="Go" onclick="save();">
-   <input type="button" value="Close" onclick="window.close();">
 
+<div style="float: right; margin-right: 30px;">
+   <input type="button" value="Add field values" onclick="save();">
+   &nbsp;&nbsp;&nbsp;
+   <input type="button" value="Close" onclick="window.close();">
+</div>
    <div id="statusDiv"></div>
 
  </body>

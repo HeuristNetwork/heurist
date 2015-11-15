@@ -93,7 +93,7 @@ function hSvsEdit(args) {
             }else{ //add new saved search
                 isEdit = false;
                 svsID = -1;
-                
+
                 svs_id.val('');
                 svs_name.val('');
                 svs_rules.val('');
@@ -179,10 +179,10 @@ function hSvsEdit(args) {
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
 
-                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, callback:
+                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
                     function(res){
                         if(!Hul.isempty(res)) {
-                            
+
                             if(res.mode == 'save') {
                                 if(Hul.isnull(ele_rules)){ //call from resultListMenu - create new rule
 
@@ -214,7 +214,7 @@ function hSvsEdit(args) {
      * @param callback
      */
      function _showDialog( mode, groupID, svsID, squery, callback ){
-     
+
         if(parseInt(svsID)>0){
             var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
             if(Hul.isnull(svs)){
@@ -222,9 +222,9 @@ function hSvsEdit(args) {
                     +'It does not belong to your group'), null, "Error");
                 return;
             }
-        } 
-         
-         
+        }
+
+
         if(callback){
             callback_method = callback;
         }

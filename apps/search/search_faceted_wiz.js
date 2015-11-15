@@ -6,7 +6,7 @@
 *    4. Define ranges for date and numeric fields
 *    5. Preview
 *    6. Save into database
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -29,7 +29,7 @@
 There are two types of queries: 1) to search facet values 2) to search results
 
 Examples
-1) No levels:   
+1) No levels:
 
 search results: t:10 f:1:"XXX" - search persons by name
 facet search:   f:1  where t:10 + other current queries
@@ -51,7 +51,7 @@ domain
 facets:[ [
 code:  10:61:5:15:4:1  to easy init and edit    rt:ft:rt:ft:rt:ft  if link is unconstrained it will be empty  61::15
 title: "Author Name < Multimedia"
-id:  1  - field type id 
+id:  1  - field type id
 type:  "freetext"  - field type
 levels: [t:4 linkedfrom:5-15, t:5 linkedfrom:10-61]   (the last query in this array is ommitted - it will be current query)
 
@@ -64,18 +64,18 @@ history:  - to keep facet values (to avoid redundat search)
 ],
 the simple (no level) facet
 [
-code: 10:1 
+code: 10:1
 title: "Family Name"
 type:  "freetext"
 id: 1
 levels: []
-search: [t:10 f:1] 
+search: [t:10 f:1]
 ]
 
 ]
 
 NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
-            
+
 */
 
 $.widget( "heurist.search_faceted_wiz", {
@@ -94,8 +94,8 @@ $.widget( "heurist.search_faceted_wiz", {
     // rectype_as_facets
     // fieldtypes:[] //allowed field types besides enum amd resource
     //  rectypes:[]                                                                                                                                     //for enums     //for other
-    //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id", 
-    //                                    currentvalue:{text:label, query:value, termid:termid}, history:[currentvalue] }, ]  
+    //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id",
+    //                                    currentvalue:{text:label, query:value, termid:termid}, history:[currentvalue] }, ]
 
 /*
 {"isadvanced":false,
@@ -111,9 +111,9 @@ $.widget( "heurist.search_faceted_wiz", {
      {"title":"Person affected","type":"resource","query":"t:13 f:16","fieldid":"f:16"},                                        lvl1
      {"title":"Punishment event(s) - SAVE record first","type":"resource","query":"f:93","fieldid":"f:93"}]],"domain":"all"}    lvl0
 
-*/     
-     
-    
+*/
+
+
 
     step: 0, //current step
     step_panels:[],
@@ -128,15 +128,15 @@ $.widget( "heurist.search_faceted_wiz", {
         //this.element.disableSelection();
 
         // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);   
+        //this._focusable($element);
 
         var that = this;
 
         this.element.css({overflow: 'none !important'}).addClass('ui-heurist-bg-light');
-        
+
         var ht = $(window).height();
         if(ht>700) ht = 700;
-        
+
         this.element.dialog({
             autoOpen: false,
             height: 400,
@@ -146,12 +146,12 @@ $.widget( "heurist.search_faceted_wiz", {
             resizeStop: function( event, ui ) {
                 that.element.css({overflow: 'none !important','width':'100%'});
             },
-            beforeClose: function( event, ui ) { 
-                            if(event && event.currentTarget){ 
+            beforeClose: function( event, ui ) {
+                            if(event && event.currentTarget){
                                 var that_dlg = this;
                                 top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
-                                        function(){ $( that_dlg ).dialog( "close" ); });  
-                                return false;        
+                                        function(){ $( that_dlg ).dialog( "close" ); });
+                                return false;
                             }
                         },
             buttons: [
@@ -191,24 +191,24 @@ $.widget( "heurist.search_faceted_wiz", {
 
         this.step_panels.push(this.step1);
 
-        //select field types                
+        //select field types
         this.step2 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
         .appendTo(this.element);
-        
+
         var header = $("<div>").css('font-size','0.8em').appendTo(this.step2);
-        
+
         header.html("<label>"+top.HR("Select fields that act as facet")+
             "</label><br><br><label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;"+
             top.HR("Show linked-from record types (reverse pointers)")+"</label>");
-        
+
         //$("<label>").text(top.HR("Select fields that act as facet")).appendTo(header);
         //$("<checkbox>").text(top.HR("Show linked-from record types (reverse pointers)")).appendTo(header);
-        
+
         $("<div>",{id:'field_treeview'}).appendTo(this.step2);
         this.step_panels.push(this.step2);
 
-        
+
         //ranges
         this.step3 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
@@ -225,12 +225,12 @@ $.widget( "heurist.search_faceted_wiz", {
         $("<div>",{id:'facets_preview'}).css('top','3.2em').appendTo(this.step4);
         this.step_panels.push(this.step4);
 
-        
+
         this._refresh();
 
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash, 
+    // Any time the widget is called with no arguments or with only an option hash,
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
     },
@@ -241,14 +241,14 @@ $.widget( "heurist.search_faceted_wiz", {
     _setOptions: function( options ) {
     },*/
 
-    /* 
-    * private function 
+    /*
+    * private function
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
 
     },
-    // 
+    //
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
@@ -279,14 +279,14 @@ $.widget( "heurist.search_faceted_wiz", {
         }
 
         if(newstep<0){
-            newstep = 0; 
+            newstep = 0;
         }else if(newstep>4){
             if(newstep==5){
                 //save into database
                 this._doSaveSearch();
                 return;
             }
-            newstep = 4;  
+            newstep = 4;
         } else{
             $("#btnNext").button('option', 'label', top.HR('Next'));
         }
@@ -299,10 +299,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 if($dlg.html()==''){
                     $dlg.load("apps/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
-                        
+
                         $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
-                        
-                        $dlg.find("#svs_Rules_edit")                  
+
+                        $dlg.find("#svs_Rules_edit")
                             .button({icons: {primary: "ui-icon-pencil"}, text:false})
                             .attr('title', top.HR('Edit Rule Set'))
                             .css({'height':'16px', 'width':'16px'})
@@ -310,27 +310,27 @@ $.widget( "heurist.search_faceted_wiz", {
                                 //that.
                                 that._editRules( $dlg.find('#svs_Rules') );
                             });
-                            
-                        $dlg.find("#svs_Rules_clear")                  
+
+                        $dlg.find("#svs_Rules_clear")
                             .button({icons: {primary: "ui-icon-close"}, text:false})
                             .attr('title', top.HR('Clear Rule Set'))
                             .css({'height':'16px', 'width':'16px'})
                             .click(function( event ) {
                                 $dlg.find('#svs_Rules').val('');
                             });
-                
-                        
+
+
                         var ishelp_on = top.HAPI4.get_prefs('help_on');
                         $dlg.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
-                        
-                        
+
+
                     });
                 }else{
                     this._initStep0_options();
                 }
 
-            }else if(this.step==0 && newstep==1){ //select record types 
+            }else if(this.step==0 && newstep==1){ //select record types
 
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
@@ -344,10 +344,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     message.empty();
                     svs_name.removeClass( "ui-state-error" );
                 }
-                
-                
+
+
                 if(this.isversion==2){
-                       this.step = 1; 
+                       this.step = 1;
                        newstep = 2; //skip step
                 }else{
                     //ART20150810 - to remove
@@ -357,10 +357,10 @@ $.widget( "heurist.search_faceted_wiz", {
 
                     if(this.options.params.isadvanced){
 
-                        this.step1.rectype_manager({selection:this.options.params.rectypes});                  
+                        this.step1.rectype_manager({selection:this.options.params.rectypes});
 
                     }else{
-                        this.step = 1; 
+                        this.step = 1;
                         newstep = 2; //skip step
                     }
                 }
@@ -416,11 +416,11 @@ $.widget( "heurist.search_faceted_wiz", {
             if(this.step==2 && newstep==1 && !this.options.params.isadvanced){
                 newstep = 0;
             }else if(this.step==4 && newstep==3){
-                newstep=2; 
+                newstep=2;
             }
 
             this._showStep(newstep);
-            
+
              if(newstep==3)               //skip step - define ranges
                 this.navigateWizard(1);
 
@@ -432,14 +432,14 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(this.step>=0) this.step_panels[this.step].css('display','none');
         this.step_panels[newstep].css('display','block');
-        
+
         if(this.step==3 && newstep==4){ //preview
 
             this._initStep4_FacetsPreview();
             $("#btnNext").button('option', 'label', top.HR('Save'));
 
         }
-        
+
         if(newstep==0){
             var that = this;
             setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
@@ -448,10 +448,10 @@ $.widget( "heurist.search_faceted_wiz", {
             var ht = $(window).height();
             if(ht>700) ht = 700;
             this.element.dialog( "option", "height",  ht );
-            
+
             $("#btnBack").show();
         }
-            
+
         this.step = newstep;
     }
 
@@ -463,9 +463,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var $dlg = this.step0;
         if($dlg){
-            
+
             var that = this;
-            
+
             var svs_id = $dlg.find('#svs_ID');
             var svs_name = $dlg.find('#svs_Name');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
@@ -474,12 +474,12 @@ $.widget( "heurist.search_faceted_wiz", {
 
             $dlg.find('.messages').empty();
             svs_name.removeClass( "ui-state-error" );
-            
+
             if($(opt_rectypes).is(':empty')){
                 top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
             }
-            
-            
+
+
             var svsID = this.options.svsID;
 
             var isEdit = (parseInt(svsID)>0);
@@ -491,25 +491,25 @@ $.widget( "heurist.search_faceted_wiz", {
                 function(){
                     svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
             });
-            
-            
+
+
             if(isEdit){
                 var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
                 this.options.params = $.parseJSON(svs[1]);
-                
+
                 this.options.domain = this.options.params.domain;
-                
+
                 svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.params.domain:svs[2]);
                 //svs_ugrid.parent().hide();
                 svs_ugrid.attr('disabled','disabled');;
-                
-                if(this.options.params.rectypes) {         
+
+                if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
                 }
-                
+
             }else{ //add new saved search
 
                 svs_id.val('');
@@ -520,8 +520,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.removeAttr('disabled');;
                 //svs_ugrid.parent().show();
             }
-            
-            
+
+
             /* ART20150810
             var svs_id = $dlg.find('#svs_ID');
             var svs_name = $dlg.find('#svs_Name');
@@ -550,10 +550,10 @@ $.widget( "heurist.search_faceted_wiz", {
                             if(this.options.params.rectypes) $(opt_rectypes).val(this.options.params.rectypes[0]);
                         }
                     }
-                }); 
+                });
 
             }
-            
+
 
             var svsID = this.options.svsID;
 
@@ -580,7 +580,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(this.options.params.isadvanced) opt_mode_advanced.click();
 
                 this.step0.find("#opt_rectype_as_facets").attr('checked', this.options.params.rectype_as_facets);
-                
+
             }else{ //add new saved search
 
                 svs_id.val('');
@@ -606,36 +606,36 @@ $.widget( "heurist.search_faceted_wiz", {
             */
         }
     }
-    
-    // 
+
+    //
     //
     //
     , _editRules: function(ele_rules) {
-        
+
                var that = this;
-                
+
                 var url = top.HAPI4.basePathV4+ "page/ruleBuilderDialog.php?db=" + top.HAPI4.database;
                 if(!Hul.isnull(ele_rules)){
                     url = url + '&rules=' + encodeURIComponent(ele_rules.val());
                 }
-                
-                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, callback: 
+
+                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
                     function(res){
                         if(!Hul.isempty(res)) {
-                               ele_rules.val( JSON.stringify(res.rules) ); //assign new rules    
+                               ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
                         }
                     }});
-        
-        
+
+
     }
-     
+
 
     // 2d step - init fieldtreeview
     , _initStep2_FieldTreeView: function(rectypeIds){
 
         if(top.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds){
-            /*if(!this.options.params.rectypes || 
-            !($(rectypeIds).not(this.options.params.rectypes).length == 0 && 
+            /*if(!this.options.params.rectypes ||
+            !($(rectypeIds).not(this.options.params.rectypes).length == 0 &&
             $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
             {
 
@@ -643,25 +643,25 @@ $.widget( "heurist.search_faceted_wiz", {
                 this.options.params.rectypes = rectypeIds;
                 var treediv = $(this.step2).find('#field_treeview');
                 var rectype;
-                
+
                 if(this.options.params.rectypes){
                     rectype = this.options.params.rectypes.join();
                 }
 
                 //load definitions for given rectypes
-                window.HAPI4.SystemMgr.get_defs({rectypes: rectype, 
-                        mode:4, 
-                        fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() }, 
-                
+                window.HAPI4.SystemMgr.get_defs({rectypes: rectype,
+                        mode:4,
+                        fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() },
+
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
 
                         //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
                         /*
                         function __set_queries(parentquery, recordtype, fields){
-                           
-                           var j; 
-                           for(j=0; j<fields.length; j++){ 
+
+                           var j;
+                           for(j=0; j<fields.length; j++){
 
                                var field = fields[j];
                                var recordtype_new = null;
@@ -677,7 +677,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                             prefix = 'lf'
                                         }else{
                                             prefix = 'rf';
-                                        }                                       
+                                        }
                                    }else {
                                        if(field.type=='resource'){
                                             prefix = 'lt'
@@ -685,50 +685,50 @@ $.widget( "heurist.search_faceted_wiz", {
                                             prefix = 'rt';
                                        }
                                    }
-                                   
-                                   
+
+
                                    var q = recordtype + ':' + prefix + field.key.substr(2);
                                    if(parentquery!=''){
                                         q = parentquery + ':' + q;
                                    }
                                    parentquery_new = q;
 
-                                   //unconstrained or one-type constraint                                    
+                                   //unconstrained or one-type constraint
                                    if(top.HEURIST4.util.isempty(field.rt_ids)
                                      || Number(field.rt_ids) === field.rt_ids
                                      || field.rt_ids.indexOf(',')<0){
                                        recordtype_new = field.rt_ids;
                                        recordtype = field.rt_ids;
                                    }
-                                   
+
                                }
 
                                if(field.children && field.children.length>0){
-                                   __set_queries(parentquery_new?parentquery_new:parentquery, 
+                                   __set_queries(parentquery_new?parentquery_new:parentquery,
                                                  recordtype_new?recordtype_new:recordtype, field.children);
                                    //__set_queries(parentquery, recordtype_new?recordtype_new:recordtype, field.children);
                                }else{
 
                                    var q = field.key;
-                                   if(q=="recTitle") q = "title"                           
-                                   else if(q=="recModified") q = "modified"                               
+                                   if(q=="recTitle") q = "title"
+                                   else if(q=="recModified") q = "modified"
                                    else q = q.substr(2);
 
                                    q = recordtype + ':' + q
                                    if(parentquery!=''){
                                         q = parentquery + ':' + q;
                                         //var nums = parentquery.split('(');
-                                        //q = q + new Array( nums.length+1 ).join(')'); 
+                                        //q = q + new Array( nums.length+1 ).join(')');
                                    }
                                    fields[j].code = q;
                                }
 
                            }
                         }//function
-                        
-                        __set_queries('', '', response.data.rectypes);                        
+
+                        __set_queries('', '', response.data.rectypes);
                         */
-                        
+
                         if(!treediv.is(':empty')){
                             treediv.fancytree("destroy");
                         }
@@ -742,14 +742,14 @@ $.widget( "heurist.search_faceted_wiz", {
                             //extensions: ["filter"],
                             //            extensions: ["select"],
                             checkbox: true,
-                            selectMode: 3,  // hierarchical multi-selection    
+                            selectMode: 3,  // hierarchical multi-selection
                             source: response.data.rectypes,
                             beforeSelect: function(event, data){
                                 // A node is about to be selected: prevent this, for folder-nodes:
                                 if( data.node.hasChildren() ){
                                     return false;
                                 }
-                            },                                
+                            },
                             select: function(e, data) {
                                 /* Get a list of all selected nodes, and convert to a key array:
                                 var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
@@ -780,9 +780,9 @@ $.widget( "heurist.search_faceted_wiz", {
                             //          initId: "treeData",
                             //cookieId: "fancytree-Cb3",
                             //idPrefix: "fancytree-Cb3-"
-                        });                        
+                        });
                         //},1000);
-                        
+
                         //restore selection
                         var facets;
                         if(that.options.params.facets_new){ //old version
@@ -799,43 +799,43 @@ $.widget( "heurist.search_faceted_wiz", {
                                           facets[i].code = codes.join(':');
                                       }
                                 }
-                            }                        
+                            }
                         }else{
                             facets = that.options.params.facets;
                         }
-                        
-                        
+
+
                         var tree = treediv.fancytree("getTree");
-                        
+
                         if(facets && facets.length>0){
                             tree.visit(function(node){
-                                            
-                                        if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf 
-                                            //find it among facets  
+
+                                        if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                                            //find it among facets
                                             for(var i=0; i<facets.length; i++){
                                                 if(facets[i].code && facets[i].code==node.data.code){
                                                     node.setSelected(true);
-                                                    break;        
+                                                    break;
                                                 }
-                                            }                        
+                                            }
                                         }
-                                });    
-                        }  
-                        
+                                });
+                        }
+
                         //change default checkbox for branch root
                         var cb = treediv.find("span.fancytree-checkbox");
                         if(cb.length>0){
                             $(cb[0]).removeClass("fancytree-checkbox");
                         }
-                        
+
                         that.current_tree_rectype_ids = rectypeIds;
-                             
+
                        $("#fsw_showreverse").change(function(event){
-                           
+
                                 var showrev = $(event.target).is(":checked");
-                           
+
                                 tree.visit(function(node){
-                                     if(node.data.isreverse==1){ //  top.HEURIST4.util.isArrayNotEmpty(node.children) && 
+                                     if(node.data.isreverse==1){ //  top.HEURIST4.util.isArrayNotEmpty(node.children) &&
                                         if(showrev){
                                             $(node.li).show();
                                         }else{
@@ -844,12 +844,12 @@ $.widget( "heurist.search_faceted_wiz", {
                                      }
                                 });
                         });
-        
+
                         //tree.options.filter.mode = "hide";
                         //tree.options.filter.highlight = false;
-                        $("#fsw_showreverse").attr('checked', false); 
+                        $("#fsw_showreverse").attr('checked', false);
                         $("#fsw_showreverse").change();
-                        
+
 
                     }else{
                         top.HEURIST4.msg.redirectToError(response.message);
@@ -871,7 +871,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var facets_new = [];
         var k, len = this.options.params.rectypes.length;
         var isOneRoot = true;
-        
+
         // ------------------------------------------------------
 
         // NOT USED - @todo remove
@@ -893,13 +893,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
                     if(isOneRoot){
                         //root rectypes will be added only once - when full_query is creating
-                        // q = "t:"+parent.key+" "+q; 
+                        // q = "t:"+parent.key+" "+q;
                     }
-                    
-                    q_full = "t:"+that.options.params.rectypes.join(",")+" "+q; 
-                    
+
+                    q_full = "t:"+that.options.params.rectypes.join(",")+" "+q;
+
                     //final exit when we access root
-                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q_full, fieldid:q }];  
+                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q_full, fieldid:q }];
                 }
             }else{
                 fieldnode = parent;
@@ -910,13 +910,13 @@ $.widget( "heurist.search_faceted_wiz", {
             if(node.data.type=="relmarker") q = "relmarker"
             else if(q=="recTitle") q = "title"
             else if(q=="recModified") q = "modified";
-            
+
             if(fieldnode.data.rt_ids){ //constrained
-                q_full = "t:"+fieldnode.data.rt_ids+" "+q; 
+                q_full = "t:"+fieldnode.data.rt_ids+" "+q;
             }else{
                 q_full = q;
             }
-            res.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:q_full, fieldid:q });    
+            res.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:q_full, fieldid:q });
 
             var res2 = __get_queries(fieldnode);
             for(var i=0; i<res2.length; i++){
@@ -928,8 +928,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
         var fieldIds = tree.getSelectedNodes(false);
-        len = fieldIds.length;  
-        
+        len = fieldIds.length;
+
         facets = [];
 
         if(len>0){
@@ -938,22 +938,22 @@ $.widget( "heurist.search_faceted_wiz", {
                 var node =  fieldIds[k];      //FancytreeNode
                 //name, type, query,  ranges
                 if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
-                
+
                     var ids = node.data.code.split(":");
                             //rtid: ids[ids.length-2],
                             //id:  ids[ids.length-1],
-                
-                    facets.push( { 
+
+                    facets.push( {
                             'var': facets.length,
                             code:node.data.code,
-                            title:(node.data.name?node.data.name:node.title), 
+                            title:(node.data.name?node.data.name:node.title),
                             type:node.data.type
                              } );
                 }
             }
 
             //draw list
-            len = facets.length; 
+            len = facets.length;
             for (k=0;k<len;k++){
                 var s = facets[k].type+'  ';
                 var title = facets[k].title;
@@ -961,11 +961,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.append($('<div>').html( title + '  ' + s + '<hr />'));
             }
 
-            this.options.params.facets = facets;  
+            this.options.params.facets = facets;
             this.options.params.version = 2;
-            
+
             if(len>0){
-                facets[0].isfacet = true;    
+                facets[0].isfacet = true;
             }
 
             return true;
@@ -982,9 +982,9 @@ $.widget( "heurist.search_faceted_wiz", {
         var listdiv = $(this.step4).find("#facets_preview");
 
         var noptions= { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
-        
+
         if(listdiv.html()==''){ //not created yet
-            listdiv.search_faceted( noptions );                    
+            listdiv.search_faceted( noptions );
         }else{
             listdiv.search_faceted('option', noptions ); //assign new parameters
         }
@@ -996,9 +996,9 @@ $.widget( "heurist.search_faceted_wiz", {
         var svs_ugrid = this.step0.find('#svs_UGrpID');
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){
-            this.options.params.domain = 'all';    
+            this.options.params.domain = 'all';
         }else{
-            this.options.params.domain = svs_ugrid;    
+            this.options.params.domain = svs_ugrid;
         }
     }
 
@@ -1029,16 +1029,16 @@ $.widget( "heurist.search_faceted_wiz", {
             this._showStep(2);
             return false;
         }
-        
+
         if(!Hul.isempty(svs_rules.val())){
              this.options.params.rules = svs_rules.val();
         }
 
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){
-            this.options.params.domain = 'all';    
+            this.options.params.domain = 'all';
         }else{
-            this.options.params.domain = svs_ugrid;    
+            this.options.params.domain = svs_ugrid;
             svs_ugrid = top.HAPI4.currentUser.ugr_ID;
         }
 
@@ -1092,7 +1092,7 @@ function showSearchFacetedWizard( params ){
     }else if(!$.isFunction($('body').fancytree)){
 
         $.getScript(top.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
-        
+
     }else{
 
         var manage_dlg = $('#heurist-search-faceted-dialog');

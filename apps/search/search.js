@@ -37,7 +37,7 @@ $.widget( "heurist.search", {
 
         islinkmode: false, //show buttons or links
         btn_visible_newrecord: true, //show add record button
-        
+
         is_progress_visible:false, //show progress bar while searching
 
 
@@ -49,19 +49,19 @@ $.widget( "heurist.search", {
     _total_count_of_curr_request: 0, //total count for current request (main and rules) - NOT USED
 
     query_request:null,
-    
+
     // the constructor
     _create: function() {
 
         var that = this;
 
-        
-        /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js                           
+
+        /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js
             $.getScript(top.HAPI4.basePathV4+'js/search_incremental.js', function(){ that._create(); } );
             return;
         }*/
         this.element.css({'height':'100%', 'min-width':'1100px'}).addClass('ui-heurist-header1');
-        
+
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
 
@@ -136,8 +136,8 @@ $.widget( "heurist.search", {
         // Loading progress bar, initially hidden
         this.div_progress = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_search_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element ).hide();
 
-        
-        //header-label     
+
+        //header-label
         this.div_search_header = $('<div>')
         .addClass('div-table-cell')
         .appendTo( this.div_search );
@@ -170,7 +170,7 @@ $.widget( "heurist.search", {
         */
 
         //
-        
+
         this.div_search_input = $('<div>')
             .addClass('div-table-cell')
             .appendTo( this.div_search );
@@ -227,13 +227,13 @@ $.widget( "heurist.search", {
         .button({icons: {
             secondary: "ui-icon-cancel"
         }});
-        
+
         this._on( this.btn_search_stop, {
             click: function(e) {
                 top.HAPI4.SearchMgr.doStop();
             }
         });
-        
+
         //
         // search buttons - may be Search or Bookmarks according to settings and whether logged in
         //
@@ -313,15 +313,15 @@ $.widget( "heurist.search", {
         //set input search textarea same height as button
         //this.input_search.height( '2.5em' );//this.btn_search_as_guest.height() - 2 );
 
-        
+
         // Add record button
         if(this.options.btn_visible_newrecord){
-            
+
             this.div_add_record = $('<div>')
                 .addClass('div-table-cell  logged-in-only')
                 .css('padding-left','1em')
                 .appendTo( this.div_search );
-            
+
             this.btn_add_record = $( "<button>", {
                 text: top.HR("Add Record")
             })
@@ -335,8 +335,8 @@ $.widget( "heurist.search", {
             .click( function(){ that._addNewRecord(); });
 
         } // add record button
-        
-        
+
+
 
         //
         // search function links below filter expression field
@@ -657,7 +657,7 @@ $.widget( "heurist.search", {
                 this._doLogin();
             }
         }
-        
+
         $(this.element).find('.div-table-cell').height( $(this.element).height() );
 
         this.btn_search_as_user.button( "option", "label", top.HR(this._getSearchDomainLabel(this.options.search_domain)));
@@ -678,7 +678,7 @@ $.widget( "heurist.search", {
                 }
                 var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                top.HEURIST4.msg.showDialog(url, { width:740, height:540, callback:
+                top.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
                     function(res){
                         if(!Hul.isempty(res)) {
                                 that.input_search.val(res);
@@ -694,9 +694,9 @@ $.widget( "heurist.search", {
 
         if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-            //data is search query request                                                                 
-            //topids not defined - this is not rules request 
-            if(data!=null && top.HEURIST4.util.isempty(data.topids)){ 
+            //data is search query request
+            //topids not defined - this is not rules request
+            if(data!=null && top.HEURIST4.util.isempty(data.topids)){
 
                     //request is from some other widget (outside)
                     if(data.source!=that.element.attr('id')){
@@ -710,8 +710,8 @@ $.widget( "heurist.search", {
                         that._refresh();
                     }
 
-                    if( data.q!='' ){    
-                        if(that.options.is_progress_visible){                
+                    if( data.q!='' ){
+                        if(that.options.is_progress_visible){
                             that.div_search.css('display','none');
                             that.div_progress.width(this.div_search.width());
                             that.div_progress.css('display','inline-block');
@@ -720,12 +720,12 @@ $.widget( "heurist.search", {
                             that.div_search_as_user.css('display','none');
                         }
                     }
-                    
+
                     that._renderProgress( null );
             }
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-        
+
                 if(data){
                     that._renderProgress( data.getProgressInfo() );
                 }
@@ -734,14 +734,14 @@ $.widget( "heurist.search", {
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
                  that._renderProgress( null );
-                 if(that.options.is_progress_visible){                
+                 if(that.options.is_progress_visible){
                     that.div_progress.css('display','none');
                     that.div_search.css('display','inline-block');
                  }else{
                     that.div_search_stop.css('display','none');
                     that.div_search_as_user.css('display','table-cell');
                  }
-                 
+
         }
 
 
@@ -799,13 +799,13 @@ $.widget( "heurist.search", {
                             detail: 'detail',
                             source: this.element.attr('id') };
 
-          top.HAPI4.SearchMgr.doSearch( this, request );                        
-                        
+          top.HAPI4.SearchMgr.doSearch( this, request );
+
         }
-        
+
     }
 
-    
+
 
     /**
     *  public method
@@ -1060,7 +1060,7 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user.remove();
         this.div_search_as_guest.remove();
-        
+
         this.btn_search_stop.remove();
         this.div_search_stop.remove();
 
@@ -1074,7 +1074,7 @@ $.widget( "heurist.search", {
     //
     //
     , _renderProgress: function( data ){
-        
+
             if(!data) data = {text:'', value:0};
 
             this.progress_lbl.html( data.text );
@@ -1087,7 +1087,7 @@ $.widget( "heurist.search", {
 
         var url = top.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
-        top.HEURIST4.msg.showDialog(url, { height:550, width:700,
+        top.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
                     callback:function(responce) {
 /*
                 var sURL = top.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
@@ -1113,7 +1113,7 @@ $.widget( "heurist.search", {
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
-        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
+        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary'} );
 
     }
 

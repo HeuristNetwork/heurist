@@ -1,6 +1,6 @@
 /**
 * Accordeon/treeview in navigation panel: saved, faceted and tag searches
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -19,7 +19,7 @@
 
 var Hul = top.HEURIST4.util;
 
-//constants 
+//constants
 const _NAME = 0, _QUERY = 1, _GRPID = 2;
 
 $.widget( "heurist.svs_list", {
@@ -34,7 +34,7 @@ $.widget( "heurist.svs_list", {
     currentSearch: null,
     hSvsEdit: null,
     treeviews:{},
-    
+
     // the constructor
     // create filter+button and div for tree
     _create: function() {
@@ -42,24 +42,24 @@ $.widget( "heurist.svs_list", {
         var that = this;
 
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
-        this.search_faceted = $( "<div>", {id:this.element.attr('id')+'_search_faceted'} ).css({'height':'100%'}).appendTo( this.element ).hide(); 
-        
-        
+        this.search_faceted = $( "<div>", {id:this.element.attr('id')+'_search_faceted'} ).css({'height':'100%'}).appendTo( this.element ).hide();
+
+
         this.div_header = $( "<div>" ).css({'width':'100%', 'padding-left':'2.5em', 'font-size':'0.9em'}) //, 'height':'2em', 'padding':'0.5em 0 0 2.2em'})
                     //.removeClass('ui-widget-content')
                     .appendTo( this.search_tree );
-        
+
         this.helper_top = $( '<div>'+top.HR('right-click for actions')+'</div>' )
             .addClass('logged-in-only heurist-helper1')
             .appendTo( $( "<div>" ).css('height','1.3em').appendTo(this.div_header) )
             //.appendTo( this.accordeon );
             if(top.HAPI4.get_prefs('help_on')=='0') this.helper_top.hide();
-        
-        
+
+
         if(this.options.btn_visible_filter){
-        
+
             this.filter = $( "<div>" ).css({'height':'2em', 'width':'100%'}).appendTo( this.search_tree );
-            
+
             this.filter_input = $('<input name="search" placeholder="Filter...">')
                             .css('width','100px').appendTo(this.filter);
             this.btn_reset = $( "<button>" )
@@ -79,11 +79,11 @@ $.widget( "heurist.svs_list", {
                 title: top.HR("Save"),
                 text:false})
             .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
-            
+
         }
 
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
-        
+
         var toppos = 1;
         //if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
         if(this.options.btn_visible_filter) toppos = toppos + 2;
@@ -92,11 +92,11 @@ $.widget( "heurist.svs_list", {
         //main container
         this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':'1em', 'right':'0.5em', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
-        
+
         this.edit_dialog = null;
-            
+
         if(this.options.btn_visible_filter){
-            // listeners            
+            // listeners
             this.filter_input.keyup(function(e){
                   var leavesOnly = true; //$("#leavesOnly").is(":checked"),
                       match = $(this).val();
@@ -110,10 +110,10 @@ $.widget( "heurist.svs_list", {
                     if(groupID){
                         var n = that.treeviews[groupID].filterNodes(match, leavesOnly); //n - found
                     }
-                 
+
                   that.btn_reset.attr("disabled", false);
-            });        
-            
+            });
+
             this._on( this.btn_reset, { click: function(){
                   this.filter_input.val("");
                   for (var groupID in this.treeviews)
@@ -123,7 +123,7 @@ $.widget( "heurist.svs_list", {
             } });
             this._on( this.btn_save, { click: "_saveTreeData"} );
         }
-        
+
 
         //global listener
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
@@ -133,8 +133,8 @@ $.widget( "heurist.svs_list", {
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
             if(data && !data.increment){
-                that.currentSearch = Hul.cloneJSON(data);  
-            } 
+                that.currentSearch = Hul.cloneJSON(data);
+            }
         });
 
         this._refresh();
@@ -150,7 +150,7 @@ $.widget( "heurist.svs_list", {
 
     /* private function */
     _refresh: function(){
-        
+
         if(!top.HAPI4.is_logged()){
              top.HAPI4.currentUser.usr_GroupsList = [];
         }else if (!this.helper_btm) {
@@ -166,11 +166,11 @@ $.widget( "heurist.svs_list", {
             var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields">'
             //+'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);vertical-align:middle">'
             +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;Faceted search</div>'        
+            +'&nbsp;Faceted search</div>'
             +'<div style="font-style:italic;" title="Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)">'
             //+'<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);vertical-align:middle">'
             +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;Search with rules</div>';        
+            +'&nbsp;Search with rules</div>';
 
             this.helper_btm = $( '<div>'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
@@ -182,7 +182,7 @@ $.widget( "heurist.svs_list", {
         var that = this;
         if(!top.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
 
-            top.HAPI4.SystemMgr.ssearch_get( null, 
+            top.HAPI4.SystemMgr.ssearch_get( null,
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
                         top.HAPI4.currentUser.usr_SavedSearch = response.data;
@@ -190,7 +190,7 @@ $.widget( "heurist.svs_list", {
                     }
             });
         }else if(!top.HAPI4.currentUser.usr_GroupsList){
-            
+
                 //get details about user groups (names etc)
                 top.HAPI4.SystemMgr.mygroups(
                     function(response){
@@ -199,32 +199,32 @@ $.widget( "heurist.svs_list", {
                             that._refresh();
                         }
                 });
-                
+
         }else{
             this._updateAccordeon();
         }
 
     },
-    
+
     //
     // save current treeview layout
     //
     _saveTreeData: function( groupToSave ){
 
             isPersonal = (groupToSave=="all" || groupToSave=="bookmark" || groupToSave=="rules");
-        
-            var treeData = {};        
+
+            var treeData = {};
               for (var groupID in this.treeviews)
                 if(groupID){
                     if ( (isPersonal && isNaN(groupID)) || groupToSave == groupID){
-                    
+
                         var d = this.treeviews[groupID].toDict(true);
                         treeData[groupID] = d;
                     }
                 }
-          
+
             var request = { data:JSON.stringify(treeData) };
-            
+
             top.HAPI4.SystemMgr.ssearch_savetree( request, function(response){} );
     },
 
@@ -232,38 +232,38 @@ $.widget( "heurist.svs_list", {
     // redraw accordeon - list of workgroups + rules, all, bookmarked
     //
     _updateAccordeon: function(){
-        
+
         this.accordeon.hide();
 
-        
+
         var islogged = (top.HAPI4.is_logged());
         //if not logged in show only rules and "my searches/all records"
-        
+
         this.treeviews = {};
-        
+
         var that = this;
-        
+
         //verify that all required libraries have been loaded
-        if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js                           
+        if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
             $.getScript(top.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
             return;
-        }else if(!islogged){   
-        
-            top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();         
-            
+        }else if(!islogged){
+
+            top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
+
         }else if(!$.ui.fancytree._extensions["dnd"]){
         //    $.getScript(top.HAPI4.basePathV4+'ext/fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
             alert('drag-n-drop extension for tree not loaded')
             return;
         }else if(!top.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded - load from file [user_id]_svstree.json
-            
+
             top.HAPI4.SystemMgr.ssearch_gettree( function(response){
-                
+
                 if(response.status = top.HAPI4.ResponseStatus.OK){
                     try {
                         //1. remove nodes that refers to missed search
                         function __cleandata(data){
-                            
+
                             if(data.children){
                                 var newchildren = [];
                                 for (var idx in data.children){
@@ -279,47 +279,47 @@ $.widget( "heurist.svs_list", {
                             }else{
                                 return data;
                             }
-                        }                        
-                        
+                        }
+
                         top.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
-                        
+
                         top.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(top.HAPI4.currentUser.ugr_SvsTreeData);
-                        
+
                     }
                     catch (err) {
-                    }  
+                    }
                 }
-                
+
                 if(!top.HAPI4.currentUser.ugr_SvsTreeData) //treeview was not saved - define tree data by default
                         top.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
                 else{
                     that._validate_TreeData();
-                }        
-                        
-                //add missed entries        
-                        
-                        
-                that._updateAccordeon();        
+                }
+
+                //add missed entries
+
+
+                that._updateAccordeon();
             } );
-            
+
             return;
-        }        
-        
-        
+        }
+
+
         //add db summary as a first entry
         if(this.options.btn_visible_dbstructure && this.helper_btm){
-                                           //8ea9b9 
-            this.helper_btm.before( 
+                                           //8ea9b9
+            this.helper_btm.before(
               $('<div>')
                 .attr('grpid',  'dbs').addClass('svs-acordeon')
                 .css('border','none')
                 .append( this._defineHeader(top.HR('Database Summary'), 'dbs').click( function(){ that._showDbSummary(); })
                 ) );
-        
+
             //
-        }        
-                
-        if(islogged){   
+        }
+
+        if(islogged){
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'rules').addClass('svs-acordeon')
@@ -327,12 +327,12 @@ $.widget( "heurist.svs_list", {
                 .append( this._defineHeader(top.HR('Rule Sets'), 'rules'))
                 .append( this._defineContent('rules') ));
 
-                
+
             this.helper_btm.before(
                 $('<div>')
                     .addClass('svs-acordeon-group')
                     .html(top.HR('PERSONAL')));
-                
+
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'bookmark').addClass('svs-acordeon')
@@ -351,12 +351,12 @@ $.widget( "heurist.svs_list", {
             var groups = top.HAPI4.currentUser.usr_GroupsList;
 
             if(groups){
-                
+
                 this.helper_btm.before(
                 $('<div>')
                     .addClass('svs-acordeon-group')
                     .html(top.HR('WORKGROUPS')));
-            
+
                 for (var groupID in groups)
                 {
                     if(groupID){
@@ -374,17 +374,17 @@ $.widget( "heurist.svs_list", {
                 .attr('grpid',  'all').addClass('svs-acordeon')
                 .append( this._defineHeader(top.HR('Predefined Searches'), 'all'))
                 .append( this._defineContent('all') )).appendTo( this.accordeon );
-                        
-               
+
+
         }
-        
+
         var keep_status = top.HAPI4.get_prefs('svs_list_status');
         if(!keep_status) keep_status = {};
         else keep_status = $.parseJSON(keep_status);
 
         var cdivs = this.accordeon.find('.svs-acordeon');
         $.each(cdivs, function(i, cdiv){
-            
+
             cdiv = $(cdiv);
             var groupid = cdiv.attr('grpid');
             cdiv.accordion({
@@ -395,17 +395,17 @@ $.widget( "heurist.svs_list", {
             activate: function(event, ui) {
                 //save status of accordions - expandad/collapsed
                 if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
-                    keep_status[ ui.newHeader.attr('grpid') ] = true;    
+                    keep_status[ ui.newHeader.attr('grpid') ] = true;
                 }else{ //collapsed
-                    keep_status[ ui.oldHeader.attr('grpid') ] = false;    
+                    keep_status[ ui.oldHeader.attr('grpid') ] = false;
                 }
                 //save
                 top.HAPI4.SystemMgr.save_prefs({'svs_list_status': JSON.stringify(keep_status)});
                 }
             });
         });
-        
-        
+
+
         /*this.accordeon.children()
         .accordion({
             active: ( ( keep_status && keep_status[ this.attr('grpid') ] )?0:false),
@@ -415,42 +415,42 @@ $.widget( "heurist.svs_list", {
             activate: function(event, ui) {
                 //save status of accordions - expandad/collapsed
                 if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
-                    keep_status[ ui.newHeader.attr('grpid') ] = true;    
+                    keep_status[ ui.newHeader.attr('grpid') ] = true;
                 }else{ //collapsed
-                    keep_status[ ui.oldHeader.attr('grpid') ] = false;    
+                    keep_status[ ui.oldHeader.attr('grpid') ] = false;
                 }
                 //save
                 top.HAPI4.save_prefs({'svs_list_status': keep_status});
             }
         });*/
-        this.accordeon.show();        
-        
+        this.accordeon.show();
+
     },
-    
-    _getAddContextMenu: function(groupID){  
+
+    _getAddContextMenu: function(groupID){
                var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }];
                if(groupID!='rules'){
-                    arr_menu.push({title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" });  
+                    arr_menu.push({title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-plus" });
                }
                arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
-               
+
                var that = this;
 
                var context_opts = {
                     menu: arr_menu,
                     select: function(event, ui) {
                          if(ui.cmd=="addFolder"){
-                             
-                            setTimeout(function(){ 
+
+                            setTimeout(function(){
                                 var tree = that.treeviews[groupID];
-                                var node = tree.rootNode;  
-                                node.folder = true;  
-                                
+                                var node = tree.rootNode;
+                                node.folder = true;
+
                                 node.editCreateNode( "child", {title:"", folder:true}); //New folder
                                 that._saveTreeData( groupID );
                                 $("#addlink"+groupID).css('display', 'none');
                             }, 300);
-                            //tree.trigger("nodeCommand", {cmd: ui.cmd}); 
+                            //tree.trigger("nodeCommand", {cmd: ui.cmd});
                          }else{
                             var isfaceted = (ui.cmd=="addSearch2");
                             that.editSavedSearch(isfaceted?'faceted':'saved', groupID);
@@ -458,8 +458,8 @@ $.widget( "heurist.svs_list", {
                     }
                     };
                return context_opts;
-    }, 
-      
+    },
+
     _defineHeader: function(name, domain){
 
         var $header = $('<h3 grpid="'+domain+'">'+name+'</h3>').addClass('tree-accordeon-header');
@@ -484,14 +484,14 @@ $.widget( "heurist.svs_list", {
             .appendTo($header);
         }
         */
-        
+
         if('dbs'!=domain){
             var context_opts = this._getAddContextMenu(domain);
             $header.contextmenu(context_opts);
         }
-        
+
         return $header
-    },    
+    },
 
     //
     // redraw treeview with the list of saved searches for given groupID and domain
@@ -502,19 +502,19 @@ $.widget( "heurist.svs_list", {
         var res;
         var that = this;
         var CLIPBOARD = null;
-        
+
         var treeData = top.HAPI4.currentUser.ugr_SvsTreeData[groupID] && top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children
                              ?top.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
-        
+
         var tree = $("<div>").css('padding-bottom','0em');
-            
-        var fancytree_options =     
+
+        var fancytree_options =
             {
         checkbox: false,
         //titlesTabbable: false,     // Add all node titles to TAB chain
         source: treeData,
         quicksearch: true,
-        
+
         renderNode: function(event, data) {
             // Optionally tweak data.node.span
             var node = data.node;
@@ -524,13 +524,13 @@ $.widget( "heurist.svs_list", {
               if(node.folder){
                   //
                     s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block;"></span>';
-                    $span.find("> span.fancytree-title").html(s1 + 
+                    $span.find("> span.fancytree-title").html(s1 +
                     '<div style="display:inline-block;vertical-align:top;padding:2 0 0 3;font-weight:normal !important">'+node.title+'</div>');
                     //vertical-align:top;
-                    
+
                     //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
                     //s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-cubes.png&quot;);">';
-              }else{ 
+              }else{
                   if(node.data.isrules){
                         //s = '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'+'" title="+rule set" style="background-image: url(&quot;'+top.HAPI4.basePathV4+'assets/fa-share-alt.png&quot;);">';
                         s = '<span class="ui-icon ui-icon-shuffle" style="float:right;font-size:1em" title="rules" ></span>';
@@ -547,9 +547,9 @@ $.widget( "heurist.svs_list", {
                             :'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields'  );
                   }
               }
-              
+
               //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
-              
+
               //.css({fontStyle: "italic"});
               /*
               $span.find("> span.fancytree-icon").css({
@@ -558,7 +558,7 @@ $.widget( "heurist.svs_list", {
                 backgroundPosition: "0 0"
               });*/
             }
-          },    
+          },
 
 
             click: function(event, data) {
@@ -577,10 +577,10 @@ $.widget( "heurist.svs_list", {
                     }
                     that._doSearch2( qname, qsearch, isfaceted, event.target );
                 }
-                
+
             }
           };
-  
+
   if(top.HAPI4.is_logged()){
 
       fancytree_options['extensions'] = ["edit", "dnd", "filter"];
@@ -594,7 +594,7 @@ $.widget( "heurist.svs_list", {
           dragEnter: function(node, data) {
               // return ["before", "after"];
               if(node.tree._id == data.otherNode.tree._id){
-                  return node.folder ?true :["before", "after"];    
+                  return node.folder ?true :["before", "after"];
               }else{
                   return false;
               }
@@ -609,7 +609,7 @@ $.widget( "heurist.svs_list", {
       fancytree_options['edit'] = {
           save:function(event, data){
               if(''!=data.input.val())
-                    that._saveTreeData( groupID ); 
+                    that._saveTreeData( groupID );
           }
       };
       fancytree_options['filter'] = { mode: "hide" };
@@ -643,24 +643,24 @@ $.widget( "heurist.svs_list", {
           node.setActive();
           break;
         case "rename":   //EDIT
-        
+
             if(!node.folder && node.key>0){
                 that.editSavedSearch(node.data.isfaceted?'faceted':'saved', groupID, node.key, null, node);
             }else{
-                node.editStart();   
+                node.editStart();
             }
-          
+
           break;
         case "remove":
-                  
+
               function __removeNode(){
-                    node.remove(); 
-                    that._saveTreeData( groupID ); 
+                    node.remove();
+                    that._saveTreeData( groupID );
                     if(that.treeviews[groupID].count()<1){
                         $("#addlink"+groupID).css('display', 'block');
                     }
               }
-        
+
             if(node.folder){
                 if(node.countChildren()>0){
                     top.HEURIST4.msg.showMsgDlg('Can not delete non-empty folder. Delete dependent entries first.',null,top.HR('Warning'));
@@ -669,7 +669,7 @@ $.widget( "heurist.svs_list", {
                 }
             }else{
                   //saved search may have several entries - try to find
-                  
+
                   //loop all nodes
                   var cnt = 0;
                   that.treeviews[groupID].visit(function(node2){
@@ -678,32 +678,32 @@ $.widget( "heurist.svs_list", {
                           if(cnt>1) return false;
                       }
                   });
-                
+
                   if(cnt==1){
                     that._deleteSavedSearch(node.key, node.title, __removeNode);
                   }else{
-                    __removeNode();    
+                    __removeNode();
                   }
             }
           break;
         case "addFolder":  //always create sibling folder
           /*if(!node.folder){
-            node = tree.rootNode;    
+            node = tree.rootNode;
           }*/
-          //node = node.parent;    
+          //node = node.parent;
           node.editCreateNode( node.folder?"child":"after", {title:"", folder:true}); //New folder
-          
+
           break;
 
         case "addSearch":  //add new saved search
         case "addSearch2": //add new faceted search
-        
+
            var isfaceted = (data.cmd == "addSearch2");
 
            that.editSavedSearch(isfaceted?'faceted':'saved', groupID, null, null, node);
-          
+
           break;
-          
+
         case "addChild":
           node.editCreateNode("child", "New folder");
           // refNode = node.addChildren({
@@ -741,12 +741,12 @@ $.widget( "heurist.svs_list", {
             CLIPBOARD.data.moveTo(node, "child");
             CLIPBOARD.data.setActive();
             that._saveTreeData( groupID );
-            
+
           } else if( CLIPBOARD.mode === "copy" ) {
             node.addChildren(CLIPBOARD.data).setActive();
             that._saveTreeData( groupID );
           }
-          
+
           break;
         default:
           alert("Unhandled command: " + data.cmd);
@@ -784,8 +784,8 @@ $.widget( "heurist.svs_list", {
           $(this).trigger("nodeCommand", {cmd: cmd});
           return false;
         }
-      });    
-      
+      });
+
       /*
        * Context menu (https://github.com/mar10/jquery-ui-contextmenu)
        */
@@ -824,11 +824,11 @@ $.widget( "heurist.svs_list", {
           .click(function(event){ tree.contextmenu("open", $(event.target) ); top.HEURIST4.util.stopEvent(event); return false;})
           .appendTo(item);
       })
-      
-      
+
+
           var context_opts = this._getAddContextMenu(groupID);
-  
-  
+
+
           //treedata is empty - add div - to show add links
           var tree_links = $("<div>", {id:"addlink"+groupID})
           .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
@@ -836,10 +836,10 @@ $.widget( "heurist.svs_list", {
               .html('<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom"></span>add')
               .click(function(event){
                   $(this).contextmenu('open', $(this));
-              }) 
+              })
               .contextmenu(context_opts)
           );
-              
+
 
           res = $('<div>').append(tree_links).append(tree);
     }else{
@@ -847,7 +847,7 @@ $.widget( "heurist.svs_list", {
           tree.fancytree(fancytree_options);
           res = $('<div>').append(tree);
     }
-      
+
        this.treeviews[groupID] = tree.fancytree("getTree");
 
        return res;
@@ -856,14 +856,14 @@ $.widget( "heurist.svs_list", {
 
     //add missed groups and saved searches to treeview
     _validate_TreeData: function(){
-        
+
         var treeData = this._define_DefaultTreeData();
-        
+
         //form files
         var treeDataF = top.HAPI4.currentUser.ugr_SvsTreeData;
         if(!treeDataF) treeDataF = {};
-        
-                
+
+
         for (var groupID in treeData){
             if(!treeDataF[groupID]){
                 //direct copy
@@ -872,12 +872,12 @@ $.widget( "heurist.svs_list", {
                 if(!treeDataF[groupID]['children']){
                     treeDataF[groupID]['children'] = [];
                 }
-                
-                
+
+
                 function __findInTeeDataF(nodes, key){
-                    
+
                     var res = false;
-                    
+
                                 for (var idx in nodes){
                                   if(idx>=0){
                                        var node = nodes[idx];
@@ -886,14 +886,14 @@ $.widget( "heurist.svs_list", {
                                        }else if(node['children']){
                                            res = __findInTeeDataF( node.children, key );
                                            if(res) return res;
-                                       }                                       
+                                       }
                                   }
                                 }
-                                
-                    return res; 
-                    
+
+                    return res;
+
                 }
-                
+
                 //add missed saved searches
                 var svs = treeData[groupID].children;
                 var i;
@@ -907,10 +907,10 @@ $.widget( "heurist.svs_list", {
                 }
             }
         }
-        
+
         top.HAPI4.currentUser.ugr_SvsTreeData = treeDataF;
     },
-    
+
     _define_DefaultTreeData: function(){
 
         var treeData;
@@ -929,9 +929,9 @@ $.widget( "heurist.svs_list", {
                 all: { title: top.HR('Searches'), folder: true, expanded: true, children: this._define_SVSlist(0, 'all') }
             };
         }
-        
+
         if(top.HAPI4.is_logged()){
-        
+
             var groups = top.HAPI4.currentUser.usr_GroupsList;
 
             for (var groupID in groups)
@@ -941,11 +941,11 @@ $.widget( "heurist.svs_list", {
                     treeData[groupID] = {title: name, folder: true, expanded: false, children: this._define_SVSlist(groupID) };
                 }
             }
-        
+
         }
-        
+
         return treeData;
-        
+
     },
 
     //
@@ -972,19 +972,19 @@ $.widget( "heurist.svs_list", {
         }
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
-        
-        
+
+
 
         for (var svsID in ssearches)
         {
             var facet_params = null, domain2, isfaceted = false, isrules = false, saddition = '';
-            
+
             if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
 
 
                 try {
                     facet_params = $.parseJSON(ssearches[svsID][_QUERY]);
-                    
+
                     if(facet_params && Hul.isArray(facet_params.rectypes)){
                         //this is faceted search
                         domain2 = facet_params.domain;
@@ -1006,11 +1006,11 @@ $.widget( "heurist.svs_list", {
                                 saddition = ' [+rules]';
                                 isrules = true;
                             }
-                            domain2 = prms.w;    
+                            domain2 = prms.w;
                             if(Hul.isempty(prms.q)) continue; //do not show saved searches without Q (rules) in this list
                         }
                 }
-                
+
                 if(!domain || domain==domain2){
                     var sname = ssearches[svsID][_NAME]; // + saddition;                     //, iconclass:'ui-icon icon-share-alt'
                     res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted, isrules:isrules } );    //, url:ssearches[svsID][_QUERY]
@@ -1039,7 +1039,7 @@ $.widget( "heurist.svs_list", {
     },*/
 
     _doSearch2: function(qname, qsearch, isfaceted, ele){
-        
+
         if ( qsearch ) {
 
             if(isfaceted){
@@ -1058,10 +1058,10 @@ $.widget( "heurist.svs_list", {
                 }
 
                 var that = this;
-                
-                
+
+
                 if(facet_params['version']==2){
-                    
+
                         this.search_faceted.show();
                         this.search_tree.hide();
 
@@ -1072,37 +1072,37 @@ $.widget( "heurist.svs_list", {
                         }};
 
                         if(this.search_faceted.html()==''){ //not created yet
-                            this.search_faceted.search_faceted( noptions );                    
+                            this.search_faceted.search_faceted( noptions );
                         }else{
                             this.search_faceted.search_faceted('option', noptions ); //assign new parameters
                         }
-                    
+
                 }else{
-                
+
                     top.HEURIST4.msg.showMsgErr("This faceted search is old version. "
                     +"We apologise for this error which is due to changes in the format of saved searches "
                     +"required to support new features, and the costs of providing backward compatibility "
-                    +"for a relatively small user-base.")    
-                
+                    +"for a relatively small user-base.")
+
                 }
 
             }else{
 
                 var request = Hul.parseHeuristQuery(qsearch);
-                
+
                 //query is not defenied, but rules are - this is pure rule set - apply it to current result set
-                if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){  
-                    
+                if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
+
                     if(this.currentSearch){
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);
                     }
-                    
-                    //target is required 
+
+                    //target is required
                     if(! top.HAPI4.SearchMgr.doApplyRules( this, request.rules ) ){
                         top.HEURIST4.msg.showMsgFlash(top.HR('Rule sets require an initial search result as a starting point.'),
                              3000, top.HR('Warning'), ele);
                     }
-                    
+
                 }else{
                     //additional params
                     request.detail = 'detail';
@@ -1116,7 +1116,7 @@ $.widget( "heurist.svs_list", {
         }
 
     },
-    
+
     _deleteSavedSearch: function(svsID, svsTitle, callback){
 
 
@@ -1140,10 +1140,10 @@ $.widget( "heurist.svs_list", {
                 }
 
             );
-            }, "Confirmation");                 
+            }, "Confirmation");
 
     }
-    
+
     , _hasRules: function(query){
           var prms = Hul.parseHeuristQuery(query);
           return (!Hul.isempty(prms.rules));
@@ -1156,10 +1156,10 @@ $.widget( "heurist.svs_list", {
     , editSavedSearch: function(mode, groupID, svsID, squery, node){
 
         var that = this;
-            
-        var callback = function(event, request) {    
+
+        var callback = function(event, request) {
                 if(Hul.isempty(svsID)){     //new saved search
-                
+
                     //update tree after addition - add new search to root
                     if(Hul.isnull(node)){
                         groupID = request.svs_UGrpID
@@ -1167,17 +1167,17 @@ $.widget( "heurist.svs_list", {
                                groupID = request.domain; //all or bookmarks
                         }
                         var tree = that.treeviews[groupID];
-                        node = tree.rootNode;  
-                        node.folder = true;  
+                        node = tree.rootNode;
+                        node.folder = true;
                     }
                     var isfaceted = (mode=='faceted');
-                    node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted, isrules:that._hasRules(request.svs_Query) }, node.folder?"child":"after" );    
-                    
+                    node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted, isrules:that._hasRules(request.svs_Query) }, node.folder?"child":"after" );
+
                     that._saveTreeData( groupID );
                     $("#addlink"+groupID).css('display', 'none');
-                    
+
                 }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
-                
+
                     //edit - changed only title in treeview
                     var saddition = '';
                     node.data.isrules = false;
@@ -1191,28 +1191,28 @@ $.widget( "heurist.svs_list", {
                     that._saveTreeData( groupID );
                 }
            };
-        
-        
+
+
         if( true ) { //}!Hul.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded     @todo - load dynamically
-            
+
             if(groupID=="rules" && Hul.isempty(svsID)) mode="rules";
-            
+
             if(Hul.isnull(svsID) && Hul.isempty(squery)){
                 squery = this.currentSearch;
             }
-        
+
             if(null == this.edit_dialog){
                 this.edit_dialog = new hSvsEdit();
             }
             //this.edit_dialog.callback_method  = callback;
             this.edit_dialog.show( mode, groupID, svsID, squery, callback );
-                
+
         }else{
             $.getScript(top.HAPI4.basePathV4+'apps/search/svs_edit.js', function(){ that.hSvsEdit = hSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
-    
+
     },
-    
+
 
     // events bound via _on are removed automatically
     // revert other modifications here
@@ -1223,26 +1223,26 @@ $.widget( "heurist.svs_list", {
         }
 
         if(this.filter){
-            this.btn_save.remove(); 
-            this.btn_reset.remove(); 
-            this.filter.remove(); 
+            this.btn_save.remove();
+            this.btn_reset.remove();
+            this.filter.remove();
         }
-        this.accordeon.remove(); 
-        //this.tree.remove(); 
-        
-        this.search_tree.remove(); 
-        this.search_faceted.remove(); 
+        this.accordeon.remove();
+        //this.tree.remove();
+
+        this.search_tree.remove();
+        this.search_faceted.remove();
     }
-    
+
     , _showDbSummary: function(){
-        
+
         var url = top.HAPI4.basePathV4+ "page/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
-        
+
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
-        
-        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8} );
-            
+
+        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
+
     }
 
 });
