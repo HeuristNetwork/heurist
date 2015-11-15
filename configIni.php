@@ -61,7 +61,8 @@ Also move parentDirectory.index.html - the Heurist 'switchboard' to the parent d
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.1.1"; // sets current program version number, determined by Heurist development lead
+$version = "4.1.2"; // sets current program version number, determined by Heurist development lead
+// Vsn 4.1.2 15 Nov 2015
 // Vsn 4.1.1 02 Nov 2015
 // Vsn 4.1.0 15 sep 2015
 // 3.2.0 alpha 8th July 2014, beta 21st July 2014
