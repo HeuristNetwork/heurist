@@ -1433,11 +1433,17 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
         }
         fclose($remote);    
 
-        // split the headers and the body
-        $response = preg_split("|(?:\r?\n){2}|m", $response, 2);
-        if(!isset($response[1])) $response[1] = "";
 
-        $result = json_decode($response[1], true);
+        // split the headers and the body
+        $response2 = preg_split("|(?:\r?\n){2}|m", $response, 2);
+        $response2 = (isset($response2[1]))?$response2[1]:"";
+
+        if(strpos($response2,$CRLF)>0){
+            $response2 = explode($CRLF, $response2);
+            $response2 = $response2[1];
+        }
+        
+        $result = json_decode($response2, true);
     }
     
     /* it requires pecl http
@@ -1587,6 +1593,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
 }else{ // single output stream
 
     openTag('hml', $hmlAttrs);
+    
+    //makeTag('raw',null, $response2 );
+    
     /*
     openTag('hml', array(
     'xmlns' => 'http://heuristscholar.org/heurist/hml',
@@ -1611,4 +1620,3 @@ if($intofile){ // flags HuNI manifest + separate files per record
     closeTag('hml');
 }
 ?>
-
