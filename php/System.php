@@ -588,7 +588,7 @@
                     $_SESSION[$this->dbname_full]['ugr_ID']       = $_SESSION[$h3session]['user_id'];
                     $_SESSION[$this->dbname_full]['ugr_Name']     = $_SESSION[$h3session]['user_name'];
                     $_SESSION[$this->dbname_full]['ugr_FullName'] = $_SESSION[$h3session]['user_realname'];
-                    $_SESSION[$this->dbname_full]['keepalive']    = $_SESSION[$h3session]['keepalive'];
+                    $_SESSION[$this->dbname_full]['keepalive']    = @$_SESSION[$h3session]['keepalive'];
                 }
             }
 

@@ -177,6 +177,10 @@ function doRegister(event){
                 margin-top:10px;
                 padding:10px;
              }
+             p{
+                 padding:5px;
+             }
+             
         </style>
 
         <script>
@@ -360,9 +364,12 @@ function doRegister(event){
 
         <?php
             if($blankServer){
-                echo '<body style="padding:45px">';
-                echo '<div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">';
-                echo '<div class="logo" style="background-color:#2e3e50;width:100%"></div>';
+        ?>
+                <body style="padding:45px">
+                    <div class="ui-corner-all ui-widget-content" 
+                        style="text-align:left; width:70%; min-height:550px; margin:0px auto; padding: 0.5em;">
+                    <div class="logo" style="background-color:#2e3e50;width:100%;margin-bottom:20px"></div>
+         <?php       
             }else{
                 echo '<body class="popup">';
                 echo (@$_REQUEST['popup']=='1'?'':'<div class="banner"><h2>Create New Database</h2></div>');
@@ -437,7 +444,7 @@ function doRegister(event){
                         <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:2px;">
                             <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
                                 class="labelBold" style="padding-left: 2em;">Standard starter database</label>
-                            <div style="padding-left: 38px;padding-bottom:10px;width:620px">
+                            <div style="padding-left: 38px;padding-bottom:10px;width:600px">
                                 Gives an uncluttered database with essential record types, fields,
                                 terms and relationships, including bibliographic and spatial entities.<br />
                                 Recommended for most new databases unless you wish to copy a particular template (next option).
@@ -447,7 +454,7 @@ function doRegister(event){
 
                             <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
                                 class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
-                            <div style="padding-left: 38px;width:620px">
+                            <div style="padding-left: 38px;width:600px">
                                 Use a database registered with the Heurist Network as a template.
                                 Copies record types, fields, terms and relationships from the database selected. 
                                 Databases with an ID &lt; 1000 are curated by the Heurist team and include templates
@@ -593,7 +600,7 @@ function doRegister(event){
                     //debug print $reg_url."</br>";
                     $name = '';
 
-if(true){ //DEBUG: set to false to avoid real database creation
+if(false){ //DEBUG: set to false to avoid real database creation
                     // this is global variable that is used in buildCrosswalks.php
                     $templateFileName = "NOT DEFINED";
                     $templateFoldersContent = "NOT DEFINED";
@@ -780,24 +787,29 @@ if(true){ //DEBUG: set to false to avoid real database creation
                     // TODO: error check, although this is unlikely to fail
 
 } //DEBUG
-
-                    echo "<h2 style='padding:0 0 10px 0'>Congratulations, your new database '$newDBName' has been created</h2>";
-
+                    ?>
+<div  style='padding:0px 0 10px 0; font-size:larger;'>
+    <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>
+<?php
                     if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
-                        echo "<p><strong>Admin username:</strong> ".$name."<br />";
-                        echo "<strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>";
+?>                        
+           <p style="padding-left:10px"><strong>Admin username:</strong> <?php echo $name ?></p>
+           <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>
+<?php
                     }
+?>
+           <p style="padding-left:10px">Click here to log in to your new database:</p>
+           <p style="padding-left:6em"><b><a href="#"
+                 title="" onclick="{closeDialog('<?php echo $newDBName;?>'); return false;}">
+                    <?php echo HEURIST_BASE_URL_V4."?db=".$newDBName; ?>
+                 </a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
 
-                    echo "<p>Click here to log in to your new database: <p style=\"padding-left:6em\"><b><a href=\"#\"".
-                    " title=\"\" onclick=\"closeDialog('".$newDBName."'); return false;\">".
-                    HEURIST_BASE_URL_V4."?db=".$newDBName.
-                    "</a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>";
-
-                    echo "<p style=\"padding-left:6em\">".
-                    "After logging in to your new database, we suggest you import some additional entity types from one of the<br />".
-                    "curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />".
-                    "using Database &gt; Import Structure or Database &gt; Annotated Templates</p>";
-
+           <p style="padding-left:6em">
+                    After logging in to your new database, we suggest you import some additional entity types from one of the<br />
+                    curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
+                    using Database &gt; Import Structure or Database &gt; Annotated Templates</p>
+</div>                    
+<?php
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
 

@@ -110,6 +110,5 @@
 
     header('Content-type: application/json'); //'text/javascript');
     print json_encode($response);
-
     exit();
 ?>

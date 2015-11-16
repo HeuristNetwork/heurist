@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
             $.getScript(top.HAPI4.basePathV4+'js/search_incremental.js', function(){ that._create(); } );
             return;
         }*/
-        this.element.css({'height':'100%', 'min-width':'1100px'}).addClass('ui-heurist-header1');
+        this.element.css({'height':'6em', 'min-width':'1100px'}).addClass('ui-heurist-header1');
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};

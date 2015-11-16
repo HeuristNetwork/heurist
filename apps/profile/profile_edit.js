@@ -85,9 +85,10 @@ $.widget( "heurist.profile_edit", {
                     }
 
                     if(that.options.isdialog){
+                        
                         that.edit_form.dialog({
                             autoOpen: false,
-                            height: 580,
+                            height: 630,
                             width: 740,
                             modal: true,
                             resizable: true,

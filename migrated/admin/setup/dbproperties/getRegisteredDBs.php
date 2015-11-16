@@ -25,9 +25,8 @@
 */
 
 
-if (!@$_REQUEST['db']){// be sure to override default this should only be called on the Master Index server so point db master index dbname
-    $_REQUEST['db'] = "Heurist_Master_Index";
-}
+define('NO_DB_ALLOWED',1);
+define('SKIP_VERSIONCHECK2',1);
 require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
@@ -37,10 +36,10 @@ $registeredDBs = array();
 $is_named = (@$_REQUEST['named']==1); //return assosiated array
 
 
-if($_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
+if(@$_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
 
 
-    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
+    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
     if($is_named){
         $reg_url =  $reg_url.'&named=1';    
     }
