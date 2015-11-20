@@ -224,7 +224,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   ssearch_save - save saved search in database
     *   ssearch_delete - delete saved searches by IDs
     *   ssearch_savetree - save saved search treeview data
-    *   ssearch_gettree - save saved search treeview data
+    *   ssearch_gettree - get saved search treeview data
     *   get_defs     - get the desired database structure definition
     *
     * @returns {Object}
@@ -344,8 +344,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', request, callback);
             }
 
-            ,ssearch_gettree: function(callback){
-                _callserver('usr_info', {a:'svs_gettree'}, callback);
+            ,ssearch_gettree: function(request, callback){
+                if(request) request.a = 'svs_gettree';
+                _callserver('usr_info', request, callback);
             }
             /**
             *  Get the desired database structure definition 

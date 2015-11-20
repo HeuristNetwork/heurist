@@ -6,6 +6,14 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     EMPTY_MESSAGE:("Server returns nothing. Either server not accessible or script is corrupted."
                 +" Please try later and if issue persists please consult your system administrator "
                 +" or contact development team"),    
+
+    showMsgErrJson: function(response){
+        if(typeof response === "string"){
+            showMsgErr(null);
+        }else{
+            showMsgErr('Can not parse server response: '+response.substr(0,255)+'...');
+        }        
+    },
     
     showMsgErr: function(response){
         var msg = "";

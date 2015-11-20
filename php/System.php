@@ -466,7 +466,7 @@
                 }else{
                     $groups = array();
                 }
-                array_push($groups, $this->current_User['ugr_ID']);
+                array_push($groups, intval($this->current_User['ugr_ID']));
                 return $groups;
             }else{
                 null;
@@ -603,7 +603,7 @@
                 }
 
                 $this->current_User = array(
-                    'ugr_ID'=>$userID,
+                    'ugr_ID'=>intval($userID),
                     'ugr_FullName'=>$_SESSION[$this->dbname_full]['ugr_FullName'],
                     'ugr_Groups' => $_SESSION[$this->dbname_full]['ugr_Groups'],
                     'ugr_Preferences' => $_SESSION[$this->dbname_full]['ugr_Preferences']);

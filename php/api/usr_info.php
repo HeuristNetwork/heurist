@@ -128,7 +128,7 @@
                 
             } else if ($action=="svs_gettree" ) { //save saved searches tree status
 
-                $res = svsGetTreeData($system);
+                $res = svsGetTreeData($system, @$_REQUEST['UGrpID']);
                 
             } else {
 

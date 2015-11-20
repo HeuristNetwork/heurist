@@ -257,29 +257,51 @@
         
         $ugrID = $system->get_user_id();
         $ugr_groups = $system->get_user_group_ids();
+        $lastID = null;
         
         foreach($groups as $id=>$treedata){
 
-            if($id=="bookmark" || $id=="all" || $id=="rules"){
+            if($id=="bookmark" || $id=="all"){
                 array_push( $personal_data, '"'.$id.'":'.json_encode($treedata) );
             }else if(in_array($id, $ugr_groups)){
                 //check date of modification 
-                mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>$id, 'ugr_NavigationTree'=>json_encode($treedata) ));
+                $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>$id, 'ugr_NavigationTree'=>json_encode($treedata) ));
+                if(!is_int($res)){
+                    $system->addError(HEURIST_DB_ERROR, 'Can not update navigation tree (personal) on server sode', $res);
+                    return false;
+                }
+                
+                $lastID = $id;
             }
         }
 
         if(count($personal_data)>0){
             
-                mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', 
+                $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', 
                    array( 'ugr_ID'=>$ugrID, 'ugr_NavigationTree'=>implode(',', $personal_data)));
+                   
+                if(!is_int($res)){
+                    $system->addError(HEURIST_DB_ERROR, 'Can not update navigation tree (personal) on server sode', $res);
+                    return false;
+                }
+                
+                $lastID = $ugrID;
         }
-
+        
+        if($lastID>0){
+            //get modification time 
+            $date = mysql__select_value( $mysqli, 'SELECT `ugr_Modified` FROM `sysUGrps` WHERE ugr_ID='.$lastID);
+            return $date;
+        }
     
-        return true;
-
+        $system->addError(HEURIST_INVALID_REQUEST, 'No data provided to update tree on server side');
+        return false;
     }
 
-    function svsGetTreeData($system){
+    //
+    // $grpID - load tree data only for particular group
+    //
+    function svsGetTreeData($system, $grpID=null){
   
         $mysqli = $system->get_mysqli();
         //verify that required column exists in sysUGrps
@@ -303,9 +325,15 @@
         //load personal treeviews - rules, my filters (all) and bookmarks
         $groups = $system->get_user_group_ids(); 
         
+        if(@$grpID>0 && $system->is_member($grpID)){ // array_search($grpID, $groups)){
+            $where = ' = '.$grpID;    
+        }else{
+            $where =  ' in ('.implode(',',$groups).')';
+        }
+        
         $ret = array();
         
-        $query = 'SELECT `ugr_ID`, `ugr_NavigationTree` FROM `sysUGrps` WHERE ugr_ID in ('.implode(',',$groups).')';
+        $query = 'SELECT `ugr_ID`, `ugr_NavigationTree`, `ugr_Modified` FROM `sysUGrps` WHERE ugr_ID'.$where;
         $res = $mysqli->query($query);
         if(!$res){
             $system->addError(HEURIST_DB_ERROR, 'Can not retrieve filters treeviews', $mysqli->error);
@@ -316,7 +344,13 @@
                 if($row[0]==$ugrID){
                     array_push($ret, $row[1] );    
                 }else{
-                    array_push($ret, '"'.$row[0].'":'.$row[1] );    
+                    //add modification date for groups
+                    $treedata = $row[1];
+                    //$datetime = new DateTime($row[2]);
+                    //$datetime->format(DateTime::ISO8601)
+                    $treedata = '{"modified":"'.$row[2].'",'.substr($treedata,1);
+                    
+                    array_push($ret, '"'.$row[0].'":'.$treedata );    
                 }
             }
         }
