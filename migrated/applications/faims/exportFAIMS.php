@@ -123,7 +123,7 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
 
 //find all records for specific record types: GeoTiff, KML, Shapefile
     $map_records = array();
-    if (! $wg_ids  &&  function_exists('get_user_id')) {
+    if (! @$wg_ids  &&  function_exists('get_user_id')) {
 
         $mrt = array();
         if(defined('RT_GEOTIFF_LAYER')){
@@ -266,7 +266,10 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
         //copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
 
         //CREATE ZIPFILE
-        unlink($folder.".zip");
+        if(file_exists($folder.".zip")){
+            unlink($folder.".zip");
+        }
+            
         $cmdline = "zip -r -j ".$folder.".zip ".$folder;
 
         $res1 = 0;
@@ -860,6 +863,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
     $body_control->addChild('label','');
 
     if($hasMapTab){
+        
+        $stypes = '';
 
         foreach ($rt_geoenabled as $rt) {
                    $rtname = $rtStructs['names'][$rt];
