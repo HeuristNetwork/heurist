@@ -794,38 +794,35 @@ class HPredicate {
     function makeDateClause() {
 
             if (strpos($this->value,"<>")) {
-
                 
                 $vals = explode("<>", $this->value);
-                $timestamp0 = strtotime($vals[0]);
-                $timestamp1 = strtotime($vals[1]);
+                $datestamp0 = validateAndConvertToISO($vals[0]);
+                $datestamp1 = validateAndConvertToISO($vals[1]);
 
-                if(strpos($vals[0],"-")===0){ //date function does not work with BCE
-                    $min = $vals[0];
-                }else{
-                    $min = date('Y-m-d', $timestamp0);
-                }
-
-                return "between '".$min."' and '".date('Y-m-d', $timestamp1)."'";
-
-                
+                return "between '$datestamp0' and '$datestamp1'";
                 
             }else{
 
-                $timestamp = strtotime($this->value);
+                //old way
+                //$timestamp = strtotime($this->value);
+                //$datestamp = date('Y-m-d H:i:s', $timestamp);
+                
+                //new way
+                $datestamp = validateAndConvertToISO($this->value);
+
                 if ($this->exact) {
-                    $datestamp = date('Y-m-d H:i:s', $timestamp);
                     return "= '$datestamp'";
                 }
                 else if ($this->lessthan) {
-                    $datestamp = date('Y-m-d H:i:s', $timestamp);
                     return "< '$datestamp'";
                 }
                 else if ($this->greaterthan) {
-                    $datestamp = date('Y-m-d H:i:s', $timestamp);
                     return "> '$datestamp'";
                 }
                 else {
+                    return "like '$datestamp%'";
+                    
+                    //old way
                     // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
                     $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
                     if (@$matches[0]) {

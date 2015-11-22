@@ -913,9 +913,10 @@
             if (strpos($this->value,"<>")) {
 
                 $vals = explode("<>", $this->value);
-                $timestamp0 = strtotime($vals[0]);
-                $timestamp1 = strtotime($vals[1]);
-                return "between '".date('Y-m-d', $timestamp0)."' and '".date('Y-m-d', $timestamp1)."'";
+                $datestamp0 = validateAndConvertToISO($vals[0]);
+                $datestamp1 = validateAndConvertToISO($vals[1]);
+
+                return "between '$datestamp0' and '$datestamp1'";
 
             }else{
 

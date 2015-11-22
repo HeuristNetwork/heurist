@@ -70,10 +70,12 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 					$value = (@$tDate['BPD']? '' . $tDate['BPD'] . ' BPD':
 									@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "");
 					if ($value) {
-						$value = $value.(@$tDate['DEV']? ' ' . convertDurationToDelta($tDate['DEV'],'±'):
-											@$tDate['DVP']? ' ' . convertDurationToDelta($tDate['DVP'],'+').
-													(@$tDate['DVN']?"/ ".convertDurationToDelta($tDate['DVN'],'-'):""):
-											@$tDate['DVN']?" ".convertDurationToDelta($tDate['DVN'],'-'):"");
+						$value = $value.(@$tDate['DEV']
+                            ? ' ' . convertDurationToDelta($tDate['DEV'],'±')
+                            : (@$tDate['DVP']
+                                ? ' ' . convertDurationToDelta($tDate['DVP'],'+').
+										(@$tDate['DVN']?"/ ".convertDurationToDelta($tDate['DVN'],'-'):"")
+                                : (@$tDate['DVN']?" ".convertDurationToDelta($tDate['DVN'],'-'):"") ));
 					}else{
 						$value = "unknown carbon temporal format";
 					}
@@ -127,11 +129,11 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     
     $need_day = true;
     
-    if( preg_match('/^-?\d+$/', $value) ){
+    if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
         $date = array('year'=>$value);
     }else{
         
-        $cnt_slash = substr_count($value,'/');
+        $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
         if( $cnt_slash>0){  // 6/2006  =  1-6-2006
             if($cnt_slash==1){
                 $value = '1-'.$value;
@@ -143,7 +145,9 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
             $need_day = false;
         }
         
-        $date = date_parse($value);
+        $timestamp = strtotime($value);
+        $datestamp = date('Y-m-d H:i:s', $timestamp);
+        $date = date_parse($datestamp);
     }
 
 	if($date){
