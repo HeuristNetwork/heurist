@@ -367,8 +367,20 @@
             }
 
             // Search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
-            if(preg_match('/&&|\\bAND\\b/i', $text)){
-                $q_bits = preg_split('/&&|\\bAND\\b/i', $text);
+            // except matches between quotes
+            preg_match_all('/"[^"]+"|(&&|\\bAND\\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
+            if(count($matches[1])>0){
+                $q_bits = array();
+                $offset = 0;
+                foreach($matches[1] as $entry){
+                    if(is_array($entry)){ //
+                        array_push($q_bits, substr($text, $offset, $entry[1]-$offset));
+                        $offset = $entry[1]+strlen($entry[0]);
+                    }
+                }
+                array_push($q_bits, substr($text, $offset));
+                
+                //$q_bits = preg_split('/"[^"]+"|(&&|\\bAND\\b)/i', $text);
             }else{
                 $q_bits = array($text);
             }
@@ -380,16 +392,28 @@
 
         function addTopLimb($text) {
 
-
-            
             $or_limbs = array();
             // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
-            $or_texts = preg_split('/\\b *OR *\\b/i', $text);
+            preg_match_all('/"[^"]+"|(&&|\\OR\\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
+            if(count($matches[1])>0){
+                $offset = 0;
+                foreach($matches[1] as $entry){
+                    if(is_array($entry)){ //
+                        //array_push($q_bits, substr($text, $offset, $entry[1]-$offset));
+                        array_push( $or_limbs, new OrLimb($this, substr($text, $offset, $entry[1]-$offset)) );
+                        $offset = $entry[1]+strlen($entry[0]);
+                    }
+                }
+                array_push( $or_limbs, new OrLimb($this, substr($text, $offset)) );
+            }
+            
+            /*
+            $or_texts = preg_split('/"[^"]+"|(\\bOR\\b)/i', $text);  // *OR *
             for ($i=0; $i < count($or_texts); ++$i){
                 if ($or_texts[$i]){
                     array_push( $or_limbs, new OrLimb($this, $or_texts[$i]) );
                 } 
-            }
+            }*/
             array_push($this->top_limbs, $or_limbs);
         }
 
