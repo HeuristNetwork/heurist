@@ -733,7 +733,8 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	background-image: url('../images/cross-grey.png');
 	background-repeat: no-repeat;
 }
-.file-resource-div.empty .delete-resource, .resource-div.empty .delete-resource, .resource-div.empty .edit-resource {
+.file-resource-div.empty .delete-resource, .resource-div.empty .delete-resource,
+ .resource-div.empty .edit-resource, .resource-div.empty .view-resource {
 	visibility: hidden;
 }
 .input-cell .resource-div.empty .file-resource-div.empty { /* ART img.delete-resource { */

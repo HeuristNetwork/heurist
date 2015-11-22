@@ -123,8 +123,13 @@ if (@$_REQUEST['replace_kwd']) {
 }
 
 if (@$_REQUEST['delete_multiple_kwds']) {
-	$kwd_ids = array_map('intval', array_keys($_REQUEST['delete_kwds']));
-	if (count($kwd_ids)) {
+    
+    $isok = false;
+    if(is_array(@$_REQUEST['delete_kwds'])){
+	    $kwd_ids = array_map('intval', array_keys(@$_REQUEST['delete_kwds']));
+        $isok = (count($kwd_ids)>0);
+    }
+	if ($isok) {
 		mysql_connection_overwrite(DATABASE);
 		$res = mysql_query('delete usrTags, usrRecTagLinks from usrTags left join usrRecTagLinks on rtl_TagID = tag_ID where tag_ID in ('. join(', ', $kwd_ids) .') and tag_UGrpID='.get_user_id());
 		$tag_message .= mysql_error() . '<div class="success">Tags deleted</div>';
@@ -223,12 +228,19 @@ $word_limit_options =
 '<option value="5" '.($word_limit==5? 'selected':'').'>at least five words</option>';
 $template = str_replace('{word_limit_options}', $word_limit_options, $template);
 
-$hyperlinks_ignored = '<div>' .
-  join("</div>\n<div>",
-       mysql__select_array('usrHyperlinkFilter', 'hyf_String', 'hyf_UGrpID is null or hyf_UGrpID='.get_user_id())) .
-                      '</div>';
+$atags = mysql__select_array('usrHyperlinkFilter', 'hyf_String', 'hyf_UGrpID is null or hyf_UGrpID='.get_user_id());
+
+if(is_array($atags) && count($atags)>0){
+    $hyperlinks_ignored = '<div>'.implode("</div>\n<div>", $atags).'</div>';
+}else{
+    $hyperlinks_ignored = '<div/>';    
+}
+                      
+$bookmarklet_script = dirname(__FILE__).'/../../import/bookmarklet/bookmarklet.js';
 $template = str_replace('{hyperlinks_ignored}', $hyperlinks_ignored, $template);
-$template = str_replace('{Bookmarklet}', file_get_contents(dirname(__FILE__).'/../../import/bookmarklet/bookmarklet.js'), $template);
+if(file_exists($bookmarklet_script)){
+$template = str_replace('{Bookmarklet}', file_get_contents($file), $template);
+}
 
 $res = mysql_query('select count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by cnt desc, tag_Text limit 1');
 $row = mysql_fetch_row($res);
@@ -258,6 +270,9 @@ while ($row = mysql_fetch_row($res)) {
         </tr>';
 
 	$foreach_kwd_js .= "kwd['".htmlspecialchars(strtolower($row[1]))."'] = ".$row[0].";\n";
+}
+if($foreach_kwd==''){
+    $foreach_kwd = '<h2>You have not defined any tags</h2>';
 }
 
 $kwd_select = "<select id=kwd_select style=\"display: none;\"><option value=\"\" disabled selected>select tag...</option>";
