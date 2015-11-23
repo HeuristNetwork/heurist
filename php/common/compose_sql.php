@@ -369,21 +369,18 @@
             // Search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
             // except matches between quotes
             preg_match_all('/"[^"]+"|(&&|\\bAND\\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
+            $q_bits = array();
+            $offset = 0;
             if(count($matches[1])>0){
-                $q_bits = array();
-                $offset = 0;
                 foreach($matches[1] as $entry){
                     if(is_array($entry)){ //
                         array_push($q_bits, substr($text, $offset, $entry[1]-$offset));
                         $offset = $entry[1]+strlen($entry[0]);
                     }
                 }
-                array_push($q_bits, substr($text, $offset));
-                
-                //$q_bits = preg_split('/"[^"]+"|(&&|\\bAND\\b)/i', $text);
-            }else{
-                $q_bits = array($text);
             }
+            array_push($q_bits, substr($text, $offset));
+            
             foreach ($q_bits as $q_bit) {
                 $this->addTopLimb($q_bit);
             }        
@@ -395,8 +392,9 @@
             $or_limbs = array();
             // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
             preg_match_all('/"[^"]+"|(&&|\\OR\\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
+            $offset = 0;
             if(count($matches[1])>0){
-                $offset = 0;
+                
                 foreach($matches[1] as $entry){
                     if(is_array($entry)){ //
                         //array_push($q_bits, substr($text, $offset, $entry[1]-$offset));
@@ -404,8 +402,8 @@
                         $offset = $entry[1]+strlen($entry[0]);
                     }
                 }
-                array_push( $or_limbs, new OrLimb($this, substr($text, $offset)) );
             }
+            array_push( $or_limbs, new OrLimb($this, substr($text, $offset)) );
             
             /*
             $or_texts = preg_split('/"[^"]+"|(\\bOR\\b)/i', $text);  // *OR *
