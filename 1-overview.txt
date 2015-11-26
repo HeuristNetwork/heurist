@@ -18,8 +18,8 @@ For full information please visit http://HeuristNetwork.org
 
 Documentation standards and overall structure are described in files in the /documentation directory
 
-INSTALLATION: please move the two files " parentDirectory_ ... " to the parent directory of the Heurist instance
-              and edit the heuristConfigIni.php file in the parent directory.
+INSTALLATION: please move the two files "move_to_parent_as_ ....." to the parent of the Heurist instances
+              (this is done automatically by the installation script) and edit the heuristConfigIni.php file in the parent directory.
               Settings for individual instances, which override the parent configuration, can be set in the configIni.php file.
 
 Updated:     22 Sep 2015

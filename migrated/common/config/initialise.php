@@ -212,8 +212,8 @@ if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonly
     returnErrorMsgPage(1, "MySql user account/password not specified. Please ask your system administrator to set in heuristConfigIni.php");
 }
 if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
-    returnErrorMsgPage(1, "Unconfigured or mis-configured Heurist instance. Please ask your system administrator to edit the MySQL passwords".
-        " in the heuristConfigIni.php file.");
+    returnErrorMsgPage(1, "Database password missing or contains special characters. Please ask your system administrator to edit the MySQL passwords ".
+        "and use a (long) alphanumeric password in the heuristConfigIni.php file.");
 }
 
 // refactor - use:  function isInValid($str) {return preg_match('[\W]', $str);}  defined in  admin/setup/dbcreate/createNewDB.php
@@ -259,7 +259,7 @@ if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultR
     }
 
     if(!isset($defaultRootFileUploadURL) || $defaultRootFileUploadURL==null || $defaultRootFileUploadURL==""){
-        returnErrorMsgPage(1, "You have to define Root filestore URL (abosulte or relative to server URL)."
+        returnErrorMsgPage(1, "You have to define Root filestore URL (absolute or relative to server URL)."
             ."<p>Define variable <b>defaultRootFileUploadURL</b> in your heuristConfigIni</p>");
     }
 

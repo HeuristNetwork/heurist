@@ -122,30 +122,31 @@ $2 ln -s /var/www/html/HEURIST/$1 $1
 echo "Heurist unpacked"
 
 echo -e "\n\n"
-echo "Creating directories, sandpit database and setting permissions"
+echo "Creating directories and setting permissions"
 
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
 
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-
-$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-$2 cp -r /var/www/html/HEURIST/migrated/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/filethumbs
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/generated-reports
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/hml-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/html-output
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/scratch
-$2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/backup
+# 23 Nov 2015: we have removed the separate registration step which require the sandpit database
+# TODO: Remove these lines once the new functionality has been tested with sandpit database deleted
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/filethumbs
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/generated-reports
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/hml-output
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/html-output
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/scratch
+# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/backup
 
 # set up override configIni files
-$2 mv /var/www/html/HEURIST/h4/parentDirectory_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
-$2 mv /var/www/html/HEURIST/h4/parentDirectory_index.html /var/www/html/HEURIST/index.html
+$2 mv /var/www/html/HEURIST/h4/move_to_parent_as_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
+$2 mv /var/www/html/HEURIST/h4/move_to_parent_as_index.html /var/www/html/HEURIST/index.html
 
 # one or other of these will fail harmlessly
-echo Trying both www-data and apache as owner:group for data directories, one will succeed
+# on a two tier system you may need to map apache to nobody
+echo Trying both www-data (Debian) and apache (Redhat) as owner:group for data directories, one will succeed
 $2 chown -R apache:apache /var/www/html/HEURIST/
 $2 chown -R www-data:www-data /var/www/html/HEURIST/
 
@@ -154,12 +155,13 @@ $2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
 # Simlink codebase as both heurist and h4 from the root web directory
 # do both /var/www and /var/www/html for good measure
+# h4 goes to index.php, heurist goes to the index.html switchboard
 cd /var/www
 $2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/h4/ heurist
+$2 ln -s /var/www/html/HEURIST/index.html heurist
 cd /var/www/html
 $2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/h4/ heurist
+$2 ln -s /var/www/html/HEURIST/index.html heurist
 
 # TODO: NEED TO ADD .htaccess file to the filestore
 
@@ -173,8 +175,8 @@ echo "There is normally limited space on /var/www, so you may wish to move HEURI
 echo "its current location - /var/www/html/HEURIST/HEURIST_FILESTORE - to a location with plenty "
 echo "of space allocated, such as /srv or /data, and add a simlink to this location in /var/www/html/HEURIST "
 echo
-echo "Heurist switchboard will be accessible at http://serveraddress/HEURIST"
-echo "Heurist Vsn 4 will be accessible at http://serveraddress/heurist or http://serveraddress/h4"
+echo "Heurist switchboard will be accessible at http://serveraddress/heurist or http://serveraddress/HEURIST/index.html"
+echo "Heurist Vsn 4 will be accessible at http://serveraddress/h4 or http://serveraddress/HEURIST/h4"
 echo
 echo "CONFIGURATION:"
 echo

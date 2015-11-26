@@ -29,10 +29,12 @@ SUMMARY:
     /var/www/html/HEURIST/                  All Heurist files except filestore in this directory
 
                     index.html              Heurist homepage providing access to services
-                                            Copy from parentDirectory_index.html in Heurist codebase root
+                                            Supplied as move_to_parent_as_index.html in Heurist codebase root
+                                            (file is moved and renamed by installer)
 
                     heuristConfigIni.php    Overrides configIni.php in individual instances
-                                            Copy from heuristConfigIni.php in Heurist codebase root
+                                            Supplied as move_to_parent_as_heuristConfigIni.php in Heurist codebase root
+                                            (file is moved and renamed by installer)
 
                     h3                      Production instance
                         help                Simlink to ../HEURIST_SUPPORT/help
@@ -102,10 +104,11 @@ Home page:              .../HEURIST/index.html
 
             A home page for Heurist on any server runnign Heurist. Provides navigation to user registration,
             create new database, open existing database, documentation and the Heurist Network project
-            pages (HeuristNetwork.org). This file is provided as parentDirectory_index.html in the root
+            pages (HeuristNetwork.org). This file is provided as move_to_parent_as_index.html in the root
             of the Heurist codebase.
 
-            Note: index.html expects the main installation of Heurist to be in subdirectory .../HEURIST/h3
+            Note: index.html expects the main installation of Heurist to be in subdirectory .../HEURIST/h4
+                  as it looks in this path to find its CSS files
 
 File permissions:       Suggested ownership of all data and program files is www-data:www-data or apache:apache with write access
                         to the filestore for owner and group. On some systems you may use www-data or nobody

@@ -116,8 +116,8 @@ echo -e "\n\n\n\n\n\n"
 echo "---- Heurist update installed in /var/www/html/HEURIST/$1 -------------------------------------------"
 echo
 echo You may need to edit the configIni.php file in the /var/www/html/HEURIST/$1 directory
-echo if you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST
-echo See /var/www/html/HEURIST/$1/parentDirectory_heuristConfigIni.php for instructions
+echo if you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST (which you should have ...)
+echo See /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php for instructions
 echo
 echo Please visit Database-Administrative functions-Utilities-Verify Installation to check that required components are installed
 echo and then verify that Heurist runs correctly from the new location, then overwrite
