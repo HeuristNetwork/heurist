@@ -222,13 +222,14 @@
                     $mysqli->query("SET foreign_key_checks = 0");
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
+                    echo {"<b>Adding records to tables: </b>"};
                     while ($table = $tables->fetch_row()) {
                         $table = $table[0];
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                         $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
 
                         if($res){
-                            echo ($table . " Added ".$mysqli->affected_rows . ". ");
+                            echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
                         }else{
                             echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
                             $res = false;
@@ -511,7 +512,7 @@
             return false;
         }
 
-        // 
+        //
         //echo_flush ("<p>Create Database Structure (tables) ".HEURIST_DIR." </p>");
         if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
 
@@ -573,14 +574,14 @@
             echo ("<h3>Warning:</h3> Unable to create/copy xsl-templates folder to $uploadPath<br>");
             $warnings = 1;
         }
-        
+
         if(recurse_copy( HEURIST_DIR."../documentation_and_templates", $uploadPath."/documentation_and_templates" )){
             add_index_html($uploadPath."/documentation_and_templates"); // index file to block directory browsing
         }else{
             echo ("<h3>Warning:</h3> Unable to create/copy documentation folder to $uploadPath<br>");
             $warnings = 1;
         }
-                                                                                                   
+
 
 
         // Create all the other standard folders required for the database
@@ -668,11 +669,11 @@
         $res = false;
         $dir = opendir($src);
         if($dir!==false){
-        
+
             if (@mkdir($dst, 0777, true)) {
 
                 $res = true;
-                
+
                 while(false !== ( $file = readdir($dir)) ) {
                     if (( $file != '.' ) && ( $file != '..' )) {
                         if ( is_dir($src . '/' . $file) ) {
@@ -686,7 +687,7 @@
                 }
             }
             closedir($dir);
-        
+
         }
 
         return $res;

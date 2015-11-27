@@ -95,7 +95,7 @@ if(mysql_error()) {
                 The new database is identical to the old in all respects including users, access and attaachments <br />
                 (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
                 The target database is unregistered with the Heurist central index even if the source database is registered.
-                </p>
+            </p>
 
             <?php
 
@@ -189,6 +189,7 @@ function cloneDatabase($targetdbname) {
 
 
     echo_flush ("<p>Copy data</p>");
+    // db_clone function in /common/php/db_utils.php does all the work
     if( db_clone(DATABASE, $newname) ){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
@@ -196,8 +197,7 @@ function cloneDatabase($targetdbname) {
         return false;
     }
 
-    //need to successful addition of constraints
-    // TODO: what does this mean?
+    //TODO: need to check for successful addition of constraints
     mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
         set t1.trm_InverseTermId=null
     where t1.trm_ID>0 and t2.trm_ID is NULL');
@@ -205,7 +205,7 @@ function cloneDatabase($targetdbname) {
         where rre_RecID>0
     and rre_RecID not in (select rec_ID from Records)');
 
-    echo_flush ("<p>Addition Referential Constraints</p>");
+    echo_flush ("<p>Addition of Referential Constraints</p>");
     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
@@ -213,7 +213,7 @@ function cloneDatabase($targetdbname) {
         return false;
     }
 
-    echo_flush ("<p>Addition Procedures and Triggers</p>");
+    echo_flush ("<p>Addition of Procedures and Triggers</p>");
     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addProceduresTriggers.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
@@ -231,9 +231,11 @@ function cloneDatabase($targetdbname) {
     }
 
     // Index new database for Elasticsearch
+    //TODO: Needs error report, trap error and warn or abort clone
     buildAllIndices($targetdbname);
 
     // Copy the images and the icons directories
+    //TODO: Needs error report, trap error and warn or abort clone
     recurse_copy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
 
     // Update file path in target database
@@ -241,15 +243,14 @@ function cloneDatabase($targetdbname) {
     "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
     $res1 = mysql_query($query1);
     if (mysql_error())  { //(mysql_num_rows($res1) == 0)
-        print "<p><h4>Warning</h4><b>Unable to set files path to new path</b>".
+        print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
         "<br>Query was:".$query1.
-        "<br>Please consult the system administrator</p>";
+        "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
     }
 
     // Success!
     echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
-    print "<p>Please go to the <a href='".HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".$targetdbname.
-    "' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
-
+    print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".$targetdbname.
+    "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
 } // straightCopyNewDatabase
 ?>
