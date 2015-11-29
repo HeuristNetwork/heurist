@@ -222,7 +222,7 @@
                     $mysqli->query("SET foreign_key_checks = 0");
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
-                    echo {"<b>Adding records to tables: </b>"};
+                    echo ("<b>Adding records to tables: </b>");
                     while ($table = $tables->fetch_row()) {
                         $table = $table[0];
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
