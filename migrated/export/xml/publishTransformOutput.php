@@ -92,7 +92,7 @@ if (@$_REQUEST['inputFilename']){// get a saved XML file
 }
 
 if (!$inputFilename ) {
-    returnXMLErrorMsgPage("cannot determine input file. Please sepecify 'inputFilename' or 'recID' or query 'q='");
+    returnXMLErrorMsgPage("cannot determine input file. Please specify 'inputFilename' or 'recID' or query 'q='");
 }
 
 if (@$_REQUEST['outputFilename']){//filename supplied so use it

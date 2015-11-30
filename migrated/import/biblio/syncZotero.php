@@ -144,7 +144,7 @@
     $fh_data = simplexml_load_file($mapping_file);
     if($fh_data==null || is_string($fh_data)){
         die("Sorry, mapping/configuration file import/biblio/zoteroMap.xml for Zotero synchronisation ".
-            "is corrupted - please ask your sysadmin to update it");
+            "is corrupted - please ask your system administrator to update it");
     }
 
 
@@ -236,7 +236,7 @@
             }else if($code==404 ){
                 $msg = $msg."Verify User and Group ID in Database administration page > Database > Advanced Properties";
             }else if($code==407 ){
-                $msg = $msg."Proxy Authentication Required, please ask sysadmin to set it";
+                $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
             }
             print $msg."</div>";
         }else if(!$items){

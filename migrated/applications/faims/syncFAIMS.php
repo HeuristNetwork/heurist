@@ -255,7 +255,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         print "<div><input type='radio' ".($mode_dir==2?"checked='true'":"")." name='mode' value='2'><div class='lbl_form'>Or select from the list of modules:</div><select name='faims_module'>".$options."</select></div>";
                     }
                 }else{
-                    print "<div>If you need to import existing FAIMS modules from the FAIMS server, ask the sysadmin to configure the path for module tarball files in heuristConfigIni.php</div>";
+                    print "<div>If you need to import existing FAIMS modules from the FAIMS server, ask the system administrator to configure the path for module tarball files in heuristConfigIni.php</div>";
                 }
 
                 print "<div><div class='lbl_form'>Check to verify structure (no data import):</div><input name='showstr' value='1' type='checkbox'></div>";

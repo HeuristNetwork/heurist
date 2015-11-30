@@ -93,14 +93,14 @@ function DetailTypeManager() {
 
 		tabView.addTab(new YAHOO.widget.Tab({
 			id: "newGroup",
-			label: "<label title='Create new group, edit or delete the existing group' style='font-style:italic'>+/-</label>",
+			label: "<label title='Create new group, edit or delete the existing group' style='font-style:bold'> +/- </label>",
 			content:
 			('<div id="formGroupEditor">'+
 				'<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
 				'<h3>Create a new detail group or edit an existing one</h3><br/>'+
-				'<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select></div></div>'+
-				'<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
-				'<div class="input-row"><div class="input-header-cell">Descrption:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
+				'<div class="input-row required"><div class="input-header-cell"><b>Group</b></div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select></div></div>'+
+				'<div class="input-row required"><div class="input-header-cell"><b>Name</b></div><div class="input-cell"><input id="edName" style="width:300px"/></div></div>'+
+				'<div class="input-row required"><div class="input-header-cell"><b>Description</b></div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
 				'<div class="input-row"><div class="input-header-cell"></div><div class="input-cell">'+
 					'<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{detailTypeManager.doGroupSave()}" />'+
 					'<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{detailTypeManager.doGroupCancel()}" style="margin:0 5px" />'+
@@ -1027,12 +1027,12 @@ function DetailTypeManager() {
 		grp; //object in HEURIST
 
 		if(Hul.isempty(name)){
-			alert('Group name is required. Please sepecify it');
+			alert('Group name is required. Please specify it');
 			Dom.get('edName').focus();
 			return;
 		}
 		if(Hul.isempty(description)){
-			alert('Group description is required. Please sepecify it');
+			alert('Group description is required. Please specify it');
 			Dom.get('edDescription').focus();
 			return;
 		}

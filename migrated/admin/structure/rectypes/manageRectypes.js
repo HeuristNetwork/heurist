@@ -102,8 +102,7 @@ function RectypeManager() {
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: "newGroup",
-                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>add/edit</label>",
-                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>[add/edit tabs]</label>",
+                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:bold'> +/- </label>",
                     content:
                     ('<div id="formGroupEditor">'+
                         '<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
@@ -1166,12 +1165,12 @@ function RectypeManager() {
         grp; //object in HEURIST
 
         if(Hul.isempty(name)){
-            alert('Group name is required. Please sepecify it');
+            alert('Group name is required. Please specify it');
             Dom.get('edName').focus();
             return;
         }
         if(Hul.isempty(description)){
-            alert('Group description is required. Please sepecify it');
+            alert('Group description is required. Please specify it');
             Dom.get('edDescription').focus();
             return;
         }

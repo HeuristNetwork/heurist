@@ -135,7 +135,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                         &nbsp;Bug report</a></li>
                 <li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
                     title="Click to clear and reload the internal working memory of Heurist" >
-                    Refresh lists</a></li>
+                    Refresh</a></li>
             </ul>
         </div> <!-- end quicklinks -->
 
@@ -178,7 +178,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                         if (is_admin()) {
                             menuEntry('','Delete entire database','setup/dboperations/deleteCurrentDB.php?db='.HEURIST_DBNAME,
                                 'Delete the current database completely - cannot be undone, although data is copied '.
-                                'to a backup which could be reloaded by a sysadmin');
+                                'to a backup which could be reloaded by a system administrator');
 
                             menuEntry('','Delete all records','setup/dboperations/clearCurrentDB.php?db='.HEURIST_DBNAME,
                                 'Clear all data (records, values, attached files) from the current database. '.
@@ -228,7 +228,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                         menuEntry('','Manage base field types','structure/fields/manageDetailTypes.php?db='.HEURIST_DBNAME,
                             'Browse and edit the base field definitions referenced by record types (often shared by multiple record types)');
 
-                        menuEntry('','Manage terms / relationsip types','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
+                        menuEntry('','Manage terms / relationship types','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
                             'Browse and edit the terms used for relationship types and for other enumerated (term list) fields');
 
                         /* This has not been reliably tested and is better left out. IJ 7/7/15
