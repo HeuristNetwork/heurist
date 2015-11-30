@@ -82,7 +82,7 @@ function EditTerms() {
 
         _tabView.addTab(new YAHOO.widget.Tab({
             id: 'enum',
-            label: 'Term list fields',
+            label: 'Terms',
             content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
         }));
         _tabView.addTab(new YAHOO.widget.Tab({
