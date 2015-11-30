@@ -113,7 +113,7 @@
                     die ("<p><b>Sorry, unable to read the sysIdentification table from the current database. ".
                         "Possibly wrong database format, please consult Heurist team</b></p>");
                 }
-                
+
                 $system_folders = array(HEURIST_THUMB_DIR,
                         HEURIST_FILESTORE_DIR."/generated-reports/",
                         HEURIST_ICON_DIR,
@@ -122,7 +122,7 @@
                         HEURIST_XSL_TEMPLATES_DIR);
                 if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
                 if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-                
+
 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 // These are the most likely location for bulk upload (of images) and restricting to these directories
@@ -136,7 +136,7 @@
                         if(substr($dir, -1) != '/'){
                             $dir .= "/";
                         }
-                    
+
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
                             chdir(HEURIST_FILESTORE_DIR);
@@ -147,9 +147,9 @@
                         }
                     }
                 }
-                $dirs = $dirs2;                
-                
-                
+                $dirs = $dirs2;
+
+
                 // add the scratch directory, which will be the default for upload of material for import
                 array_push($dirs, HEURIST_UPLOAD_ROOT.'scratch');
 
@@ -164,7 +164,7 @@
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
                     print ("<p><b>If you wish to upload files to a directory other than the scratch space, define the folders in <br />".
-                        "Designer View > Database > Advanced Properties > Additional Folders for indexing.<br />".
+                        "Database administration page > Database > Advanced Properties > Additional Folders for indexing.<br />".
                         "You may also add additional file extensions.</b></p>");
                 }else{
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";

@@ -1,7 +1,7 @@
 <?php
 
 /**
-* adminMenu.php : framework for adminstrative interface (designer view)
+* adminMenu.php : framework for database administration page
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -33,11 +33,11 @@ if (!is_logged_in()) {
     return;
 }
 
-// Introductory orientation for designer view
+// Introductory orientation for administration page
 
 $url = "../common/html/msgWelcomeAdmin.html";
 
-// Direct access to admin menu (designer view) functions
+// Direct access to administration page functions
 if (array_key_exists('mode', $_REQUEST)) {
     $mode = $_REQUEST['mode'];
 
@@ -55,13 +55,13 @@ if (array_key_exists('mode', $_REQUEST)) {
             $url = $url . "&rtID=" . $rtID;
         }
     }
-} // end direct access to admin menu (designer view) functions
+} // end direct access to administration page functions
 ?>
 
 <html>
 
     <head>
-        <title>Heurist - <?=HEURIST_DBNAME?> Designer View</title>
+        <title>Heurist - <?=HEURIST_DBNAME?> Database administration</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="icon" href="../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
@@ -123,7 +123,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 
         <!-- database name = link back to default search (Uaeer View) -->
         <a id="dbSearch-link" href="../../?db=<?=HEURIST_DBNAME?>">
-            <div id="dbname" ><?=HEURIST_DBNAME?> <span>Designer View</span></div>
+            <div id="dbname" ><?=HEURIST_DBNAME?> <span>Database administration</span></div>
         </a>
 
         <!-- Quicklinks section - top right -->
@@ -197,7 +197,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                                 'for harvesting email from external servers');
 
                             // June 2014: TODO: need to fix the triggers on record creation and editing for this function to work.
-                            // Warning in fucntion
+                            // Warning in function
                             /*
                             menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
                             'Selectively roll back the data in the database to a specific date and time)');

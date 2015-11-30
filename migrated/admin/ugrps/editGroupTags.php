@@ -53,7 +53,7 @@ mysql_connection_select(DATABASE);
         <link rel="stylesheet" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
         <link rel="stylesheet" href="<?=HEURIST_BASE_URL_V3?>common/css/edit.css">
         <link rel="stylesheet" href="<?=HEURIST_BASE_URL_V3?>common/css/admin.css">
-        
+
         <style type="text/css">
             .tbox { border: 1px solid black; margin: 1px; }
             .gr_div { padding: 4px 0px; }
@@ -74,7 +74,7 @@ mysql_connection_select(DATABASE);
         <?php if(@$_REQUEST['popup']!="yes") { ?>
         <div class="banner"><h2>Workgroup Tags</h2></div>
         <?php } ?>
-        
+
         <div id="page-inner">
             Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
             workgroup tags are a controlled list of shared tags established by a workgroup administrator.
@@ -101,7 +101,7 @@ mysql_connection_select(DATABASE);
 
                 <?php
 	                $adminGroupList = array();
-	                // This retrieves all the user groups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
+	                // This retrieves all the Workgroups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
 	                // foreach ($_SESSION['heurist']['user_access'] as $grp_id => $access) {
 	                //	if ($access == "admin") array_push($adminGroupList,$grp_id);
 	                $q='select distinct ugl_GroupID from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_UserID='.get_user_id().' and ugl_Role="admin"';

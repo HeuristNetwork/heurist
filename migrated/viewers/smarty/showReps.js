@@ -139,7 +139,7 @@ function ShowReps() {
             document.getElementById('cbUseAllRecords2').value = _sQueryMode;
             document.getElementById('cbUseAllRecords1').value = _sQueryMode;
         }
-        
+
 
         _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -198,10 +198,10 @@ function ShowReps() {
         var callback = _updateTemplatesList;
         Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
     }
-    
-    
+
+
     function _getSelectedTemplate(){
-        
+
                 var sel = document.getElementById('selTemplates');
                 if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
                 return sel.options[sel.selectedIndex].value; // by default first entry
@@ -248,16 +248,16 @@ function ShowReps() {
 
         var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
         var squery = null;
-        
+
         if(_currentRecordset!=null){
 
             //new approach to support h4
             if(Hul.isnull(template_file)){
                 template_file = _getSelectedTemplate();
             }
-            
+
             squery =  'db='+_db+'&template='+template_file+'&recordset='+JSON.stringify(_currentRecordset);
-            
+
         }else{
             squery = _getQueryAndTemplate(template_file, false);
         }
@@ -274,10 +274,10 @@ function ShowReps() {
                 }, squery);
 
         }
-        
+
         //Hul.getJsonData(baseurl, callback, squery);
     }
-    
+
     //
     function _isEditorVisible(){
         //
@@ -686,10 +686,10 @@ function ShowReps() {
             }else{
                 squery = _getQuery();;
             }
-            
+
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
-            
+
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
             infoMessageBox.show();
 
@@ -1124,7 +1124,7 @@ function ShowReps() {
 
     //
     // root loop
-    // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next fucntion
+    // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next function
     //
     function _insertRootForEach(){
         var textedit = Dom.get("edTemplateBody");
@@ -1249,11 +1249,11 @@ function ShowReps() {
 
     function _showInsertPopup( varid, isloop, elt ){
 
-        top.HEURIST.insertVar = _insertSelectedVars; 
+        top.HEURIST.insertVar = _insertSelectedVars;
         top.HEURIST.insertPattern = _insertPattern;
         top.HEURIST.insertModifier = _insertModifier;
-        
-        
+
+
         if(isloop){
             $(".ins_isloop").show();
         }else{
@@ -1262,9 +1262,9 @@ function ShowReps() {
 
 
         function __shownewpopup(){
-            
+
             var ele = document.getElementById("insert-popup");
-            
+
             var pos = top.HEURIST.getPosition(elt);
             var scroll = document.getElementById("treeContainer").scrollTop;
             insert_ID = varid;
@@ -1277,9 +1277,9 @@ function ShowReps() {
                 title = 'Insert variable';
             }
 
-            
+
             if(top.HEURIST4){
-                
+
                 //show jquery dialog
                 insertPopupID = $(ele).dialog({
                     autoOpen: true,
@@ -1289,18 +1289,18 @@ function ShowReps() {
                     title: title,
                     position: { my: "right top", at: "left bottom", of: $(elt) }
                  });
-                
+
             }else{
                 var topWindowDims = top.HEURIST.util.innerDimensions(window);
                 var xpos = topWindowDims.w - 400;
 
                 top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
                     "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
-                    
+
             }
         }//__shownewpopup
 
-        
+
         if(top.HEURIST4){
 
             if(insertPopupID){
@@ -1308,8 +1308,8 @@ function ShowReps() {
                 insertPopupID = null;
             }
             __shownewpopup();
-            
-        }else{        
+
+        }else{
             if(top.HEURIST.util.popups.list.length>0){ //close previous
                 top.HEURIST.util.closePopupAll();
                 //top.HEURIST.util.closePopup(insertPopupID);
@@ -1334,7 +1334,7 @@ function ShowReps() {
         }else{
             top.HEURIST.util.closePopupAll();
         }
-        
+
         if(varid==null){
             //top.HEURIST.util.closePopup(insertPopupID);
             insertPopupID = null;
@@ -1720,12 +1720,12 @@ function ShowReps() {
             _reload(template_file);
         },
 
-        
+
         // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599....."}
         assignRecordset: function(recordset){
              _currentRecordset = recordset;
         },
-        
+
         isNeedSelection: function(){
             return _needSelection;
         },

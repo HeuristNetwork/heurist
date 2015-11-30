@@ -474,7 +474,7 @@
         }
 
         /**
-        * Returns true if given id is id of current user or it is id of member of one of current user group
+        * Returns true if given id is id of current user or it is id of member of one of current Workgroup
         *
         * @param mixed $ug - user ID to check
         */
@@ -483,9 +483,9 @@
         }
 
         /**
-        * Returns user group ID if given id is id of database owner or admin of given group otehrwise it returns FALSE
+        * Returns Workgroup ID if given id is id of database owner or admin of given group otehrwise it returns FALSE
         *
-        * @param mixed $ugrID - user group id, if it is omitted it takes current user ID
+        * @param mixed $ugrID - Workgroup id, if it is omitted it takes current user ID
         */
         function is_admin2($ugrID){
 

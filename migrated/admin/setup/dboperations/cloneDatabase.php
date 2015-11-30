@@ -2,7 +2,7 @@
 
 /**
 * cloneDatabase.php: Copies an entire database verbatim
-*                    Note that the cloning method was changed in 2014, using our own SQL dump fucntion, to give more control
+*                    Note that the cloning method was changed in 2014, using our own SQL dump function, to give more control
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

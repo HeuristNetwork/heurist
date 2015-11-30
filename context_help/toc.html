@@ -1,1478 +1,1478 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-
-<head>
-	<title>index- Table of Contents</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc Personal Edition 3.9.0.595">
-	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
-	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
-    <link type="text/css" rel="stylesheet" media="all" href="css/toc.css" />
-	<!--[if lte IE 8]>
-		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
-	<![endif]-->
-	<style type="text/css">
-		#tabs .ui-widget-header
-		{
-			background-color: #EFEFEF;
-		}
-	</style>
-	<script type="text/javascript" src="js/jquery.min.js"></script>
-	<script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
-    <script type="text/javascript" src="js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
-	<script type="text/javascript" src="js/hndjsse.js"></script>
-	<script type="text/javascript">
-	
-		var bSearchDataLoaded = false;
-		var sHelpIdToActivate = '';
-	
-		$(document).ready(function()
-		{
-			var sAnchorName = '';
-			try { sAnchorName = top.location.href.substring(top.location.href.lastIndexOf("#") + 1, top.location.href.length); }
-			catch(err) { sAnchorName = ''; }
-			var nSelectedTab = 0;
-			if (sAnchorName == '_index') nSelectedTab = 1
-			else if (sAnchorName == '_search') nSelectedTab = 2;			
-			$("#tabs").tabs({
-				selected: nSelectedTab,
-				select: function(event, ui) { HideKwPopup(); }
-			});
-			
-			// Toc
-			if ($("#tab-toc").length) {
-				$("#tab-toc").dynatree({
-					clickFolderMode: 1,
-					debugLevel: 0,
-					imagePath: 'css/dynatree/chm/',
-					onActivate: function(node){
-						if ($("#tab-keywords").length && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
-							$("#tab-keywords").dynatree("getTree").activateKey(null);
-						if(node.data.href && node.data.href != '#'){
-							window.open(node.data.href, node.data.target);
-						}
-					}
-				});
-				// Expand all nodes if required
-				// Select the active help id
-				if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
-			}
-			
-			// Keywords
-			
-			if ($("#tab-keywords").length) {
-				$("#tab-keywords").dynatree({
-					clickFolderMode: 1,
-					debugLevel: 0,
-					imagePath: 'css/dynatree/chm/',
-					onClick: function(node, event){
-						HideKwPopup();
-						if (node.data && node.data.click)
-						{
-							var aRefList = null;
-							eval('aRefList=' + node.data.click);
-							if (ShowKwPopup(node.li, aRefList))
-							{
-								if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
-									$("#tab-toc").dynatree("getTree").activateKey(null);
-								if(node.data.href && node.data.href != '#'){
-									window.open(node.data.href, node.data.target);
-								}
-							}
-						}
-					}
-				});
-				// Expand all nodes if required
-				}
-			
-			// Load search data
-			$.getScript("js/searchdata.js",	function() {
-				bSearchDataLoaded = true;
-			});
-		});
-		
-		$('body').click(function() {
-			HideKwPopup();
-		});
-		
-		function SelectTocItem(sHelpId)
-		{
-			if ($("#tab-toc").length && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
-				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
-			}
-			else {
-				sHelpIdToActivate = sHelpId;
-			}
-		}
-		
-		function HideKwPopup()
-		{
-			if($("#popupMenu")) $("#popupMenu").remove();
-		}
-		
-		function ShowKwPopup(oSender, aLinks)
-		{
-			HideKwPopup();
-			if (!aLinks || !aLinks.length || aLinks.length == 0) return false
-			else if (aLinks.length == 1) return true
-			else
-			{
-				var oParentDiv = document.createElement("DIV");
-				oParentDiv.id = "popupMenu";
-				var oLink = null;
-				// Close button
-				oLink = document.createElement("SPAN");
-				oLink.className = "close-button";
-				oLink.innerHTML = "X";
-				oLink.href = "#";
-				oLink.onclick = HideKwPopup;
-				oParentDiv.appendChild(oLink);
-				// Items
-				for (var nCnt=0; nCnt<aLinks.length; nCnt++)
-				{
-					oLink = document.createElement("A");
-					oLink.innerHTML = aLinks[nCnt][0];
-					oLink.href = aLinks[nCnt][1];
-					oLink.target = "FrameMain";
-					oLink.onclick = HideKwPopup;
-					oParentDiv.appendChild(oLink);
-				}
-				document.body.appendChild(oParentDiv);
-				var pos = $(oSender).offset(); 
-				var height = $(oSender).height();
-				$(oParentDiv).css({
-					"left": (pos.left+20) + "px",
-					"top": (pos.top + height + 5) + "px"
-				});
-				$(oParentDiv).show();
-				return false;
-			}
-		}
-		
-		function PerformSearch()
-		{
-			sValue = $("#search_value").val();
-			$("#search_results").html('Searching...');
-			var oSearchEngine = new HndJsSe;
-			oSearchEngine.ParseInput(sValue);			
-			oSearchEngine.PerformSearch();
-			if (!oSearchEngine.aResults || !oSearchEngine.aResults.length)
-			{
-				$("#search_results").html('No results found.');
-			}
-			else
-			{
-				$("#search_results").html('<div id="search_results_content"></div>');
-				var oUl = $("#search_results_content").append("<ul id='lr'></ul>").find("ul");
-				for (var nCnt = 0; nCnt < oSearchEngine.aResults.length; nCnt++)
-				{
-					if (oSearchEngine.aResults[nCnt] < aTl.length)
-					{
-						oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt]][1]) + "</a></li>");
-					}
-				}
-				// Tree
-				$("#search_results_content").dynatree({
-					clickFolderMode: 1,
-					debugLevel: 0,
-					imagePath: 'css/dynatree/chm/',
-					onActivate: function(node){
-						if ($("#search_results_content") && $("#search_results_content").dynatree && $("#search_results_content").dynatree("getTree") && $("#search_results_content").dynatree("getTree").activateKey)
-							$("#search_results_content").dynatree("getTree").activateKey(null);
-						if(node.data.href && node.data.href != '#'){
-							window.open(node.data.href, node.data.target);
-						}
-					}
-				});
-			}
-		}
-	</script>
-</head>
-
-<body>
-
-	<div id="tabs">
-		<ul>
-			<li><a href="#tab-toc">Contents</a></li>
-			<li><a href="#tab-keywords">Index</a></li>
-			<li><a href="#tab-search">Search</a></li>
-			</ul>
-		<div id="tab-toc">
-			<ul id="toc" class="">
-
-				<li class="folder" id="Introduction" data="">
-							<a
-							href="Introduction.html"
-							target="FrameMain">
-								Introduction</a>
-
-				<ul><li class="" id="Introduction1" data="">
-							<a
-							href="Introduction1.html"
-							target="FrameMain">
-								Overview</a>
-
-				</li><li class="folder" id="KeyConcepts" data="">
-							<a
-							href="KeyConcepts.html"
-							target="FrameMain">
-								Key Features</a>
-
-				<ul><li class="" id="Create" data="">
-							<a
-							href="Create.html"
-							target="FrameMain">
-								Create</a>
-
-				</li><li class="" id="Design" data="">
-							<a
-							href="Design.html"
-							target="FrameMain">
-								Design</a>
-
-				</li><li class="" id="Populate" data="">
-							<a
-							href="Populate.html"
-							target="FrameMain">
-								Populate</a>
-
-				</li><li class="" id="KeyFeatures" data="">
-							<a
-							href="KeyFeatures.html"
-							target="FrameMain">
-								Connect</a>
-
-				</li><li class="" id="Search" data="">
-							<a
-							href="Search.html"
-							target="FrameMain">
-								Search</a>
-
-				</li><li class="" id="Filter" data="">
-							<a
-							href="Filter.html"
-							target="FrameMain">
-								Organise</a>
-
-				</li><li class="" id="Analyise" data="">
-							<a
-							href="Analyise.html"
-							target="FrameMain">
-								Analysis</a>
-
-				</li><li class="" id="Personalise" data="">
-							<a
-							href="Personalise.html"
-							target="FrameMain">
-								Personalise</a>
-
-				</li><li class="" id="Collaborate" data="">
-							<a
-							href="Collaborate.html"
-							target="FrameMain">
-								Share</a>
-
-				</li><li class="" id="Publish" data="">
-							<a
-							href="Publish.html"
-							target="FrameMain">
-								Export</a>
-
-				</li></ul></li><li class="" id="FindOutMoreAboutHeurist" data="">
-							<a
-							href="FindOutMoreAboutHeurist.html"
-							target="FrameMain">
-								About Heurist</a>
-
-				</li></ul></li><li class="folder" id="GettingStarted" data="">
-							<a
-							href="GettingStarted.html"
-							target="FrameMain">
-								Getting Started</a>
-
-				<ul><li class="" id="FindOutMoreAboutHeurist1" data="">
-							<a
-							href="FindOutMoreAboutHeurist1.html"
-							target="FrameMain">
-								Heurist Project Page</a>
-
-				</li><li class="" id="Register" data="">
-							<a
-							href="Register.html"
-							target="FrameMain">
-								Register as New User</a>
-
-				</li><li class="folder" id="Login" data="">
-							<a
-							href="Login.html"
-							target="FrameMain">
-								Open a Database</a>
-
-				<ul><li class="" id="LogintoHeuristPublicDatabase" data="">
-							<a
-							href="LogintoHeuristPublicDatabase.html"
-							target="FrameMain">
-								Open the Heurist Public Database</a>
-
-				</li><li class="" id="LogintoAHeuristDatabase" data="">
-							<a
-							href="LogintoAHeuristDatabase.html"
-							target="FrameMain">
-								Open a user Database</a>
-
-				</li><li class="" id="Login2" data="">
-							<a
-							href="Login2.html"
-							target="FrameMain">
-								Log into default DB on non-Heurist server</a>
-
-				</li><li class="" id="Login3" data="">
-							<a
-							href="Login3.html"
-							target="FrameMain">
-								Retrieve Password</a>
-
-				</li></ul></li><li class="folder" id="UserInterfaceNavigation" data="">
-							<a
-							href="UserInterfaceNavigation.html"
-							target="FrameMain">
-								User Interface/Navigation</a>
-
-				<ul><li class="" id="UserView" data="">
-							<a
-							href="UserView.html"
-							target="FrameMain">
-								User View</a>
-
-				</li><li class="" id="DesignerView" data="">
-							<a
-							href="DesignerView.html"
-							target="FrameMain">
-								Designer View</a>
-
-				</li></ul></li><li class="folder" id="NewUsersWhattodonext" data="">
-							<a
-							href="NewUsersWhattodonext.html"
-							target="FrameMain">
-								New Users: What to do Next</a>
-
-				<ul><li class="folder" id="NewUsersWhattodonext1" data="">
-							<a
-							href="NewUsersWhattodonext1.html"
-							target="FrameMain">
-								Designer Workflow</a>
-
-				<ul><li class="" id="DataModellingConcepts" data="">
-							<a
-							href="DataModellingConcepts.html"
-							target="FrameMain">
-								Data Modelling Concepts</a>
-
-				</li></ul></li><li class="" id="NewUsersWhattodonext2" data="">
-							<a
-							href="NewUsersWhattodonext2.html"
-							target="FrameMain">
-								User Workflow</a>
-
-				</li></ul></li></ul></li><li class="folder" id="Designer" data="">
-							<a
-							href="Designer.html"
-							target="FrameMain">
-								Designer</a>
-
-				<ul><li class="" id="CreateorOpenDatabase" data="">
-							<a
-							href="CreateorOpenDatabase.html"
-							target="FrameMain">
-								Create a Database</a>
-
-				</li><li class="folder" id="DefineStructure" data="">
-							<a
-							href="DefineStructure.html"
-							target="FrameMain">
-								Define Structure</a>
-
-				<ul><li class="folder" id="DefineStructure1" data="">
-							<a
-							href="DefineStructure1.html"
-							target="FrameMain">
-								Specify Record Types</a>
-
-				<ul><li class="" id="StandardRecordTypes" data="">
-							<a
-							href="StandardRecordTypes.html"
-							target="FrameMain">
-								Standard Record Types</a>
-
-				</li><li class="" id="CreateRecordTypeGroup" data="">
-							<a
-							href="CreateRecordTypeGroup.html"
-							target="FrameMain">
-								Create Record Type Group</a>
-
-				</li></ul></li><li class="folder" id="DefineRecordTypes" data="">
-							<a
-							href="DefineRecordTypes.html"
-							target="FrameMain">
-								Define New Record Type</a>
-
-				<ul><li class="" id="CreateTitleMask" data="">
-							<a
-							href="CreateTitleMask.html"
-							target="FrameMain">
-								Create Title Mask</a>
-
-				</li><li class="" id="AddThumbnailsandIcons" data="">
-							<a
-							href="AddThumbnailsandIcons.html"
-							target="FrameMain">
-								Add Thumbnails and Icons</a>
-
-				</li></ul></li><li class="" id="DefineRecordConstraints" data="">
-							<a
-							href="DefineRecordConstraints.html"
-							target="FrameMain">
-								Define Record Constraints</a>
-
-				</li><li class="folder" id="AddFields" data="">
-							<a
-							href="AddFields.html"
-							target="FrameMain">
-								Specify Fields</a>
-
-				<ul><li class="" id="InsertPredefinedFieldType" data="">
-							<a
-							href="InsertPredefinedFieldType.html"
-							target="FrameMain">
-								Insert Predefined Field Type</a>
-
-				</li><li class="folder" id="DefineFieldType" data="">
-							<a
-							href="DefineFieldType.html"
-							target="FrameMain">
-								Define New Field Type</a>
-
-				<ul><li class="" id="DefineaTermsList" data="">
-							<a
-							href="DefineaTermsList.html"
-							target="FrameMain">
-								Define a Terms List</a>
-
-				</li><li class="" id="DefineRelationshipMarker" data="">
-							<a
-							href="DefineRelationshipMarker.html"
-							target="FrameMain">
-								Define Relationship Marker</a>
-
-				</li><li class="" id="DefineRecordPointer" data="">
-							<a
-							href="DefineRecordPointer.html"
-							target="FrameMain">
-								Define Record Pointer</a>
-
-				</li></ul></li></ul></li></ul></li><li class="folder" id="ModifyStructure" data="">
-							<a
-							href="ModifyStructure.html"
-							target="FrameMain">
-								Modify Structure</a>
-
-				<ul><li class="" id="EditRecordType" data="">
-							<a
-							href="EditRecordType.html"
-							target="FrameMain">
-								Edit Record Type</a>
-
-				</li><li class="" id="EditField" data="">
-							<a
-							href="EditField.html"
-							target="FrameMain">
-								Edit Field Expression</a>
-
-				</li><li class="" id="EditFieldType" data="">
-							<a
-							href="EditFieldType.html"
-							target="FrameMain">
-								Edit Field Type</a>
-
-				</li></ul></li></ul></li><li class="folder" id="AdvancedDesigner" data="">
-							<a
-							href="AdvancedDesigner.html"
-							target="FrameMain">
-								Advanced Designer</a>
-
-				<ul><li class="folder" id="ConfigureDatabase" data="">
-							<a
-							href="ConfigureDatabase.html"
-							target="FrameMain">
-								Configure Database</a>
-
-				<ul><li class="" id="SetDatabaseProperties" data="">
-							<a
-							href="SetDatabaseProperties.html"
-							target="FrameMain">
-								Set Database Properties</a>
-
-				</li><li class="" id="RegisterDatabase" data="">
-							<a
-							href="RegisterDatabase.html"
-							target="FrameMain">
-								Register Database</a>
-
-				</li></ul></li><li class="folder" id="AdvancedDesigner1" data="">
-							<a
-							href="AdvancedDesigner1.html"
-							target="FrameMain">
-								Manage Database Structure</a>
-
-				<ul><li class="" id="ImportDatabaseStructure" data="">
-							<a
-							href="ImportDatabaseStructure.html"
-							target="FrameMain">
-								Import Database Structure</a>
-
-				</li><li class="" id="ManageDatabaseStructure" data="">
-							<a
-							href="ManageDatabaseStructure.html"
-							target="FrameMain">
-								Manage Field Types</a>
-
-				</li><li class="" id="ConfigureDatabase1" data="">
-							<a
-							href="ConfigureDatabase1.html"
-							target="FrameMain">
-								Manage Terms</a>
-
-				</li><li class="" id="ManageDatabaseStructure1" data="">
-							<a
-							href="ManageDatabaseStructure1.html"
-							target="FrameMain">
-								View Structure</a>
-
-				</li></ul></li><li class="folder" id="ManageDatabaseAccess" data="">
-							<a
-							href="ManageDatabaseAccess.html"
-							target="FrameMain">
-								Manage Database Access</a>
-
-				<ul><li class="folder" id="ManageWorkgroups" data="">
-							<a
-							href="ManageWorkgroups.html"
-							target="FrameMain">
-								Manage Workgroups</a>
-
-				<ul><li class="" id="CreateaWorkgroup" data="">
-							<a
-							href="CreateaWorkgroup.html"
-							target="FrameMain">
-								Create a Workgroup</a>
-
-				</li><li class="" id="AddRemoveGroupMembers" data="">
-							<a
-							href="AddRemoveGroupMembers.html"
-							target="FrameMain">
-								Add/Remove Group Members</a>
-
-				</li><li class="" id="AddWorkgroupTags" data="">
-							<a
-							href="AddWorkgroupTags.html"
-							target="FrameMain">
-								Add Workgroup Tags</a>
-
-				</li><li class="" id="QuitWorkgroupTemporally" data="">
-							<a
-							href="QuitWorkgroupTemporally.html"
-							target="FrameMain">
-								Quit Workgroup Temporally</a>
-
-				</li></ul></li><li class="folder" id="ManageUsers" data="">
-							<a
-							href="ManageUsers.html"
-							target="FrameMain">
-								Manage Users</a>
-
-				<ul><li class="" id="CreateUser" data="">
-							<a
-							href="CreateUser.html"
-							target="FrameMain">
-								Create User</a>
-
-				</li><li class="" id="ImportUsers" data="">
-							<a
-							href="ImportUsers.html"
-							target="FrameMain">
-								Import Users</a>
-
-				</li><li class="" id="EditUser" data="">
-							<a
-							href="EditUser.html"
-							target="FrameMain">
-								Edit User</a>
-
-				</li><li class="" id="ChangeOwnerProperties" data="">
-							<a
-							href="ChangeOwnerProperties.html"
-							target="FrameMain">
-								Change Owner / Login Details</a>
-
-				</li></ul></li></ul></li><li class="folder" id="ManageDatabases" data="">
-							<a
-							href="ManageDatabases.html"
-							target="FrameMain">
-								Manage Databases</a>
-
-				<ul><li class="" id="CloneDatabase" data="">
-							<a
-							href="CloneDatabase.html"
-							target="FrameMain">
-								Clone Database</a>
-
-				</li><li class="" id="DeleteDatabase" data="">
-							<a
-							href="DeleteDatabase.html"
-							target="FrameMain">
-								Delete  Database</a>
-
-				</li><li class="" id="DeleteAllRecords" data="">
-							<a
-							href="DeleteAllRecords.html"
-							target="FrameMain">
-								Delete All Records</a>
-
-				</li><li class="" id="RollbackDatabase" data="">
-							<a
-							href="RollbackDatabase.html"
-							target="FrameMain">
-								Rollback  Database</a>
-
-				</li></ul></li><li class="folder" id="ValidateDatabaseIntegrity" data="">
-							<a
-							href="ValidateDatabaseIntegrity.html"
-							target="FrameMain">
-								Validate Database Integrity</a>
-
-				<ul><li class="" id="CheckTitleMasks" data="">
-							<a
-							href="CheckTitleMasks.html"
-							target="FrameMain">
-								Check Title Masks</a>
-
-				</li><li class="" id="CheckTitleMasks1" data="">
-							<a
-							href="CheckTitleMasks1.html"
-							target="FrameMain">
-								Synch Canonical Title Masks</a>
-
-				</li><li class="" id="CheckInvalidPointers" data="">
-							<a
-							href="CheckInvalidPointers.html"
-							target="FrameMain">
-								Check Invalid Pointers</a>
-
-				</li><li class="" id="CheckInvalidFieldTypes" data="">
-							<a
-							href="CheckInvalidFieldTypes.html"
-							target="FrameMain">
-								Check Invalid Field Types</a>
-
-				</li><li class="" id="FindDuplicateRecords" data="">
-							<a
-							href="FindDuplicateRecords.html"
-							target="FrameMain">
-								Find Duplicate Records</a>
-
-				</li><li class="" id="CheckWYSIWYGText" data="">
-							<a
-							href="CheckWYSIWYGText.html"
-							target="FrameMain">
-								Check WYSIWYG Text</a>
-
-				</li><li class="" id="CheckInvalidCharacters" data="">
-							<a
-							href="CheckInvalidCharacters.html"
-							target="FrameMain">
-								Check Invalid Characters</a>
-
-				</li><li class="" id="CleanInvalidCharacters" data="">
-							<a
-							href="CleanInvalidCharacters.html"
-							target="FrameMain">
-								Clean Invalid Characters</a>
-
-				</li><li class="" id="SearchBrokenURLs" data="">
-							<a
-							href="SearchBrokenURLs.html"
-							target="FrameMain">
-								Search Broken URLs</a>
-
-				</li></ul></li><li class="folder" id="MaintainDatabase" data="">
-							<a
-							href="MaintainDatabase.html"
-							target="FrameMain">
-								Maintain Database</a>
-
-				<ul><li class="" id="ClearDatabaseLocks" data="">
-							<a
-							href="ClearDatabaseLocks.html"
-							target="FrameMain">
-								Clear Database Locks</a>
-
-				</li><li class="" id="DatabasetoDatabaseTransfer" data="">
-							<a
-							href="DatabasetoDatabaseTransfer.html"
-							target="FrameMain">
-								Database to Database Transfer</a>
-
-				</li><li class="" id="UpgradeAssociatedFileNames" data="">
-							<a
-							href="UpgradeAssociatedFileNames.html"
-							target="FrameMain">
-								Upgrade Associated File Names</a>
-
-				</li><li class="" id="MaintainScheduledReports" data="">
-							<a
-							href="MaintainScheduledReports.html"
-							target="FrameMain">
-								Maintain Scheduled Reports</a>
-
-				</li><li class="" id="RebuildTitles" data="">
-							<a
-							href="RebuildTitles.html"
-							target="FrameMain">
-								Rebuild Titles</a>
-
-				</li></ul></li></ul></li><li class="folder" id="User" data="">
-							<a
-							href="User.html"
-							target="FrameMain">
-								User</a>
-
-				<ul><li class="folder" id="EnterData" data="">
-							<a
-							href="EnterData.html"
-							target="FrameMain">
-								Enter Data</a>
-
-				<ul><li class="folder" id="CreateRecord" data="">
-							<a
-							href="CreateRecord.html"
-							target="FrameMain">
-								Create Record</a>
-
-				<ul><li class="folder" id="RecordTabs" data="">
-							<a
-							href="RecordTabs.html"
-							target="FrameMain">
-								Record Tabs</a>
-
-				<ul><li class="folder" id="SharedInformationTab" data="">
-							<a
-							href="SharedInformationTab.html"
-							target="FrameMain">
-								Shared Information Tab</a>
-
-				<ul><li class="folder" id="DataTypes" data="">
-							<a
-							href="DataTypes.html"
-							target="FrameMain">
-								Adding Data Types</a>
-
-				<ul><li class="" id="TermsList" data="">
-							<a
-							href="TermsList.html"
-							target="FrameMain">
-								Terms List</a>
-
-				</li><li class="" id="Numeric" data="">
-							<a
-							href="Numeric.html"
-							target="FrameMain">
-								Numeric</a>
-
-				</li><li class="" id="DateTemporal" data="">
-							<a
-							href="DateTemporal.html"
-							target="FrameMain">
-								Date/Temporal</a>
-
-				</li><li class="" id="File" data="">
-							<a
-							href="File.html"
-							target="FrameMain">
-								File</a>
-
-				</li><li class="" id="GeoSpatial" data="">
-							<a
-							href="GeoSpatial.html"
-							target="FrameMain">
-								GeoSpatial</a>
-
-				</li><li class="" id="Text" data="">
-							<a
-							href="Text.html"
-							target="FrameMain">
-								Text</a>
-
-				</li><li class="" id="MemoMultiLine" data="">
-							<a
-							href="MemoMultiLine.html"
-							target="FrameMain">
-								Memo (Multi-Line)</a>
-
-				</li><li class="" id="RecordPointer" data="">
-							<a
-							href="RecordPointer.html"
-							target="FrameMain">
-								Record Pointer</a>
-
-				</li><li class="" id="RelationshipMarker" data="">
-							<a
-							href="RelationshipMarker.html"
-							target="FrameMain">
-								Relationship Marker</a>
-
-				</li><li class="" id="Calculated" data="">
-							<a
-							href="Calculated.html"
-							target="FrameMain">
-								Calculated</a>
-
-				</li></ul></li></ul></li><li class="" id="PrivateInformationTab" data="">
-							<a
-							href="PrivateInformationTab.html"
-							target="FrameMain">
-								Private Information Tab</a>
-
-				</li><li class="" id="WorkgroupTagsTab" data="">
-							<a
-							href="WorkgroupTagsTab.html"
-							target="FrameMain">
-								Workgroup Tags Tab</a>
-
-				</li><li class="" id="TextTab" data="">
-							<a
-							href="TextTab.html"
-							target="FrameMain">
-								Text Tab</a>
-
-				</li><li class="" id="RelationshipsTab" data="">
-							<a
-							href="RelationshipsTab.html"
-							target="FrameMain">
-								Relationships Tab</a>
-
-				</li></ul></li><li class="" id="FindRecordDialog" data="">
-							<a
-							href="FindRecordDialog.html"
-							target="FrameMain">
-								Find Record Dialog</a>
-
-				</li><li class="" id="RichTextEditor" data="">
-							<a
-							href="RichTextEditor.html"
-							target="FrameMain">
-								Rich Text Editor</a>
-
-				</li></ul></li><li class="" id="EnterData1" data="">
-							<a
-							href="EnterData1.html"
-							target="FrameMain">
-								Edit Record Data</a>
-
-				</li></ul></li><li class="folder" id="FindData" data="">
-							<a
-							href="FindData.html"
-							target="FrameMain">
-								Find Data</a>
-
-				<ul><li class="" id="NavigationPane" data="">
-							<a
-							href="NavigationPane.html"
-							target="FrameMain">
-								Navigation Pane</a>
-
-				</li><li class="" id="QuickSearch" data="">
-							<a
-							href="QuickSearch.html"
-							target="FrameMain">
-								Quick Search</a>
-
-				</li><li class="folder" id="OrganiseSearchResults" data="">
-							<a
-							href="OrganiseSearchResults.html"
-							target="FrameMain">
-								Organise Search Results</a>
-
-				<ul><li class="" id="LayoutMenu" data="">
-							<a
-							href="LayoutMenu.html"
-							target="FrameMain">
-								Layout Menu</a>
-
-				</li><li class="" id="LevelMenus" data="">
-							<a
-							href="LevelMenus.html"
-							target="FrameMain">
-								Level Menus</a>
-
-				</li><li class="" id="Icons" data="">
-							<a
-							href="Icons.html"
-							target="FrameMain">
-								Icons</a>
-
-				</li></ul></li><li class="" id="SummaryView" data="">
-							<a
-							href="SummaryView.html"
-							target="FrameMain">
-								Summary View</a>
-
-				</li></ul></li><li class="folder" id="SaveData" data="">
-							<a
-							href="SaveData.html"
-							target="FrameMain">
-								Save Data</a>
-
-				<ul><li class="" id="SavedSeaches" data="">
-							<a
-							href="SavedSeaches.html"
-							target="FrameMain">
-								Saved Searches</a>
-
-				</li><li class="" id="SavedCollections" data="">
-							<a
-							href="SavedCollections.html"
-							target="FrameMain">
-								Saved Collections</a>
-
-				</li></ul></li><li class="folder" id="BookmarkData" data="">
-							<a
-							href="BookmarkData.html"
-							target="FrameMain">
-								Bookmark Data</a>
-
-				<ul><li class="" id="TagData" data="">
-							<a
-							href="TagData.html"
-							target="FrameMain">
-								Tag Records</a>
-
-				</li></ul></li><li class="folder" id="ViewDataApplications" data="">
-							<a
-							href="ViewDataApplications.html"
-							target="FrameMain">
-								Analysis Data (Applications)</a>
-
-				<ul><li class="" id="RecordView" data="">
-							<a
-							href="RecordView.html"
-							target="FrameMain">
-								Record Application</a>
-
-				</li><li class="" id="MapandTimelineView" data="">
-							<a
-							href="MapandTimelineView.html"
-							target="FrameMain">
-								Map and Timeline Application</a>
-
-				</li><li class="folder" id="ReportView" data="">
-							<a
-							href="ReportView.html"
-							target="FrameMain">
-								Report Application</a>
-
-				<ul><li class="" id="Smarty" data="">
-							<a
-							href="Smarty.html"
-							target="FrameMain">
-								Run Report</a>
-
-				</li><li class="" id="RunninganExistingReport" data="">
-							<a
-							href="RunninganExistingReport.html"
-							target="FrameMain">
-								Get Report Link</a>
-
-				</li><li class="" id="ReportingPublishing2" data="">
-							<a
-							href="ReportingPublishing2.html"
-							target="FrameMain">
-								Print Report</a>
-
-				</li></ul></li></ul></li><li class="folder" id="ShareData" data="">
-							<a
-							href="ShareData.html"
-							target="FrameMain">
-								Share Data with Workgroup Members</a>
-
-				<ul><li class="" id="ChangeRecordOwnership1" data="">
-							<a
-							href="ChangeRecordOwnership1.html"
-							target="FrameMain">
-								Change Record Ownership</a>
-
-				</li><li class="folder" id="CreateBlogPosts" data="">
-							<a
-							href="CreateBlogPosts.html"
-							target="FrameMain">
-								Create Blog Posts</a>
-
-				<ul><li class="" id="AddExtendedTextDiscussions" data="">
-							<a
-							href="AddExtendedTextDiscussions.html"
-							target="FrameMain">
-								Add Extended Text/Discussions</a>
-
-				</li></ul></li><li class="" id="SendEmailReminders" data="">
-							<a
-							href="SendEmailReminders.html"
-							target="FrameMain">
-								Send Email Reminders</a>
-
-				</li><li class="" id="AddWorkgroupTag" data="">
-							<a
-							href="AddWorkgroupTag.html"
-							target="FrameMain">
-								Add Workgroup Tag</a>
-
-				</li></ul></li></ul></li><li class="folder" id="AdvancedUser" data="">
-							<a
-							href="AdvancedUser.html"
-							target="FrameMain">
-								Advanced User</a>
-
-				<ul><li class="folder" id="MyProfile1" data="">
-							<a
-							href="MyProfile1.html"
-							target="FrameMain">
-								My Profile</a>
-
-				<ul><li class="" id="Preferences" data="">
-							<a
-							href="Preferences.html"
-							target="FrameMain">
-								Preferences</a>
-
-				</li><li class="" id="ManageTags" data="">
-							<a
-							href="ManageTags.html"
-							target="FrameMain">
-								Manage Tags</a>
-
-				</li><li class="" id="ManageReminders" data="">
-							<a
-							href="ManageReminders.html"
-							target="FrameMain">
-								Manage Reminders</a>
-
-				</li><li class="" id="ExportmyData" data="">
-							<a
-							href="ExportmyData.html"
-							target="FrameMain">
-								Export my Data</a>
-
-				</li><li class="folder" id="Access" data="">
-							<a
-							href="Access.html"
-							target="FrameMain">
-								Access</a>
-
-				<ul><li class="" id="MyUserGroups" data="">
-							<a
-							href="MyUserGroups.html"
-							target="FrameMain">
-								My User Groups</a>
-
-				</li><li class="" id="MyUserInfo" data="">
-							<a
-							href="MyUserInfo.html"
-							target="FrameMain">
-								My User Info</a>
-
-				</li></ul></li></ul></li><li class="folder" id="AdvancedRecordTasks" data="">
-							<a
-							href="AdvancedRecordTasks.html"
-							target="FrameMain">
-								Advanced Record Tasks</a>
-
-				<ul><li class="folder" id="ModifyData" data="">
-							<a
-							href="ModifyData.html"
-							target="FrameMain">
-								Modify Data</a>
-
-				<ul><li class="folder" id="EditSingleRecordEditRecordScreen" data="">
-							<a
-							href="EditSingleRecordEditRecordScreen.html"
-							target="FrameMain">
-								Edit Single Record (Edit Record Screen)</a>
-
-				<ul><li class="" id="ChangeRecordType" data="">
-							<a
-							href="ChangeRecordType.html"
-							target="FrameMain">
-								Change Record Type</a>
-
-				</li><li class="" id="AddNonStandardField" data="">
-							<a
-							href="AddNonStandardField.html"
-							target="FrameMain">
-								Add Non-Standard Field</a>
-
-				</li></ul></li><li class="" id="EditMultipleRecordsEditMenu" data="">
-							<a
-							href="EditMultipleRecordsEditMenu.html"
-							target="FrameMain">
-								Edit Multiple Records (Edit Menu)</a>
-
-				</li></ul></li><li class="" id="UsetheScratchapd" data="">
-							<a
-							href="UsetheScratchapd.html"
-							target="FrameMain">
-								Use the Scratchapd</a>
-
-				</li><li class="" id="RefreshMemory" data="">
-							<a
-							href="RefreshMemory.html"
-							target="FrameMain">
-								Refresh Memory</a>
-
-				</li><li class="" id="SavedAggregations" data="">
-							<a
-							href="SavedAggregations.html"
-							target="FrameMain">
-								Create Aggregation</a>
-
-				</li></ul></li><li class="folder" id="AdvancedSearch" data="">
-							<a
-							href="AdvancedSearch.html"
-							target="FrameMain">
-								Advanced Search</a>
-
-				<ul><li class="" id="Syntax" data="">
-							<a
-							href="Syntax.html"
-							target="FrameMain">
-								Syntax</a>
-
-				</li></ul></li><li class="folder" id="Import" data="">
-							<a
-							href="Import.html"
-							target="FrameMain">
-								Import</a>
-
-				<ul><li class="" id="CSV1" data="">
-							<a
-							href="CSV1.html"
-							target="FrameMain">
-								CSV</a>
-
-				</li><li class="" id="CSVupdate" data="">
-							<a
-							href="CSVupdate.html"
-							target="FrameMain">
-								CSV (update)</a>
-
-				</li><li class="" id="KML" data="">
-							<a
-							href="KML.html"
-							target="FrameMain">
-								KML</a>
-
-				</li><li class="folder" id="Bibliographic" data="">
-							<a
-							href="Bibliographic.html"
-							target="FrameMain">
-								Bibliographic</a>
-
-				<ul><li class="" id="EditBibliographicData" data="">
-							<a
-							href="EditBibliographicData.html"
-							target="FrameMain">
-								Edit Bibliographic Data</a>
-
-				</li></ul></li><li class="folder" id="Hyperlinks" data="">
-							<a
-							href="Hyperlinks.html"
-							target="FrameMain">
-								Hyperlinks</a>
-
-				<ul><li class="" id="InputOutput1" data="">
-							<a
-							href="InputOutput1.html"
-							target="FrameMain">
-								Using the Bookmarklet</a>
-
-				</li></ul></li><li class="" id="Import1" data="">
-							<a
-							href="Import1.html"
-							target="FrameMain">
-								Files In Situ</a>
-
-				</li><li class="" id="IMAPEmail" data="">
-							<a
-							href="IMAPEmail.html"
-							target="FrameMain">
-								IMAP (Email)</a>
-
-				</li></ul></li><li class="folder" id="InputOutput2" data="">
-							<a
-							href="InputOutput2.html"
-							target="FrameMain">
-								Export</a>
-
-				<ul><li class="" id="XForms" data="">
-							<a
-							href="XForms.html"
-							target="FrameMain">
-								X-Forms</a>
-
-				</li><li class="" id="Export" data="">
-							<a
-							href="Export.html"
-							target="FrameMain">
-								HML</a>
-
-				</li></ul></li><li class="folder" id="Publish1" data="">
-							<a
-							href="Publish1.html"
-							target="FrameMain">
-								Report</a>
-
-				<ul><li class="folder" id="ReportingPublishing1" data="">
-							<a
-							href="ReportingPublishing1.html"
-							target="FrameMain">
-								Create Report Template</a>
-
-				<ul><li class="" id="CreatingaReportTemplate1" data="">
-							<a
-							href="CreatingaReportTemplate1.html"
-							target="FrameMain">
-								Edit Report Template</a>
-
-				</li><li class="" id="RunninganExistingReport2" data="">
-							<a
-							href="RunninganExistingReport2.html"
-							target="FrameMain">
-								Delete Template</a>
-
-				</li><li class="" id="ReportingPublishing" data="">
-							<a
-							href="ReportingPublishing.html"
-							target="FrameMain">
-								Smarty Synatx</a>
-
-				</li></ul></li><li class="" id="RunninganExistingReport1" data="">
-							<a
-							href="RunninganExistingReport1.html"
-							target="FrameMain">
-								Publish Report</a>
-
-				</li></ul></li><li class="folder" id="AdvancedUser1" data="">
-							<a
-							href="AdvancedUser1.html"
-							target="FrameMain">
-								Transform</a>
-
-				<ul><li class="" id="ViewDataApplications1" data="">
-							<a
-							href="ViewDataApplications1.html"
-							target="FrameMain">
-								About Transforms</a>
-
-				</li><li class="" id="Transforms" data="">
-							<a
-							href="Transforms.html"
-							target="FrameMain">
-								Before you Begin</a>
-
-				</li><li class="" id="Transforms2" data="">
-							<a
-							href="Transforms2.html"
-							target="FrameMain">
-								Create XML Record</a>
-
-				</li><li class="" id="TransformView" data="">
-							<a
-							href="TransformView.html"
-							target="FrameMain">
-								Apply Transform</a>
-
-				</li><li class="folder" id="Transforms1" data="">
-							<a
-							href="Transforms1.html"
-							target="FrameMain">
-								Available Transforms</a>
-
-				<ul><li class="folder" id="TransformTypes" data="">
-							<a
-							href="TransformTypes.html"
-							target="FrameMain">
-								TEI Annotation Transform</a>
-
-				<ul><li class="" id="Annotations1" data="">
-							<a
-							href="Annotations1.html"
-							target="FrameMain">
-								About TEI</a>
-
-				</li><li class="" id="Transforms3" data="">
-							<a
-							href="Transforms3.html"
-							target="FrameMain">
-								Create TEI XML Document</a>
-
-				</li><li class="" id="TEIAnnotations" data="">
-							<a
-							href="TEIAnnotations.html"
-							target="FrameMain">
-								Using the Annotation Transform</a>
-
-				</li></ul></li><li class="" id="TransformView3" data="">
-							<a
-							href="TransformView3.html"
-							target="FrameMain">
-								Picasa Album Viewer Transform</a>
-
-				</li></ul></li><li class="" id="TransformView1" data="">
-							<a
-							href="TransformView1.html"
-							target="FrameMain">
-								Create Transform</a>
-
-				</li></ul></li></ul></li><li class="folder" id="Reference" data="">
-							<a
-							href="Reference.html"
-							target="FrameMain">
-								Reference</a>
-
-				<ul><li class="" id="Reference1" data="">
-							<a
-							href="Reference1.html"
-							target="FrameMain">
-								Reference Sites &amp; Resources</a>
-
-				</li><li class="" id="HelpConventions" data="">
-							<a
-							href="HelpConventions.html"
-							target="FrameMain">
-								Help Conventions</a>
-
-				</li><li class="" id="ScreenConventions" data="">
-							<a
-							href="ScreenConventions.html"
-							target="FrameMain">
-								Screen Conventions</a>
-
-				</li><li class="" id="Termonology" data="">
-							<a
-							href="Termonology.html"
-							target="FrameMain">
-								Glossary</a>
-
-				</li><li class="" id="Statuses" data="">
-							<a
-							href="Statuses.html"
-							target="FrameMain">
-								Statuses</a>
-
-				</li><li class="" id="TipsTricks" data="">
-							<a
-							href="TipsTricks.html"
-							target="FrameMain">
-								Tips &amp; Tricks</a>
-
-				</li><li class="" id="Troubleshooting" data="">
-							<a
-							href="Troubleshooting.html"
-							target="FrameMain">
-								Troubleshooting</a>
-
-				</li><li class="" id="ReportBug" data="">
-							<a
-							href="ReportBug.html"
-							target="FrameMain">
-								Submit Bugs &amp; Issues</a>
-
-				</li><li class="folder" id="PROGRAMMERSREFERENCE" data="">
-							<a
-							href="PROGRAMMERSREFERENCE.html"
-							target="FrameMain">
-								Programming Reference [redo]</a>
-
-				<ul><li class="" id="TechnicalOverview" data="">
-							<a
-							href="TechnicalOverview.html"
-							target="FrameMain">
-								Technical Overview</a>
-
-				</li><li class="" id="HAPI" data="">
-							<a
-							href="HAPI.html"
-							target="FrameMain">
-								HAPI</a>
-
-				</li><li class="" id="HAPIDevelopersGuide" data="">
-							<a
-							href="HAPIDevelopersGuide.html"
-							target="FrameMain">
-								HAPI Developer's Guide</a>
-
-				</li><li class="" id="GeographicObjectsInterface" data="">
-							<a
-							href="GeographicObjectsInterface.html"
-							target="FrameMain">
-								Geographic Objects Interface</a>
-
-				</li><li class="" id="T1000Database" data="">
-							<a
-							href="T1000Database.html"
-							target="FrameMain">
-								T1000 Database</a>
-
-				</li><li class="" id="TimeMapJavaWebmap" data="">
-							<a
-							href="TimeMapJavaWebmap.html"
-							target="FrameMain">
-								TimeMap Java Webmap</a>
-
-				</li><li class="" id="Databasedefinitiontemplates" data="">
-							<a
-							href="Databasedefinitiontemplates.html"
-							target="FrameMain">
-								Database definition templates</a>
-
-				</li><li class="" id="Enumvaluestargetsrelationshipcon" data="">
-							<a
-							href="Enumvaluestargetsrelationshipcon.html"
-							target="FrameMain">
-								Enum values, targets, relationship constraints</a>
-
-				</li></ul></li></ul></li></ul>
-		</div>
-		
-		<div id="tab-keywords">
-			<ul id="keywords">
-
-				</ul>
-		</div>
-		
-		<div id="tab-search">
-			<form onsubmit="PerformSearch(); return false;">
-				<label for="search_value">Search:</label>
-				<input id="search_value" name="search_value"></input>
-				<input type="submit" value="Search"/>
-			</form>
-			<div id="search_results"></div>
-		</div>
-		
-		</div>
-    
-</body>
-
-</html>
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+	<title>index- Table of Contents</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.9.0.595">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+    <link type="text/css" rel="stylesheet" media="all" href="css/toc.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#tabs .ui-widget-header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
+	<script type="text/javascript" src="js/hndjsse.js"></script>
+	<script type="text/javascript">
+
+		var bSearchDataLoaded = false;
+		var sHelpIdToActivate = '';
+
+		$(document).ready(function()
+		{
+			var sAnchorName = '';
+			try { sAnchorName = top.location.href.substring(top.location.href.lastIndexOf("#") + 1, top.location.href.length); }
+			catch(err) { sAnchorName = ''; }
+			var nSelectedTab = 0;
+			if (sAnchorName == '_index') nSelectedTab = 1
+			else if (sAnchorName == '_search') nSelectedTab = 2;
+			$("#tabs").tabs({
+				selected: nSelectedTab,
+				select: function(event, ui) { HideKwPopup(); }
+			});
+
+			// Toc
+			if ($("#tab-toc").length) {
+				$("#tab-toc").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#tab-keywords").length && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
+							$("#tab-keywords").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
+				// Expand all nodes if required
+				// Select the active help id
+				if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+			}
+
+			// Keywords
+
+			if ($("#tab-keywords").length) {
+				$("#tab-keywords").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onClick: function(node, event){
+						HideKwPopup();
+						if (node.data && node.data.click)
+						{
+							var aRefList = null;
+							eval('aRefList=' + node.data.click);
+							if (ShowKwPopup(node.li, aRefList))
+							{
+								if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
+									$("#tab-toc").dynatree("getTree").activateKey(null);
+								if(node.data.href && node.data.href != '#'){
+									window.open(node.data.href, node.data.target);
+								}
+							}
+						}
+					}
+				});
+				// Expand all nodes if required
+				}
+
+			// Load search data
+			$.getScript("js/searchdata.js",	function() {
+				bSearchDataLoaded = true;
+			});
+		});
+
+		$('body').click(function() {
+			HideKwPopup();
+		});
+
+		function SelectTocItem(sHelpId)
+		{
+			if ($("#tab-toc").length && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
+				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
+			}
+			else {
+				sHelpIdToActivate = sHelpId;
+			}
+		}
+
+		function HideKwPopup()
+		{
+			if($("#popupMenu")) $("#popupMenu").remove();
+		}
+
+		function ShowKwPopup(oSender, aLinks)
+		{
+			HideKwPopup();
+			if (!aLinks || !aLinks.length || aLinks.length == 0) return false
+			else if (aLinks.length == 1) return true
+			else
+			{
+				var oParentDiv = document.createElement("DIV");
+				oParentDiv.id = "popupMenu";
+				var oLink = null;
+				// Close button
+				oLink = document.createElement("SPAN");
+				oLink.className = "close-button";
+				oLink.innerHTML = "X";
+				oLink.href = "#";
+				oLink.onclick = HideKwPopup;
+				oParentDiv.appendChild(oLink);
+				// Items
+				for (var nCnt=0; nCnt<aLinks.length; nCnt++)
+				{
+					oLink = document.createElement("A");
+					oLink.innerHTML = aLinks[nCnt][0];
+					oLink.href = aLinks[nCnt][1];
+					oLink.target = "FrameMain";
+					oLink.onclick = HideKwPopup;
+					oParentDiv.appendChild(oLink);
+				}
+				document.body.appendChild(oParentDiv);
+				var pos = $(oSender).offset();
+				var height = $(oSender).height();
+				$(oParentDiv).css({
+					"left": (pos.left+20) + "px",
+					"top": (pos.top + height + 5) + "px"
+				});
+				$(oParentDiv).show();
+				return false;
+			}
+		}
+
+		function PerformSearch()
+		{
+			sValue = $("#search_value").val();
+			$("#search_results").html('Searching...');
+			var oSearchEngine = new HndJsSe;
+			oSearchEngine.ParseInput(sValue);
+			oSearchEngine.PerformSearch();
+			if (!oSearchEngine.aResults || !oSearchEngine.aResults.length)
+			{
+				$("#search_results").html('No results found.');
+			}
+			else
+			{
+				$("#search_results").html('<div id="search_results_content"></div>');
+				var oUl = $("#search_results_content").append("<ul id='lr'></ul>").find("ul");
+				for (var nCnt = 0; nCnt < oSearchEngine.aResults.length; nCnt++)
+				{
+					if (oSearchEngine.aResults[nCnt] < aTl.length)
+					{
+						oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt]][1]) + "</a></li>");
+					}
+				}
+				// Tree
+				$("#search_results_content").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#search_results_content") && $("#search_results_content").dynatree && $("#search_results_content").dynatree("getTree") && $("#search_results_content").dynatree("getTree").activateKey)
+							$("#search_results_content").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="tabs">
+		<ul>
+			<li><a href="#tab-toc">Contents</a></li>
+			<li><a href="#tab-keywords">Index</a></li>
+			<li><a href="#tab-search">Search</a></li>
+			</ul>
+		<div id="tab-toc">
+			<ul id="toc" class="">
+
+				<li class="folder" id="Introduction" data="">
+							<a
+							href="Introduction.html"
+							target="FrameMain">
+								Introduction</a>
+
+				<ul><li class="" id="Introduction1" data="">
+							<a
+							href="Introduction1.html"
+							target="FrameMain">
+								Overview</a>
+
+				</li><li class="folder" id="KeyConcepts" data="">
+							<a
+							href="KeyConcepts.html"
+							target="FrameMain">
+								Key Features</a>
+
+				<ul><li class="" id="Create" data="">
+							<a
+							href="Create.html"
+							target="FrameMain">
+								Create</a>
+
+				</li><li class="" id="Design" data="">
+							<a
+							href="Design.html"
+							target="FrameMain">
+								Design</a>
+
+				</li><li class="" id="Populate" data="">
+							<a
+							href="Populate.html"
+							target="FrameMain">
+								Populate</a>
+
+				</li><li class="" id="KeyFeatures" data="">
+							<a
+							href="KeyFeatures.html"
+							target="FrameMain">
+								Connect</a>
+
+				</li><li class="" id="Search" data="">
+							<a
+							href="Search.html"
+							target="FrameMain">
+								Search</a>
+
+				</li><li class="" id="Filter" data="">
+							<a
+							href="Filter.html"
+							target="FrameMain">
+								Organise</a>
+
+				</li><li class="" id="Analyise" data="">
+							<a
+							href="Analyise.html"
+							target="FrameMain">
+								Analysis</a>
+
+				</li><li class="" id="Personalise" data="">
+							<a
+							href="Personalise.html"
+							target="FrameMain">
+								Personalise</a>
+
+				</li><li class="" id="Collaborate" data="">
+							<a
+							href="Collaborate.html"
+							target="FrameMain">
+								Share</a>
+
+				</li><li class="" id="Publish" data="">
+							<a
+							href="Publish.html"
+							target="FrameMain">
+								Export</a>
+
+				</li></ul></li><li class="" id="FindOutMoreAboutHeurist" data="">
+							<a
+							href="FindOutMoreAboutHeurist.html"
+							target="FrameMain">
+								About Heurist</a>
+
+				</li></ul></li><li class="folder" id="GettingStarted" data="">
+							<a
+							href="GettingStarted.html"
+							target="FrameMain">
+								Getting Started</a>
+
+				<ul><li class="" id="FindOutMoreAboutHeurist1" data="">
+							<a
+							href="FindOutMoreAboutHeurist1.html"
+							target="FrameMain">
+								Heurist Project Page</a>
+
+				</li><li class="" id="Register" data="">
+							<a
+							href="Register.html"
+							target="FrameMain">
+								Register as New User</a>
+
+				</li><li class="folder" id="Login" data="">
+							<a
+							href="Login.html"
+							target="FrameMain">
+								Open a Database</a>
+
+				<ul><li class="" id="LogintoHeuristPublicDatabase" data="">
+							<a
+							href="LogintoHeuristPublicDatabase.html"
+							target="FrameMain">
+								Open the Heurist Public Database</a>
+
+				</li><li class="" id="LogintoAHeuristDatabase" data="">
+							<a
+							href="LogintoAHeuristDatabase.html"
+							target="FrameMain">
+								Open a user Database</a>
+
+				</li><li class="" id="Login2" data="">
+							<a
+							href="Login2.html"
+							target="FrameMain">
+								Log into default DB on non-Heurist server</a>
+
+				</li><li class="" id="Login3" data="">
+							<a
+							href="Login3.html"
+							target="FrameMain">
+								Retrieve Password</a>
+
+				</li></ul></li><li class="folder" id="UserInterfaceNavigation" data="">
+							<a
+							href="UserInterfaceNavigation.html"
+							target="FrameMain">
+								User Interface/Navigation</a>
+
+				<ul><li class="" id="UserView" data="">
+							<a
+							href="UserView.html"
+							target="FrameMain">
+								User View</a>
+
+				</li><li class="" id="DesignerView" data="">
+							<a
+							href="DesignerView.html"
+							target="FrameMain">
+								Designer View</a>
+
+				</li></ul></li><li class="folder" id="NewUsersWhattodonext" data="">
+							<a
+							href="NewUsersWhattodonext.html"
+							target="FrameMain">
+								New Users: What to do Next</a>
+
+				<ul><li class="folder" id="NewUsersWhattodonext1" data="">
+							<a
+							href="NewUsersWhattodonext1.html"
+							target="FrameMain">
+								Designer Workflow</a>
+
+				<ul><li class="" id="DataModellingConcepts" data="">
+							<a
+							href="DataModellingConcepts.html"
+							target="FrameMain">
+								Data Modelling Concepts</a>
+
+				</li></ul></li><li class="" id="NewUsersWhattodonext2" data="">
+							<a
+							href="NewUsersWhattodonext2.html"
+							target="FrameMain">
+								User Workflow</a>
+
+				</li></ul></li></ul></li><li class="folder" id="Designer" data="">
+							<a
+							href="Designer.html"
+							target="FrameMain">
+								Designer</a>
+
+				<ul><li class="" id="CreateorOpenDatabase" data="">
+							<a
+							href="CreateorOpenDatabase.html"
+							target="FrameMain">
+								Create a Database</a>
+
+				</li><li class="folder" id="DefineStructure" data="">
+							<a
+							href="DefineStructure.html"
+							target="FrameMain">
+								Define Structure</a>
+
+				<ul><li class="folder" id="DefineStructure1" data="">
+							<a
+							href="DefineStructure1.html"
+							target="FrameMain">
+								Specify Record Types</a>
+
+				<ul><li class="" id="StandardRecordTypes" data="">
+							<a
+							href="StandardRecordTypes.html"
+							target="FrameMain">
+								Standard Record Types</a>
+
+				</li><li class="" id="CreateRecordTypeGroup" data="">
+							<a
+							href="CreateRecordTypeGroup.html"
+							target="FrameMain">
+								Create Record Type Group</a>
+
+				</li></ul></li><li class="folder" id="DefineRecordTypes" data="">
+							<a
+							href="DefineRecordTypes.html"
+							target="FrameMain">
+								Define New Record Type</a>
+
+				<ul><li class="" id="CreateTitleMask" data="">
+							<a
+							href="CreateTitleMask.html"
+							target="FrameMain">
+								Create Title Mask</a>
+
+				</li><li class="" id="AddThumbnailsandIcons" data="">
+							<a
+							href="AddThumbnailsandIcons.html"
+							target="FrameMain">
+								Add Thumbnails and Icons</a>
+
+				</li></ul></li><li class="" id="DefineRecordConstraints" data="">
+							<a
+							href="DefineRecordConstraints.html"
+							target="FrameMain">
+								Define Record Constraints</a>
+
+				</li><li class="folder" id="AddFields" data="">
+							<a
+							href="AddFields.html"
+							target="FrameMain">
+								Specify Fields</a>
+
+				<ul><li class="" id="InsertPredefinedFieldType" data="">
+							<a
+							href="InsertPredefinedFieldType.html"
+							target="FrameMain">
+								Insert Predefined Field Type</a>
+
+				</li><li class="folder" id="DefineFieldType" data="">
+							<a
+							href="DefineFieldType.html"
+							target="FrameMain">
+								Define New Field Type</a>
+
+				<ul><li class="" id="DefineaTermsList" data="">
+							<a
+							href="DefineaTermsList.html"
+							target="FrameMain">
+								Define a Terms List</a>
+
+				</li><li class="" id="DefineRelationshipMarker" data="">
+							<a
+							href="DefineRelationshipMarker.html"
+							target="FrameMain">
+								Define Relationship Marker</a>
+
+				</li><li class="" id="DefineRecordPointer" data="">
+							<a
+							href="DefineRecordPointer.html"
+							target="FrameMain">
+								Define Record Pointer</a>
+
+				</li></ul></li></ul></li></ul></li><li class="folder" id="ModifyStructure" data="">
+							<a
+							href="ModifyStructure.html"
+							target="FrameMain">
+								Modify Structure</a>
+
+				<ul><li class="" id="EditRecordType" data="">
+							<a
+							href="EditRecordType.html"
+							target="FrameMain">
+								Edit Record Type</a>
+
+				</li><li class="" id="EditField" data="">
+							<a
+							href="EditField.html"
+							target="FrameMain">
+								Edit Field Expression</a>
+
+				</li><li class="" id="EditFieldType" data="">
+							<a
+							href="EditFieldType.html"
+							target="FrameMain">
+								Edit Field Type</a>
+
+				</li></ul></li></ul></li><li class="folder" id="AdvancedDesigner" data="">
+							<a
+							href="AdvancedDesigner.html"
+							target="FrameMain">
+								Advanced Designer</a>
+
+				<ul><li class="folder" id="ConfigureDatabase" data="">
+							<a
+							href="ConfigureDatabase.html"
+							target="FrameMain">
+								Configure Database</a>
+
+				<ul><li class="" id="SetDatabaseProperties" data="">
+							<a
+							href="SetDatabaseProperties.html"
+							target="FrameMain">
+								Set Database Properties</a>
+
+				</li><li class="" id="RegisterDatabase" data="">
+							<a
+							href="RegisterDatabase.html"
+							target="FrameMain">
+								Register Database</a>
+
+				</li></ul></li><li class="folder" id="AdvancedDesigner1" data="">
+							<a
+							href="AdvancedDesigner1.html"
+							target="FrameMain">
+								Manage Database Structure</a>
+
+				<ul><li class="" id="ImportDatabaseStructure" data="">
+							<a
+							href="ImportDatabaseStructure.html"
+							target="FrameMain">
+								Import Database Structure</a>
+
+				</li><li class="" id="ManageDatabaseStructure" data="">
+							<a
+							href="ManageDatabaseStructure.html"
+							target="FrameMain">
+								Manage Field Types</a>
+
+				</li><li class="" id="ConfigureDatabase1" data="">
+							<a
+							href="ConfigureDatabase1.html"
+							target="FrameMain">
+								Manage Terms</a>
+
+				</li><li class="" id="ManageDatabaseStructure1" data="">
+							<a
+							href="ManageDatabaseStructure1.html"
+							target="FrameMain">
+								View Structure</a>
+
+				</li></ul></li><li class="folder" id="ManageDatabaseAccess" data="">
+							<a
+							href="ManageDatabaseAccess.html"
+							target="FrameMain">
+								Manage Database Access</a>
+
+				<ul><li class="folder" id="ManageWorkgroups" data="">
+							<a
+							href="ManageWorkgroups.html"
+							target="FrameMain">
+								Manage Workgroups</a>
+
+				<ul><li class="" id="CreateaWorkgroup" data="">
+							<a
+							href="CreateaWorkgroup.html"
+							target="FrameMain">
+								Create a Workgroup</a>
+
+				</li><li class="" id="AddRemoveGroupMembers" data="">
+							<a
+							href="AddRemoveGroupMembers.html"
+							target="FrameMain">
+								Add/Remove Group Members</a>
+
+				</li><li class="" id="AddWorkgroupTags" data="">
+							<a
+							href="AddWorkgroupTags.html"
+							target="FrameMain">
+								Add Workgroup Tags</a>
+
+				</li><li class="" id="QuitWorkgroupTemporally" data="">
+							<a
+							href="QuitWorkgroupTemporally.html"
+							target="FrameMain">
+								Quit Workgroup Temporally</a>
+
+				</li></ul></li><li class="folder" id="ManageUsers" data="">
+							<a
+							href="ManageUsers.html"
+							target="FrameMain">
+								Manage Users</a>
+
+				<ul><li class="" id="CreateUser" data="">
+							<a
+							href="CreateUser.html"
+							target="FrameMain">
+								Create User</a>
+
+				</li><li class="" id="ImportUsers" data="">
+							<a
+							href="ImportUsers.html"
+							target="FrameMain">
+								Import Users</a>
+
+				</li><li class="" id="EditUser" data="">
+							<a
+							href="EditUser.html"
+							target="FrameMain">
+								Edit User</a>
+
+				</li><li class="" id="ChangeOwnerProperties" data="">
+							<a
+							href="ChangeOwnerProperties.html"
+							target="FrameMain">
+								Change Owner / Login Details</a>
+
+				</li></ul></li></ul></li><li class="folder" id="ManageDatabases" data="">
+							<a
+							href="ManageDatabases.html"
+							target="FrameMain">
+								Manage Databases</a>
+
+				<ul><li class="" id="CloneDatabase" data="">
+							<a
+							href="CloneDatabase.html"
+							target="FrameMain">
+								Clone Database</a>
+
+				</li><li class="" id="DeleteDatabase" data="">
+							<a
+							href="DeleteDatabase.html"
+							target="FrameMain">
+								Delete  Database</a>
+
+				</li><li class="" id="DeleteAllRecords" data="">
+							<a
+							href="DeleteAllRecords.html"
+							target="FrameMain">
+								Delete All Records</a>
+
+				</li><li class="" id="RollbackDatabase" data="">
+							<a
+							href="RollbackDatabase.html"
+							target="FrameMain">
+								Rollback  Database</a>
+
+				</li></ul></li><li class="folder" id="ValidateDatabaseIntegrity" data="">
+							<a
+							href="ValidateDatabaseIntegrity.html"
+							target="FrameMain">
+								Validate Database Integrity</a>
+
+				<ul><li class="" id="CheckTitleMasks" data="">
+							<a
+							href="CheckTitleMasks.html"
+							target="FrameMain">
+								Check Title Masks</a>
+
+				</li><li class="" id="CheckTitleMasks1" data="">
+							<a
+							href="CheckTitleMasks1.html"
+							target="FrameMain">
+								Synch Canonical Title Masks</a>
+
+				</li><li class="" id="CheckInvalidPointers" data="">
+							<a
+							href="CheckInvalidPointers.html"
+							target="FrameMain">
+								Check Invalid Pointers</a>
+
+				</li><li class="" id="CheckInvalidFieldTypes" data="">
+							<a
+							href="CheckInvalidFieldTypes.html"
+							target="FrameMain">
+								Check Invalid Field Types</a>
+
+				</li><li class="" id="FindDuplicateRecords" data="">
+							<a
+							href="FindDuplicateRecords.html"
+							target="FrameMain">
+								Find Duplicate Records</a>
+
+				</li><li class="" id="CheckWYSIWYGText" data="">
+							<a
+							href="CheckWYSIWYGText.html"
+							target="FrameMain">
+								Check WYSIWYG Text</a>
+
+				</li><li class="" id="CheckInvalidCharacters" data="">
+							<a
+							href="CheckInvalidCharacters.html"
+							target="FrameMain">
+								Check Invalid Characters</a>
+
+				</li><li class="" id="CleanInvalidCharacters" data="">
+							<a
+							href="CleanInvalidCharacters.html"
+							target="FrameMain">
+								Clean Invalid Characters</a>
+
+				</li><li class="" id="SearchBrokenURLs" data="">
+							<a
+							href="SearchBrokenURLs.html"
+							target="FrameMain">
+								Search Broken URLs</a>
+
+				</li></ul></li><li class="folder" id="MaintainDatabase" data="">
+							<a
+							href="MaintainDatabase.html"
+							target="FrameMain">
+								Maintain Database</a>
+
+				<ul><li class="" id="ClearDatabaseLocks" data="">
+							<a
+							href="ClearDatabaseLocks.html"
+							target="FrameMain">
+								Clear Database Locks</a>
+
+				</li><li class="" id="DatabasetoDatabaseTransfer" data="">
+							<a
+							href="DatabasetoDatabaseTransfer.html"
+							target="FrameMain">
+								Database to Database Transfer</a>
+
+				</li><li class="" id="UpgradeAssociatedFileNames" data="">
+							<a
+							href="UpgradeAssociatedFileNames.html"
+							target="FrameMain">
+								Upgrade Associated File Names</a>
+
+				</li><li class="" id="MaintainScheduledReports" data="">
+							<a
+							href="MaintainScheduledReports.html"
+							target="FrameMain">
+								Maintain Scheduled Reports</a>
+
+				</li><li class="" id="RebuildTitles" data="">
+							<a
+							href="RebuildTitles.html"
+							target="FrameMain">
+								Rebuild Titles</a>
+
+				</li></ul></li></ul></li><li class="folder" id="User" data="">
+							<a
+							href="User.html"
+							target="FrameMain">
+								User</a>
+
+				<ul><li class="folder" id="EnterData" data="">
+							<a
+							href="EnterData.html"
+							target="FrameMain">
+								Enter Data</a>
+
+				<ul><li class="folder" id="CreateRecord" data="">
+							<a
+							href="CreateRecord.html"
+							target="FrameMain">
+								Create Record</a>
+
+				<ul><li class="folder" id="RecordTabs" data="">
+							<a
+							href="RecordTabs.html"
+							target="FrameMain">
+								Record Tabs</a>
+
+				<ul><li class="folder" id="SharedInformationTab" data="">
+							<a
+							href="SharedInformationTab.html"
+							target="FrameMain">
+								Shared Information Tab</a>
+
+				<ul><li class="folder" id="DataTypes" data="">
+							<a
+							href="DataTypes.html"
+							target="FrameMain">
+								Adding Data Types</a>
+
+				<ul><li class="" id="TermsList" data="">
+							<a
+							href="TermsList.html"
+							target="FrameMain">
+								Terms List</a>
+
+				</li><li class="" id="Numeric" data="">
+							<a
+							href="Numeric.html"
+							target="FrameMain">
+								Numeric</a>
+
+				</li><li class="" id="DateTemporal" data="">
+							<a
+							href="DateTemporal.html"
+							target="FrameMain">
+								Date/Temporal</a>
+
+				</li><li class="" id="File" data="">
+							<a
+							href="File.html"
+							target="FrameMain">
+								File</a>
+
+				</li><li class="" id="GeoSpatial" data="">
+							<a
+							href="GeoSpatial.html"
+							target="FrameMain">
+								GeoSpatial</a>
+
+				</li><li class="" id="Text" data="">
+							<a
+							href="Text.html"
+							target="FrameMain">
+								Text</a>
+
+				</li><li class="" id="MemoMultiLine" data="">
+							<a
+							href="MemoMultiLine.html"
+							target="FrameMain">
+								Memo (Multi-Line)</a>
+
+				</li><li class="" id="RecordPointer" data="">
+							<a
+							href="RecordPointer.html"
+							target="FrameMain">
+								Record Pointer</a>
+
+				</li><li class="" id="RelationshipMarker" data="">
+							<a
+							href="RelationshipMarker.html"
+							target="FrameMain">
+								Relationship Marker</a>
+
+				</li><li class="" id="Calculated" data="">
+							<a
+							href="Calculated.html"
+							target="FrameMain">
+								Calculated</a>
+
+				</li></ul></li></ul></li><li class="" id="PrivateInformationTab" data="">
+							<a
+							href="PrivateInformationTab.html"
+							target="FrameMain">
+								Private Information Tab</a>
+
+				</li><li class="" id="WorkgroupTagsTab" data="">
+							<a
+							href="WorkgroupTagsTab.html"
+							target="FrameMain">
+								Workgroup Tags Tab</a>
+
+				</li><li class="" id="TextTab" data="">
+							<a
+							href="TextTab.html"
+							target="FrameMain">
+								Text Tab</a>
+
+				</li><li class="" id="RelationshipsTab" data="">
+							<a
+							href="RelationshipsTab.html"
+							target="FrameMain">
+								Relationships Tab</a>
+
+				</li></ul></li><li class="" id="FindRecordDialog" data="">
+							<a
+							href="FindRecordDialog.html"
+							target="FrameMain">
+								Find Record Dialog</a>
+
+				</li><li class="" id="RichTextEditor" data="">
+							<a
+							href="RichTextEditor.html"
+							target="FrameMain">
+								Rich Text Editor</a>
+
+				</li></ul></li><li class="" id="EnterData1" data="">
+							<a
+							href="EnterData1.html"
+							target="FrameMain">
+								Edit Record Data</a>
+
+				</li></ul></li><li class="folder" id="FindData" data="">
+							<a
+							href="FindData.html"
+							target="FrameMain">
+								Find Data</a>
+
+				<ul><li class="" id="NavigationPane" data="">
+							<a
+							href="NavigationPane.html"
+							target="FrameMain">
+								Navigation Pane</a>
+
+				</li><li class="" id="QuickSearch" data="">
+							<a
+							href="QuickSearch.html"
+							target="FrameMain">
+								Quick Search</a>
+
+				</li><li class="folder" id="OrganiseSearchResults" data="">
+							<a
+							href="OrganiseSearchResults.html"
+							target="FrameMain">
+								Organise Search Results</a>
+
+				<ul><li class="" id="LayoutMenu" data="">
+							<a
+							href="LayoutMenu.html"
+							target="FrameMain">
+								Layout Menu</a>
+
+				</li><li class="" id="LevelMenus" data="">
+							<a
+							href="LevelMenus.html"
+							target="FrameMain">
+								Level Menus</a>
+
+				</li><li class="" id="Icons" data="">
+							<a
+							href="Icons.html"
+							target="FrameMain">
+								Icons</a>
+
+				</li></ul></li><li class="" id="SummaryView" data="">
+							<a
+							href="SummaryView.html"
+							target="FrameMain">
+								Summary View</a>
+
+				</li></ul></li><li class="folder" id="SaveData" data="">
+							<a
+							href="SaveData.html"
+							target="FrameMain">
+								Save Data</a>
+
+				<ul><li class="" id="SavedSeaches" data="">
+							<a
+							href="SavedSeaches.html"
+							target="FrameMain">
+								Saved Searches</a>
+
+				</li><li class="" id="SavedCollections" data="">
+							<a
+							href="SavedCollections.html"
+							target="FrameMain">
+								Saved Collections</a>
+
+				</li></ul></li><li class="folder" id="BookmarkData" data="">
+							<a
+							href="BookmarkData.html"
+							target="FrameMain">
+								Bookmark Data</a>
+
+				<ul><li class="" id="TagData" data="">
+							<a
+							href="TagData.html"
+							target="FrameMain">
+								Tag Records</a>
+
+				</li></ul></li><li class="folder" id="ViewDataApplications" data="">
+							<a
+							href="ViewDataApplications.html"
+							target="FrameMain">
+								Analysis Data (Applications)</a>
+
+				<ul><li class="" id="RecordView" data="">
+							<a
+							href="RecordView.html"
+							target="FrameMain">
+								Record Application</a>
+
+				</li><li class="" id="MapandTimelineView" data="">
+							<a
+							href="MapandTimelineView.html"
+							target="FrameMain">
+								Map and Timeline Application</a>
+
+				</li><li class="folder" id="ReportView" data="">
+							<a
+							href="ReportView.html"
+							target="FrameMain">
+								Report Application</a>
+
+				<ul><li class="" id="Smarty" data="">
+							<a
+							href="Smarty.html"
+							target="FrameMain">
+								Run Report</a>
+
+				</li><li class="" id="RunninganExistingReport" data="">
+							<a
+							href="RunninganExistingReport.html"
+							target="FrameMain">
+								Get Report Link</a>
+
+				</li><li class="" id="ReportingPublishing2" data="">
+							<a
+							href="ReportingPublishing2.html"
+							target="FrameMain">
+								Print Report</a>
+
+				</li></ul></li></ul></li><li class="folder" id="ShareData" data="">
+							<a
+							href="ShareData.html"
+							target="FrameMain">
+								Share Data with Workgroup Members</a>
+
+				<ul><li class="" id="ChangeRecordOwnership1" data="">
+							<a
+							href="ChangeRecordOwnership1.html"
+							target="FrameMain">
+								Change Record Ownership</a>
+
+				</li><li class="folder" id="CreateBlogPosts" data="">
+							<a
+							href="CreateBlogPosts.html"
+							target="FrameMain">
+								Create Blog Posts</a>
+
+				<ul><li class="" id="AddExtendedTextDiscussions" data="">
+							<a
+							href="AddExtendedTextDiscussions.html"
+							target="FrameMain">
+								Add Extended Text/Discussions</a>
+
+				</li></ul></li><li class="" id="SendEmailReminders" data="">
+							<a
+							href="SendEmailReminders.html"
+							target="FrameMain">
+								Send Email Reminders</a>
+
+				</li><li class="" id="AddWorkgroupTag" data="">
+							<a
+							href="AddWorkgroupTag.html"
+							target="FrameMain">
+								Add Workgroup Tag</a>
+
+				</li></ul></li></ul></li><li class="folder" id="AdvancedUser" data="">
+							<a
+							href="AdvancedUser.html"
+							target="FrameMain">
+								Advanced User</a>
+
+				<ul><li class="folder" id="MyProfile1" data="">
+							<a
+							href="MyProfile1.html"
+							target="FrameMain">
+								My Profile</a>
+
+				<ul><li class="" id="Preferences" data="">
+							<a
+							href="Preferences.html"
+							target="FrameMain">
+								Preferences</a>
+
+				</li><li class="" id="ManageTags" data="">
+							<a
+							href="ManageTags.html"
+							target="FrameMain">
+								Manage Tags</a>
+
+				</li><li class="" id="ManageReminders" data="">
+							<a
+							href="ManageReminders.html"
+							target="FrameMain">
+								Manage Reminders</a>
+
+				</li><li class="" id="ExportmyData" data="">
+							<a
+							href="ExportmyData.html"
+							target="FrameMain">
+								Export my Data</a>
+
+				</li><li class="folder" id="Access" data="">
+							<a
+							href="Access.html"
+							target="FrameMain">
+								Access</a>
+
+				<ul><li class="" id="MyUserGroups" data="">
+							<a
+							href="MyUserGroups.html"
+							target="FrameMain">
+								My Workgroups</a>
+
+				</li><li class="" id="MyUserInfo" data="">
+							<a
+							href="MyUserInfo.html"
+							target="FrameMain">
+								My User Info</a>
+
+				</li></ul></li></ul></li><li class="folder" id="AdvancedRecordTasks" data="">
+							<a
+							href="AdvancedRecordTasks.html"
+							target="FrameMain">
+								Advanced Record Tasks</a>
+
+				<ul><li class="folder" id="ModifyData" data="">
+							<a
+							href="ModifyData.html"
+							target="FrameMain">
+								Modify Data</a>
+
+				<ul><li class="folder" id="EditSingleRecordEditRecordScreen" data="">
+							<a
+							href="EditSingleRecordEditRecordScreen.html"
+							target="FrameMain">
+								Edit Single Record (Edit Record Screen)</a>
+
+				<ul><li class="" id="ChangeRecordType" data="">
+							<a
+							href="ChangeRecordType.html"
+							target="FrameMain">
+								Change Record Type</a>
+
+				</li><li class="" id="AddNonStandardField" data="">
+							<a
+							href="AddNonStandardField.html"
+							target="FrameMain">
+								Add Non-Standard Field</a>
+
+				</li></ul></li><li class="" id="EditMultipleRecordsEditMenu" data="">
+							<a
+							href="EditMultipleRecordsEditMenu.html"
+							target="FrameMain">
+								Edit Multiple Records (Edit Menu)</a>
+
+				</li></ul></li><li class="" id="UsetheScratchapd" data="">
+							<a
+							href="UsetheScratchapd.html"
+							target="FrameMain">
+								Use the Scratchapd</a>
+
+				</li><li class="" id="RefreshMemory" data="">
+							<a
+							href="RefreshMemory.html"
+							target="FrameMain">
+								Refresh Memory</a>
+
+				</li><li class="" id="SavedAggregations" data="">
+							<a
+							href="SavedAggregations.html"
+							target="FrameMain">
+								Create Aggregation</a>
+
+				</li></ul></li><li class="folder" id="AdvancedSearch" data="">
+							<a
+							href="AdvancedSearch.html"
+							target="FrameMain">
+								Advanced Search</a>
+
+				<ul><li class="" id="Syntax" data="">
+							<a
+							href="Syntax.html"
+							target="FrameMain">
+								Syntax</a>
+
+				</li></ul></li><li class="folder" id="Import" data="">
+							<a
+							href="Import.html"
+							target="FrameMain">
+								Import</a>
+
+				<ul><li class="" id="CSV1" data="">
+							<a
+							href="CSV1.html"
+							target="FrameMain">
+								CSV</a>
+
+				</li><li class="" id="CSVupdate" data="">
+							<a
+							href="CSVupdate.html"
+							target="FrameMain">
+								CSV (update)</a>
+
+				</li><li class="" id="KML" data="">
+							<a
+							href="KML.html"
+							target="FrameMain">
+								KML</a>
+
+				</li><li class="folder" id="Bibliographic" data="">
+							<a
+							href="Bibliographic.html"
+							target="FrameMain">
+								Bibliographic</a>
+
+				<ul><li class="" id="EditBibliographicData" data="">
+							<a
+							href="EditBibliographicData.html"
+							target="FrameMain">
+								Edit Bibliographic Data</a>
+
+				</li></ul></li><li class="folder" id="Hyperlinks" data="">
+							<a
+							href="Hyperlinks.html"
+							target="FrameMain">
+								Hyperlinks</a>
+
+				<ul><li class="" id="InputOutput1" data="">
+							<a
+							href="InputOutput1.html"
+							target="FrameMain">
+								Using the Bookmarklet</a>
+
+				</li></ul></li><li class="" id="Import1" data="">
+							<a
+							href="Import1.html"
+							target="FrameMain">
+								Files In Situ</a>
+
+				</li><li class="" id="IMAPEmail" data="">
+							<a
+							href="IMAPEmail.html"
+							target="FrameMain">
+								IMAP (Email)</a>
+
+				</li></ul></li><li class="folder" id="InputOutput2" data="">
+							<a
+							href="InputOutput2.html"
+							target="FrameMain">
+								Export</a>
+
+				<ul><li class="" id="XForms" data="">
+							<a
+							href="XForms.html"
+							target="FrameMain">
+								X-Forms</a>
+
+				</li><li class="" id="Export" data="">
+							<a
+							href="Export.html"
+							target="FrameMain">
+								HML</a>
+
+				</li></ul></li><li class="folder" id="Publish1" data="">
+							<a
+							href="Publish1.html"
+							target="FrameMain">
+								Report</a>
+
+				<ul><li class="folder" id="ReportingPublishing1" data="">
+							<a
+							href="ReportingPublishing1.html"
+							target="FrameMain">
+								Create Report Template</a>
+
+				<ul><li class="" id="CreatingaReportTemplate1" data="">
+							<a
+							href="CreatingaReportTemplate1.html"
+							target="FrameMain">
+								Edit Report Template</a>
+
+				</li><li class="" id="RunninganExistingReport2" data="">
+							<a
+							href="RunninganExistingReport2.html"
+							target="FrameMain">
+								Delete Template</a>
+
+				</li><li class="" id="ReportingPublishing" data="">
+							<a
+							href="ReportingPublishing.html"
+							target="FrameMain">
+								Smarty Synatx</a>
+
+				</li></ul></li><li class="" id="RunninganExistingReport1" data="">
+							<a
+							href="RunninganExistingReport1.html"
+							target="FrameMain">
+								Publish Report</a>
+
+				</li></ul></li><li class="folder" id="AdvancedUser1" data="">
+							<a
+							href="AdvancedUser1.html"
+							target="FrameMain">
+								Transform</a>
+
+				<ul><li class="" id="ViewDataApplications1" data="">
+							<a
+							href="ViewDataApplications1.html"
+							target="FrameMain">
+								About Transforms</a>
+
+				</li><li class="" id="Transforms" data="">
+							<a
+							href="Transforms.html"
+							target="FrameMain">
+								Before you Begin</a>
+
+				</li><li class="" id="Transforms2" data="">
+							<a
+							href="Transforms2.html"
+							target="FrameMain">
+								Create XML Record</a>
+
+				</li><li class="" id="TransformView" data="">
+							<a
+							href="TransformView.html"
+							target="FrameMain">
+								Apply Transform</a>
+
+				</li><li class="folder" id="Transforms1" data="">
+							<a
+							href="Transforms1.html"
+							target="FrameMain">
+								Available Transforms</a>
+
+				<ul><li class="folder" id="TransformTypes" data="">
+							<a
+							href="TransformTypes.html"
+							target="FrameMain">
+								TEI Annotation Transform</a>
+
+				<ul><li class="" id="Annotations1" data="">
+							<a
+							href="Annotations1.html"
+							target="FrameMain">
+								About TEI</a>
+
+				</li><li class="" id="Transforms3" data="">
+							<a
+							href="Transforms3.html"
+							target="FrameMain">
+								Create TEI XML Document</a>
+
+				</li><li class="" id="TEIAnnotations" data="">
+							<a
+							href="TEIAnnotations.html"
+							target="FrameMain">
+								Using the Annotation Transform</a>
+
+				</li></ul></li><li class="" id="TransformView3" data="">
+							<a
+							href="TransformView3.html"
+							target="FrameMain">
+								Picasa Album Viewer Transform</a>
+
+				</li></ul></li><li class="" id="TransformView1" data="">
+							<a
+							href="TransformView1.html"
+							target="FrameMain">
+								Create Transform</a>
+
+				</li></ul></li></ul></li><li class="folder" id="Reference" data="">
+							<a
+							href="Reference.html"
+							target="FrameMain">
+								Reference</a>
+
+				<ul><li class="" id="Reference1" data="">
+							<a
+							href="Reference1.html"
+							target="FrameMain">
+								Reference Sites &amp; Resources</a>
+
+				</li><li class="" id="HelpConventions" data="">
+							<a
+							href="HelpConventions.html"
+							target="FrameMain">
+								Help Conventions</a>
+
+				</li><li class="" id="ScreenConventions" data="">
+							<a
+							href="ScreenConventions.html"
+							target="FrameMain">
+								Screen Conventions</a>
+
+				</li><li class="" id="Termonology" data="">
+							<a
+							href="Termonology.html"
+							target="FrameMain">
+								Glossary</a>
+
+				</li><li class="" id="Statuses" data="">
+							<a
+							href="Statuses.html"
+							target="FrameMain">
+								Statuses</a>
+
+				</li><li class="" id="TipsTricks" data="">
+							<a
+							href="TipsTricks.html"
+							target="FrameMain">
+								Tips &amp; Tricks</a>
+
+				</li><li class="" id="Troubleshooting" data="">
+							<a
+							href="Troubleshooting.html"
+							target="FrameMain">
+								Troubleshooting</a>
+
+				</li><li class="" id="ReportBug" data="">
+							<a
+							href="ReportBug.html"
+							target="FrameMain">
+								Submit Bugs &amp; Issues</a>
+
+				</li><li class="folder" id="PROGRAMMERSREFERENCE" data="">
+							<a
+							href="PROGRAMMERSREFERENCE.html"
+							target="FrameMain">
+								Programming Reference [redo]</a>
+
+				<ul><li class="" id="TechnicalOverview" data="">
+							<a
+							href="TechnicalOverview.html"
+							target="FrameMain">
+								Technical Overview</a>
+
+				</li><li class="" id="HAPI" data="">
+							<a
+							href="HAPI.html"
+							target="FrameMain">
+								HAPI</a>
+
+				</li><li class="" id="HAPIDevelopersGuide" data="">
+							<a
+							href="HAPIDevelopersGuide.html"
+							target="FrameMain">
+								HAPI Developer's Guide</a>
+
+				</li><li class="" id="GeographicObjectsInterface" data="">
+							<a
+							href="GeographicObjectsInterface.html"
+							target="FrameMain">
+								Geographic Objects Interface</a>
+
+				</li><li class="" id="T1000Database" data="">
+							<a
+							href="T1000Database.html"
+							target="FrameMain">
+								T1000 Database</a>
+
+				</li><li class="" id="TimeMapJavaWebmap" data="">
+							<a
+							href="TimeMapJavaWebmap.html"
+							target="FrameMain">
+								TimeMap Java Webmap</a>
+
+				</li><li class="" id="Databasedefinitiontemplates" data="">
+							<a
+							href="Databasedefinitiontemplates.html"
+							target="FrameMain">
+								Database definition templates</a>
+
+				</li><li class="" id="Enumvaluestargetsrelationshipcon" data="">
+							<a
+							href="Enumvaluestargetsrelationshipcon.html"
+							target="FrameMain">
+								Enum values, targets, relationship constraints</a>
+
+				</li></ul></li></ul></li></ul>
+		</div>
+
+		<div id="tab-keywords">
+			<ul id="keywords">
+
+				</ul>
+		</div>
+
+		<div id="tab-search">
+			<form onsubmit="PerformSearch(); return false;">
+				<label for="search_value">Search:</label>
+				<input id="search_value" name="search_value"></input>
+				<input type="submit" value="Search"/>
+			</form>
+			<div id="search_results"></div>
+		</div>
+
+		</div>
+
+</body>
+
+</html>
+

@@ -428,7 +428,7 @@ define('HEURIST_FAIMS_DIR', $path);
 
 //--------------------------------------------------------------------------------------------------------------
 
-// ID of Heurist System User Group which has special privileges - deprecated, although more generally
+// ID of Heurist System Workgroup which has special privileges - deprecated, although more generally
 // group 1 on every database is the Database Managers group
 define('HEURIST_SYS_GROUP_ID', 1);
 

@@ -122,6 +122,7 @@ var cfg_layouts = [
     },
 
     // Position of widgets are specified in CSS, all widgets can be dragged around and repositioned
+    /* This layout needs to be defiend spcifically to be useful
     {id:'FreeLayout', name:'Free example', theme:'heurist', type:'free',
         mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
             apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
@@ -135,6 +136,8 @@ var cfg_layouts = [
             ]}]
         }
     },
+    */
+
     {id:'DigitalHarlem', name:'Digital Harlem', theme:'heurist', type:'cardinal',
         north:{size:140, resizable:false, overflow:'hidden',
             apps:[

@@ -1,11 +1,11 @@
 /**
 *  Various utility functions
-* 
+*
 * @todo - split to generic utilities and UI utilities
 * @todo - split utilities for hapi and load them dynamically from hapi
-* 
+*
 * @see editing_input.js
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -39,7 +39,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }else if(top.HEURIST4.util.isArray(obj)){
             return obj.length<1;
         }else{
-            return (obj==="") || (obj==="null");    
+            return (obj==="") || (obj==="null");
         }
 
     },
@@ -48,21 +48,21 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         //return typeof n === 'number' && isFinite(n);
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
-    
+
     cloneJSON:function (data){
-        try{  
-            return JSON.parse(JSON.stringify(data));  
+        try{
+            return JSON.parse(JSON.stringify(data));
         }catch (ex2){
             console.log('can not clone json array '+data);
             return [];
         }
     },
-   
+
     em: function(input) {
         var emSize = parseFloat($("body").css("font-size"));
         return (emSize * input);
     },
-    
+
     px: function(input) {
         var emSize = parseFloat($("body").css("font-size"));
         return (input / emSize);
@@ -74,9 +74,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         else
             return '?';
     },
-    
+
     composeHeuristQuery: function(query, domain, rules, notes){
-            var query_to_save = []; 
+            var query_to_save = [];
             if(!(top.HEURIST4.util.isempty(domain) || domain=="all")){
                 query_to_save.push('w='+domain);
             }
@@ -91,11 +91,11 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             }
             return '?'+query_to_save.join('&');
     },
-    
+
     //
     // converts query string to object
     //
-    parseHeuristQuery: function(qsearch)            
+    parseHeuristQuery: function(qsearch)
     {
         var domain = null, rules = '', notes = '';
         if(qsearch && qsearch.indexOf('?')==0){
@@ -105,7 +105,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             qsearch = top.HEURIST4.util.getUrlParameter('q', qsearch);
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
-        
+
         return {q:qsearch, w:domain, rules:rules, notes:notes};
     },
 
@@ -134,7 +134,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     {
         return Object.prototype.toString.apply(a) === '[object Array]';
     },
-    
+
     htmlEscape: function(s) {
         return s?s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;"):'';
     },
@@ -143,7 +143,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     {
         return Object.prototype.toString.apply(a) === '[object Object]';
     },
-    
+
     stopEvent: function(e){
         if (!e) e = window.event;
 
@@ -198,7 +198,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return termName+(withcode ?termCode :'');
     },
 
-    // not used 
+    // not used
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         var selObj = top.HEURIST4.util.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
 
@@ -226,14 +226,14 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         if(!terms[i].parents){
         terms[i].parents = [];
         }else{
-        terms[i].parents = terms[i].parents.concat(parent.parents);    
+        terms[i].parents = terms[i].parents.concat(parent.parents);
         }
         terms[i].parents.unshift(parent);
 
         __setParents(terms[i], terms[i].children);
         }
         }
-        */        
+        */
         function __findTerm(termId, parent, terms)
         {
             for (var i=0; i<terms.length; i++){
@@ -266,16 +266,16 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     * defaultTermID - term to be selected
     * topOptions - text or array for top most item(s)
     * needArray  return array tree if terms (instead of select element)
-    * 
+    *
     */
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
-        return top.HEURIST4.util.createTermSelectExt2(selObj, 
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList, 
-             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});    
+        return top.HEURIST4.util.createTermSelectExt2(selObj,
+            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
+             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});
     },
 
     createTermSelectExt2: function(selObj, options) {
-        
+
         var datatype =  options.datatype,
             termIDTree =  options.termIDTree,
             headerTermIDsList =  options.headerTermIDsList,
@@ -283,8 +283,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             topOptions =  options.topOptions,
             needArray  =  options.needArray,
             supressTermCode = options.supressTermCode;
-        
-        
+
+
         if(needArray){
 
         }else{
@@ -369,7 +369,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 var isDisabled = (headerTerms[termID]? true:false);
                 var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
                 var isHeader   = ((headerTerms[termID]? true:false) && hasChildren);
-                var new_optgroup; 
+                var new_optgroup;
 
                 //in FF optgroup is allowed on first level only - otherwise it is invisible
 
@@ -443,14 +443,14 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }else{
             toparray = [ termIDTree ];
         }
-        
+
         var m, lenn = toparray.length;
         var reslist_final = [];
-        
+
         for(m=0;m<lenn;m++){
-            
+
             var termTree = toparray[m];
-            
+
             //
             //prepare tree
             //
@@ -464,13 +464,13 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                     termTree = terms.treesByDomain[datatype];
                 }
             }
-            
+
             var reslist = createSubTreeOptions(null, 0, termTree, termLookup, defaultTermID);
             if(!selObj){
                 reslist_final = reslist_final.concat( reslist);
             }
         }
-        
+
         if(selObj){
             if (!defaultTermID) selObj.selectedIndex = 0;
             return selObj;
@@ -501,16 +501,16 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                top.HEURIST4.util.addoption(selObj, key, title);    
+                                top.HEURIST4.util.addoption(selObj, key, title);
                             }
 
                         }
                     }
                 }
-            }        
+            }
         }else if(!top.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions ='';
-            top.HEURIST4.util.addoption(selObj, '', topOptions); 
+            top.HEURIST4.util.addoption(selObj, '', topOptions);
         }
 
 
@@ -532,7 +532,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
         for (index in rectypes.groups){
             if (index == "groupIDToIndex" ){
-                //rectypes.groups[index].showTypes.length < 1) 
+                //rectypes.groups[index].showTypes.length < 1)
                 continue;
             }
 
@@ -615,7 +615,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         var dtyID, details;
 
         if(Number(rectype)>0){
-            //structure not defined 
+            //structure not defined
             if(!(top.HEURIST4.rectypes && top.HEURIST4.rectypes.typedefs)) return selObj;
             var rectypes = top.HEURIST4.rectypes.typedefs[rectype];
 
@@ -646,7 +646,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             //add to select
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
-                top.HEURIST4.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                top.HEURIST4.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);
             }
 
         }else{ //show all detail types
@@ -687,7 +687,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                     //add to select
                     var i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
-                        top.HEURIST4.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);  
+                        top.HEURIST4.util.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                     }
                 }
 
@@ -700,7 +700,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     },
 
     /**
-    *  Fills give SELECT selObj with list of current user groups
+    *  Fills give SELECT selObj with list of current Workgroups
     */
     createUserGroupsSelect: function(selObj, groups, topOptions, callback) {
 
@@ -708,8 +708,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
         if(!groups){ //use groups of current user
             groups = top.HAPI4.currentUser.usr_GroupsList;
-            if(!groups){        
-                //looad detailed info about user groups
+            if(!groups){
+                //looad detailed info about Workgroups
                 top.HAPI4.SystemMgr.mygroups(
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -717,7 +717,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                             top.HEURIST4.util.createUserGroupsSelect(selObj, groups, topOptions, callback);
                         }
                 });
-                return;    
+                return;
             }
         }
 
@@ -736,7 +736,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                     }
                 }
             }
-        }            
+        }
         if(groups){
 
             for (var idx in groups)
@@ -757,14 +757,14 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
 
     },
-    
+
     sendRequest: function(url, request, caller, callback){
 
         if(!request.db){
             request.db = top.HAPI4.database;
         }
 
-        //note jQuery ajax does not properly in the loop - success callback does not work often   
+        //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({
             url: url,
             type: "POST",
@@ -785,7 +785,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             }
         });
     },
-    
+
     getScrollBarWidth: function() {
         var $outer = $('<div>').css({visibility: 'hidden', width: 100, overflow: 'scroll'}).appendTo('body'),
             widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();
@@ -796,9 +796,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
     /**
     * convert wkt to
     * format - 0 timemap, 1 google
-    * 
-    * @todo 2 - kml 
-    * @todo 3 - OpenLayers 
+    *
+    * @todo 2 - kml
+    * @todo 3 - OpenLayers
     */
     parseCoordinates: function(type, wkt, format) {
 
@@ -964,7 +964,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                         bounds = new google.maps.LatLngBounds(southWest, northEast);
                     }
             }
-            
+
         }
 
         return (format==0)?shape:{bounds:bounds, points:points};

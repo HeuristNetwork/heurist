@@ -48,7 +48,7 @@ define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid
 define('_ERR_REP_MSG', 1);  // returns detailed error message
 define('_ERR_REP_SILENT', 2); // returns empty string
 
-define('_ERROR_MSG', "Title mask not properly defined for this record type: please edit through Designer View > Essentials > Record types/fields");
+define('_ERROR_MSG', "Title mask not properly defined for this record type: please edit through Database administration page > Essentials > Record types/fields");
 define('_EMPTY_MSG', "**** No data in title fields for this record ****");
 
 /**

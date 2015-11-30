@@ -14,7 +14,7 @@
 
 /**
 * editGroup.js
-* A form to edit user groups, or create a new group. It is utilized as pop-up from manageGroup
+* A form to edit Workgroups, or create a new group. It is utilized as pop-up from manageGroup
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

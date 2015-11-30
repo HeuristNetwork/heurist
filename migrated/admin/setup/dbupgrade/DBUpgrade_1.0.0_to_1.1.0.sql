@@ -53,7 +53,7 @@
     ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility
         ENUM(  'viewable',  'hidden',  'public', 'pending' ) NOT NULL DEFAULT  'viewable'
-        COMMENT  'Defines if record visible outside owning user group(s)';
+        COMMENT  'Defines if record visible outside owning Workgroup(s)';
 
     ALTER TABLE  sysIdentification
         ADD  sys_IncomingEmailAddresses VARCHAR( 4000 ) NULL
@@ -115,7 +115,7 @@
   ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility
         ENUM('viewable','hidden','public','pending') NOT NULL DEFAULT 'viewable'
-        COMMENT 'Defines if record visible outside owning user group(s) or to anyone';
+        COMMENT 'Defines if record visible outside owning Workgroup(s) or to anyone';
 
   ALTER TABLE  `sysIdentification`
         CHANGE  `sys_NewRecAccess`  `sys_NewRecAccess`

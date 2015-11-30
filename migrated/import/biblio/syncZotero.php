@@ -132,7 +132,7 @@
 
     if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
         print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
-        " ' <p>Please go to Designer View > Database > Advanced Properties to enter access details for your Zotero library</div></body>
+        " ' <p>Please go to Database administration page > Database > Advanced Properties to enter access details for your Zotero library</div></body>
         </html>";
         exit;
     }
@@ -232,9 +232,9 @@
         }else if($code>399){
             $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
             if($code==401 || $code==403){
-                $msg = $msg."Verify API key in Designer View > Database > Advanced Properties";
+                $msg = $msg."Verify API key in Database administration page > Database > Advanced Properties";
             }else if($code==404 ){
-                $msg = $msg."Verify User and Group ID in Designer View > Database > Advanced Properties";
+                $msg = $msg."Verify User and Group ID in Database administration page > Database > Advanced Properties";
             }else if($code==407 ){
                 $msg = $msg."Proxy Authentication Required, please ask sysadmin to set it";
             }

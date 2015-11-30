@@ -1,11 +1,11 @@
 /**
 * Main class for Heurist API
-* 
+*
 * Constructor:
 * @param _db - database name, if omit it takes from url parameter
 * @param _oninit - callback function, obtain parameter true if initialization is successeful
 * @returns hAPI Object
-*  
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -37,7 +37,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     * initialization of hAPI object
     *  1) define paths from top.location
     *  2) takes regional from  localization.js
-    * 
+    *
     * @param _db - database name, if omit it takes from url parameter
     * @param _oninit - callback function, obtain parameter true if initialization is successeful
     *
@@ -50,7 +50,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             _database = top.HEURIST4.util.getUrlParameter('db');
         }
 
-        // 
+        //
         var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page|migrated)\/.*)|(index.*))/, "");
         that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL = that.basePathV4 + 'php/common/rt_icon.php?db='+_database+'&id=';
@@ -62,7 +62,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         that.basePathV3 = top.location.protocol + '//'+top.location.host  + installDir;
 
         //global variable defined in localization.js
-        if(!(typeof regional === 'undefined')){ 
+        if(!(typeof regional === 'undefined')){
             _regional = regional;
             /*todo
             $.getScript(that.basePathV4+'js/localization.js', function() {
@@ -77,14 +77,14 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(typeof hSearchMinimal !== 'undefined' && $.isFunction(hSearchMinimal)){
             that.SearchMgr = new hSearchMinimal();
         }
-        
-        
+
+
         /*if(_currentUser){
         that.currentUser = _currentUser;
         }else{}*/
 
         if(that.database){
-        
+
         // Get current user if logged in, and global database settings
         that.SystemMgr.sys_info(
             function(response){
@@ -101,7 +101,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             }
         );
-        
+
         }else if(_oninit){
             _oninit( false );
         }
@@ -110,27 +110,27 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     // not used
     function _processerror(response){
-        
+
         if(response.status != top.HAPI4.ResponseStatus.OK){
                 var msg = response.message;
-                
+
                 if(!msg){
-                    msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";   
+                    msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";
                 }
                 if(response.sysmsg){
                     msg = msg + "<br>System error:" + response.sysmsg;
                 }
-                
+
                 top.HEURIST4.util.showMsgErr(msg);
         }
     }
-    
+
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
-    * 
+    *
     * @param action   - name of php script in php/api foolder on server side
     * @param request - data to be sent to server side
-    * @param callback - callback function, it obtains object with 2 properties: 
+    * @param callback - callback function, it obtains object with 2 properties:
     *       status - see ResponseStatus
     *       message - ajax response or error message
     */
@@ -147,7 +147,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         //top.HEURIST4.ajax.getJsonData(url, callback, request);
 
-        //note jQuery ajax does not properly in the loop - success callback does not work often   
+        //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({
             url: url,
             type: "POST",
@@ -155,19 +155,19 @@ function hAPI(_db, _oninit) { //, _currentUser
             dataType: "json",
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
-                
+
                 var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: jqXHR.responseText }
                 //_processerror(response);
-                
+
                 if(callback){
                     callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
-                
+
                 //_processerror(response);
-                
+
                 if(callback){
                     callback(response);
                 }
@@ -210,16 +210,16 @@ function hAPI(_db, _oninit) { //, _currentUser
     *       user/groups information/credentials
     *       database definitions - record structure, field types, terms
     *       saved searches
-    * 
+    *
     * see usr_info.php and sys_structure.php
-    * 
+    *
     * methods:
     *   login        - login and get current user info
-    *   logout 
+    *   logout
     *   reset_password
     *   sys_info     - get current user info and database settings
     *   save_prefs   - save user preferences  in session
-    *   mygroups     - description of current user groups
+    *   mygroups     - description of current Workgroups
     *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber
     *   ssearch_save - save saved search in database
     *   ssearch_delete - delete saved searches by IDs
@@ -235,7 +235,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             * Log in
-            * 
+            *
             * @param request - object {username: , password: }
             * @param callback - callback function with response parameter HUser object
             */
@@ -266,7 +266,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             /**
             * Save user profile info in db
             * @param request
-            * @param callback  
+            * @param callback
             */
             ,user_save: function(request, callback){
                 if(request) request.a = 'usr_save';
@@ -276,7 +276,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             /**
             * Get user profile info form db - used in Admin part only?
             * @param request
-            * @param callback  
+            * @param callback
             */
             ,user_get: function(request, callback){
                 if(request) request.a = 'usr_get';
@@ -286,16 +286,16 @@ function hAPI(_db, _oninit) { //, _currentUser
             /**
             * Save user personal info/register new user
             * @param request - object - user info
-            * @param callback  
+            * @param callback
             */
             ,save_prefs: function(request, callback){
                 if(request) request.a = 'save_prefs';
                 _callserver('usr_info', request, callback);
             }
 
-            /**                         
+            /**
             * Returns detailed description of groupfs for current user
-            * 
+            *
             * response data - array of ugl_GroupID:[ugl_Role, ugr_Name, ugr_Description]
             */
             ,mygroups: function(callback){
@@ -304,21 +304,21 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             *  Get saved searched for current user and all usergroups where user is memeber
-            * 
-            * request 
+            *
+            * request
             *    UGrpID: group id -  if not defined returns all saved searches for current user
             *  response data - array of  svs_ID:[svs_Name, svs_Query, svs_UGrpID]
             */
             ,ssearch_get: function(request, callback){
                 if(!request) request = {};
-                
+
                 request.a = 'svs_get';
                 _callserver('usr_info', request, callback);
             }
 
             /**
             *  Save saved search in database
-            * 
+            *
             *  request - object
             *   svs_ID (not specified if ADD new search)
             *   svs_Name - name
@@ -329,7 +329,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'svs_save';
                 _callserver('usr_info', request, callback);
             }
-            
+
             /**
             * Delete saved searches by IDs
             * request : {ids: list of records to be deleted}
@@ -338,7 +338,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'svs_delete';
                 _callserver('usr_info', request, callback);
             }
-            
+
             ,ssearch_savetree: function(request, callback){
                 if(request) request.a = 'svs_savetree';
                 _callserver('usr_info', request, callback);
@@ -349,11 +349,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', request, callback);
             }
             /**
-            *  Get the desired database structure definition 
+            *  Get the desired database structure definition
             * request
             *   terms, rectypes, detailtypes :  list of desired ids,  OR 'all'
             *   mode: applied for rectypes  0 only names (default), 1 only strucuture, 2 - both, 3 - all,   4 - for faceted search(with type names)
-            * 
+            *
             */
             ,get_defs: function(request, callback){
                 _callserver('sys_structure', request, callback);
@@ -369,25 +369,25 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     /**
     * System class that responsible for record's edit, search and tags
-    * 
+    *
     * see record_edit.php, record_tags.php and record_search.php
-    * 
+    *
     * methods:
     *   add       - creates new temporary record
     *   save      - save record
     *   remove    - delete record
-    *   
+    *
     *   search
     *   minmax
     *   get
-    * 
+    *
     *   tag_save
     *   tag_delete
     *   tag_get
     *   tag_set
     *   tag_replace
     *   tag_rating
-    * 
+    *
     *   file_save
     *   file_delete
     *   file_get
@@ -400,7 +400,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             * Creates temporary new record
-            * 
+            *
             * @param request a: a|add
             *      optional  rt - rectype, ro - owner,  rv - visibility
             * @param callback - response hRecordSet object
@@ -416,9 +416,9 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             *  Save Record (remove temporary falg if new record)
-            * 
+            *
             * @param request a: s|save
-            * @param callback - response hRecordSet object 
+            * @param callback - response hRecordSet object
             */
             ,save: function(request, callback){
                 if(request) request.a = 's';
@@ -427,7 +427,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             * Remove Record
-            * 
+            *
             * @param request a: d|delete
             *               ids: list of records to be deleted
             * @param callback
@@ -439,29 +439,29 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             * Search for records
-            * 
+            *
             * request { }
             *  q - query string
             *  w - a|b - domain all or bookmarks
             *  f - none or cs list detail,map,structure,tags,relations,(backward)links,text,comments - details of output
             *  limit - limit
             *  o - offset
-            * 
+            *
             *  callback - callback function or  $document we have trigger the event
             */
             ,search: function(request, callback){
 
 
                 if(!$.isFunction(callback)){   //@todo - remove all this stuff since it is implemented in SearchMgr
-                
+
                     if(!request.increment || top.HEURIST4.util.isnull(request.id)){
                             request.id = Math.round(new Date().getTime() + (Math.random() * 100));
                     }
-                    
+
                     var document = callback;
                     if(!top.HEURIST4.util.isnull(document) && !request.increment){
-                        document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
-                    } 
+                        document.trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
+                    }
 
                     callback = function(response)
                     {
@@ -469,10 +469,10 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
-                            
+
                             top.HEURIST4.util.showMsgErr(response);
-                            
-                            if(!top.HEURIST4.util.isnull(document)){    
+
+                            if(!top.HEURIST4.util.isnull(document)){
                                 document.trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
                             }
                         }
@@ -482,32 +482,32 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 }
 
-                
+
                 //if limit is not defined - get it from preferences
                 if(top.HEURIST4.util.isnull(request.limit)){
                     request.limit = top.HAPI4.get_prefs('search_limit');
                 }
 
-                // start search                
-                _callserver('record_search', request, callback);    //standard search 
-            
+                // start search
+                _callserver('record_search', request, callback);    //standard search
+
             }
-            
-            
+
+
             /**
             * Search relation within given set of records
-            * 
+            *
             * request { }
             *  ids - list of record ids
-            * 
+            *
             *  callback - callback function or  $document we have trigger the event
             */
             ,search_related: function(request, callback){
                 if(request) request.a = 'related';
-                _callserver('record_search', request, callback);    //standard search 
+                _callserver('record_search', request, callback);    //standard search
             }
-            
-            
+
+
             // find min and max values for
             // rt - record type
             // dt - detailtyep
@@ -517,7 +517,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             // find ranges for faceted search
-            //             
+            //
             ,get_facets: function(request, callback){
                 if(request && !request.a) request.a = 'getfacets';
                 _callserver('record_search', request, callback);
@@ -548,10 +548,10 @@ function hAPI(_db, _oninit) { //, _currentUser
             // get list of tags for sepcified userid
             // request  a: search
             //          UGrpID
-            //          recIDs - record ids 
-            //          info - full or short 
+            //          recIDs - record ids
+            //          info - full or short
             // responce  recIDs
-            // 
+            //
             ,tag_get: function(request, callback){
                 if(request) request.a = 'search';
                 _callserver('record_tags', request, callback);
@@ -584,8 +584,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'rating';
                 _callserver('record_tags', request, callback);
             }
-            
-            
+
+
 
             // add/save file
             // request  a: save
@@ -622,7 +622,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     /**
     * Localization
-    * 
+    *
     * Returns string resouce according to current region setting
     */
     function _key(res){
@@ -666,7 +666,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         /**
         * Assign user after system initialization - obtained from server side by SystemMgr.sys_info
-        * 
+        *
         * @param user
         */
         setCurrentUser: function(user){
@@ -702,7 +702,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         /**
         * Return userGroup ID if currentUser is database owner or admin of given group
-        * 
+        *
         * @param ugrID - userGroup ID
         */
         has_access: function(ugrID){
@@ -721,7 +721,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         /**
         * Returns current user preferences
-        * 
+        *
         * @returns {Object}
         */
         get_prefs: function(name){
@@ -730,7 +730,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'heurist', 'search_limit':1000, 'help_on':'0'};
             }
             if(top.HEURIST4.util.isempty(name)){
-                return that.currentUser['ugr_Preferences'];    
+                return that.currentUser['ugr_Preferences'];
             }else{
                 var res = that.currentUser['ugr_Preferences'][name]
                 if(!res && 'search_limit'==name) res = 1000;
@@ -744,8 +744,8 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         currentUser: _guestUser,
         sysinfo: {},
-        
-        currentRecordset: null, 
+
+        currentRecordset: null,
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -761,11 +761,11 @@ function hAPI(_db, _oninit) { //, _currentUser
         },*/
 
         RecordMgr: new hRecordMgr(),
-        
+
         //@todo - assign it later since we may have different search managers - incremental, partial...
         //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result
         SearchMgr: null, //class that responsible for search and incremental loading of result
-        
+
         LayoutMgr: null,
 
         /*RecordMgr: function(){
@@ -781,12 +781,12 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
             return _key;  //_key is function
         }
-        
+
         /**
         *   if needIds is true  it returns array of record ids
         */
         , getSelection: function(selection, needIds){
-            
+
                 if (selection == "all") {
                     if(this.currentRecordset){
                         selection = needIds ?this.currentRecordset.getIds() :this.currentRecordset;
@@ -797,10 +797,10 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if( selection ) {
                     if( (typeof selection.isA == "function") && selection.isA("hRecordSet") ){
                         if(selection.length()>0){
-                            return (needIds) ?selection.getIds():selection; //array of record ids   
+                            return (needIds) ?selection.getIds():selection; //array of record ids
                         }
                     }else{
-                            return (needIds) ?selection  
+                            return (needIds) ?selection
                                         :((that.currentRecordset)?that.currentRecordset.getSubSetByIds(selection):null);
                     }
                 }

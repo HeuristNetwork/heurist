@@ -146,7 +146,7 @@ if (! is_logged_in()) {
             if(HEURIST_DBID==0){ //is not registered
 
                 print "<p style=\"color:red\">Note: Database must be registered with the Heurist master index to use this function<br>".
-                "Register the database using Designer View > Database > Registration - ".
+                "Register the database using Database administration page > Database > Registration - ".
                 "only available to the database creator/owner (user #2)</p>";
 
             }else{

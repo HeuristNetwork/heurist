@@ -16,7 +16,7 @@
 
 /**
 * editGroup.html
-* A form to edit user groups, or create a new group. It is utilized as pop-up from manageGroup
+* A form to edit Workgroups, or create a new group. It is utilized as pop-up from manageGroup
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -111,13 +111,13 @@
         <div style="width:580;margin:auto;">
             <br/>
             <div id="statusMsg"></div>
-            
+
             <div id="detailTypeValues" style="padding:5px;">
 	            <div class="dtyField">
 		            <label class="dtyLabel" for="ugr_ID">Code:</label>
 		            <label id="ugr_ID"></label>
 	            </div>
-                
+
 	            <div class="dtyField">
 		            <label class="dtyLabel required" for="ugr_Name">Standard name:</label>
 		            <input id="ugr_Name" style="width:200;" maxlength="65" />
@@ -125,7 +125,7 @@
 			            The display name for the group - keep it short (<20 characters)
 		            </div>
 	            </div>
-                
+
 	            <div class="dtyField">
 		            <label class="dtyLabel" for="ugr_LongName">Long name:</label>
 		            <input id="ugr_LongName" style="width:200;" maxlength="128" />
@@ -133,7 +133,7 @@
 			            An extended name for the group
 		            </div>
 	            </div>
-                
+
 	            <div class="dtyField">
 		            <label class="dtyLabel" style="vertical-align:top" for="ugr_Description">Description:</label>
 		            <textarea cols="200" id="ugr_Description" rows="3" style="width:420;"></textarea>
@@ -141,7 +141,7 @@
 			            A description of the group
 		            </div>
 	            </div>
-                
+
 	            <div class="dtyField">
 		            <label class="dtyLabel" style="vertical-align:top" for="ugr_URLs">URLs:</label>
 		            <textarea cols="200" id="ugr_URLs" rows="3" style="width:420;"></textarea>
@@ -168,14 +168,14 @@
 		            </div>
 	            </div>
             </div>
-            
+
             <br/>
-            
+
             <div id="btn_edits" class="actionButtons">
                 <input type="button" style="height: 25px; width: 99px" value="Save" onclick="window.groupEditor.save();" />
                 <input type="button" style="height: 25px; width: 99px" value="Cancel" onclick="window.groupEditor.cancel();" />
             </div>
-            
+
             <div id="btn_view" class="actionButtons" style="display:none;padding-right: 240px">
                 <input type="button" style="height: 25px; width: 99px" value="Close" onclick="window.close(null);" />
             </div>

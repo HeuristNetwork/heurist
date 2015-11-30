@@ -128,7 +128,7 @@
             </div>
 
             <div class="input-row required">
-                <div class="input-header-cell"  style="vertical-align:top" for="ugr_Interests">Research Interests</div>
+                <div class="input-header-cell"  style="vertical-align:top" for="ugr_Interests">Research interests</div>
                 <div class="input-cell"><textarea id="ugr_Interests" rows="2" style="width:420;" maxlength="255"></textarea>
                     <div class="help prompt">
                         Enter a concise description (up to 250 characters) of your research interests
@@ -198,7 +198,7 @@
                     </div>
 
 
-                    <!-- This field is really intended more for user groups-->
+                    <!-- This field is really intended more for Workgroups-->
                     <div class="input-row" style="display: none;">
                         <div class="input-header-cell" style="vertical-align:top" for="ugr_Description">Description</div>
                         <div class="input-cell"><textarea cols="200" id="ugr_Description" rows="4" style="width:420;"></textarea>
@@ -222,7 +222,7 @@
 
             <div id="condition" class="togglepnl hidden" style="margin-left: 50px;">
                 <a onMouseDown="$('#options2').slideToggle('fast'); $('#condition').toggleClass('show'); $('#options2').toggleClass('hidden');">
-                    Conditions of Use</a>
+                    Terms and Conditions of Use</a>
                 <div id="options2" class="hidden" style="background-color:#ffffff;">
                     <br />
                     <div>HEURIST is a development system maintained by the University of Sydney, and our funding is modest.
@@ -296,13 +296,13 @@
 
         <div>
             <div id="regInfo" class="hidden">
-                <p>Please read the Conditions of Use above, then click the Register button at the end of the page.
+                <p>Please read the Terms and Conditions of Use above, then click the Register button at the end of the page.
                 Note: This system should not be used for the storage of confidential personally-identifiable information
                 such as health information without the express permission of the system managers.</p>
-                <p>If you experience problems with the registration process,
-                    please let us know what went wrong (and send your registration details for manual addition).</p>
+
                 <p id="contactDetails"> (database owner)</p>
                 <input type="checkbox" name="agree" onClick="e=getElementById('register_button'); if (e) e.disabled=!this.checked;">
+                <br />
                 I have read and agree to the Terms and Conditions of Use above<br>
             </div>
 

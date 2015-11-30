@@ -55,8 +55,8 @@ CREATE TABLE Records (
   rec_AddedByImport tinyint(1) unsigned NOT NULL default '0' COMMENT 'Whether added by an import (value 1) or by manual entry (value 0)',
   rec_Popularity int(10) unsigned NOT NULL default '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
   rec_FlagTemporary tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a partially created record before fully populated',
-  rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'User group which owns this record, 0 = everyone',
-  rec_NonOwnerVisibility enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning user group(s) or to anyone',
+  rec_OwnerUGrpID smallint(5) unsigned NOT NULL default '0' COMMENT 'Workgroup which owns this record, 0 = everyone',
+  rec_NonOwnerVisibility enum('viewable','hidden','public','pending') NOT NULL default 'viewable' COMMENT 'Defines if record visible outside owning Workgroup(s) or to anyone',
   rec_URLLastVerified datetime default NULL COMMENT 'Last date time when URL was verified as contactable',
   rec_URLErrorMessage varchar(255) default NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   rec_URLExtensionForMimeType varchar(10) default NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
@@ -564,7 +564,7 @@ CREATE TABLE sysIdentification (
   sys_IncomingEmailAddresses varchar(4000) default NULL COMMENT 'Comma-sep list of incoming email addresses for archiving emails visible to all admins',
   sys_TargetEmailAddresses varchar(255) default NULL COMMENT 'Comma-sep list for selecting target for sending records as data, see also ugr_TargetEmailAddresses',
   sys_UGrpsDatabase varchar(63) default NULL COMMENT 'Full name of SQL database containing user tables, null = use internal users/groups tables',
-  sys_OwnerGroupID smallint(5) unsigned NOT NULL default '1' COMMENT 'User group which owns/administers this database, 1 by default',
+  sys_OwnerGroupID smallint(5) unsigned NOT NULL default '1' COMMENT 'Workgroup which owns/administers this database, 1 by default',
   sys_dbName varchar(63) NOT NULL default 'Please enter a DB name ...' COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
   sys_dbOwner varchar(250) default NULL COMMENT 'Information on the owner of the database, may be a URL reference',
   sys_dbRights varchar(1000) NOT NULL default 'Please define ownership and rights here ...' COMMENT 'A statement of ownership and copyright for this database and content',
@@ -622,8 +622,8 @@ CREATE TABLE sysUGrps (
   ugr_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'User or group ID, used wherever a user or group is to be identified',
   ugr_Type enum('user','workgroup','ugradclass') NOT NULL default 'user' COMMENT 'User or workgroup, special workgroup types also supported',
   ugr_Name varchar(63) NOT NULL COMMENT 'The unique user/login/group name, user name defaults to email address',
-  ugr_LongName varchar(128) default NULL COMMENT 'An optional longer descriptive name for a user group',
-  ugr_Description varchar(1000) default NULL COMMENT 'Extended description of a user group displayed on homepage',
+  ugr_LongName varchar(128) default NULL COMMENT 'An optional longer descriptive name for a Workgroup',
+  ugr_Description varchar(1000) default NULL COMMENT 'Extended description of a Workgroup displayed on homepage',
   ugr_Password varchar(40) NOT NULL COMMENT 'Encrypted password string',
   ugr_eMail varchar(100) NOT NULL COMMENT 'Contact email address of the user/group',
   ugr_FirstName varchar(40) default NULL COMMENT 'Person''s first name, only for Users, not Workgroups',
@@ -827,7 +827,7 @@ CREATE TABLE usrTags (
   UNIQUE KEY tag_composite_key (tag_Text,tag_UGrpID),
   KEY tag_UGrpID (tag_UGrpID),
   KEY tag_Text (tag_Text)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Personal and Workgroup tags (formerly keywords)';
 
 -- --------------------------------------------------------
 
@@ -838,7 +838,7 @@ CREATE TABLE usrTags (
 CREATE TABLE woot_ChunkPermissions (
   wprm_ChunkID int(11) NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
   wprm_UGrpID smallint(6) NOT NULL COMMENT 'User with specified right to this chunk',
-  wprm_GroupID smallint(6) NOT NULL COMMENT 'User groups with specified right to this chunk',
+  wprm_GroupID smallint(6) NOT NULL COMMENT 'Workgroups with specified right to this chunk',
   wprm_Type enum('RW','RO') NOT NULL COMMENT 'Read-write or read-only permission for this chunk/user/wg',
   wprm_CreatorID smallint(6) NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
   wprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
@@ -877,7 +877,7 @@ CREATE TABLE woot_Chunks (
 CREATE TABLE woot_RecPermissions (
   wrprm_WootID int(11) NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
   wrprm_UGrpID int(11) NOT NULL COMMENT 'User ID to which this permission is being granted',
-  wrprm_GroupID int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
+  wrprm_GroupID int(11) NOT NULL COMMENT 'Workgroup ID to which this permission is being granted',
   wrprm_Type enum('RW','RO') NOT NULL COMMENT 'Type of permission being granted - read only or read-write',
   wrprm_CreatorID int(11) NOT NULL COMMENT 'Creator of the permission',
   wrprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
@@ -921,7 +921,7 @@ CREATE TABLE woots (
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior)
   VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype');
-  
+
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   --       This reflects the actual state of the database structure in H3CORECLONE which was pasted in here
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user

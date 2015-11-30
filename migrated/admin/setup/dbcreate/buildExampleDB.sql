@@ -57,8 +57,8 @@ CREATE TABLE `Records` (
   `rec_AddedByImport` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Whether added by an import (value 1) or by manual entry (value 0)',
   `rec_Popularity` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Calculated popularity rating for sorting order, set by cron job',
   `rec_FlagTemporary` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Flags a partially created record before fully populated',
-  `rec_OwnerUGrpID` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'User group which owns this record, 0 = everyone',
-  `rec_NonOwnerVisibility` enum('viewable','hidden','public','pending') NOT NULL DEFAULT 'viewable' COMMENT 'Defines if record visible outside owning user group(s) or to anyone',
+  `rec_OwnerUGrpID` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Workgroup which owns this record, 0 = everyone',
+  `rec_NonOwnerVisibility` enum('viewable','hidden','public','pending') NOT NULL DEFAULT 'viewable' COMMENT 'Defines if record visible outside owning Workgroup(s) or to anyone',
   `rec_URLLastVerified` datetime DEFAULT NULL COMMENT 'Last date time when URL was verified as contactable',
   `rec_URLErrorMessage` varchar(255) DEFAULT NULL COMMENT 'Error returned by URL checking script for bad/inaccessible URLs',
   `rec_URLExtensionForMimeType` varchar(10) DEFAULT NULL COMMENT 'A mime type extension for multimedia files pointed to DIRECTLY by the record URL',
@@ -1539,7 +1539,7 @@ CREATE TABLE `sysIdentification` (
   `sys_IncomingEmailAddresses` varchar(4000) DEFAULT NULL COMMENT 'Comma-sep list of incoming email addresses for archiving emails visible to all admins',
   `sys_TargetEmailAddresses` varchar(255) DEFAULT NULL COMMENT 'Comma-sep list for selecting target for sending records as data, see also ugr_TargetEmailAddresses',
   `sys_UGrpsDatabase` varchar(63) DEFAULT NULL COMMENT 'Full name of SQL database containing user tables, null = use internal users/groups tables',
-  `sys_OwnerGroupID` smallint(5) unsigned NOT NULL DEFAULT '1' COMMENT 'User group which owns/administers this database, 1 by default',
+  `sys_OwnerGroupID` smallint(5) unsigned NOT NULL DEFAULT '1' COMMENT 'Workgroup which owns/administers this database, 1 by default',
   `sys_dbName` varchar(63) NOT NULL DEFAULT 'Please enter a DB name ...' COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
   `sys_dbOwner` varchar(250) DEFAULT NULL COMMENT 'Information on the owner of the database, may be a URL reference',
   `sys_dbRights` varchar(1000) NOT NULL DEFAULT 'Please define ownership and rights here ...' COMMENT 'A statement of ownership and copyright for this database and content',
@@ -1632,8 +1632,8 @@ CREATE TABLE `sysUGrps` (
   `ugr_ID` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT 'User or group ID, used wherever a user or group is to be identified',
   `ugr_Type` enum('user','workgroup','ugradclass') NOT NULL DEFAULT 'user' COMMENT 'User or workgroup, special workgroup types also supported',
   `ugr_Name` varchar(63) NOT NULL COMMENT 'The unique user/login/group name, user name defaults to email address',
-  `ugr_LongName` varchar(128) DEFAULT NULL COMMENT 'An optional longer descriptive name for a user group',
-  `ugr_Description` varchar(1000) DEFAULT NULL COMMENT 'Extended description of a user group displayed on homepage',
+  `ugr_LongName` varchar(128) DEFAULT NULL COMMENT 'An optional longer descriptive name for a Workgroup',
+  `ugr_Description` varchar(1000) DEFAULT NULL COMMENT 'Extended description of a Workgroup displayed on homepage',
   `ugr_Password` varchar(40) NOT NULL COMMENT 'Encrypted password string',
   `ugr_eMail` varchar(100) NOT NULL COMMENT 'Contact email address of the user/group',
   `ugr_FirstName` varchar(40) DEFAULT NULL COMMENT 'Person''s first name, only for Users, not Workgroups',
@@ -1667,7 +1667,7 @@ CREATE TABLE `sysUGrps` (
 
 LOCK TABLES `sysUGrps` WRITE;
 /*!40000 ALTER TABLE `sysUGrps` DISABLE KEYS */;
-INSERT INTO `sysUGrps` VALUES (0,'workgroup','All users','All users','A dummy workgroup representing all users of the system. There are no user group - user links in the sysUsrGrpLinks table for this group, they are implied','Password not set for this group','none@junk.com','All','Users',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(2,'user','not set','',NULL,'','not set','not set','not set','not set','not set','','','','...','y','2014-07-23 23:26:00',3,74,0,NULL,NULL,NULL,0,'2014-07-23 13:26:00');
+INSERT INTO `sysUGrps` VALUES (0,'workgroup','All users','All users','A dummy workgroup representing all users of the system. There are no Workgroup - user links in the sysUsrGrpLinks table for this group, they are implied','Password not set for this group','none@junk.com','All','Users',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(1,'workgroup','Database owners','Group 1 owns databases by default. DO NOT DELETE.',NULL,'PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=1','db','owners',NULL,NULL,NULL,NULL,NULL,NULL,'y',NULL,3,0,0,NULL,NULL,NULL,0,'0000-00-00 00:00:00'),(2,'user','not set','',NULL,'','not set','not set','not set','not set','not set','','','','...','y','2014-07-23 23:26:00',3,74,0,NULL,NULL,NULL,0,'2014-07-23 13:26:00');
 /*!40000 ALTER TABLE `sysUGrps` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -2057,7 +2057,7 @@ CREATE TABLE `usrTags` (
   KEY `tag_UGrpID` (`tag_UGrpID`),
   KEY `tag_Text` (`tag_Text`),
   CONSTRAINT `fk_tag_UGrpID` FOREIGN KEY (`tag_UGrpID`) REFERENCES `sysUGrps` (`ugr_ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='Personal and user group tags (formerly keywords)';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='Personal and Workgroup tags (formerly keywords)';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2080,7 +2080,7 @@ DROP TABLE IF EXISTS `woot_ChunkPermissions`;
 CREATE TABLE `woot_ChunkPermissions` (
   `wprm_ChunkID` int(11) NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
   `wprm_UGrpID` smallint(6) NOT NULL COMMENT 'User with specified right to this chunk',
-  `wprm_GroupID` smallint(6) NOT NULL COMMENT 'User groups with specified right to this chunk',
+  `wprm_GroupID` smallint(6) NOT NULL COMMENT 'Workgroups with specified right to this chunk',
   `wprm_Type` enum('RW','RO') NOT NULL COMMENT 'Read-write or read-only permission for this chunk/user/wg',
   `wprm_CreatorID` smallint(6) NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
   `wprm_Created` datetime NOT NULL COMMENT 'Date and time of creation of the permission',
@@ -2141,7 +2141,7 @@ DROP TABLE IF EXISTS `woot_RecPermissions`;
 CREATE TABLE `woot_RecPermissions` (
   `wrprm_WootID` int(11) NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
   `wrprm_UGrpID` int(11) NOT NULL COMMENT 'User ID to which this permission is being granted',
-  `wrprm_GroupID` int(11) NOT NULL COMMENT 'User group ID to which this permission is being granted',
+  `wrprm_GroupID` int(11) NOT NULL COMMENT 'Workgroup ID to which this permission is being granted',
   `wrprm_Type` enum('RW','RO') NOT NULL COMMENT 'Type of permission being granted - read only or read-write',
   `wrprm_CreatorID` int(11) NOT NULL COMMENT 'Creator of the permission',
   `wrprm_Created` datetime NOT NULL COMMENT 'Date and time of creation of the permission',

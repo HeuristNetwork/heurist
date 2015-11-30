@@ -16,8 +16,8 @@
 
     /**
     * listFieldTypeDefinitionErrorsCompact.php - identifies invalid terms and record pointer constraints in field definitions
-    * Compact version in popup for editRecord. Normal version is used by Designer View > Utilities
-    * 
+    * Compact version in popup for editRecord. Normal version is used by administration page > Utilities
+    *
     * TODO: This largely duplicates similar funciton in listFieldTypeDefinitionErrors.php - the two shoudl be combined
     *       and fixing of the errors shoudl be automated, possibly with an email to development team so we are aware of problem
     *
@@ -42,7 +42,7 @@
         $lists = getInvalidFieldTypes(@$_REQUEST['rt']);
         if(!@$_REQUEST['show']){
             if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0 && count($lists["rt_contraints"])==0){
-                $lists = array();   
+                $lists = array();
             }
             print json_encode($lists);
             exit();
@@ -52,7 +52,7 @@
     $dtysWithInvalidTerms = $lists["terms"];
     $dtysWithInvalidNonSelectableTerms = $lists["terms_nonselectable"];
     $dtysWithInvalidRectypeConstraint = $lists["rt_contraints"];
-?>    
+?>
 <html>
     <head>
         <title>Invalid Field Type Definition check</title>
@@ -86,7 +86,7 @@
                     }
 
                     var dt = [
-                        <?php   
+                        <?php
                             $isfirst = true;
                             foreach ($dtysWithInvalidTerms as $row) {
                                 print ($isfirst?"":",")."[".$row['dty_ID'].", 0, '".$row['validTermsString']."']";
@@ -124,12 +124,12 @@
                 <div>
                 <h3>Enumeration, Relationship type or Relationship marker field types with invalid terms definitions</h3>
                 </div>
-                -->            
+                -->
                 <?php
                     foreach ($dtysWithInvalidTerms as $row) {
                     ?>
-                    <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has 
-                        <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?> 
+                    <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has
+                        <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?>
                         (code: <?= join(",",$row['invalidTermIDs'])?>)
                     </div>
                     <?php
@@ -143,8 +143,8 @@
                 <?php
                     foreach ($dtysWithInvalidNonSelectableTerms as $row) {
                     ?>
-                    <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has 
-                        <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?> 
+                    <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has
+                        <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?>
                         (code: <?= join(",",$row['invalidNonSelectableTermIDs'])?>)
                     </div>
                     <?php
@@ -154,13 +154,13 @@
                 ?>
                 <!--
                 <div>
-                <h3>Record Pointer or Relationship Marker field types with invalid record type(s) in constraint definitions</h3> 
+                <h3>Record Pointer or Relationship Marker field types with invalid record type(s) in constraint definitions</h3>
                 </div> -->
                 <?php
                     foreach ($dtysWithInvalidRectypeConstraint as $row) {
                     ?>
-                    <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has 
-                        <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?> 
+                    <div class="msgline"><b><?= $row['dty_Name'] ?></b> field (code <?= $row['dty_ID'] ?>) has
+                        <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?>
                         (code: <?= join(",",$row['invalidRectypeConstraint'])?>)
                     </div>
 

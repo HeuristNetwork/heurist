@@ -9,7 +9,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0   
+    * @version     4.0
     */
 
     /*
@@ -25,13 +25,13 @@
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     if (!is_admin()) {
     print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body><div class=wrap>".
-    "<div id=errorMsg><span>You must be logged in as system administrator to add or change user groups</span>".
+    "<div id=errorMsg><span>You must be logged in as system administrator to add or change Workgroups</span>".
     "<p><a href=".HEURIST_BASE_URL_V3."common/connect/login.php?logout=1&amp;db=".HEURIST_DBNAME.
     " target='_top'>Log out</a></p></div></div></body></html>";
     return;
     }
     */
-    
+
     $isPopup = (array_key_exists('popup', $_REQUEST) && $_REQUEST['popup']=="yes");
 ?>
 
@@ -96,11 +96,11 @@
 
                     <div id="divFilterByMembership" style="display: inline-block;">
                         Show:&nbsp;&nbsp;&nbsp;
-                        <input type="radio" id="inputFilterByMembership1" name="inputFilterByMembership" 
+                        <input type="radio" id="inputFilterByMembership1" name="inputFilterByMembership"
                             value="all" style="display: inline-block;">
                         <label id="lblForInputFilterByMembership1" style="display: inline-block;">&nbsp;All groups&nbsp;</label>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type="radio" id="inputFilterByMembership2" name="inputFilterByMembership" 
+                        <input type="radio" id="inputFilterByMembership2" name="inputFilterByMembership"
                             value="any" checked="checked">&nbsp;My groups&nbsp;
                         <input type="radio" id="inputFilterByMembership3" name="inputFilterByMembership" value="admin">&nbsp;Admin. only&nbsp;
                         <input type="radio" id="inputFilterByMembership4" name="inputFilterByMembership" value="member">&nbsp;Member only&nbsp;&nbsp;

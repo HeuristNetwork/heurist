@@ -133,7 +133,7 @@ $.widget( "heurist.mainMenu", {
             this.div_BottomRow = $("<div>").css({ 'position':'absolute', top:46, left: '2px', right:0, 'padding-right': '2em' }).appendTo( this.element );
 
             this.btn_switch_to_design = $( "<button>", {
-                text: top.HR("go to designer view")
+                text: top.HR("go to database administration")
             })
             .css('width','160px')
             .appendTo( this.div_BottomRow )

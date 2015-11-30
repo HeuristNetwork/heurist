@@ -484,7 +484,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             var isEdit = (parseInt(svsID)>0);
 
-            //fill with list of user groups in case non bookmark search
+            //fill with list of Workgroups in case non bookmark search
             var selObj = svs_ugrid.get(0); //select element
             top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
@@ -586,7 +586,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val('');
                 svs_name.val('');
 
-                //fill with list of user groups in case non bookmark search
+                //fill with list of Workgroups in case non bookmark search
                 var selObj = svs_ugrid.get(0); //select element
                 top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                     [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],

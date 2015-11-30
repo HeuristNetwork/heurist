@@ -118,7 +118,7 @@ function hSvsEdit(args) {
 
                 // TODO: remove this code if no longer needed
                 //svs_ugrid.val('all');
-                //fill with list of user groups in case non bookmark search
+                //fill with list of Workgroups in case non bookmark search
                 /*var selObj = svs_ugrid.get(0);
                 if(domain=="bookmark"){
                     svs_ugrid.empty();

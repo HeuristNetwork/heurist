@@ -68,7 +68,7 @@ $.widget( "heurist.svs_manager", {
         }
 
         //---------------------------------------- HEADER
-        // user group selector
+        // Workgroup selector
         this.select_grp = $( "<select>", {width:'96%'} )
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.wcontainer );
@@ -121,7 +121,7 @@ $.widget( "heurist.svs_manager", {
         if(!top.HAPI4.currentUser.usr_GroupsList){
 
             var that = this;
-            //get details about user groups (names etc)
+            //get details about Workgroups (names etc)
             top.HAPI4.SystemMgr.mygroups(
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -330,7 +330,7 @@ $.widget( "heurist.svs_manager", {
                 var domain = this.currentSearch.w;
                 domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-                //fill with list of user groups in case non bookmark search
+                //fill with list of Workgroups in case non bookmark search
                 var selObj = svs_ugrid.get(0);
                 top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                     [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
