@@ -180,7 +180,7 @@ function doRegister(event){
              p{
                  padding:5px;
              }
-             
+
         </style>
 
         <script>
@@ -295,7 +295,7 @@ function doRegister(event){
                 //only once
                 if(is_db_got) return;
                 is_db_got = true;
-                
+
                 var ddiv = $('#registered_dbs');
                 ddiv.show();
                 ddiv.height('40px');
@@ -366,10 +366,10 @@ function doRegister(event){
             if($blankServer){
         ?>
                 <body style="padding:45px">
-                    <div class="ui-corner-all ui-widget-content" 
+                    <div class="ui-corner-all ui-widget-content"
                         style="text-align:left; width:70%; min-height:550px; margin:0px auto; padding: 0.5em;">
                     <div class="logo" style="background-color:#2e3e50;width:100%;margin-bottom:20px"></div>
-         <?php       
+         <?php
             }else{
                 echo '<body class="popup">';
                 echo (@$_REQUEST['popup']=='1'?'':'<div class="banner"><h2>Create New Database</h2></div>');
@@ -443,7 +443,7 @@ function doRegister(event){
 
                         <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:2px;">
                             <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
-                                class="labelBold" style="padding-left: 2em;">Standard starter database</label>
+                                class="labelBold" style="padding-left: 2em;">Standard database template</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
                                 Gives an uncluttered database with essential record types, fields,
                                 terms and relationships, including bibliographic and spatial entities.<br />
@@ -456,7 +456,7 @@ function doRegister(event){
                                 class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
                             <div style="padding-left: 38px;width:600px">
                                 Use a database registered with the Heurist Network as a template.
-                                Copies record types, fields, terms and relationships from the database selected. 
+                                Copies record types, fields, terms and relationships from the database selected.
                                 Databases with an ID &lt; 1000 are curated by the Heurist team and include templates
                                 for the HuNI and FAIMS infrastructure projects,
                                 as well as community servers maintained by other research groups.
@@ -792,7 +792,7 @@ if(false){ //DEBUG: set to false to avoid real database creation
     <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>
 <?php
                     if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
-?>                        
+?>
            <p style="padding-left:10px"><strong>Admin username:</strong> <?php echo $name ?></p>
            <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>
 <?php
@@ -808,7 +808,7 @@ if(false){ //DEBUG: set to false to avoid real database creation
                     After logging in to your new database, we suggest you import some additional entity types from one of the<br />
                     curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
                     using Database &gt; Import Structure or Database &gt; Annotated Templates</p>
-</div>                    
+</div>
 <?php
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost

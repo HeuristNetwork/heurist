@@ -43,8 +43,8 @@
   }
 
   /**
-  * 
-  * 
+  *
+  *
   * @param mixed $data
   */
   function add_detail($data) {
@@ -93,7 +93,7 @@
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_DetailTypeID'  => $dtyID,
                   'dtl_Modified'  => $now);
-    $baseTag = "add field $dtyName $now";
+    $baseTag = "~add field $dtyName $now";
     if(@$data['val']){
       $dtl['dtl_Value'] = $data['val'];
     }
@@ -107,7 +107,7 @@
     $processedRecIDs = array();
     $limittedRecIDs = array();
     $insertErrors = array();
-    
+
     mysql_connection_overwrite(DATABASE);
     foreach ($recIDs as $recID) {
       //check field limit for this record
@@ -116,10 +116,10 @@
                             "from recDetails ".
                             "where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID group by dtl_RecID) as tmp on rec_ID = tmp.recID ".
                 "where rec_ID = $recID";
-                
+
       $res = mysql_query($query);
       $row = mysql_fetch_row($res);
-      
+
       if (!array_key_exists($row[0],$rtyLimits)) {
           array_push($undefinedFieldsRecIDs, $recID);
           continue;
@@ -167,7 +167,7 @@
             $result[$resIndex] = '';
       }
       $limittedFieldsTagResult = bookmark_and_tag_record_ids(array('rec_ids' => $limittedRecIDs, 'tagString' => $baseTag." limitted"));
-      $result[$resIndex] .= "Exceeded repeat values limit for field $dtyName in ".count($limittedRecIDs). 
+      $result[$resIndex] .= "Exceeded repeat values limit for field $dtyName in ".count($limittedRecIDs).
         " Record(s). The additional values have not been added to these records.\n\n";
       $result['count']['limitted'] = count($limittedRecIDs);
       $result['limitted'] = array('recIDs' => $limittedRecIDs, 'queryString' => "tag:\"$baseTag limitted\"", 'tagResults' => $limittedFieldsTagResult);
@@ -185,8 +185,8 @@
     return $result;
   }
 
-  
-  
+
+
   function replace_detail($data) {
     global $ACCESSABLE_OWNER_IDS;
 
@@ -292,7 +292,7 @@
 
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_Modified'  => $now);
-    $baseTag = "replace field $dtyName $now";
+    $baseTag = "~replace field $dtyName $now";
 
     if (count($processedRecIDs)){
       $resIndex = 'ok';
@@ -435,7 +435,7 @@
 
     $now = date('Y-m-d H:i:s');
     $dtl = Array('dtl_Modified'  => $now);
-    $baseTag = "delete field $dtyName $now";
+    $baseTag = "~delete field $dtyName $now";
 
     if (count($processedRecIDs)){
       $resIndex = 'ok';
@@ -788,12 +788,12 @@
   function save_search($data) {
 
     $result = array();
-    
+
     $wg = intval(@$data['svs_UGrpID']);
     $sID = @$data['svs_ID'];
     //$publish = $data['publish'];
     $label = @$data['svs_Name'];
-    
+
     $now = date('Y-m-d');
     $cmb = Array(
       'svs_Name'     => $label,
@@ -808,7 +808,7 @@
     $row = mysql_fetch_row($res);*/
 
     mysql_connection_overwrite(DATABASE);
-    
+
     if ($sID) {
       /*$row ||  if ($row ) {
       $ss = intval($row[0]);

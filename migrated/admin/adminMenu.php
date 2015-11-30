@@ -225,10 +225,10 @@ if (array_key_exists('mode', $_REQUEST)) {
                             'Browse documented record type templates on the Heurist Network site '.
                             'and selectively import them into the current database');
 
-                        menuEntry('','Base field types','structure/fields/manageDetailTypes.php?db='.HEURIST_DBNAME,
+                        menuEntry('','Manage base field types','structure/fields/manageDetailTypes.php?db='.HEURIST_DBNAME,
                             'Browse and edit the base field definitions referenced by record types (often shared by multiple record types)');
 
-                        menuEntry('','Terms / relation types','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
+                        menuEntry('','Manage terms / relationsip types','structure/terms/editTerms.php?db='.HEURIST_DBNAME,
                             'Browse and edit the terms used for relationship types and for other enumerated (term list) fields');
 
                         /* This has not been reliably tested and is better left out. IJ 7/7/15

@@ -14,7 +14,7 @@
 
 /**
 * importRecordsFromDelimited
-* javascript functions for importing comma or tab delimited data 
+* javascript functions for importing comma or tab delimited data
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -58,7 +58,7 @@ FlexImport = (function () {
 	workgroups: {},
 	workgroupTags: {},
 	colSelectors: [], //select html elements with list of detail types
-    colKeys: [],  //detail type id - that gives unique key - for update purpose 
+    colKeys: [],  //detail type id - that gives unique key - for update purpose
 	cols: [],   //DetailType Id - selected dt for cvs columns
     cols_uniqkey: [], //array of dt id that compose unique key, or has the only value 'recId'
 	subTypes: [],
@@ -441,25 +441,25 @@ FlexImport = (function () {
             cbkey.type = 'checkbox';
             cbkey.style.visibility = 'hidden';
             cbkey.id = "cb"+i;
-            
+
             FlexImport.colKeys[i] = cbkey;
             td.appendChild(document.createElement("br"));
-            
+
 			sel = td.appendChild(document.createElement("select"));
             sel.id = "sel"+i;
-            
+
 			sel.onchange = function() {
 
                 var isRecHeaderFlds = (this.value == "null" || this.value == "url"  ||  this.value == "scratchpad"  ||
                     this.value == "tags"  ||  this.value == "wgTags");
-                var  variety = null;    
+                var  variety = null;
                 if(!isRecHeaderFlds){
                     var dt = HDetailManager.getDetailTypeById(this.value);
                     if(dt){
-                        variety = dt.getVariety();    
+                        variety = dt.getVariety();
                     }
                 }
-                
+
 				if (this.value != "tags"  &&  this.value != "wgTags") {
 					//search if this detail is in another column and remove it from the other column if it is
 					// todo: should we stop people putting data from two columns into the same field? I think not. Maybe popup an alert
@@ -474,12 +474,12 @@ FlexImport = (function () {
 						}
 					}
 				}
-                
-                
+
+
                 cbkey = document.getElementById("cb"+this.id.substr(3));
                 var lbl = document.getElementById('lblKeyFields');
                 $allcbs = $('[type="checkbox"][id^="cb"]');
-                    
+
                 if (isRecHeaderFlds || variety == HVariety.GEOGRAPHIC || variety == HVariety.FILE) {
                     cbkey.style.visibility = 'hidden';
                     lbl.style.visibility = 'hidden';
@@ -491,11 +491,11 @@ FlexImport = (function () {
                     });
                 }else{
                     cbkey.checked = false;
-                    cbkey.style.visibility = 'visible';  
-                    lbl.style.visibility = 'visible';  
+                    cbkey.style.visibility = 'visible';
+                    lbl.style.visibility = 'visible';
                 }
                 //if one of selection is record id disable all checkboxes
-                
+
                 $allcbs.attr('disabled', false);
                 $allcbs.attr('title', 'Use as key field: Heurist will attempt to match key fields to identify existing records for update rather than addition of a new record');
                 var $sels = $('select[id^="sel"]');
@@ -509,8 +509,8 @@ FlexImport = (function () {
                         return false;
                     }
                 });
-                
-                
+
+
 				// for types that have subtypes show select for subtypes
 				if (!isRecHeaderFlds &&
 					variety == HVariety.GEOGRAPHIC) {
@@ -536,7 +536,7 @@ FlexImport = (function () {
 					}
 				}
 			};
-            
+
 
 			// fill in comlumn selector options for recType
 			FlexImport.colSelectors[i] = sel;
@@ -609,7 +609,7 @@ FlexImport = (function () {
 			for (d = 0; d < alist.length; ++d) {
 				var opt = _addOpt(sel, alist[d].id, alist[d].name, alist[d].selected);
 				if(alist[d].req){
-                    
+
 					opt.className = "required";
 				}
 			}
@@ -644,8 +644,8 @@ FlexImport = (function () {
 				sel.value = FlexImport.cols[i];
 			}
 		}//for
-        
-        
+
+
 		// create rest of table filling it with the csv analysed data
 		for (var i = FlexImport.hasHeaderRow ? 1:0; i < FlexImport.fields.length; ++i) {
 			var inputRow = FlexImport.fields[i];
@@ -703,8 +703,8 @@ FlexImport = (function () {
             FlexImport.colSelectors[i].onchange();
         }
 
-        
-        
+
+
 		},200);
 	}, //end createColumnSelectors
 
@@ -851,19 +851,19 @@ FlexImport = (function () {
            alert('Select record type');
            return;
         }
-        
-        
+
+
 		var detailType;
 		var refCols = [];
 		var recIDs = [];
 		var recID = "";
 		var valCheck = {};
-        
+
 
 		//get list of required field types
 		var reqDetailTypes = HDetailManager.getRequiredDetailTypesForRecordType(FlexImport.recType);
 		var k;
-        
+
         FlexImport.cols_uniqkey = [];
 
 		//detect what fields to be imported
@@ -871,21 +871,21 @@ FlexImport = (function () {
 		for (i = 0; i < l; ++i) {
 			if (FlexImport.colSelectors[i].selectedIndex > 0) {
 				FlexImport.cols[i] = FlexImport.colSelectors[i].value;
-                
+
                 //@todo checkbox for tags and wgTags must be invisible
                 if(FlexImport.cols[i]=="record id" ||
                     (FlexImport.colKeys[i].checked && FlexImport.cols[i]!=="tags"  &&  FlexImport.cols[i]!== "wgTags"))
                 {
                      FlexImport.cols_uniqkey.push(FlexImport.colSelectors[i].value);
-                }               
-                
+                }
+
 			}else if(i<FlexImport.cols.length){
 				FlexImport.cols[i] = undefined;
 			}
 			FlexImport.subTypes[i] = FlexImport.colSelectors[i].subTypeSelect ? FlexImport.colSelectors[i].subTypeSelect.value : null;
 			if ( FlexImport.cols[i]  &&  FlexImport.cols[i]!=="tags"   &&  FlexImport.cols[i]!== "wgTags" && FlexImport.cols[i] !== "url" && FlexImport.cols[i] !== "scratchpad") {
 				detailType = HDetailManager.getDetailTypeById(FlexImport.cols[i]);
-                if(detailType)    
+                if(detailType)
                 {
 					for (k = 0; k < reqDetailTypes.length; ++k) {
 						if(detailType.getID() == reqDetailTypes[k].getID()){
@@ -1070,9 +1070,9 @@ FlexImport = (function () {
 		var kwds = false;
 		var j, l = FlexImport.cols.length;
 		for (j = 0; j < l; ++j) {
-			if (! FlexImport.cols[j]  || FlexImport.cols[j]=="record id" || 
+			if (! FlexImport.cols[j]  || FlexImport.cols[j]=="record id" ||
               (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
-             
+
 			td = tr.appendChild(document.createElement("td"));
 			if (FlexImport.cols[j] == "url") {
 				td.innerHTML = "URL";
@@ -1102,7 +1102,7 @@ FlexImport = (function () {
 		var min = now.getMinutes(); if (min < 10) min = "0" + min;
 		var s = now.getSeconds(); if (s < 10) s = "0" + s;
 
-		var importTag = "FlexImport " + y + "-" + m + "-" + d + " " + h + ":" + min + ":" + s;
+		var importTag = "~FlexImport " + y + "-" + m + "-" + d + " " + h + ":" + min + ":" + s;
 		try {
 			HTagManager.addTag(importTag);
 		} catch(e) {
@@ -1175,7 +1175,7 @@ FlexImport = (function () {
 
 			tags = false; kwds = false;
 			for (var j = 0; j < FlexImport.fields[i].length; ++j) {
-				if (! FlexImport.cols[j]  || FlexImport.cols[j]=="record id" || 
+				if (! FlexImport.cols[j]  || FlexImport.cols[j]=="record id" ||
                         (FlexImport.cols[j]=="tags" && tags)  ||  (FlexImport.cols[j]=="wgTags" && kwds)) continue;
 
 				var inputRow = FlexImport.fields[i];
@@ -1227,31 +1227,31 @@ FlexImport = (function () {
 		} // for i = 0 loop
 
         FlexImport.findExistingRecordsForUpdateMode(0);
-        
+
 		},200);
-        
+
     },
-    
+
     findExistingRecordsForUpdateMode:function(index){
-   
+
         if(index>=FlexImport.records.length || FlexImport.cols_uniqkey.length<1){
-        
+
             //setTimeout(function() {              }, 200);
             FlexImport.gotoStepSaveRecords();
-            
-            
+
+
         }else{
-        
-            // in case of UPDATE mode 
-            // 1. create query string for each record 
-            // 2. find the record 
-            // 3. 
-        
+
+            // in case of UPDATE mode
+            // 1. create query string for each record
+            // 2. find the record
+            // 3.
+
             //HRecord
             var record = FlexImport.records[index];
             var i, dtid, dt;
             var query = "";
-            
+
             //1. compose search string based on markerd columns colKeys
             var l= FlexImport.cols_uniqkey.length;    //array of detail type ids
             for(i=0; i<l; ++i){
@@ -1263,23 +1263,23 @@ FlexImport = (function () {
                         record.setID(null);
                     }
                     break;
-                }else             
+                }else
                 if (dtid != "url"  &&  dtid != "scratchpad"  &&
                     dtid != "tags"  &&  dtid != "wgTags"){
                         dt = HDetailManager.getDetailTypeById(dtid);
                         if(dt && dt.getVariety() != HVariety.GEOGRAPHIC && dt.getVariety() != HVariety.FILE){
-                            var vals = record.getDetails(dt);           
+                            var vals = record.getDetails(dt);
                             if(vals && vals.length>0 && vals[0] && !top.HEURIST.util.isempty(vals[0])){
                                 query = query + " f:"+dtid+":"+vals[0].substr(0,50);
                             }
                         }
                 }
             }
-            
+
             if(dtid != "record id" && !top.HEURIST.util.isempty(query)){
                 query = 't:'+FlexImport.recTypeSelect.value+query;
             }
-            
+
             //2. perform search
             if(query){
                 var baseSearch = new HSearch(query, null);
@@ -1292,7 +1292,7 @@ FlexImport = (function () {
                             ss = recID;
                             //add special marker for all named details - to delete the existing ones
                             record.markDetailsForDelete();
-                            
+
                         } else if (r.length > 1) {// more than 1
                             ss = "ambiguity: "+r.length+" recs";
                         } else {
@@ -1307,18 +1307,18 @@ FlexImport = (function () {
                         var td = document.getElementById("tdrecid"+index);
                         td.innerHTML = "error search";
                         FlexImport.findExistingRecordsForUpdateMode(index+1);
-                    }                    
+                    }
                 );
-                HeuristScholarDB.loadRecords(baseSearch, myLoader);                
-                
+                HeuristScholarDB.loadRecords(baseSearch, myLoader);
+
             }else{
                 FlexImport.findExistingRecordsForUpdateMode(index+1);
             }
         }
-        
-        
+
+
     },
-    
+
     gotoStepSaveRecords:function(){
 
         FlexImport.gotoStep(3);
@@ -1346,15 +1346,15 @@ FlexImport = (function () {
             $("#btn_correct").hide();
             $("#btn_save").show();
         }
-    
+
     },
-        
+
 	startSaveRecords:function(){
 
        if (! confirm("This will attempt to save all the displayed records to " +
         (HAPI.database ? "the \""+HAPI.database+"\" Heurist database" : "Heurist") + ".\nAre you sure you want to continue?")){
-            return;  
-        } 
+            return;
+        }
 
 		var e = $("#records-div-info")[0];
 		e.innerHTML = "";
@@ -1379,8 +1379,8 @@ FlexImport = (function () {
 				err[key] += "\n" + msg;
 			}
 		}
-        
-        
+
+
 		if (top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['RT_RELATION'] && recType.getID() == top.HEURIST.magicNumbers['RT_RELATION']) {//MAGIC NUMBER
 			hRec = new HRelationship();
 		}
@@ -1401,7 +1401,7 @@ FlexImport = (function () {
 			if (! FlexImport.cols[j]  ||  FlexImport.cols[j] == "") {
 				continue;
 			}
-            
+
 			// get detail value
 			val = fields[j];
 			if (! val) {
@@ -1456,7 +1456,7 @@ FlexImport = (function () {
 					} else if (detailType.getVariety() == HVariety.GEOGRAPHIC) {
                         if(FlexImport.subTypes[j]=="lat"){
                             geoLat = vals;
-                            geoDt = detailType; 
+                            geoDt = detailType;
                             continue;
                         }else if(FlexImport.subTypes[j]=="lng"){
                             geoLng = vals;
@@ -1504,31 +1504,31 @@ FlexImport = (function () {
                         //replace all details
 						hRec.setDetails(detailType, vals);
 					}
-				}   
+				}
 			}catch(e) {
 				logError(j,e);
 			}
 		}
-        
+
         if(geoLat && geoLng){
             var vals = [];
             var lat, lng;
             for (var v = 0; v < geoLat.length; ++v) {
-                
+
                 lat = parseFloat(geoLat[v]);
                 lng = (v<geoLng.length)?parseFloat(geoLng[v]):NaN;
                 if(!(isNaN(lat) || isNaN(lng))){
-                    vals.push( new HGeographicValue("p", "POINT("+lng+" "+lat+")") );    
+                    vals.push( new HGeographicValue("p", "POINT("+lng+" "+lat+")") );
                 }
-                
+
             }
             if (vals.length>0) {
                 hRec.setDetails(geoDt, vals);
             }
         }
-        
-        
-         
+
+
+
 		if ((!err || !err.invalidRecord) && !hRec.isValid()) { // if record is invalid and hasn't been flagged yet, must be a missing req detail
 			logError("invalidRecord", " Missing required field(s).");
 		}
