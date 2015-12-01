@@ -392,7 +392,7 @@ function hSvsEdit(args) {
                     width: 450,
                     modal: true,
                     resizable: false,
-                    title: top.HR(isRules?'Edit Rule Set':'Edit saved search'),
+                    title: top.HR(isRules?'Edit Rule Set':'Edit saved filter criteria'),
                     buttons: [
                         {text:top.HR('Save'), click: __doSave},
                         {text:top.HR('Cancel'), click: function() {
@@ -411,7 +411,7 @@ function hSvsEdit(args) {
         }else{
             //show dialogue
             var isRules = _fromDataToUI(svsID, squery, groupID);
-            edit_dialog.dialog("option",'title', top.HR(isRules?'Edit Rule Set':'Edit saved search'));
+            edit_dialog.dialog("option",'title', top.HR(isRules?'Edit Rule Set':'Edit saved filter criteria'));
             edit_dialog.dialog("open");
         }
 

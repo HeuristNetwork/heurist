@@ -241,12 +241,12 @@ $.widget( "heurist.svs_manager", {
                 $itemdiv.append( $('<div>')
                     .addClass('edit-delete-buttons')
                     .css('margin','0.4em 1.2em')
-                    .append( $('<div>', { svsid:svsID, title: top.HR('Edit saved search filter') })
+                    .append( $('<div>', { svsid:svsID, title: top.HR('Edit saved filter criteria') })
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
                         .click(function( event ) {
                             that._editSavedSearch( $(this).attr('svsid') );
                     }) )
-                    .append($('<div>',{ svsID:svsID, title: top.HR('Delete saved search filter') })
+                    .append($('<div>',{ svsID:svsID, title: top.HR('Delete saved filter criteria') })
                         .button({icons: {primary: "ui-icon-close"}, text:false})
                         .click(function( event ) {
                             that._deleteSavedSearch( $(this).attr('svsid') );
