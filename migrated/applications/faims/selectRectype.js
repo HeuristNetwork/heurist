@@ -109,9 +109,9 @@
 
                 // We always require the control tab and start/stop synch as the app hangs inconveniently when synching, so you need to be able to turn it off
                 $("<div>").css('font-weight','bold').append("<input type='checkbox' checked='checked' disabled onclick='onCtCheckBox(event)' id='mainct'>").append("<label for='mainct'>Control tab<label>").appendTo($mdiv);
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' disabled id='ct1' name='ct1' value='1'><label for='ct1'>Start/stop synching (always required)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct1' name='ct1' value='1'><label for='ct1'>Start synching on start<label>").appendTo($mdiv);
                 
-                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS (on from start if not checked)<label>").appendTo($mdiv);
+                $("<div>").css('padding-left','40px').append("<input type='checkbox' checked='checked' id='ct2' name='ct2' value='1'><label for='ct2'>Start Internal GPS on start<label>").appendTo($mdiv);
                 $("<div>").css('padding-left','40px').append("<input type='checkbox' id='ct3'><label for='ct3' name='ct3' value='1'>Connect to External GPS (leave unchecked if no external GPS)<label>").appendTo($mdiv);
 
                 /* Feb 2014: Brian says tracklog requires extra logic which is not yet available, so this option has been hidden - code exists in exportFAIMS.php to write appropriate logic in bsh file */
@@ -134,6 +134,8 @@
                 } else {
                     $("<div>").css('padding-left','40px').css('padding-bottom','20px').append("No map layers in database. You may add layers manually before loading module in FAIMS server.").appendTo($mdiv);                    
                 }
+
+                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='ct5' name='ct5' value='1' checked='checked' ><label for='ct5'>Add Certainty and Annotation to constrained data (vocabs)<label>").appendTo($mdiv);
                         
             //$("#rt_selected").val(recordTypesSelected);
             $("#buttondiv").css('display','block');                        

@@ -26,7 +26,7 @@
 * @package     Heurist academic knowledge management system
 */
 
-        require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
@@ -257,7 +257,7 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
         $content_a16n = null;
 
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
-        file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport));
+        file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport, $rt_geoenabled));
         file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled));
         file_put_contents($folder."/arch16N.properties", arrToProps());
         file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport, $rt_geoenabled));
@@ -341,7 +341,9 @@ function add16n($line, $val=null){
 //generate a16n (localisation) file, providing translation of all terms and labels
 function arrToProps(){
     global $content_a16n;
-    $res = "";
+    
+    $res = file_get_contents('templates/arch16N.properties');
+    
         foreach ($content_a16n as $prop=>$value){
             $res = $res.str_replace(' ','_',$prop)."=".$value."\n";
         }
@@ -380,10 +382,11 @@ function writeUTF8File($filename, $content) {
 //
 // Generate the database schema file (db_schema.xml)
 //
-function generateSchema($projname, $rt_toexport){
+function generateSchema($projname, $rt_toexport, $rt_geoenabled){
 
     global $rtStructs, $dtStructs, $dtTerms, $ind_descr, $supported;
 
+    $hasMapTab = @$_REQUEST['mainmt']=="1";
     $hasControlTracklog = @$_REQUEST['ct4']=="1";
 
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?> <dataSchema />');
@@ -451,6 +454,7 @@ function generateSchema($projname, $rt_toexport){
                 }
 
            }//for detals
+           
         }//for rectypes
 
         if(count($reltypes)>0){
@@ -624,7 +628,21 @@ function generateSchema($projname, $rt_toexport){
                 $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'] = $cnt;
             }
         } //for
-
+        
+        if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
+            $property = $arch_element->addChild('property');
+            $property->addAttribute('name', 'Latitude');
+            $property->addAttribute('type', 'float');
+            $property = $arch_element->addChild('property');
+            $property->addAttribute('name', 'Longitude');
+            $property->addAttribute('type', 'float');
+            $property = $arch_element->addChild('property');
+            $property->addAttribute('name', 'Northing');
+            $property->addAttribute('type', 'float');
+            $property = $arch_element->addChild('property');
+            $property->addAttribute('name', 'Easting');
+            $property->addAttribute('type', 'float');
+        }
         // Each ArchEnt in FAIMS has to have at least one attribute (field) marked as an identifier
         if(!$has_identifier){
             addComment($root, 'ERROR!!!!! This ArchaeologicalEntity does not have identifiers!!! Verify TitleMask in Heurist recordtype!');
@@ -634,7 +652,7 @@ function generateSchema($projname, $rt_toexport){
     }//foreach recordtype
 
     //specila entity for tracklog
-    if(true || $hasControlTracklog){
+    if(false && $hasControlTracklog){
          addComment($root, mb_strtoupper("GPS TRACK"));
          $gps_track = new SimpleXMLElement('
   <ArchaeologicalElement name="gps_track">
@@ -668,8 +686,6 @@ function generateSchema($projname, $rt_toexport){
 } // generation of DB schema
 
 
-
-
 /**
 * Generate the FAIMS user interface schema file
 *
@@ -682,20 +698,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
     global $rtStructs, $dtTerms, $supported;
 
-    $hasControlSync = @$_REQUEST['ct1']=="1"; // This is disabled in the form so will always be on -
-                                              // app hangs while synching so always need to be able to switch it off
-    $hasControlInternalGPS = @$_REQUEST['ct2']=="1";
-    $hasControlExternalGPS = @$_REQUEST['ct3']=="1";
-    $hasControlTracklog = @$_REQUEST['ct4']=="1";
-
     $hasMapTab = @$_REQUEST['mainmt']=="1";
-
-    $hasControlGPS = ($hasControlSync ||  $hasControlInternalGPS || $hasControlExternalGPS || $hasControlTracklog);
-
-   add16n('Users');
-   add16n('placeholder');
-   add16n('Devices');
-   add16n('Start.Recording');
+    $certainityForVocab = (@$_REQUEST['ct5']=="1");
 
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?>
     <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml"
@@ -728,12 +732,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
     xml_adopt($faims, $style);
 
     // user
-    $header_user = new SimpleXMLElement('<user><usertab><users/><login/></usertab></user>');
+    $header_user = new SimpleXMLElement('<User><User><Select_User/><Login/></User></User>');
     xml_adopt($faims, $header_user);
-
-    //<devices/><login/>
-    //$faims->addChild('user')->addChild('usertab')->addChild('users');
-
 
     // ------------------------------------------------------------------------------------------------------------
 
@@ -769,22 +769,26 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
     $header_controldata = new SimpleXMLElement('
             <data>
-                <entityTypeList/>
-                <newEntity/>
-                <entityList/>
+              <entityTypeList/>
+              <newEntity/>
+              <Colgroup_0>
+                <Col_0>
+                  <entitySearchTerm/>
+                </Col_0>
+                <Col_1>
+                  <entitySearchButton/>
+                </Col_1>
+                <Col_2>
+                  <entityAllButton/>
+                </Col_2>
+              </Colgroup_0>
+              <entityList/>
             </data>');
     xml_adopt($header_control, $header_controldata);
 
-    if($hasControlGPS){
-        $tab_gps = new SimpleXMLElement('<gps>'
-                  .($hasControlInternalGPS?'<connectinternal/>':'')
-                  .($hasControlExternalGPS?'<connectexternal/>':'')
-                  .($hasControlSync?'<startsync/><stopsync/>':'')
-                  .($hasControlTracklog?'<starttrackingtime/><starttrackingdistance/><stoptracking/>':'')
-                .'</gps>');
-        xml_adopt($header_control, $tab_gps);
-    }
-
+    $header_gps = new SimpleXMLElement('<gps><GPS_Diagnostics/></gps>');
+    xml_adopt($header_control, $header_gps);
+    
 
 /* @todo - add to control/data
                 <searchpanel>
@@ -839,19 +843,19 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
     // User
     $body_user = new SimpleXMLElement(
-    '<group ref="user">
-      <label>'.getResStrA16n('User List').'</label>
-      <group ref="usertab" faims_scrollable="false">
-        <label>'.getResStrA16n('User List').'</label>
-        <select1 ref="users">
-          <label>{Users}:</label>
+    '<group ref="User">
+      <label>{User_List}</label>
+      <group ref="User">
+        <label>{User}</label>
+        <select1 ref="Select_User">
+          <label>{Select_User}</label>
           <item>
-            <label>placeholder</label>
-            <value>placeholder</value>
+            <label>Options not loaded</label>
+            <value>0</value>
           </item>
         </select1>
-        <trigger ref="login">
-          <label>Login</label>
+        <trigger ref="Login">
+          <label>{Login}</label>
         </trigger>
       </group>
     </group>');
@@ -860,140 +864,106 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
     $body_control = $body->addChild('group','','http://www.w3.org/2002/xforms');
     $body_control->addAttribute('ref', 'control');
-    $body_control->addChild('label','');
+    $body_control->addChild('label','{Control}');
 
     if($hasMapTab){
         
-        $stypes = '';
-
-        foreach ($rt_geoenabled as $rt) {
-                   $rtname = $rtStructs['names'][$rt];
-                   $rtnamex = getProperName($rtname, $rt);
-                   $stypes = $stypes."<item><label>".getResStrA16n(prepareText($rtname))."</label><value>".$rtnamex."</value></item>";
-        }
-        $map = new SimpleXMLElement('<group faims_scrollable="false" ref="map">
-            <label>Map</label>
-            <input faims_certainty="false" faims_map="true" ref="map">
+        $map = new SimpleXMLElement(
+      '<group ref="map" faims_scrollable="false">
+        <label>{Map}</label>
+        <input ref="map" faims_map="true">
+          <label/>
+        </input>
+        <group ref="mapContainer" faims_style="orientation">
+          <label/>
+          <group ref="child0" faims_style="even">
+            <label/>
+            <trigger ref="zoomGPS">
+              <label>{centerMe}</label>
+            </trigger>
+          </group>
+          <group ref="child1" faims_style="even">
+            <label/>
+            <trigger ref="clear">
+              <label>{Clear}</label>
+            </trigger>
+          </group>
+        </group>
+        <group ref="mapCreateNew" faims_style="orientation">
+          <label/>
+          <group ref="child1" faims_style="even"> 
+            <label/>
+            <select1 ref="entityTypeList">
               <label/>
-            </input>
-            <group faims_style="orientation" ref="mapContainer">
-              <label/>
-              <group faims_style="even" ref="child0">
-                <label/>
-                <trigger ref="zoomGPS">
-                  <label>centerMe</label>
-                </trigger>
-              </group>
-              <group faims_style="even" ref="child1">
-                <label/>
-                <trigger ref="clear">
-                  <label>Clear</label>
-                </trigger>
-              </group>
-            </group>
-            <group faims_style="orientation" ref="mapCreateNew">
-                <label/>
-                <group faims_style="even" ref="child1">
-                <label/>
-                <select1 ref="entityTypeList">
-                    <label/>'.$stypes.'
-                </select1>
-                </group>
-                <group faims_style="large" ref="child2">
-                    <label/>
-                    <trigger ref="create">
-                        <label>Create</label>
-                    </trigger>
-                </group>
-            </group>
-          </group>');
+              <item>
+                <label>placeholder</label>
+                <value>placeholder</value>
+              </item>
+            </select1>
+          </group>
+          <group ref="child2" faims_style="large">
+            <label/>
+            <trigger ref="create">
+              <label>{Create}</label>
+            </trigger>
+          </group>
+        </group>
+      </group>');
         xml_adopt($body_control, $map);
     }
 
-    //group for list of rectypes
-    $body_controldata = $body_control->addChild('group','','http://www.w3.org/2002/xforms');
-    $body_controldata->addAttribute('ref', 'data');
-    $body_controldata->addAttribute('faims_scrollable', 'false');
-    $body_controldata->addChild('label','All Entities');
-
-
-        //all top level rectyps will be in this list
-    $rectypes = $body_controldata->addChild('select1');
-    $rectypes->addAttribute('ref', 'entityTypeList');
-    $rectypes->addChild('label','Select Entity Type:');
-        /*$rectypes = new SimpleXMLElement(
-        '<select1 ref="entityTypeList">
-          <label>Select record type:</label>
-        </select1>');
-        xml_adopt($body_controldata, $rectypes); */
-
-        // new record button
-        $trigger = new SimpleXMLElement('<trigger ref="newEntity"><label>Create New Entity</label></trigger>');
-        xml_adopt($body_controldata, $trigger);
-
-        /* @todo search panel
-        $searchgroup = new SimpleXMLElement(
-        '<group faims_style="orientation" ref="searchpanel">
-          <label/>
-          <group faims_style="even" ref="child1">
-            <label/>
-            <input faims_certainty="false" faims_read_only="false" ref="searchInput">
-              <label>Search</label>
-            </input>
-          </group>
-          <group faims_style="large" ref="child2">
-            <label/>
-            <trigger ref="searchButton">
-              <label>Search</label>
-            </trigger>
-          </group>
-        </group>');
-        xml_adopt($body_controldata, $searchgroup);
-        */
-
-        $input = new SimpleXMLElement(
-        '<select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="entityList">
-          <label>Tap entity in list below to load it</label>
+        $map = new SimpleXMLElement(
+      '<group ref="data" faims_scrollable="false">
+        <label>{All_Entities}</label>
+        <select1 ref="entityTypeList">
+          <label>{Select_Entity_Type}</label>
           <item>
-            <label>placeholder</label>
+            <label>placeholder</label> <!-- new -->
             <value>placeholder</value>
           </item>
-        </select1>');
-        xml_adopt($body_controldata, $input);
-
-    if($hasControlGPS){ // This is the tab labelled Control - not jsut GPS, also includes Sync
-
-        $gps = new SimpleXMLElement('<group ref="gps">
-            <label>Control</label>'
-            .($hasControlInternalGPS?'
-            <trigger ref="connectinternal">
-              <label>Connect To Internal GPS</label>
-            </trigger>':'')
-            .($hasControlExternalGPS?'
-            <trigger ref="connectexternal">
-              <label>Connect To External GPS</label>
-            </trigger>':'')
-            .($hasControlSync?'
-            <trigger ref="startsync">
-              <label>Start Synching</label>
+        </select1>
+        <trigger ref="newEntity">
+          <label>{Create_New_Entity}</label>
+        </trigger>
+        <group ref="Colgroup_0" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even"> 
+            <label/>
+            <input ref="entitySearchTerm">
+                <label/>
+            </input>
+          </group>
+          <group ref="Col_1" faims_style="large">
+            <label/>
+            <trigger ref="entitySearchButton">
+                <label>{Search}</label>
             </trigger>
-            <trigger ref="stopsync">
-              <label>Stop Synching</label>
-            </trigger>':'')
-            .($hasControlTracklog?'
-            <trigger ref="starttrackingtime">
-                <label>Start tracking gps based on time interval</label>
+          </group>
+          <group ref="Col_2" faims_style="large">
+            <label/>
+            <trigger ref="entityAllButton">
+                <label>{All}</label>
             </trigger>
-            <trigger ref="starttrackingdistance">
-                <label>Start tracking gps based on distance interval</label>
-            </trigger>
-            <trigger ref="stoptracking">
-                <label>Stop tracking gps</label>
-            </trigger>':'')
-        .'</group>');
-        xml_adopt($body_control, $gps);
-    }
-
+          </group>
+        </group>
+        <select1 appearance="compact" ref="entityList">
+          <label>Tap entity in list below to load it</label>
+          <item>
+            <label>Entities not loaded</label>
+            <value>0</value>
+          </item>
+        </select1>
+      </group>');
+        xml_adopt($body_control, $map);    
+    
+        $map = new SimpleXMLElement(
+      '<group ref="gps">
+        <label>GPS</label>
+        <input faims_read_only="true" ref="GPS_Diagnostics">
+          <label>{GPS_Diagnostics}</label>
+        </input>
+      </group>');    
+        xml_adopt($body_control, $map);    
 
         $select_resource = new SimpleXMLElement(
         '<group ref="selectEntity">
@@ -1024,6 +994,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
     $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
     $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];
+    $idx_rst_defaultvalue = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DefaultValue"];
 
     // --------------------------------------------------------------------------------------------------------
 
@@ -1045,19 +1016,13 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 /*****DEBUG****///error_log("2. No details defined for RT#".$rt."  ".$rtname);
             continue;
         }
-
-
-        //add to rectypes list on control/data  - this is list of rectypes that can be searched/edit directly from main page
-        if( in_array($rt, $rt_toexport_toplevel) ){
-                $item = $rectypes->addChild('item');
-                $item->label = getResStrA16n(prepareText($rtname));
-                $item->value = $rtnamex;
-        }
-
+        
+        getResStrA16n(prepareText($rtname)); //save name of rectype
 
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
         $headername = $rtnamex.'_General_Information'; //first tab implied if no header at top of record
+        $headername_uids = $rtnamex.'_uids';
 
         addComment($faims, 'ArchEntType: '.mb_strtoupper($rtname) );
         $header_rectypeform = $faims->addChild($rtnamex);  //tabgroup for this record type
@@ -1075,17 +1040,18 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
         // second hidden tab - contains record UID and pointers UID values
         $tab_uids = $header_rectypeform->addChild($rtnamex."_uids");
-        $tab_uids->addChild('FAIMS_UID');
+        //$tab_uids->addChild('FAIMS_UID');
         $group_uids = $body_rectypeform->addChild('group');
         $group_uids->addAttribute('ref', $rtnamex."_uids");
         $group_uids->addAttribute('faims_hidden', 'true');
         $group_uids->addChild('label', 'UIDs');
 
-        $input = new SimpleXMLElement(
+/*        $input = new SimpleXMLElement(
         '<input ref="FAIMS_UID" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
           <label>UID</label>
         </input>');
         xml_adopt($group_uids, $input);
+*/
 
 
         $hasattachfile = false;
@@ -1138,7 +1104,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                       <group faims_style="large" ref="child2">
                         <label/>
                         <trigger ref="Update" faims_style_class="positive-button">
-                            <label>Save</label>
+                            <label>{Save}</label>
                         </trigger>
                       </group>
                     </group>');
@@ -1177,11 +1143,12 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     //add to uids tab
                     $tab_uids->addChild($dtdisplaynamex.'_UID');
                     $input = new SimpleXMLElement(
-                        '<input ref="'.$dtdisplaynamex.'_UID" faims_annotation="false" faims_certainty="false" faims_attribute_name="'.prepareText($dtdisplayname).'" faims_attribute_type="freetext">
+                        '<input ref="'.$dtdisplaynamex.'_UID" faims_annotation="false" faims_certainty="false" faims_attribute_name="'.prepareText($dtdisplayname).'" faims_attribute_type="measure">
                             <label/>
                         </input>');
                     xml_adopt($group_uids, $input);
 
+                    //add to header    
                     $container = new SimpleXMLElement(
                       '<container'.$container_no.'>
                         <child1>
@@ -1220,7 +1187,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     xml_adopt($group, $container);
                     $container_no++;
 
-                    /** Browse buttons */
+                    // Browse buttons 
                     // Trigger group model
                     $triggers = $tab->addChild('container'.$container_no);
 
@@ -1244,9 +1211,44 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     }//for
 
                 }//if ignore unconstrained
+                
+            }else if ($dt_type=='date' && @$detail[$idx_rst_defaultvalue]!='today'){
+
+                $date_pickup = new SimpleXMLElement('
+              <Dategroup'.$dtdisplaynamex.'>
+                <child0>
+                <'.$dtdisplaynamex.'/>
+                </child0>
+                <child1>
+                <attach'.$dtdisplaynamex.'/>
+                </child1>
+              </Dategroup'.$dtdisplaynamex.'>');    
+                xml_adopt($tab, $date_pickup);
+                
+                //add into body
+                $date_pickup = new SimpleXMLElement(
+        '<group ref="Dategroup'.$dtdisplaynamex.'" faims_style="orientation">
+          <label/>
+          <group ref="child0" faims_style="even"> 
+            <label/>
+            <input ref="'.$dtdisplaynamex
+                        .'" faims_attribute_name="'
+                        .prepareText($dtdisplayname).'" faims_certainty="true" faims_attribute_type="measure" faims_read_only="false">
+                <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
+            </input>
+          </group>
+          <group ref="child1" faims_style="large">
+            <label/>
+            <trigger ref="attach'.$dtdisplaynamex.'" faims_style_class="attach-button">
+                <label>{Pickup_Date}</label>
+            </trigger>
+          </group>
+        </group>');
+                xml_adopt($group, $date_pickup);
+   
 
             }else{
-                $tab->addChild($dtdisplaynamex); //add to structure
+                $tab->addChild($dtdisplaynamex); //add to structure in header
                 if($dt_type=='file'){
                        $tab->addChild('attach'.$dtdisplaynamex);
                 }
@@ -1275,8 +1277,11 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                 $input->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
                 $input->addAttribute('ref', $dtdisplaynamex);
                 $input->addAttribute('faims_attribute_name', prepareText($dtdisplayname)); //was $dtname));
-                $input->addAttribute('faims_certainty', 'false'); //was before 2014-02-20 $isIdentifier?'false':'true');
-                if($isvocab){
+                if(!$isvocab || $certainityForVocab){
+                    $input->addAttribute('faims_certainty', 'true');
+                    $input->addAttribute('faims_annotation','true');
+                }else{
+                    $input->addAttribute('faims_certainty', 'false');
                     $input->addAttribute('faims_annotation','false');
                 }
                 if($isvocab && !$is_repeatable) {
@@ -1289,9 +1294,9 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                 }
 
                 if($isIdentifier){
-                    $input->addAttribute('faims_attribute_type', 'freetext');
+                    $input->addAttribute('faims_attribute_type', 'measure');
                 }else{
-                    $input->addAttribute('faims_attribute_type', $isvocab?'vocab': ($dt_type=='float' || $dt_type=='integer' ?'measure':'freetext'));
+                    $input->addAttribute('faims_attribute_type', $isvocab?'vocab':'measure');
                 }
 
                 if($dt_type=='file'){
@@ -1308,11 +1313,12 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     }
 
                     $input->addAttribute('type', $filetype);
-                    $input->addAttribute('faims_annotation', 'false');
 
                     $trigger = $group->addChild('trigger');
                     $trigger->addAttribute('ref', 'attach'.$dtdisplaynamex);
                     $trigger->addChild('label', $actionlabel);
+                } else if ($dt_type=='date' && @$detail[$idx_rst_defaultvalue]='today') {
+                    $input->addAttribute('faims_read_only', 'true');
                 } else {
                     $input->addAttribute('faims_read_only', 'false');
                 }
@@ -1357,8 +1363,63 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
         }
 */
 
-        /** Save, Update, Delete buttons etc. */
-        // Trigger group model
+        //add gps_location  - create new tab
+        if( in_array($rt, $rt_geoenabled) ){
+            
+            $headername = $rtnamex.'_gps_location';
+            $tab = $header_rectypeform->addChild($headername);
+            $group = $body_rectypeform->addChild('group');
+            $group->addAttribute('ref', $headername);
+            $group->addChild('label', '{GPS_Location}' );
+            
+            
+            $tabcontent = new SimpleXMLElement(
+              '<Colgroup_GPS>
+                <Col_0>
+                  <Latitude/>
+                  <Northing/>
+                </Col_0>
+                <Col_1>
+                  <Longitude/>
+                  <Easting/>
+                </Col_1>
+              </Colgroup_GPS>');
+            xml_adopt($tab, $tabcontent);
+            $tab->addChild('Take_From_GPS');  
+
+            $groupcontent = new SimpleXMLElement(
+        '<group ref="Colgroup_GPS" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <input ref="Latitude" faims_attribute_name="Latitude" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Latitude}</label>
+            </input>
+            <input ref="Northing" faims_attribute_name="Northing" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Northing}</label>
+            </input>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input ref="Longitude" faims_attribute_name="Longitude" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Longitude}</label>
+            </input>
+            <input ref="Easting" faims_attribute_name="Easting" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Easting}</label>
+            </input>
+          </group>
+        </group>');
+            xml_adopt($group, $groupcontent);
+            
+            $btn_take_gps = $group->addChild('trigger');
+            $btn_take_gps->addAttribute('ref', 'Take_From_GPS');
+            $btn_take_gps->addChild('label', '{Take_From_GPS}' );
+            
+        }
+
+
+        // Save, Update, Delete buttons etc.
+        // Trigger group model (add tp header)
         $triggers = $tab->addChild('container'.$container_no);
 
         // Trigger group body
@@ -1415,69 +1476,39 @@ function addEvenTrigger($model, $body, $ref, $label, $class) {
 
 /** Returns the Heurist styling */
 function getStyling() {
-return
-".button {
-    background-color: #1ad;
-    color: #fff;
-    padding: 0px;
-    margin: 2px;
-    font-size: 14px;
-    text-align: center;
-}
-
-.label {
-    text-align: left;
-    font-size: 18px;
-    font-weight: bold;
-    padding-top: 15px;
-}
-
-.input-field, .text-area {
-    background-color: #eee;
-    margin: 2px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    text-align: left;
-}
-
-.clear-button {
-    background-color: #b11;
-    margin: 0px;
-    margin-top: 60px;
-    padding: 0px;
-    width: 20px;
-    height: 20px;
-}
-
-.positive-button {
-    background-color: #181;
-}
-
-.negative-button {
-    background-color: #b11;
-}
-
-.neutral-button {
-
-}
-
-.browse-button {
-
-}
-
-
-";
+    return file_get_contents('templates/style.css');
 }
 
 function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
 
     global $rtStructs, $dtTerms, $supported;
+    
+    //need to create substitutes
+    // TEMPLATE_EVENTS - list of recctypes and events
+    // TEMPLATE_TOVALIDATE - list of rectypes to validate
+    // TEMPLATE_FIELDS_TOVALIDATE - list of fields to validate
+    // TEMPLATE_MAPCOLORS - list of mapenabled rectypes and colors
+    // TEMPLATE_GET_FROM_GPS
+    // TEMPLATE_INIT_SYNC_AND_GPS 
+    
+    $TEMPLATE_EVENTS = '';
+    $TEMPLATE_DEFAULTVALUES = '';
+    $TEMPLATE_TOVALIDATE = '';
+    $TEMPLATE_FIELDS_TOVALIDATE = '';
+    $TEMPLATE_RELATED = '';
+    $TEMPLATE_SELECTORS = ''; //enums
+    $TEMPLATE_MAPCOLORS = '';
+    $TEMPLATE_INIT_SYNC_AND_GPS  = '';
 
-    $hasControlSync = @$_REQUEST['ct1']=="1";
-    $hasControlInternalGPS = @$_REQUEST['ct2']=="1";
+    $startSync = @$_REQUEST['ct1']=="1";
+    $startInternalGPS = @$_REQUEST['ct2']=="1";
     $hasControlExternalGPS = @$_REQUEST['ct3']=="1";
     $hasControlTracklog = @$_REQUEST['ct4']=="1";
     $hasMapTab = @$_REQUEST['mainmt']=="1";
 
+    $colors = array('BLUE','DKGRAY','GREEN','MAGENTA','CYAN','LTGRAY','RED','YELLOW');
+    $colors_idx = 0;
+    
     $ind_rt_description = $rtStructs['typedefs']['commonNamesToIndex']['rty_Description'];
     $int_rt_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']["dty_Type"];
 
@@ -1489,15 +1520,9 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
 
     $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];
     $idx_rst_required = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_RequirementType"];
+    $idx_rst_defaultvalue = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DefaultValue"];
 
-
-    $function_section = "";
-    $event_section = "";
-    $load_selectors = '';
-    $load_related = '';
-    $rectype_to_entname = '';
-    $entname_to_rectype = '';
-    $mandatory_check = '';
+    $event_section = '';
 
     // Loop through each of the record types (ArchEntTypes) and output fields
     $rectyps = is_array($rt_toexport) ?$rt_toexport :explode(",", $rt_toexport);
@@ -1511,26 +1536,22 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
 /*****DEBUG****///error_log("3. No details defined for RT#".$rt."  ".$rtname);
             continue;
         }
+        
+        $defaultvalue_section = '';
+        
+        $TEMPLATE_EVENTS .= 'rectypeToEntity.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
+';
 
-        $rectype_to_entname .=  '
-            if("'.$rtnamex.'".equals(rectype)){
-                return "'.prepareText($rtname).'";
-            }
-        ';
-
-        $entname_to_rectype .=  '
-            if("'.prepareText($rtname).'".equals(entname)){
-                return "'.$rtnamex.'";
-            }
-        ';
-
-
+        //init navigation    
+        $event_section .= '
+addOnEvent("'.$rtnamex.'", "show", "addNavigationButtons(\"'.$rtnamex.'\")");';
         // Show edit form
         $event_section .= '
-onEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
+addOnEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
         // Enable auto saving
         $event_section .= '
-onEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
+addOnEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
+
 
         $load_related_part = '';
 
@@ -1538,7 +1559,6 @@ onEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
 
         $hasattachfile = false;
         $headername = $rtnamex."/".$rtnamex.'_General_Information'; //first tab implied if no header at top of record
-        $headername_uids = $rtnamex."/".$rtnamex.'_uids'; //first tab implied if no header at top of record
         $cnt_pertab = 0;
         $issectab = false;
         $mandatory_attributes = '';
@@ -1547,6 +1567,8 @@ onEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
         foreach ($details as $dtid=>$detail) {
 
             $is_repeatable = ($detail[$int_dt_repeat]!='1');
+            
+            $default_value = $detail[$idx_rst_defaultvalue];
 
             $dt_type = $detail[$int_rt_dt_type];
 
@@ -1565,8 +1587,9 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
                 //new tab
                 if($issectab || $cnt_pertab>0){
 
-                    $event_section = $event_section.'
-onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, false)");';
+                    //show save button on every tab    
+                    $event_section .= '
+addOnEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, false)");';
 
                     $headername = $rtnamex."/".$rtnamex.'_'.$dtdisplaynamex;
                     $issectab=true;
@@ -1598,14 +1621,24 @@ onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", tr
 
 
                 $event_section .= '
-onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
+addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
 
+            }else if ($dt_type=='date') {
+                 
+                 if( $default_value=='today'){
+                    $defaultvalue_section .= '
+    setTimestamp( "'.$headername.'/'.$dtdisplaynamex.'" );'; 
+                 }else{   
+                    $event_section .= '
+addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
+                 }
+                
             }else if ($dt_type=='enum') {
 
                 $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
 
                 if($is_repeatable){
-                        $action = 'populateCheckBoxGroup';
+                    $action = 'populateCheckBoxGroup';
                 }else if ($termsCount<4) {
                     $action = 'populateRadioGroup';
                 }else{
@@ -1622,8 +1655,8 @@ onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$
                               });
                               ';
                 // Add to load selectors
-                $load_selectors .= $makeVocab;
-                //$load_selectors .= ''.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.prepareText($dtdisplayname).'"));'); // OLD
+                $TEMPLATE_SELECTORS .= $makeVocab;
+                //$TEMPLATE_SELECTORS .= ''.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.prepareText($dtdisplayname).'"));'); // OLD
             }else if ($dt_type=='resource') {
 
                 $dt_pointers = $detail[$idx_rst_pointers];
@@ -1636,35 +1669,34 @@ onEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "'.$action.'(\"'.$
                         $rtnamex2 = getProperName($rtname2, $rt2);
 
                     $event_section .= '
-onEvent("'.$headername.'/'.$dtdisplaynamex.'_browse_'.$rtnamex2.'", "click", "startSelectEntity(\"'.$rtnamex2.'\", \"'.$headername.'/'.$dtdisplaynamex.'\")");';
+addOnEvent("'.$headername.'/'.$dtdisplaynamex.'_browse_'.$rtnamex2.'", "click", "startSelectEntity(\"'.$rtnamex2.'\", \"'.$headername.'/'.$dtdisplaynamex.'\")");';
                     }//for
 
                     $event_section .= '
-onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
+addOnEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
 
                     $load_related_part .= '
                     fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
 
 
                     if($detail[$idx_rst_required]=="required"){
-                        $mandatory_attributes .= '
-                        value = getFieldValue("'.$headername_uids.'/'.$dtdisplaynamex.'_UID");
-                        if( null==value || "".equals(value) ){
-                            msg = msg + "'.prepareText($dtdisplayname).'\n";
-                        }';
+                        $mandatory_attributes .= ' 
+       f.add(fieldPair("'.$headername_uids.'/'.$dtdisplaynamex.'_UID", "'.prepareText($dtdisplayname).'", true, null));';
                     }
 
                 }
+            }else  if (($dt_type=='freetext' || $dt_type=='blocktext') && !is_empty($default_value)) {
+                    $defaultvalue_section .= '
+    setFieldValue( "'.$headername.'/'.$dtdisplaynamex.'", "'.mysql_real_escape_string($default_value).'" );'; 
+            }else  if (($dt_type=='float' || $dt_type=='integer' || $dt_type=='year') && is_numeric($default_value)) {
+                    $defaultvalue_section .= '
+    setFieldValue( "'.$headername.'/'.$dtdisplaynamex.'", "'.$default_value.'" );'; 
             }
 
-            if(!($dt_type=='resource' || $dt_type=='file')){
-                    if($detail[$idx_rst_required]=="required"){
-                        $mandatory_attributes .= '
-                        value = getFieldValue("'.$headername.'/'.$dtdisplaynamex.'");
-                        if( null==value || "".equals(value) ){
-                            msg = msg + "'.prepareText($dtdisplayname).'\n";
-                        }';
-                    }
+            if((!($dt_type=='resource' || $dt_type=='file')) && ($detail[$idx_rst_required]=="required")){
+                    
+                    $mandatory_attributes .= '
+       f.add(fieldPair("'.$headername.'/'.$dtdisplaynamex.'", "'.prepareText($dtdisplayname).'", true, null));';
             }
 
 
@@ -1678,551 +1710,111 @@ onEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPoint
 onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entityId)");';
         }
 */
-
-        $mandatory_check .= '
-            if("'.$rtnamex.'".equals(rectype)){
-                '.$mandatory_attributes.'
-            }
-        ';
+        $compare_type = '
+    if("'.$rtnamex.'".equals(rectypeTab)){
+';
 
         if($load_related_part!=''){
-                $load_related .= '
-if("'.$rtnamex.'".equals(rectype)){'.$load_related_part.'
-    return;
-}
+                $TEMPLATE_RELATED .= $compare_type.$load_related_part.'
+       return;
+    }
 ';
         }
 
+        if( in_array($rt, $rt_geoenabled) ){
+            
+            $headername = $rtnamex."/".$rtnamex.'_gps_location';            
 
-//event handlers for save/delete
-$event_section = $event_section.'
-onEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, false)");
-onEvent("'.$headername.'/UpdateAndClose", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, true)");
-onEvent("'.$headername.'/Delete", "delayclick", "deleteEntity(\"'.$rtnamex.'\")");
-';
-        if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
-$event_section = $event_section.'onEvent("'.$headername.'/AttachGeometry", "click", "attachGeometry()");
-';
+            if( $hasMapTab ) {
+$event_section .= '
+addOnEvent("'.$headername.'/AttachGeometry", "click", "doAttachGeometry(\"'.$rtnamex.'\")");';
+            }
+$event_section .= '
+addOnEvent("'.$headername.'/Take_From_GPS", "click", "takePoint(\"'
+                .$rtnamex.'\", \"'.$headername.'/\")");';
+
+            $TEMPLATE_MAPCOLORS .=  '
+  rectypeToColor.put("'.$rtnamex.'", Color.'.$colors[$colors_idx].');';
+            $colors_idx++;
+            if($colors_idx>=count($colors)) $colors_idx = 0;
         }
+
+//show ALL save buttons on the last tab
+$event_section .= '
+addOnEvent("'.$headername.'/Update", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, false)");
+addOnEvent("'.$headername.'/UpdateAndClose", "delayclick", "saveEntity(\"'.$rtnamex.'\", true, true)");
+addOnEvent("'.$headername.'/Delete", "delayclick", "deleteEntity(\"'.$rtnamex.'\")");
+';
+        
+        $compare_type = '
+ if("'.$rtnamex.'".equals(rectypeTab)){
+';
+        
+        if($defaultvalue_section!=''){
+            $TEMPLATE_DEFAULTVALUES .= $compare_type . $defaultvalue_section.'  }';
+        }
+        if($mandatory_attributes!=''){
+            $TEMPLATE_FIELDS_TOVALIDATE .= $compare_type . $mandatory_attributes.' }';
+            $TEMPLATE_TOVALIDATE .= '
+ tabgroupsToValidate.add("'.$rtnamex.'");';
+        }
+
 
     }//for record types
 
-$function_section  = '
-//
-// find related entity and fill pointer attrubute with their names
-//
-loadRelatedEntities(rectype){
-    '.$load_related.'
+    if( $hasMapTab ){
+        $TEMPLATE_MAPCOLORS .= '
+//        
+mapRefresh(){
+    refreshMap("control/map/map");
+    onClearMap();
 }
-
-//
-// return entity name by tab name
-//
-getEntityNameByTabname(rectype) {
-    '.$rectype_to_entname.
-    'return null;
-}
-
-//
-// get tab name by entity name
-//
-getTabnameByEntityName(entname) {
-    '.$entname_to_rectype.
-    'return null;
-}
-
-//
-//
-//
-checkMandatoryAttributes(rectype){
-    String msg = "";
-    '.$mandatory_check.'
-    return msg;
-}
-
-//
-// load all selectors for terms for every rectype
-//
-loadAllAttributes(){
-    //showToast("load attributes");
-    '.$load_selectors.'
-}
-';
-
-//header
-$out = '
+mapInit();';
+    }else{
+        $TEMPLATE_MAPCOLORS .= '
+mapRefresh(){ 
+}';
+    }
+    
+    $TEMPLATE_EVENTS .= $event_section;
+    
+    $TEMPLATE_HEADER = '
 /******
  FAIMS Logic File generated by Heurist Vsn '.HEURIST_VERSION.', '. date('l jS \of F Y h:i:s A').'
  Database: '.DATABASE.'   Heurist user:'.get_user_name().'
  ******/
+ ';
 
-User user;
-String userid;
+    $out = file_get_contents('templates/ui_logic.bsh');
+    $out = str_replace('{{TEMPLATE_HEADER}}',$TEMPLATE_HEADER,$out);
+    $out = str_replace('{{TEMPLATE_EVENTS}}',$TEMPLATE_EVENTS,$out);
+    $out = str_replace('{{TEMPLATE_DEFAULTVALUES}}',$TEMPLATE_DEFAULTVALUES,$out);
+    $out = str_replace('{{TEMPLATE_FIELDS_TOVALIDATE}}',$TEMPLATE_FIELDS_TOVALIDATE,$out);
+    $out = str_replace('{{TEMPLATE_TOVALIDATE}}',$TEMPLATE_TOVALIDATE,$out);
+    $out = str_replace('{{TEMPLATE_RELATED}}',$TEMPLATE_RELATED,$out);
+    $out = str_replace('{{TEMPLATE_SELECTORS}}',$TEMPLATE_SELECTORS,$out);
+    $out = str_replace('{{TEMPLATE_MAPCOLORS}}',$TEMPLATE_MAPCOLORS,$out);
 
-showWarning("Ver 25. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
-
-//stack of tabs in use
-ArrayList tabs_edit = new ArrayList(); //list of edit form in use
-ArrayList tabs_select = new ArrayList(); //list of calls to select (see last_invoker)
-//keeps rectype to select(browse) and field path to assign the result of selection
-// for example Person=DigitalMediaItem/DigitalMediaItem_General_Information/Creators
-String last_invoker = null;
-List attachedGeometry = null;
-
-/*** EVENTS ***/
-onEvent("control/data", "show", "loadEntityTypeList()");
-onEvent("control/data/entityTypeList", "click", "refreshEntities()");
-onEvent("user/usertab/login", "click", "login()");
-
-onEvent("control/data/entityList", "click", "loadEntity()"); //load entity after tap in the list
-onEvent("control/data/newEntity", "click", "newEntity(null)");
-//selectEntity tab
-onEvent("selectEntity/data", "show", "onShowSelect()");
-onEvent("selectEntity/data/entityList", "click", "onSelectEntity()");
-onEvent("selectEntity/data/newEntity", "click", "onAddNewEntityWhenSelect()");
-
-/*** START: this section of code depends on the module and entity types selected ***/
-'.$event_section.$function_section;
-
-/* misc functions to add */
-$out = $out.'
-/*** END: this section of code depends on the module and entity types selected ***/
-
-/*** navigation functions ***/
-//
-// onshow list of entities (to fill pointer field)
-//
-onShowSelect(){
-
-    if(tabs_select.size()>0 && last_invoker.equals(tabs_select.get(tabs_select.size()-1))){
-        //inital call - open new select
-
-    }else{
-        //back call - return after new entity addition
-        if(tabs_edit.size()>0){
-            tabs_edit.remove(tabs_edit.size()-1);
-        }
+    if($startSync){ // there are start/stop synch controls on the interface
+        $TEMPLATE_INIT_SYNC_AND_GPS = '
+            setFileSyncEnabled(true); 
+            setSyncEnabled(true);
+        ';
     }
 
-    String last_select_callback = tabs_select.get(tabs_select.size()-1);
-
-    String[] parts = last_select_callback.split("=");
-    String rectype = parts[0]; //rectype to search
-    String fieldpath = parts[1]; //
-
-    //search entity for given entType
-    String entName = getEntityNameByTabname( rectype );
-    fetchEntityList(entName, new FetchCallback() {
-        onFetch(result) {
-            populateList("selectEntity/data/entityList", result);
-        }
-    });
-
-}
-//
-// onshow edit form for particular entity
-//
-onShowEditForm(rectype){
-
-    if(tabs_edit.size()>0 && rectype.equals(tabs_edit.get(tabs_edit.size()-1))){
-        //return from select
-        if(tabs_select.size()>0){
-            tabs_select.remove(tabs_select.size()-1);
-        }
-    }else{
-        tabs_edit.add(rectype);
-    }
-}
-/*** selectEntity functions ***/
-//
-// search for resource for pointer filed - open select tab
-// rectype - to search
-// fieldpath - field to assign
-//
-startSelectEntity(rectype, fieldpath) {
-
-    last_invoker = rectype+"="+fieldpath;
-
-    tabs_select.add(rectype+"="+fieldpath); //keep last call
-    showTabGroup("selectEntity");
-
-}
-//
-// create new record from select (in case required resource not found)
-//
-onAddNewEntityWhenSelect(){
-    String last_select_callback = tabs_select.get(tabs_select.size()-1);
-    String[] parts = last_select_callback.split("=");
-    String rectype = parts[0];
-
-    for (String rt : tabs_edit) {
-        if (rt.equals(rectype) ) {
-            //prevents show edit form in case it is already in use
-            showWarning("Already in use", "Can not create new "+rectype+". Save previous");
-            return;
-        }
+    if($startInternalGPS){
+        $TEMPLATE_INIT_SYNC_AND_GPS .= '
+            startInternalGPS();
+            showToast("{Internal_GPS_Enabled}");
+            updateGPSDiagnostics();';
     }
 
-    newTabGroup(rectype); //load and clear fields
-}
-//
-// user click on record in list - back to edit form and fill pointer field
-//
-onSelectEntity() {
-
-    String uid = getListItemValue(); //get id from list
-    String last_select_callback = tabs_select.get(tabs_select.size()-1);
-
-    String[] parts = last_select_callback.split("=");
-    String fieldname = parts[1]; //
-    parts = fieldname.split("/");
-    String rectype = parts[0]; //editing rectype
-    String rectype_tab = parts[1];
-    String field = parts[2];
-
-    //back to edit form
-    cancelTabGroup("selectEntity", false);
-    showTab(rectype+"/"+rectype_tab);
-
-    //showToast("selected "+uid);
-
-    //ArrayList pairs = new ArrayList();
-    //pairs.add(new NameValuePair("selected "+uid, uid));
-
-    //fill pointer field
-    populateDropdownByQuery(fieldname, uid);
-
-    String fieldname_uid = getPointerFiledName(fieldname);
-    setFieldValue(fieldname_uid, uid);
-}
-//
-// Returns path to UID field on hidden tab for given resource attribute (field)
-//
-getPointerFiledName(fieldname){
-    String[] parts = fieldname.split("/");
-    parts[1] = parts[0]+"_uids"; //hidden tab with uid fields
-    parts[2] = parts[2]+"_UID";  //pointer field to keep UID of resource record
-    return parts[0]+"/"+parts[1]+"/"+parts[2];
-}
-//
-// Clear resource attribute (field) - dropdown and UID field on hidden tab
-//
-clearPointer(fieldname){
-    ArrayList pairs = new ArrayList();
-    pairs.add(new NameValuePair("select with Browse button(s)", ""));
-    populateDropDown(fieldname, pairs );
-
-    String fieldname_uid = getPointerFiledName(fieldname);
-    setFieldValue(fieldname_uid, "");
-}
-//
-// Fill dropdown (name) for pointer field by value of hidden UID field
-//
-fillPointer(fieldname){
-    String fieldname_uid = getPointerFiledName(fieldname);
-    String res_id = getFieldValue(fieldname_uid);
-    if(null==res_id || "".equals(res_id) || "null".equals(res_id)){
-        clearPointer(fieldname);
-    }else{
-        populateDropdownByQuery(fieldname, res_id);
-    }
-}
-
-/*** record management function ***/
-
-//
-// Create new record for main entity
-// (some entities are not accessible from main tab - they can be added from select tab only)
-//
-newEntity(rectype){
-
-    if (isNull(rectype)){
-        entName = getFieldValue("control/data/entityTypeList");
-        rectype = getTabnameByEntityName(entName);
-    }
-
-    for (String rt : tabs_edit) {
-        if (rt.equals(rectype) ) {
-            showWarning("Already in use", "Can not create new "+rectype+". Save previous");
-            return;
-        }
-    }
-
-    newTabGroup(rectype); //load and clear fields
-}
-//
-// Select record in list - load edit form
-//
-loadEntity() {
-    String uid = getListItemValue(); //get id from list
-    String rectype = getFieldValue("control/data/entityTypeList");
-    loadEntityById(uid, rectype);
-}
-//
-// Show edit form by record id and record type
-//
-loadEntityById(entid, rectype) {
-
-    // EntID check
-    if (isNull(entid)) return;
-    //showToast(entid);
-
-    // Show rectype tabgroup
-    rectype = getTabnameByEntityName(rectype);
-    showTabGroup(rectype, entid);
-    setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", entid);
-
-    // Load related entities
-    loadRelatedEntities(rectype);
-    //updateRelns();
-}
-
-// Returns the query to load information about a certain entity
-getEntityQuery(uid) {
-    return  "SELECT uuid, group_concat(coalesce(measure   || \' \'  || vocabname || \'(\'  ||  freetext ||\'; \'|| (certainty * 100.0) || \'% certain)\',  "+
-            "                                     measure   || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
-            "                                     vocabname || \' (\' || freetext  || \'; \' || (certainty * 100.0) || \'% certain)\',  "+
-            "                                     measure   || \' \'  || vocabname || \' (\' || (certainty * 100.0) || \'% certain)\',  "+
-            "                                       vocabname || \' (\' || freetext  || \')\',  "+
-            "                                       measure   || \' (\' || freetext  || \')\',  "+
-            "                                     measure   || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
-            "                                     vocabname || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
-            "                                     freetext  || \' (\' ||(certainty * 100.0) || \'% certain)\',  "+
-            "                                     measure,  "+
-            "                                     vocabname,  "+
-            "                                     freetext), \' \') as response  "+
-
-            "FROM (select * from latestNonDeletedArchentIdentifiers order by attributename) "+
-            "WHERE uuid = \'"+uid+"\' "+
-            "GROUP BY uuid;";
-}
-
-// Executes a query for the given uid and then uses the result to populate a dropdown
-populateDropdownByQuery(fieldname, uid) {
-    fetchAll(getEntityQuery(uid), new FetchCallback() {
-        onFetch(result) {
-            populateDropDown(fieldname, result);
-        }
-    });
-}
-
-//
-// Get entity(record) UID from field on hidden tab
-//
-getEntityId(rectype){
-
-    String uid = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
-    if("".equals(uid)){
-        uid=null;
-    }
-    return uid;
-}
-
-//
-// save new entity
-//
-saveEntity(rectype, checkmandatory, andclose) {
-    if(checkmandatory) {
-        String msg = checkMandatoryAttributes(rectype);
-        if (!(isNull(msg) || "".equals(msg))){
-            showWarning("Warning", "Please fill in the following mandatory fields:\n"+msg);
-            return;
-        }
-    }
-
-    String uid = getEntityId(rectype);
-    if("".equals(uid)){
-        uid=null;
-    }
-
-    data = null;
-'.($hasMapTab?'
-    if(!isNull(attachedGeometry)){
-         data = attachedGeometry;
-         attachedGeometry = null;
-
-    }else if (!isNull(uid)) {
-        //need for geometry
-        fetchArchEnt(uid, new FetchCallback() {
-            onFetch(entity) {
-                data = entity.getGeometryList();
-            }
-        });
-
-    }else if( tabs_edit.size()==1 ){ //add geo for main edit only
-        //LIMITATION!!!! map data can be assigned for new entity ONLY!!
-        data = getCreatedGeometry(); //map data
-    }':'').'
-
-    // save record/entity
-    saveTabGroup(rectype, uid, data, null, new SaveCallback() {
-        onSave(uuid, newRecord) {
-            setFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID", uuid);
-            onClearMap();
-
-            if(checkmandatory) {
-                showToast("Successfully saved data!");
-            }
-
-            if(andclose){
-                goBack();
-            }
-        }
-    }, true);
-}
-
-//
-// Deleting entities
-//
-deleteEntity(rectype){
-    String uid = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
-    if (!isNull(uid)) {
-        showAlert("Confirm Deletion", "Press OK to Delete this entity!", "deleteEntityConfirmed(\""+rectype+"\")", "deleteRecordCanceled()");
-    }
-}
-deleteEntityConfirmed(rectype){
-    String uid = getFieldValue(rectype+"/"+rectype+"_uids/FAIMS_UID");
-    deleteArchEnt(uid);
-    cancelTabGroup(rectype, false);
-}
-deleteEntityCanceled(){
-    showToast("Delete Cancelled.");
-}
-/*** END record management function ***/
-
-//
-// clear edit/select stacks on control/data, control/map show
-//
-clearStacks(){
-   tabs_select.clear();
-   tabs_edit.clear();
-   last_invoker = null;
-}
-
-/*** main list of records on control/data ***/
-//
-// loads all available entity types into a dropdown
-//
-loadEntityTypeList() {
-    // Populate entity type dropdown
-   fetchAll("select aenttypename, aenttypename from aenttype;", new FetchCallback() {
-        onFetch(result) {
-            populateDropDown("control/data/entityTypeList", result);
-            refreshEntities();
-        }
-   });
-}
-
-//
-// reload list of records on control/data show or on rectype selection
-//
-refreshEntities() {
-
-   clearStacks();
-   //showToast("Fetching all entities...");
-
-   // Populate list of entity types
-   String entName = getFieldValue("control/data/entityTypeList");
-   //showToast("Ent name: " + entName);
-
-   fetchEntityList(entName, new FetchCallback() {
-        onFetch(result) {
-            print("Entity list result: " + result);
-            populateList("control/data/entityList", result);
-        }
-   });
-
-}
-
-/*** USER ***/
-
-// Returns a query to select all users
-getUserQuery() {
-    return "select userid, fname || \' \' || lname from user";
-}
-
-// Populates a user dropdown
-populateListForUsers(){
-    fetchAll(getUserQuery(), new FetchCallback() {
-        onFetch(result) {
-            populateDropDown("user/usertab/users", result);
-        }
-    });
-}
-
-populateListForUsers();
-
-String username = "";
-String device = "";
-
-login(){
-    // Fetch user
-    fetchOne("select userid,fname,lname,email from user where userid=\'" + getFieldValue("user/usertab/users") + "\';", new FetchCallback() {
-        onFetch(result) {
-            User user = new User(result.get(0),result.get(1),result.get(2),result.get(3));
-            userid = result.get(0);
-            setUser(user);
-            username = result.get(1) + " " + result.get(2);
-            showTabGroup("control");
-        }
-    });
-}
-
-/*** INIT ATTRIBUTES ***/
-loadAllAttributes();
-';
-
-if($hasControlSync){ // there are start/stop synch controls on the interface
-$out = $out.'
-/*** SYNC  ***/
-onEvent("control/gps/startsync", "click", "startSync()");
-onEvent("control/gps/stopsync", "click", "stopSync()");
-
-setSyncMinInterval(60.0f); // sync every minute
-setSyncMaxInterval(120.0f); // max interval 2 minutes
-setSyncDelay(10.0f); // increment delay 10 secs each time sync fails up to max
-
-startSync() {
-    setSyncEnabled(true);
-    setFileSyncEnabled(true);
-}
-
-stopSync() {
-    setSyncEnabled(false);
-    setFileSyncEnabled(false);
-}
-
-';
-}else{  // deprecated by Ian 25/3/14: sync hangs the app, so start/stop sync controls will always be enabled
-$out = $out.'
-/*** SYNC  ***/
-setSyncEnabled(true);
-setFileSyncEnabled(true);
-
-';
-}
-
-if($hasControlInternalGPS){
-$out = $out.'
-/*** INTERNAL GPS ***/
-onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
-';
-}else{
-$out = $out.'
-startInternalGPS();
-';
-}
-
-if($hasControlExternalGPS){
-$out = $out.'
-/*** EXTRNAL GPS ***/
-onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
-';
-}
-
+    $out = str_replace('{{HASCONTROL_GPSEXT}}', $hasControlExternalGPS?'true':'false', $out);
+    $out = str_replace('{{TEMPLATE_INIT_SYNC_AND_GPS}}',$TEMPLATE_INIT_SYNC_AND_GPS, $out);
+    
 // Feb 2014: Brian says tracklog requires extra logic which is not yet available, so the option
 //           to switch this section on has been removed from the export interface
-if($hasControlTracklog){
+if(false && $hasControlTracklog){
 $out = $out.'
 /*** TRACKLOG ***/
 onEvent("control/gps/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
@@ -2261,173 +1853,6 @@ saveGPSTrack(List attributes) {
 }
 ';
 }
-
-if($hasMapTab){
-$out = $out.'
-/*** MAP ***/
-
-DATA_ENTRY_LAYER = "Data Entry Layer";
-DATA_ENTRY_LAYER_ID = 0;
-
-onEvent("control/map", "show", "clearStacks()");
-
-//mapping tool to load entity by selected feature on map
-onToolEvent("control/map/map", "load", "onLoadData()");
-
-onLoadData() {
-    uuid = getMapGeometryLoaded();
-    isEntity = "entity".equals(getMapGeometryLoadedType());
-
-    if (isEntity) {
-        // Fetch entity
-        fetchOne("select aenttypename from aenttype join latestnondeletedarchent using (aenttypeid) where uuid = "+uuid+";", new FetchCallback() {
-            onFetch(entity) {
-                 String entname = entity.get(0);
-                 String rectype = getTabnameByEntityName(entname);
-
-                 loadEntityById(uuid, rectype);
-            }
-        });
-
-    } else {
-        //to implement loadUIRelationship(uuid);
-    }
-}
-
-onEvent("control/map/clear", "click", "onClearMap()");
-onEvent("control/map/create", "click", "onCreateMap()");
-
-onClearMap() {
-    clearGeometryList("control/map/map", getCreatedGeometry() );
-}
-
-onCreateMap() {
-    List geomList = getCreatedGeometry();
-    if (geomList == null || geomList.size() == 0) {
-        showWarning("Logic Error", "No geometry found on data entry layer");
-    } else if (geomList.size() > 1) {
-        showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
-    } else {
-        Geometry geom = geomList.get(0);
-        /*if (geom instanceof Point) {
-            showTabGroup("createPoint");
-        } else if (geom instanceof Line) {
-            showTabGroup("createLine");
-        } else if (geom instanceof Polygon) {
-            showTabGroup("createPolygon");
-        }*/
-
-        String rectype = getFieldValue("control/map/entityTypeList");
-        newEntity(rectype);
-    }
-}
-
-getCreatedGeometry() {
-    return getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
-}
-
-attachGeometry(){
-    List geomList = getCreatedGeometry();
-    if (geomList == null || geomList.size() == 0) {
-        showWarning("Logic Error", "No geometry found on data entry layer");
-    } else if (geomList.size() > 1) {
-        showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
-    } else {
-        attachedGeometry = geomList;
-        showToast("Geometry attached. Now you may save Entity");
-    }
-}
-
-zoomGPS(){
-    Object position = getGPSPositionProjected();
-    Object projPosition = getGPSPositionProjected();
-    if (projPosition != null ){
-        Double latitude = projPosition.getLatitude();
-        Double longitude = projPosition.getLongitude();
-        showToast("Zooming to "+position.getLongitude()+", "+position.getLatitude());
-        setMapFocusPoint("control/map/map", longitude, latitude);
-    } else {
-        showToast("GPS Not initialized");
-    }
-
-}
-onEvent("control/map/zoomGPS", "click", "zoomGPS()");
-
-//
-// @todo - show map tab and zoom to current record
-//
-mapRecord(rectype){
-
-    String uid = getEntityId(rectype);
-    if (!isNull(uid)) {
-        // Fetch entity
-        fetchArchEnt(uid, new FetchCallback() {
-            onFetch(entity) {
-                data = entity.getGeometryList();
-                //setMapFocusPoint("control/map/map", longitude, latitude);
-            }
-        });
-
-    }
-}
-
-initMap() {
-    setMapZoom("control/map/map", 19.0f);
-
-    //showBaseMap("control/map/map", "Base Layer", "files/data/maps/ZAG-TPan-3857-grass-tiled.tif");
-    createCanvasLayer("control/map/map", "Non-saved sketch layer");
-
-    DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
-
-    isEntity = true;
-    queryName = "All entities";
-    querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
-
-    addDatabaseLayerQuery("control/map/map", queryName, querySQL);
-'.($hasControlTracklog?'
-    addTrackLogLayerQuery("control/map/map", "track log entities",
-        "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" +
-        " FROM archentity join aenttype using (aenttypeid)\n" +
-        " where archentity.deleted is null\n" +
-        "   and lower(aenttypename) = lower(\'gps_track\')\n" +
-        " group by uuid\n" +
-        " having max(aenttimestamp)");':'').'
-
-    addSelectQueryBuilder("control/map/map", "Select entity by type", createQueryBuilder(
-        "select uuid\n" +
-        "  from latestNonDeletedArchent\n" +
-        "  JOIN latestNonDeletedAentValue using (uuid)\n" +
-        "  join aenttype using (aenttypeid)\n" +
-        "  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" +
-        "  where lower(aenttypename) = lower(?) \n" +
-        "   group by uuid").addParameter("Type", "RemoteSensingFeature"));
-
-
-    // define database layer styles for points, lines, polygons and text
-    ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
-    ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
-    pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
-    ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
-
-    showDatabaseLayer("control/map/map", "Saved Data Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
-}
-
-initMap();
-
-';
-}else{
-
-$out = $out.'
-/*** MAP STUB ***/
-onClearMap() {}
-';
-}
-
-/* @todo???
-    addDatabaseLayerQuery("control/map/map", "Digital Media Item", querySQL+" where lower(aenttypename) = lower('Digital Media Item')");
-    addDatabaseLayerQuery("control/map/map", "Organisation", querySQL+" where lower(aenttypename) = lower('Organisation')");
-    addDatabaseLayerQuery("control/map/map", "Person", querySQL+" where lower(aenttypename) = lower('Person')");
-*/
 
 return $out;
 }
@@ -2673,6 +2098,11 @@ function formatXML2($sxml){
     $dom->formatOutput = true;
     $dom->loadXML($sxml);
     return $dom->saveXML();
+}
+
+//isNullOrEmptyString
+function is_empty($question){
+    return (!isset($question) || trim($question)==='');
 }
 
 

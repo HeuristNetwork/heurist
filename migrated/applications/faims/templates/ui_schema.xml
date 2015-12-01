@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+  <TEMPLATE_HEADER/> 	
+  <h:head>
+    <h:title><TEMPLATE_DBNAME/></h:title>
+    <!--model lists user interface tabgroups, tabs and content of tabs-->
+    <model>
+      <instance>
+        <faims id="hdb_osmak_delete">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+            <large>
+              <layout_weight/>
+            </large>
+          </style>
+          <User> <!-- new -->
+            <User>
+              <Select_User/>
+              <Login/>
+            </User>
+          </User>
+          <!--control tabgroup that contains button to manipulate entities: load, list, create-->
+          <control>
+            <map>
+              <map/>
+              <mapContainer>
+                <child0>
+                  <zoomGPS/>
+                </child0>
+                <child1>
+                  <clear/>
+                </child1>
+              </mapContainer>
+              <mapCreateNew>
+                <child1>
+                  <entityTypeList/>
+                </child1>
+                <child2>
+                  <create/>
+                </child2>
+              </mapCreateNew>
+            </map>
+            <data>
+              <entityTypeList/>
+              <newEntity/>
+              <Colgroup_0>
+                <Col_0>
+                  <entitySearchTerm/>
+                </Col_0>
+                <Col_1>
+                  <entitySearchButton/>
+                </Col_1>
+                <Col_2>
+                  <entityAllButton/>
+                </Col_2>
+              </Colgroup_0>
+              <entityList/>
+            </data>
+            <gps>
+			  <GPS_Diagnostics/>
+            </gps>
+          </control>
+          <!--select entity for given entity type-->
+          <selectEntity>
+            <data>
+              <newEntity/>
+              <entityList/>
+            </data>
+          </selectEntity>
+          <!--list of tabgroups for ArchEntTypes)-->
+          <!--ArchEntType: RTFAIMS-->
+          <Rtfaims>
+            <Rtfaims_General_Information>
+              <NameTitle/>
+              <ShortSummary/>
+              <TimeStampNow/>
+			  <Dategroup>
+                <child0>
+				<Date/>
+				</child0>
+                <child1>
+				<attachDate/>
+				</child1>
+			  </Dategroup>	
+
+              <RepresentativeImageOrThumbnail/>
+              <attachRepresentativeImageOrThumbnail/>
+              <container1>
+                <container_AttachGeometry>
+                  <AttachGeometry/>
+                </container_AttachGeometry>
+                <container_Update>
+                  <Update/>
+                </container_Update>
+                <container_UpdateAndClose>
+                  <UpdateAndClose/>
+                </container_UpdateAndClose>
+                <container_Delete>
+                  <Delete/>
+                </container_Delete>
+              </container1>
+            </Rtfaims_General_Information>
+            <Rtfaims_gps_location>
+			  <Colgroup_GPS>
+                <Col_0>
+                  <Latitude/>
+                  <Northing/>
+                </Col_0>
+                <Col_1>
+                  <Longitude/>
+                  <Easting/>
+                </Col_1>
+              </Colgroup_GPS>
+              <Take_From_GPS/>			  
+            </Rtfaims_gps_location>
+          </Rtfaims>
+        </faims>
+      </instance>
+      <!--list of numeric and blocktext(memo) attributes(fields)-->
+      <bind nodeset="/faims/Rtfaims/Rtfaims_General_Information/ShortSummary" type="string"/>
+	  <bind nodeset="/faims/Rtfaims/Rtfaims_General_Information/Dategroup/child0/Date" type="decimal"/>
+	  <!-- <bind nodeset="/faims/Rtfaims_General_Information/Date" type="decimal"/> -->
+    </model>
+  </h:head>
+  <h:body>
+    <!--Describes controls for each tabgroup and its nested tabs-->
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label>1</label>
+        </input>
+      </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
+    </group>
+    <group ref="User">
+      <label>{User_List}</label>
+      <group ref="User">
+        <label>{User}</label>
+        <select1 ref="Select_User">
+          <label>{Select_User}</label>
+          <item>
+            <label>Options not loaded</label>
+            <value>0</value>
+          </item>
+        </select1>
+        <trigger ref="Login">
+          <label>{Login}</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="control">
+      <label>{Control}</label>
+      <group ref="map" faims_scrollable="false">
+        <label>{Map}</label>
+        <input ref="map" faims_map="true">
+          <label/>
+        </input>
+        <group ref="mapContainer" faims_style="orientation">
+          <label/>
+          <group ref="child0" faims_style="even">
+            <label/>
+            <trigger ref="zoomGPS">
+              <label>{centerMe}</label>
+            </trigger>
+          </group>
+          <group ref="child1" faims_style="even">
+            <label/>
+            <trigger ref="clear">
+              <label>{Clear}</label>
+            </trigger>
+          </group>
+        </group>
+        <group ref="mapCreateNew" faims_style="orientation">
+          <label/>
+          <group ref="child1" faims_style="even"> 
+            <label/>
+            <select1 ref="entityTypeList">
+              <label/>
+              <item>
+                <label>placeholder</label>
+                <value>placeholder</value>
+              </item>
+            </select1>
+          </group>
+          <group ref="child2" faims_style="large">
+            <label/>
+            <trigger ref="create">
+              <label>{Create}</label>
+            </trigger>
+          </group>
+        </group>
+      </group>
+      <group ref="data" faims_scrollable="false">
+        <label>{All_Entities}</label>
+        <select1 ref="entityTypeList">
+          <label>{Select_Entity_Type}</label>
+          <item>
+            <label>placeholder</label> <!-- new -->
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <trigger ref="newEntity">
+          <label>{Create_New_Entity}</label>
+        </trigger>
+        <group ref="Colgroup_0" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even"> 
+            <label/>
+			<input ref="entitySearchTerm">
+				<label/>
+			</input>
+          </group>
+          <group ref="Col_1" faims_style="large">
+            <label/>
+			<trigger ref="entitySearchButton">
+				<label>{Search}</label>
+			</trigger>
+          </group>
+          <group ref="Col_2" faims_style="large">
+            <label/>
+			<trigger ref="entityAllButton">
+				<label>{All}</label>
+			</trigger>
+          </group>
+        </group>
+        <select1 appearance="compact" ref="entityList">
+          <label>Tap entity in list below to load it</label>
+          <item>
+            <label>Entities not loaded</label>
+            <value>0</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="gps">
+        <label>GPS</label>
+        <input faims_read_only="true" ref="GPS_Diagnostics">
+          <label>{GPS_Diagnostics}</label>
+        </input>
+      </group>
+    </group>
+    <group ref="selectEntity">
+      <label/>
+      <group ref="data" faims_scrollable="false">
+        <label>Select entity or create new one</label>
+        <trigger ref="newEntity">
+          <label>Create New Entity</label>
+        </trigger>
+        <select1 appearance="compact" faims_annotation="false" faims_certainty="false" ref="entityList">
+          <label>Tap entity in list below to select it</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <!--RTFAIMS-->
+    <group ref="Rtfaims" faims_archent_type="rtfaims">
+      <label>{rtfaims}</label>
+      <group ref="Rtfaims_General_Information">
+        <label>Gen</label>
+        <input ref="NameTitle" faims_attribute_name="Name / Title" faims_certainty="false" faims_attribute_type="measure" faims_read_only="false">
+          <label>{Name_/_Title}</label>
+        </input>
+        <input ref="ShortSummary" faims_attribute_name="Short summary" faims_certainty="false" faims_attribute_type="measure" faims_read_only="false">
+          <label>{Short_summary}</label>
+        </input>
+        <input ref="TimeStampNow" faims_attribute_name="Timestamp now" faims_certainty="false" faims_attribute_type="measure" faims_read_only="true">
+          <label>{Time_Stamp}</label>
+        </input>
+
+        <group ref="Dategroup" faims_style="orientation">
+          <label/>
+          <group ref="child0" faims_style="even"> 
+            <label/>
+			<input ref="Date" faims_attribute_name="Date" faims_certainty="true" faims_attribute_type="measure" faims_read_only="false">
+				<label>{Date}</label>
+			</input>
+          </group>
+          <group ref="child1" faims_style="large">
+            <label/>
+			<trigger ref="attachDate" faims_style_class="attach-button">
+				<label>{Pickup_Date}</label>
+			</trigger>
+          </group>
+        </group>
+		<!-- end new -->
+		
+        <select ref="RepresentativeImageOrThumbnail" faims_attribute_name="Representative image or thumbnail" faims_certainty="false" faims_attribute_type="measure" faims_sync="true" type="camera" faims_annotation="false">
+          <label>{Representative_image_or_thumbnail}</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="attachRepresentativeImageOrThumbnail">
+          <label>{Take_Picture}</label>
+        </trigger>
+        <group faims_style="orientation" ref="container1">
+          <label/>
+          <group ref="container_AttachGeometry" faims_style="even">
+            <label/>
+            <trigger ref="AttachGeometry" faims_style_class="neutral-button">
+              <label>{Attach_Geometry_from_Map}</label>
+            </trigger>
+          </group>
+          <group ref="container_Update" faims_style="even">
+            <label/>
+            <trigger ref="Update" faims_style_class="positive-button">
+              <label>{Save_Entity}</label>
+            </trigger>
+          </group>
+          <group ref="container_UpdateAndClose" faims_style="even">
+            <label/>
+            <trigger ref="UpdateAndClose" faims_style_class="positive-button">
+              <label>{Save_Entity_and_Close}</label>
+            </trigger>
+          </group>
+          <group ref="container_Delete" faims_style="even">
+            <label/>
+            <trigger ref="Delete" faims_style_class="negative-button">
+              <label>{Delete_Entity}</label>
+            </trigger>
+          </group>
+        </group>
+      </group>
+      <group ref="Rtfaims_gps_location">
+        <label>{GPS_Location}</label>
+        <group ref="Colgroup_GPS" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even">
+            <label/>
+            <input ref="Latitude" faims_attribute_name="Latitude" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Latitude}</label>
+            </input>
+            <input ref="Northing" faims_attribute_name="Northing" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Northing}</label>
+            </input>
+          </group>
+          <group ref="Col_1" faims_style="even">
+            <label/>
+            <input ref="Longitude" faims_attribute_name="Longitude" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Longitude}</label>
+            </input>
+            <input ref="Easting" faims_attribute_name="Easting" faims_attribute_type="measure" faims_read_only="true">
+              <label>{Easting}</label>
+            </input>
+          </group>
+        </group>
+        <trigger ref="Take_From_GPS">
+          <label>{Take_From_GPS}</label>
+        </trigger>		
+      </group>
+    </group>
+  </h:body>
+</h:html>
