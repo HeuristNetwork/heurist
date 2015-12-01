@@ -379,7 +379,8 @@
                     }
                 }
             }
-            array_push($q_bits, substr($text, $offset));
+            if($offset<strlen($text))
+                array_push($q_bits, substr($text, $offset));
             
             foreach ($q_bits as $q_bit) {
                 $this->addTopLimb($q_bit);

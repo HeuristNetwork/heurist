@@ -24,7 +24,10 @@
 
     query is json array  { conjunction: [ {predicate} , {predicate}, .... ] }
     
-    conjunction:  not, all (default), any, notall, notany  
+    conjunction:  not, all (default)
+                       any        OR
+                       notall     NOT ( AND )
+                       notany     NOT ( OR )
     
     predicate:   keyword:value
     

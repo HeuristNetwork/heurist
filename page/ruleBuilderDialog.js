@@ -38,14 +38,6 @@ $(document).ready(function() {
 
 });
 
-function addLevel(){
-    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule sets builder for level 1
-        onremove: function(event, data){
-            $('#'+data.id).remove();    //remove this rule sets builder
-        }
-    }).insertBefore($('#div_add_level'));
-}
-
 function onInit(success) //callback function of hAPI initialization
 {
     if(success)  //system is inited
@@ -103,6 +95,17 @@ function onInit(success) //callback function of hAPI initialization
 
 
     }
+}
+
+//
+// add first level (init ruleBuilder widget)
+//
+function addLevel(){
+    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule sets builder for level 1
+        onremove: function(event, data){
+            $('#'+data.id).remove();    //remove this rule sets builder
+        }
+    }).insertBefore($('#div_add_level'));
 }
 
 //

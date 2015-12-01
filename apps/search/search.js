@@ -866,7 +866,7 @@ $.widget( "heurist.search", {
             .appendTo( $dlg )
             .addClass('ui-heurist-btn-header1')
             .zIndex(9999)
-            .css({'position':'absolute', 'right':4, top:4, width:18, height:18})
+            .css({'position':'absolute', 'right':4, top:4, width:16, height:16, 'font-size':'0.8em'})
             .button({icons: {
                 primary: "ui-icon-triangle-1-n"
                 }, text:false});

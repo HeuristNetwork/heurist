@@ -479,6 +479,10 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
     }
 
+    //
+    // topOptions either array or string
+    // [{key:'',title:''},....]
+    //
     ,createSelector: function(selObj, topOptions) {
         if(selObj==null){
             selObj = document.createElement("select");
