@@ -53,7 +53,7 @@ function doLogin(isforsed){
                         {
                             top.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
-                                    $dlg.dialog( "close" );
+                                    //$dlg.dialog( "close" );
                                     top.HEURIST4.msg.showMsgDlg(top.HR('Your password has been reset. You should receive an email shortly with your new password'), null, "Info");
                                 }else{
                                     top.HEURIST4.msg.showMsgErr(response);

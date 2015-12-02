@@ -149,7 +149,7 @@ function setCachedData($key, $var) {
 /**
 * resolves a recID to any forwarded value and returns resolved recID with any bmkID for user and indicates
 * that it had to resolve. If currect recID it returns with any user bkmID. If bkmID it returns with the
-* cooresponding recID.
+* corresponding recID.
 * @param     int $recID record ID
 * @param     int $bmkID bookmark ID
 * @return    array list of recID,bkmID,isReplaced

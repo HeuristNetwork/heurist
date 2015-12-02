@@ -180,6 +180,17 @@ function doRegister(event){
              p{
                  padding:5px;
              }
+             .lastcol{
+                 display:table-cell;
+                 /*width:50%;
+                 min-width:400px;*/
+             }
+             .tabrow{
+                /*width:90%;*/
+                display:table-row;
+                padding-left: 38px;    
+             }
+             
 
         </style>
 
@@ -292,12 +303,13 @@ function doRegister(event){
             var is_db_got = false;
             function getRegisteredDatabases(){
 
+                var ddiv = $('#registered_dbs');
+                ddiv.show();
+                
                 //only once
                 if(is_db_got) return;
                 is_db_got = true;
-
-                var ddiv = $('#registered_dbs');
-                ddiv.show();
+                
                 ddiv.height('40px');
 
                 // request for server side
@@ -319,12 +331,12 @@ function doRegister(event){
                                     //regurl = responce[idx][0]
                                     var bgcolor = (idx % 2 == 0)?'#EDF5FF':'#FFF';
 
-                                    s = s + '<div style="display:table-row;padding-left: 38px;background-color:'+bgcolor+'">'
-                                    +'<div style="width:50px;display:table-cell"><input type="radio" name="dbreg" value="'+idx+'" id="rbdb'+idx+'"/></div>'
-                                    +'<div style="width:50px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][0]+'</label></div>'
+                                    s = s + '<div class="tabrow" style="background-color:'+bgcolor+'">'
+                                    +'<div style="min-width:20px;display:table-cell"><input type="radio" name="dbreg" value="'+idx+'" id="rbdb'+idx+'"/></div>'
+                                    +'<div style="min-width:40px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][0]+'</label></div>'
                                     +'<div style="width:300px;display:table-cell">'
                                         +'<label for="rbdb'+idx+'" '+(Number(responce[idx][0])<1000?'style="font-weight:bold;"':'')+'>'+responce[idx][2]+'</label></div>'
-                                    +'<div style="max-width:<?php echo (@$_REQUEST['popup']=='1'?'190':'400') ?>px;display:table-cell" class="truncate" >'
+                                    +'<div class="truncate lastcol" >'
                                         +'<label for="rbdb'+idx+'" title="'+responce[idx][3]+'">'+responce[idx][3]+'</label></div></div>';
                                 }
                             }
@@ -442,7 +454,8 @@ function doRegister(event){
                         <input type="hidden" name="popup" value="<?php echo @$_REQUEST['popup']?'1':''; ?>">
 
                         <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:2px;">
-                            <input type="radio" name="dbtype" value="0" id="rb1" checked /><label for="rb1"
+                            <input type="radio" name="dbtype" value="0" id="rb1" checked 
+                                onclick="{$('#registered_dbs').hide()}"/><label for="rb1"
                                 class="labelBold" style="padding-left: 2em;">Standard database template</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
                                 Gives an uncluttered database with essential record types, fields,
@@ -462,7 +475,7 @@ function doRegister(event){
                                 as well as community servers maintained by other research groups.
                             </div>
 
-                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;margin-top:10px;max-width:<?php echo (@$_REQUEST['popup']=='1'?'620':'720') ?>px;
+                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
                               background:url(../../../../assets/loading-animation-white.gif) no-repeat center center;">
                                 <!-- list of registered DATABASEs  -->
                             </div>

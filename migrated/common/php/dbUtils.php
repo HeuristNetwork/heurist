@@ -235,6 +235,10 @@
                             $res = false;
                             break;
                         }
+                        
+                        if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
+                            $mysqli->query('DELETE FROM recForwarding where rfw_NewRecID not  in (select rec_ID from Records)');
+                        }
 
                         $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
                     }

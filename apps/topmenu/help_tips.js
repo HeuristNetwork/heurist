@@ -55,12 +55,14 @@ $.widget( "heurist.help_tips", {
                 },
                 buttons: [
                     {text:top.HR('Previous'),
+                        id: 'btnTipPrev',
                         title: top.HR("Show previous tip"),
                         class: 'tags-actions',
                         click: function() {
                             that._previous();
                     }},
                     {text:top.HR('Next'),
+                        id: 'btnTipNext',
                         title: top.HR("Show next tip"),
                         class: 'tags-actions',
                         click: function() {
@@ -125,6 +127,17 @@ $.widget( "heurist.help_tips", {
             }else{
                 that.options.current_tip = idx;
                 top.HAPI4.SystemMgr.save_prefs({'help_tip':idx, 'help_tip_last':(new Date()) });
+                
+                top.HEURIST4.util.setDisabled($.find('#btnTipPrev'), (idx==1));
+
+                $.ajax( "context_help/tips/tip"+(idx+1)+".html?t="+(new Date().time) )
+                    .done(function() {
+                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);
+                    })
+                    .fail(function() {
+                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                    });                
+                
             }
         });
 

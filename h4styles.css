@@ -40,7 +40,7 @@ body {
 }
 .db-list li {
     list-style: none;
-    background-image: url(assets/b_databasePressed.png);
+    background-image: url(assets/database.png);
     background-position: left;
     background-repeat: no-repeat;
     padding-left: 30px;

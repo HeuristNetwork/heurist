@@ -35,20 +35,26 @@
         <link rel="stylesheet" href="../../common/css/edit.css">
         <link rel="stylesheet" href="../../common/css/printview.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/calendar.css" />
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
         <title>Replace a value in each record</title>
 
         <style type="text/css">
             #record-count {
                 font-weight: bold;
             }
-        </style>1
+        </style>
+  <script>
+    $(function() {
+        init();
+    });  
+  </script>
+        
     </head>
 
-    <body class="popup" width=600 height=500 onload="init();">
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+    <body class="popup" width=600 height=500>
         <script src="../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
         <script src="../../common/js/hintDiv.js"></script>
         <script src="../../common/js/calendarViewer.js"></script>
         <script src="../../common/js/calendar.js"></script>
@@ -192,7 +198,7 @@
                     rty = rtyIDs[i];
                     rtyName = top.HEURIST.rectypes.names[rty];
                     for (dty in top.HEURIST.rectypes.typedefs[rty].dtFields) {
-                        if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in {"selector":1,"relmarker":1,"calculated":1}){
+                        if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in {"separator":1,"relmarker":1,"calculated":1}){
                             continue;
                         }
                         dtyName = top.HEURIST.detailTypes.names[dty];
@@ -227,7 +233,7 @@
                     fieldSelect.appendChild(opt);
                 }
                 fieldSelect.onchange = createInputElement;
-                createInputElement();
+                //createInputElement();
             }
 
             function createInputElement(){

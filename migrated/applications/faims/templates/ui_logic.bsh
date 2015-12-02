@@ -975,7 +975,6 @@ doAttachGeometry(String rectypeTab){
         attachedGeometry = geomList;
 		if(!isNull(rectypeTab)){ //if it is called from form - try to save geometry at once
 			saveAttachedGeometry(rectypeTab, null);
-			//showToast("{Geometry attached. Now you may save Entity}");
 		}
 		return true;
     }
@@ -993,7 +992,7 @@ zoomGPS(){
         showToast("Zooming to "+position.getLongitude()+", "+position.getLatitude());
         setMapFocusPoint("control/map/map", longitude, latitude);
     } else {
-        showToast("{GPS Not initialized}");
+        showToast("{GPS_Not_Initialised}");
     }
 
 }

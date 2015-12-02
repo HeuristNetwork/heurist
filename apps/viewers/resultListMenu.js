@@ -901,7 +901,7 @@ $.widget( "heurist.resultListMenu", {
             return
         }
 
-        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database ;
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + top.HAPI4.database + '&t='+(new Date().time) ;
 
         //substitutes
         top.HEURIST.search4 = {};

@@ -67,6 +67,24 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         var emSize = parseFloat($("body").css("font-size"));
         return (input / emSize);
     },
+    
+    setDisabled: function(element, mode){
+      if(element){
+          if(!$.isArray(element)){
+                element = [element];
+          }
+          $.each(element, function(idx, ele){
+              ele = $(ele);
+              if (mode) {
+                    ele.prop('disabled', 'disabled');
+                    ele.addClass('ui-state-disabled');
+              }else{
+                    ele.removeProp('disabled');
+                    ele.removeClass('ui-state-disabled');
+              }
+          });
+      }  
+    },
 
     composeHeuristQuery2: function(params){
         if(params)
