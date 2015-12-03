@@ -135,7 +135,7 @@
                     $("<div>").css('padding-left','40px').css('padding-bottom','20px').append("No map layers in database. You may add layers manually before loading module in FAIMS server.").appendTo($mdiv);                    
                 }
 
-                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='ct5' name='ct5' value='1' checked='checked' ><label for='ct5'>Add Certainty and Annotation to constrained data (vocabs)<label>").appendTo($mdiv);
+//                $("<div>").css('font-weight','bold').append("<input type='checkbox' id='ct5' name='ct5' value='1' checked='checked' ><label for='ct5'>Add Certainty and Annotation to constrained data (vocabs)<label>").appendTo($mdiv);
                         
             //$("#rt_selected").val(recordTypesSelected);
             $("#buttondiv").css('display','block');                        

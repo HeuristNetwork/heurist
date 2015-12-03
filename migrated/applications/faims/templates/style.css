@@ -14,7 +14,14 @@
     padding-top: 15px;
 }
 
-.input-field, .text-area {
+.required-label{
+    color: #f00;
+    font-size: 18px;
+    font-weight: bold;
+    padding-top: 15px;
+}
+
+.input-field, .text-area, .required, .dropdown {
     background-color: #eee;
     margin: 2px;
     border: 1px solid rgba(0, 0, 0, 0.25);

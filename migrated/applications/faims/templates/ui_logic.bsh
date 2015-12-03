@@ -63,10 +63,6 @@ bindOnEvents() {
  
 showWarning("Ver 26. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
 
-//stack of tabs in use
-ArrayList tabs_edit = new ArrayList(); 
-ArrayList tabs_select = new ArrayList(); //list of calls to select (see last_invoker)
-
 Map rectypeToUuid = new HashMap(); //list of edit form in use
 getUuid(String rectypeTab) {
 	String uid = rectypeToUuid.get(rectypeTab);
@@ -79,9 +75,19 @@ setUuid(String rectypeTab, String uuid) {
   rectypeToUuid.put(rectypeTab, uuid);
 }
 
+//stack of tabs in use to prevent edit twice
+ArrayList tabs_edit = new ArrayList(); 
+
+// stack of calls to select (see last_invoker)
+// populated on selectEntity tab show
+// removed on onShowEditForm 
+// cleared in clearStacks (conttol/data or control/map show)
+ArrayList tabs_select = new ArrayList(); 
+
 //keeps rectype to select(browse) and field path to assign the result of selection
 // for example Person=DigitalMediaItem/DigitalMediaItem_General_Information/Creators
 String last_invoker = null;
+
 List attachedGeometry = null;  //geometry object from map to be attached to current entity
 
 ArrayList rectypeToEntity = new ArrayList();
@@ -189,7 +195,7 @@ addOnEvent("selectEntity/data/newEntity", "click", "onAddNewEntityWhenSelect()")
 onShowSelect(){
 
     if(tabs_select.size()>0 && last_invoker.equals(tabs_select.get(tabs_select.size()-1))){
-        //inital call - open new select
+        //initial call - open new select
 
     }else{
         //back call - return after new entity addition
@@ -299,13 +305,13 @@ onSelectEntity() {
     //fill pointer field
     populateDropdownByQuery(fieldname, uid);
 
-    String fieldname_uid = getPointerFiledName(fieldname);
+    String fieldname_uid = getPointerUidFileName(fieldname);
     setFieldValue(fieldname_uid, uid);
 }
 //
 // Returns path to UID field on hidden tab for given resource attribute (field)
 //
-getPointerFiledName(String fieldname){
+getPointerUidFileName(String fieldname){
     String[] parts = fieldname.split("/");
     parts[1] = parts[0]+"_uids"; //hidden tab with uid fields
     parts[2] = parts[2]+"_UID";  //pointer field to keep UID of resource record
@@ -319,14 +325,14 @@ clearPointer(String fieldname){
     pairs.add(new NameValuePair("select with Browse button(s)", ""));
     populateDropDown(fieldname, pairs );
 
-    String fieldname_uid = getPointerFiledName(fieldname);
+    String fieldname_uid = getPointerUidFileName(fieldname);
     setFieldValue(fieldname_uid, "");
 }
 //
 // Fill dropdown (name) for pointer field by value of hidden UID field
 //
 fillPointer(String fieldname){
-    String fieldname_uid = getPointerFiledName(fieldname);
+    String fieldname_uid = getPointerUidFileName(fieldname);
     String res_id = getFieldValue(fieldname_uid);
     if(null==res_id || "".equals(res_id) || "null".equals(res_id)){
         clearPointer(fieldname);
@@ -553,7 +559,7 @@ addNavigationButtons(String rectypeTab) {
     }
     actionOn() {
       if(!isNull(getUuid(rectypeTab))) {
-		  clearStacks();
+		  //clearStacks();
           newEntity(rectypeTab);
           showToast("{New_record_created}");
 		  onShowEditForm(rectypeTab);

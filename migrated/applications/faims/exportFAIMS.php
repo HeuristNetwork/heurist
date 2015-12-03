@@ -343,9 +343,10 @@ function arrToProps(){
     global $content_a16n;
     
     $res = file_get_contents('templates/arch16N.properties');
+    $res = $res."\n";
     
         foreach ($content_a16n as $prop=>$value){
-            $res = $res.str_replace(' ','_',$prop)."=".$value."\n";
+            $res = $res.str_replace(' ','_',$prop).'='.$value."\n";
         }
     return $res;
 }
@@ -441,7 +442,7 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
                 }else if($rst_dt_type=="resource"){
 
                     $dt_pointers = $detail[$idx_rst_pointers];
-                    $dt_pointers = explode(",", dt_pointers);
+                    $dt_pointers = explode(",", $dt_pointers);
                     if(count($dt_pointers)>0){   //ignore unconstrained
 
                         $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
@@ -582,14 +583,73 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
 /*****DEBUG****///error_log("1. No details defined for RT#".$rt);
             continue;
         }
+        
+        
+        //important! to form proper record title we need to order properties in scheme in order they apper in title mask
+        $dt_order = array();
+        
+        $titlemask_rest = $titlemask;
+        $offset = 0;
+        $data = preg_match_all('/\[([^\"]*?)\]/', $titlemask, $matches);
+        //foreach $matches as 
+        if(count($matches)>0){
+            for ($idx=0; $idx<count($matches[1]); $idx++ ){
+                $entry = $matches[1][$idx];
+                //find detail in structure by concept code
+                foreach ($details as $dtid=>$detail) {
+                    $dt_type = $detail[$int_rt_dt_type];
+                    if(!in_array($dt_type, $supported)){
+                        continue;
+                    }
+                    $det = $dtStructs['typedefs'][$dtid]['commonFields'];
+                    $ccode = $det[$int_dt_ccode];
+                    
+                    if($ccode!='' && ($ccode==$entry || strpos($entry, $ccode.'.')!==false)){
+                        $detail['isIdentifier'] = true;
+                        
+                        //get piece to next entry
+                        if($idx+1<count($matches[0])){
+                            $pos = strpos($titlemask, $matches[0][$idx+1], $offset);
+                            $formatStr = substr($titlemask, $offset, $pos-$offset );
+                            $offset = $pos;
+                        }else{
+                            $formatStr = substr($titlemask, $offset );
+                        }
+                        if($dt_type=='enum' || $dt_type=='relationtype'){
+                            $faimsmagic = '{{if $1 then "$1" }}';
+                        }else{
+                            $faimsmagic = '{{if $2 then "$2" }}';
+                        }
+                        //replace entry to faims magic
+                        $formatStr = str_replace($matches[0][$idx], $faimsmagic, $formatStr);
+                        
+                        $detail['formatString'] = $formatStr;
+                        $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'] = true; //to use later in ui_scheme
+                        $dt_order[$dtid] = $detail;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Each ArchEnt in FAIMS has to have at least one attribute (field) marked as an identifier
+        if(count($dt_order)==0){
+            addComment($root, 'ERROR!!!!! This ArchaeologicalEntity does not have identifiers!!! Verify TitleMask in Heurist recordtype!');
+            continue;                 
+        }
+
+        //add rest details
+        foreach ($details as $dtid=>$detail) {
+            if(!@$dt_order[$dtid]){
+                $dt_order[$dtid] = $detail;
+            }
+        }
 
         // Loop through the fields (details)
 
-        foreach ($details as $dtid=>$detail) {
-
+        foreach ($dt_order as $dtid=>$detail) {
 
             $dt_type = $detail[$int_rt_dt_type];
-
             if(!in_array($dt_type, $supported)){
                 continue;
             }
@@ -610,14 +670,15 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
                 $property->addChild('description', prepareText($detail[$int_rt_dt_descrip]));
             }
 
-            $det = $dtStructs['typedefs'][$dtid]['commonFields'];
+            /*$det = $dtStructs['typedefs'][$dtid]['commonFields'];
             $ccode = $det[$int_dt_ccode];
-
             $is_in_titlemask = (!( strpos($titlemask, ".".$ccode."]")===false && strpos($titlemask, "[".$ccode."]")===false )) ;
-            if($is_in_titlemask){
+            if($is_in_titlemask){*/
+            if(@$detail['isIdentifier']){    
                 $property->addAttribute('isIdentifier', 'true');
-                $has_identifier = true;
-                $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'] = true;
+                if(@$detail['formatString']){
+                    addCdata('formatString', $detail['formatString'], $property);
+                }
             }
 
             if($dt_type=='enum' || $dt_type=='relationtype'){
@@ -629,7 +690,7 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
             }
         } //for
         
-        if( $hasMapTab && in_array($rt, $rt_geoenabled) ){
+        if( in_array($rt, $rt_geoenabled) ){
             $property = $arch_element->addChild('property');
             $property->addAttribute('name', 'Latitude');
             $property->addAttribute('type', 'float');
@@ -642,11 +703,6 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
             $property = $arch_element->addChild('property');
             $property->addAttribute('name', 'Easting');
             $property->addAttribute('type', 'float');
-        }
-        // Each ArchEnt in FAIMS has to have at least one attribute (field) marked as an identifier
-        if(!$has_identifier){
-            addComment($root, 'ERROR!!!!! This ArchaeologicalEntity does not have identifiers!!! Verify TitleMask in Heurist recordtype!');
-
         }
 
     }//foreach recordtype
@@ -699,7 +755,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
     global $rtStructs, $dtTerms, $supported;
 
     $hasMapTab = @$_REQUEST['mainmt']=="1";
-    $certainityForVocab = (@$_REQUEST['ct5']=="1");
+    $certainityForVocab = true; //(@$_REQUEST['ct5']=="1");
 
     $root = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?>
     <h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml"
@@ -995,6 +1051,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
     $int_rt_disp_name = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DisplayName"];
     $idx_rst_pointers = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_PtrFilteredIDs"];
     $idx_rst_defaultvalue = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DefaultValue"];
+    $idx_rst_required = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_RequirementType"];
 
     // --------------------------------------------------------------------------------------------------------
 
@@ -1132,6 +1189,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
             }
 
             $isIdentifier = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['isIdentifier'];
+            $isRequired = ($detail[$idx_rst_required]=="required");
 
             //add field to header
             if($dt_type=='resource'){
@@ -1168,8 +1226,9 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                           <group faims_style="even" ref="child1">
                             <label/>
 
-                            <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false">
-                                <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
+                            <select1 ref="'.$dtdisplaynamex.'" faims_annotation="false" faims_certainty="false" '
+                                .($isRequired?' faims_style_class="required"':'').'>'
+                                .'<label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
                                 <item>
                                     <label>browse for resource entity</label>
                                     <value>null</value>
@@ -1180,7 +1239,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                           <group faims_style="large" ref="child2">
                             <label/>
                             <trigger ref="'.$dtdisplaynamex.'_clearPointer" faims_style_class="clear-button">
-                              <label>X</label>
+                              <label>{Clear}</label>
                             </trigger>
                           </group>
                         </group>');
@@ -1225,6 +1284,9 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
               </Dategroup'.$dtdisplaynamex.'>');    
                 xml_adopt($tab, $date_pickup);
                 
+                                    
+
+                
                 //add into body
                 $date_pickup = new SimpleXMLElement(
         '<group ref="Dategroup'.$dtdisplaynamex.'" faims_style="orientation">
@@ -1233,14 +1295,16 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
             <label/>
             <input ref="'.$dtdisplaynamex
                         .'" faims_attribute_name="'
-                        .prepareText($dtdisplayname).'" faims_certainty="true" faims_attribute_type="measure" faims_read_only="false">
-                <label>'.getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
+                        .prepareText($dtdisplayname).'" faims_certainty="true" faims_attribute_type="measure" faims_read_only="false"'
+                        .($isRequired?' faims_style_class="required"':'').'>
+                        <label>'
+                        .getResStrA16n( prepareText($detail[$int_rt_disp_name] )).'</label>
             </input>
           </group>
           <group ref="child1" faims_style="large">
             <label/>
             <trigger ref="attach'.$dtdisplaynamex.'" faims_style_class="attach-button">
-                <label>{Pickup_Date}</label>
+                <label>{Pick_Date}</label>
             </trigger>
           </group>
         </group>');
@@ -1262,7 +1326,8 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
                 if($isvocab){
                     $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
-                    addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": ($termsCount<4)?"Radiogroup":"Dropdown")  );
+                    addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": 
+                                                            (($termsCount<4)?"Radiogroup":"Dropdown"))   );
                     $inputtype = $is_repeatable?'select':'select1';  //if enum repeatable checkbox list otherwise dropdown
                 }else if($dt_type=='file'){
                      $inputtype = 'select';
@@ -1273,10 +1338,13 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                 }
 
                 $input = $group->addChild($inputtype);
-
                 $input->addChild('label', getResStrA16n( prepareText($detail[$int_rt_disp_name] )) );
                 $input->addAttribute('ref', $dtdisplaynamex);
                 $input->addAttribute('faims_attribute_name', prepareText($dtdisplayname)); //was $dtname));
+                
+                if($isRequired){
+                    $input->addAttribute('faims_style_class', 'required');
+                }
                 if(!$isvocab || $certainityForVocab){
                     $input->addAttribute('faims_certainty', 'true');
                     $input->addAttribute('faims_annotation','true');
@@ -1293,11 +1361,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                     //$input->addAttribute('appearance', ($termsCount>4)?'compact':'full');
                 }
 
-                if($isIdentifier){
-                    $input->addAttribute('faims_attribute_type', 'measure');
-                }else{
-                    $input->addAttribute('faims_attribute_type', $isvocab?'vocab':'measure');
-                }
+                $input->addAttribute('faims_attribute_type', $isvocab?'vocab':'measure');
 
                 if($dt_type=='file'){
 
@@ -2085,6 +2149,27 @@ function getTermsPlainList($datatype, $terms, $disableTerms){
     return $res;
 }
 
+/**
+  * Adds a CDATA property to an XML document.
+  *
+  * @param string $name
+  *   Name of property that should contain CDATA.
+  * @param string $value
+  *   Value that should be inserted into a CDATA child.
+  * @param object $parent
+  *   Element that the CDATA child should be attached too.
+  */
+ function addCdata($name, $value, &$parent) {
+   $child = $parent->addChild($name);
+
+   if ($child !== NULL) {
+     $child_node = dom_import_simplexml($child);
+     $child_owner = $child_node->ownerDocument;
+     $child_node->appendChild($child_owner->createCDATASection($value));
+   }
+
+   return $child;
+ };
 
 function formatXML($simpleXml){
     $dom = dom_import_simplexml($simpleXml)->ownerDocument;
