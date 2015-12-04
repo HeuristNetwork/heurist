@@ -378,8 +378,8 @@ function RectypeManager() {
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
 
-                        var str1 = top.HEURIST.iconBaseURL + id + ".png#" + curtimestamp;
-                        var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png#" + curtimestamp;
+                        var str1 = top.HEURIST.iconBaseURL + id + "&t=" + curtimestamp;
+                        var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png&t=" + curtimestamp;
                         var icon ="<div class=\"rectypeImages\">"+
                         "<a href=\"#edit_icon\">"+
                         "<img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
@@ -1468,13 +1468,13 @@ function icon_refresh(rectypeID) {
         var img = $(imgIcon);
         if(img){
             //was img.src = top.HEURIST.iconBaseURL+rectypeID+".png" + '?' + (new Date()).getTime();
-            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+'")');
+            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+"&t="+curtimestamp+'")');
         }
 
         var imgThumb = "#thumb" + rectypeID;
         img = $(imgThumb);
         if(img){
-            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png?"+curtimestamp+'")');
+            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png&t="+curtimestamp+'")');
             ///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
         }
 

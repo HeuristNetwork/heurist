@@ -95,7 +95,8 @@ function _upload_icon(mode) {
             }
         }else{
                var img = document.getElementById('imgIcon');
-               img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+               img.src = top.HEURIST.iconBaseURL + rectypeID + '&t='+ (new Date()).getTime();
+               //img.src.replace(/\?.*/, '') + '?'+ (new Date()).getTime();
         }
         _isIconWasUpdated = true;
     }
@@ -110,7 +111,7 @@ function _upload_icon(mode) {
             }
         }else{
             var img = document.getElementById('imgThumb');
-            img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+            img.src = top.HEURIST.iconBaseURL + 'thumb/th_' + rectypeID + '.png&t='+ (new Date()).getTime();
         }
         _isIconWasUpdated = true;
     }
@@ -163,13 +164,13 @@ function setRtyValues() {
             document.getElementById("rectypeIcon").innerHTML =
             "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(0)\" title=\"Click to change icon\">"+
             "<img id=\"imgIcon\" src=\""+
-            top.HEURIST.iconBaseURL + rectypeID + ".png?" + curtimestamp +
+            top.HEURIST.iconBaseURL + rectypeID + "&t=" + curtimestamp +
             "\" width=\"16\" height=\"16\"></a>";
 
             document.getElementById("rectypeThumb").innerHTML =
             "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(1)\" title=\"Click to change thumbnail\">"+
             "<img id=\"imgThumb\" src=\""+
-            top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp +
+            top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png&t=" + curtimestamp +
             "\" width=\"64\" height=\"64\"></a>";
 
         } catch(e) {
