@@ -28,7 +28,7 @@
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
-    if (isForAdminOnly("to register a database with the Heurist master index")){
+    if (isForOwnerOnly("to register a database with the Heurist master index")){
         return;
     }
 

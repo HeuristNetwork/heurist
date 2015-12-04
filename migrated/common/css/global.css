@@ -874,7 +874,7 @@ ul li ul div.separator {
 #errorMsg{
 	width:100%;
 	height:99%;
-	background-color:#000;
+	/*background-color:#000;*/
     color: red;
 	text-align:left;
 	vertical-align: top;

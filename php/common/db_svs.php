@@ -327,8 +327,10 @@
         
         if(@$grpID>0 && $system->is_member($grpID)){ // array_search($grpID, $groups)){
             $where = ' = '.$grpID;    
-        }else{
+        }else if(is_array($groups)){
             $where =  ' in ('.implode(',',$groups).')';
+        }else {
+            $where = ' = '.$ugrID;    
         }
         
         $ret = array();

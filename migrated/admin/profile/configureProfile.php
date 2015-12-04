@@ -179,7 +179,7 @@ if (get_user_id() == 96) {
 	}
 	foreach ($usernames as $id => $name) {
 		$user_hyperlinks_import .=
-'   <option value="'.$id.'">'.htmlspecialchars($name).'</option>';
+'   <option value="'.$id.'">'.escChars($name).'</option>';
 	}
 
 	$user_hyperlinks_import .= '</select></p>';
@@ -258,8 +258,9 @@ while ($row = mysql_fetch_row($res)) {
         '<tr>
          <td nowrap>
           <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
-          <img src="'.HEURIST_BASE_URL_V3.'common/images/cross.png" onclick="delete_kwd('.$row[0].',\''.htmlspecialchars($row[1]).'\','.$row[2].')">
-          <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.htmlspecialchars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
+          <img src="'.HEURIST_BASE_URL_V3.'common/images/cross.png" onclick="delete_kwd('.$row[0]
+                .',\''.escChars($row[1]).'\','.$row[2].')">
+          <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.escChars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
          </td>
          <td nowrap>' . $row[2] . '</td>
          <td class="u-cell">
@@ -269,7 +270,7 @@ while ($row = mysql_fetch_row($res)) {
          <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
         </tr>';
 
-	$foreach_kwd_js .= "kwd['".htmlspecialchars(strtolower($row[1]))."'] = ".$row[0].";\n";
+	$foreach_kwd_js .= "kwd['".escChars(strtolower($row[1]))."'] = ".$row[0].";\n";
 }
 if($foreach_kwd==''){
     $foreach_kwd = '<h2>You have not defined any tags</h2>';
@@ -278,7 +279,7 @@ if($foreach_kwd==''){
 $kwd_select = "<select id=kwd_select style=\"display: none;\"><option value=\"\" disabled selected>select tag...</option>";
 $res = mysql_query('select tag_ID, tag_Text from usrTags where tag_UGrpID= ' . get_user_id() . ' order by tag_Text');
 while ($row = mysql_fetch_row($res)) {
-	$kwd_select .= "<option value=".$row[0].">".htmlspecialchars($row[1])."</option>";
+	$kwd_select .= "<option value=".$row[0].">".escChars($row[1])."</option>";
 }
 $kwd_select .= "</select>";
 
@@ -300,4 +301,7 @@ $template = str_replace('{kwd_select}', $kwd_select, $template);
 
 echo($template);
 
+function escChars($val){
+    return htmlspecialchars(str_replace("'",'',$val));   //&#039;   
+}
 ?>

@@ -277,6 +277,22 @@ function updateSessionForUser($user_id, $key, $value){
 
 }
 
+function isForOwnerOnly($message="", $redirect=true){
+
+    if ($redirect && !is_logged_in()) {
+        header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
+        return;
+    }
+    
+    if(get_user_id()==2){
+        return false;
+    }else{
+        outWarning('Database Owner', $message);
+        return true;
+    }
+    
+}
+
 function isForAdminOnly($message="", $redirect=true)
 {
 
@@ -285,30 +301,35 @@ function isForAdminOnly($message="", $redirect=true)
         return;
     }
 
-
     if (is_admin()) {
         return false;
     }else{
+        outWarning("Administrator of group 'Database Managers'", $message);
+        return true;
+    }
+}
+
+function outWarning($role, $message){
         ?>
         <html>
             <head>
-                <link rel=stylesheet href='../../common/css/global.css'>
+                <link rel=stylesheet href='../../../common/css/global.css'>
                 <meta http-equiv="content-type" content="text/html; charset=utf-8">
             </head>
             <body>
                 <div class=wrap>
                     <div id=errorMsg>
-                        <span>You must be logged in as database owner <?=$message ?></span>
+                        <span>You must be logged in as <?php echo $role.' '.$message; ?></span>
                         <p>
-                            <a href="<?=HEURIST_BASE_URL_V3?>common/connect/login.php?logout=1&db=<?=HEURIST_DBNAME?>" target="_top">Log out / log in again</a>
+                            <a href="<?php echo HEURIST_BASE_URL_V3;?>common/connect/login.php?logout=1&db=<?php echo HEURIST_DBNAME;?>" 
+                                target="_top">Log out / log in again</a>
                         </p>
                     </div>
                 </div>
             </body>
         </html>
         <?php
-        return true;
-    }
+        
 }
 
 function flush_buffers($start=true){
