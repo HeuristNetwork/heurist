@@ -139,10 +139,10 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="apps/profile/profile_login.js"></script>
         <script type="text/javascript" src="apps/viewers/resultListMenu.js"></script>
+        <script type="text/javascript" src="apps/editing/editing_input.js"></script>
         <!-- todo: load dynamically
         <script type="text/javascript" src="apps/editing/rec_search.js"></script>
         <script type="text/javascript" src="apps/editing/rec_relation.js"></script>
-        <script type="text/javascript" src="apps/editing/editing_input.js"></script>
          -->
         <!-- script type="text/javascript" src="page/editing.js"></script -->
 

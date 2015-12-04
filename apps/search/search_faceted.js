@@ -464,6 +464,7 @@ $.widget( "heurist.search_faceted", {
                         '<div class="input-cell"></div>').appendTo($fieldset);
                   
              }else{
+                 //instead of list of links it is possible to allow enter search value directly into input field
                  
                    var ed_options = {
                                 varid: field['var'],  //content_id+"_"+
@@ -1394,6 +1395,9 @@ $.widget( "heurist.search_faceted", {
         return f_link;
     },
     
+    //
+    // instead of list of links it is possible to allow enter search value directly into input field
+    //
     _createInputField :function(field_index){
 
                var field = this.options.params.facets[field_index];
