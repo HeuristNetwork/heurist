@@ -36,7 +36,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     
     
     var map; //google map
-    var data;           
+    var map_data;                  // all map documents/layer/dataset related info
     var overlays = {};             // layers in current map document
     var overlays_not_in_doc = {};  // main layers(current query) and layers added by user/manually
     var loadingbar = null;         // progress bar - overlay on map 
@@ -52,19 +52,19 @@ function _loadMapDocuments(startup_mapdocument) {
     var api = top.HAPI4.basePathV4 + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
 //console.log("API call URL: " + api);
     $.getJSON(api, function(_data) {
-        data = _data;
+        map_data = _data;
 //console.log("DATA");
-//console.log(data);
+//console.log(map_data);
 
         // Have any map documents been defined?
-        if(data.length > 0) {
+        if(map_data && map_data.length > 0) {
             
             // Show options in dropdown
             var ele = $("#map-doc-select");
             ele.empty();
-            ele.append("<option value='-1'>"+(data.length>0?'select...':'none available')+"</option>");
-            for(var i = 0; i < data.length; i++) {
-                ele.append("<option value='"+data[i].id+"'>"+data[i].title+"</option>"); //["+data[i].id+"]
+            ele.append("<option value='-1'>"+(map_data.length>0?'select...':'none available')+"</option>");
+            for(var i = 0; i < map_data.length; i++) {
+                ele.append("<option value='"+map_data[i].id+"'>"+map_data[i].title+"</option>"); //["+map_data[i].id+"]
             }
 
             // select listener - load map documents
@@ -101,9 +101,9 @@ function _loadMapDocumentById(mapdocument_id) {
         
         //find mapdoc data
         var index = -1;
-        if(mapdocument_id>0)
-        for(var i=0;i<data.length;i++){
-            if(mapdocument_id==data[i].id){
+        if(mapdocument_id>0 && map_data)
+        for(var i=0;i<map_data.length;i++){
+            if(mapdocument_id==map_data[i].id){
                 index = i;
                 break;
             }
@@ -111,7 +111,7 @@ function _loadMapDocumentById(mapdocument_id) {
 
         var btnMapEdit = $("#btnMapEdit");
         if(index >= 0) {
-            var doc = data[index];
+            var doc = map_data[index];
             //show info popup
             if(!top.HEURIST4.util.isempty( doc['description']) ){
                 top.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, true);
