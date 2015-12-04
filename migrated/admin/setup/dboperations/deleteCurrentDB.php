@@ -24,7 +24,7 @@
     require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 
-    if(isForAdminOnly("to delete a database")){
+    if(isForOwnerOnly("to delete a database")){
         return;
     }
 ?>

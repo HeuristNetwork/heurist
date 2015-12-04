@@ -351,7 +351,7 @@ $.widget( "heurist.mainMenu", {
                         var options = { title: link.html() };
 
                         if (link.hasClass('small')){
-                            options.height=dim.h*0.55; options.width=dim.w*0.5;
+                            options.height=dim.h*0.6; options.width=dim.w*0.5;
                         }else if (link.hasClass('portrait')){
                             options.height=dim.h*0.8; options.width=dim.w*0.55;
                             if(options.width<700) options.width = 700;
