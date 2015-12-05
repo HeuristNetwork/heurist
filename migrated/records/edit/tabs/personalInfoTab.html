@@ -178,12 +178,14 @@
 			var topTags = top.HEURIST.user.topTags.slice(0);
 			topTags.sort(alphasort);
 			for (var i=0; i < topTags.length; ++i) {
+                if(topTags[i].indexOf('~')===0) continue;
 				addTagLink(topTags[i], topTagsCell);
 			}
 			var recentTagsCell = document.getElementById("recent-tags-cell");
 			var recentTags = top.HEURIST.user.recentTags.slice(0, 8);
 			recentTags.sort(alphasort);
 			for (var i=0; i < recentTags.length; ++i) {
+                if(recentTags[i].indexOf('~')===0) continue;
 				addTagLink(recentTags[i], recentTagsCell);
 			}
 

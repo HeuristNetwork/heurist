@@ -85,10 +85,13 @@ if(@$_REQUEST['recid']){
         <!--<div class="input-header-cell"><h3>Tags</h3></div>
         <div class="input-cell" id="divCurrentTags"></div>-->
 <?php
+            $k = 0;
 			for ($i=0; $i < count($tags); ++$i) {
 				$tag = $tags[$i];
-				if ($i > 0) print ',&nbsp;';
-				print htmlspecialchars($tags[$i]);
+                if(strpos($tag,'~')===0) continue;
+				if ($k > 0) print ',&nbsp;';
+				print htmlspecialchars($tag);
+                $k++;
 			}
 ?>
 
@@ -98,7 +101,7 @@ if(@$_REQUEST['recid']){
 ?>
 <form onSubmit="window.close(true, $('#tags').val()); return false;">
     <div class="input-row">
-        <div class="input-header-cell"><strong>Tags to add or remove</strong></div>
+        <div class="input-header-cell" style="width:145px !important;max-width:145px !important"><strong>Tags to add or remove</strong></div>
         <div class="input-cell" style="min-width:250px">
         	<input id="tags" name="tagString" type="text">
         	<!--<input type="button" value="Save" style="display:none">-->
@@ -107,7 +110,7 @@ if(@$_REQUEST['recid']){
 </form>
 <div id="top-tags-cell">
 	<span class="prompt">Top:</span>
-        <a href="#" class="add-tag-link" onClick="addTag('Favourites'); return false;">Favourites</a> <a href="#" class="add-tag-link" onClick="addTag('To Read'); return false;">To Read</a> |
+        <a href="#" class="add-tag-link" onClick="addTag('Favourites'); return false;">Favourites</a> <a href="#" class="add-tag-link" onClick="addTag('To Read'); return false;">To Read</a> 
 </div>
 <div id="recent-tags-cell">
     	<span class="prompt">Recent:</span>
@@ -167,12 +170,14 @@ var topTagsCell = document.getElementById("top-tags-cell");
 var topTags = top.HEURIST.user.topTags.slice(0);
 topTags.sort(alphasort);
 for (var i=0; i < topTags.length; ++i) {
+    if(topTags[i].indexOf('~')===0) continue;
 	addTagLink(topTags[i], topTagsCell);
 }
 var recentTagsCell = document.getElementById("recent-tags-cell");
 var recentTags = top.HEURIST.user.recentTags.slice(0, 5);
 recentTags.sort(alphasort);
 for (var i=0; i < recentTags.length; ++i) {	// only use the last 5 tags here, we are starved for space
+    if(recentTags[i].indexOf('~')===0) continue;
 	addTagLink(recentTags[i], recentTagsCell);
 }
 
