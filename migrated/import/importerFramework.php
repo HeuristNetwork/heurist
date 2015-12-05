@@ -231,7 +231,7 @@ function mode_file_selection() {
                 <?php
             }else if ($frm == "GEO") {
                 ?>
-                Currently, support is limited to <a href='<?=HEURIST_BASE_URL_V3?>context_help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
+                Currently, support is limited to <a href='<?=HEURIST_BASE_URL_V4?>context_help/kml_import.html' onClick="top.HEURIST.util.popupURL(window, href); return false;">KML</a> format.<br>
                 <?php
             }
         }

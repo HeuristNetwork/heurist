@@ -119,7 +119,8 @@ if(@$_REQUEST['recid']){
 <div id="add-remove-buttons" style="display: none;"></div>
 <div class="actionButtons">
 	<span id="more" class="prompt"><!-- onClick="top.HEURIST.util.popupURL(top, href, {'close-on-blur': true,'no-help':true, 'no-close':true}); return false;" -->
-    	<a href="context_help/tags.html" trget="_blank">More about tags</a></span>
+        <a href="<?=HEURIST_BASE_URL_V4?>context_help/tags.html" onClick="top.HEURIST.util.popupURL(window, this.href); return false;">More about tags</a></span>
+        
 	<input type=button value="add tags" id=add-button>
     <input type=button value="remove tags" id=remove-button>
 </div>
