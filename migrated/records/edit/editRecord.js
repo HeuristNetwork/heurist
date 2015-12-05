@@ -337,7 +337,7 @@ if (! top.HEURIST.edit) {
             if (document) {
                 /* TODO: remove? ARTEM commented out 2012-10-08
                 if (document.getElementById('rectype-img')) {
-                document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ".png)";
+                document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ")";
                 }*/
                 if (document.getElementById('title-val')) {
                     document.getElementById('title-val').innerHTML = top.HEURIST.edit.record.title;

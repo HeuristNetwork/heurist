@@ -53,7 +53,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //
         var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page|migrated)\/.*)|(index.*))/, "");
         that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
-        that.iconBaseURL = that.basePathV4 + 'php/common/rt_icon.php?db='+_database+'&id=';
+        that.iconBaseURL= that.basePathV4 + 'php/common/rt_icon.php?db='+_database+'&id=';
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
         that.database = _database;
 

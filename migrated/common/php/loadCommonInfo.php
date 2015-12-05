@@ -81,7 +81,8 @@
 	print "if (!top.HEURIST.baseURL_V3) top.HEURIST.baseURL_V3 = ".json_format(HEURIST_BASE_URL_V3) . ";\n";
     print "if (!top.HEURIST.baseURL_V4) top.HEURIST.baseURL_V4 = ".json_format(HEURIST_BASE_URL_V4) . ";\n";
 	print "if (!top.HEURIST.iconDir) top.HEURIST.iconDir = ".json_format(HEURIST_ICON_DIR) . ";\n";
-	print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = ".json_format(HEURIST_ICON_URL) . ";\n";
+	print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = top.HEURIST.baseURL_V4+ 'php/common/rt_icon.php?db='+top.HEURIST.database.name+'&id=';\n";
+    //.json_format(HEURIST_ICON_URL) . ";\n";
 
     //print "alert(top.HEURIST.iconBaseURL);";
 

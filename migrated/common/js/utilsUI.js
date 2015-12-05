@@ -2160,7 +2160,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     {
         if(recTypeID && top.HEURIST.rectypes && top.HEURIST.rectypes.names[recTypeID]){
             return "<img src=\""+top.HEURIST.baseURL_V3+"common/images/16x16.gif\" "+
-            "style=\"background-image: url('"+top.HEURIST.iconBaseURL+recTypeID+".png');\" /> "+top.HEURIST.rectypes.names[recTypeID];
+            "style=\"background-image: url('"+top.HEURIST.iconBaseURL+recTypeID+"');\" /> "+top.HEURIST.rectypes.names[recTypeID];
         }else{
             return "";
         }

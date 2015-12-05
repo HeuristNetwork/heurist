@@ -74,7 +74,7 @@ function EditRecStructure() {
 		if (location.search.length > 1) {
 			window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = window.HEURIST.parameters.rty_ID;
-			var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID+".png";
+			var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID;
 			var formTitle = document.getElementById('recordTitle');
 			formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
 		}
