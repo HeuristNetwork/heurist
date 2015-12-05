@@ -514,15 +514,19 @@ if (! top.HEURIST.edit) {
 
                 if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
                     top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3
-                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { callback: function(tags) {
-                            if (tags) {
-                                personalWindow.document.getElementById("tags").value = tags;
-                                top.HEURIST.edit.changed("personal");
-                            }
-                            top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
+                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { 
+                            title: 'Add tags',
+                            height: '360px', width:'450px',
+                            callback: function(tags) {
+                                if (tags) {
+                                    personalWindow.document.getElementById("tags").value = tags;
+                                    top.HEURIST.edit.changed("personal");
+                                }
+                                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
 
-                            setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
-                    } });
+                                setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
+                            } 
+                        });
                     return;
                 }
             }

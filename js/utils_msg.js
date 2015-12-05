@@ -378,9 +378,11 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 
 //    options['callback']
                 //(this.document.find('body').innerHeight()-20)
+                        options.height = parseInt(options.height, 10);
                         if(isNaN(options.height) || options.height<10){
                             options.height = top.innerHeight-20;
                         }
+                        options.width = parseInt(options.width, 10);
                 
                         var opts = {
                                 autoOpen: true,

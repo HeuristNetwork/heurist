@@ -58,16 +58,18 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         }
     },
 
+    // get current font size in em
     em: function(input) {
         var emSize = parseFloat($("body").css("font-size"));
         return (emSize * input);
     },
 
+    // get current font size in pixels
     px: function(input) {
         var emSize = parseFloat($("body").css("font-size"));
         return (input / emSize);
     },
-    
+
     setDisabled: function(element, mode){
       if(element){
           if(!$.isArray(element)){

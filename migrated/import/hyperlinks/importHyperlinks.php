@@ -332,8 +332,10 @@ if (@$urls) {
 or by capturing hyperlinks from a web page (such as a list of links, or a page containing some
 hyperlinks of interest).</p>
 
+<!--
 <p><b>Firefox</b>: Bookmarks <b>&nbsp;&gt;&nbsp;</b> Manage Bookmarks <b>&nbsp;&gt;&nbsp;</b> File <b>&nbsp;&gt;&nbsp;</b> Export, writes <tt>bookmarks.html</tt> by default</p>
 <p style="margin-left: 20px;" class="normal"><b>IE</b>: File <b>&nbsp;&gt;&nbsp;</b> Import and Export <b>&nbsp;&gt;&nbsp;</b> Export Favourites, writes <tt>bookmark.htm</tt> by default</p>
+-->
 
 <div class="separator_row" style="margin:20px 0 5px 0;"></div>
 
@@ -341,15 +343,23 @@ hyperlinks of interest).</p>
  <div class="input-row"><div class="error"><?= $error ?></div></div>
 <?php		} ?>
  <div class="input-row">
-  <div class="input-header-cell"><input type="radio" name="source" value="file" id="radio_file">
-  Import from file:</div>
-  <div class="input-cell"><input type="file" name="file" size="41" onChange="document.getElementById('radio_file').checked = true;"></div>
+        <div class="input-header-cell">
+            <input type="radio" name="source" value="file" id="radio_file">Import from file:</div>
+        <div class="input-cell">
+            <input type="file" name="file" size="41" onChange="document.getElementById('radio_file').checked = 'checked';">
+        </div>
  </div>
  <div class="input-row">
-  <div class="input-header-cell"><input type="radio" name="source" value="url" id="radio_url">Import from URL:</div>
-  <div class="input-cell"><input type="text" name="url" size="50" onChange="document.getElementById('radio_url').checked = true;"><input type="submit" name="mode" value="Analyse"></div>
+        <div class="input-header-cell">
+            <input type="radio" name="source" value="url" id="radio_url">Import from URL:
+        </div>
+        <div class="input-cell">
+            <input type="text" name="url" size="50" onChange="document.getElementById('radio_url').checked = 'checked';">
+        </div>
  </div>
-
+ <div class="input-row" style="text-align:center">
+        <input type="submit" name="mode" value="Analyse">
+ </div>
 
 <?php
 	} else if ($nextmode == 'printurls') {

@@ -1112,7 +1112,10 @@ fillWgTags: function($select){
 /* ART
 showEditTagDialog: function(){
 
-	top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "records/tags/addTagsPopup.html?no-tags", { callback: function(tags) {
+	top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "records/tags/addTagsPopup.html?no-tags", { 
+                            title: 'Add tags',
+                            height: '360px', width:'450px',
+                            callback: function(tags) {
 		if (tags)
 			$input = $(".entry-edit-tags-input", this.$table); {
 			$input.val(tags);

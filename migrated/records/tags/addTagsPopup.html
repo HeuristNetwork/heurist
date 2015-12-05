@@ -65,7 +65,7 @@
 
         </style>
     </head>
- <body width=450 height=360>
+ <body width=450 height=360  class="popup">
   <script src="../../common/js/utilsLoad.js"></script>
   <script src="../../common/php/displayPreferences.php"></script>
   <script src="autocompleteTags.js"></script>
@@ -171,12 +171,14 @@ var topTagsCell = document.getElementById("top-tags-cell");
 var topTags = top.HEURIST.user.topTags.slice(0);
 topTags.sort(alphasort);
 for (var i=0; i < topTags.length; ++i) {
+    if(topTags[i].indexOf('~')===0) continue;
 	addTagLink(topTags[i], topTagsCell);
 }
 var recentTagsCell = document.getElementById("recent-tags-cell");
 var recentTags = top.HEURIST.user.recentTags.slice(0, 5);
 recentTags.sort(alphasort);
 for (var i=0; i < recentTags.length; ++i) {	// only use the last 5 tags here, we are starved for space
+    if(recentTags[i].indexOf('~')===0) continue;
 	addTagLink(recentTags[i], recentTagsCell);
 }
 
