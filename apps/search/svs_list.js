@@ -504,10 +504,15 @@ $.widget( "heurist.svs_list", {
 
                          var newdata = $.parseJSON(response.data);
 
-                         if( !top.HAPI4.currentUser.ugr_SvsTreeData[groupID] ||
-                             !top.HAPI4.currentUser.ugr_SvsTreeData[groupID].modified ||
-                             newdata[groupID].modified > top.HAPI4.currentUser.ugr_SvsTreeData[groupID].modified){
+                         if( !newdata[groupID] ||
+                             !top.HAPI4.currentUser.ugr_SvsTreeData[groupID] ||
+                             (top.HAPI4.currentUser.ugr_SvsTreeData[groupID].modified &&
+                             newdata[groupID].modified <= top.HAPI4.currentUser.ugr_SvsTreeData[groupID].modified))
+                         {
 
+                             continueFunc();
+                                 
+                         }else{
                              top.HAPI4.currentUser.ugr_SvsTreeData[groupID] = newdata[groupID];
 
                              that._redefineContent( groupID );
@@ -516,8 +521,6 @@ $.widget( "heurist.svs_list", {
                                top.HAPI4.currentUser.usr_GroupsList[groupID][1]
                                 +'" group has been modified by another user. The tree will be reloaded. '
                                 +'Please repeat your operation with the new tree');
-                         }else{
-                             continueFunc();
                          }
                     }
                     catch (err) {

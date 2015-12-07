@@ -1007,6 +1007,7 @@ function RectypeManager() {
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": false,
+                title: 'RECORD STRUCTURE',
                 height: dim.h*0.9,
                 width: 860,
                 "no-close": true,

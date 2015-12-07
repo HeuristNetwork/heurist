@@ -55,10 +55,28 @@
 		}
 
 	</style>
+    <script type="text/javascript">
+            function onDocumentReady(){
+                //resize parent dialog
+                setTimeout(function(){
 
+                    var body = document.body,
+                        html = document.documentElement;
+
+                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight );                    
+                    var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth, 
+                                           html.clientWidth, html.scrollWidth, html.offsetWidth ); 
+                                                              
+                    if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
+                        doDialogResize(desiredWidth, desiredHeight);              
+                    }
+                }, 1000);
+            }
+    </script>
  </head>
 
- <body class="popup" width="600" height="500" style="overflow:hidden;">
+ <body class="popup" width="600" height="400" style="overflow:hidden;" onload="onDocumentReady()">
   <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
   <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
   <script type="text/javascript" src="../../common/php/displayPreferences.php"></script>

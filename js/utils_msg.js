@@ -354,6 +354,18 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                     $dlg.dialog('close');
                     return true;
                 };             
+
+                $dosframe[0].doDialogResize = function(width, height) {
+                    //top.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
+                    var body = $(this.document).find('body');
+                    var dim = {h:body.innerHeight()-10, w:body.innerWidth()-10};
+                    
+                    if(width>0)
+                        $dlg.dialog('option','width', Math.min(dim.w, width));
+                    if(height>0)
+                        $dlg.dialog('option','height', Math.min(dim.h, height));
+                };
+
                 
                 //on load content event listener
                 $dosframe.on('load', function(){
@@ -366,7 +378,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         }
                         content.close = $dosframe[0].close;    // make window.close() do what we expect
                         //content.popupOpener = opener;  
-                        
+                        content.doDialogResize = $dosframe[0].doDialogResize;
                         
                         var onloadCallback = options['onpopupload'];
                         if(onloadCallback){

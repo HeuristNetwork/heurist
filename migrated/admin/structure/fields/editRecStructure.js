@@ -227,7 +227,8 @@ function EditRecStructure() {
                 sortable:false, width:10,
                 formatter: function(elLiner, oRecord, oColumn, oData) {
                     elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' title='Click to add new field or section header' style='cursor:pointer;' "+
-                    " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldMenu(event);}' >";
+                    " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event);}' >";
+                    //editStructure.onAddFieldMenu(event);
                 }
             },
 			{
@@ -1230,6 +1231,11 @@ function EditRecStructure() {
 	*/
 	function _addDetails(dty_ID_list, index_toinsert){
 
+        if(dty_ID_list=='section_header'){
+            _onAddSeparator(index_toinsert);
+            return;
+        }
+
 		var arrDty_ID = dty_ID_list.split(",");
 		if(Hul.isempty(dty_ID_list) || arrDty_ID.length<1) {
 			return;
@@ -1585,6 +1591,7 @@ function EditRecStructure() {
                         {
                             "close-on-blur": false,
                             "no-resize": true,
+                            title: 'Record Type Title Mask Edit',
                             height: 800,
                             width: 800,
                             callback: function(newvalue) {
@@ -1593,6 +1600,20 @@ function EditRecStructure() {
                     });
     }
 
+    function _onAddFieldAtIndex(e){
+        e = top.HEURIST.util.stopEvent(e);
+        var targ = e.target;
+        var rst_ID = targ.getAttribute("rst_ID")
+
+        if(!rst_ID) return;
+
+        var index_toinsert = _getRecordById(rst_ID).row_index+1;
+        _myDataTable.unselectAllRows();
+        
+        onAddNewDetail(index_toinsert);
+    }
+    
+    //Ian decided to remove this feature -however it may be helpful in another place
     var onMenuClick = function (eventName, eventArgs, subscriptionArg){
             var clonearr = top.HEURIST.util.cloneObj(subscriptionArg);
             var fname = clonearr.shift();
@@ -1936,6 +1957,10 @@ function EditRecStructure() {
 		onAddSeparator: function(index_toinsert){
 			_onAddSeparator(index_toinsert);
 		},
+        
+        onAddFieldAtIndex: function(e){
+           _onAddFieldAtIndex(e);
+        },
 
         onAddFieldMenu: function(e){
            _addFieldMenu(e);
@@ -1999,6 +2024,7 @@ function onAddNewDetail(index_toinsert){
 		"admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
+            title: 'Add Field',
 			height: dim.h*0.9,
 			width: 700, //back to fixed width    dim.w*0.5,
 
@@ -2038,6 +2064,7 @@ function onDefineNewType(index_toinsert){
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
+            title: 'Edit field type',
 			height: 700,
 			width: 700,
 				callback: function(context) {

@@ -377,16 +377,21 @@ function checkIfInteger(evt) {
 
 //
 function updateRectypeOnServer() {
+    if($('#btnSave').is(":disabled")) return;
+    $('#btnSave').attr('disabled','disabled');
+    
     testTitleMask(); //then it calls updateRectypeOnServer_continue
 }
 
 function updateRectypeOnServer_continue()
 {
     if(!titleMaskIsOk){
+        $('#btnSave').removeAttr('disabled');
         alert("Title mask is invalid");
         return;
     }
     if(!(rectypeID>0 || _rectype_icon!='')){
+        $('#btnSave').removeAttr('disabled');
         alert("Please select Icon for new record type");
         return;
     }
@@ -426,6 +431,7 @@ function updateRectypeOnServer_continue()
 }
 
 var updateResult = function(context) {
+    $('#btnSave').removeAttr('disabled');
     top.HEURIST.rectypes.saveStatus = context;
 
     if(!Hul.isnull(context)) {
@@ -484,6 +490,7 @@ function editRecStructure()
     Hul.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
             "close-on-blur": false,
             "no-resize": false,
+            title: 'RECORD STRUCTURE',
             height: 480,
             width: 620,
             callback: function(context) {

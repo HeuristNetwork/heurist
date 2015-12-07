@@ -252,6 +252,7 @@ if (@$_REQUEST['order_by_popularity']) {
 	$res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as cnt from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID= ' . get_user_id() . ' group by tag_ID order by tag_Text');
 }
 
+$tagsCount = 0;
 $foreach_kwd = $foreach_kwd_js = '';
 while ($row = mysql_fetch_row($res)) {
 	$foreach_kwd .=
@@ -271,9 +272,12 @@ while ($row = mysql_fetch_row($res)) {
         </tr>';
 
 	$foreach_kwd_js .= "kwd['".escChars(strtolower($row[1]))."'] = ".$row[0].";\n";
+    $tagsCount++;
 }
-if($foreach_kwd==''){
+if($tagsCount==0){
     $foreach_kwd = '<h2>You have not defined any tags</h2>';
+}else{
+    $foreach_kwd_js .=  'tagsCount='.$tagsCount."\n";
 }
 
 $kwd_select = "<select id=kwd_select style=\"display: none;\"><option value=\"\" disabled selected>select tag...</option>";
@@ -298,6 +302,11 @@ $template = str_replace('{UserHyperlinksImport}', $user_hyperlinks_import, $temp
 $template = str_replace('{sortby_button}', $sortby_button, $template);
 $template = str_replace('{sortby_input}', $sortby_input, $template);
 $template = str_replace('{kwd_select}', $kwd_select, $template);
+
+/*
+$template = str_replace('{resize_button}', 
+'<button class="button" value="resize" onclick="{if(!!(doDialogResize    && doDialogResize.call && doDialogResize.apply)) doDialogResize(500,700);}" style="float: right;">reize</button>', $template);
+*/
 
 echo($template);
 

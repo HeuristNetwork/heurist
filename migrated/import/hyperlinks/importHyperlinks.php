@@ -298,10 +298,29 @@ if (@$urls) {
 		.similar_bm{text-align: left;width:100%;color: #6A7C99;}
 		.similar_bm label{text-align: left;}
 	</style>
+    <script type="text/javascript">
+            function onDocumentReady(){
+                //resize parent dialog
+                setTimeout(function(){
+
+                    var body = document.body,
+                        html = document.documentElement;
+
+                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight );                    
+                    var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth, 
+                                           html.clientWidth, html.scrollWidth, html.offsetWidth ); 
+                                                              
+                    if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
+                        doDialogResize(desiredWidth, desiredHeight);              
+                    }
+                }, 1000);
+            }
+    </script>
 </head>
 
 
-<body class="popup" width=600 height=400 style="margin:10px;">
+<body class="popup" width=600 height=400 style="margin:10px;" onload="onDocumentReady()">
 
 <script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js"></script>
 <script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsUI.js"></script>
@@ -318,7 +337,8 @@ if (@$urls) {
 <?php //this frame is needed for title lookup ?>
 <iframe style="display: none;" name="grabber"></iframe>
 
-<form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" name="mainform" style="margin: 0px 3px;">
+<form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" 
+        enctype="multipart/form-data" name="mainform" id="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
 <input type="hidden" name="adding_tags" value="0" id="adding_tags_elt">

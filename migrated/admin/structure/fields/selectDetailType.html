@@ -115,6 +115,17 @@
                     <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;">
                             <option value="all">all groups</option>
                     </select>
+                    
+                    <div style="display:inline-block;" class="input-header-cell">
+                        Show
+                    </div>
+                    <div style="display:inline-block;">
+                        <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/>
+                            <label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
+                        <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/>
+                            <label for="inputFilterBySelection2" style="text-align:left">Selected</label>
+                    </div>
+                    
                 </div>
             </div>
             
@@ -128,19 +139,16 @@
                 </div>
             </div>
             
-	        <div class="input-row">
-		        <div style="display:inline-block;" class="input-header-cell">
-			        Show
-		        </div>
-		        <div style="display:inline-block;">
-			        <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/><label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
-			        <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/><label for="inputFilterBySelection2" style="text-align:left">Selected</label>
-			        <a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
+	        <div>
+                <div style="padding-left:30px"><b>Not finding field you require?</b></div>
+                <div style="padding:10px 0 0 105px">
+                <input type="button" style="margin:0 5px;min-width:11ex;" value="Add section header" 
+                    onClick="{window.selectDetailType.addHeader();}" 
+                    title="Add section header" />
+	            <input type="button" style="margin:0 5px;min-width:11ex;" value="Define New field" 
+                    onClick="{window.selectDetailType.onDefineNewType();}" 
+                    title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new field type." />
                 </div>
-                
-	          <div  style="float:right;text-align:right;">
-	            <input type="button" style="margin:0 5px;min-width:11ex;" value="Define New" onClick="{window.selectDetailType.onDefineNewType();}" title="Create a completely new field type - it is preferable to use an existing type (choose below and Insert Selected) before creating a new field type." />
-	          </div>
 	        </div>
         </div>
 
@@ -149,6 +157,7 @@
           <div style="float:right; text-align:right;padding-top:5px">
             <label id="lblSelect1"></label>
             <!--  <input type="button" tabindex="12" value="Cancel" onClick="selectDetailType.cancel();" />-->
+            <a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear selection">clear</a>
             <input type="button" tabindex="11" value="Insert selected" onClick="onApply()" />
           </div>
         </div>

@@ -120,7 +120,6 @@
         
         <script type="text/javascript">
         <!--
-
 	        function delete_kwd(tag_ID, tag_Text, use_count) {
 		        if (use_count == 0) {
 			        if (! confirm('Tag "'+tag_Text+'" is currently unused. Remove forever?')) return;
@@ -210,11 +209,48 @@
 		        }
 		        container.appendChild(b);
 	        }
+            
+            var tagsCount = 0;
+            
+            function onDocumentReady(){
+                if ('{section}' != ''  &&  
+                        (enddoc=document.getElementById('enddoc'))  &&  
+                        (elt=document.getElementById('{section}'))) { 
+                            enddoc.focus(); 
+                            elt.focus(); 
+                            elt.blur(); 
+                }                
+                //resize parent dialog
+                setTimeout(function(){
+                    
+                    var body = document.body,
+                        html = document.documentElement;
+
+                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight );                    
+                    var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth, 
+                                           html.clientWidth, html.scrollWidth, html.offsetWidth ); 
+                                                              
+                    if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
+                        doDialogResize(desiredWidth, desiredHeight);              
+                    }
+/*                    
+                var desiredHeight = 300;
+                if(tagsCount>0){
+                    desiredHeight = tagsCount*24+200; 
+                }
+                if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
+                    doDialogResize(0, desiredHeight);              
+                }
+*/                
+                }, 1000);
+            }
+            
         //-->
         </script>
     </head>
 
-    <body style="padding:20px" class="popup" onLoad="if ('{section}' != ''  &&  (enddoc=document.getElementById('enddoc'))  &&  (elt=document.getElementById('{section}'))) { enddoc.focus(); elt.focus(); elt.blur(); }">
+    <body style="padding:20px" class="popup" onLoad="onDocumentReady()">
 
         <div class="hide_on_bookmark_import"> 
             <a name="tag_edit"> </a>

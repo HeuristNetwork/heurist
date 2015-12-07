@@ -110,7 +110,7 @@ function SelectDetailType() {
 
 		//refill array
 		// 1. Reads GET parameters
-		if (location.search.length > 1) {
+		if (location.search && location.search.length > 1) {
 			//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = top.HEURIST.parameters.rty_ID;
@@ -560,6 +560,7 @@ function SelectDetailType() {
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
+                title: 'Define new field type',
 			height: 700,
 			width: 700,
 				callback: function(context) {
@@ -596,6 +597,11 @@ function SelectDetailType() {
 						window.close(res);
 				},
 
+                addHeader : function () {
+                        var res = "section_header";
+                        window.close(res);
+                },
+                
 				/**
 				 * Cancel form - closes this window
 				 */

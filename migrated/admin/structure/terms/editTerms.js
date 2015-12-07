@@ -317,7 +317,14 @@ function EditTerms() {
     */
     function _onNodeClick(obj){
 
-        var node = obj.node;
+        var node = null;
+        if(obj){
+            if(obj.node){
+                node = obj.node;
+            }else{
+                node = obj;
+            }
+        }
 
         _parentNode = null;
 
@@ -434,10 +441,11 @@ function EditTerms() {
             Dom.get('formMessage').style.display = "block";
         }
 
-
-        var ind = _tabView.get("activeIndex");
-        var tv = (ind===0)?_termTree1:_termTree2;
-        tv.onEventToggleHighlight(obj);
+        if(node){ //obj && obj.event){
+            var ind = _tabView.get("activeIndex");
+            var tv = (ind===0)?_termTree1:_termTree2;
+            tv.onEventToggleHighlight(node);
+        }
     }
 
     /**
@@ -774,11 +782,11 @@ function EditTerms() {
         for (ind in sibs){
             if(!Hul.isnull(ind)){
                 if(sibs[ind].label == new_name){
-                    alert("Duplicate term - there is already a term with the same label in this branch at this level");
+                    alert("Duplicate term '"+new_name+"' - there is already a term with the same label in this branch at this level");
                     return false;
                 }
                 if(new_code!='' && sibs[ind].data.termcode == new_code){
-                    alert("There is already a term with the same standard code in this branch");
+                    alert("There is already a term with the standard code '"+new_code+"' in this branch");
                     return false;
                 }
             }

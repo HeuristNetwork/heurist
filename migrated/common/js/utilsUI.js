@@ -1959,7 +1959,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }else if (Number(msg)===-1){
             msg = "No response from server, please try again later";
         }else if (msg.toLowerCase().indexOf("error")<0){
-            msg = "An unknown error occurred: " + msg;
+            msg = "Error occurred: " + msg;
         }
         if(top.HEURIST4 && top.HEURIST4.msg){
             top.HEURIST4.msg.showMsgErr(msg);

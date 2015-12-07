@@ -837,10 +837,6 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
             case "point":
                 matches = wkt.match(/POINT\((\S+)\s+(\S+)\)/i);
                 break;
-            case "r":  //rectangle
-            case "rect":
-                matches = wkt.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
-                break;
 
             case "c":  //circle
             case "circle":
@@ -856,6 +852,10 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 }
                 break;
 
+            case "r":  //rectangle
+            case "rect":
+                //matches = wkt.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
+                //break;
             case "pl": //polygon
             case "polygon":
                 matches = wkt.match(/POLYGON\(\((.+)\)\)/i);
@@ -889,6 +889,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
 
                     break;
 
+                /*
                 case "r":  //rectangle
                 case "rect":
 
@@ -921,7 +922,7 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                     }
 
                     break;
-
+                */
                 case "c":  //circle
                 case "circle":  //circle
 
@@ -956,6 +957,8 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
                 case "path":
                 case "polyline":
 
+                case "r":  //rectangle
+                case "rect":
                 case "pl": //polygon
                 case "polygon":
 

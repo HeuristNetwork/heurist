@@ -731,6 +731,8 @@ function DetailTypeEditor() {
     * @param context - data from server
     */
     function _updateResult(context) {
+        $('#btnSave').removeAttr('disabled');
+
         if(!Hul.isnull(context)){
 
             var error = false,
@@ -775,9 +777,12 @@ function DetailTypeEditor() {
     */
     function _updateDetailTypeOnServer()
     {
+        if($('#btnSave').is(":disabled")) return;
+        $('#btnSave').attr('disabled','disabled');
 
         //1. gather changed data
         if(_fromUItoArray(true)==="mandatory"){ //save all changes
+            $('#btnSave').removeAttr('disabled');
             return;
         }
 

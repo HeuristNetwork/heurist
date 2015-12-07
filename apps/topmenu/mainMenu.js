@@ -343,7 +343,7 @@ $.widget( "heurist.mainMenu", {
 
     _onPopupLink: function(event){
 
-                        var body = this.document.find('body');
+                        var body = $(this.document).find('body');
                         var dim = {h:body.innerHeight(), w:body.innerWidth()},
                             link = $(event.target),
                             that = this;

@@ -1262,7 +1262,7 @@
                 } else {
                     $recCount = $res->num_rows;
                     if($recCount>0){
-                        $ret = "Duplicate label or code not allowed terms at same level in tree";
+                        $ret = "Duplicate label '$ch_label' or code '$ch_code' not allowed terms at same level in tree";
                     }
                 }
 
