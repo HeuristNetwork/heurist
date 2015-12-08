@@ -226,7 +226,9 @@ function EditRecStructure() {
                 label: "Add",
                 sortable:false, width:10,
                 formatter: function(elLiner, oRecord, oColumn, oData) {
-                    elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' title='Click to add new field or section header' style='cursor:pointer;' "+
+                    elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
+                    //+" title='Click to add new field or section header' "+
+                    +" title='Click this button to insert a new field or section header at this point in the record structure / data entry form' "+
                     " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event);}' >";
                     //editStructure.onAddFieldMenu(event);
                 }

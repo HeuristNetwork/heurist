@@ -427,6 +427,7 @@ function DetailTypeEditor() {
                     "close-on-blur": false,
                     "no-resize": true,
                     "no-close": true,
+                    title: 'Edit Vocabulary',
                     height: 340,
                     width: 700,
                     callback: function(context) {
@@ -451,6 +452,7 @@ function DetailTypeEditor() {
                 {
                     "close-on-blur": false,
                     "no-resize": true,
+                    title: 'Select terms',
                     height: 500,
                     width: 750,
                     callback: function(editedTermTree, editedDisabledTerms) {
@@ -502,6 +504,7 @@ function DetailTypeEditor() {
             Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": true,
+                title: 'Select Record Type',
                 height: 480,
                 width: 440,
                 callback: function(recordTypesSelected) {
@@ -984,6 +987,7 @@ function DetailTypeEditor() {
                 {
                     "close-on-blur": false,
                     "no-resize": false,
+                    title: 'Edit Terms',
                     height: 620,
                     width: 900,
                     callback: function(needTreeReload) {

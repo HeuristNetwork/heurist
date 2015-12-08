@@ -214,7 +214,7 @@ function SelectDetailType() {
 								{ key: "description",   hidden:true},
 								{ key: "group",   hidden:true},
 								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-										elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
+										elLiner.innerHTML = '<img src="../../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
 					            { key: "usage", label: "Used in ...", sortable:true, className:'center',
 					                formatter: function(elLiner, oRecord, oColumn, oData) {
 					                var str = oRecord.getData("usage");
@@ -576,6 +576,7 @@ function SelectDetailType() {
                             //close after creation of new field
                             var res = _arr_selection.join(",");
                             window.close(res);
+                            return true;
                         }
 
 						//new field type to be added - refresh list

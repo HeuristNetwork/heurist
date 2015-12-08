@@ -339,7 +339,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 var $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
                             .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                 $dosframe.hide();
-
+/*
                 //on close event listener - invoke callback function if defined
                 $dosframe[0].close = function() {
                     var rval = true;
@@ -354,7 +354,8 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                     $dlg.dialog('close');
                     return true;
                 };             
-
+*/
+                //callback function to resize dialog from internal frame functions
                 $dosframe[0].doDialogResize = function(width, height) {
                     //top.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
                     var body = $(this.document).find('body');
@@ -376,7 +377,25 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         if(!options["title"]){
                             $dlg.dialog( "option", "title", content.document.title );
                         }
-                        content.close = $dosframe[0].close;    // make window.close() do what we expect
+                        
+                        //functions in internal document
+                        //content.close = $dosframe[0].close;    // make window.close() do what we expect
+                        content.close = function() {
+                            var did = $dlg.attr('id');
+                            $dlg.dialog('close');
+                            
+                            var rval = true;
+                            var closeCallback = options['callback'];
+                            if(closeCallback){
+                                rval = closeCallback.apply(opener, arguments);
+                            }
+                            if ( rval===false ){ //!rval  &&  rval !== undefined){
+                                return false;
+                            }
+                            return true;
+                        }; 
+                        
+                        
                         //content.popupOpener = opener;  
                         content.doDialogResize = $dosframe[0].doDialogResize;
                         
@@ -412,6 +431,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                                 }
                         };
                         $dlg.dialog(opts);
+                        //start content loading
                         $dosframe.attr('src', url);
 
     },
