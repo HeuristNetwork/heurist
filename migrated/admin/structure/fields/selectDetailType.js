@@ -334,7 +334,7 @@ function SelectDetailType() {
 	}//end of initialization ==============================
 
 	function _showSelectCount(){
-				lblSelect1.innerHTML = "You selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length>1)?"s":"");
+				lblSelect1.innerHTML = "Selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length!=1)?"s":"");
 				if(!Hul.isnull(lblSelect2)) {
 					lblSelect2.innerHTML = lblSelect1.innerHTML;
 				}
@@ -573,7 +573,7 @@ function SelectDetailType() {
 						if(!isNaN(_dtyID)){
 							_arr_selection.push(""+Math.abs(_dtyID));
 
-                            //close after creation of new field                            
+                            //close after creation of new field
                             var res = _arr_selection.join(",");
                             window.close(res);
                         }
@@ -601,7 +601,7 @@ function SelectDetailType() {
                         var res = "section_header";
                         window.close(res);
                 },
-                
+
 				/**
 				 * Cancel form - closes this window
 				 */

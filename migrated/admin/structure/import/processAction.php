@@ -799,10 +799,8 @@ function dropDB() {
 	$isTempDB = strpos($tempDBName, "temp_");
 	if($isTempDB !== false) {
 		mysql_query("drop database ".$tempDBName);
-		if(!mysql_error()) {
-			$message = "Temporary database was sucessfully deleted";
-		} else {
-			$message = "Error: Something went wrong deleting the temporary database";
+		if(mysql_error()) {
+			$message = "Warning: Error deleting the temporary database. Please let your sysadmin know so that they are aware of this.";
 			$res = false;
 		}
 	} else {
