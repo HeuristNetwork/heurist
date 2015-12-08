@@ -295,12 +295,12 @@ optgroup {
 /*  SEARCH RESULT */
 
 .bookmarked {
-    background-image: url(assets/star-red.png);
+    background-image: url(assets/bookmark.png);
     height:16px;
     width:12px;
 }
 .unbookmarked {
-    background-image: url(assets/star-white.png);
+    background-image: url(assets/nobookmark.png);
 }
 
 
