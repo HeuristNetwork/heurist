@@ -749,6 +749,13 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .svs-contextmenu{
 
 }
+.svs-type-icon{
+    display:inline-block;
+    height:1em;
+    top:2px;
+    font-size:0.9em;
+    width:1em;
+}
 
 ul > li:hover > .svs-contextmenu, div:hover > .svs-contextmenu {
     display: inline-block;

@@ -585,17 +585,18 @@ $.widget( "heurist.svs_list", {
 
 
                   if(node.data.isfaceted){
-                        s = '<span class="ui-icon ui-icon-box" style="float:right;font-size:1em" title="faceted" ></span>';
+                        s = '<span class="ui-icon ui-icon-box svs-type-icon" title="faceted" ></span>';
                         s_hint = this._HINT_FACETED;
                   }else if(top.HAPI4.currentUser.usr_SavedSearch[node.key]) {
                         var qsearch = top.HAPI4.currentUser.usr_SavedSearch[node.key][_QUERY];
                         var hasrules = that._hasRules(qsearch);
                         if(hasrules==1){ //withrules
-                            s = '<span class="ui-icon ui-icon-shuffle" style="float:right;font-size:1em;width:0.9em;"></span>'
-                                +'<span class="ui-icon ui-icon-plus" style="float:right;font-size:0.8em;width:0.7em;"></span>';
+                            s = '<span class="ui-icon ui-icon-plus svs-type-icon"></span>'
+                                +'<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
+                                
                             s_hint = this._HINT_WITHRULES;
                         }else if(hasrules==2){ //rules only
-                            s = '<span class="ui-icon ui-icon-shuffle" style="float:right;font-size:1em" title="rules" ></span>';
+                            s = '<span class="ui-icon ui-icon-shuffle svs-type-icon" title="rules" ></span>';
                             s_hint = this._HINT_RULESET;
                         }
                   }
@@ -603,7 +604,10 @@ $.widget( "heurist.svs_list", {
                   if(s==''){
                         $span.find("> span.fancytree-title").text(node.title);
                   }else{
-                        $span.find("> span.fancytree-title").html(node.title + s);
+                      //'<span style="display:inline-block;">'+node.title+ '</span>'
+                      //'<div style="display:inline-block;">'+node.title+'</div>'
+                      //
+                        $span.find("> span.fancytree-title").html( node.title+' '+s );
                             //.attr('title', s_hint);
                   }
               }
