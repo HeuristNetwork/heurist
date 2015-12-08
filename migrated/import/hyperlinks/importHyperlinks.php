@@ -314,7 +314,7 @@ if (@$urls) {
                     if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
                         doDialogResize(desiredWidth, desiredHeight);              
                     }
-                }, 1000);
+                }, 500);
             }
     </script>
 </head>

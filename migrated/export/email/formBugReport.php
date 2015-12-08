@@ -168,7 +168,7 @@
 		</script>
 
 	</head>
-	<body class="popup" onLoad="addFileUploadInput()"> <!-- size set at call -->
+	<body class="popup" width="600" height="400" onLoad="addFileUploadInput()"> <!-- size set at call -->
 		<script src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
 
