@@ -75,7 +75,7 @@
                                            
                     var desiredHeight = $(contentWindow.document.forms[0]).height() + 100;                                           
                                                               
-                    if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
+                    if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
                         doDialogResize(0, desiredHeight);              
                     }
                 }, 500);

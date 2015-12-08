@@ -344,7 +344,7 @@ $.widget( "heurist.mainMenu", {
     _onPopupLink: function(event){
 
                         var body = $(this.document).find('body');
-                        var dim = {h:body.innerHeight(), w:body.innerWidth()},
+                        var dim = {h:body.innerHeight   (), w:body.innerWidth()},
                             link = $(event.target),
                             that = this;
 
@@ -652,8 +652,9 @@ $.widget( "heurist.mainMenu", {
             })
             $dlg.find('.header').css({'min-width':'300px', 'width':'300px'});
 
-            populateLanguages(); //fill list of languages
-            populateLayouts(); //fill list of layouts
+            //fill list of languages
+            //fill list of layouts
+            initProfilePreferences();
 
             //assign values to form fields from top.HAPI4.currentUser['ugr_Preferences']
             var prefs = top.HAPI4.currentUser['ugr_Preferences'];
@@ -759,7 +760,7 @@ $.widget( "heurist.mainMenu", {
 
             $dlg.dialog({
                 autoOpen: true,
-                height: 650,
+                height: 580,
                 width: 800,
                 modal: true,
                 resizable: false,

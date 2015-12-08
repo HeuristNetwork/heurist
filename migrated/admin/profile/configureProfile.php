@@ -305,7 +305,7 @@ $template = str_replace('{kwd_select}', $kwd_select, $template);
 
 /*
 $template = str_replace('{resize_button}', 
-'<button class="button" value="resize" onclick="{if(!!(doDialogResize    && doDialogResize.call && doDialogResize.apply)) doDialogResize(500,700);}" style="float: right;">reize</button>', $template);
+'<button class="button" value="resize" onclick="{if(typeof doDialogResize != 'undefined'    && doDialogResize.call && doDialogResize.apply) doDialogResize(500,700);}" style="float: right;">reize</button>', $template);
 */
 
 echo($template);

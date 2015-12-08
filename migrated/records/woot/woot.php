@@ -460,7 +460,7 @@ function saveWoot($args) {
 							 from ".PERMISSION_TABLE." where wprm_ChunkID=$prevChunkId");
 				}
 
-				if ($chunk["nonce"]) {
+				if (@$chunk["nonce"]) {
 					// if the client hasn't specified a nonce they're obviously not interested in the resulting chunk number
 					$chunkNonceToNumber[$chunk["nonce"]] = $chunkNumber;
 				}
@@ -526,7 +526,7 @@ function insertPermissions($chunkId, &$chunk, $creatorId) {
 	foreach ($chunk["permissions"] as $permission) {
 		$permission["type"] = strtoupper($permission["type"]);
 		if (! preg_match('/^(RW|RO)$/', $permission["type"])  ||
-		    ! ($permission["userId"]  ||  $permission["groupId"])) {
+		    ! (@$permission["userId"]  ||  @$permission["groupId"])) {
 			return(array("success" => false,
                          "errorType" => "invalid chunk permissions",
                          "chunkNonce" => $chunk["nonce"]));
@@ -585,7 +585,7 @@ function insertWootPermissions($wootId, &$woot) {
 	foreach ($woot["permissions"] as $permission) {
 		$permission["type"] = strtoupper($permission["type"]);
 		if (! preg_match('/^(RW|RO)$/', $permission["type"])  ||
-		    ! ($permission["userId"]  ||  $permission["groupId"])) {
+		    ! (@$permission["userId"]  ||  @$permission["groupId"])) {
 			return(array("success" => false, "errorType" => "invalid woot permissions"));
 		}
 		if (@$permission["userId"] == -1) {	// automagic reference to userId -1 is converted to the owner's id

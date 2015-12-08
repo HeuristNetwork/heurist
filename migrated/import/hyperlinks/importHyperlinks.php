@@ -311,7 +311,7 @@ if (@$urls) {
                     var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth, 
                                            html.clientWidth, html.scrollWidth, html.offsetWidth ); 
                                                               
-                    if(!!(doDialogResize && doDialogResize.call && doDialogResize.apply)) {
+                    if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
                         doDialogResize(desiredWidth, desiredHeight);              
                     }
                 }, 500);
