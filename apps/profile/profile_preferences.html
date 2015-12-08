@@ -18,11 +18,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 -->
-
-
 <script type="text/javascript">
 
-    function populateLanguages(){
+    function initProfilePreferences(){
+        
         var sel = $("#layout_language");
         if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
 
@@ -35,10 +34,8 @@
                 }
             }
         }
-    }
-    
-    function populateLayouts(){
-        var sel = $("#layout_id");
+        
+        sel = $("#layout_id");
         if(sel.length==1){ //global variable defined in layout_default.js
 
             var key;
@@ -50,12 +47,43 @@
                 }
             }
         }
+        
+        //init bookmarklet
+        sel = $("#bookmarklet-link");
+        if(sel.length==1){ //global variable defined in layout_default.js
+            sel.attr('href',
+            "javascript:(function(){h='" + top.HAPI4.basePathV3 + "';"
+            + "d=document;c=d.contentType;"
+            + "if(c=='text/html'||!c){"
+            + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+            + "s=d.createElement('script');s.type='text/javascript';"
+            + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+top.HAPI4.database+"';"
+            + "d.getElementsByTagName('head')[0].appendChild(s);}"
+            + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+top.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+            //+ "window.setTimeout('w.focus()',200);}"
+            + "}})();"            
+            );
+            sel.text('>> '+top.HAPI4.database)
+        }
     }
     
 </script>
 
-<form>
+<form style="font-size:0.9em">
     <fieldset>
+    
+        <h3>Bookmarklet</h3>
+        <div>
+            <label class="header">Drag this link on your bookmarks bar</label><b><u>
+            <a id="bookmarklet-link" 
+                onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}" 
+                title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."            
+                href="#"></a>
+            </u></b><label>&nbsp;(it provides bookmarking of web pages)</label><br><br>
+        </div>
+        
+        <hr/>
+        
         <h3>Search</h3>
         <div>
             <div class="header"><label for="search_limit">Block size for loading record data</label></div>
@@ -108,7 +136,7 @@
             <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
         </div>
         <div>
-            <div class="header"><label for="layout_theme">Theme</label></div>
+            <div class="header"><label>Theme</label></div>
             <div id="layout_theme" style="min-width: 300px;"></div>
             <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
         </div>

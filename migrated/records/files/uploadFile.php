@@ -121,17 +121,34 @@
         mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
             '", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
         /* nonce is a random value used to download the file */
-        /*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".$filename);
+        /*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".HEURIST_FILES_DIR.$filename);
+
+        if(!file_exists($tmp_name)){
+error_log("NOT FOUND ".$tmp_name);
+        }
+
         $pos = strpos($tmp_name, HEURIST_FILES_DIR);   
-        if( is_numeric($pos) && $pos==0 && copy($tmp_name, HEURIST_FILES_DIR . "/" . $filename) )  //file is already in upload folder
+        if( copy($tmp_name, HEURIST_FILES_DIR .  $filename) )  //file is already in upload folder
         {
+            //rename file    
             unlink($tmp_name);
             return $file_id;
 
-        } else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_FILES_DIR . "/" . $filename)) {  //move file into upload folder
+        } 
+        /*else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_FILES_DIR . $filename)) {  //move file into upload folder
 
             return $file_id;
-        } else {
+        }*/
+        /*
+        
+        $isError = move_uploaded_file($tmp_name, HEURIST_FILES_DIR . $filename);
+error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$isError);         
+        if($isError==true){
+            return $file_id;
+        }else*/
+        
+        if(true){
+            
             /* something messed up ... make a note of it and move on */
             $uploadFileError = "upload file: $name couldn't be saved to upload path definied for db = "
             . HEURIST_DBNAME." (".HEURIST_FILES_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory";
