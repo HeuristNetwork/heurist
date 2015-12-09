@@ -546,6 +546,8 @@
 		if (count($dtFieldNames) && count($rt['dtFields']))
 		{
 
+            //if  rst_OriginatingDBID>0 (means that rectype is registered) need to mark that 
+            //rectype structure was modified locally    
 			$wasLocallyModified = false;
 
 			foreach ($rt['dtFields'] as $dtyID => $fieldVals)
@@ -617,7 +619,7 @@
 
 			if($wasLocallyModified){
 				$query = "update defRecTypes set rty_LocallyModified=1  where rty_ID = $rtyID";
-				execSQL($mysqli, $query, $parameters, true);
+				execSQL($mysqli, $query, null, true);
 			}
 
 		} //if column names

@@ -23,7 +23,7 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../common/db_files.php');
 
-    $system = new System();
+    $system = new System(); //without connection
     $db = @$_REQUEST['db'];
     
     if($db){
@@ -39,7 +39,7 @@
                 downloadFile('image/png', $thumbfile);
             }else{
                 //@todo - change to the same script in h4
-                $thumb_url = HEURIST_BASE_URL_V3."common/php/resizeImage.php?db=".HEURIST_DBNAME."&ulf_ID=".$fileid;
+                $thumb_url = HEURIST_BASE_URL_V3."common/php/resizeImage.php?db=".$db."&ulf_ID=".$fileid;
                 header("Location: ".$thumb_url);
                 exit();
             }
