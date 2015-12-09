@@ -151,7 +151,7 @@
 
 
                 // add the scratch directory, which will be the default for upload of material for import
-                array_push($dirs, HEURIST_UPLOAD_ROOT.'scratch');
+                array_push($dirs, HEURIST_FILESTORE_DIR.'scratch');
 
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded

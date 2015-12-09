@@ -669,6 +669,18 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
             if($detail[$int_rt_dt_descrip]){
                 $property->addChild('description', prepareText($detail[$int_rt_dt_descrip]));
             }
+            if($dt_type=="file"){
+                $property->addAttribute('file', 'true');
+                
+                $dtdisplayname = $detail[$int_rt_disp_name];
+                $ftype = detectFileType($dtdisplayname);
+                $filetype = $ftype[1];
+                
+                if($filetype=='camera'){ //sync for camera only
+                    $property->addAttribute('thumbnail', 'true');
+                    $property->addAttribute('sync', 'true');
+                }
+            }
 
             /*$det = $dtStructs['typedefs'][$dtid]['commonFields'];
             $ccode = $det[$int_dt_ccode];
@@ -1239,7 +1251,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                           <group faims_style="large" ref="child2">
                             <label/>
                             <trigger ref="'.$dtdisplaynamex.'_clearPointer" faims_style_class="clear-button">
-                              <label>{Clear}</label>
+                              <label>X</label>
                             </trigger>
                           </group>
                         </group>');

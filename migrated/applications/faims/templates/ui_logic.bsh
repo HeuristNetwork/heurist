@@ -135,13 +135,15 @@ print ("Exception "+e.getMessage());
 //
 //
 setTimestamp(String path) {
-    setFieldValue(path, new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date()));
+    time = getCurrentTime();
+    setFieldValue(path, time);
+    //new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date()));
 }
 
 //
 // find related entity and fill pointer attrubute with their names
 //
-loadRelatedEntities(rectype){
+loadRelatedEntities(rectypeTab){
 {{TEMPLATE_RELATED}}    
 }
 
