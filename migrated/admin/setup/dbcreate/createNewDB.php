@@ -390,7 +390,7 @@ function doRegister(event){
 
         <div id="page-inner" style="overflow:auto;<?php echo (@$_REQUEST['popup']=='1'?'top:10px;':'') ?>">
             <div id="loading" style="display:none">
-                <img alt="loading ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
+                <img alt="creation ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>
             </div>
 

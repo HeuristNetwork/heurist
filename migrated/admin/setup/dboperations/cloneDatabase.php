@@ -81,6 +81,28 @@ if(mysql_error()) {
                 }
                 return true;
             }
+            
+            function onSubmit(event){
+                event.target.disabled = 'disabled';
+
+                var ele = document.getElementById("loading");
+                ele.style.display = "block";
+                ele = document.getElementById("mainform");
+                ele.style.display = "none";
+                
+                showProgress();
+                document.forms[0].submit();
+            }
+            
+            function showProgress(){
+
+                var ele = document.getElementById("divProgress");
+                if(ele){
+                        ele.innerHTML = ele.innerHTML + ".";
+                        setTimeout(showProgress, 500);
+                }
+            }
+            
         </script>
 
 
@@ -91,7 +113,15 @@ if(mysql_error()) {
         <script src="../../../common/php/loadCommonInfo.php"></script>
         <div id="page-inner" style="overflow:auto">
 
-            <p>This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
+            <div id="loading" style="display:none">
+                <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
+                <strong><span id="divProgress">&nbsp; Cloning of database will take a few seconds </span></strong>
+            </div>
+            <div id="mainform">
+        
+        
+            <p>
+                This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
                 The new database is identical to the old in all respects including users, access and attaachments <br />
                 (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
                 The target database is unregistered with the Heurist central index even if the source database is registered.
@@ -113,10 +143,12 @@ if(mysql_error()) {
                     <h3>Enter a name for the cloned database:</h3>
                     <div style="margin-left: 40px;">
                         <input type='text' name='targetdbname' onkeypress="{onKeyPress(event)}"/>
-                        <input type='submit' value='Clone "<?=HEURIST_DBNAME?>"'/>
+                        <input type='button' value='Clone "<?=HEURIST_DBNAME?>"' 
+                            onclick='onSubmit(event)'/>
                     </div>
 
                 </form>
+                </div>
             </div>
         </body>
     </html>
@@ -223,7 +255,7 @@ function cloneDatabase($targetdbname) {
 
     mysql_connection_insert($newname);
     // RESET register db ID
-    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null where 1";
+        $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null where 1";
     $res1 = mysql_query($query1);
     if (mysql_error())  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().

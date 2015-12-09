@@ -58,11 +58,14 @@ if(@$_REQUEST['popup']=="1"){
     print "<div class='banner'><h2>Open Database</h2></div>";
     print "<div id='page-inner'>";
 }
+$url = HEURIST_BASE_URL_V4;
+/*
 if(@$_REQUEST['v']=="4"){
     $url = "../../../";
 }else{
     $url = HEURIST_BASE_URL_V3;
 }
+*/
 
 	$email = null;
 	$role = null;

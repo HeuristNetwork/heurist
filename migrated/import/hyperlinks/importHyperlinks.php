@@ -409,7 +409,11 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button" onClick="top.HEURIST.util.popupURL(top, '<?=HEURIST_BASE_URL_V3?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', { callback: function() { document.forms[0].submit(); } });" value="Change settings">
+  <input type="button
+    " onClick="{top.HEURIST.util.popupURL(top,'<?=HEURIST_BASE_URL_V3?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', 
+  { title:'Bookmark import settings',
+    callback: function() { document.forms[0].submit(); } });}" 
+    value="Change settings">
 <br />
 We recommend bookmarking a few links at a time.<br />The list is reloaded after each addition and after change of settings.
 

@@ -170,7 +170,7 @@
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
 
-                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1' "
+                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=3' "
                     ." title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
                     ."Click here to set media/upload folders</a></p>";
 

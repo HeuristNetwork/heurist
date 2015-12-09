@@ -233,7 +233,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             $dlg.append('<span>'+top.HR(message)+'</span>');
         }
 
-        if(!title) title = 'Info';
+        if(!title) title = top.HR('Info');
         
         var options =  {
             title: top.HR(title),
