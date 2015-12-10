@@ -57,17 +57,34 @@ mysql_connection_overwrite(DATABASE);
 		p {line-height:11px;margin:6px 0}
 		.deleteButton {color: #BB0000;float: right;font-weight: bold;height: 20px;margin: 10px 0;text-transform: uppercase; width: 60px;}
   </style>
+  
+    <script type="text/javascript">
+            function onDocumentReady(){
+                //resize parent dialog
+                setTimeout(function(){
+
+                    var body = document.body,
+                        html = document.documentElement;
+
+                    var desiredHeight = Math.max( 250, body.scrollHeight, body.offsetHeight, 
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight )+50;                    
+                                                              
+                    if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
+                        doDialogResize(0, desiredHeight);              
+                    }
+                }, 500);
+            }
+    </script>
+  
 </head>
 
-<body class="popup" width=450 height=350>
+<body class="popup" width=450 height=350 onload="onDocumentReady()">
 <?php
 
 	if(!@$_REQUEST['ids'] && @$_REQUEST['delete']!=1){
-?>
-	<form method="post">
-		<input id="ids" name="ids" type="hidden" />
-	</form>
-<?php
+
+	    print '<form method="post"><input id="ids" name="ids" type="hidden" /></form>';
+
 	}else if (@$_REQUEST['delete'] == 1) {
 
 		$recs_count = 0;
@@ -86,11 +103,12 @@ function update_counts(processed, deleted, relations, bookmarks, errors)
 	document.getElementById('relations').innerHTML = relations;
 	document.getElementById('bookmarks').innerHTML = bookmarks;
 	document.getElementById('errors').innerHTML = errors;
-	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?=$total_cnt?>) / 10;
+<?php 
+    echo "document.getElementById('percent').innerHTML = Math.round(1000 * processed / ".$total_cnt." ) / 10;";
+?>
 }
 </script>
 <?php
-
 
 print '<div><span id=total_count>'.$total_cnt.'</span> records in total to be deleted</div>';
 print '<div><span id=processed_count>0</span> processed so far  <span id=percent>0</span>%</div>';
@@ -244,16 +262,18 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 ?>
 <input type="hidden" name="delete" value="1">
 <div style="padding-top:5px;">
-<?=(count($bib_ids)>20)?"This is a fairly slow process, taking several minutes per 1000 records, please be patient…":""?>
+<?php echo (count($bib_ids)>20)?"This is a fairly slow process, taking several minutes per 1000 records, please be patient…":""; ?>
 <input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
 </div>
 </form>
 <?php
 	if(count($bib_ids)>3){
 ?>
-	<div>Total count of records: <b><?=count($bib_ids)?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
+	<div>Total count of records: <b><?php echo $bib_ids;?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
 <script>
- cnt_checked = <?=$cnt_checked?>;
+<?php
+  echo "cnt_checked = $cnt_checked ;";                                  
+?> 
  document.getElementById('spSelected').innerHTML = "<?=$cnt_checked?>";
  document.getElementById('spSelected2').innerHTML = "<?=$cnt_checked?>";
 </script>
@@ -264,4 +284,3 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 
 </body>
 </html>
-
