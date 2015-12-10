@@ -104,7 +104,7 @@ function executeSmartyTemplate($params){
 
 		$limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
 		if (!$limit || $limit<1){
-			$limit = 1000; //default limit in dispPreferences
+			$limit = 10000; //default limit in dispPreferences
 		}
 
 		$params["limit"] = $limit; //force limit

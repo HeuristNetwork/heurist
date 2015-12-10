@@ -86,6 +86,25 @@
         
         <h3>Search</h3>
         <div>
+            <div class="header"><label for="defaultSearch">Heurist search string to execute when loading the search page</label></div>
+            <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"/>
+        </div>
+        <div>
+            <div class="header"><label for="searchQueryInBrowser">Show current search query in browser address field</label></div>
+            <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all h3pref"/>
+        </div>
+        <div>
+            <div class="header"><label for="report-output-limit">Limit number of lines in report output</label></div>
+            <select name="report-output-limit" id="report-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"
+                title="no warning if limit exceeded">
+                <option value="10000">10000</option>
+                <option value="5000">5000</option>
+                <option value="1000">1000</option>
+                <option value="500">500</option>
+            </select>            
+        </div>
+<!--        
+        <div>
             <div class="header"><label for="search_limit">Block size for loading record data</label></div>
             <select name="search_limit" id="search_limit" class="text ui-widget-content ui-corner-all" style="min-width:300px"
                 title="Larger = faster (for large databases, up to 1000), Smaller = more progress reporting (for slow connections)">
@@ -96,14 +115,7 @@
                 <option value="100">100</option>
             </select>
         </div>
-        <div>
-            <div class="header"><label for="defaultSearch">Heurist search string to execute when loading the search page</label></div>
-            <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"/>
-        </div>
-        <div>
-            <div class="header"><label for="searchQueryInBrowser">Show current search query in browser address field</label></div>
-            <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all h3pref"/>
-        </div>
+-->        
 
         <hr />
         <h3>Edit</h3>

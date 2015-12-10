@@ -176,7 +176,14 @@ $.widget( "heurist.recordListExt", {
                 query_string_main = query_string;
                 
                 if(!top.HEURIST4.util.isempty(this._query_request.q)){
-                    query_string_main = query_string_main + '&q=' + encodeURIComponent(this._query_request.q);
+                    
+                    if($.isArray(this._query_request.q)){
+                        sq = JSON.stringify(this._query_request.q);
+                    }else{
+                        sq = this._query_request.q;
+                    }
+                    
+                    query_string_main = query_string_main + '&q=' + encodeURIComponent(sq);
                 }
                 if(!top.HEURIST4.util.isempty(this._query_request.rules)){
                     //@todo simplify rules array - rempove redundant info
