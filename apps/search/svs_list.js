@@ -1279,7 +1279,7 @@ $.widget( "heurist.svs_list", {
         if( true ) { //}!Hul.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded     @todo - load dynamically
 
             if(Hul.isnull(svsID) && Hul.isempty(squery)){
-                squery = this.currentSearch;
+                squery = top.HEURIST4.util.cloneJSON(this.currentSearch);
             }
 
             if(null == this.edit_dialog){

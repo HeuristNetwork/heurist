@@ -98,6 +98,7 @@ function hSvsEdit(args) {
                 svs_name.val('');
                 svs_rules.val('');
                 svs_notes.val('');
+                svs_ugrid.parent().show();
 
                 //var domain = 'all';
 
@@ -113,7 +114,7 @@ function hSvsEdit(args) {
                 } else if(!Hul.isempty(squery)){
                     svs_query.val( squery );
                 } else {
-                   svs_query.val( '' );
+                    svs_query.val( '' );
                 }
 
                 // TODO: remove this code if no longer needed
@@ -131,23 +132,14 @@ function hSvsEdit(args) {
             }
 
             var isRules = Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val());
-
+            
             if(isRules){
                  svs_query.parent().hide();
-                 svs_ugrid.parent().hide();
                  return true;
             }else{
-                  svs_query.parent().show();
-                  if(!isEdit) svs_ugrid.parent().show();
-                  return false;
+                 svs_query.parent().show();
+                 return false;
             }
-
-
-            /* never need to hide!
-            if(domain=='rules' || (Hul.isempty(svs_query.val()) &&  !Hul.isempty(svs_rules.val())) ){  // We are dealing wit ha rule!!!
-                    svs_query.parent().hide();
-                    svs_ugrid.parent().hide();
-            }*/
 
         }
      }
@@ -170,7 +162,7 @@ function hSvsEdit(args) {
     //
     //
     //
-    function _editRules(ele_rules, squery) {
+    function _editRules(ele_rules, squery, groupID) {
 
                var that = this;
 
@@ -194,7 +186,7 @@ function hSvsEdit(args) {
                                      //squery = Hul.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
 
                                     //mode, groupID, svsID, squery, callback
-                                    _showDialog('saved', null, null, squery ); //open new dialog
+                                    _showDialog('saved', groupID, null, squery ); //open new dialog
                                 }else{
                                     ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
                                 }
@@ -253,7 +245,7 @@ function hSvsEdit(args) {
 
             if(Hul.isnull(squery)) squery = {};
              squery.q = ''; // from rule builder we always save pure query only
-             _editRules(null, squery);
+             _editRules(null, squery, groupID);
 
         }else if(null == edit_dialog){
                 //create new dialog
@@ -276,7 +268,7 @@ function hSvsEdit(args) {
                     .css({'height':'16px', 'width':'16px'})
                     .click(function( event ) {
                         //that.
-                        _editRules( $dlg.find('#svs_Rules') );
+                        _editRules( $dlg.find('#svs_Rules'), '', groupID );
                     });
 
                 $dlg.find("#svs_Rules_clear")
@@ -330,10 +322,10 @@ function hSvsEdit(args) {
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID;
                             //if(domain!="all"){query_to_save.push('w='+domain);}
                         }
-                        if(Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val())){   //PURE RULE SET
+                        /*if(Hul.isempty(svs_query.val()) && !Hul.isempty(svs_rules.val())){   //PURE RULE SET
                             domain = 'rules';
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
-                        }
+                        }*/
 
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
