@@ -107,8 +107,9 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
 
 		/* get a list of the link-texts that we are going to ignore */
-		$ignored = mysql__select_assoc('usrHyperlinkFilter', 'lcase(hyf_String)', '-1',
+		$ignored = mysql__select_assoc('usrHyperlinkFilters', 'lcase(hyf_String)', -1,
 		                               'hyf_UGrpID is null or hyf_UGrpID='.get_user_id());
+                                       
 		$wildcard_ignored = array();
 		if($ignored){
 			foreach ($ignored as $key => $val) {
@@ -120,7 +121,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 				}
 			}
 		}
-
+        
 		mysql_connection_select(USERS_DATABASE);
 		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
 		$row = mysql_fetch_row($res);
@@ -156,9 +157,11 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			if (@$ignored[$lcase]){
                     $forbidden = 1;            // ignore forbidden links
             }
-			else {
+			else {                
 				foreach ($wildcard_ignored as $wc => $len) {
-					if (substr($lcase, 0, $len) == $wc) { $forbidden = 1; break; }
+					if (substr($lcase, 0, $len) == $wc) { 
+                            $forbidden = 1; break; 
+                    }
 				}
 			}
 			if (! @$forbidden  and  substr($matches[3][$i], 0, 5) != 'http:') {
@@ -298,6 +301,9 @@ if (@$urls) {
 		.similar_bm{text-align: left;width:100%;color: #6A7C99;}
 		.similar_bm label{text-align: left;}
 	</style>
+    
+    <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+    
     <script type="text/javascript">
             function onDocumentReady(){
                 //resize parent dialog
@@ -308,7 +314,7 @@ if (@$urls) {
 
                     var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
                                            html.clientHeight, html.scrollHeight, html.offsetHeight );                    
-                    var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth, 
+                    var desiredWidth = Math.max( 700, body.scrollWidth, body.offsetWidth, 
                                            html.clientWidth, html.scrollWidth, html.offsetWidth ); 
                                                               
                     if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
@@ -335,8 +341,6 @@ if (@$urls) {
 </script>
 
 <?php //this frame is needed for title lookup ?>
-<iframe style="display: none;" name="grabber"></iframe>
-
 <form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" 
         enctype="multipart/form-data" name="mainform" id="mainform" style="margin: 0px 3px;">
 
@@ -409,10 +413,19 @@ Note: the list only shows links which you have not already bookmarked.<br>
 <?php } else { ?>Common<?php } ?>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
-  <input type="button
-    " onClick="{top.HEURIST.util.popupURL(top,'<?=HEURIST_BASE_URL_V3?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', 
+  <input type="button"
+    onClick="{top.HEURIST.util.popupURL(top,'<?=HEURIST_BASE_URL_V3?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', 
   { title:'Bookmark import settings',
-    callback: function() { document.forms[0].submit(); } });}" 
+    width:700,
+    height:400,
+    callback: function( context ) { 
+        if(context){
+            document.forms[0].style.display = 'none';
+            document.location.reload();
+            //top.HEURIST4.msg.showMsgDlg('Rerun '+context);
+            //document.forms[0].submit(); 
+        }
+    } });}" 
     value="Change settings">
 <br />
 We recommend bookmarking a few links at a time.<br />The list is reloaded after each addition and after change of settings.
@@ -562,14 +575,14 @@ function print_link($url, $title) {
 	global $notes;
 
 ?>
-<div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:80%;">
+<div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">
 		<input type="checkbox" name="links[<?= $linkno ?>]" value="1" class="check_link" id="flag<?= $linkno ?>" <?= @$_REQUEST['links'][$linkno]? 'checked' : '' ?> onChange="var t=document.getElementById('t<?= $linkno ?>').value; var n=document.getElementById('n<?= $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?= $linkno ?>'); if(e) e.checked = this.checked; }">
 		&nbsp;<input type="text" name="title[<?= $linkno ?>]" value="<?= $title ?>" style="width:70%; font-weight: bold; background-color: #eee;" id="t<?= $linkno ?>">
 		<input type="hidden" name="alt_title[<?= $linkno ?>]" value="<?= $title ?>" id="at<?= $linkno ?>">
 		<input type="hidden" name="link[<?= $linkno ?>]" value="<?= htmlspecialchars($url) ?>" id="u<?= $linkno ?>">
 
   		&nbsp;&#91;<a href="<?= $url ?>" target="_blank"><span class="button">Visit</span></a>&#93;&nbsp;
-		<input type="button" style="padding-top: 2px;height:23px !important;font-weight:normal;font-size:1em;" name="lookup[<?= $linkno ?>]" value="Lookup" title="Lookup title from URL"
+		<input type="button" style="padding-top: 2px;height:23px !important;font-weight:normal;font-size:1em;" name="lookup[<?= $linkno ?>]" value="Lookup Title" title="Lookup title from URL"
 			onClick="{lookup_revert(this, <?= $linkno ?>);}" id="lu<?= $linkno ?>">
 		<input type="hidden" name="kwd[<?= $linkno ?>]" value="<?= htmlspecialchars(@$_REQUEST['kwd'][$linkno]) ?>" id="key<?= $linkno ?>">
 </div>

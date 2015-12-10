@@ -277,7 +277,8 @@ function mysql__select_array($table, $column, $condition) {
 * @return   array of key-value pairs from the $key_column and $val_column columns of $table or NULL on failure
 */
 function mysql__select_assoc($table, $key_column, $val_column, $condition) {
-    $res = mysql_query("SELECT $key_column, $val_column FROM $table WHERE $condition");
+    $query = "SELECT $key_column, $val_column FROM $table WHERE $condition";
+    $res = mysql_query($query);
     if (!$res) return NULL;
     $matches = array();
     while (($row = mysql_fetch_array($res))) $matches[$row[0]] = $row[1];

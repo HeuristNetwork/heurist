@@ -100,7 +100,7 @@ function unCheckAll() {
 //
 function lookup_revert(button, linkno){
 
-	if (button.value == 'Lookup'){
+	if (button.value == 'Lookup Title'){
 		lookupTitle(button);
 	} else {
 		var e1 = document.getElementById('t'+linkno);
@@ -116,11 +116,14 @@ function lookup_revert(button, linkno){
 //
 function lookupTitle(button) {
 
+    // button.display.style = 'none';
+    
 	// buttonName should be "lookup[xxx]"; we extract that numeric xxx
 	var buttonName = button.name;
 
 	var buttonNum, titleElt, urlElt;
 	if (buttonName != 'popup') {
+        //lookup title
 		buttonNum = parseInt(buttonName.substring(7));
 
 		titleElt = document.forms['mainform'].elements['title['+buttonNum+']'];
@@ -149,7 +152,42 @@ function lookupTitle(button) {
 	button.disabled = true;
 	titleElt.disabled = true;
 
-	frames['grabber'].location.href = 'getTitleFromURL.php?num='+buttonNum+'&url='+escape(urlElt.value);
+	var baseurl = 'getTitleFromURL.php?num='+buttonNum+'&url='+escape(urlElt.value);
+    
+        $.ajax({
+            url: baseurl,
+            type: "GET",
+            data: null,
+            dataType: "json",
+            cache: false,
+            error: function( jqXHR, textStatus, errorThrown ) {
+                button.disabled = false;
+                titleElt.disabled = false;
+                top.HEURIST4.msg.showMsgErr(textStatus);
+            },
+            success: function( response, textStatus, jqXHR ){
+                    
+                    if(!top.HEURIST4.util.isnull(response)){
+                        var num = response.num;
+                        
+                        var lockedLookupElt = document.forms['mainform'].elements['lookup['+num+']'];
+                        var lockedTitleElt = document.forms['mainform'].elements['title['+num+']'];
+                        lockedTitleElt.disabled = false;
+                        lockedLookupElt.disabled = false;
+                    
+                        if(response.error){
+                            lockedLookupElt.value = 'URL error';
+                            lockedLookupElt.title = "";
+                            top.HEURIST4.msg.showMsgErr(response.error);
+                        }else{
+                            lockedLookupElt.value = 'Revert';
+                            lockedLookupElt.title = "Revert title";
+                            lockedTitleElt.value = response.title;
+                        }
+                    }
+            }
+        });
+    
 }
 
 //

@@ -94,10 +94,13 @@ function _issel($val){
 	    <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 	    <style type="text/css">
 		    #ignored_hyperlinks {
-				    overflow: auto; background-color: #AAAAAA;
-				    padding-left: 5px;
-				    height: 260px;
-		    }
+                overflow: auto;
+                background-color: lightgrey;
+                padding: 5px;
+                height: 200px;
+                border: 1px solid darkgrey;
+                margin-top:10px;
+            }
 	    </style>
     </head>
 
@@ -144,8 +147,8 @@ function _issel($val){
 	 		        <input type="hidden" id="isdelete" name="isdelete" value="0">
 	 		        <input type="submit" value="Add">
 	 		        <input type="button" value="Remove" onclick="onDeleteSubmit()"> <br />
-
-			        <b>Ignore the following hyperlink texts when importing bookmarks:</b><br /><br />
+                    <br /><br />
+			        <b>Ignore the following hyperlink texts when importing bookmarks:</b>
 			        <div id="ignored_hyperlinks">
 				        <?=$hyperlinks_ignored?>
 			        </div>
@@ -155,7 +158,7 @@ function _issel($val){
         </form>
         
 	    <div style="position:absolute;bottom:10; text-align:right;">
-		    <input type=button value=Done onclick="window.close();">
+		    <input type=button value="Done and Rerun Analyze" onclick="window.close(true);">
 	    </div>
     </body>
 </html>
