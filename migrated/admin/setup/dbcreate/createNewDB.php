@@ -96,7 +96,7 @@ $(document).ready(function() {
         ?>
 
 
-        $("#btnRegister").button({label:'Define Database Administrator'}).on('click', doRegister);
+        $("#btnRegister").button({label:'Register as User'}).on('click', doRegister);
         $("#div_register").show();
         $("#div_create").hide();
     }

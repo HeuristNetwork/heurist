@@ -84,6 +84,8 @@ function executeSmartyTemplate($params){
 
 	global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth;
 
+    set_time_limit(0); //no limit    
+    
 	mysql_connection_overwrite(DATABASE); //AO: mysql_connection_select - does not work since there is no access to stored procedures(getTemporalDateString) Steve uses in some query
 											//TODO SAW  grant ROuser EXECUTE on getTemporalDate and any other readonly procs
 
