@@ -799,7 +799,7 @@ $.widget( "heurist.resultListMenu", {
 
         top.HEURIST4.msg.showDialog(url, {
                     title: top.HR('Delete Records'),
-                    height: 700, width: 600,
+                    height: 300, width: 600,
                     onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
                             var ele = frame.contentDocument.getElementById("ids");
                             if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
