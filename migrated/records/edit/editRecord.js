@@ -516,14 +516,13 @@ if (! top.HEURIST.edit) {
                     top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3
                         + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { 
                             title: 'Add tags',
-                            height: '360px', width:'450px',
+                            height:400, width:550,
                             callback: function(tags) {
                                 if (tags) {
                                     personalWindow.document.getElementById("tags").value = tags;
                                     top.HEURIST.edit.changed("personal");
                                 }
                                 top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
-
                                 setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
                             } 
                         });

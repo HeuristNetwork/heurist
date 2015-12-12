@@ -111,7 +111,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     },
     
     //
-    // buttons - callback function or array of buttons for dialog option
+    // buttons - callback function or objects of buttons for dialog option
     //
     showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
 

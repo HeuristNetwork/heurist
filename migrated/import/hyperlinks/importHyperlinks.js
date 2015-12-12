@@ -200,9 +200,11 @@ function doBookmark(dbname){
                     title: 'Add tags',
                     height: '360px', width:'450px',
                     callback: function(tags) {
-   							document.getElementById('wgTags').value = tags;
-   							document.getElementById('adding_tags_elt').value = 1;
-   							document.forms[0].submit();
+                            if(tags){
+   							    document.getElementById('wgTags').value = tags;
+   							    document.getElementById('adding_tags_elt').value = 1;
+   							    document.forms[0].submit();
+                            }
    						}
    				} );
 

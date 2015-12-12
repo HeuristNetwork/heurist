@@ -64,6 +64,10 @@
             .tag-link-nest .tag-links { text-indent: 4em; }
 
         </style>
+        
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        
     </head>
  <body width=450 height=360  class="popup">
   <script src="../../common/js/utilsLoad.js"></script>
@@ -82,7 +86,7 @@
          </div>
 </div>
 
-<form onsubmit="window.close(document.getElementById('tags').value); return false;">
+<form onsubmit="return onCloseWindow();">
   <table border=0 cellspacing=3 cellpadding=0 style="width: 100%;">
    <tr>
     <td style="width: 8ex; text-align: right; white-space:nowrap;" nowrap><b>Add tags</b></td>
@@ -164,6 +168,32 @@ function addTagLink(tag, parentNode) {
 function onTooglePopup(event){
 	top.HEURIST.util.setDisplayPreference('tagging-popup', event.target.checked?"true":"false");
 }
+
+function onCloseWindow(){
+    
+    var tags = document.getElementById('tags').value;
+    
+    if (!location.search.match(/no-tags/)) {
+        if(!tags){
+            var sMsg = "The links you have selected will only be saved if you enter at least one tag.";
+            if(top.HEURIST4){
+                var $dlg = top.HEURIST4.msg.showMsgDlg(sMsg, 
+                    {'Return to Enter tags':function(){ 
+                            $dlg.dialog('close'); 
+                     } ,
+                     'Cancel':function(){ window.close(); $dlg.dialog('close'); } });   
+            }else{
+                alert(sMsg);
+            }
+        }else{
+            window.close(tags);
+        }
+    }else{
+        window.close(tags);
+    }
+    return false;
+}
+
 
 var alphasort = function(a,b) { a = a.toLowerCase(); b = b.toLowerCase(); return (a < b)? -1 : (a > b)? 1 : 0; };
 

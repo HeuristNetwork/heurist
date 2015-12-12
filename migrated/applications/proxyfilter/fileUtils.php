@@ -42,11 +42,15 @@ function loadRemoteURLContent($url, $timeout=10) {
     $error = curl_error($ch);
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-        //echo "$error ($code)" . " url = ". $url;
+/*****DEBUG****///error_log("CAN NOT LOAD REMOTE URL:  $error ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
         curl_close($ch);
         return false;
     } else {
         curl_close($ch);
+        if(!$data){
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+/*****DEBUG****///error_log("Returned empty data: ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
+        }
         return $data;
     }
 }
