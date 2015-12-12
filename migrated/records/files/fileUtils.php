@@ -72,16 +72,22 @@
     $data = curl_exec($ch);
 
     $error = curl_error($ch);
+    
     if ($error) {
-      $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-      //echo "$error ($code)" . " url = ". $url;
-/*****DEBUG****///error_log("CAN NOT LOAD DATA FROM REMOTE URL. Error code: $error ($code)" . " url = ". $url);
-      curl_close($ch);
-      return false;
+        $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+/*****DEBUG****///error_log("CAN NOT LOAD REMOTE URL:  $error ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
+        curl_close($ch);
+        return false;
     } else {
-      curl_close($ch);
-      return $data;
+        curl_close($ch);
+        if(!$data){
+            $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+/*****DEBUG****///error_log("Remote url returns empty data: ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
+        }
+        return $data;
     }
+    
+    
   }
 
   /**

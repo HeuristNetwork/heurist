@@ -125,7 +125,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             //$_REQUEST['vo'] = 'h3';
             //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
             $url = HEURIST_BASE_URL_V3."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
-            $reclist = loadRemoteURLContent($url);
+            $reclist = loadRemoteURLContent($url, false);
             $reclist = json_decode($reclist, true);
 
             if (array_key_exists('error', $reclist)) {
