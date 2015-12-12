@@ -20,21 +20,30 @@
     */
 
 
+    //@todo use geekMail class instead
+    
     function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
 
-        $res = null;
+        $res = "ok";
 
         if(!$email_to){
             $res = "Mail send failed. Recipient email address is not defined.";
         }else if(!$email_text){
             $res = "Mail send failed. Message text is not defined.";
-        }
+        }else {
 
-        if(!$res){
-
-            if(!$email_title){
+            if(!@$email_title){
                 $email_title = "";
             }
+            $errorMsg = "Can not send email "
+                    .($email_title?"'".$email_title."'":'')
+                    .". This may indicate that mail transport agent is not correctly configured on server."
+                    ." Please advise the system adminstrator";
+                    
+            if(!checkSmtp()){
+                return $errorMsg;
+            }
+            
             $email_title = "HEURIST ".$email_title;
 
             if(!$email_header){
@@ -58,16 +67,32 @@
 
             $rv = mail($email_to, $email_title, $email_text, $email_header);
             if(!$rv){
-                $res = "Can not send email. This may indicate that mail transport agent is not correctly configured on server. Please advise the system adminstrator";
+                $res = $errorMsg;
             }
         }
 
-        if($res){ //error
-/*****DEBUG****///error_log("MAIL :".$res);
-        }else{
-            $res = "ok";
-        }
-
-        return "ok";
+        return $res;
     }
+    
+    
+    function checkSmtp(){
+        
+        $smtpHost = 'localhost';
+        $smtpPort = '25';
+        $smtpTimeout = 5;
+        
+        $res = @fsockopen($smtpHost,
+                      $smtpPort,
+                      $errno,
+                      $errstr,
+                      $smtpTimeout);
+
+      if (!is_resource($res))
+      {
+        error_log("email_smtp_error {$errno} {$errstr}");
+        return false;
+      }
+      return true;
+    }        
+
 ?>

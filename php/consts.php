@@ -99,7 +99,8 @@
     define("HEURIST_REQUEST_DENIED", "denied");      // The webpage is not allowed to use the service.
     define("HEURIST_UNKNOWN_ERROR", "unknown");      // A request could not be processed due to a server error. The request may succeed if you try again.
     define("HEURIST_DB_ERROR", "database");          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
-    define("HEURIST_SYSTEM_FATAL", "system");        // System fatal configuration. Contact system admin
+    define("HEURIST_SYSTEM_CONFIG", "syscfg");       // System not-fatal configuration error. Contact system admin
+    define("HEURIST_SYSTEM_FATAL", "system");        // System fatal configuration error. Contact system admin
     /*
     $usrTags = array(
     "rty_ID"=>"i",

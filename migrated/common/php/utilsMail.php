@@ -80,4 +80,24 @@ function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8
     
     return "ok";
 }
+
+function checkSmtp(){
+    
+    $smtpHost = 'localhost';
+    $smtpPort = '25';
+    $smtpTimeout = 5;
+    
+    $res = @fsockopen($smtpHost,
+                  $smtpPort,
+                  $errno,
+                  $errstr,
+                  $smtpTimeout);
+
+  if (!is_resource($res))
+  {
+    error_log("email_smtp_error {$errno} {$errstr}");
+    return false;
+  }
+  return true;
+}        
 ?>

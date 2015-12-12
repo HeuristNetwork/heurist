@@ -344,6 +344,19 @@ function updateUserGroup( $type, $colNames, $recID, $groupID, $values ) {
             $isApprovement = isApprovement($type, $recID);
         }
 
+        if (($type=='user' && $isInsert && !is_logged_in()) || $isApprovement){
+
+                if(!checkSmtp()){
+
+                    if(!is_logged_in()){
+                        $ret = 'Your registration is not possible since registration ';
+                    }else{
+                        $ret = 'Approval is not possible since ';
+                    }
+                    $ret = $ret.'email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation';
+                    return $ret;
+                }
+        }
 
         if($query!=""){
             if($isInsert){

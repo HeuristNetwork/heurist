@@ -122,6 +122,12 @@
                 $system->addError(HEURIST_REQUEST_DENIED,  "Incorrect username / email");
 
             }else{
+                //do not update password if mail is not enabled
+                if(!checkSmtp()){
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Recovery');
+                    return false;
+                }
+                
                 $new_passwd = generate_passwd();
                 $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
                 $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
@@ -140,7 +146,7 @@
                     if($rv=="ok"){
                         return true;
                     }else{
-                        $system->addError(HEURIST_UNKNOWN_ERROR, $rv);
+                        $system->addError(HEURIST_SYSTEM_CONFIG, $rv);
                     }
 
                 }else{
@@ -290,6 +296,12 @@
 
             }else if ($is_registration || $system->is_admin2($recID)) {
 
+                //do not allow registration if approvement mail can not be sent
+                if($is_registration && (!checkSmtp())){
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
+                    return false;
+                }
+                
                 $mysqli = $system->get_mysqli();
 
                 $res = mysql__select_value($mysqli,
@@ -329,10 +341,14 @@
 
                     //actions on complete
                     if($rectype=='user'){
+                        $rv = true;
                         if($recID<1 && $system->get_user_id()<1){
-                            user_EmailAboutNewUser($mysqli, $new_recID);
+                            $rv = user_EmailAboutNewUser($mysqli, $new_recID);
                         }else if($recID<1 || $is_approvement){
-                            user_EmailApproval($mysqli, $new_recID, $tmp_password, $is_approvement);
+                            $rv = user_EmailApproval($mysqli, $new_recID, $tmp_password, $is_approvement);
+                        }
+                        if(!$rv){
+                            return false;
                         }
 
                     }else if($recID<1){
@@ -402,7 +418,7 @@
 
         $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
         $user = user_getById($mysqli, $recID); //find user
-        if($dbowner_Email && $user)
+        if($user)
         {
             $ugr_Name = $user['ugr_Name'];
             $ugr_FullName = $user['ugr_FirstName'].' '.$user['ugr_LastName'];
@@ -422,9 +438,16 @@
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
-            sendEmail($dbowner_Email, $email_title, $email_text, null);
-
+            $rv = sendEmail($dbowner_Email, $email_title, $email_text, null);
+            if($rv != 'ok'){
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
+                return false;
+            }
+        }else{
+                $system->addError(HEURIST_NOT_FOUND, 'User not found');
+                return false;
         }
+        return true;
     }
 
     /**
@@ -434,7 +457,7 @@
 
         $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
         $user = user_getById($mysqli, $recID); //find user
-        if($dbowner_Email && $user)
+        if($user)
         {
 
             $ugr_Name = $user['ugr_Name'];
@@ -467,9 +490,17 @@
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
-            sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
+            $rv = sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
 
+            if($rv != 'ok'){
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Approvement');
+            }
+        }else{
+                $system->addError(HEURIST_NOT_FOUND, 'User not found');
+                return false;
         }
+
+        return true;
     }  // sendApprovalEmail
 
     function generate_passwd ($length = 8) {

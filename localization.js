@@ -24,7 +24,12 @@ regional['en'] = {
     'Please log in':'Please Log in or Register to use all features Heurist in full scale',
     'Please contact to register':'Please contact database owner to register and use all features Heurist in full scale',
     'My Searches':'My Filters (private)',
-    'My Bookmarks':'My Bookmarks (private)'
+    'My Bookmarks':'My Bookmarks (private)',
+    
+    'Password_Reset':'Your password has been reset. You should receive an email shortly with your new password',
+    
+    'Error_Mail_Recovery':'Your password recovery email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
+    'Error_Mail_Registration':'Your registration is not possible since registration email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation'
 };
 
 regional['ru'] = {
