@@ -982,6 +982,8 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             .button({icons: {
                 secondary: "ui-icon-triangle-1-s"
             }});
+            
+            this.btn_page_menu.find('.ui-icon-triangle-1-s').css({'font-size': '1.3em', right: 0});
 
             this.btn_page_next = $( "<button>", {text:currentPage} )
             .appendTo( span_pages )

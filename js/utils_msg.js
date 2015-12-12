@@ -35,7 +35,8 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 }
                 
             }
-            if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL){
+            if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL 
+            || response.status==top.HAPI4.ResponseStatus.SYSTEM_FATALSYSTEM_CONFIG){
 
                 msg = msg + "<br><br>The system is not configured properly. Please consult your system administrator";
             

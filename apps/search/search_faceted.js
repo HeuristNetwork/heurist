@@ -126,6 +126,8 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button({icons: {secondary: "ui-icon-close"}});
 
+        this.btn_close.find('.ui-icon-close').css({'font-size': '1.3em', right: 0});
+        
         //Ian this.div_toolbar.buttonset();
 
         this._on( this.btn_submit, { click: "doSearch" });
