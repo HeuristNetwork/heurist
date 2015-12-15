@@ -165,40 +165,17 @@ $.widget( "heurist.recordListExt", {
              
         }else{ //content has been loaded already
 
-            var query_string = 'db=' + top.HAPI4.database,
-                query_string_all = null,
+            var query_string_all = null,
                 query_string_sel = null,
-                query_string_main = null;
+                query_string_main = top.HEURIST4.util.composeHeuristQuery( this._query_request, true );
 
-            if(!top.HEURIST4.util.isnull(this._query_request)){
-                query_string = query_string + '&w='+this._query_request.w;
-                
-                query_string_main = query_string;
-                
-                if(!top.HEURIST4.util.isempty(this._query_request.q)){
-                    
-                    if($.isArray(this._query_request.q)){
-                        sq = JSON.stringify(this._query_request.q);
-                    }else{
-                        sq = this._query_request.q;
-                    }
-                    
-                    query_string_main = query_string_main + '&q=' + encodeURIComponent(sq);
-                }
-                if(!top.HEURIST4.util.isempty(this._query_request.rules)){
-                    //@todo simplify rules array - rempove redundant info
-                    query_string_main = query_string_main + '&rules=' + encodeURIComponent(this._query_request.rules);
-                }
-            }else{
-                query_string = query_string + '&w=all';
-                query_string_main = query_string;
-            }
-        
-            
             if (top.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
                   var recIDs_list = this.options.selection;
                   if(!top.HEURIST4.util.isempty(recIDs_list.length)){
-                        query_string_sel = query_string + '&q=ids:'+recIDs_list.join(',');
+                      
+                        query_string_sel = 'db=' + top.HAPI4.database 
+                            + '&w=' + top.HEURIST4.util.isnull(this._query_request)?this._query_request.w:'all'
+                            + '&q=ids:'+recIDs_list.join(',');
                   }
             }
             

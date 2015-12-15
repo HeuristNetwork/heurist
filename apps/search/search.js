@@ -720,6 +720,12 @@ $.widget( "heurist.search", {
                             that.div_search_as_user.css('display','none');
                         }
                     }
+                    
+                    if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
+                        window.history.pushState("object or string", "Title", location.pathname+'?'+ 
+                            top.HEURIST4.util.composeHeuristQuery(data, false) );
+                    }                    
+                    
 
                     that._renderProgress( null );
             }
