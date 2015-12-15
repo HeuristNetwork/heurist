@@ -61,6 +61,15 @@
             <div class="header"><label for="password2">Repeat password</label></div>
             <input type="password" name="password2" id="password2" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16"/>
         </div>
+        
+        <div class="mode-registration">
+            <div class="header"><label for="ugr_Captcha">Are you human?</label></div>
+            <input type="text" name="ugr_Captcha" id="ugr_Captcha" class="text ui-widget-content ui-corner-all" />
+            <div class="prompt">
+                See question at bottom of form
+            </div>
+        </div>
+        
         <div>
             <div class="header"><label for="ugr_Organisation">Institution/company</label></div>
             <input type="text" name="ugr_Organisation" id="ugr_Organisation" class="text ui-widget-content ui-corner-all mandatory" style="width:35em;" maxlength="120"/>
@@ -68,6 +77,7 @@
                 Enter 'None' if not affiliated with an institution or company
             </div>
         </div>
+        
         <div>
             <div class="header" style="vertical-align:top;"><label for="ugr_Interests">Research interests</label></div>
             <textarea id="ugr_Interests" name="ugr_Interests" rows="2" cols="80" style="width:35em;"
@@ -218,13 +228,16 @@
     </div>
 
     <div class="mode-registration">
-        <p>Please read the Terms and Conditions of Use above, then click the Register button at the end of the page.
+        <p style="font-size:0.9em">
+            Please read the Terms and Conditions of Use above, then click the Register button at the end of the page.
             Note: This system should not be used for the storage of confidential personally-identifiable information
             such as health information without the express permission of the system managers.</p>
         <p id="contactDetails"> (database owner)</p>
         <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
-        <label for="agree"><br>
-        I have read and agree to the Terms and Conditions of Use above</label>
+        <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
+        
+        <div id="imgdiv" style="float:left;display:inline-block;display:none;font-weight:bold"></div>
+        <!-- div id="btnCptRefresh" style="display:none;">Refresh</div -->    
     </div>
 
 </form>

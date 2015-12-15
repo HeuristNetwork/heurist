@@ -642,7 +642,7 @@ function hRecordSet(initdata) {
             for (idx=0;idx<order2.length;idx++){
                 recid = order2[idx];
                 //for (recid in records2){
-                if(recid){ //&& !records[recid]){
+                if(recid && !records[recid]){
                     records_new[recid] = records2[recid];
                     order_new.push(recid);
                 }

@@ -191,6 +191,15 @@ $.widget( "heurist.profile_edit", {
                 this.edit_form.find(".mode-registration").hide();
             }else{ //registration
                 this.edit_form.find(".mode-registration").show();
+                
+                //init captcha
+                this.edit_form.find('#imgdiv').show();
+                /*that.edit_form.find('#btnCptRefresh')
+                        .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
+                        .show()
+                        .click( __refreshCaptcha );*/
+                        
+                this._refreshCaptcha();                
             }
         }
 
@@ -218,6 +227,18 @@ $.widget( "heurist.profile_edit", {
 
         }
     },
+    
+    _refreshCaptcha: function(){
+            var that = this;
+            var $dd = that.edit_form.find('#imgdiv');
+            var id = Math.random();
+            if(true){
+                $dd.load(top.HAPI4.basePathV4+'php/captcha.php?id='+id);
+            }else{
+                $dd.empty(); //find("#img").remove();
+                $('<img id="img" src="php/captcha.php?img='+id+'"/>').appendTo($dd);
+            }
+    },
 
     _doSave: function(){
 
@@ -233,6 +254,12 @@ $.widget( "heurist.profile_edit", {
                 err_text = err_text + ', '+that.edit_form.find('label[for="' + input.attr('id') + '"]').html();
             }
         });
+        if(this.options.isregistration){
+            var ss = top.HEURIST4.msg.checkLength2( this.edit_form.find("#ugr_Captcha"), '', 1, 0 );
+            if(ss!=''){
+                err_text = err_text + ', Are you human';
+            }
+        }
 
         if(err_text==''){
             // validate email 
@@ -253,7 +280,6 @@ $.widget( "heurist.profile_edit", {
                     err_text = err_text + ', '+ss;
                 }
             }
-
             // validate passwords    
             var password = this.edit_form.find("#ugr_Password");
             var password2 = this.edit_form.find("#password2");
@@ -319,6 +345,10 @@ $.widget( "heurist.profile_edit", {
                             }
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
+                            if(that.options.isregistration){
+                                that.edit_form.find("#ugr_Captcha").val('');
+                                that._refreshCaptcha();
+                            }
                         }
                     }
                 );
@@ -351,6 +381,7 @@ function autofill_login(value){
     }
 }
 function enable_register(value){
+    var that = this;
     var ele = $('#btn_save');
     if(ele){
         if(value){

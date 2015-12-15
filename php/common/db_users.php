@@ -297,9 +297,22 @@
             }else if ($is_registration || $system->is_admin2($recID)) {
 
                 //do not allow registration if approvement mail can not be sent
-                if($is_registration && (!checkSmtp())){
-                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
-                    return false;
+                if($is_registration){
+                    if(false && !checkSmtp()){
+                        $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
+                        return false;
+                    }
+                    //check capture
+                    if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != @$record['ugr_Captcha']) {
+                        $system->addError(HEURIST_UNKNOWN_ERROR, 'Are you bot? Please enter correct value into Challenge field');
+                        return false;
+                    }
+                    if (@$_SESSION["captcha_code"]){
+                        unset($_SESSION["captcha_code"]);
+                    }
+                }
+                if(@$record['ugr_Captcha']){
+                    unset($record['ugr_Captcha']);
                 }
                 
                 $mysqli = $system->get_mysqli();

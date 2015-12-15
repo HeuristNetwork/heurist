@@ -122,7 +122,6 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="apps/digital_harlem/dh_search.js"></script>
         <script type="text/javascript" src="apps/digital_harlem/dh_maps.js"></script>
 
-
         <!-- DOCUMENTATION TODO: What are these, why are they commented out -->
         <!-- these widgets are loaded dynamically, but for debug they should be loaded explicitely
         <script type="text/javascript" src="apps/profile/profile.js"></script>
@@ -131,7 +130,6 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="apps/topmenu/mainMenu.js"></script>
         script type="text/javascript" src="apps/search.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
-        <script type="text/javascript" src="apps/profile_edit.js"></script>
         <script type="text/javascript" src="apps/pagination.js"></script>
         <script type="text/javascript" src="apps/rec_list.js"></script>
         -->

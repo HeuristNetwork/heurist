@@ -32,12 +32,36 @@ function doLogin(isforsed){
             var $dlg = login_dialog;
 
             //load login dialogue
-            $dlg.load(top.HAPI4.basePathV4 + "apps/profile/profile_login.html", function(){  //?t="+(new Date().getTime())
+            $dlg.load(top.HAPI4.basePathV4 + "apps/profile/profile_login.html?t="+Math.random(), function(){  //?t="+(new Date().getTime())
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){
                     $(this).html(top.HR($(this).html()));
                 });
+               
+                if(false){
+                    //init captcha
+                    
+                    function __refreshCaptcha(){
+                        var $dd = $dlg.find('#imgdiv');
+                        var id = Math.random();
+                        if(true){
+                            $dd.load(top.HAPI4.basePathV4+'php/captcha.php?id='+id);
+                        }else{
+                            $dd.empty(); //find("#img").remove();
+                            $('<img id="img" src="php/captcha.php?img='+id+'"/>').appendTo($dd);
+                        }
+                    }
+                    
+                    $dlg.find('#imgdiv').show();
+                    $dlg.find('#btnCptRefresh')
+                            .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
+                            .show()
+                            .click( __refreshCaptcha );
+                            
+                    __refreshCaptcha();
+                }
+                
 
                 var allFields = $dlg.find('input');
                 var message = $dlg.find('.messages');
@@ -148,6 +172,7 @@ function doLogin(isforsed){
                         $dlg.find("#fld_reset").hide();
                         $dlg.find("#fld_login").show();
                         $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
+                        
                     }
                 });
                 
