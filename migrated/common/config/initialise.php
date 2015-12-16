@@ -156,6 +156,8 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 }
 
 define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // eg. /h4/
+
+// TODO: This is NOT the H3 base URL, it is the Heurist base URL. However changing it to correct path breaks CSS
 define('HEURIST_BASE_URL_V3', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h4/
 
 
@@ -169,6 +171,8 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
 }
 $installDir =  ($installDir == '' ? '/' : $installDir) . '/';
 define('HEURIST_BASE_URL_V4', HEURIST_SERVER_URL . $installDir);
+//This is the base URL which should be used rather than H4 specific URL
+define('HEURIST_BASE_URL', HEURIST_SERVER_URL . $installDir);
 
 
 $documentRoot = @$_SERVER["DOCUMENT_ROOT"];

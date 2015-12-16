@@ -201,7 +201,7 @@
             top.HEURIST.whenLoaded([recordEvent, "edit-js", "edit-html"], top.HEURIST.edit.loadAllModules);
             top.HEURIST.whenLoaded([recordEvent, "edit-js", "HAPI", "edit-html"], createRectypeChanger );
             window.onbeforeunload = top.HEURIST.edit.onbeforeunload;
-            
+
             function editRecordType_inNewWindow(){
 
                 window.open("../../admin/adminMenu.php?db="+
@@ -220,7 +220,7 @@
                 { "no-titlebar": false, "no-close": false, width: 330, height: 140 });
 
             }
-                
+
             function editRecordType(){
                 if(top.HEURIST.edit.is_something_chnaged()){
                         var message = "You have unsaved changes in this record.\nClick OK to save changes and modify structure.";
@@ -229,8 +229,8 @@
                         }
                         return;
                 }
-                
-                
+
+
                 var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+
                             top.HEURIST.database.name+
                             "&rty_ID="+top.HEURIST.edit.record.rectypeID;
@@ -238,7 +238,7 @@
                 var win = this.window;
 
                 var dim = top.HEURIST.util.innerDimensions(win);
-                
+
                 top.HEURIST.util.popupURL(top, URL, {
                         "close-on-blur": false,
                         "no-resize": false,
@@ -254,14 +254,14 @@
                         }
                 });
             }
-            
+
             //
-            // show the specific reminder for recordtype 
+            // show the specific reminder for recordtype
             //
             function onAddNewRecordMessage(){
-                
+
                 if(!top.HEURIST.magicNumbers) return;
-                
+
                 if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']=="new_bib"){
 
                     var smsg = '';
@@ -279,9 +279,9 @@
                         { "no-titlebar": false, "no-close": false, width: 330, height: 140 });
                     }
 
-                }                
+                }
             }
-            
+
 
             function createRectypeChanger() {
                 var rectypeEdit = document.getElementById("rectype-edit");
@@ -319,7 +319,7 @@
                     var edt = document.getElementById("admin_editrectype");
                     edt.innerHTML = "<a href='#' onclick='{editRecordType(); return false;}' style='font-size:1.3em;padding:0;'>Modify record structure<img src='../../common/images/edit-pencil.png'></a>"+
                     "<a href='#' class='externalLink' onclick='{editRecordType_inNewWindow(); return false;}' style='font-size:1.3em;padding:0 3px;'></a>";
-                    
+
                     ;
                 }
                 if(top.HEURIST.edit.record && top.HEURIST.edit.record.isTemporary){
@@ -329,7 +329,7 @@
                     ".  "+top.document.title;
                 }
 
-                
+
                 onAddNewRecordMessage();
             }
 
@@ -416,20 +416,11 @@
             <div id=dbname ></div>
         </a>
         <!-- message of the day TODO: FIX OR REMOVE, SEEMS THIS IS NOT DISPLAYED ALTHOUGH IT IS IN PAGE SOURCE-->
-        <div id="message"> Heurist 3 : Open Source <a href="../help/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
+        <div id="message"> Heurist : Open Source <a href="../help/index.html?ACL" target="_blank" title="Click for full information"><br><font style="font-size:11px">Credits</font></a> </div>
         <!-- quicklinks -->
         <div id="quicklinks" style="padding-top: 25px">
                 <!--<div id="logged-in" style="height:22px"></div>-->
-            
-                <div style="display:inline-block;padding-top: 5px;">cite as: <a href='#' id=cite-as-url contextmenu=enable onClick="return false;"></a></div>
-                <script>
-                    top.HEURIST.whenLoaded(recordEvent, function() {
-                        var citeAs = document.getElementById("cite-as-url");
-                        citeAs.href = window.location.protocol + "//" + window.location.host+ top.HEURIST.baseURL_V3 +"resolver.php?db="+ top.HEURIST.database.name +"&recID=" + top.HEURIST.edit.record.bibID;
-                        citeAs.appendChild(document.createTextNode(citeAs.href));
-                    });
-                </script>
-            
+
             <ul id=quicklink-cell style="display: inline-block;padding-left:15px;display:inline-block">
                 <!-- <li><a href="../../help/index.html" onClick="top.HEURIST.util.popupURL(window, href); return false;"><b>About</b></a></li> -->
                 <li><a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 320,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;" title="Click to send a bug report to the Heurist developers"><b>Report bug</b></a></li>
@@ -548,7 +539,7 @@
                             document.getElementById("moddate").appendChild(document.createTextNode("updated: " + top.HEURIST.edit.record.moddate));
                     });
                 </script>
-            
+
         </div>
         <!-- end sidebar -->
 
@@ -558,8 +549,8 @@
             <!-- banner -->
             <div class="banner">
                 <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
-                
-                    <input type=checkbox id=ui-pref-simplemode 
+
+                    <input type=checkbox id=ui-pref-simplemode
                         onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode()" class=minimal>
                     <label for=ui-pref-simplemode style="vertical-align:top">simplified view</label>
 
@@ -567,7 +558,7 @@
 
                     <input type=checkbox id=ui-pref-tabs onClick="" class=minimal style="display:none">
                     <label for=ui-pref-tabs style="vertical-align:top;padding-right:1em;display:none">tabs</label>
-                    
+
                     <input type=checkbox id=ui-pref-showhelp onClick="top.HEURIST.util.helpToggler(this)" class=minimal>
                     <label for=ui-pref-showhelp style="vertical-align:top;padding-right:1em">help</label>
 
@@ -575,7 +566,7 @@
                             onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
                     <label class=public-visible for=ui-pref-optfields style="vertical-align:top">optional fields</label>
                 </div>
-                
+
                 <div id="admin_editrectype" style="float:right;width:230px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
                 <span id="changed_marker" style="display:none;float:right;width:16px;height:16px;margin-top:4px;margin-right:4px;background-image: url('../../common/images/save-disk.gif')"></span>
             </div>
@@ -617,7 +608,7 @@
                     */
                     //ART document.getElementById("act-stay").checked = true;
                 }
-                
+
                 var helpLink = top.document.getElementById("ui-pref-showhelp");
                 top.HEURIST.util.setHelpDiv(helpLink,null);
             });

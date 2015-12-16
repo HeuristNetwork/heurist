@@ -40,7 +40,7 @@ $id = @$_REQUEST["recID"];
 
 // Redirect to .../records/view/viewRecord.php
 
-header('Location: '.HEURIST_BASE_URL_V3.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
+header('Location: '.HEURIST_BASE_URL.'migrated/records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
 
 return;
 
