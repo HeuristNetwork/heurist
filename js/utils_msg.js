@@ -2,26 +2,26 @@ if (!top.HEURIST4){
     top.HEURIST4 = {};
 }
 if (! top.HEURIST4.msg) top.HEURIST4.msg = {
-    
-    EMPTY_MESSAGE:("Server returns nothing. Either server not accessible or script is corrupted."
-                +" Please try later and if issue persists please consult your system administrator "
-                +" or contact development team"),    
+
+    EMPTY_MESSAGE:("No response received from server. This may be due to a temporary network outage. Please reload page."
+                +" If issue persists, please consult your system administrator "
+                +" or email the Heurist development team (info at HeuristNetwork dot org)"),
 
     showMsgErrJson: function(response){
         if(typeof response === "string"){
             showMsgErr(null);
         }else{
             showMsgErr('Can not parse server response: '+response.substr(0,255)+'...');
-        }        
+        }
     },
-    
+
     showMsgErr: function(response){
         var msg = "";
         if(typeof response === "string"){
             msg = response;
         }else{
             if(top.HEURIST4.util.isempty(response.message)){
-                msg = top.HEURIST4.msg.EMPTY_MESSAGE;   
+                msg = top.HEURIST4.msg.EMPTY_MESSAGE;
             }else{
                 msg = response.message;
             }
@@ -33,13 +33,13 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 }else{
                     msg = msg + '<br>System error: ' + response.sysmsg;
                 }
-                
+
             }
-            if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL 
+            if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL
             || response.status==top.HAPI4.ResponseStatus.SYSTEM_FATALSYSTEM_CONFIG){
 
                 msg = msg + "<br><br>The system is not configured properly. Please consult your system administrator";
-            
+
             }else if(response.status==top.HAPI4.ResponseStatus.INVALID_REQUEST){
 
                 msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please contact development team";
@@ -49,47 +49,47 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 msg = msg + "<br><br>This action is not allowed for your current permissions";
 
             }else if(response.status==top.HAPI4.ResponseStatus.DB_ERROR){
-                msg = msg + "<br><br>Please consult your system administrator. Error may be due to an incomplete "   
+                msg = msg + "<br><br>Please consult your system administrator. Error may be due to an incomplete "
                         +"database eg. missing stored procedures, functions, triggers, or there may be an "
                         +"error in our code (in which case we need to know so we can fix it";
             }
         }
         if(top.HEURIST4.util.isempty(msg)){
-                msg = top.HEURIST4.msg.EMPTY_MESSAGE;   
+                msg = top.HEURIST4.msg.EMPTY_MESSAGE;
         }
 
         top.HEURIST4.msg.showMsgDlg(msg, null, "Error");
     },
-    
+
     //load content to dialog and show it
-    // 
+    //
     //
     showMsgDlgUrl: function(url, buttons, title){
 
         if(url){
             var $dlg = top.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
-                top.HEURIST4.msg.showMsgDlg(null, buttons, title);    
+                top.HEURIST4.msg.showMsgDlg(null, buttons, title);
             });
         }
     },
-    
+
     //
     //
     showMsgWorkInProgress: function( message ){
-        
+
         if(top.HEURIST4.util.isempty(message)){
             message = "this feature";
         }
-        
+
         message = "Beta version: we are still working on "
-              + message 
+              + message
               + "<br/><br/>Please email Heurist support (support _at_ HeuristNetwork.org)"
               + "<br/>if you need this feature and we will provide workarounds and/or fast-track your needs.";
-            
+
         top.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");
     },
-    
+
     //
     //
     //
@@ -110,7 +110,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         }
         return $dlg;
     },
-    
+
     //
     // buttons - callback function or objects of buttons for dialog option
     //
@@ -126,32 +126,32 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
         if(message!=null){
             $dlg.empty();
-            
+
             var isobj = (typeof message ===  "object");
-            
+
             if(!isobj){
                 isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
             }
-            
+
             if(isPopupDlg){
 
                 $dlg = top.HEURIST4.msg.getPopupDlg();
                 if(isobj){
-                    $dlg.append(message);    
+                    $dlg.append(message);
                 }else if(message.indexOf('#')===0 && $(message).length>0){
-                    $dlg.html($(message).html());    
+                    $dlg.html($(message).html());
                 }else{
-                    $dlg.html(message);    
+                    $dlg.html(message);
                 }
-                
+
                 isPopup = true;
-                
+
             }else{
                 isPopup = false;
                 if(isobj){
-                    $dlg.append(message);    
+                    $dlg.append(message);
                 }else{
-                    $dlg.append('<span>'+top.HR(message)+'</span>');    
+                    $dlg.append('<span>'+top.HR(message)+'</span>');
                 }
             }
         }
@@ -180,7 +180,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             };
 
         }
-        
+
         var options =  {
             title: top.HR(title),
             resizable: false,
@@ -191,26 +191,26 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             buttons: buttons
         };
         if(isPopup){
-            
-            options.open = function(event, ui){ 
+
+            options.open = function(event, ui){
                 $dlg.scrollTop(0);
             };
-            
+
             options.height = 515;
             options.width = 705;
             options.resizable = true;
             options.resizeStop = function( event, ui ) {
-                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height() 
+                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
                             - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
                 };
         }
-        
+
         if(position_to_element){
            options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };
         }
-        
+
         $dlg.dialog(options);
-        
+
         return $dlg;
         //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
@@ -224,9 +224,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             alert(message);
             return;
         }
-        
+
         $dlg = top.HEURIST4.msg.getMsgDlg();
-        
+
         $dlg.addClass('ui-heurist-border');
 
         if(message!=null){
@@ -235,7 +235,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         }
 
         if(!title) title = top.HR('Info');
-        
+
         var options =  {
             title: top.HR(title),
             resizable: false,
@@ -244,25 +244,25 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             modal: false,
             buttons: {}
         };
-        
-        
+
+
         if(position_to_element){
            options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };
         }
-        
+
         $dlg.dialog(options);
         $dlg.dialog("option", "buttons", null);
-        
+
         if (!(timeout>200)) {
             timeout = 1000;
         }
-    
+
         setTimeout(function(){
-            $dlg.dialog('close');    
+            $dlg.dialog('close');
         }, timeout);
-        
+
     },
-        
+
     //@todo - redirect to error page
     redirectToError: function(message){
         top.HEURIST4.msg.showMsgDlg(message, null, 'Error');
@@ -300,13 +300,13 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 }else{
                     message_text = message_text + (len-max) + top.HR(" characters over");
                 }
-                
-                
+
+
             }else if(min==1){
                 message_text = top.HR(title)+" "+top.HR("required field");
             }
 
-            return message_text; 
+            return message_text;
 
         } else {
             return '';
@@ -321,21 +321,21 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             return true;
         }
     },
-  
+
     /**
     * show url in iframe within popup dialog
     */
     showDialog: function(url, options){
-    
+
                 if(!options) options = {};
-        
+
                 if(!options.title) options.title = 'Information';
-        
+
                 var opener = options['window']?options['window'] :window;
-        
+
                 //.appendTo( that.document.find('body') )
-                
-                //create new div for dialogue with $(this).uniqueId();                 
+
+                //create new div for dialogue with $(this).uniqueId();
                 var $dlg = $('<div>').addClass('loading').appendTo( $(opener.document).find('body') ).uniqueId();
                 var $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
                             .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
@@ -351,24 +351,24 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                     if ( !rval  &&  rval !== undefined){
                         return false;
                     }
-                    
+
                     $dlg.dialog('close');
                     return true;
-                };             
+                };
 */
                 //callback function to resize dialog from internal frame functions
                 $dosframe[0].doDialogResize = function(width, height) {
                     //top.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
                     var body = $(this.document).find('body');
                     var dim = {h:body.innerHeight()-10, w:body.innerWidth()-10};
-                    
+
                     if(width>0)
                         $dlg.dialog('option','width', Math.min(dim.w, width));
                     if(height>0)
                         $dlg.dialog('option','height', Math.min(dim.h, height));
                 };
 
-                
+
                 //on load content event listener
                 $dosframe.on('load', function(){
                         $dosframe.show();
@@ -378,13 +378,13 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         if(!options["title"]){
                             $dlg.dialog( "option", "title", content.document.title );
                         }
-                        
+
                         //functions in internal document
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
                         content.close = function() {
                             var did = $dlg.attr('id');
                             $dlg.dialog('close');
-                            
+
                             var rval = true;
                             var closeCallback = options['callback'];
                             if(closeCallback){
@@ -394,20 +394,20 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                                 return false;
                             }
                             return true;
-                        }; 
-                        
-                        
-                        //content.popupOpener = opener;  
+                        };
+
+
+                        //content.popupOpener = opener;
                         content.doDialogResize = $dosframe[0].doDialogResize;
-                        
+
                         var onloadCallback = options['onpopupload'];
                         if(onloadCallback){
                                 onloadCallback.call(opener, $dosframe[0]);
                         }
-                        
+
                         $dlg.removeClass('loading'); //.css('background','none');
                 });
-                
+
 //    options['callback']
                 //(this.document.find('body').innerHeight()-20)
                         options.height = parseInt(options.height, 10);
@@ -415,7 +415,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                             options.height = top.innerHeight-20;
                         }
                         options.width = parseInt(options.width, 10);
-                
+
                         var opts = {
                                 autoOpen: true,
                                 width : (options.width>0?options.width+20 :690 ),
@@ -436,18 +436,18 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         $dosframe.attr('src', url);
 
     },
-    
+
     showElementAsDialog: function(options){
-        
+
             var opener = options['window']?options['window'] :window;
-        
+
             var $dlg = $('<div>')
                .appendTo( $(opener.document).find('body') );
-               
+
             var element = options['element'];
             var originalParentNode = element.parentNode;
             element.parentNode.removeChild(element);
-               
+
             $(element).show().appendTo($dlg);
 
             var opts = {
@@ -459,17 +459,17 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                     //draggable: false,
                     title: options["title"],
                     close: function(event, ui){
-                        
+
                         //var element = popup.element.parentNode.removeChild(popup.element);
                         element.style.display = "none";
                         originalParentNode.appendChild(element);
-                        
+
                         $dlg.remove();
                     }
             };
             $dlg.dialog(opts);
-        
+
             return $dlg;
     },
-    
+
 };

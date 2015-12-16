@@ -108,23 +108,6 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     }
 
-    // not used
-    function _processerror(response){
-
-        if(response.status != top.HAPI4.ResponseStatus.OK){
-                var msg = response.message;
-
-                if(!msg){
-                    msg = "Server returns nothing. Either server not accessible or script is corrupted. Please try later and if issue persists contact development team";
-                }
-                if(response.sysmsg){
-                    msg = msg + "<br>System error:" + response.sysmsg;
-                }
-
-                top.HEURIST4.util.showMsgErr(msg);
-        }
-    }
-
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
     *
