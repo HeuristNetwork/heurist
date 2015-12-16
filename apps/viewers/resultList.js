@@ -585,12 +585,15 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
         var html_owner = '';
         var owner_id = fld('rec_OwnerUGrpID');
         if(owner_id && owner_id!='0'){
-
+            // 0 owner group is 'everyone' which is treated as automatically making it public (although this is not logical)
+            // TODO: I think 0 should be treated like any other owner group in terms of public visibility
             var visibility = fld('rec_NonOwnerVisibility');
-            var clr = (visibility=='hidden')?'red':'green';
-            var hint = ((visibility=='hidden')? 'hidden': (visibility!='public')?'public':'read-only') + ' to others';
+            // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
+            var clr  = (visibility=='hidden')? 'red': ((visibility=='viewable')? 'orange' : ((visibility=='pending')? 'green' : 'blue'));
+            var hint = (visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)";
 
-            html_owner =  '<span class="rec_owner" style="color:'+clr+'" title="'+hint+'">'+owner_id+'</span>';
+            // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
+            html_owner =  '<span class="rec_owner" style="color:' + clr + '" title="' + hint + '">&nbsp;&nbsp;<b>' + owner_id + '</b></span>';
         }
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
@@ -982,7 +985,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             .button({icons: {
                 secondary: "ui-icon-triangle-1-s"
             }});
-            
+
             this.btn_page_menu.find('.ui-icon-triangle-1-s').css({'font-size': '1.3em', right: 0});
 
             this.btn_page_next = $( "<button>", {text:currentPage} )

@@ -15,7 +15,7 @@
 */
 
 /**
-* UI for viewing record 
+* UI for viewing record
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,7 +27,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/View   
+* @subpackage  Records/View
 */
 
 
@@ -80,7 +80,7 @@ $rec_id = intval(@$_REQUEST['recID']);
 	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
     <script type="text/javascript" src="../../external/jquery/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 	<!-- <script src="../../external/jquery/jquery-1.6.min.js"></script> -->
-    
+
 	<!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
 	<script type="text/javascript" src="../../records/files/initViewer.js"></script -->
 	<script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->
@@ -302,14 +302,14 @@ function print_private_details($bib) {
 				print '<span style="font-weight: bold; color: black;">'.htmlspecialchars($workgroup_name).'</span>';
 				switch ($bib['rec_NonOwnerVisibility']) {
 					case 'hidden':
-						print '<span> - hidden to others</span></div></div>';
+						print '<span> - hidden to all except owner</span></div></div>';
 						break;
 					case 'viewable':
 						print '<span> - read-only to other logged-in users</span></div></div>';
 						break;
 					case 'public':
 					default:
-						print '<span> - read-only to general public</span></div></div>';
+						print '<span> - readable by anyone</span></div></div>';
 				}
 			}
 
@@ -570,7 +570,7 @@ function print_private_details($bib) {
     $prevLbl = null;
 	foreach ($bds as $bd) {
 		print '<div class=detailRow style="width:100%;border:none 1px #00ff00;"><div class=detailType>'.($prevLbl==$bd['name']?"":htmlspecialchars($bd['name'])).'</div><div class=detail>'.$bd['val'].'</div></div>';
-        $prevLbl = $bd['name']; 
+        $prevLbl = $bd['name'];
 	}
 ?>
 
@@ -707,7 +707,7 @@ global $relRT,$ACCESSABLE_OWNER_IDS;
     </div></div>
 <?php
 	$rectypesStructure = getAllRectypeStructures();
-    
+
     $lbl = 'Linked from';
 
 	while ($row = mysql_fetch_assoc($res)) {
@@ -718,7 +718,7 @@ global $relRT,$ACCESSABLE_OWNER_IDS;
 		print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL_V3.'common/images/16x16.gif">&nbsp;';
 		print '<a target=_new href="'.HEURIST_BASE_URL_V3.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
 		print '</div></div>';
-        
+
         $lbl = '';
 	}
 }
