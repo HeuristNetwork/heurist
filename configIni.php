@@ -62,7 +62,8 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.1.2"; // sets current program version number, determined by Heurist development lead
+$version = "4.1.3"; // sets current program version number, determined by Heurist development lead
+// Vsn 4.1.3 16 Dec 2015
 // Vsn 4.1.2 15 Nov 2015
 // Vsn 4.1.1 02 Nov 2015
 // Vsn 4.1.0 15 sep 2015
