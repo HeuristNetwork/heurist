@@ -71,6 +71,9 @@ function errorOut($msg){
         <link rel=icon href="../../../../favicon.ico" type="image/x-icon">
         <link rel="stylesheet" href="../../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="../../../../h4styles.css">
+
+        <!-- TODO: These all climb laboriously out of migrated/ then into H4 /ext, /js etc...
+             /localization does not even exist -->
         <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <script type="text/javascript" src="../../../../localization.js"></script>
@@ -188,9 +191,9 @@ function doRegister(event){
              .tabrow{
                 /*width:90%;*/
                 display:table-row;
-                padding-left: 38px;    
+                padding-left: 38px;
              }
-             
+
 
         </style>
 
@@ -305,11 +308,11 @@ function doRegister(event){
 
                 var ddiv = $('#registered_dbs');
                 ddiv.show();
-                
+
                 //only once
                 if(is_db_got) return;
                 is_db_got = true;
-                
+
                 ddiv.height('40px');
 
                 // request for server side
@@ -454,7 +457,7 @@ function doRegister(event){
                         <input type="hidden" name="popup" value="<?php echo @$_REQUEST['popup']?'1':''; ?>">
 
                         <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:2px;">
-                            <input type="radio" name="dbtype" value="0" id="rb1" checked 
+                            <input type="radio" name="dbtype" value="0" id="rb1" checked
                                 onclick="{$('#registered_dbs').hide()}"/><label for="rb1"
                                 class="labelBold" style="padding-left: 2em;">Standard database template</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
