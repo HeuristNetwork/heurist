@@ -60,7 +60,7 @@ bindOnEvents() {
 /*                            INIT VARIABLES                                  */
 /*                                                                            */
 /******************************************************************************/
- 
+
 showWarning("Ver 26. Thanks for trying this module!", "This module has been generated from a Heurist database structure. You can customise the module yourself or we can help you. Contact info@fedarch.org for help.");
 
 Map rectypeToUuid = new HashMap(); //list of edit form in use
@@ -76,13 +76,13 @@ setUuid(String rectypeTab, String uuid) {
 }
 
 //stack of tabs in use to prevent edit twice
-ArrayList tabs_edit = new ArrayList(); 
+ArrayList tabs_edit = new ArrayList();
 
 // stack of calls to select (see last_invoker)
 // populated on selectEntity tab show
-// removed on onShowEditForm 
+// removed on onShowEditForm
 // cleared in clearStacks (conttol/data or control/map show)
-ArrayList tabs_select = new ArrayList(); 
+ArrayList tabs_select = new ArrayList();
 
 //keeps rectype to select(browse) and field path to assign the result of selection
 // for example Person=DigitalMediaItem/DigitalMediaItem_General_Information/Creators
@@ -121,14 +121,14 @@ assignDate(fieldid, value){
 	try{
 		//String pattern = android.text.format.DateFormat.getDateFormat();
 		String pattern = Settings.System.getString(getActivity().getContentResolver(), Settings.System.DATE_FORMAT);
-print ("date "+value+"  "+pattern);	
+print ("date "+value+"  "+pattern);
 		Date dtvalue = (new java.text.SimpleDateFormat(pattern)).parse(value);
-print (dtvalue);		
+print (dtvalue);
 		setFieldValue(fieldid, dateFormat.format("yyyy-MM-dd hh:mm:ss", dtvalue));
 	}catch(Exception e){
-print ("Exception "+e.getMessage());	
+print ("Exception "+e.getMessage());
 	}
-*/	
+*/
 }
 
 //
@@ -144,14 +144,14 @@ setTimestamp(String path) {
 // find related entity and fill pointer attrubute with their names
 //
 loadRelatedEntities(rectypeTab){
-{{TEMPLATE_RELATED}}    
+{{TEMPLATE_RELATED}}
 }
 
 //
 // return entity name by tab name
 //
 getEntityNameByTabname(rectypeTab) {
-    
+
 	for (NameValuePair pair : rectypeToEntity) {
 		if(pair.getName().equals(rectypeTab)){
 			return pair.getValue();
@@ -164,7 +164,7 @@ getEntityNameByTabname(rectypeTab) {
 // get tab name by entity name
 //
 getTabnameByEntityName(entName) {
-    
+
 	for (NameValuePair pair : rectypeToEntity) {
 		if(pair.getValue().equals(entName)){
 			return pair.getName();
@@ -234,12 +234,12 @@ onShowEditForm(rectypeTab){
     }else{
         tabs_edit.add(rectypeTab);
     }
-	
+
 	  //fill id
 	  String entid = getUuid(rectypeTab);
 
 	  if(null==entid){
-		onInitNewRecord( rectypeTab );	
+		onInitNewRecord( rectypeTab );
 	  }else{
 		// Load related entities
 		loadRelatedEntities(rectypeTab);
@@ -271,7 +271,7 @@ onAddNewEntityWhenSelect(){
     for (String rt : tabs_edit) {
         if (rt.equals(rectypeTab) ) {
             //prevents show edit form in case it is already in use
-            showWarning("Already in use", "Can not create new "+rectypeTab+". Save previous");
+            showWarning("Already in use", "Cannot create new "+rectypeTab+". Save previous");
             return;
         }
     }
@@ -355,14 +355,14 @@ newEntity(String rectypeTab){
         entName = getFieldValue("control/data/entityTypeList");
         rectypeTab = getTabnameByEntityName(entName);
 		if(isNull(rectypeTab)){
-            showWarning("Cannot edit", "Entity type '"+entName+"' can not be edited");
+            showWarning("Cannot edit", "Entity type '"+entName+"' cannot be edited");
             return;
 		}
     }
 
     for (String rt : tabs_edit) {
         if (rt.equals(rectypeTab) ) {
-            showWarning("Already in use", "Can not create new '"+rectypeTab+"'. Save previous");
+            showWarning("Already in use", "Cannot create new '"+rectypeTab+"'. Save previous");
             return;
         }
     }
@@ -439,29 +439,29 @@ saveEntity(String rectypeTab, Boolean needValidation, Boolean andclose) {
         onSave(uuid, newRecord) {
             setUuid(rectypeTab, uuid);
 			showToast("Successfully saved data!");
-			
+
 			if(null!=attachedGeometry){
 				mapRefresh(); //refresh map
 			}
 
 			String entName = getEntityNameByTabname( rectypeTab );
 			searchEntity(entName); //refresh list
-			
-/* debug			
+
+/* debug
 			fetchArchEnt(uuid, new FetchCallback() {
 				onFetch(entity) {
 					geometry = entity.getGeometryList();
-print("after save "+geometry);				
+print("after save "+geometry);
 				}
 			});
-*/			
+*/
         }
     }, true);
-	
+
     if(andclose){
 			goBack();
     }
-	
+
 }
 
 //
@@ -470,14 +470,14 @@ print("after save "+geometry);
 saveAttachedGeometry(String rectypeTab, String gps_accuracy){
 
     String uuid = getUuid(rectypeTab);
-	
+
 	if(isNull(uuid)){
-	
+
 		showToast("Please enter data first and let a save occur.");
-	
+
 	}else if(!isNull(attachedGeometry)){
 
-	
+
 		if(isNull(gps_accuracy)){
 			gps_accuracy = "Geometry is manually plotted";
 		}
@@ -485,7 +485,7 @@ saveAttachedGeometry(String rectypeTab, String gps_accuracy){
 		//save annotation
 		List attributes = createAttributeList();
 		attributes.add(createEntityAttribute("Latitude", gps_accuracy, null, null, null));
-		
+
 		String entName = getEntityNameByTabname(rectypeTab);
 
 		saveArchEnt(uuid, entName, attachedGeometry, attributes, new SaveCallback() {
@@ -510,11 +510,11 @@ deleteEntity(rectypeTab){
 }
 deleteEntityConfirmed(rectypeTab){
     String uuid = getUuid(rectypeTab);
-	
+
     deleteArchEnt(uuid, new DeleteCallback() {
         onDelete(uuid) {
-            cancelTabGroup(rectypeTab, false);        
-			
+            cancelTabGroup(rectypeTab, false);
+
 			String entName = getEntityNameByTabname( rectypeTab );
 			searchEntity(entName);
 			mapRefresh();
@@ -550,11 +550,11 @@ removeNavigationButtons() {
 
 addNavigationButtons(String rectypeTab) {
   removeNavigationButtons();
-  
+
   //only some rectype should be validated. SPECIFIC
   List tabgroupsToValidate = new ArrayList();
   {{TEMPLATE_TOVALIDATE}}
-  
+
   addNavigationButton("new", new ActionButtonCallback() {
     actionOnLabel() {
       "{New}";
@@ -615,7 +615,7 @@ duplicateEntity(String tabgroup) {
   //String duplicateTabGroupFunction = "duplicate" + tabgroup.replaceAll("_", "") + "()"; // Typical value: "duplicateTabgroup()"
   //eval(duplicateTabGroupFunction);
   //Log.d("duplicateRecord", tabgroup);
-  
+
   String uuidOld = getUuid(tabgroup);
 
   disableAutoSave(tabgroup);
@@ -626,7 +626,7 @@ duplicateEntity(String tabgroup) {
 
       Boolean enable_autosave = true;
 
-/* it does not work	  
+/* it does not work
       fetchAll(getDuplicateRelnQuery(uuidOld), new FetchCallback(){
         onFetch(result) {
           Log.e("Module", result.toString());
@@ -638,7 +638,7 @@ duplicateEntity(String tabgroup) {
 */
       showToast("{Duplicated_record}");
       dialog.dismiss();
-/*	  
+/*
       saveTabGroup(tabgroup, getUuid(tabgroup), null, null, new SaveCallback(){
         onSave(autosaveUuid, autosaveNewRecord) {
             setUuid(tabgroup, autosaveUuid);
@@ -646,7 +646,7 @@ duplicateEntity(String tabgroup) {
 			searchEntity(entName); //refresh list
         }
       }, enable_autosave);
-*/	  
+*/
     }
   };
 
@@ -659,7 +659,7 @@ duplicateEntity(String tabgroup) {
       duplicateTabGroup(tabgroup, null, getExtraAttributes(result), excludeAttributes, saveCallback);
     }
   });
-  
+
 }
 
 // generic fetch saved attributes query
@@ -779,7 +779,7 @@ validateFields(List fields, String format) {
     // Only validate a field whose validation condition evaluates to `true`
 	if(!isNull(cond)){
 		String condition = cond+"(\""+ref+"\")";
-print ("validate: "+condition);	
+print ("validate: "+condition);
 		Boolean isValid = (Boolean) eval( condition );
 		if(!isValid){
 			out += "- " + name + " has wrong format\n";
@@ -869,24 +869,24 @@ searchEntity( forEntityType ){
   String entName = getFieldValue("control/data/entityTypeList");
 
   if(isNull(forEntityType) || forEntityType.equals(entName)){
-  
+
 	String term    = getFieldValue("control/data/entitySearchTerm");
 	if(isNull(term) || "".equals(term)){ //load all
-   
+
 		fetchEntityList(entName, new FetchCallback() {
 			onFetch(result) {
 				populateList("control/data/entityList", result);
 			}
 		});
-   
+
     }else{
-  
+
 		String searchQuery = "SELECT uuid, response "+
 					   "  FROM latestNonDeletedArchEntFormattedIdentifiers  "+
                        " WHERE uuid in (SELECT uuid "+
                        "                  FROM latestNonDeletedArchEntIdentifiers "+
                        "                 WHERE measure LIKE '"+term+"'||'%'  "+
-                       "                   AND ( aenttypename LIKE '"+entName+"' ) "+ 
+                       "                   AND ( aenttypename LIKE '"+entName+"' ) "+
                        "                )  "+
                        " ORDER BY response "+
                        " LIMIT ? "+
@@ -909,16 +909,16 @@ loadEntityTypeList() {
    if(isNull(entName) || "".equals(entName)){
 		populateDropDown("control/data/entityTypeList", rectypeToEntity);
 		searchEntity( null );
-/*   
+/*
 		fetchAll("select aenttypename, aenttypename from aenttype;", new FetchCallback() {
 			onFetch(result) {
 				populateDropDown("control/data/entityTypeList", result);
 				searchEntity( null );
 			}
 		});
-*/		
+*/
    }
-   
+
    clearStacks();
 }
 
@@ -1027,8 +1027,8 @@ mapRecord(rectypeTab){
 //
 // list of color by rectypeTab
 //
-Map rectypeToColor = new HashMap(); 
-Map rectypeToMapLayer = new HashMap(); 
+Map rectypeToColor = new HashMap();
+Map rectypeToMapLayer = new HashMap();
 
 //
 // load database layer for particular type
@@ -1048,17 +1048,17 @@ mapLoadLayer(rectypeTab) {
     String queryName = rectypeTab;
 	String entName = getEntityNameByTabname( rectypeTab );
     String querySql = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEnt join aenttype using (aenttypeid) where aenttypename = '"+entName+"'";
-	
+
 	clr = rectypeToColor.get(rectypeTab);
 	if(null==clr){
 		clr = Color.RED;
 	}
-	
+
     ps = createPointStyle(10, clr, 0.2f, 0.5f);
     ls = createLineStyle(10, clr, 0.05f, 0.3f, null);
     pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, clr, 0.01f, 0.3f, null));
     ts = createTextStyle(10, clr, 40, Typeface.SANS_SERIF);
-    
+
     layerID = showDatabaseLayer("control/map/map", rectypeTab, isEntity, queryName, querySql, ps, ls, pos, ts);
 	rectypeToMapLayer.put(rectypeTab, layerID);
 }
@@ -1077,7 +1077,7 @@ mapInit() {
     setSelectedLayer("control/map/map", DATA_ENTRY_LAYER);
 
 	populateDropDown("control/map/entityTypeList", rectypeToEntity);
-	
+
 	addOnEvent("control/map", "show", "clearStacks()");
 	addOnEvent("control/map/clear", "click", "onClearMap()");
 	addOnEvent("control/map/create", "click", "onCreateEntityFromMap()");
@@ -1086,7 +1086,7 @@ mapInit() {
 
 {{TEMPLATE_MAPCOLORS}}
 
-/* included into previous template 
+/* included into previous template
 mapRefresh(){
 	refreshMap("control/map/map");
 	onClearMap();
@@ -1199,7 +1199,7 @@ addOnEvent("control/gps", "show", "updateGPSDiagnostics()");
 
 updateGPSDiagnostics() {
   String diagnosticsRef = "control/gps/GPS_Diagnostics";
-  
+
   if (diagnosticsRef.equals("")) {
     return;
   }
@@ -1322,11 +1322,11 @@ takePoint(String rectypeTab, String tabgroup) {
   setFieldValue(tabgroup + "Latitude"  , latitude );
   setFieldValue(tabgroup + "Easting"   , easting );
   setFieldValue(tabgroup + "Northing"  , northing );
-	  
+
   samplePoint = new Point(new MapPos(easting, northing), null, (PointStyle) null, null);
   attachedGeometry = new ArrayList();
   attachedGeometry.add(samplePoint);
-	
+
   saveAttachedGeometry( rectypeTab, "Accuracy: "+getGPSEstimatedAccuracy());
 }
 

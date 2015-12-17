@@ -3,7 +3,7 @@
     /**
     * Application interface. See hRecordMgr in hapi.js
     * Record search
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -27,16 +27,16 @@
 
     /*
      parameters
-     
+
     *       FOR RULES
     *       rules - rules queries - to search related records on server side
     *       getrelrecs (=1) - search relationship records (along with related) on server side
     *       topids - list of records ids, it is used to compose 'parentquery' parameter to use in rules (@todo - replace with new rules algorithm)
-    * 
-    *       INTERNAL/recursive 
-    *       parentquery - sql expression to substiture in rule query 
+    *
+    *       INTERNAL/recursive
+    *       parentquery - sql expression to substiture in rule query
     *       sql - sql expression to execute (used as recursive parameters to search relationship records)
-    * 
+    *
     *       SEARCH parameters that are used to compose sql expression
     *       q - query string (old mode) or json array (new mode)
     *       w (=all|bookmark a|b) - search among all or bookmarked records
@@ -44,30 +44,30 @@
     *       offset - offset parameter value for sql query
     *       s - sort order
     *
-    *       OUTPUT parameters        
+    *       OUTPUT parameters
     *       vo (=h3) - output format in h3 for backward capability (for detail=ids only)
-    *       needall (=1) - by default it returns only first 1000, to return all set it to 1, 
+    *       needall (=1) - by default it returns only first 1000, to return all set it to 1,
     *                      it is set to 1 for server-side rules searches
     *       publiconly (=1) - ignore current user and returns only public records
-    * 
+    *
     *       detail (former 'f') - ids       - only record ids
     *                             header    - record header
     *                             timemap   - record header + timemap details
-    *                             detail    - record header + all details 
+    *                             detail    - record header + all details
     *                             structure - record header + all details + record type structure (for editing) - NOT USED
-    * 
+    *
     *       CLIENT SIDE
     *       id - unque id to sync with client side
     *       source - id of html element that is originator of this search
     *       qname - original name of saved search (for messaging)
 
-    */ 
-     
-    //these are internal parameters, they can not be sent from client side
+    */
+
+    //these are internal parameters, they cannot be sent from client side
     if( @$_REQUEST['sql'] )unset( $_REQUEST['sql'] );
     if( @$_REQUEST['parentquery'] ) unset ($_REQUEST['parentquery'] );
     //if( @$_REQUEST['needall'] ) unset ($_REQUEST['needall'] );
-    
+
     $response = array();
 
     $system = new System();
@@ -79,32 +79,32 @@
 
         $response = recordSearchMinMax($system, $_REQUEST);
 
-    }else if(@$_REQUEST['a'] == 'getfacets'){ //returns     
+    }else if(@$_REQUEST['a'] == 'getfacets'){ //returns
 
         $response = recordSearchFacets($system, $_REQUEST);
-        
-    }else if(@$_REQUEST['a'] == 'related'){    
-        
-        $response = recordSearchRelated($system, $_REQUEST['ids']);        
+
+    }else if(@$_REQUEST['a'] == 'related'){
+
+        $response = recordSearchRelated($system, $_REQUEST['ids']);
 
     }else {
-        
+
         //temorary!!!
         //verify than recLinks does not exist
         $isok = true;
         $value = mysql__select_value($system->get_mysqli(), "SHOW TABLES LIKE 'recLinks'");
         if($value==null || $value==""){
             include(dirname(__FILE__).'/../common/utils_db_script.php');
-            
+
             if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../common/sqlCreateRecLinks.sql")){
-                $system->addError(HEURIST_DB_ERROR, "Can not execute script sqlCreateRecLinks.sql");
+                $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
                 $response = $system->getError();
                 $isok = false;
-            }        
+            }
         }
         if($isok){
-            $response = recordSearch($system, $_REQUEST);    
-        
+            $response = recordSearch($system, $_REQUEST);
+
         }
     }
 

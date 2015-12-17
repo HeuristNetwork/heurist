@@ -1,4 +1,4 @@
-<?php  
+<?php
 /**
 * filename: explanation
 *
@@ -35,21 +35,19 @@ function loadRemoteURLContent($url, $timeout=10) {
     if (defined("HEURIST_HTTP_PROXY")) {
         curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
     }
-    
+
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
 
     $error = curl_error($ch);
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-/*****DEBUG****///error_log("CAN NOT LOAD REMOTE URL:  $error ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
         curl_close($ch);
         return false;
     } else {
         curl_close($ch);
         if(!$data){
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-/*****DEBUG****///error_log("Returned empty data: ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
         }
         return $data;
     }

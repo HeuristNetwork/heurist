@@ -23,20 +23,20 @@
         $terms = dbs_GetTerms($system);
     }
 
-    if($recTypeID==RT_ADDRESS){        
+    if($recTypeID==RT_ADDRESS){
 
-        //find linked place roles  RT_PLACE_ROLE        
-        
+        //find linked place roles  RT_PLACE_ROLE
+
         $records_placeroles = recordSearch($system, array(
-                'q'=>'[{"t":"16"},{"linked_to:12:90":"'. $recID .'" }]', 
+                'q'=>'[{"t":"16"},{"linked_to:12:90":"'. $recID .'" }]',
                 'detail'=>'detail'));
              if(@$records_placeroles['status']!='ok'){
-                return 'Can not get linked placeroles for addressrelated event for person';
+                return 'Cannot get linked place roles for address-related event for person';
              }else{
-                $records_placeroles = $records_placeroles['data']; 
+                $records_placeroles = $records_placeroles['data'];
              }
-        
-?>        
+
+?>
 <div class="infowindow">
 
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
@@ -47,10 +47,10 @@
 
 <ul>
 
-<?php 
+<?php
         if(@$records_placeroles['reccount']>0){
         foreach($records_placeroles['records'] as $roleID => $record){
-            
+
             $date_out = composeDates( $records_placeroles, $roleID, '<b>Date: </b>');
 ?>
     <li>
@@ -62,7 +62,7 @@
 <?php
         }
         }else{
-            echo '<li>None recorded</li>';    
+            echo '<li>None recorded</li>';
         }
 ?>
 </ul></p>
@@ -224,9 +224,9 @@
 
 
 </div>
-        
-        
+
+
 <?php
-    exit();   
+    exit();
     }
 ?>

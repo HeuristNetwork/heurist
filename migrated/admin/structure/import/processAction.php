@@ -356,7 +356,7 @@ function importRectype($importRty) {
 
 		$res = mysql_query($query);
 		if(mysql_num_rows($res) == 0) {
-			makeLogEntry("<b>Error</b> Creating Record-type Group", -1, " Can not find group #".$importRty['rty_RecTypeGroupID']);
+			makeLogEntry("<b>Error</b> Creating Record-type Group", -1, " Cannot find group #".$importRty['rty_RecTypeGroupID']);
 			$error = true;
 		}else{
 			$rtyGroup_src = mysql_fetch_assoc($res);

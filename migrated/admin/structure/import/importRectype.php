@@ -372,7 +372,7 @@
 
         }else{
 
-            error_exit("Can not add record type for id#".$recId.". ".$res);
+            error_exit("Cannot add record type for id#".$recId.". ".$res);
 
         }
     }

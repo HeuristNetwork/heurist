@@ -578,7 +578,7 @@ function EditTerms() {
 
 
                         if(Hul.isempty(trmLabel)){
-                            alert('Term label can not be empty');
+                            alert('Term label cannot be empty');
                             return;
                         }
 

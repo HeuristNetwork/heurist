@@ -69,7 +69,7 @@
 		}
 
 		$fresh = !! @$args["f"];
-        
+
         $noCache = (@$args["nocache"]==1);
 
 		$query = REQUEST_to_query("select SQL_CALC_FOUND_ROWS rec_ID ", $searchType, $args, null, $publicOnly);
@@ -77,7 +77,6 @@
 		$res = mysql_query($query);
 
 		if (mysql_error()) {
-/*****DEBUG****///error_log("queryError in getSearchResults -".mysql_error());
 		}
 		$fres = mysql_query('select found_rows()');
 		$resultCount = mysql_fetch_row($fres); $resultCount = $resultCount[0];
@@ -94,16 +93,15 @@
 			while ($row = mysql_fetch_assoc($res)) {
 
 				if (mysql_error()) {
-/*****DEBUG****///error_log("2.queryError in getSearchResults -".mysql_error());
 				}
 
                 if($noCache){
-                    $record = loadRecord_NoCache($row["rec_ID"], $bare);    
+                    $record = loadRecord_NoCache($row["rec_ID"], $bare);
                 }else{
-                    $record = loadRecord($row["rec_ID"], $fresh, $bare);    
+                    $record = loadRecord($row["rec_ID"], $fresh, $bare);
                 }
-                
-                
+
+
 				if (array_key_exists("error", $record)) {
 					return array("error" => $record["error"]);
 				}
@@ -177,11 +175,11 @@
 	}
 
     //
-    // do not use memcache - use in export 
+    // do not use memcache - use in export
     // otherwise it fails on export of entire database
     //
     function loadRecord_NoCache($id, $bare = false) {
-        
+
         if (! $id) {
             return array("error" => "must specify record id");
         }
@@ -191,8 +189,8 @@
         }
         return $record;
     }
-    
-    
+
+
 	function updateCachedRecord($id) {
 		global $memcache;
 		$key = DATABASE . ":record:" . $id;
@@ -244,7 +242,7 @@
 	}
 
 	function loadRecordDetails(&$record) {
-        
+
 		$recID = $record["rec_ID"];
 		$squery =
 		"select dtl_ID,
@@ -269,7 +267,6 @@
 			// skip all invalid value
 			if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
 				(($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
-/*****DEBUG****///error_log("found INVALID detail in rec $rd[rec_ID] dtl $rd[dtl_ID] dty $rd[dtl_DetailTypeID] with value = $rd[dtl_Value]");
 				continue;
 			}
 

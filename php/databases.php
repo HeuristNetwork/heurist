@@ -24,7 +24,7 @@
     $system = new System();
     $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 
-    if( !$isSystemInited ){  //can not init system (apparently connection to Server is wrong)
+    if( !$isSystemInited ){  //cannot init system (apparently connection to Server is wrong)
         $err = $system->getError();
         $error_msg = @$err['message'];
     }else if (@$_REQUEST['msg']){

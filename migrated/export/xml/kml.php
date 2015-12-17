@@ -129,7 +129,6 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             $reclist = json_decode($reclist, true);
 
             if (array_key_exists('error', $reclist)) {
-/*****DEBUG****///error_log("Error: ".$reclist['error']);
                 return;
             }
 

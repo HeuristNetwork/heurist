@@ -367,7 +367,7 @@ $ACCESSABLE_OWNER_IDS = mysql__select_array(
     'sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID', 'ugl_UserID='
     . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
 
-    
+
 if (is_logged_in()) {
     array_push($ACCESSABLE_OWNER_IDS, get_user_id());
     if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
@@ -711,7 +711,7 @@ function outputRecords($result) {
     if (array_key_exists('expandColl', $_REQUEST)) {
         $rec_ids = expandCollections($rec_ids);
     }
-    
+
     if(count($rec_ids)>1000){
         set_time_limit( 30 * count($rec_ids) % 1000 );
     }
@@ -795,11 +795,11 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
     // TODO: no error checking on success so silent failure if directory non-writable
     // beware: File is closed in outputRecords function
     $recAttr = array();
-    
+
     if($intofile){
         $hunifile = fopen( HEURIST_HML_DIR.$record['rec_ID'].".xml", 'w');
         output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
-        
+
         //add attributes
         $recAttr['xmlns'] = 'http://heuristnetwork.org';
         $recAttr['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
@@ -811,7 +811,7 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
         $recAttr['visnote'] = ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
                  : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') );
         $recAttr['selected'] = (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no');
-    
+
     openTag('record', $recAttr);
 
     if (isset($dbID) && ($dbID != 0)) {
@@ -1344,7 +1344,6 @@ function check($text) {
     foreach ($invalidChars as $charCode) {
         //$pattern = "". chr($charCode);
         if (strpos($text, $charCode)) {
-/*****DEBUG****///error_log("found invalid char ");
             return false;
         }
     }
@@ -1397,19 +1396,19 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     if($PUBONLY){
         $url = $url."&publiconly=1";
     }
-    
+
     /*
     $result = loadRemoteURLContent($url);
     $result = json_decode($result, true);
     */
-    
+
     $hostname = '127.0.0.1'; //HEURIST_DOMAIN;
     $url = str_replace(HEURIST_DOMAIN, $hostname, $url);
-    
+
     $headers[] = "GET ".$url." HTTP/1.1";
     $headers[] = "Host: ".$hostname;
     $headers[] = "Accept-language: en";
-    
+
     $cookies = array();
     foreach ($_COOKIE as $id=>$val){
         array_push($cookies, $id.'='.$val );
@@ -1421,7 +1420,6 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     $remote = fsockopen($hostname, 80, $errno, $errstr, 5);
     if($remote===false){
        $result = array();
-/*****DEBUG****///error_log('Can not open socket '.$hostname.'  Error# '.$errno.'   '.$errstr);
     }else{
         // a pinch of error handling here
         fwrite($remote, implode($CRLF, $headers).$CRLF);
@@ -1431,7 +1429,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
             // Get 100K from buffer
             $response .= fread($remote, 102400);
         }
-        fclose($remote);    
+        fclose($remote);
 
 
         // split the headers and the body
@@ -1442,10 +1440,10 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
             $response2 = explode($CRLF, $response2);
             $response2 = $response2[1];
         }
-        
+
         $result = json_decode($response2, true);
     }
-    
+
     /* it requires pecl http
     $r = new HttpRequest($url, HttpRequest::METH_GET);
     $r->addCookies($_COOKIE);
@@ -1593,9 +1591,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
 }else{ // single output stream
 
     openTag('hml', $hmlAttrs);
-    
+
     //makeTag('raw',null, $response2 );
-    
+
     /*
     openTag('hml', array(
     'xmlns' => 'http://heuristscholar.org/heurist/hml',

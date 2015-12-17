@@ -847,9 +847,9 @@ function getTermOffspringList($termID, $getAllDescentTerms = true) {
 }
 function getTermListAll($termDomain) {
         $terms = array();
-        $res = mysql_query('SELECT * FROM defTerms 
+        $res = mysql_query('SELECT * FROM defTerms
             where (trm_Domain="'.$termDomain.'") and (trm_ParentTermId=0 or trm_ParentTermId is NULL)');
-            
+
         if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 array_push($terms, $row['trm_ID']);
@@ -858,7 +858,6 @@ function getTermListAll($termDomain) {
                 }
             }
         }else{
-/*****DEBUG****///error_log('getTermListAll:>>>>'.mysql_error());
         }
         return $terms;
 }
@@ -947,7 +946,6 @@ function getRectypeDef($rtID) {
         //it stores as cocept codes - need to convert it to human readable string
         $rtDef = makeTitleMaskHumanReadable($rtDef, $rtID);
     }else{
-/*****DEBUG****///error_log('getRectypeDef: record type not found '.$rtID.'  '.mysql_error());
     }
 
     return $rtDef;

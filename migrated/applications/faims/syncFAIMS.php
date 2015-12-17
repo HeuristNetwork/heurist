@@ -171,7 +171,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                             if(copy($tmp_name, $dbname_faims)){
                                 unlink($tmp_name);
                             }else{
-                                die('Can not copy file '.$upload["name"].' to '.$folder);
+                                die('Cannot copy file '.$upload["name"].' to '.$folder);
                             }
 
 
@@ -193,7 +193,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                             if(copy($tmp_name, $tarfile)){
                                 unlink($tmp_name);
                             }else{
-                                die('Can not copy file '.$upload["name"].' to '.$folder);
+                                die('Cannot copy file '.$upload["name"].' to '.$folder);
                             }
 
                             //$cmdline = "tar --extract --file=".$tarfile." db.sqlite3";
@@ -1558,7 +1558,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
                     if(!$mysqli->query($query)){
                         $syserror = $mysqli->error;
-                        print "<div style='color:red'> Error: Can not delete record details ".$syserror."</div>";
+                        print "<div style='color:red'> Error: Cannot delete record details ".$syserror."</div>";
                         return null;
                     }
                 }
@@ -1738,7 +1738,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     $stmt->bind_param('s', $dtyName);
                     if(!$stmt->execute()){
                         //sql error
-                        print  "<div style='color:red'>'Can not rename Field type $dty_ID. MySQL error: ".$mysqli->error."</div>";
+                        print  "<div style='color:red'>'Cannot rename Field type $dty_ID. MySQL error: ".$mysqli->error."</div>";
                     }else{
                         print  "<div style='color:purple'>Existing Field type ".$dty_ID." is renamed to ".$dtyName."</div>";
                     }
@@ -1767,9 +1767,9 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     $stmt->bind_param('s', $rtyName);
                     if(!$stmt->execute()){
                         //sql error
-                        print  "<div style='color:red'>'Can not rename Record type $rty_ID. MySQL error: ".$mysqli->error."</div>";
+                        print  "<div style='color:red'>'Cannot rename Record type $rty_ID. MySQL error: ".$mysqli->error."</div>";
                     }else{
-                        print  "<div style='color:purple'>Existing Record type ".$row[0]." is renamed to ".$rtyName."</div>";
+                        print  "<div style='color:purple'>Existing Record type ".$row[0]." was renamed to ".$rtyName."</div>";
                     }
                 }
             }

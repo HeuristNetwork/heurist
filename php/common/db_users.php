@@ -127,7 +127,7 @@
                     $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Recovery');
                     return false;
                 }
-                
+
                 $new_passwd = generate_passwd();
                 $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
                 $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
@@ -150,7 +150,7 @@
                     }
 
                 }else{
-                    $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 }
             }
 
@@ -296,7 +296,7 @@
 
             }else if ($is_registration || $system->is_admin2($recID)) {
 
-                //do not allow registration if approvement mail can not be sent
+                //do not allow registration if approvement mail cannot be sent
                 if($is_registration){
                     if(false && !checkSmtp()){
                         $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
@@ -314,7 +314,7 @@
                 if(@$record['ugr_Captcha']){
                     unset($record['ugr_Captcha']);
                 }
-                
+
                 $mysqli = $system->get_mysqli();
 
                 $res = mysql__select_value($mysqli,
@@ -372,7 +372,7 @@
 
                     return $res; //returns affected record id
                 }else{
-                    $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 }
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 'Operation denied. Not enough rights');

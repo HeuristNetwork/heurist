@@ -137,7 +137,6 @@ if(!file_exists($filename) || filemtime($filename)<time()-(86400*30))
     $error = curl_error($ch);
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-/*****DEBUG****///error_log("$error ($code)" . " url = ". $url);
         curl_close($ch);
         return;
     }else{

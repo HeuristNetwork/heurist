@@ -150,7 +150,7 @@ function doRegister(event){
                 if($.isFunction($('body').profile_edit)){
                     doRegister();
                 }else{
-                    top.HEURIST4.msg.showMsgErr('Widget "Profile edit" can not be loaded!');
+                    top.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
                 }
             });
         }

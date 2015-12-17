@@ -21,7 +21,7 @@
 
 
     //@todo use geekMail class instead
-    
+
     function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
 
         $res = "ok";
@@ -35,15 +35,15 @@
             if(!@$email_title){
                 $email_title = "";
             }
-            $errorMsg = "Can not send email "
+            $errorMsg = "Cannot send email "
                     .($email_title?"'".$email_title."'":'')
                     .". This may indicate that mail transport agent is not correctly configured on server."
                     ." Please advise the system adminstrator";
-                    
+
             if(!checkSmtp()){
                 return $errorMsg;
             }
-            
+
             $email_title = "HEURIST ".$email_title;
 
             if(!$email_header){
@@ -73,14 +73,14 @@
 
         return $res;
     }
-    
-    
+
+
     function checkSmtp(){
-        
+
         $smtpHost = 'localhost';
         $smtpPort = '25';
         $smtpTimeout = 5;
-        
+
         $res = @fsockopen($smtpHost,
                       $smtpPort,
                       $errno,
@@ -93,6 +93,6 @@
         return false;
       }
       return true;
-    }        
+    }
 
 ?>

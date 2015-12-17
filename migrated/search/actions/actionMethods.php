@@ -952,7 +952,6 @@
           $query = "insert into usrTags (tag_Text, tag_UGrpID) values (\"" . mysql_real_escape_string($tag_name) . "\", " . $userid . ")";
           mysql_query($query);
           if (mysql_error()) {
-/*****DEBUG****///error_log(">>>> Erorr adding tag ".mysql_error());
           }else{
             // saw TODO: add error coding here
             array_push($tag_ids, mysql_insert_id());

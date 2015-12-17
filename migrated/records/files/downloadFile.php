@@ -16,7 +16,7 @@
 */
 
 /**
-* returns an attached file requested using the obfuscated file identifier 
+* returns an attached file requested using the obfuscated file identifier
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -28,7 +28,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
@@ -61,7 +61,6 @@
   $isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes');
   $isannotation_editor = (defined('DT_ANNOTATION_RANGE') && defined('DT_ANNOTATION_RESOURCE') && @$_REQUEST['annedit']=='yes');
 
-  /*****DEBUG****///error_log(">>>>>".$type_media."   ".$isplayer);
 
   if($isplayer){
 
@@ -107,7 +106,6 @@
     }
     else if($type_media=='audio')
     {
-      /*****DEBUG****///error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
 
       print createAudioTag($filedata['URL'], $filedata['mimeType']);
     }
@@ -127,7 +125,6 @@
 
     $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
     $filename = str_replace('//', '/', $filename);
-    /*****DEBUG****///error_log("filename = ".$filename."  Exists=".file_exists($filename));
   }
 
   if(isset($filename) && file_exists($filename)){ //local resources
@@ -157,7 +154,6 @@
       $zz=zip_entry_read($zip_entry, $zip_fs);
 
       $zname = HEURIST_FILESTORE_DIR."/".$zname;
-      /*****DEBUG****///error_log(">>>>>>>>>>".$zname);
       /*	       $z=fopen($zname,"w");
       fwrite($z,$zz);
       fclose($z);
@@ -186,7 +182,7 @@
       /* Redirect browser */
       //header('HTTP/1.1 201 Created', true, 201);
       //if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
-      
+
       header('Location: '.$filedata['URL']);
     }
     /* Make sure that code below does not get executed when we redirect. */

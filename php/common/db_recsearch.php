@@ -627,7 +627,6 @@ if(@$params['debug']) echo $query."<br>";
 
                     }else{
                         //@todo terminate execution and return error
-/*****DEBUG****///error_log("ERROR ".print_r($response, true));
                     }
 
                     $k = $k + 3000;
@@ -698,7 +697,6 @@ if(@$params['debug']) echo $query."<br>";
 
         }
 
-/*****DEBUG****///error_log("Q: ".$is_ids_only.'   user='.print_r($currentUser, true).'   Q='.$query);
 
         $res = $mysqli->query($query);
         if (!$res){

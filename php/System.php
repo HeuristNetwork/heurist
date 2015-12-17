@@ -661,7 +661,6 @@
                         }
                         $cres = setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_SERVER_NAME);
                         if(!$cres){
-/*****DEBUG****///error_log("Cookie no SAVED");
                         }
 
                         //update login time in database

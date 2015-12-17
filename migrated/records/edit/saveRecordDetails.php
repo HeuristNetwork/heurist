@@ -49,8 +49,8 @@
 
     $rtFieldDefs = null;  // constraints in recstrucutre (min max values)
     $dtyIDDefs = null;    // constraints in field definition   (terms and rectype pointers)  STATIC!!!! - stupidity?
-    
-    
+
+
     mysql_connection_overwrite(DATABASE);
     mysql_query('set @logged_in_user_id = ' . get_user_id());
 
@@ -148,13 +148,13 @@
     * @param mixed $rtyID - rectype id
     */
     function isValidID($id, $dtyID, $rtyID = null) {
-        
+
         if (!is_numeric($id) || !is_numeric($dtyID)) return false;
 
         if (!@$dtyIDDefs){
             $dtyIDDefs = array();
         }
-        
+
         if (!@$dtyIDDefs[$dtyID]) {
             $res = mysql_query("select dty_ID, dty_Type, dty_JsonTermIDTree,dty_TermIDTreeNonSelectableIDs,dty_PtrTargetRectypeIDs".
                                " from defDetailTypes".
@@ -162,9 +162,9 @@
             while ($res && $row = mysql_fetch_row($res)) {
                 //use first element as index
                 if ( $dtyID == DT_RELATION_TYPE ) { //$row[1] === 'relationtype' ){
-                    
+
                     $dtyIDDefs[$dtyID] = getTermListAll('relation');
-                    
+
                 } else if ( $row[1] === 'enum') {
                     //create term Id list and term list.
                     $terms = getTermsFromFormat($row[2]);
@@ -260,7 +260,7 @@ which is one step too many and has been removed from design by Ian in approx 201
     * @param int $recID
     */
     function updateRecord($recID, $rtyID = null) {
-        
+
         // Update the given record.
         // This is non-trivial: so that the versioning stuff (achive_*) works properly
         // we need to separate this into updates, inserts and deletes.
@@ -289,7 +289,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         // Get the existing records details and compare them to the incoming data
         $recDetails = getRecordDetails($recID);
 
-        
+
 // find UPDATES - everything that is in current record and has a post value is treated as an update
         $recDetailUpdates = array();
         foreach ($recDetails as $dtyID => $dtlIDs) {
@@ -323,13 +323,13 @@ which is one step too many and has been removed from design by Ian in approx 201
                 $eltID ="bd:".$dtlID;
 
                 $val = @$_POST[$eltName][$eltID];
-                
+
                 if (! $bdInputHandler->inputOK($val,$dtyID,$rtyID)) {
                     continue;	// faulty input ... ignore
                 }
-                
+
                 $toadd = $bdInputHandler->convertPostToMysql($val);
-                
+
                 if ($toadd==null) continue;
 
                 $recDetailUpdates[$dtlID] = $toadd;
@@ -347,7 +347,7 @@ which is one step too many and has been removed from design by Ian in approx 201
                 unset($recDetails[$dtyID][$dtlID]);	// remove data from local reflection of the database
             }
         }
- 
+
 // find DELETES
         // Anything left in recDetails now represents recDetails rows that need to be deleted
 
@@ -364,7 +364,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         $bibDetailInserts = array();
 
         foreach ($_POST as $eltName => $bds) {
-            
+
             // if not properly formatted or empty or an empty array then skip it
             if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;
 
@@ -390,7 +390,7 @@ which is one step too many and has been removed from design by Ian in approx 201
         //  - $recDetailUpdates: an assoc. array of dtl_ID => column values to be updated in recDetails
         //  - $bibDetailInserts: an array of column values to be inserted into recDetails
         //  - $bibDetailDeletes: an array of dtl_ID values corresponding to rows to be deleted from recDetails
-        
+
         // Commence versioning ...
         mysql_query("start transaction");
 
@@ -416,7 +416,6 @@ which is one step too many and has been removed from design by Ian in approx 201
         mysql__update("Records", "rec_ID=$recID", $recUpdates);
         $biblioUpdated = (mysql_affected_rows() > 0)? true : false;
 
-/*****DEBUG****///if (mysql_error()) error_log("error rec update ".mysql_error());
         $updatedRowCount = 0;
         foreach ($recDetailUpdates as $bdID => $vals) {
 
@@ -426,7 +425,6 @@ which is one step too many and has been removed from design by Ian in approx 201
                 ++$updatedRowCount;
             }
         }
-/*****DEBUG****///if (mysql_error()) error_log("error detail updates ".mysql_error());
 
         $insertedRowCount = 0;
         foreach ($bibDetailInserts as $vals) {
@@ -435,7 +433,6 @@ which is one step too many and has been removed from design by Ian in approx 201
                 ++$insertedRowCount;
             }
         }
-/*****DEBUG****///if (mysql_error()) error_log("error detail inserts ".mysql_error());
 
         $deletedRowCount = 0;
         if ($bibDetailDeletes) {
@@ -444,7 +441,6 @@ which is one step too many and has been removed from design by Ian in approx 201
                 $deletedRowCount = mysql_affected_rows();
             }
         }
-/*****DEBUG****///if (mysql_error()) error_log("error detail deletes ".mysql_error());
 
         // eliminate any duplicated lines
         $notesIn = explode("\n", str_replace("\r", "", $_POST["notes"]));
@@ -535,7 +531,6 @@ which is one step too many and has been removed from design by Ian in approx 201
             updateRecord($recID, $rtyID);
             return true;
         }else{
-/*****DEBUG****///if (mysql_error()) error_log("error INSERT RECORD ".mysql_error());
             return false;
         }
     }
@@ -823,7 +818,7 @@ which is one step too many and has been removed from design by Ian in approx 201
 
             $type = strtolower($matches[1]);
             $pointString = $matches[2];
-            
+
             if(strlen($pointString)<10000){ //otherwise verification takes tooooo long time
                 $FLOAT = '-?[0-9]+(?:\\.[0-9]*)?'; // ensure that we have a list of float pairs  xx.xxxxx yy.yyyyyy, x.xx y.yy, etc
                 $ret = preg_match("/^$FLOAT $FLOAT(?:,$FLOAT $FLOAT)*$/", $pointString);

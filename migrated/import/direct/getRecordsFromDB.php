@@ -118,7 +118,6 @@ Make sure the target records and field types are compatible. <b>If you get the c
 				dty_PtrTargetRectypeIDs,  dty_FieldSetRectypeID,  dty_ShowInLists,  dty_NonOwnerVisibility,  dty_Modified,  dty_LocallyModified) VALUES ('Original ID',' ','freetext','The original ID of the record in a source database from which these data were imported','','reserved',2,'Original ID',36,99,0,'','','',0,1,'viewable','2011-10-12 09:05:19',0)");
 
 				if (mysql_error()) {
-/*****DEBUG****///error_log(mysql_error());
 				}else{
 					$dt_SourceRecordID = mysql_insert_id();
 					define('DT_ORIGINAL_RECORD_ID', $dt_SourceRecordID);
@@ -1256,7 +1255,6 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 			function jsonError($message) {
 
 				//mysql_query("rollback");
-/*****DEBUG****///error_log("ERROR :".$message);
 			}
 
 

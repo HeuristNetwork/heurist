@@ -28,7 +28,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Files/Util 
+* @subpackage  Files/Util
 */
 
 
@@ -37,7 +37,6 @@ require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-/*****DEBUG****///error_log("in saveFile baseURL = ".HEURIST_BASE_URL_V3 );
 /*
 if (! defined("USING-XSS")) {
 	function outputAsRedirect($text) {
@@ -75,11 +74,9 @@ function generate_thumbnail($sURL, $needConnect){
 	$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
 	$heurist_path = tempnam(HEURIST_FILESTORE_DIR, "_temp_"); // . $file_id;
 
-	/*****DEBUG****///error_log("22222 WE ARE HERE! ".$remote_path."   ".$heurist_path);
 
 	$filesize = saveURLasFile($remote_path, $heurist_path);
 
-	/*****DEBUG****///error_log(">>>>>SAVED SIZE=".$filesize);
 
 	if($filesize>0){
 
@@ -103,7 +100,6 @@ function generate_thumbnail($sURL, $needConnect){
 			$res = getError("File upload was interrupted. ".$fileID);
 		}
 
-	/*****DEBUG****///error_log("22222 FILE ID=".$fileID);
 	}else{
 		$res = getError("Cannot download image");
 	}

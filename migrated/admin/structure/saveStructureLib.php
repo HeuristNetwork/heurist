@@ -546,8 +546,8 @@
 		if (count($dtFieldNames) && count($rt['dtFields']))
 		{
 
-            //if  rst_OriginatingDBID>0 (means that rectype is registered) need to mark that 
-            //rectype structure was modified locally    
+            //if  rst_OriginatingDBID>0 (means that rectype is registered) need to mark that
+            //rectype structure was modified locally
 			$wasLocallyModified = false;
 
 			foreach ($rt['dtFields'] as $dtyID => $fieldVals)
@@ -1334,7 +1334,7 @@
         $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = $merge_id";
         $res = $mysqli->query($query);
         if ($mysqli->error) {
-            $ret['error'] = "SQL error can not change parent term for $merge_id from defTerms table: ".$mysqli->error;
+            $ret['error'] = "SQL error - cannot change parent term for $merge_id from defTerms table: ".$mysqli->error;
             return $ret;
         }
 

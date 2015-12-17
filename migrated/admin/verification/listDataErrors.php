@@ -36,9 +36,9 @@
     <head>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    
+
         <script type=text/javascript>
-        
+
             function open_selected(sname) {
                 var cbs = document.getElementsByName(sname);
                 if (!cbs  ||  ! cbs instanceof Array)
@@ -230,15 +230,15 @@
                 //find all fields with faulty dates
                 $res = mysql_query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
                     from recDetails, defDetailTypes, Records a
-                    where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) 
+                    where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID)
                     and (dty_Type = "date") and (dtl_Value is not null)');
-                    
+
                 $wascorrected = 0;
                 $bibs = array();
                 $ids  = array();
                 $dtl_ids = array();
                 while ($row = mysql_fetch_assoc($res)){
-                    
+
                     //parse and validate value
                     $row['new_value'] = validateAndConvertToISO($row['dtl_Value']);
                     if($row['new_value']=='Temporal'){
@@ -246,16 +246,16 @@
                     }else if($row['new_value']==trim($row['dtl_Value'])){
                         continue;
                     }
-                    
+
                     //remove wrong term IDs
                     if(@$_REQUEST['fixdates']=="1"){
-                         
+
                         if($row['new_value']){
-                            mysql_query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);    
+                            mysql_query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
                         }else{
-                            mysql_query('delete from recDetails where dtl_ID='.$row['dtl_ID']);    
+                            mysql_query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                         }
-                        
+
                         $wascorrected++;
                     }else{
                         array_push($bibs, $row);
@@ -264,7 +264,7 @@
                     }
                 }
 
-                
+
                 if(count($bibs)==0){
                     print '<div><h3>All records have recognisable Date values</h3></div>';
                     if($wascorrected>1){
@@ -283,8 +283,8 @@
                         <a target=_new href='#' id=selected_link onClick="return open_selected('recCB5');">(show selected as search)</a>
                     </span>
                     <div>To fix faulty date values as suggested, please click here:
-                        <button 
-                            onclick="{document.getElementById('page-inner').style.display = 'none'; 
+                        <button
+                            onclick="{document.getElementById('page-inner').style.display = 'none';
                                     window.open('listDataErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
                             Correct</button>
                     </div>
@@ -326,7 +326,7 @@
                     $res = mysql_query( $query );
                     if(! $res )
                     {
-                        print "<div class='error'>Can not delete invalid term values from Records. SQL error: ".mysql_error()."</div>";
+                        print "<div class='error'>Cannot delete invalid term values from Records. SQL error: ".mysql_error()."</div>";
                     }else{
                         $wasdeleted = mysql_affected_rows();
                     }

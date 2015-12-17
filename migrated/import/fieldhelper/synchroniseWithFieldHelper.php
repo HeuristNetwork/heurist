@@ -296,7 +296,6 @@ if (! is_logged_in()) {
         function jsonError($message) {
             global $rep_issues, $currfile;
             //mysql_query("rollback");
-/*****DEBUG****///error_log("ERROR :".$message);
             $rep_issues = $rep_issues."<br/>Error save record for file:".$currfile.". ".$message;
         }
 

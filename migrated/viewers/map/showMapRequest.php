@@ -186,7 +186,6 @@
 	// Find the records that actually have any geographic data to plot
 	$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
 if(mysql_error()) {
-/*****DEBUG****///error_log("ERROR in ShowMap=".mysql_error());
 }
 	if($res){
 		while ($val = mysql_fetch_row($res)) {
@@ -267,18 +266,18 @@ if(mysql_error()) {
 				$rec['error'] = "URL is not defined for image layer";
 
 			}else if($manifest_file){
-                
+
                 if(file_exists($manifest_file)){
-                    $manifest = simplexml_load_file($manifest_file);    
+                    $manifest = simplexml_load_file($manifest_file);
                 }else{
                     $content = loadRemoteURLContent($manifest_file, false);
                     $manifest = simplexml_load_string($content);
                 }
 
-				
+
 				if($manifest==null || is_string($manifest)){ //manifest not found
 
-					$rec['error'] = "Can not load manifest file image layer. ".$manifest_file;
+					$rec['error'] = "Cannot load manifest file image layer. ".$manifest_file;
 
 				}else{
 					if($rec['type'] == "maptiler"){
@@ -307,7 +306,7 @@ if(mysql_error()) {
 					}
 
 					if(!array_key_exists('extent',$rec)){
-						$rec['error'] = "Can not find bounds parameters in manifest file";
+						$rec['error'] = "Cannot find bounds parameters in manifest file";
 					}
 				}
 			}

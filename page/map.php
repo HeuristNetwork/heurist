@@ -50,7 +50,7 @@
         <meta content="telephone=no" name="format-detection">
 
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-        
+
         <!-- Styles
         <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
         <link rel="stylesheet" type="text/css" href="../h4styles.css" />
@@ -141,7 +141,7 @@
             .vis-item-bbox{
                 background-color:lightgray;
             }
-            
+
         </style>
 
         <!-- Initializing -->
@@ -208,7 +208,7 @@
 
                                 onMapInit();
                             }else{
-                                top.HEURIST4.msg.showMsgErr('Can not obtain database definitions');
+                                top.HEURIST4.msg.showMsgErr('Cannot obtain database definitions');
                             }
                         });
                     }else{
@@ -216,7 +216,7 @@
                     }
 
                 }else{
-                    top.HEURIST4.msg.showMsgErr('Can not init HAPI');
+                    top.HEURIST4.msg.showMsgErr('Cannot init HAPI');
                 }
             }
 

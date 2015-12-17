@@ -410,7 +410,7 @@ $.widget( "heurist.resultListMenu", {
             var str = JSON.stringify(_data);
             var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //h3 action handler
 
-            /* it can not prase reponse properly
+            /* it cannot parse reponse properly
             var request = {db:top.HAPI4.database, data: str, action: action }
             $.ajax({
                 url: baseurl,

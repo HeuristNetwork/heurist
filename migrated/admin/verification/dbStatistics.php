@@ -38,8 +38,6 @@
     function mysql__select_val($query) {
         $res = mysql_query($query);
         if (!$res) {
-/*****DEBUG****///error_log("dbStats: ".$query);
-/*****DEBUG****///error_log("dbStats mysql_error:".mysql_error());
             return 0;
         }
 

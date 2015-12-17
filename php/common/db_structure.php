@@ -1,12 +1,12 @@
 <?php
 
-    /** 
+    /**
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -19,13 +19,13 @@
 
     /**
     * @todo convert to class (singleton?)
-    * 
-    * 
+    *
+    *
     * Library of function that provides database structure information: rectypes, fieldtypes and terms defined in database
-    * 
+    *
     * dbs_ - prefix for functions
     *
-    * 
+    *
     * dbs_GetRectypeStructures
     * dbs_GetRectypeStructure
     * dbs_GetRectypeGroups
@@ -33,7 +33,7 @@
     * dbs_GetTerms
     * dbs_GetDetailTypes
     * dbs_GetDtLookups
-    * 
+    *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
     * __getColumnNameToIndex
@@ -41,7 +41,7 @@
     * __getTermTree
     * __attachChild
     * __getTermColNames
-    * 
+    *
     */
 
 
@@ -62,7 +62,7 @@
     *                                 "commonFields":[val,....]},
     *                         ...},
     *             "constraints":[]}};
-    * 
+    *
     * @uses      dbs_GetRectypeColNames()
     * @uses      dbs_GetColumnNameToIndex()
     * @uses      dbs_GetRectypeStructureFieldColNames()
@@ -178,7 +178,6 @@
         $querywhere.
         " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
 
-        //DEBUG $rtStructs['query'] = $query;
 
         $res = $mysqli->query($query);
         while ($row = $res->fetch_row()) {
@@ -204,7 +203,7 @@
 
     /**
     * Return record structure for given id and update $recstructures array
-    *  
+    *
     * @param mixed $system
     * @param mixed $recstructures
     * @param mixed $rectype
@@ -264,7 +263,7 @@
 
     /**
     * Get term structure with trees from relation and enum domains
-    * 
+    *
     * @param     boolean $useCachedData whether to use cached data (default = false)
     * @return    object terms structure that contains domainLookups and domain term trees
     * @uses      __getTermColNames()
@@ -306,10 +305,10 @@
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
     }
-    
+
     //
     // to public method
-    //    
+    //
     function getTermByLabel($term_label, $domain)
     {
         global $terms;
@@ -329,25 +328,25 @@
     function getTermById($term_id, $field='trm_Label'){
 
         global $terms;
-        
+
         if($term_id>0){
-        
+
             $idx = @$terms['fieldNamesToIndex'][$field];
-            //if(null==$idx) return 'AAA'.$idx; 
-            
+            //if(null==$idx) return 'AAA'.$idx;
+
             $term = @$terms['termsByDomainLookup']['enum'][$term_id];
             if(null==$term){
                 $term = @$terms['termsByDomainLookup']['relation'][$term_id];
             }
-            
+
             if($term){
-                return $term[$idx]; 
+                return $term[$idx];
             }
         }
-        
-        return null; 
+
+        return null;
     }
-    
+
     //-----------------------------------------------------------------------------------------------
     // INTERNAL FUNCTIONS
 

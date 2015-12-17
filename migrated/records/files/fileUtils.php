@@ -15,7 +15,7 @@
 */
 
 /**
-* utility functions for dealing with files 
+* utility functions for dealing with files
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,7 +27,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Files/Util  
+* @subpackage  Files/Util
 */
 
 
@@ -37,16 +37,15 @@
   }
 
   function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=20) {
-      
+
     if(!function_exists("curl_init"))  {
-/*****DEBUG****///error_log(" CURL is not installed!!!");
         return false;
     }
-    
+
     if(strpos($url, HEURIST_SERVER_URL)===0){
         $url= str_replace(HEURIST_SERVER_URL,'http://localhost',$url);
     }
-      
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
@@ -72,22 +71,20 @@
     $data = curl_exec($ch);
 
     $error = curl_error($ch);
-    
+
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-/*****DEBUG****///error_log("CAN NOT LOAD REMOTE URL:  $error ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
         curl_close($ch);
         return false;
     } else {
         curl_close($ch);
         if(!$data){
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-/*****DEBUG****///error_log("Remote url returns empty data: ($code)" . " url = ". $url."  proxy = ".(defined("HEURIST_HTTP_PROXY")?HEURIST_HTTP_PROXY:'not proxy'));
         }
         return $data;
     }
-    
-    
+
+
   }
 
   /**
@@ -101,7 +98,7 @@
     $rawdata = loadRemoteURLContent($url);
     return saveAsFile($rawdata, $filename);
   }
-  
+
   function saveAsFile($rawdata, $filename)
   {
     if($rawdata){
@@ -166,13 +163,13 @@
     }
     readfile($filename);
       */
-    
+
         /*
         if($mimeType!="video/mp4"){
         header('access-control-allow-origin: *');
         header('access-control-allow-credentials: true');
         }*/
-        if (file_exists($filename)) {        
+        if (file_exists($filename)) {
 
                 //??? ob_start();
                 header('Content-Description: File Transfer');
@@ -193,12 +190,12 @@
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($filename));
                 @ob_clean();
-                flush();        
-          
-                readfile($filename);                      
-  
+                flush();
+
+                readfile($filename);
+
         }
-    
+
   }
 
   /**
@@ -245,9 +242,9 @@
 // remove folder and all its content
 //
 function delFolderTree($dir, $rmdir) {
-    
+
     array_map('unlink', glob($dir."/*"));
-    
+
     /* OLD WAY
     $files = array_diff(scandir($dir), array('.','..'));
     foreach ($files as $file) {

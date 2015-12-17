@@ -15,7 +15,7 @@
 */
 
 /**
-* function to search and define image annotations   
+* function to search and define image annotations
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -27,7 +27,7 @@
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
@@ -103,7 +103,6 @@
 			$result = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
 
 			if(!array_key_exists('records',$result) ||  $result['resultCount']==0 ){
-/*****DEBUG****///error_log("EMPTY");
 			}
 		}
 		return $result;

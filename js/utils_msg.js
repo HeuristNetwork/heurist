@@ -11,7 +11,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         if(typeof response === "string"){
             showMsgErr(null);
         }else{
-            showMsgErr('Can not parse server response: '+response.substr(0,255)+'...');
+            showMsgErr('Cannot parse server response: '+response.substr(0,255)+'...');
         }
     },
 
@@ -38,11 +38,11 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL
             || response.status==top.HAPI4.ResponseStatus.SYSTEM_FATALSYSTEM_CONFIG){
 
-                msg = msg + "<br><br>The system is not configured properly. Please consult your system administrator";
+                msg = msg + "<br><br>The system may not be properly configured. Please consult your system administrator.";
 
             }else if(response.status==top.HAPI4.ResponseStatus.INVALID_REQUEST){
 
-                msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please contact development team";
+                msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please email the Heurist development team ( info at HeuristNetwork dot org)";
 
             }else if(response.status==top.HAPI4.ResponseStatus.REQUEST_DENIED){
 

@@ -483,7 +483,6 @@
 			*/
 			function jsonError($message) {
 				//mysql_query("rollback");
-/*****DEBUG****///error_log("ERROR :".$message);
 			}
 
 			/**

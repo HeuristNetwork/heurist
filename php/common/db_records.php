@@ -2,13 +2,13 @@
 
     /**
     * Library to update records
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -128,7 +128,7 @@
 
         if(!$newId){
 
-            $response = $system->addError(HEURIST_DB_ERROR, "Can not add record", $syserror);
+            $response = $system->addError(HEURIST_DB_ERROR, "Cannot add record", $syserror);
 
         }else if($return_id_only){
 
@@ -224,7 +224,7 @@
                 $syserror = $mysqli->error;
                 $stmt->close();
                 $mysqli->rollback();
-                return $system->addError(HEURIST_DB_ERROR, 'Can not save record', $syserror);
+                return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
             }
             $stmt->close();
 
@@ -233,7 +233,7 @@
             if(!$mysqli->query($query)){
                 $syserror = $mysqli->error;
                 $mysqli->rollback();
-                return $system->addError(HEURIST_DB_ERROR, 'Can not delete old details', $syserror);
+                return $system->addError(HEURIST_DB_ERROR, 'Cannot delete old details', $syserror);
             }
         }
         //END HEADER SAVE
@@ -265,7 +265,7 @@
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $mysqli->rollback();
-                    return $system->addError(HEURIST_DB_ERROR, 'Can not save details', $syserror);
+                    return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
                 }
 
                 /*if($dtl_Geo){
@@ -281,7 +281,7 @@
         }else{
             $syserror = $mysqli->error;
             $mysqli->rollback();
-            return $system->addError(HEURIST_DB_ERROR, 'Can not save details', $syserror);
+            return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
         $mysqli->commit();
@@ -302,7 +302,7 @@
 
     /**
     * @todo - to be implemented
-    * 
+    *
     * @param mixed $mysqli
     * @param mixed $user
     * @param mixed $recids
@@ -339,7 +339,7 @@
             return false;
         }else{
 
-            $system->addError(HEURIST_REQUEST_DENIED, "Can not set ownership to group without membership");
+            $system->addError(HEURIST_REQUEST_DENIED, "Cannot set ownership to group without membership");
             return true;
 
             /* not used: since only group member can set ownership - it means that it exists
@@ -382,7 +382,7 @@
             $record = $res->fetch_assoc();
             $res->close();
         } else {
-            $system->addError(HEURIST_DB_ERROR, 'Can not get record', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get record', $mysqli->error);
             return false;
         }
 
@@ -401,7 +401,7 @@
             if($ownerid_old>0 && !$system->is_admin('group', $ownerid_old)) {  //changing ownership
 
                 $system->addError(HEURIST_REQUEST_DENIED,
-                    'Can not change ownership. User is not a group admin');
+                    'Cannot change ownership. User is not a group admin');
                 $res = false;
 
             }else if($ownerid_old == 0) {
@@ -437,7 +437,7 @@
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
                 $stmt->close();
-                return $system->addError(HEURIST_DB_ERROR, 'Can not save record', $syserror);
+                return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
             }
             $stmt->close();
 
@@ -463,7 +463,7 @@
     }
     $res->close();
     if(!isset($rec)){
-    return $system->addError(HEURIST_DB_ERROR, 'Can not get record', $mysqli->error);
+    return $system->addError(HEURIST_DB_ERROR, 'Cannot get record', $mysqli->error);
     }
 
     // check that all the required fields are present
@@ -502,7 +502,7 @@
 
         $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
         if(!$mask){
-            $system->addError(HEURIST_DB_ERROR, 'Can not get title mask for record type', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
             return false;
         }
 
@@ -519,7 +519,7 @@
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
                 $stmt->close();
-                $system->addError(HEURIST_DB_ERROR, 'Can not save record title', $syserror);
+                $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $syserror);
                 return false;
             }
             $stmt->close();
@@ -570,7 +570,6 @@
         }
 
         //get list of fieldtypes for all details
-        //DEBUG print join(array_keys($details2), ",")."<br/>";
         $det_types = mysql__select_assoc($mysqli, "defDetailTypes", "dty_ID", "dty_Type",
             "dty_ID in (" . join(array_keys($details2), ",") . ")");
 
@@ -868,9 +867,9 @@
         foreach($lvl as $sub_term_id=>$childs){
 
             if($sub_term_id == $term_id){
-                return $topmost?$topmost:$term_id;                
+                return $topmost?$topmost:$term_id;
             }else if( count($childs)>0 ) {
-                
+
                 $res = getTopMostTermParent($term_id, $childs, $topmost?$topmost:$sub_term_id );
                 if($res) return $res;
             }
@@ -878,7 +877,7 @@
 
         return null; //not found
     }
-    
+
     function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
     {
         global $recstructures, $detailtypes;

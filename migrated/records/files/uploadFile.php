@@ -121,34 +121,33 @@
         mysql_query('update recUploadedFiles set ulf_FileName = "'.$filename.
             '", ulf_ObfuscatedFileID = "' . addslashes(sha1($file_id.'.'.rand())) . '" where ulf_ID = ' . $file_id);
         /* nonce is a random value used to download the file */
-        /*****DEBUG****///error_log(">>>>".$tmp_name."  >>>> ".HEURIST_FILES_DIR.$filename);
 
         if(!file_exists($tmp_name)){
 error_log("NOT FOUND ".$tmp_name);
         }
 
-        $pos = strpos($tmp_name, HEURIST_FILES_DIR);   
+        $pos = strpos($tmp_name, HEURIST_FILES_DIR);
         if( copy($tmp_name, HEURIST_FILES_DIR .  $filename) )  //file is already in upload folder
         {
-            //rename file    
+            //rename file
             unlink($tmp_name);
             return $file_id;
 
-        } 
+        }
         /*else if ($tmp_name==null || move_uploaded_file($tmp_name, HEURIST_FILES_DIR . $filename)) {  //move file into upload folder
 
             return $file_id;
         }*/
         /*
-        
+
         $isError = move_uploaded_file($tmp_name, HEURIST_FILES_DIR . $filename);
-error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$isError);         
+error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$isError);
         if($isError==true){
             return $file_id;
         }else*/
-        
+
         if(true){
-            
+
             /* something messed up ... make a note of it and move on */
             $uploadFileError = "upload file: $name couldn't be saved to upload path definied for db = "
             . HEURIST_DBNAME." (".HEURIST_FILES_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory";
@@ -208,7 +207,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         }else{
             $file_size = round($size / 1024);
         }
-        
+
         // get relative path
         $relative_path = getRelativePath(HEURIST_FILES_DIR, $dirname);
 
@@ -234,7 +233,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                 'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt));
 
 
-            /*****DEBUG****///error_log(">>>>>".print_r($toins,true));
 
             $res = mysql__insert('recUploadedFiles', $toins);
 
@@ -484,10 +482,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         }
         $filedata = json_decode($filejson, true);
 
-        //DEBUG
-        /*****DEBUG****///error_log("1.>>>>>".$filedata);
-        /*****DEBUG****///error_log("is_array".is_array($filedata)." 2.>>>>>".print_r($filedata, true));
-
 
         if(!is_array($filedata)){ //can't parse - assume this is URL - old way
 
@@ -515,7 +509,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         if(@$filedata['ext']==null && $filedata['mediaType']=="xml"){
             $filedata['ext'] = "xml";
         }
-        //*****DEBUG****/// error_log("reg remote file data ".print_r($filedata,true));
         $fileparameters = @$filedata['params'] ? $filedata['params'] : "mediatype=".$filedata['mediaType'];
         if(@$filedata['remoteSource'] && $filedata['remoteSource']!='heurist'){ // && $filedata['remoteSource']!='generic'){
             $fileparameters	= $fileparameters."|source=".$filedata['remoteSource'];
@@ -578,7 +571,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             );
 
             if (!$res) {
-                /*****DEBUG****///error_log("ERROR Insert record: ".mysql_error());
                 return null; //"Error registration remote source  $url into database";
             }
 
@@ -663,22 +655,22 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
     }
 
     /**
-    * 
-    * 
-    * 
+    *
+    *
+    *
     * @param mixed $path
     */
     function resolveFilePath($path){
-        
-        
-        
+
+
+
             if( $path && !file_exists($path) ){
                 chdir(HEURIST_FILES_DIR);          // HEURIST_FILESTORE_DIR.'file_uploads'
                 $fpath = realpath($path);
                 if(file_exists($fpath)){
                     return $fpath;
                 }else{
-                    chdir(HEURIST_FILESTORE_DIR);  
+                    chdir(HEURIST_FILESTORE_DIR);
                     $fpath = realpath($path);
                     if(file_exists($fpath)){
                         return $fpath;
@@ -692,10 +684,10 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                     }
                 }
             }
-            
+
             return $path;
     }
-    
+
     /**
     * put your comment there...
     *
@@ -755,7 +747,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             }else{
                 $res["URL"] = $downloadURL;
             }
-            
+
             if(@$res['ulf_FilePath'] || @$res['ulf_FileName']){
                 $res['fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
             }
@@ -853,7 +845,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             ($imgDT?		" dtl_DetailTypeID = $imgDT desc,"		:"").
             " dtl_DetailTypeID".	// no preference on associated or other files just select the first
             " limit 1";
-            /*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>".$squery);
             $res = mysql_query($squery);
 
             if ($res && mysql_num_rows($res) == 1) {
@@ -867,7 +858,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                 }
             }
         }
-        /*****DEBUG****///error_log(">>>>>>>>>>>>>>>>>>>>>>>thumb url ".$thumb_url);
         //check freetext (url) type details for a something to represent this record as an icon
         if( $thumb_url == "" && ($thumbUrlDT || $fullUrlDT || $webIconDT)) {
             $squery = "select dtl_Value".
@@ -880,7 +870,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             " dtl_DetailTypeID".	// anythingelse is last
             " limit 1";
 
-            /*****DEBUG****///error_log("2.>>>>>>>>>>>>>>>>>>>>>>>".$squery);
             $res = mysql_query($squery);
 
             if ($res && mysql_num_rows($res) == 1) {
@@ -919,7 +908,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         }
     }*/
 
-    
+
     /**
      * Returns the target path as relative reference from the base path.
      *
@@ -972,6 +961,6 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         return '' === $path || '/' === $path[0]
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
             ? "./$path" : $path;
-    }    
+    }
 
 ?>

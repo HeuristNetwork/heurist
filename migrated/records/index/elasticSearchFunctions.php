@@ -58,7 +58,6 @@
             $error = curl_error($ch);
             if ($error) {
                 $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-/*****DEBUG****///error_log("testElasticSearchOK: Failed to contact ElasticSearch server: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return($code);
             }
@@ -162,13 +161,12 @@
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
             curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-            
+
             $data = curl_exec($ch);
             $error = curl_error($ch);
             if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: updateRecordIndexEntry indexing: $error ($code) & url = $url & data = $jsonData";
-/*****DEBUG****///error_log("updateRecordIndexEntry indexing: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return $code;
             } else {
@@ -209,7 +207,6 @@
             if ($error) {
                 $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: deleteRecordIndexEntry: $error ($code)" . " url = ". $url;
-/*****DEBUG****///error_log("deleteRecordIndexEntry: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return $code;
             } else {
@@ -241,7 +238,6 @@
             if ($error) {
                 $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: deleteIndexForRectype: $error ($code)" . " url = ". $url;
-/*****DEBUG****///error_log("deleteIndexForRectype: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return $code;
             } else {
@@ -262,19 +258,18 @@
         if($elasticSearch) {
             // TODO: check that this is correct spec for deletion of the index for a database
             global $indexServerAddress, $indexServerPort;
-      
+
             $url="$indexServerAddress:$indexServerPort/$dbName";
             print "Deleting all Elasticsearch indices for $dbName at $url<br />";
-            
+
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $data = curl_exec($ch);
             $error = curl_error($ch);
             if ($error) {
-                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE)); 
+                $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
                 //print "<br />ERROR: deleteIndexForDatabase: $error ($code)" . " url = ". $url;
-/*****DEBUG****///error_log("deleteIndexForDatabase: $error ($code)" . " url = ". $url);
                 curl_close($ch);
                 return($code);
             } else {

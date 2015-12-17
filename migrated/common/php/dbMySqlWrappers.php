@@ -126,7 +126,7 @@ function mysql_connection_overwrite($database = '', $server = HEURIST_DBSERVER_N
     }
     if ($database != ''){
         if(!mysql_query("use $database")){
-            printf("Can not connect to sql database $database: %s\n", mysql_error());
+            printf("Cannot connect to sql database $database: %s\n", mysql_error());
             die(mysql_error());
         }
     }
@@ -296,7 +296,6 @@ function mysql__lookup($query) {
     /*	*/
     $res = mysql_query($query);
     if (!$res) {
-/*****DEBUG****///error_log('mysql__lookup: ' . mysql_error());
         return NULL;
     }
     $lookup = array();
@@ -437,7 +436,6 @@ function get_dbowner_email()
     if($row){
         return $row[0];
     }
-/*****DEBUG****///error_log("email for dbowner was not found");
     return null;
 }
 
@@ -461,7 +459,6 @@ function execSQL($mysqli, $sql, $params, $retCnt=true) {
             if ($result == "") {
                 $result = $mysqli->affected_rows;
             } else {
-/*****DEBUG****///error_log(">>> MySQL Error code " . $mysqli->error);
             }
         }
     } else { //prepared query

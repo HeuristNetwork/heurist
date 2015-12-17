@@ -898,7 +898,7 @@
 
                 if(!$res){
                     $syserror = mysql_error();
-                    print "<div style='color:red'> Error: Can not delete record details ".$syserror."</div>";
+                    print "<div style='color:red'> Error: Cannot delete record details ".$syserror."</div>";
                     return;
                 }
             }

@@ -269,7 +269,7 @@ $.widget( "heurist.dh_search", {
                 }
                 if(!facet_params || !Hul.isArray(facet_params.facets) || facet_params['version']!=2){
                     // Do something about the exception here
-                    top.HEURIST4.msg.showMsgDlg(top.HR('Can not init this search. Corrupted parameters. Please contact support team'), null, "Error");
+                    top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise this search. Corrupted parameters. Please contact support team'), null, "Error");
                     return;
                 }
 

@@ -235,7 +235,7 @@
                             $res = false;
                             break;
                         }
-                        
+
                         if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
                             $mysqli->query('DELETE FROM recForwarding where rfw_NewRecID not  in (select rec_ID from Records)');
                         }
@@ -248,7 +248,7 @@
                 }else{
                     $res = false;
                     if($verbose) {
-                        echo ("<br/><p class=\"error\">Error: Can not get list of table in database ".$db_target."</p>");
+                        echo ("<br/><p class=\"error\">Error: Cannot get list of table in database ".$db_target."</p>");
                     }
                 }
 

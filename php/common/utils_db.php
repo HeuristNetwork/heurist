@@ -190,7 +190,7 @@
     * @param mixed $table_name
     * @param mixed $table_prefix
     * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
-    *                          fields that don't have specified prefix are ignored 
+    *                          fields that don't have specified prefix are ignored
     */
     function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
@@ -241,8 +241,6 @@
         }else{
             $query = $query." where ".$table_prefix."ID=".$rec_ID;
         }
-
-        //DEBUG print $query."<br>";
 
         $stmt = $mysqli->prepare($query);
         if($stmt){

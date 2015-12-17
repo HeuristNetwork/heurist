@@ -877,7 +877,6 @@ function check($text) {
 	foreach ($invalidChars as $charCode){
 		//$pattern = "". chr($charCode);
 		if (strpos($text,$charCode)) {
-/*****DEBUG****///error_log("found invalid char " );
 			return false;
 		}
 	}

@@ -71,7 +71,6 @@ if($rps_ID==0){
 	//load one
 	$res = mysql_query("select * from usrReportSchedule where rps_ID=".$rps_ID);
 	if(mysql_error()){
-/*****DEBUG****///error_log("ERROR=".mysql_error());
 	}else{
 		$row = mysql_fetch_assoc($res);
 		if($row){
@@ -144,7 +143,7 @@ function doReport($row){
 	}else{
 		$params = array("q"=>$hquery);
 	}
-    
+
 	if(!array_key_exists("ver", $params)){
 		$params["ver"] = "1";
 	}

@@ -73,7 +73,6 @@ function mysql__select_array3($mysqli, $query, $withindex=true) {
             $res->close();
 
         }else{
-/*****DEBUG****///error_log("ERROR: ".$mysqli->error);
         }
     }
     return $result;
@@ -316,7 +315,7 @@ function matchingSearch($mysqli, $imp_session, $params){
         }
 
     }else{
-        return "SQL error: Can not execute query to calculate number of records to be inserted";
+        return "SQL error: Cannot execute query to calculate number of records to be inserted";
     }
 
     return $imp_session;
@@ -449,7 +448,7 @@ function matchingAssign($mysqli, $imp_session, $params){
     .implode(" and ",$select_query_update_where)." and imp_id>0";
 
     if(!$mysqli->query($updquery)){
-        return "SQL error: can not update import table (set record id field) ".$updquery;
+        return "SQL error: cannot update import table (set record id field) ".$updquery;
     }
 
     //new records   ".implode(",",$sel_query).",
@@ -480,7 +479,7 @@ function matchingAssign($mysqli, $imp_session, $params){
 
                 $updquery = "update ".$import_table." set ".$id_field."=".$ind." where imp_id in (".implode(",",$ids_part).")";  //end($row)
                 if(!$mysqli->query($updquery)){
-                    return "SQL error: can not update import table: mark records for insert. ".$updquery;
+                    return "SQL error: cannot update import table: mark records for insert. ".$updquery;
                 }
                 $k = $k+100;
             }
@@ -830,7 +829,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
             $updquery = "update ".$import_table." set ".$id_field."='".$ids
             ."' where imp_id = ".$imp_id;
             if(!$mysqli->query($updquery)){
-                return "SQL error: can not update import table: set ID field ".$mysqli->error."    QUERY:".$updquery;
+                return "SQL error: cannot update import table: set ID field ".$mysqli->error."    QUERY:".$updquery;
             }
         }
     }
@@ -992,7 +991,7 @@ function validateImport($mysqli, $imp_session, $params){
             }
 
         }else{
-            return "SQL error: Can not execute query to calculate number of records to be updated!";
+            return "SQL error: Cannot execute query to calculate number of records to be updated!";
         }
 
         if(!$ignore_insert){
@@ -1010,7 +1009,7 @@ function validateImport($mysqli, $imp_session, $params){
                     $imp_session['validation']['recs_insert'] = mysql__select_array3($mysqli, $select_query, false);
                 }
             }else{
-                return "SQL error: Can not execute query to calculate number of records to be inserted";
+                return "SQL error: Cannot execute query to calculate number of records to be inserted";
             }
         }
         //additional query for non-existing IDs
@@ -2287,7 +2286,7 @@ function saveSession($mysqli, $imp_session){
             "imp_session"=>json_encode($imp_session) ));
 
     if(intval($imp_id)<1){
-        return "Can not save session. SQL error:".$imp_id;
+        return "Cannot save session. SQL error:".$imp_id;
     }else{
         $imp_session["import_id"] = $imp_id;
         return $imp_session;
@@ -2413,7 +2412,7 @@ function download_import_session($session_id, $idfield=null, $mode=1){
         header('Content-type: text/csv');
         readfile($tmpFile);
     }else{
-        print "File can not be downloaded. SQL error: ".$mysqli->error;
+        print "File cannot be downloaded. SQL error: ".$mysqli->error;
     }
 }
 
