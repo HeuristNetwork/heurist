@@ -1339,7 +1339,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                 if($isvocab){
                     $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
                     addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": 
-                                                            (($termsCount<4)?"Radiogroup":"Dropdown"))   );
+                                                            (($termsCount<5)?"Radiogroup":"Dropdown"))   );
                     $inputtype = $is_repeatable?'select':'select1';  //if enum repeatable checkbox list otherwise dropdown
                 }else if($dt_type=='file'){
                      $inputtype = 'select';
@@ -1367,7 +1367,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
                 if($isvocab && !$is_repeatable) {
 
                     $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
-                    if($termsCount<4){
+                    if($termsCount<5){
                         $input->addAttribute('appearance', 'full');
                     }
                     //$input->addAttribute('appearance', ($termsCount>4)?'compact':'full');
@@ -1560,20 +1560,14 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
     global $rtStructs, $dtTerms, $supported;
     
     //need to create substitutes
-    // TEMPLATE_EVENTS - list of recctypes and events
-    // TEMPLATE_TOVALIDATE - list of rectypes to validate
-    // TEMPLATE_FIELDS_TOVALIDATE - list of fields to validate
-    // TEMPLATE_MAPCOLORS - list of mapenabled rectypes and colors
-    // TEMPLATE_GET_FROM_GPS
-    // TEMPLATE_INIT_SYNC_AND_GPS 
-    
-    $TEMPLATE_EVENTS = '';
-    $TEMPLATE_DEFAULTVALUES = '';
-    $TEMPLATE_TOVALIDATE = '';
-    $TEMPLATE_FIELDS_TOVALIDATE = '';
-    $TEMPLATE_RELATED = '';
+    $TEMPLATE_EVENTS = '';              //list of recctypes and events
+    $TEMPLATE_DEFAULTVALUES = '';       //default values and reset link fields
+    $TEMPLATE_TOVALIDATE = '';          //list of rectypes to validate    
+    $TEMPLATE_FIELDS_TOVALIDATE = '';   //list of fields to validate
+    $TEMPLATE_RELATED_INIT = '';
+    $TEMPLATE_RELATED_SAVE = '';
     $TEMPLATE_SELECTORS = ''; //enums
-    $TEMPLATE_MAPCOLORS = '';
+    $TEMPLATE_MAPCOLORS = '';            //list of mapenabled rectypes and colors
     $TEMPLATE_INIT_SYNC_AND_GPS  = '';
 
     $startSync = @$_REQUEST['ct1']=="1";
@@ -1614,6 +1608,7 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
         }
         
         $defaultvalue_section = '';
+        $reset_link_section = '';
         
         $TEMPLATE_EVENTS .= 'rectypeToEntity.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
 ';
@@ -1630,6 +1625,7 @@ addOnEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)")
 
 
         $load_related_part = '';
+        $save_related_part = '';
 
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
@@ -1715,14 +1711,14 @@ addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'
 
                 if($is_repeatable){
                     $action = 'populateCheckBoxGroup';
-                }else if ($termsCount<4) {
+                }else if ($termsCount<5) {
                     $action = 'populateRadioGroup';
                 }else{
                     $action = 'populateDropDown';
                 }
 
                 // makeVocab method
-                $makeVocab = 'fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\'",
+                $makeVocab = 'fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\' order by vocabcountorder",
                               new FetchCallback() {
                                 onFetch(result) {
                                 '.
@@ -1751,8 +1747,18 @@ addOnEvent("'.$headername.'/'.$dtdisplaynamex.'_browse_'.$rtnamex2.'", "click", 
                     $event_section .= '
 addOnEvent("'.$headername.'/'.$dtdisplaynamex.'_clearPointer", "click", "clearPointer(\"'.$headername.'/'.$dtdisplaynamex.'\")");';
 
-                    $load_related_part .= '
-                    fillPointer("'.$headername.'/'.$dtdisplaynamex.'");';
+                    $load_related_part .= (($load_related_part?'else':'').'
+                    if("'.$dtdisplaynamex.'".equals(attrName)){
+                        fillPointer("'.$headername.'/'.$dtdisplaynamex.'", attrVal);
+                    }');
+                    
+                    $save_related_part .= '
+                        saveRelation("has'.$dtdisplaynamex.'", uuid, "'.$headername.'/'.$dtdisplaynamex.'");
+                    ';
+                    
+                    
+                    $reset_link_section .= '
+                    clearPointerUI("'.$headername.'/'.$dtdisplaynamex.'");';
 
 
                     if($detail[$idx_rst_required]=="required"){
@@ -1787,13 +1793,17 @@ onEvent("'.$headername.'/viewattached", "click", "viewArchEntAttachedFiles(entit
         }
 */
         $compare_type = '
-    if("'.$rtnamex.'".equals(rectypeTab)){
+            if("'.$rtnamex.'".equals(rectypeTab)){
 ';
 
         if($load_related_part!=''){
-                $TEMPLATE_RELATED .= $compare_type.$load_related_part.'
-       return;
-    }
+            
+                $TEMPLATE_RELATED_INIT .= $compare_type.$load_related_part.'
+            }
+';
+                $TEMPLATE_RELATED_SAVE .= $compare_type.$save_related_part.'
+                return;
+            }
 ';
         }
 
@@ -1826,8 +1836,10 @@ addOnEvent("'.$headername.'/Delete", "delayclick", "deleteEntity(\"'.$rtnamex.'\
  if("'.$rtnamex.'".equals(rectypeTab)){
 ';
         
-        if($defaultvalue_section!=''){
-            $TEMPLATE_DEFAULTVALUES .= $compare_type . $defaultvalue_section.'  }';
+        if($defaultvalue_section!='' || $reset_link_section!=''){
+            $TEMPLATE_DEFAULTVALUES .= $compare_type . $reset_link_section . $defaultvalue_section.'  
+                return;
+            }';
         }
         if($mandatory_attributes!=''){
             $TEMPLATE_FIELDS_TOVALIDATE .= $compare_type . $mandatory_attributes.' }';
@@ -1867,7 +1879,8 @@ mapRefresh(){
     $out = str_replace('{{TEMPLATE_DEFAULTVALUES}}',$TEMPLATE_DEFAULTVALUES,$out);
     $out = str_replace('{{TEMPLATE_FIELDS_TOVALIDATE}}',$TEMPLATE_FIELDS_TOVALIDATE,$out);
     $out = str_replace('{{TEMPLATE_TOVALIDATE}}',$TEMPLATE_TOVALIDATE,$out);
-    $out = str_replace('{{TEMPLATE_RELATED}}',$TEMPLATE_RELATED,$out);
+    $out = str_replace('{{TEMPLATE_RELATED_INIT}}',$TEMPLATE_RELATED_INIT,$out);
+    $out = str_replace('{{TEMPLATE_RELATED_SAVE}}',$TEMPLATE_RELATED_SAVE,$out);
     $out = str_replace('{{TEMPLATE_SELECTORS}}',$TEMPLATE_SELECTORS,$out);
     $out = str_replace('{{TEMPLATE_MAPCOLORS}}',$TEMPLATE_MAPCOLORS,$out);
 
@@ -2047,12 +2060,15 @@ function getFullTermName($term, $datatype){
 }
 
 
+$datatype = '';
 //  return count
 // for UI_Schema
 //
-function getTermsTree($property, $datatype, $terms){
+function getTermsTree($property, $d_type, $terms){
 
-    global $dtTerms;
+    global $dtTerms, $datatype;
+    
+    $datatype = $d_type;
 
     if($datatype == "relmarker" || $datatype === "relationtype"){
         $datatype = "relation";
@@ -2060,7 +2076,7 @@ function getTermsTree($property, $datatype, $terms){
         return 0;
     }
 
-    if(is_numeric($terms)){
+    if(is_numeric($terms)){ //vocabulary
         $termTree =  $dtTerms['treesByDomain'][$datatype][$terms];
     }else{
         $termTree = json_decode($terms);
@@ -2071,18 +2087,74 @@ function getTermsTree($property, $datatype, $terms){
 
     $parent = $property->addChild('lookup');
 
-    return createSubTree($parent, $datatype, $termTree, "");
+    return createSubTree($parent, $termTree, "");
 }
 
-function createSubTree($parent, $datatype, $termTree, $parentname){
+function sortByName($a, $b){
+    global $dtTerms, $ind_label, $datatype;
+    $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
+    
+    $termName1 = @$termLookup[$a][$ind_label];
+    $termName2 = @$termLookup[$b][$ind_label];
+    return strcmp ($termName1, $termName2);
+    
+}
+function sortByCodeNum($a,$b){
+    global $dtTerms, $datatype;
+    $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
+    $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];
+    
+    $termCode1 = @$termLookup[$a][$ind_tcode];
+    $termCode2 = @$termLookup[$b][$ind_tcode];
+    return ($termCode1<$termCode2)?-1:1;
+}
+function sortByCodeAlpha($a,$b){
+    global $dtTerms, $datatype;
+    $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
+    $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];
+    
+    $termCode1 = @$termLookup[$a][$ind_tcode];
+    $termCode2 = @$termLookup[$b][$ind_tcode];
+    return strcmp ($termCode1, $termCode2);
+}
 
-    global $dtTerms, $ind_label;
+
+function createSubTree($parent, $termTree, $parentname){
+
+    global $dtTerms, $ind_label, $datatype;
     $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
     $ind_label = $dtTerms['fieldNamesToIndex']['trm_Label'];
     $ind_descr = $dtTerms['fieldNamesToIndex']['trm_Description'];
     $ind_ccode = $dtTerms['fieldNamesToIndex']['trm_ConceptID'];
     $ind_tcode = $dtTerms['fieldNamesToIndex']['trm_Code'];
 
+    $is_all_codes_numeric = true;
+    $cnt_withcodes = 0;
+    
+    //first loop need to order by code (numeric or alphanumeric)  or by name (alphanumeric)
+    foreach ($termTree as $termid=>$child_terms){
+        $termName = @$termLookup[$termid][$ind_label];
+        if($termName){
+            $termCode = @$termLookup[$termid][$ind_tcode];
+            if($termCode){
+                $is_all_codes_numeric = $is_all_codes_numeric && is_numeric($termCode);
+                $cnt_withcodes++;
+            }else{
+                $is_all_codes_numeric = false;
+            }
+        }
+    }
+    $fsort = 'sortByName';
+    if($cnt_withcodes>count($termTree)*0.89){
+        if($is_all_codes_numeric){
+            $fsort = 'sortByCodeNum';
+        }else{
+            $fsort = 'sortByCodeAlpha';
+        }
+    }
+
+    uksort( $termTree, $fsort );
+    
     $cnt = 0;
 
     foreach ($termTree as $termid=>$child_terms){
@@ -2113,7 +2185,7 @@ function createSubTree($parent, $datatype, $termTree, $parentname){
             $term->addChild('description', ($termDescr?prepareText($termDescr):"") );
             $cnt++;
 
-            $cnt = $cnt + createSubTree($term, $datatype, $child_terms, $parentname.$termName."-");
+            $cnt = $cnt + createSubTree($term, $child_terms, $parentname.$termName."-");
         }
     }
 

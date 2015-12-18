@@ -82,6 +82,8 @@ ArrayList tabs_edit = new ArrayList();
 // populated on selectEntity tab show
 // removed on onShowEditForm 
 // cleared in clearStacks (conttol/data or control/map show)
+
+// list of pairs:  rectype to search = field to fill with selected value
 ArrayList tabs_select = new ArrayList(); 
 
 //keeps rectype to select(browse) and field path to assign the result of selection
@@ -96,7 +98,7 @@ ArrayList rectypeToEntity = new ArrayList();
 {{TEMPLATE_EVENTS}}
 
 //
-// assign values for new string
+// assign default values for new Record
 //
 onInitNewRecord( String rectypeTab ){
 {{TEMPLATE_DEFAULTVALUES}}
@@ -141,13 +143,6 @@ setTimestamp(String path) {
 }
 
 //
-// find related entity and fill pointer attrubute with their names
-//
-loadRelatedEntities(rectypeTab){
-{{TEMPLATE_RELATED}}    
-}
-
-//
 // return entity name by tab name
 //
 getEntityNameByTabname(rectypeTab) {
@@ -183,7 +178,7 @@ loadAllAttributes(){
 /*** END: this section of code depends on the module and entity types selected ***/
 
 /******************************************************************************/
-/*                            SELCT ENTITY                                    */
+/*                            SELECT ENTITY                                    */
 /*                                                                            */
 /******************************************************************************/
 
@@ -196,7 +191,7 @@ addOnEvent("selectEntity/data/newEntity", "click", "onAddNewEntityWhenSelect()")
 //
 onShowSelect(){
 
-    if(tabs_select.size()>0 && last_invoker.equals(tabs_select.get(tabs_select.size()-1))){
+    if(tabs_select.size()>0 && !isNull(last_invoker) && last_invoker.equals(tabs_select.get(tabs_select.size()-1))){
         //initial call - open new select
 
     }else{
@@ -205,7 +200,9 @@ onShowSelect(){
             tabs_edit.remove(tabs_edit.size()-1);
         }
     }
+    last_invoker = null;
 
+    //detect what entity type show in select list
     String last_select_callback = tabs_select.get(tabs_select.size()-1);
 
     String[] parts = last_select_callback.split("=");
@@ -238,12 +235,8 @@ onShowEditForm(rectypeTab){
 	  //fill id
 	  String entid = getUuid(rectypeTab);
 
-	  if(null==entid){
+	  if(isNullOrEmpty(entid)){
 		onInitNewRecord( rectypeTab );	
-	  }else{
-		// Load related entities
-		loadRelatedEntities(rectypeTab);
-		//updateRelns();
 	  }
 }
 /*** selectEntity functions ***/
@@ -285,7 +278,7 @@ onAddNewEntityWhenSelect(){
 //
 onSelectEntity() {
 
-    String uid = getListItemValue(); //get id from list
+    String child_uuid = getListItemValue(); //get id from list
     String last_select_callback = tabs_select.get(tabs_select.size()-1);
 
     String[] parts = last_select_callback.split("=");
@@ -299,47 +292,76 @@ onSelectEntity() {
     cancelTabGroup("selectEntity", false);
     showTab(rectypeTab+"/"+rectype_tab);
 
-    //showToast("selected "+uid);
+    //showToast("selected "+child_uuid);
 
     //ArrayList pairs = new ArrayList();
-    //pairs.add(new NameValuePair("selected "+uid, uid));
+    //pairs.add(new NameValuePair("selected "+child_uuid, child_uuid));
 
     //fill pointer field
-    populateDropdownByQuery(fieldname, uid);
-
-    String fieldname_uid = getPointerUidFileName(fieldname);
-    setFieldValue(fieldname_uid, uid);
+    populateDropdownByQuery(fieldname, child_uuid);
+    
+    //delete previous relation
+    deleteRelation(fieldname); 
+    
+    String fieldname_uid = getPointerUidFieldName(fieldname);
+    setFieldValue(fieldname_uid, child_uuid);
 }
 //
 // Returns path to UID field on hidden tab for given resource attribute (field)
+// for example we have  fieldname Grandparent/Grandparent_General_Information/DedaToPapa  (selector)
+// it means that uid field will be Grandparent/Grandparent_General_uids/DedaToPapa_UID    (hidden field that contain relation ID) 
 //
-getPointerUidFileName(String fieldname){
+getPointerUidFieldName(String fieldname){
     String[] parts = fieldname.split("/");
     parts[1] = parts[0]+"_uids"; //hidden tab with uid fields
     parts[2] = parts[2]+"_UID";  //pointer field to keep UID of resource record
     return parts[0]+"/"+parts[1]+"/"+parts[2];
 }
+
+//
+// get current record id by name of any field
+//
+getUuidByField(String fieldname){
+    String[] parts = fieldname.split("/");
+    String rectypeTab = parts[0];
+    return getUuid(rectypeTab);
+}
+
 //
 // Clear resource attribute (field) - dropdown and UID field on hidden tab
 //
-clearPointer(String fieldname){
+clearPointerUI(String fieldname){
     ArrayList pairs = new ArrayList();
     pairs.add(new NameValuePair("select with Browse button(s)", ""));
     populateDropDown(fieldname, pairs );
-
-    String fieldname_uid = getPointerUidFileName(fieldname);
+    
+    String fieldname_uid = getPointerUidFieldName(fieldname);
     setFieldValue(fieldname_uid, "");
 }
+
+//
+// Remove relationship from database
+//
+clearPointer(String fieldname){
+    deleteRelation(fieldname);
+    clearPointerUI(fieldname);
+}
+
+//
+// Check empty or null string
+//
+isNullOrEmpty(String val){  
+    return null==val || "".equals(val) || "null".equals(val);
+}
+
 //
 // Fill dropdown (name) for pointer field by value of hidden UID field
 //
-fillPointer(String fieldname){
-    String fieldname_uid = getPointerUidFileName(fieldname);
-    String res_id = getFieldValue(fieldname_uid);
-    if(null==res_id || "".equals(res_id) || "null".equals(res_id)){
-        clearPointer(fieldname);
+fillPointer(String fieldname, String child_uuid){  //NEW
+    if(isNullOrEmpty(child_uuid)){
+        clearPointerUI(fieldname);
     }else{
-        populateDropdownByQuery(fieldname, res_id);
+        populateDropdownByQuery(fieldname, child_uuid);
     }
 }
 
@@ -376,14 +398,91 @@ newEntity(String rectypeTab){
 loadEntityById(String entid, String entName) {
 
     // EntID check
-    if (isNull(entid)) return;
+    if (isNullOrEmpty(entid)) return;
     //showToast(entid);
 
     // Show rectype tabgroup
     rectypeTab = getTabnameByEntityName(entName);
 	setUuid(rectypeTab, entid);
-    showTabGroup(rectypeTab, entid);
+    
+    showTabGroup(rectypeTab, entid, new FetchCallback() {  
+        onFetch(result) {
+        
+            entity = result;
+                
+            fetchedAttributes = entity.getAttributes();
 
+            for (attribute : fetchedAttributes) {   
+                String attrName = attribute.getName();
+                String attrVal = attribute.getMeasure();
+                {{TEMPLATE_RELATED_INIT}}
+            }
+        } 
+        onError(message) {
+            showToast(message);
+        }
+    });
+}
+
+
+//
+// save relations (on save new record)
+//
+saveRelations(String rectypeTab){
+        String uuid = getUuid(rectypeTab);
+        if(!isNullOrEmpty(uuid)){
+            {{TEMPLATE_RELATED_SAVE}}
+        }
+}
+
+//
+// Save relation 
+//
+saveRelation(String relationName, String parent_uuid, String fieldname){
+    String fieldname_uid = getPointerUidFieldName(fieldname);
+    String child_uuid = getFieldValue(fieldname_uid);
+    if(!isNullOrEmpty(child_uuid)){
+        String relationshipidQuery = "select relationshipid from parentchild where parentuuid = '"+parent_uuid+"' and childuuid = '"+child_uuid+"';";
+        fetchOne(relationshipidQuery, new FetchCallback() {
+          onFetch(result) {
+            if(isNull(result) || result.size()==0 || isNullOrEmpty(result.get(0))){ //to avoid duplications
+                saveEntitiesToRel(relationName, parent_uuid, child_uuid);
+            }
+          }
+          onError(message) {
+            showToast(message);
+          }
+        });
+    }
+}
+
+//
+// Delete relation for given link field
+//                
+deleteRelation(fieldname){
+
+    String parent_uuid = getUuidByField(fieldname);
+    String child_uuid = getFieldValue( getPointerUidFieldName(fieldname) );
+
+    if (!(isNullOrEmpty(parent_uuid) || isNullOrEmpty(child_uuid))){
+
+        String relationshipidQuery = "select relationshipid from parentchild where parentuuid = '"+parent_uuid+"' and childuuid = '"+child_uuid+"';";
+        fetchOne(relationshipidQuery, new FetchCallback() {
+          onFetch(result) {
+            if(!isNull(result) && result.size()>0){
+                reln_id = result.get(0);
+                if(!isNullOrEmpty(reln_id)){
+                    String deletequery = "insert into aentreln (uuid, relationshipid, deleted, participatesverb, userid) SELECT uuid, relationshipid, 'true', participatesverb, '"+userid+"' FROM latestnondeletedaentreln WHERE relationshipid = '"+reln_id+"';";
+                    fetchOne(deletequery, null);
+                    //deleteRel(reln_id);
+                }
+            }
+          }
+          onError(message) {
+            showToast(message);
+          }
+        });        
+    }
 }
 
 //
@@ -418,7 +517,13 @@ getEntityQuery(uid) {
 populateDropdownByQuery(String fieldname, String uid) {
     fetchAll(getEntityQuery(uid), new FetchCallback() {
         onFetch(result) {
-            populateDropDown(fieldname, result);
+            if(isNull(result) || result.size()==0){
+                //nothing found - apparently linked record has been removed
+print ("Child was deleted - remove relation");                
+                clearPointer(fieldname);
+            }else{
+                populateDropDown(fieldname, result);
+            }
         }
     });
 }
@@ -438,6 +543,7 @@ saveEntity(String rectypeTab, Boolean needValidation, Boolean andclose) {
     saveTabGroup(rectypeTab, uuid, attachedGeometry, null, new SaveCallback() {
         onSave(uuid, newRecord) {
             setUuid(rectypeTab, uuid);
+            saveRelations(rectypeTab); 
 			showToast("Successfully saved data!");
 			
 			if(null!=attachedGeometry){
@@ -715,6 +821,23 @@ getExtraAttributes(fetchedAttributes) {
   return extraAttributes;
 }
 
+/******************************************************************************/
+/*        ENTITY AND RELATIONSHIP SAVING AND LOADING HELPER FUNCTIONS         */  
+/******************************************************************************/
+
+/** Saves two entity ids as a relation. **/
+saveEntitiesToRel(String type, String entity1, String entity2) {
+  String callback = null;
+  saveEntitiesToRel(type, entity1, entity2, callback);
+}
+
+/** Saves two entity ids as a relation with some callback executed. **/
+saveEntitiesToRel(String type, String entity1, String entity2, String callback) {
+  String e1verb = null;
+  String e2verb = null;
+  saveEntitiesToHierRel(type, entity1, entity2, e1verb, e2verb, callback);
+}
+
 /** Saves two entity ids as a hierachical relation with some callback executed. **/
 saveEntitiesToHierRel(String type, String entity1, String entity2, String e1verb, String e2verb, String callback) {
   if (isNull(entity1) || isNull(entity2)) return;
@@ -871,7 +994,7 @@ searchEntity( forEntityType ){
   if(isNull(forEntityType) || forEntityType.equals(entName)){
   
 	String term    = getFieldValue("control/data/entitySearchTerm");
-	if(isNull(term) || "".equals(term)){ //load all
+    if(isNullOrEmpty(term)){ //load all   
    
 		fetchEntityList(entName, new FetchCallback() {
 			onFetch(result) {
@@ -906,7 +1029,8 @@ loadEntityTypeList() {
    String entName = getFieldValue("control/data/entityTypeList");
 
    // Populate entity type dropdown - only once
-   if(isNull(entName) || "".equals(entName)){
+   if(isNullOrEmpty(entName)){  
+
 		populateDropDown("control/data/entityTypeList", rectypeToEntity);
 		searchEntity( null );
 /*   
@@ -1342,7 +1466,7 @@ setSyncMaxInterval(600.0f);
 
 {{TEMPLATE_INIT_SYNC_AND_GPS}}
 
-/*
+
 makeLocalID(){
   fetchOne("CREATE TABLE IF NOT EXISTS localSettings (key text primary key, value text);", null);
   fetchOne("DROP VIEW IF EXISTS parentchild;", null);
@@ -1361,6 +1485,6 @@ makeLocalID(){
            "    ON (parent.relationshipid = child.relationshipid AND parent.uuid != child.uuid);", null);
 }
 makeLocalID();
-*/
+
 
 bindOnEvents();
