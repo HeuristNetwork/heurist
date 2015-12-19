@@ -125,13 +125,13 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     }
     
     //add default fields
-    $res['recID'] = 'ID';
-    $res['recTitle'] = 'RecTitle';
-    $res['recTypeID'] = 'RecTypeID';
-    $res['recTypeName'] = 'RecTypeName';
-    $res['recURL'] = 'URL';
-    $res['recModified'] = 'Modified';
-    $res['recWootText'] = 'WootText';
+    $res['recID'] = 'Record ID';
+    $res['recTitle'] = 'Record Title';
+    $res['recTypeID'] = 'Record TypeID';
+    $res['recTypeName'] = 'Record TypeName';
+    $res['recURL'] = 'Record URL';
+    $res['recModified'] = 'Record Modified';
+    $res['recWootText'] = 'Record WootText';
     
     if($recTypeId=="Relationship") {
         //add specific Relationship fields

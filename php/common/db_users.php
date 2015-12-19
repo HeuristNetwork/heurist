@@ -210,6 +210,15 @@
         return $result;
     }
 
+    function user_getAllWorkgroups($mysqli){
+
+        $result = mysql__select_assoc($mysqli, 'sysUGrps', 'ugr_ID', 'ugr_Name', '(ugr_Type != "user") OR (ugr_ID=2)');
+        
+        if($result==null) $result = array();
+        
+        return $result;
+    }
+    
     /**
     * Get list of members for given group (this is non admin short info)
     *

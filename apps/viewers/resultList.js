@@ -581,6 +581,10 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
         }else{
             pwd = '';
         }
+        
+        function __getOwnerName(ugr_id){
+            return top.HAPI4.sysinfo.db_usergroups[ugr_id];
+        }
 
         var html_owner = '';
         var owner_id = fld('rec_OwnerUGrpID');
@@ -590,7 +594,8 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             var visibility = fld('rec_NonOwnerVisibility');
             // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
             var clr  = (visibility=='hidden')? 'red': ((visibility=='viewable')? 'orange' : ((visibility=='pending')? 'green' : 'blue'));
-            var hint = (visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)";
+            var hint = __getOwnerName(owner_id)+', '+
+             ((visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)");
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner" style="color:' + clr + '" title="' + hint + '">&nbsp;&nbsp;<b>' + owner_id + '</b></span>';

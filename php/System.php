@@ -423,6 +423,7 @@
                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
+                    "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
                     "basePathV3"=>HEURIST_BASE_URL_V3)
             );
 

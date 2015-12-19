@@ -725,6 +725,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         is_ui_normal: function(){
             return (top.HAPI4.get_prefs('layout_style')=='normal');
         },
+        
 
         currentUser: _guestUser,
         sysinfo: {},

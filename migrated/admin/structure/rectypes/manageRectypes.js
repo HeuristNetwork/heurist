@@ -942,6 +942,7 @@ function RectypeManager() {
                 "no-resize": false,
                 height: 700,
                 width: 700,
+                title: 'Edit field type',
                 callback: function(changedValues) {
                     if(Hul.isnull(changedValues)) {
                         // Canceled
@@ -1029,6 +1030,7 @@ function RectypeManager() {
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": true,
+                title:'Recalculation of composite record titles',
                 height: 400,
                 width: 400,
                 callback: function(context) {
@@ -1070,6 +1072,7 @@ function RectypeManager() {
         Hul.popupURL(top, url,
             {   "close-on-blur": false,
                 "no-resize": false,
+                title:'Edit Record Tytpe',
                 height: dim.h*0.9,
                 width: 700,
                 callback: function(context) {
@@ -1450,6 +1453,7 @@ function _upload_icon(rectypeID,mode) {
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
+            title:'Upload Record Type Icon',
             height: 500, //(mode==0?200:250),
             width: 700,
             callback: function(context){

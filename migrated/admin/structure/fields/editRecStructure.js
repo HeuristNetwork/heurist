@@ -404,8 +404,8 @@ function EditRecStructure() {
                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
 
                     // Field width
-                    '<span><label style="min-width:65px;width:65px">Field width:</label><div class="input-cell"><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
-                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/></div></div></div>'+
+                    '<span><label style="min-width:65px;width:65px">Field width:</label><input id="ed'+rst_ID+'_rst_DisplayWidth" '+
+                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/></span></div>'+
 
 
                     // Help text
