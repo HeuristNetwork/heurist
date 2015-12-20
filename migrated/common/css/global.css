@@ -588,7 +588,7 @@ body.w-all #all-records-button, body.w-bookmark #my-records-button {color:#000;t
 .add_records_img {vertical-align: text-bottom;padding: 0 1ex 0 0;}
 *.openTools {position:absolute;right:5px;bottom:5px;z-index:11;cursor:pointer;height: 15px;width:28px;background-image: url("../images/cog.png");background-position: 0 0;}
 .openTools {position:absolute;left:40px;}
-#toolbox, #alertBox {background-color: RGBA(0,0,0,0.8);padding:0 10px;margin: 0;position: absolute;top: 22px;left: 5px;width: auto;overflow: visible;/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:5px;-moz-border-radius-bottomright:5px;-moz-border-radius-topleft:5px;-moz-border-radius-topright:5px;-webkit-border-bottom-left-radius:5px;-webkit-border-bottom-right-radius:5px;-webkit-border-top-left-radius:5px;-webkit-border-top-right-radius:5px;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:5px;border-top-right-radius:5px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 200;}
+#toolbox, #alertBox {background-color: #dbdfe6; padding:0 10px;margin: 0;position: absolute;top: 22px;left: 5px;width: auto;overflow: visible;/* IE only */width: expression(document.documentElement.clientWidth-151);-moz-border-radius-bottomleft:5px;-moz-border-radius-bottomright:5px;-moz-border-radius-topleft:5px;-moz-border-radius-topright:5px;-webkit-border-bottom-left-radius:5px;-webkit-border-bottom-right-radius:5px;-webkit-border-top-left-radius:5px;-webkit-border-top-right-radius:5px;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:5px;border-top-right-radius:5px;border :2px solid #FFF;-webkit-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);-moz-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);z-index: 200;}
 #toolbox span{text-indent: 0;white-space: nowrap;font-size: 12px;display:block;z-index:12;}
 #toolbox span:hover{color: #FFF;}
 #toolbox a {color:#CCCCCC;display:block;font-size:10px;font-weight:bold;height:19px;padding:3px 10px 0;text-decoration:none;}
@@ -720,7 +720,7 @@ li {list-style:disc ;}
 /***** custom alert box *****/
 #modalContainer {/*background-color: RGBA(100,100,100,0.5);*/}
 #alertBox {padding:10px;width:250px; height:auto; position:absolute; left:50%; top:50%; margin:-50px 0 0 -125px;text-align: center;font-size: 14px; overflow:hidden}
-#alertBox p{border-bottom-color: #AAAAAA;border-bottom-style: solid;border-bottom-width: 1px;color: #FFFFFF;font-size: 13px;line-height: 15px;margin-bottom: 10px;padding-bottom: 10px;}
+#alertBox p{border-bottom-color: #AAAAAA;border-bottom-style: solid;border-bottom-width: 1px;color: #222222;font-size: 13px;line-height: 15px;margin-bottom: 10px;padding-bottom: 10px;}
 #alertBox #closeBtn,#alertBox #OKBtn,#alertBox #cancelBtn,#alertBox button, .yui-simple-dialog button{color:#CCC; font-size: 12px;-moz-border-radius:2px; -webkit-border-radius:2px; border-radius:2px;border-color: #CCC !important;background-color: #666; bottom:10px; left:50%; -webkit-box-shadow: 0 3px 6px #000;-moz-box-shadow: 0 3px 6px #000;box-shadow: 0 3px 6px #000; margin:0 3px}
 #alertBox #cancelBtn{width:60px;left:66%; margin-right:-30px;}
 #alertBox #OKBtn{left:33%; margin-left:-20px;}

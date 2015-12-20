@@ -2323,6 +2323,11 @@ if(document.getElementById) {
 * @param args
 */
 function createCustomAlert(txt,args) {
+    
+    
+        if(typeof jQuery == "undefined" || top.HEURIST.util.isnull(top.HEURIST4)){
+            
+            
     // shortcut reference to the document object
     d = document;
 
@@ -2354,6 +2359,11 @@ function createCustomAlert(txt,args) {
         //if (args = "map") _tabView.set('activeIndex', 0);
         removeCustomAlert();
         return ; }
+        
+        }else{
+            top.HEURIST4.msg.showMsgDlg(txt, null, "Info");
+        }
+        
 }
 
 // removes the custom alert from the DOM

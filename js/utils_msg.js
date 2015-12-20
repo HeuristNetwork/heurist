@@ -373,6 +373,32 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 $dosframe.on('load', function(){
                         $dosframe.show();
                         var content = $dosframe[0].contentWindow;
+                        
+                        content.alert = function(txt){
+                            top.HEURIST4.msg.showMsgDlg(txt, null, "Info");
+                            return true;
+                        }
+                        /*
+                        content.confirm = function(txt){
+                            var resConfirm = false,
+                                isClosed = false;
+                            
+                            var $confirm_dlg = top.HEURIST4.msg.showMsgDlg(txt, function(){
+                                resConfirm = true;
+                            }, "Confirm");
+                            
+                            $confirm_dlg.dialog('option','close',
+                                function(){
+                                    isClose = true;        
+                                });
+                            
+                            while(!isClosed){
+                               $.delay(300);
+                            }
+                            
+                            return resConfirm;
+                        }*/
+                        
                         //content.document.reference_to_parent_dialog = $dlg.attr('id');
                         //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
                         if(!options["title"]){
@@ -473,3 +499,4 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     },
 
 };
+
