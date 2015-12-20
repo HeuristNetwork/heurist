@@ -65,7 +65,7 @@ H2 span {
 	width: 300px;
 	margin-left:2px;
 }
-#templateTree #treeContainer {
+#treeContainer {
 	background-color: #FFFFFF;
 	border: 1px solid #7D9AAA;
 	bottom: 0;
@@ -73,7 +73,7 @@ H2 span {
 	overflow: auto;
 	padding: 5px;
 	right: 0;
-	top: 30px;
+	top: 55px;
 	position:absolute;
 }
 #templateTree label {

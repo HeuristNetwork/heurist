@@ -415,14 +415,35 @@ function ShowReps() {
             _doExecuteFromEditor(); //execute at once
         }
 
-        var squery = _getQuery();
-
-        if(Hul.isnull(squery)){
-            alert('Please select some records in search results');
-        }else{
-            var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
-            Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
+        if(isLoadGenerated){
+            __onGenerateTemplate([]);
         }
+        
+        var ele = $('#rectype_selector');
+        ele.load( top.HEURIST.baseURL_V3 + "common/php/recordTypeSelect.php?db="+_db,
+            function(){
+                ele.find('#rectype_elt').on('change', function(event){
+                    var selel = $(event.target).val();
+                    if(selel>0){
+                        var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
+                        Hul.getJsonData(baseurl, __onGenerateTemplate, 'db='+_db+'&mode=list&rty_id='+selel);
+                    }
+                });        
+                
+            } );
+        
+
+            /*
+            var squery = _getQuery();
+
+            if(Hul.isnull(squery)){
+                alert('Please select some records in search results');
+            }else{
+                var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
+                Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
+            }
+            */
+        
     }
 
     function _initEditor(content) {
@@ -863,6 +884,8 @@ function ShowReps() {
         //top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
         var idx_maxval = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
         var idx_dtype  = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
+        
+        var first_node = null;
 
         //internal function
         // parent_single - true if recrod pointer or enum is not repeatable field type
@@ -974,6 +997,8 @@ function ShowReps() {
 
                     childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
                     childNode.enableHighlight = false;
+                    
+                    if(first_node==null) first_node = childNode;
 
                     if( is_multiconstrained ){
 
@@ -1065,8 +1090,10 @@ function ShowReps() {
         //TODO tv.subscribe("clickEvent", tv.onEventToggleHighlight);
 
         tv.render();
-        //first_node.focus();
-        //first_node.toggle();
+        if(first_node){
+            first_node.focus();
+            first_node.toggle();
+        }
     }
 
     function _addIfOperator(nodedata, varname){

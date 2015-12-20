@@ -57,6 +57,20 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
     $mode = @$_REQUEST['mode'];
     
+    if($mode=='list'){
+        
+        $rectypeIDs = explode(',', @$_REQUEST['rty_id']);
+        foreach ($rectypeIDs as $rectypeID){
+              $res = getRecordTypeTree($rectypeID, 0);
+              array_push($resVars, $res);
+        }        
+        
+        header("Content-type: text/javascript");
+        echo json_format($resVars, true);
+        
+    }else{
+    
+    
     $isvarname = ($mode=='varsonly');
 
     $_REQUEST['limit'] = 100;
@@ -102,6 +116,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
 
             header("Content-type: text/javascript");
             echo json_format($resVars, true);
+    }
     }
 
 exit();

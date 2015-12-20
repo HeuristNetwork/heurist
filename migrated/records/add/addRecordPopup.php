@@ -321,29 +321,8 @@
                 <div class="input-header-cell" style="color:red; font-weight:bold;">Type of record to add</div>
                 <div class="input-cell">
                     <?php
-                        $res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
-                            from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
-                        where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
+                        include(dirname(__FILE__).'/../../common/php/recordTypeSelect.php');
                     ?>
-                    <select name="ref_type" style="font-weight:bold; margin: 3px; margin-bottom:10px;" id="rectype_elt"
-                        title="New record type" >
-                        <option selected disabled value="0">select ...</option>
-                        <?php
-                            $section = "";
-                            while ($row = mysql_fetch_assoc($res)) {
-                                if ($row["rtg_Name"] != $section) {
-                                    if ($section) print "</optgroup>\n";
-                                    $section = $row["rtg_Name"];
-                                    print '<optgroup label="' . htmlspecialchars($section) . '">';
-                                }
-                            ?>
-                            <option value="<?= $row["rty_ID"] ?>"
-                                title="<?= htmlspecialchars($row["rty_Description"]) ?>" ><?= htmlspecialchars($row["rty_Name"]) ?></option>
-                            <?php
-                            }//while
-                            if ($section) print "</optgroup>\n";
-                        ?>
-                    </select>
                 </div>
             </div>
 
