@@ -447,7 +447,7 @@
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below to review further details and approve the registration:\n".
-            HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+            HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
@@ -483,10 +483,6 @@
             }else{
                 $email_text = "A new Heurist account has been created for you.";
             }
-
-            // point them to the home page
-            // This is confusing for the user who has a specific database, and the URL is wrong b/c it goes to an H3 address which doesn't exist ...
-            //$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."?db=".HEURIST_DBNAME." with the username: " . $ugr_Name;
 
             //give them a pointer to the search page for the database
             $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at ".

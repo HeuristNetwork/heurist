@@ -1,9 +1,9 @@
 <?php
 
-    /** 
-    * Application interface. See hRecordMgr in hapi.js           
+    /**
+    * Application interface. See hRecordMgr in hapi.js
     * record manipulation - add, save, delete
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -22,7 +22,7 @@
 
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_records.php');
+    require_once (dirname(__FILE__).'/../../common/db_records.php');
 
     $response = array();
 

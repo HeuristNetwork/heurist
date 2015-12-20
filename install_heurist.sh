@@ -100,15 +100,6 @@ $2 rm -f help.tar.bz2
 
 cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
-
-# I plan to move migrated functions back to root level soon, Nov 2015, in order to make a more coherent
-# structure. These simlinks will avoid problems with existing installations not having them
-cd /var/www/html/HEURIST/$1
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
-
-# "migrated" directory within h4 contains h3 functions not yet or partially converted to h4
-cd /var/www/html/HEURIST/$1/migrated
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 
@@ -125,20 +116,6 @@ echo -e "\n\n"
 echo "Creating directories and setting permissions"
 
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
-
-# 23 Nov 2015: we have removed the separate registration step which require the sandpit database
-# TODO: Remove these lines once the new functionality has been tested with sandpit database deleted
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/rectype-icons/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/smarty-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/xsl-templates/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-# $2 cp -r /var/www/html/HEURIST/migrated/admin/setup/settings/ /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/filethumbs
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/generated-reports
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/hml-output
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/html-output
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/scratch
-# $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE/Heurist_Sandpit/backup
 
 # set up override configIni files
 $2 mv /var/www/html/HEURIST/h4/move_to_parent_as_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php

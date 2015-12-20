@@ -51,7 +51,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         //
-        var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page|migrated)\/.*)|(index.*))/, "");
+        var installDir = top.location.pathname.replace(/(((\?|admin|applications|apps|assets|common|context_help|export|ext|external|hapi|help|import|js|page|php|records|search|viewers)\/.*)|(index.*))/, "");
         that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
         that.iconBaseURL= that.basePathV4 + 'php/common/rt_icon.php?db='+_database+'&id=';
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!

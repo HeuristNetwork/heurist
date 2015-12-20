@@ -1,8 +1,8 @@
 <?php
 
-    /** 
+    /**
     *  Download (or proxy) files that are registered in Heurist database
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -21,34 +21,34 @@
 
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_files.php');
+    require_once (dirname(__FILE__).'/../../common/db_files.php');
 
     $system = new System(); //without connection
     $db = @$_REQUEST['db'];
-    
+
     if($db){
 
-        //@todo - allow Obfuscated id only    
+        //@todo - allow Obfuscated id only
 
         $fileid = @$_REQUEST['thumb'];
         if($fileid){
             $system->initPathConstants($db);
-            
+
             $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
             if(file_exists($thumbfile)){
                 downloadFile('image/png', $thumbfile);
             }else{
                 //@todo - change to the same script in h4
-                $thumb_url = HEURIST_BASE_URL_V3."common/php/resizeImage.php?db=".$db."&ulf_ID=".$fileid;
+                $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".$db."&ulf_ID=".$fileid;
                 header("Location: ".$thumb_url);
                 exit();
             }
         }else if(@$_REQUEST['id']) {
 
             $system->init($db);
-            
+
             $fileid = @$_REQUEST['id'];
-            //find 
+            //find
             $listpaths = fileGetPath_URL_Type($system, $fileid);
             if(is_array($listpaths) && count($listpaths)>0){
 
@@ -65,12 +65,12 @@
                 {
 
                     if($url){
-                        $filepath = $url; 
+                        $filepath = $url;
                     }else{
                         $filepath = HEURIST_BASE_URL."file.php?db=".HEURIST_DBNAME."&id=".$fileid;
                     }
 
-                ?>               
+                ?>
                 <html xmlns="http://www.w3.org/1999/xhtml">
                     <head>
                         <title>Heurist mediaplayer</title>
@@ -90,13 +90,13 @@
                         </script>
                     </head>
                     <body>
-                        <?php 
+                        <?php
                             if(strpos($params,"youtube")!==false){
                             ?>
                             <video width="640" height="360" id="player1" preload="none">
                                 <source type="video/youtube" src="<?=$filepath?>" />
-                            </video>    
-                            <?php 
+                            </video>
+                            <?php
                             }else if ($is_video) {
                                 //poster="poster.jpg"
                                 $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
@@ -112,23 +112,23 @@
                                     -->
                                 </object>
                             </video>
-                            <?php 
+                            <?php
                             }else{
                             ?>
                             <audio controls="controls" preload="none">
                                 <source type="<?=$mimeType?>" src="<?=$filepath?>" />
-                            </audio>    
-                            <?php 
+                            </audio>
+                            <?php
                             }
                         ?>
 
-                    </body>     
-                </html>    
-                <?php                 
+                    </body>
+                </html>
+                <?php
                 }else if(file_exists($filepath)){
                     downloadFile($mimeType, $filepath);
                 }else if($fileinfo[1]){
-                    header('Location: '.$fileinfo[1]);  //redirect to URL   
+                    header('Location: '.$fileinfo[1]);  //redirect to URL
                 }
             }
 
@@ -143,8 +143,8 @@
     */
     function downloadFile($mimeType, $filename){
 
-        if (file_exists($filename)) {        
-        
+        if (file_exists($filename)) {
+
                 header('Content-Description: File Transfer');
                 if ($mimeType) {
                   header('Content-type: ' .$mimeType);
@@ -163,10 +163,10 @@
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($filename));
                 @ob_clean();
-                flush();        
-          
-                readfile($filename);                      
-                
+                flush();
+
+                readfile($filename);
+
         }
     }
 ?>

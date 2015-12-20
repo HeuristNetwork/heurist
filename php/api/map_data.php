@@ -4,7 +4,7 @@
 
     /**
     * Retrieves map data for a certain database.
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -22,15 +22,15 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_files.php');
-    
+    require_once (dirname(__FILE__).'/../../common/db_files.php');
+
     $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
     $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
-    
-    
+
+
     /**
     * Finds the url that belongs to the file with the given fileID in the given system
-    * 
+    *
     * @param mixed $system System reference
     * @param mixed $fileID FileID
     * @return mixed Image URL
@@ -39,7 +39,7 @@
         $paths = fileGetPath_URL_Type($system, $fileID);
         //print_r($paths);
 
-        if(isset($paths[0][0])) {  
+        if(isset($paths[0][0])) {
             // Heurist URL
             return HEURIST_FILESTORE_URL . $paths[0][0];
         }else if(isset($paths[0][1])) {
@@ -48,16 +48,16 @@
         }
         return "null";
     }
-  
+
     /**
     * Retrieves a term by its ID
-    * 
+    *
     * @param mixed $system System reference
-    * @param mixed $id     Term ID                 
+    * @param mixed $id     Term ID
     */
     function _getTermByID($system, $id) {
         $term = new stdClass();
-    
+
         // Select term
         $query = "SELECT * FROM defTerms WHERE trm_ID=".$id;
         $res = $system->get_mysqli()->query($query);
@@ -69,21 +69,21 @@
                 $term->label = $row["trm_Label"];
                 $term->description = $row["trm_Description"];
             }
-        } 
-        
-        return $term;    
+        }
+
+        return $term;
     }
-    
+
     /**
     * Finds a record in the database by ID
-    * 
+    *
     * @param mixed $system System reference
     * @param mixed $id  Record ID
     */
     function getRecordByID($system, $id) {
         global $recordQuery;
         $record = new stdClass();
-        
+
         // Select the record
         $query = $recordQuery." WHERE r.rec_ID=".$id;
         $res = $system->get_mysqli()->query($query);
@@ -95,16 +95,16 @@
                 $record = getRecord($row);
             }
         }
-        
+
         return $record;
     }
-    
+
     /**
     * Constructs a record object from a SQL result row:
     * - ID: the id
     * - Title: record title
-    * - RectypeID: record type id      
-    * 
+    * - RectypeID: record type id
+    *
     * @param mixed $row SQL row
     * @return stdClass Record object
     */
@@ -116,17 +116,17 @@
         $obj->rectypeName = $row["rty_Name"];
         return $obj;
     }
-    
+
     /**
     * Retrieves a detailed record data out of the database
-    * 
-    * Allowed types according to field type 'Data source' (3-1083): 
+    *
+    * Allowed types according to field type 'Data source' (3-1083):
     * - Map image file (tiled)        RT_TILED_IMAGE_LAYER
     * - KML                           RT_KML_LAYER
     * - Shapefile                     RT_SHP_LAYER
     * - Map image file (untiled)      RT_IMAGE_LAYER
     * - Mappable query                RT_QUERY_LAYER
-    * 
+    *
     * @param mixed $system System reference
     * @param mixed $id Record ID
     */
@@ -134,9 +134,9 @@
         //echo "Get detailed record #".$id;
         $record = getRecordByID($system, $id);
         $record = getRecordDetails($system, $record);
-        return $record; 
+        return $record;
     }
-    
+
     /**
     * Adds extended details to a record
     * Possible etail types:
@@ -162,100 +162,100 @@
         shxFile: a SHX component
         files: Array of files
         zipFile: A .zip file
-    * 
+    *
     * @param mixed $system System reference
     * @param mixed $record Record reference
     */
     function getRecordDetails($system, $record) {
         global $detailQuery;
         //echo "Get record details of " . ($record->id);
-        
+
         // Retrieve extended details
         $query = $detailQuery . $record->id;
         $details = $system->get_mysqli()->query($query);
         if($details) {
             // [dtl_ID]  [dtl_RecID]  [dtl_DetailTypeID]  [dtl_Value] [dtl_AddedByImport]  [dtl_UploadedFileID]   [dtl_Geo]  [dtl_ValShortened]  [dtl_Modified]
-            while($detail = $details->fetch_assoc()) {  
+            while($detail = $details->fetch_assoc()) {
                 // Fields
                 //print_r($detail);
                 $type = $detail["dtl_DetailTypeID"];
                 $value = $detail["dtl_Value"];
-                $fileID = $detail["dtl_UploadedFileID"]; 
+                $fileID = $detail["dtl_UploadedFileID"];
 
                 /* GENERAL */
                 if($type == DT_SHORT_SUMMARY) {
                     // Description
-                    $record->description = $value; 
-                    
+                    $record->description = $value;
+
                 }else if($type == DT_CREATOR) {
                     // Creators
                     if(!property_exists($record, "creators")) {
-                        $record->creators = array();   
+                        $record->creators = array();
                     }
                     array_push($record->creators, getRecordByID($system, $value));
-                    
-  
+
+
                 /* SOURCE */
                 }else if(defined('DT_SERVICE_URL') && $type == DT_SERVICE_URL) {
                     // Source URL
                     $record->sourceURL = $value;
-                    
+
                 }else if(defined('DT_DATA_SOURCE') && $type == DT_DATA_SOURCE) {
                     // Data source
                     $record->dataSource = getDetailedRecord($system, $value);
 
-                       
+
                 /* MAP LAYERS */
                 }else if(defined('DT_TOP_MAP_LAYER') && $type == DT_TOP_MAP_LAYER) { // Recursive
-                    // Top map layer 
+                    // Top map layer
                     $record->toplayer = getDetailedRecord($system, $value);
 
                 }else if(defined('DT_MAP_LAYER') && $type == DT_MAP_LAYER) {
                     // Map layer
                     if(!property_exists($record, "layers")) { // Recursive
-                        $record->layers = array();   
+                        $record->layers = array();
                     }
                     array_push($record->layers, getDetailedRecord($system, $value));
- 
-                
+
+
                 /* LOCATION */
                 }else  if(defined('DT_LONGITUDE_CENTREPOINT') && $type == DT_LONGITUDE_CENTREPOINT) {
                     // Longitude centrepoint
                     $record->long = floatval($value);
-                    
+
                 }else if(defined('DT_LATITUDE_CENTREPOINT') && $type == DT_LATITUDE_CENTREPOINT) {
                     // Latitude centrepoint
                     $record->lat = floatval($value);
-                  
-                  
-                /* ZOOM */  
+
+
+                /* ZOOM */
                 }else if(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
                     // Maximum zoom
                     $record->maxZoom = floatval($value);
-                     
+
                 }else if(defined('DT_MINIMUM_ZOOM') && $type == DT_MINIMUM_ZOOM) {
                     // Minimum zoom
-                    $record->minZoom = floatval($value); 
+                    $record->minZoom = floatval($value);
 
-                    
+
                 }else if(defined('DT_OPACITY') && $type == DT_OPACITY) {
                     // Opacity
                     $record->opacity = floatval($value);
-   
+
                 }else if(defined('DT_MINOR_SPAN') && $type == DT_MINOR_SPAN) {
                     // Initial minor span
                     $record->minorSpan = floatval($value);
 
-                    
+
                 /* IMAGE INFO */
                 } else if(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {
-                    // Uploaded thumbnail 
+                    // Uploaded thumbnail
                     $record->thumbnail = getFileURL($system, $fileID);
-                    
-                } else if(defined('DT_MIME_TYPE') && $type == DT_MIME_TYPE) { 
+
+                } else if(defined('DT_MIME_TYPE') && $type == DT_MIME_TYPE) {
                     // Mime type
                     $record->mimeType = _getTermByID($system, $value);
-                    
+
                 } else if(defined('DT_IMAGE_TYPE') && $type == DT_IMAGE_TYPE) {
                     // Tiled image type
                     $record->imageType = _getTermByID($system, $value);
@@ -263,53 +263,53 @@
                 }else if(defined('DT_MAP_IMAGE_LAYER_SCHEMA') && $type == DT_MAP_IMAGE_LAYER_SCHEMA) {
                     // Image tiling schema
                     $record->tilingSchema = _getTermByID($system, $value);
-                    
-                    
+
+
                 /* SNIPPET */
                 }else if(defined('DT_QUERY_STRING') && $type == DT_QUERY_STRING) {
                     // Heurist query string
                     $record->query = $value;
-                    
+
                 }else if(defined('DT_KML') && $type == DT_KML) {
                     // KML snippet
                     $record->kmlSnippet = $value;
 
-                    
+
                 /* FILES */
                 }else if(defined('DT_FILE_RESOURCE') && $type == DT_FILE_RESOURCE) {
                     // File(s)
                     if(!property_exists($record, "files")) {
-                        $record->files = array();   
+                        $record->files = array();
                     }
                     array_push($record->files, getFileURL($system, $fileID));
-                    
+
                 }else if(defined('DT_SHAPE_FILE') && $type == DT_SHAPE_FILE) {
                     // Shape file (SHP component)
                     $record->shpFile = getFileURL($system, $fileID);
-                    
+
                 }else if(defined('DT_DBF_FILE') && $type == DT_DBF_FILE) {
                     // DBF file (DBF component)
                     $record->dbfFile = getFileUrl($system, $fileID);
-                    
+
                 }else if(defined('DT_SHX_FILE') && $type == DT_SHX_FILE) {
                     // SHX file (SHX component)
                     $record->shxFile = getFileURL($system, $fileID);
-                    
+
                 }else if(defined('DT_ZIP_FILE') && $type == DT_ZIP_FILE) {
                     // Zip file
                     $record->zipFile = getFileURL($system, $fileID);
-       
+
                 }
-            }    
+            }
         }
         return $record;
     }
-    
-    
+
+
 
     /**
     * Returns an array of all Map Documents for this database
-    * 
+    *
     * Document object:
     * -----------------------------------------
     * - id: Record ID
@@ -321,11 +321,11 @@
     * - long: Longitude
     * - lat: Latitude
     * - minZoom: Minimum zoom
-    * - maxZoom: Maximum zoom 
+    * - maxZoom: Maximum zoom
     * - minorSpan: Initial minor span in degrees
-    * - thumbnail: Thumbnail file   
+    * - thumbnail: Thumbnail file
     * ------------------------------------------
-    * 
+    *
     * @param mixed $system System reference
     */
     function getMapDocuments($system) {
@@ -333,7 +333,7 @@
         global $recordQuery;
         global $detailQuery;
         $documents = array();
-        
+
         if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
             // Select all Map Document types
             $query = $recordQuery." WHERE rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
@@ -353,10 +353,10 @@
         //print_r($documents);
         return $documents;
     }
-    
+
     // Initialize a System object that uses the requested database
     $system = new System();
-    if( $system->init(@$_REQUEST['db']) ){                               
+    if( $system->init(@$_REQUEST['db']) ){
         // Get all Map Documents
         $documents = getMapDocuments($system);
 
@@ -365,9 +365,9 @@
         print json_encode($documents);
     }else {
         // Show construction error
-        echo $system->getError();   
+        echo $system->getError();
     }
-    
+
     exit();
 
 ?>

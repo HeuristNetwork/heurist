@@ -1,14 +1,14 @@
 <?php
 
-    /** 
+    /**
     *  Standalone record edit page. It may be used separately or wihin widget (in iframe)
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -20,8 +20,8 @@
     */
 
 
-    require_once(dirname(__FILE__)."/System.php");
-    require_once(dirname(__FILE__).'/common/db_structure.php');
+    require_once(dirname(__FILE__)."/../php/System.php");
+    require_once(dirname(__FILE__).'/../common/db_structure.php');
 
     $system = new System();
 

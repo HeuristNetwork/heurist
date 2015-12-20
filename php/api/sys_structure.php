@@ -1,9 +1,9 @@
 <?php
 
-    /** 
-    * Application interface. See hSystemMgr in hapi.js 
+    /**
+    * Application interface. See hSystemMgr in hapi.js
     *   database definitions - record types, record structure, field types, terms
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -22,8 +22,8 @@
 
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_structure.php');
-    require_once (dirname(__FILE__).'/../common/db_structure_tree.php');
+    require_once (dirname(__FILE__).'/../../common/db_structure.php');
+    require_once (dirname(__FILE__).'/../../common/db_structure_tree.php');
 
     /* DEBUG
     $_REQUEST['db'] = 'dos_3';
@@ -57,9 +57,9 @@
             $mode = intval(@$_REQUEST['mode']);
 
             if($mode>2){
-                $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes']);    
+                $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes']);
             }else{
-                $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );    
+                $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );
             }
         }
 

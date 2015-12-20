@@ -20,11 +20,11 @@
 
    //@todo - reimplement using Singleton pattern
 
-    require_once (dirname(__FILE__) . '/../configIni.php'); // read in the configuration file
+    require_once (dirname(__FILE__).'/../configIni.php'); // read in the configuration file
     require_once (dirname(__FILE__).'/consts.php');
-    require_once (dirname(__FILE__).'/common/utils_db.php');
-    require_once (dirname(__FILE__).'/common/db_users.php');
-    require_once (dirname(__FILE__).'/common/utils_file.php');
+    require_once (dirname(__FILE__).'/../common/utils_db.php');
+    require_once (dirname(__FILE__).'/../common/db_users.php');
+    require_once (dirname(__FILE__).'/../common/utils_file.php');
 
     /**
     *  Class that contains mysqli (dbconnection), current user and system settings
@@ -325,8 +325,7 @@
             $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
             if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 
-            //$topDirs = "apps|js|php|page";
-            $topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
+            $topDirs = "admin|applications|apps|assets|common|context_help|export|ext|external|hapi|help|import|js|page|php|records|search|viewers";
             $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 
             if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
@@ -423,7 +422,7 @@
                     "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
-                    "basePathV3"=>HEURIST_BASE_URL_V3)
+                    "basePathV3"=>HEURIST_BASE_URL)
             );
 
             return $res;

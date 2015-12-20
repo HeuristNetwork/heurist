@@ -50,6 +50,7 @@ if(@$_REQUEST['db']){
         <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
+        <!-- avoid problem created by Skype (2015) -->
         <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
         <meta content="telephone=no" name="format-detection">
 
@@ -103,7 +104,7 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="apps/topmenu/help_tips.js"></script>
 
-        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL_V3; ?>common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL; ?>common/js/temporalObjectLibrary.js"></script>
 
         <!-- DOCUMENTATION TODO: explain this -->
         <!-- these scripts are loaded explicitely - for debug purposes
@@ -292,9 +293,9 @@ if(@$_REQUEST['db']){
 
 
         <!-- These are old H3 stuff - needed to support existing features in popups -->
-        <script>top.installDirFromH4="<?=HEURIST_BASE_URL_V3?>";</script>
-        <script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL_V3?>common/php/displayPreferences.php"></script>
+        <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
+        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
 
         <!-- TODO: H4 currently not using Magic Numbers, but should be using them -->
         <!-- <script src="../../common/php/getMagicNumbers.php"></script> -->

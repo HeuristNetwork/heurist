@@ -62,8 +62,10 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.1.3"; // sets current program version number, determined by Heurist development lead
-// Vsn 4.1.3 16 Dec 2015
+$version = "4.1.4"; // sets current program version number, determined by Heurist development lead
+
+// Vsn 4.1.4 17 Dec 2015 Restructure, move H3 code back to codebase level
+// Vsn 4.1.3 16 Dec 2015 Distribution as ...alpha  16/12/15
 // Vsn 4.1.2 15 Nov 2015
 // Vsn 4.1.1 02 Nov 2015
 // Vsn 4.1.0 15 sep 2015
@@ -97,10 +99,6 @@ $websiteThumbnailUsername = "";
 $websiteThumbnailPassword = "";
 // $websiteThumbnailXsize = 500;
 // $websiteThumbnailYsize = 300;
-
-
-// records relative path to the migrated H3 functions used by H4
-$heurist3url = "migrated/";
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
 // the ConfigIni.php in the installation need not be configured. This allows unconfigured ConfigIni.php files to exist

@@ -1,10 +1,10 @@
 <?php
 
-    /** 
+    /**
     * Application interface. See hSystemMgr in hapi.js
     *    user/groups information/credentials
     *    saved searches
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -22,8 +22,8 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_users.php');
-    require_once (dirname(__FILE__).'/../common/db_svs.php');
+    require_once (dirname(__FILE__).'/../../common/db_users.php');
+    require_once (dirname(__FILE__).'/../../common/db_svs.php');
 
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
 
@@ -40,12 +40,12 @@
         $action = @$_REQUEST['a']; //$system->getError();
 
         //no enough permission for guest
-        if ( $system->get_user_id()<1 && 
-            !( $action=='login' || $action=='reset_password' || $action=="svs_savetree"  || $action=="svs_gettree" 
+        if ( $system->get_user_id()<1 &&
+            !( $action=='login' || $action=='reset_password' || $action=="svs_savetree"  || $action=="svs_gettree"
                || $action=="usr_save" || $action=="usr_get" || $action=="sysinfo" || $action=="svs_get" ) ) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED, "Operation denied. Not enough rights");
-            
+
         }else{
 
             $res = false;
@@ -62,7 +62,7 @@
                     checkDatabaseFunctions($mysqli);
                 }
 
-            } else if ($action=="reset_password") {    
+            } else if ($action=="reset_password") {
 
                 if(user_ResetPassword($system, @$_REQUEST['username'])){
                     $res = true;
@@ -92,12 +92,12 @@
                 $ugrID = $_REQUEST['UGrpID'];
 
                 if($system->is_admin2($ugrID)){
-                    $res = user_getById($system->get_mysqli(), $ugrID); 
+                    $res = user_getById($system->get_mysqli(), $ugrID);
                     if(is_array($res)){
-                        $res['ugr_Password'] = '';   
+                        $res['ugr_Password'] = '';
                     }
                 }else{
-                    $system->addError(HEURIST_REQUEST_DENIED);    
+                    $system->addError(HEURIST_REQUEST_DENIED);
                 }
 
             } else if ($action=="groups") {
@@ -125,11 +125,11 @@
             } else if ($action=="svs_savetree" ) { //save saved searches tree status
 
                 $res = svsSaveTreeData($system, @$_REQUEST['data']);
-                
+
             } else if ($action=="svs_gettree" ) { //save saved searches tree status
 
                 $res = svsGetTreeData($system, @$_REQUEST['UGrpID']);
-                
+
             } else {
 
                 $system->addError(HEURIST_INVALID_REQUEST);

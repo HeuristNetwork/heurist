@@ -1,0 +1,22 @@
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3 & 4
+
+---------------------------------------------------------------------
+
+
+Directory:	/applications
+
+Overview:	Applications developed within Heurist vsn 3
+
+Notes:
+
+faims has been converted to run in Heurist 4
+dictofsyd, huni have not been converted and will therefore most likely require editing to work
+mobile was never properly finished and would require extensive work
+proxyfilter is a standalone for filtering websites to restyle pages and restrict to listed content
+
+Updated: 	16 december 2015

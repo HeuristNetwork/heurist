@@ -92,7 +92,6 @@ cd /var/www/html
 $2 ln -s HEURIST/$1 $1
 cd HEURIST/$1
 $2 ln -s ../HEURIST_SUPPORT/external_h4 ext
-cd migrated
 $2 ln -s ../../HEURIST_SUPPORT/external external
 $2 ln -s ../../HEURIST_SUPPORT/help help
 

@@ -42,9 +42,8 @@
 
     $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
-    // calculate the dir where the Heurist code is installed, for example /h3 or /h3-ij
-    $topdirs = "admin|applications|common|export|external|hapi|help|import|records|search|viewers|apps|js|php|page";
-    //$topdirs = "apps|js|php|page";
+    // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
+    $topdirs = "admin|applications|apps|assets|common|context_help|export|ext|external|hapi|help|import|js|page|php|records|search|viewers";
 
     $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
     if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
@@ -62,7 +61,7 @@
     define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html        @todo - read simlink
     define('HEURIST_SERVER_URL', $serverBaseURL);
     define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); //. 'applications/h4/'); // eg. http://heurist.sydney.edu.au/h4/
-    define('HEURIST_BASE_URL_V3',  ((strpos($heurist3url, "http://")===0)?$heurist3url:HEURIST_BASE_URL.$heurist3url) );//$serverBaseURL . $installDir ); // access to old app
+    define('HEURIST_BASE_URL',  ((strpos("", "http://")===0)?"":HEURIST_BASE_URL."") );//$serverBaseURL . $installDir ); // access to old app
 
 
     if ($dbHost) {

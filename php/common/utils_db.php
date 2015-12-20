@@ -337,7 +337,7 @@
             }else{
 
                 include('utils_db_script.php'); //
-                if(db_script(HEURIST_DBNAME_FULL, HEURIST_BASE_URL_V3.'/admin/setup/dbcreate/addProceduresTriggers.sql')){
+                if(db_script(HEURIST_DBNAME_FULL, HEURIST_BASE_URL.'admin/setup/dbcreate/addProceduresTriggers.sql')){
                     $res = true;
                 }
             }
