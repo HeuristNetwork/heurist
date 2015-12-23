@@ -44,6 +44,8 @@ if(@$_REQUEST['db']){
     exit();
 }
 
+// TODO: There is a lot of extra commented-out stuff in index.php. It needs rationalisation.
+
 ?>
 <html>
     <head>
@@ -67,7 +69,7 @@ if(@$_REQUEST['db']){
         <link rel="stylesheet" type="text/css" href="ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
-             number of widgets. Currently it is commented out of the code in layout_default.js -->
+        number of widgets. Currently it is commented out of the code in layout_default.js -->
 
         <!-- for gridster layout, development version - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
@@ -104,7 +106,7 @@ if(@$_REQUEST['db']){
 
         <script type="text/javascript" src="apps/topmenu/help_tips.js"></script>
 
-        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL; ?>common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>common/js/temporalObjectLibrary.js"></script>
 
         <!-- DOCUMENTATION TODO: explain this -->
         <!-- these scripts are loaded explicitely - for debug purposes
@@ -142,7 +144,7 @@ if(@$_REQUEST['db']){
         <!-- todo: load dynamically
         <script type="text/javascript" src="apps/editing/rec_search.js"></script>
         <script type="text/javascript" src="apps/editing/rec_relation.js"></script>
-         -->
+        -->
         <!-- script type="text/javascript" src="page/editing.js"></script -->
 
         <!-- move to profile.js dynamic load -->
@@ -233,15 +235,15 @@ if(@$_REQUEST['db']){
                                         var request = {q: qsearch, w: qdomain, f: 'map', source:'init' };
                                         //top.HEURIST4.query_request = request;
                                         setTimeout(function(){
-                                                top.HAPI4.SearchMgr.doSearch(document, request);
-                                        }, 3000);
+                                            top.HAPI4.SearchMgr.doSearch(document, request);
+                                            }, 3000);
                                     }else if(layoutid!='DigitalHarlem'){
                                         var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                                         if(!top.HEURIST4.util.isempty(init_search)){
                                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                                             setTimeout(function(){
                                                 top.HAPI4.SearchMgr.doSearch(document, request);
-                                            }, 3000);
+                                                }, 3000);
                                         }
                                     }
 
@@ -262,7 +264,7 @@ if(@$_REQUEST['db']){
                         }else{  // Failed to initialise system
 
                             //top.HEURIST4.msg.redirectToError
-                            alert("Cannot initialize system, please consult Heurist developers");
+                            alert("Cannot initialize system, please contact your system administrator or email Heurist developers info a t HeuristNetwork.org");
                         }
                 });
 
@@ -297,8 +299,6 @@ if(@$_REQUEST['db']){
         <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
         <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
 
-        <!-- TODO: H4 currently not using Magic Numbers, but should be using them -->
-        <!-- <script src="../../common/php/getMagicNumbers.php"></script> -->
 
         <div id="layout_panes" style="height:100%">
             &nbsp;

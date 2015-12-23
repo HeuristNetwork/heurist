@@ -35,7 +35,6 @@
 define('SEARCH_VERSION', 1);
 
 header('Content-type: text/plain');
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 
 if (!is_logged_in()) {

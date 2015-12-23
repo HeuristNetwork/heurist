@@ -1,6 +1,8 @@
 <?php
+
 /**
-* dh_popup.php : Content for map bubble and info popup
+*
+* dh_popup.php (Digital Harlem): Content for map bubble and info popup
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -105,11 +107,13 @@
 
         $comment = getFieldValue($records, $recID, DT_SHORT_SUMMARY);
 ?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
     <?php echo $comment? 'Building details:<br/>'.$comment:''; ?>
     <?php echo $moredetailLink; ?>
 </div>
+
 <?php
     }else{
 
@@ -128,7 +132,7 @@
              // get person role in the event
              $person_role = getTermById_2( recordGetRealtionshipType( $system, $eventID, $recID ) );
 
-             //$relation1 = recordGetRealtionship_2($system, $eventID, $recID, 'event for person' );
+             // TODO: Remove, enable or explain: $relation1 = recordGetRealtionship_2($system, $eventID, $recID, 'event for person' );
 
              //get relationship record for address of related event
              $relation2 = recordGetRealtionship_2($system, $eventID, $addrID, 'address for event' );
@@ -150,6 +154,7 @@
 
 
 ?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
 
@@ -194,6 +199,7 @@
         <p><?php echo $date_out;?></p>
         <?php echo $moredetailLink; ?>
 </div>
+
 <?php
         }
     }else if($recTypeID==RT_EVENT){
@@ -220,6 +226,7 @@
              $date_out = composeDates( $records, $recID, '<b>Date: </b>');
              $time_out = composeTime( $records, $recID, '<b>Time: </b>' );
 ?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, DT_NAME) ?></h3>
         <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_EVENT_TYPE)) ?> </b></p>
@@ -235,6 +242,7 @@
         </p>
         <?php echo $moredetailLink; ?>
 </div>
+
 <?php
     }
     }
@@ -265,8 +273,6 @@ function getFieldValue($records, $recID, $fieldID, $needall=false){
 
     if(is_numeric($fieldID)){ //detail
 
-
-
         $detail = @$record['d'][$fieldID];
         if($needall){
             return $detail;
@@ -283,6 +289,8 @@ function getFieldValue($records, $recID, $fieldID, $needall=false){
     }
 }
 
+
+
 function composeDates( $records, $recID, $prefix='') {
      $date_out = '';
      $date_start = getFieldValue($records, $recID, DT_START_DATE);
@@ -296,6 +304,8 @@ function composeDates( $records, $recID, $prefix='') {
      }
      return $date_out;
 }
+
+
 
 function composeTime( $records, $recID, $prefix='') {
 
@@ -317,6 +327,8 @@ function composeTime( $records, $recID, $prefix='') {
              return $time_out;
 }
 
+
+
 //
 // find term by termid, returns human readable message if not found
 //
@@ -328,6 +340,8 @@ function getTermById_2($term_id, $type_suffix=''){
         return $ret;
     }
 }
+
+
 
 //
 //
@@ -342,6 +356,8 @@ function recordGetRealtionship_2($system, $sourceID, $targetID, $remark=' record
         return $res['data'];
      }
 }
+
+
 
 function recordSearch_2( $query ){
 
@@ -360,6 +376,7 @@ function recordSearch_2( $query ){
 }
 
 
+
 //
 // returns relationship records(s) for given source and target records
 //
@@ -371,7 +388,6 @@ function recordGetRealtionship($system, $sourceID, $targetID ){
     $query = 'SELECT rl_RelationID FROM recLinks '
         .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
 
-//error_log("1>>>".$query);
 
     $res = $mysqli->query($query);
     if (!$res){
@@ -388,6 +404,8 @@ function recordGetRealtionship($system, $sourceID, $targetID ){
 
 
 }
+
+
 
 //
 // returns only first relationship type ID for 2 given records
@@ -410,4 +428,5 @@ function recordGetRealtionshipType($system, $sourceID, $targetID ){
         }
     }
 }
+
 ?>

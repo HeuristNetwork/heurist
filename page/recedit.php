@@ -21,7 +21,7 @@
 
 
     require_once(dirname(__FILE__)."/../php/System.php");
-    require_once(dirname(__FILE__).'/../common/db_structure.php');
+    require_once(dirname(__FILE__).'/../php/common/db_structure.php');
 
     $system = new System();
 

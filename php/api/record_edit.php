@@ -22,7 +22,7 @@
 
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../../common/db_records.php');
+    require_once (dirname(__FILE__).'/../common/db_records.php');
 
     $response = array();
 

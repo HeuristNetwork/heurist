@@ -21,7 +21,7 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../../common/db_tags.php');
+    require_once (dirname(__FILE__).'/../common/db_tags.php');
 
     $response = array();
 

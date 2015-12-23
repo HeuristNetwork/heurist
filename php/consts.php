@@ -60,8 +60,10 @@
     define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. heuristscholar.org
     define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html        @todo - read simlink
     define('HEURIST_SERVER_URL', $serverBaseURL);
-    define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); //. 'applications/h4/'); // eg. http://heurist.sydney.edu.au/h4/
+    define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); //. 'applications/h4/'); eg. http://heurist.sydney.edu.au/h4/
+    /*
     define('HEURIST_BASE_URL',  ((strpos("", "http://")===0)?"":HEURIST_BASE_URL."") );//$serverBaseURL . $installDir ); // access to old app
+    */
 
 
     if ($dbHost) {

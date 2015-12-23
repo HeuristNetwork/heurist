@@ -28,7 +28,7 @@
 */
 
 
-include_once 'classEmailAttachment.php';
+require_once(dirname(__FILE__).'/classEmailAttachment.php');
 
 class Email{
 

@@ -35,17 +35,18 @@ require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-include_once('../../external/geoPHP/geoPHP.inc');
+require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
 
 mysql_connection_select(DATABASE);
 
 $isAtom = (array_key_exists("feed", $_REQUEST) && $_REQUEST['feed'] == "atom");
 
+// TODO: Remove, enable or explain
 //header('Content-type: text/xml; charset=utf-8');
-
 //header("Cache-Control: public");
 //header("Content-Description: File Transfer");
 //header("Content-Disposition: attachment; filename=\"heuristfeed.xml\"");
+
 header("Content-Type: application/".($isAtom?"atom":"rss")."+xml");
 
 $explanation="This feed returns the results of a HEURIST search. The search URL specifies the search parameters and the search results are built live from the HEURIST database. If you are not logged in you may see fewer records than you expect, as only records marked as 'Publicly Visible' will be rendered in the feed";
@@ -74,6 +75,7 @@ if($isAtom){
     <?php
 }else{
     //
+    // TODO: Remove, enable or explain
     //	<atom:link href="=urlencode(HEURIST_CURRENT_URL)" rel="self" type="application/rss+xml"/>
     ?>
     <rss version="2.0" xmlns:georss="http://www.georss.org/georss" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -83,13 +85,13 @@ if($isAtom){
     <description><?=$explanation?></description>
     <language>en-gb</language>
     <pubDate><?=date("r")?></pubDate>
-    <copyright>Copyright: (C) University of Sydney Digital Innovation Unit</copyright>
+    <copyright>Copyright: (C) University of Sydney Faculty of Arts and Social Sciences</copyright>
     <generator>HEURIST search</generator>
     <managingEditor>info@heuristscholar.org (Information at Heurist)</managingEditor>
     <atom:link href="<?=htmlspecialchars(HEURIST_CURRENT_URL)?>" rel="self" type="application/rss+xml"/>
     <item>
-        <title>HEURIST home</title>
-        <description>HEURIST home page (search)</description>
+        <title>HEURIST main page</title>
+        <description>HEURIST main page (search)</description>
         <pubDate><?=date("r")?></pubDate>
         <link><?=htmlspecialchars(HEURIST_BASE_URL."?".$_SERVER['QUERY_STRING'])?></link>
         <guid isPermaLink="false"><?=htmlspecialchars(HEURIST_BASE_URL."?db=".HEURIST_DBNAME)?></guid>
@@ -164,7 +166,6 @@ if ($reccount>0)
             }
         }
 
-
         //find rectitle for creator
         if($row[8]){
             $creator = mysql__select_array("Records","rec_Title", "rec_ID=".$row[8]);
@@ -184,8 +185,6 @@ if ($reccount>0)
 
         $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
         $uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-        //HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&amp;q=ids:".$row[0];
-        //$uid = $uniq_id;
         $uniq_id++;
 
         $date_published = date("r", strtotime(($row[5]==null)? $row[6] : $row[5]));
@@ -203,6 +202,7 @@ if ($reccount>0)
             <link href="<?=$url?>"/>
             <?php
             if($creator!=null){
+                // TODO: this is email - not creator's record title. ? this has been fixed, see line 172
                 print "<author><name><![CDATA[".$creator."]]></name></author>";
             }
         }else{
@@ -216,8 +216,8 @@ if ($reccount>0)
             <link><?=$url?></link>
             <?php
             if($creator!=null){
-                // this is email - not creator's rectitle
-                //print "\n	<author><![CDATA[".$creator."]]></author>";
+                // TODO: this is email - not creator's record title ? this has been fixed, see line 172
+                print "<author><name><![CDATA[".$creator."]]></name></author>";
             }
         }
 

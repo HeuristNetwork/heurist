@@ -98,8 +98,8 @@ if(mysql_error()) {
 
                 var ele = document.getElementById("divProgress");
                 if(ele){
-                        ele.innerHTML = ele.innerHTML + ".";
-                        setTimeout(showProgress, 500);
+                    ele.innerHTML = ele.innerHTML + ".";
+                    setTimeout(showProgress, 500);
                 }
             }
 
@@ -120,34 +120,34 @@ if(mysql_error()) {
             <div id="mainform">
 
 
-            <p>
-                This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
-                The new database is identical to the old in all respects including users, access and attaachments <br />
-                (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
-                The target database is unregistered with the Heurist central index even if the source database is registered.
-            </p>
+                <p>
+                    This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
+                    The new database is identical to the old in all respects including users, access and attaachments <br />
+                    (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
+                    The target database is unregistered with the Heurist central index even if the source database is registered.
+                </p>
 
-            <?php
+                <?php
 
 
-            // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
+                // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
 
-            if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
-                ?>
-                <div class="separator_row" style="margin:20px 0;"></div>
-                <form name='selectdb' action='cloneDatabase.php' method='get'>
-                    <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
-                    <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
-                    <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
-                        (all databases created by this installation of the software will have the same prefix).</p>
-                    <h3>Enter a name for the cloned database:</h3>
-                    <div style="margin-left: 40px;">
-                        <input type='text' name='targetdbname' onkeypress="{onKeyPress(event)}"/>
-                        <input type='button' value='Clone "<?=HEURIST_DBNAME?>"'
-                            onclick='onSubmit(event)'/>
-                    </div>
+                if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
+                    ?>
+                    <div class="separator_row" style="margin:20px 0;"></div>
+                    <form name='selectdb' action='cloneDatabase.php' method='get'>
+                        <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
+                        <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
+                        <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
+                            (all databases created by this installation of the software will have the same prefix).</p>
+                        <h3>Enter a name for the cloned database:</h3>
+                        <div style="margin-left: 40px;">
+                            <input type='text' name='targetdbname' onkeypress="{onKeyPress(event)}"/>
+                            <input type='button' value='Clone "<?=HEURIST_DBNAME?>"'
+                                onclick='onSubmit(event)'/>
+                        </div>
 
-                </form>
+                    </form>
                 </div>
             </div>
         </body>
@@ -182,7 +182,7 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
     $list = mysql__getdatabases();
     $list = array_map("arraytolower", $list);
     if(in_array(strtolower($targetdbname), $list)){
-        echo ("<p class='error'>Error: database '".$targetdbname."' already exists. Choose different name<br/></p>");
+        echo ("<p class='error'>Warning: database '".$targetdbname."' already exists. Please choose a different name<br/></p>");
         return false;
     }
 
@@ -255,7 +255,7 @@ function cloneDatabase($targetdbname) {
 
     mysql_connection_insert($newname);
     // RESET register db ID
-        $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null where 1";
+    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null where 1";
     $res1 = mysql_query($query1);
     if (mysql_error())  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().

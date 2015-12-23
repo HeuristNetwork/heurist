@@ -89,6 +89,7 @@ if (@$argv) {
 
 }
 
+// Note: applyCredentils.php is listed later in the file
 require_once (dirname(__FILE__) . '/../../common/config/initialise.php');
 require_once (dirname(__FILE__) . '/../../search/getSearchResults.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');

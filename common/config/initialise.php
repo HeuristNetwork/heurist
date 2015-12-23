@@ -110,7 +110,7 @@ HEURIST_FAIMS_DIR      - by default   HEURIST_FILESTORE_DIR/faims otherwise rede
 HEURIST_INDEX_BASE_URL - url for master index database, heurist.sydney.edu.au/h4
 */
 
-require_once (dirname(__FILE__) . '/../../../configIni.php'); // read in the configuration file
+require_once (dirname(__FILE__) . '/../../configIni.php'); // read in the configuration file
 require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 
 $talkToSysAdmin="Please advise your system administrator or email info - a t - HeuristNetwork.org for assistance.";
@@ -161,22 +161,6 @@ define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // e
 
 define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h4/
 
-//TODO: REMOVE  This appears redundant
-
-//get Heurist base URL
-//$installDir = preg_replace("/\/(migrated)\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
-//if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
-//    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);
-//}
-//if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
-//    $installDir = '';
-//}
-//$installDir =  ($installDir == '' ? '/' : $installDir) . '/';
-//define('HEURIST_BASE_URL', HEURIST_SERVER_URL . $installDir);
-
-// define('HEURIST_BASE_URL', HEURIST_SERVER_URL . $installDir);
-
-
 $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
 if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 //define('HEURIST_SERVER_ROOT_DIR', $documentRoot); //  eg. /var/www/html/      @todo - remove
@@ -186,7 +170,9 @@ define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h4/
 // DO NOT CHANGE THIS URL
 // Note: had /migrated appended up to 17 Dec 2015, need to update the server with new copy of H4
 // anything using h3 code will still go to the h3 codebase, only h4 code is affected
-define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4/");
+// TODO: Temporary fudge 22/12/15 use h4-ij until h4 updated without /migrated
+define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4-ij/");
+define('HEURIST_INDEX_DBNAME', "HeuristMasterIndex");
 
 //-------------------------------------------------------------------------- MEMCACHE AND PROXY
 

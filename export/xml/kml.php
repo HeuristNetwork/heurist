@@ -33,18 +33,21 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-include_once('../../external/geoPHP/geoPHP.inc');
+require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
 
 mysql_connection_select(DATABASE);
 
 $islist = array_key_exists("q", $_REQUEST);
 
+// TODO: Remove, enable or explain
 //header('Content-type: text/xml; charset=utf-8');
 
 header("Cache-Control: public");
 header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=\"export.kml\"");
 header("Content-Type: text/kml");
+
+// TODO: Remove, enable or explain
 //header("Content-Transfer-Encoding: binary");
 
 /*
@@ -91,7 +94,7 @@ if(!$islist){
 print "<?xml version='1.0' encoding='UTF-8'?>\n";
 print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
 print '<Document>';
-print '<name>Export from Heurist 3</name>';
+print '<name>Export from Heurist</name>';
 
 /*
 2. create new KML output that contains placemarks created from WKT and links to heurist's uploaded kml files
@@ -121,10 +124,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
         if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
-            //$_REQUEST['idonly'] = 1;
-            //$_REQUEST['vo'] = 'h3';
-            //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-            $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
+            $url = HEURIST_BASE_URL."/php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
             $reclist = loadRemoteURLContent($url, false);
             $reclist = json_decode($reclist, true);
 
@@ -223,7 +223,8 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                         print '</Placemark>';
                     }
                 }else{
-                    /* @todo - tomorrow
+                    // TODO: Remove, enable or explain: /* @todo - tomorrow
+                    /* @todo - tomorrow (!!!)
                     $kml = $row[1];
                     if(strpos($kml, "<?xml")>=0){
                     $start = strpos($kml, "<Placemark>");

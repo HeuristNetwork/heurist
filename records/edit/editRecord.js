@@ -514,7 +514,7 @@ if (! top.HEURIST.edit) {
 
                 if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
                     top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3
-                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { 
+                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", {
                             title: 'Add tags',
                             height:400, width:550,
                             callback: function(tags) {
@@ -524,7 +524,7 @@ if (! top.HEURIST.edit) {
                                 }
                                 top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                                 setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
-                            } 
+                            }
                         });
                     return;
                 }
@@ -3399,7 +3399,7 @@ if (! top.HEURIST.edit) {
         this.fieldset.appendChild(this.document.createElement("legend")).appendChild(this.document.createTextNode("Add reminder"));
 
         var p = this.fieldset.appendChild(this.document.createElement("p"));
-        p.appendChild(this.document.createTextNode("Set up email reminders about this record"));
+        p.appendChild(this.document.createTextNode("Set up email reminders about this record. Reminders can be immediate, delayed or periodic."));
 
         var tbody = this.fieldset.appendChild(this.document.createElement("div"));
         tbody.className = "reminder-table";
@@ -3473,7 +3473,7 @@ if (! top.HEURIST.edit) {
         this.nowRadioButton.type = "radio";
         this.nowRadioButton.name = "when";
         this.nowRadioButton.checked = true;
-        this.nowRadioButton.onclick = function() { thisRef.whenSpan.style.display = "none"; thisRef.saveButton.value = "Send"; };
+        this.nowRadioButton.onclick = function() { thisRef.whenSpan.style.display = "none"; thisRef.saveButton.value = "Send now"; };
         td.appendChild(this.nowRadioButton);
         td.appendChild(this.document.createTextNode("Now"));
 
@@ -3481,7 +3481,7 @@ if (! top.HEURIST.edit) {
         this.laterRadioButton.type = "radio";
         this.laterRadioButton.name = "when";
         //this.laterRadioButton.style.marginLeft = "20px";
-        this.laterRadioButton.onclick = function() { thisRef.whenSpan.style.display = ""; thisRef.saveButton.value = "Store" };
+        this.laterRadioButton.onclick = function() { thisRef.whenSpan.style.display = ""; thisRef.saveButton.value = "Set reminder" };
         td.appendChild(this.laterRadioButton);
         td.appendChild(this.document.createTextNode("Later / periodic"));
 
@@ -3534,7 +3534,7 @@ if (! top.HEURIST.edit) {
         //td.style.textAlign = "right";
         this.saveButton = this.document.createElement("input");
         this.saveButton.type = "button";
-        this.saveButton.value = "Send";
+        this.saveButton.value = "Send now";
         this.saveButton.style.margin = "0 10px 0 0";
         var thisRef = this;
         this.saveButton.onclick = function() { thisRef.save(thisRef.nowRadioButton.checked); };
@@ -3544,8 +3544,8 @@ if (! top.HEURIST.edit) {
         td.style.textAlign = "left";
         //td.style.verticalAlign = "baseline";
         //td.style.paddingTop = "10px";
-        td.appendChild(this.document.createTextNode("You must Send (now) or Set (periodic) your reminder before saving record. " +
-            "Periodic reminders are normally sent shortly after midnight (server time) on the reminder day."));
+        td.appendChild(this.document.createTextNode("You must Send (now) or Set (future/periodic) the reminder before saving the record. " +
+            "Periodic reminders are normally sent shortly after midnight server time on the reminder day."));
 
         var bibIDelt = this.document.createElement("input");
         bibIDelt.type = "hidden";

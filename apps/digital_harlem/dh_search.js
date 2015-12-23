@@ -1,5 +1,6 @@
 /**
-* Accordeon/treeview in navigation panel: saved, faceted and tag searches
+*
+* dh_search.js (Digital Harlem) : Special navigation panel: saved, faceted and tag searches
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -34,6 +35,7 @@ $.widget( "heurist.dh_search", {
 
     _currentRequest:null,
     _currentRecordset:null,
+
 
 
     // the constructor
@@ -167,6 +169,8 @@ $.widget( "heurist.dh_search", {
 
     }, //end _create
 
+
+
     // events bound via _on are removed automatically
     // revert other modifications here
     _destroy: function() {
@@ -185,6 +189,7 @@ $.widget( "heurist.dh_search", {
     },
 
 
+
     _setOption: function( key, value ) {
         this._super( key, value );
         /*
@@ -192,6 +197,8 @@ $.widget( "heurist.dh_search", {
         this._refresh();
         }*/
     },
+
+
 
     /* private function */
     _refresh: function(){
@@ -211,6 +218,8 @@ $.widget( "heurist.dh_search", {
         }
 
     },
+
+
 
     //
     // redraw list of saved searches
@@ -251,6 +260,8 @@ $.widget( "heurist.dh_search", {
 
 
     },
+
+
 
     _doSearch2: function(svsID){
 
@@ -308,6 +319,8 @@ $.widget( "heurist.dh_search", {
 
     },
 
+
+
     //
     // this is public methid, it is called on search complete - see dh_search_minimal._doSearch
     //
@@ -336,6 +349,8 @@ $.widget( "heurist.dh_search", {
             }
 
     },
+
+
 
     // add layer to current map document
     _onAddLayer: function(){

@@ -41,8 +41,9 @@ session_start();
 $last_uri = urldecode(@$_REQUEST['last_uri']);
 
 // TODO: should this be deleted. Is it useful?
-//if (! $last_uri)
-//	$last_uri = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'];
+// if (! $last_uri)
+// $last_uri = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['last_uri'];
+
 if (! $last_uri) {
     if (@$_SERVER['HTTP_REFERER']  &&  strpos($_SERVER['HTTP_REFERER'], $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME']) === false) {
         $last_uri = $_SERVER['HTTP_REFERER'];
@@ -132,7 +133,8 @@ if(!$needRegistration){
 
             $groups = reloadUserGroups($user[USERS_ID_FIELD]);
 
-            $groups[$user[USERS_ID_FIELD]] = 'member'; // a person in a member of his own user type group, not admin as can't add users to this group
+            // a person is a member, not admin, of their own user group as they can't add users to this group
+            $groups[$user[USERS_ID_FIELD]] = 'member';
 
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['cookie_version'] = COOKIE_VERSION;
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_name'] = $user[USERS_USERNAME_FIELD];
@@ -141,20 +143,19 @@ if(!$needRegistration){
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'] = $groups;
             $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = (defined('HEURIST_MAIL_TO_ADMIN') && (@$user[USERS_EMAIL_FIELD]==HEURIST_MAIL_TO_ADMIN))?"1":"0";
 
-
             $time = 0;
             if ($_REQUEST['session_type'] == 'public') { //expire on exit
                 $time = 0;
             } else if ($_REQUEST['session_type'] == 'shared') {
                 $time = time() + 24*60*60;
             } else if ($_REQUEST['session_type'] == 'remember') {
-                //Besides make sure thah php.ini session.gc_maxlifetime set to the similar value
+                //Besides make sure that php.ini session.gc_maxlifetime set to the similar value
                 $time = time() +  30*24*60*60; //remember for 30 days
                 $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['keepalive'] = true;
             }
-            setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_DOMAIN);
+            setcookie('heurist-sessionid', session_id(), $time, '/');
 
-            /* bookkeeping */
+            // bookkeeping
             mysql_connection_overwrite(USERS_DATABASE);
             mysql_query('update sysUGrps usr set usr.ugr_LastLoginTime=now(), usr.ugr_LoginCount=usr.ugr_LoginCount+1
                 where usr.ugr_ID='.$user[USERS_ID_FIELD]);
@@ -173,13 +174,13 @@ if(!$needRegistration){
 
     }
 }
-
-
-
 ?>
+
+
 <html>
+
     <head>
-        <title>Heurist Login</title>
+        <title>Heurist login</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel=icon href='<?=HEURIST_BASE_URL?>favicon.ico' type=image/x-icon>
         <link rel="shortcut icon" href='<?=HEURIST_BASE_URL?>favicon.ico' type=image/x-icon>
@@ -237,14 +238,10 @@ if(!$needRegistration){
                     <?php
                     echo "<input type=hidden name=last_uri value={$last_uri}>\n";
 
-                    //echo "SESSION=".print_r(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'],true)."<br>";
-                    //  var/log/apache2
-                    //  var/www
-
                     if (! is_logged_in() ) {
                         ?>
 
-                        <table cellpadding=3 id="login-table" border="0">
+                        <table style="padding: 3px; border: 0px;" id="login-table">
                             <?php
                             if(@$_REQUEST['register']==1 && HEURIST_DBNAME=="Heurist_Sandpit"){
                                 ?>

@@ -65,134 +65,134 @@ function errorOut($msg){
         <title>Create New Heurist Database</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<?php
-    if($blankServer){
-?>
-        <link rel=icon href="../../../../favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" href="../../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../../../../h4styles.css">
+        <?php
+        if($blankServer){
+            ?>
+            <link rel=icon href="../../../favicon.ico" type="image/x-icon">
+            <link rel="stylesheet" href="../../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+            <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
 
-        <!-- TODO: These all climb laboriously out to codebase then into /ext, /js etc...
-             /localization does not even exist -->
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-        <script type="text/javascript" src="../../../localization.js"></script>
-        <script type="text/javascript" src="../../../js/utils.js"></script>
-        <script type="text/javascript" src="../../../js/utils_msg.js"></script>
-        <script type="text/javascript" src="../../../js/hapi.js"></script>
+            <!-- TODO: These all climb laboriously out to codebase then into /ext, /js etc...
+            /localization does not even exist -->
+            <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+            <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+            <script type="text/javascript" src="../../../localization.js"></script>
+            <script type="text/javascript" src="../../../js/utils.js"></script>
+            <script type="text/javascript" src="../../../js/utils_msg.js"></script>
+            <script type="text/javascript" src="../../../js/hapi.js"></script>
 
-        <script type="text/javascript" src="../../../../apps/profile/profile_edit.js"></script>
+            <script type="text/javascript" src="../../../apps/profile/profile_edit.js"></script>
 
-        <script type="text/javascript">
-$(document).ready(function() {
+            <script type="text/javascript">
+                $(document).ready(function() {
 
-    if($("#createDBForm").length>0){
-        top.HAPI4 = new hAPI(null);
-        var prefs = top.HAPI4.get_prefs();
-        //loads localization
-        top.HR = top.HAPI4.setLocale(prefs['layout_language']);
+                    if($("#createDBForm").length>0){
+                        top.HAPI4 = new hAPI(null);
+                        var prefs = top.HAPI4.get_prefs();
+                        //loads localization
+                        top.HR = top.HAPI4.setLocale(prefs['layout_language']);
 
-        <?php if(!$passwordForDatabaseCreation)
-        {
-            echo 'doRegister();';
+                        <?php if(!$passwordForDatabaseCreation)
+                        {
+                            echo 'doRegister();';
+                        }
+                        ?>
+
+
+                        $("#btnRegister").button({label:'Register as User'}).on('click', doRegister);
+                        $("#div_register").show();
+                        $("#div_create").hide();
+                    }
+                });
+
+
+                var profile_edit_dialog = null;
+
+                function onRegisterDialogClose(){
+                    var edit_date = profile_edit_dialog.profile_edit('option','edit_data');
+
+                    var frm = $("#dbForm");
+                    for (var fld_name in edit_date) {
+                        if (edit_date.hasOwnProperty(fld_name)) {
+                            var fld = frm.find('#'+fld_name);
+                            if(fld.length>0){
+                                fld.val( edit_date[fld_name] );
+                            }else{
+                                $('<input>', {id:fld_name, type:'hidden', name:fld_name, value:edit_date[fld_name]} ).appendTo(frm);
+                            }
+                        }
+                    }
+
+                    $("#div_register").hide();
+                    $("#div_create").show();
+                    setUserPartOfName();
+                }
+
+                function doRegister(event){
+
+                    top.HEURIST4.util.stopEvent(event);
+
+                    if($.isFunction($('body').profile_edit)){
+
+                        if(profile_edit_dialog==null){
+                            profile_edit_dialog = $('#heurist-profile-dialog');
+                            if(profile_edit_dialog.length<1){
+                                profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
+                            }
+                            profile_edit_dialog.profile_edit({'ugr_ID': -1, needclear:false, callback:onRegisterDialogClose  });
+                        }else{
+                            profile_edit_dialog.profile_edit('open');
+                        }
+
+
+                    }else{
+                        $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
+                            if($.isFunction($('body').profile_edit)){
+                                doRegister();
+                            }else{
+                                top.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
+                            }
+                        });
+                    }
+
+                }
+
+            </script>
+            <?php
+        }else{
+            ?>
+            <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+            <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+            <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+            <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
+            <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+            <?php
         }
         ?>
-
-
-        $("#btnRegister").button({label:'Register as User'}).on('click', doRegister);
-        $("#div_register").show();
-        $("#div_create").hide();
-    }
-});
-
-
-var profile_edit_dialog = null;
-
-function onRegisterDialogClose(){
-    var edit_date = profile_edit_dialog.profile_edit('option','edit_data');
-
-    var frm = $("#dbForm");
-    for (var fld_name in edit_date) {
-        if (edit_date.hasOwnProperty(fld_name)) {
-                var fld = frm.find('#'+fld_name);
-                if(fld.length>0){
-                    fld.val( edit_date[fld_name] );
-                }else{
-                    $('<input>', {id:fld_name, type:'hidden', name:fld_name, value:edit_date[fld_name]} ).appendTo(frm);
-                }
-        }
-    }
-
-    $("#div_register").hide();
-    $("#div_create").show();
-    setUserPartOfName();
-}
-
-function doRegister(event){
-
-        top.HEURIST4.util.stopEvent(event);
-
-        if($.isFunction($('body').profile_edit)){
-
-            if(profile_edit_dialog==null){
-                profile_edit_dialog = $('#heurist-profile-dialog');
-                if(profile_edit_dialog.length<1){
-                    profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
-                }
-                profile_edit_dialog.profile_edit({'ugr_ID': -1, needclear:false, callback:onRegisterDialogClose  });
-            }else{
-                profile_edit_dialog.profile_edit('open');
-            }
-
-
-        }else{
-            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
-                if($.isFunction($('body').profile_edit)){
-                    doRegister();
-                }else{
-                    top.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
-                }
-            });
-        }
-
-}
-
-        </script>
-<?php
-    }else{
-?>
-        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../../../h4styles.css">
-        <script type="text/javascript" src="../../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-<?php
-    }
-?>
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
 
         <style>
             .detailType {width:180px !important}
-             h2 {padding:10px}
-             .error {
+            h2 {padding:10px}
+            .error {
                 width:90%;
                 margin:auto;
                 margin-top:10px;
                 padding:10px;
-             }
-             p{
-                 padding:5px;
-             }
-             .lastcol{
-                 display:table-cell;
-                 /*width:50%;
-                 min-width:400px;*/
-             }
-             .tabrow{
+            }
+            p{
+                padding:5px;
+            }
+            .lastcol{
+                display:table-cell;
+                /*width:50%;
+                min-width:400px;*/
+            }
+            .tabrow{
                 /*width:90%;*/
                 display:table-row;
                 padding-left: 38px;
-             }
+            }
 
 
         </style>
@@ -315,9 +315,9 @@ function doRegister(event){
 
                 ddiv.height('40px');
 
-                // request for server side
-                var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
-                var params = "db=<?=HEURIST_DBNAME?>";   // &named=1&excluded=dbid
+                // request for server side on the Heurist master index
+                var baseurl = "<?=HEURIST_INDEX_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+                var params = "db=<?=HEURIST_INDEX_DBNAME?>";   // &named=1&excluded=dbid
                 top.HEURIST.util.getJsonData(baseurl,
                     // fillRegisteredDatabasesTable
                     function(responce){
@@ -338,9 +338,9 @@ function doRegister(event){
                                     +'<div style="min-width:20px;display:table-cell"><input type="radio" name="dbreg" value="'+idx+'" id="rbdb'+idx+'"/></div>'
                                     +'<div style="min-width:40px;display:table-cell"><label for="rbdb'+idx+'">'+responce[idx][0]+'</label></div>'
                                     +'<div style="width:300px;display:table-cell">'
-                                        +'<label for="rbdb'+idx+'" '+(Number(responce[idx][0])<1000?'style="font-weight:bold;"':'')+'>'+responce[idx][2]+'</label></div>'
+                                    +'<label for="rbdb'+idx+'" '+(Number(responce[idx][0])<1000?'style="font-weight:bold;"':'')+'>'+responce[idx][2]+'</label></div>'
                                     +'<div class="truncate lastcol" >'
-                                        +'<label for="rbdb'+idx+'" title="'+responce[idx][3]+'">'+responce[idx][3]+'</label></div></div>';
+                                    +'<label for="rbdb'+idx+'" title="'+responce[idx][3]+'">'+responce[idx][3]+'</label></div></div>';
                                 }
                             }
 
@@ -348,22 +348,23 @@ function doRegister(event){
                             var ddiv = $("#registered_dbs")
                             ddiv.empty();
                             for(var idx in responce){
-                                if(idx){
-                                    ddiv.append(
-                                         $("<div>"+responce[idx][0]+"  "+responce[idx][2]+"</div>")
-                                    );
-                                }
+                            if(idx){
+                            ddiv.append(
+                            $("<div>"+responce[idx][0]+"  "+responce[idx][2]+"</div>")
+                            );
+                            }
                             }
                             */
 
                         }
                         if(s==''){
-                            s = '<p class="error ui-state-error">Cannot access Heurist database index<p>';
+                            s = '<p class="error ui-state-error">Cannot access Heurist databases index at: ';
+                            s = s + baseurl + ' (' + params + ')<p>';
                         }
                         ddiv.innerHTML = s;
                         $(ddiv).height('300px');
                     },
-                params);
+                    params);
             }
 
             function closeDialog(newDBName){
@@ -377,18 +378,18 @@ function doRegister(event){
         </script>
     </head>
 
-        <?php
-            if($blankServer){
+    <?php
+    if($blankServer){
         ?>
-                <body style="padding:45px">
-                    <div class="ui-corner-all ui-widget-content"
-                        style="text-align:left; width:70%; min-height:550px; margin:0px auto; padding: 0.5em;">
-                    <div class="logo" style="background-color:#2e3e50;width:100%;margin-bottom:20px"></div>
-         <?php
-            }else{
-                echo '<body class="popup">';
-                echo (@$_REQUEST['popup']=='1'?'':'<div class="banner"><h2>Create New Database</h2></div>');
-            }
+        <body style="padding:45px">
+            <div class="ui-corner-all ui-widget-content"
+                style="text-align:left; width:70%; min-height:550px; margin:0px auto; padding: 0.5em;">
+            <div class="logo" style="background-color:#2e3e50;width:100%;margin-bottom:20px"></div>
+            <?php
+        }else{
+            echo '<body class="popup">';
+            echo (@$_REQUEST['popup']=='1'?'':'<div class="banner"><h2>Create New Database</h2></div>');
+        }
         ?>
 
         <div id="page-inner" style="overflow:auto;<?php echo (@$_REQUEST['popup']=='1'?'top:10px;':'') ?>">
@@ -417,7 +418,7 @@ function doRegister(event){
                 $list = mysql__getdatabases();
                 $dbname = $_REQUEST['uname']."_".$_REQUEST['dbname'];
                 if(array_key_exists($dbname, $list)){
-                echo "<h3>Database '".$dbname."' already exists. Choose different name</h3>";
+                echo "<h3>Database '".$dbname."' already exists. Please choose different name</h3>";
                 }else{
                 */
 
@@ -437,7 +438,7 @@ function doRegister(event){
             print '<script type="text/javascript">hideProgress();</script>';
 
             if($isDefineNewDatabase){
-?>
+                ?>
 
                 <h2 style="padding:0 0 0 10px;">Creating new database on server</h2>
 
@@ -479,17 +480,17 @@ function doRegister(event){
                             </div>
 
                             <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
-                              background:url(../../../../assets/loading-animation-white.gif) no-repeat center center;">
+                                background:url(../../../assets/loading-animation-white.gif) no-repeat center center;">
                                 <!-- list of registered DATABASEs  -->
                             </div>
 
-                             <div id="nextSteps"
+                            <div id="nextSteps"
                                 style="padding-left: 38px; wdith:620px;display:none">
                                 <div><b>Suggested next steps</b></div>
                                 <div>
-                                <br />After the database is created, we suggest visiting Database &gt; Acquire from databases and Database > Acquire from templates
-                                to download pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
-                                <br />New databases are created on the current server. You will become the owner and administrator of the new database.
+                                    <br />After the database is created, we suggest visiting Database &gt; Acquire from databases and Database > Acquire from templates
+                                    to download pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
+                                    <br />New databases are created on the current server. You will become the owner and administrator of the new database.
                                 </div>
                             </div>
                         </div>
@@ -500,30 +501,34 @@ function doRegister(event){
                                 <!-- user name used as prefix -->
                                 <i>no spaces or punctuation other than underscore</i><br />&nbsp;<br />
                                 <b><?= HEURIST_DB_PREFIX ?>
-                                    <input type="text" maxlength="30" size="6" name="uname" id="uname" onkeypress="{onKeyPress(event)}"
-                                        style="padding-left:3px; font-weight:bold;" value=<?=(is_logged_in()?prepareDbName():'')?> > _  </b>
+                                    <input type="text" maxlength="30" size="6" name="uname" id="uname"
+                                        onkeypress="{onKeyPress(event)}"
+                                        style="padding-left:3px; font-weight:bold;"
+                                        value=<?=(is_logged_in()?prepareDbName():'')?>
+                                        >
+                                </b>
                                 <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
                                 <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
                                 <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
-                                databases so that they are easily identified and appear together in the list of databases.</p>
+                                    databases so that they are easily identified and appear together in the list of databases.</p>
                             </div>
 
                         </div>
                     </form>
 
-                        <div id="div_register" style="display: none;">
-                             <!-- h3 style="margin-left: 38px">Define Database Administrator</h3 -->
-                             <div style="margin-left: 60px; margin-top: 10px;">
-                                <button id="btnRegister" style="font-weight: bold;" />
-                             </div>
-                             <div style="padding-left: 38px; margin-top: 10px; margin-bottom: 20px;">
-                                You are going to create your first database on this server. Please define the user who will
-                                be database owner and administrator
-                            </div>
+                    <div id="div_register" style="display: none;">
+                        <!-- h3 style="margin-left: 38px">Define Database Administrator</h3 -->
+                        <div style="margin-left: 60px; margin-top: 10px;">
+                            <button id="btnRegister" style="font-weight: bold;" />
                         </div>
+                        <div style="padding-left: 38px; margin-top: 10px; margin-bottom: 20px;">
+                            You are going to create your first database on this server. Please define the user who will
+                            be database owner and administrator
+                        </div>
+                    </div>
 
                 </div> <!-- createDBForm -->
-<?php
+                <?php
             }
 
             function arraytolower($item)
@@ -605,7 +610,7 @@ function doRegister(event){
                     $list = mysql__getdatabases();
                     $list = array_map("arraytolower", $list);
                     if(in_array(strtolower($newDBName), $list)){
-                        errorOut ('Error: database "'.$newname.'" already exists. Choose different name');
+                        errorOut ('Warning: database "'.$newname.'" already exists. Please choose a different name');
                         $isDefineNewDatabase = true;
                         return false;
                     }
@@ -616,13 +621,13 @@ function doRegister(event){
                     //debug print $reg_url."</br>";
                     $name = '';
 
-if(true){ //DEBUG: set to false to avoid real database creation
-                    // this is global variable that is used in buildCrosswalks.php
-                    $templateFileName = "NOT DEFINED";
-                    $templateFoldersContent = "NOT DEFINED";
+                    if(true){ //DEBUG: set to false to avoid real database creation
+                        // this is global variable that is used in buildCrosswalks.php
+                        $templateFileName = "NOT DEFINED";
+                        $templateFoldersContent = "NOT DEFINED";
 
 
-                    if($reg_url){
+                        if($reg_url){
 
                             $nouse_proxy = true;
 
@@ -645,8 +650,8 @@ if(true){ //DEBUG: set to false to avoid real database creation
                             }
                             if($resval){
                                 errorOut ("Error importing core definitions from template database for database $newname<br>"
-                                .$resval
-                                .'<br>Please check whether this database is valid; consult Heurist support if needed');
+                                    .$resval
+                                    .'<br>Please check whether this database is valid; consult Heurist support if needed');
                                 return false;
                             }
 
@@ -681,151 +686,151 @@ if(true){ //DEBUG: set to false to avoid real database creation
                                 $res = file_put_contents ( $templateFoldersContent, $data );
                                 if(!$res){
                                     errorOut ('Warning: cannot save content of settting folders from template database into local file. '
-                                    .' Please verify that folder '
-                                    .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
-                                    .' is writeable');
+                                        .' Please verify that folder '
+                                        .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
+                                        .' is writeable');
                                     return false;
                                 }
                             }else{
-                                    errorOut ('Warning: server does not return the content of settting folders from template database. '
+                                errorOut ('Warning: server does not return the content of settting folders from template database. '
                                     .'Please verify that zip extension on remote server is installed and upload folder is writeable');
-                                    return false;
+                                return false;
                             }
 
 
 
 
-                    }else if($isTemplateDB){
-                                errorOut ('Wrong parameters: Template database is not defined.');
-                                return false;
-                    }else{
-                        $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
-                    }
+                        }else if($isTemplateDB){
+                            errorOut ('Wrong parameters: Template database is not defined.');
+                            return false;
+                        }else{
+                            $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
+                        }
 
-                    if(!file_exists($templateFileName)){
-                                errorOut('Error: definitions file '.$templateFileName.' not found');
-                                return false;
-                    }
+                        if(!file_exists($templateFileName)){
+                            errorOut('Error: definitions file '.$templateFileName.' not found');
+                            return false;
+                        }
 
-                    if(!createDatabaseEmpty($newDBName)){
-                        $isDefineNewDatabase = true;
-                        return false;
-                    }
+                        if(!createDatabaseEmpty($newDBName)){
+                            $isDefineNewDatabase = true;
+                            return false;
+                        }
 
-                    // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
-                    // yes, this is badly structured, but it works - if it ain't broke ...
+                        // Run buildCrosswalks to import minimal definitions from coreDefinitions.txt into the new DB
+                        // yes, this is badly structured, but it works - if it ain't broke ...
 
-                    $isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
+                        $isNewDB = true; // flag of context for buildCrosswalks, tells it to use coreDefinitions.txt
 
-                    require_once(dirname(__FILE__).'../../structure/import/buildCrosswalks.php');
+                        require_once(dirname(__FILE__).'/../../structure/import/buildCrosswalks.php');
 
-                    // errorCreatingTables is set to true by buildCrosswalks if an error occurred
-                    if($errorCreatingTables) {
-                        errorOut('Error importing core definitions from '
-                            .($isTemplateDB?"template database":"coreDefinitions.txt")
-                            .' for database '.$newname.'<br>'
-                            .'Please check whether this file or database is valid; consult Heurist support if needed');
-                        cleanupNewDB($newname);
-                        return false;
-                    }
+                        // errorCreatingTables is set to true by buildCrosswalks if an error occurred
+                        if($errorCreatingTables) {
+                            errorOut('Error importing core definitions from '
+                                .($isTemplateDB?"template database":"coreDefinitions.txt")
+                                .' for database '.$newname.'<br>'
+                                .'Please check whether this file or database is valid; consult Heurist support if needed');
+                            cleanupNewDB($newname);
+                            return false;
+                        }
 
-                    // Get and clean information for the user creating the database
-                    if(!is_logged_in()) {
-                        $longName = "";
+                        // Get and clean information for the user creating the database
+                        if(!is_logged_in()) {
+                            $longName = "";
 
-                        $firstName = getUsrField('ugr_FirstName');
-                        $lastName = getUsrField('ugr_LastName');
-                        $eMail = getUsrField('ugr_eMail');
-                        $name = getUsrField('ugr_Name');
-                        $password = getUsrField('ugr_Password');
-                        $department = getUsrField('ugr_Department');
-                        $organisation = getUsrField('ugr_Organisation');
-                        $city = getUsrField('ugr_City');
-                        $state = getUsrField('ugr_State');
-                        $postcode = getUsrField('ugr_Postcode');
-                        $interests = getUsrField('ugr_Interests');
+                            $firstName = getUsrField('ugr_FirstName');
+                            $lastName = getUsrField('ugr_LastName');
+                            $eMail = getUsrField('ugr_eMail');
+                            $name = getUsrField('ugr_Name');
+                            $password = getUsrField('ugr_Password');
+                            $department = getUsrField('ugr_Department');
+                            $organisation = getUsrField('ugr_Organisation');
+                            $city = getUsrField('ugr_City');
+                            $state = getUsrField('ugr_State');
+                            $postcode = getUsrField('ugr_Postcode');
+                            $interests = getUsrField('ugr_Interests');
 
-                        $ugr_IncomingEmailAddresses = getUsrField('ugr_IncomingEmailAddresses');
-                        $ugr_TargetEmailAddresses = getUsrField('ugr_TargetEmailAddresses');
-                        $ugr_URLs = getUsrField('ugr_URLs');
+                            $ugr_IncomingEmailAddresses = getUsrField('ugr_IncomingEmailAddresses');
+                            $ugr_TargetEmailAddresses = getUsrField('ugr_TargetEmailAddresses');
+                            $ugr_URLs = getUsrField('ugr_URLs');
 
-                        $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-                        $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
-                        $password = crypt($password, $salt);
+                            $s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+                            $salt = $s[rand(0, strlen($s)-1)] . $s[rand(0, strlen($s)-1)];
+                            $password = crypt($password, $salt);
 
-                    }else{
-                        mysql_connection_insert(DATABASE);
-                        $query = mysql_query('SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, '
-                         .'ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests, '
-                         .'ugr_IncomingEmailAddresses, ugr_TargetEmailAddresses, ugr_URLs '
-                         .'FROM sysUGrps WHERE ugr_ID='.get_user_id());
-                        $details = mysql_fetch_row($query);
-                        $longName = mysql_real_escape_string($details[0]);
-                        $firstName = mysql_real_escape_string($details[1]);
-                        $lastName = mysql_real_escape_string($details[2]);
-                        $eMail = mysql_real_escape_string($details[3]);
-                        $name = mysql_real_escape_string($details[4]);
-                        $password = mysql_real_escape_string($details[5]);
-                        $department = mysql_real_escape_string($details[6]);
-                        $organisation = mysql_real_escape_string($details[7]);
-                        $city = mysql_real_escape_string($details[8]);
-                        $state = mysql_real_escape_string($details[9]);
-                        $postcode = mysql_real_escape_string($details[10]);
-                        $interests = mysql_real_escape_string($details[11]);
-                        $ugr_IncomingEmailAddresses = mysql_real_escape_string($details[12]);
-                        $ugr_TargetEmailAddresses = mysql_real_escape_string($details[13]);
-                        $ugr_URLs = mysql_real_escape_string($details[14]);
+                        }else{
+                            mysql_connection_insert(DATABASE);
+                            $query = mysql_query('SELECT ugr_LongName, ugr_FirstName, ugr_LastName, ugr_eMail, ugr_Name, ugr_Password, '
+                                .'ugr_Department, ugr_Organisation, ugr_City, ugr_State, ugr_Postcode, ugr_Interests, '
+                                .'ugr_IncomingEmailAddresses, ugr_TargetEmailAddresses, ugr_URLs '
+                                .'FROM sysUGrps WHERE ugr_ID='.get_user_id());
+                            $details = mysql_fetch_row($query);
+                            $longName = mysql_real_escape_string($details[0]);
+                            $firstName = mysql_real_escape_string($details[1]);
+                            $lastName = mysql_real_escape_string($details[2]);
+                            $eMail = mysql_real_escape_string($details[3]);
+                            $name = mysql_real_escape_string($details[4]);
+                            $password = mysql_real_escape_string($details[5]);
+                            $department = mysql_real_escape_string($details[6]);
+                            $organisation = mysql_real_escape_string($details[7]);
+                            $city = mysql_real_escape_string($details[8]);
+                            $state = mysql_real_escape_string($details[9]);
+                            $postcode = mysql_real_escape_string($details[10]);
+                            $interests = mysql_real_escape_string($details[11]);
+                            $ugr_IncomingEmailAddresses = mysql_real_escape_string($details[12]);
+                            $ugr_TargetEmailAddresses = mysql_real_escape_string($details[13]);
+                            $ugr_URLs = mysql_real_escape_string($details[14]);
 
-                    }
+                        }
 
-                    //	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
-                    //	 todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
+                        //	 todo: code location of upload directory into sysIdentification, remove from edit form (should not be changed)
+                        //	 todo: might wish to control ownership rather than leaving it to the O/S, although this works well at present
 
 
-                    createDatabaseFolders($newDBName);
+                        createDatabaseFolders($newDBName);
 
-                    if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
-                        unzip($templateFoldersContent, HEURIST_UPLOAD_ROOT.$newDBName."/");
-                    }
+                        if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
+                            unzip($templateFoldersContent, HEURIST_UPLOAD_ROOT.$newDBName."/");
+                        }
 
-                    // Prepare to write to the newly created database
-                    mysql_connection_insert($newname);
+                        // Prepare to write to the newly created database
+                        mysql_connection_insert($newname);
 
-                    // Make the current user the owner and admin of the new database
-                    mysql_query('UPDATE sysUGrps SET ugr_Enabled="Y", ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
-                        ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
-                        ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
-                        ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
-                        ugr_IncomingEmailAddresses="'.$ugr_IncomingEmailAddresses.'",
-                        ugr_TargetEmailAddresses="'.$ugr_TargetEmailAddresses.'",
-                        ugr_URLs="'.$ugr_URLs.'",
-                        ugr_interests="'.$interests.'" WHERE ugr_ID=2');
-                    // TODO: error check, although this is unlikely to fail
+                        // Make the current user the owner and admin of the new database
+                        mysql_query('UPDATE sysUGrps SET ugr_Enabled="Y", ugr_LongName="'.$longName.'", ugr_FirstName="'.$firstName.'",
+                            ugr_LastName="'.$lastName.'", ugr_eMail="'.$eMail.'", ugr_Name="'.$name.'",
+                            ugr_Password="'.$password.'", ugr_Department="'.$department.'", ugr_Organisation="'.$organisation.'",
+                            ugr_City="'.$city.'", ugr_State="'.$state.'", ugr_Postcode="'.$postcode.'",
+                            ugr_IncomingEmailAddresses="'.$ugr_IncomingEmailAddresses.'",
+                            ugr_TargetEmailAddresses="'.$ugr_TargetEmailAddresses.'",
+                            ugr_URLs="'.$ugr_URLs.'",
+                            ugr_interests="'.$interests.'" WHERE ugr_ID=2');
+                        // TODO: error check, although this is unlikely to fail
 
-} //DEBUG
+                    } //DEBUG
                     ?>
-<div  style='padding:0px 0 10px 0; font-size:larger;'>
-    <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>
-<?php
-                    if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
-?>
-           <p style="padding-left:10px"><strong>Admin username:</strong> <?php echo $name ?></p>
-           <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>
-<?php
-                    }
-?>
-           <p style="padding-left:10px">Click here to log in to your new database:</p>
-           <p style="padding-left:6em"><b><a href="#"
-                 title="" onclick="{closeDialog('<?php echo $newDBName;?>'); return false;}">
-                    <?php echo HEURIST_BASE_URL."?db=".$newDBName; ?>
-                 </a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
+                    <div  style='padding:0px 0 10px 0; font-size:larger;'>
+                        <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>
+                        <?php
+                        if(@$_REQUEST['db']!='' && @$_REQUEST['db']!=null){
+                            ?>
+                            <p style="padding-left:10px"><strong>Admin username:</strong> <?php echo $name ?></p>
+                            <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as account currently logged in to</i>&#62;</p>
+                            <?php
+                        }
+                        ?>
+                        <p style="padding-left:10px">Click here to log in to your new database:</p>
+                        <p style="padding-left:6em"><b><a href="#"
+                                    title="" onclick="{closeDialog('<?php echo $newDBName;?>'); return false;}">
+                                    <?php echo HEURIST_BASE_URL."?db=".$newDBName; ?>
+                                </a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
 
-           <p style="padding-left:6em">
-                    After logging in to your new database, we suggest you import some additional entity types from one of the<br />
-                    curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
-                    using Database &gt; Import Structure or Database &gt; Annotated Templates</p>
-</div>
-<?php
+                        <p style="padding-left:6em">
+                            After logging in to your new database, we suggest you import some additional entity types from one of the<br />
+                            curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
+                            using Database &gt; Import Structure or Database &gt; Annotated Templates</p>
+                    </div>
+                    <?php
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
 
@@ -836,7 +841,7 @@ if(true){ //DEBUG: set to false to avoid real database creation
             if($blankServer){
                 echo '</div>';
             }
-?>
+            ?>
         </div>
     </body>
 </html>

@@ -28,16 +28,15 @@
 */
 
 
-// TODO: Needs a progress bar or counter as it takes soem time to complete
+// TODO: Needs a progress bar or counter as it takes some time to complete
 
-// TO DO: Needs to use global concept nubmers in place of local codes for rectype/fields
+// TODO: Needs to use global concept codes in place of local codes for rectype/fields
 
 set_time_limit(0); //no limit
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/php/getRecordInfoLibrary.php');
+require_once(dirname(__FILE__)."/../records/files/uploadFile.php");
 
 if (! is_logged_in()) {
     header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
@@ -45,15 +44,14 @@ if (! is_logged_in()) {
 }
 
 $_POST["save-mode"] = "none";
-require_once(dirname(__FILE__).'/../../records/edit/saveRecordDetails.php');
+require_once(dirname(__FILE__).'/../records/edit/saveRecordDetails.php');
 
-include_once 'classEmailProcessor.php';
+require_once(dirname(__FILE__). '/classEmailProcessor.php');
 
 
 function returnErrorMsgPage2($msg) {
     $msg2= "<p>&nbsp;<h2>Email configuration error</h2></p><p>".$msg."</p><p><i>Please edit the system configuration (DBAdmin > Database > Advanced Properties) or user configuration ( DBAdmin > Access > Users)</i></p>";
     header("Location: ".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2");
-    // echo "location.replace(\"".HEURIST_BASE_URL."common/html/msgErrorMsg.html?msg=$msg2\");";
 } // returnErrorMsgPage2
 
 
@@ -79,14 +77,6 @@ if(is_admin()){
     $ownership = $sysValues['sys_OwnerGroupID'];
 }
 
-/* hardcoded
-$server   = 'imap.gmail.com';
-$port     = '993';
-$username = 'prime.heurist@gmail.com';
-$password = 'sydarb43';
-$protocol = '';
-*/
-
 // get list of emails addresses - messages from them will be processed
 $res=mysql_query("select ugr_IncomingEmailAddresses from sysUGrps where ugr_ID=".get_user_id());
 if (!$res) returnErrorMsgPage2("Unable to retrieve incoming email address information from user's sysUGrps record, MySQL error: ".mysql_error());
@@ -97,18 +87,13 @@ if($email && $email['ugr_IncomingEmailAddresses'] && $email['ugr_IncomingEmailAd
     }
     $senders = $senders.$email['ugr_IncomingEmailAddresses'];
 }
-//TODO!!!!  remove this before shipping -- hardcoded $senders='osmakov@gmail.com, steven.hayes@sydney.edu.au, stephenawhite@hotmail.com';
 
 $use_ssl = ($protocol!='noprotocol');
 // delete processed mails from mail server
 $delete_processed=true;
 
-// path to attachments directory
-//$attachments_save_path='/home/maxim/mail_attachments/';
-
-// maximum size of attachment, in bytes
+// maximum size of attachment, 8 Mb. in bytes
 $attachment_size_max=8388608; //8*1024*1024;
-
 
 // count of emails processed
 $emails_processed=0;
@@ -116,6 +101,9 @@ $emails_failed=0;
 $emails_processed_ids="";
 
 $oldFileArray = false;
+
+
+
 /**
 * call back function of classEmailProcessor
 *
@@ -130,7 +118,7 @@ function add_email_as_record($email){
     $description=$email->getBody();
     $rec_id = null;
 
-    /* use UNIX-style lines
+    /* TODO: Remove, enable or explain: use UNIX-style lines
     $description=str_replace("\r\n", "\n", $description);
     $description=str_replace("\r", "\n", $description);
     */
@@ -161,9 +149,7 @@ function add_email_as_record($email){
             if (is_numeric($pos) && $pos == 0)
             {
 
-
-                //@todo we have to convert the content of fields as well -
-                // since it may contain terms and references to other rectypes !!!1
+                //@todo we have to also convert content of fields as may contain terms and references to other rectypes !!!
                 $typeid = substr($key, 5);
                 // temporay code to translate existing reports
                 switch ($typeid){
@@ -227,7 +213,6 @@ function add_email_as_record($email){
             exit();
         }
 
-
         //associated files
         if($key_file){
             $files_arr = $arrnew[$key_file];
@@ -244,7 +229,7 @@ function add_email_as_record($email){
         }
 
 
-        /*$bug_descr = $arrnew["type:".DT_BUG_REPORT_DESCRIPTION];
+        /* TODO: Remove, enable or explain: $bug_descr = $arrnew["type:".DT_BUG_REPORT_DESCRIPTION];
         if($bug_descr){
         $bug_descr = str_replace("<br>","\n",$bug_descr);
         $arrnew["type:".DT_BUG_REPORT_DESCRIPTION] = $bug_descr;
@@ -255,6 +240,7 @@ function add_email_as_record($email){
         if ($statusKey){
             $_POST["type:".$statusKey] = array("Received");
         }
+
     }else if(defined('RT_NOTE')){
         // this is from usual email - we will add email rectype
 
@@ -273,6 +259,7 @@ function add_email_as_record($email){
         $_POST["notes"]="";
         $_POST["rec_url"]="";
 
+        // TODO: Ian to explain his logic in using Note rather than Email record type
         /* FOR EMAIL RECORD TYPE  - BUT IAN REQUIRES POST "NOTE" RECORDTYPE
         $_POST["type:160"] = array($email->getSubject());
         $_POST["type:166"] = array(date('Y-m-d H:i:s')); //date sent
@@ -405,6 +392,7 @@ function saveAttachments($files_arr, $email){
 
                 $full_name = HEURIST_FILES_DIR."/ulf_".$file_id."_".$name;   //@todo!!!!
 
+                // TODO: Remove, enable or explain
                 /*if(!is_file($full_name))
                 {
                 $filenameparts=split("[/\\.]", $filename);

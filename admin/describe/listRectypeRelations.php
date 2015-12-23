@@ -26,7 +26,7 @@
     require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 
-    //TODO: why do we need to be logged in?
+    // Although the relationships are part of record strucutre, this also outputs the actual counts, hence login
     if (!is_logged_in()) {
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
         return;

@@ -1,7 +1,8 @@
 <?php
 
 /**
-* dh_legend.php : Generates the legend panel for Digital Harlem
+*
+* dh_legend.php (Digital Harlem): Generates the special legend panel for Digital Harlem
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -20,20 +21,23 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-    require_once(dirname(__FILE__).'/../../php/System.php');
+require_once(dirname(__FILE__).'/../../php/System.php');
 
-    define('PLACE_ICON', 4326);
-    define('PERSON_ROLE', 3306);
-    define('EVENT_TYPE', 3297);
+define('PLACE_ICON', 4326);
+define('PERSON_ROLE', 3306);
+define('EVENT_TYPE', 3297);
 
 
-    $statistics = "";
-    $system = new System();
-    // connect to given database
-    if(!(@$_REQUEST['db'] && $system->init(@$_REQUEST['db']))){
-        exit;
-    }
+$statistics = "";
+$system = new System();
+
+// connect to given database
+if(!(@$_REQUEST['db'] && $system->init(@$_REQUEST['db']))){
+    exit;
+}
+
 /*
+TODO: Remove, enable or explain
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="../../h4styles.css">
@@ -43,53 +47,56 @@
 </html>
 */
 ?>
+
+
 <div id="legendtable">
-<p><b>PLACES</b></p>
-<table>
-  <tbody>
-  <tr>
-    <td class="legend_icon"><img src="<?=HEURIST_TERM_ICON_URL.PLACE_ICON?>.png"></td>
-    <td class="legend_text">Address in DB</td>
-  </tr>
-</tbody></table>
+    <p><b>PLACES</b></p>
+    <table>
+        <tbody>
+            <tr>
+                <td class="legend_icon"><img src="<?=HEURIST_TERM_ICON_URL.PLACE_ICON?>.png"></td>
+                <td class="legend_text">Address in DB</td>
+            </tr>
+        </tbody></table>
 
 
-<p><b>PEOPLE</b></p>
-<table>
-<tbody>
-<?php
-    $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.PERSON_ROLE.' ORDER BY trm_Label';
-    $res = $system->get_mysqli()->query($query);
-    while($row = $res->fetch_assoc()) {
-            $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
-//print $filename.'<br>';
-//print HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png<br>';
-            if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
-print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
-print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
+    <p><b>PEOPLE</b></p>
+    <table>
+        <tbody>
+            <?php
+            $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.PERSON_ROLE.' ORDER BY trm_Label';
+            $res = $system->get_mysqli()->query($query);
+            while($row = $res->fetch_assoc()) {
+                $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
+                // TODO: Remove, enable or explain
+                // print $filename.'<br>';
+                // print HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png<br>';
+                if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
+                    print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
+                    print '<td class="legend_text">'.$row["trm_Label"].'</td></tr>';
 
+                }
             }
-    }
-?>
-</tbody>
-</table>
+            ?>
+        </tbody>
+    </table>
 
-<p><b>EVENTS</b></p>
-<table>
-<tbody>
-<?php
-    $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
-    $res = $system->get_mysqli()->query($query);
-    while($row = $res->fetch_assoc()) {
-            $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
-            if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
-print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
-print '<td class="legend_text">'.$row['trm_Label'].'</td></tr>';
+    <p><b>EVENTS</b></p>
+    <table>
+        <tbody>
+            <?php
+            $query = 'SELECT trm_ID, trm_Label, trm_Code from defTerms where trm_ParentTermID='.EVENT_TYPE.' ORDER BY trm_Label';
+            $res = $system->get_mysqli()->query($query);
+            while($row = $res->fetch_assoc()) {
+                $filename = HEURIST_TERM_ICON_URL.$row['trm_ID'].'.png';
+                if(file_exists(HEURIST_TERM_ICON_DIR.$row['trm_ID'].'.png')){
+                    print '<tr><td class="legend_icon"><img src="'.$filename.'"></td>';
+                    print '<td class="legend_text">'.$row['trm_Label'].'</td></tr>';
 
+                }
             }
-    }
-?>
-</tbody>
-</table>
+            ?>
+        </tbody>
+    </table>
 </div>
 

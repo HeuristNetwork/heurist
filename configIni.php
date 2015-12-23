@@ -69,6 +69,7 @@ $version = "4.1.4"; // sets current program version number, determined by Heuris
 // Vsn 4.1.2 15 Nov 2015
 // Vsn 4.1.1 02 Nov 2015
 // Vsn 4.1.0 15 sep 2015
+
 // 3.2.0 alpha 8th July 2014, beta 21st July 2014
 // 3.3.0 beta 11th Nov 2014
 // 3.3.0 27th Nov 2014 / 3.4.0-beta
@@ -101,13 +102,13 @@ $websiteThumbnailPassword = "";
 // $websiteThumbnailYsize = 300;
 
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
-// the ConfigIni.php in the installation need not be configured. This allows unconfigured ConfigIni.php files to exist
-// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
+// the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
+// to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
+$defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
 
-$defaultFaimsModulesPath = ""; //'/var/www/faims/modules/';
-
+// parent directory configuration file is optional, hence include not require
 if (is_file($parentIni)){
     include_once($parentIni);
 }
