@@ -1,39 +1,39 @@
 <?php
 
-    /**
-    * Standalone mapping page (for development purposes )
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2015 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* Standalone mapping page (for development purposes )
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
-    // System manager
-    require_once(dirname(__FILE__)."/../php/System.php");
-    $system = new System();
+// System manager
+require_once(dirname(__FILE__)."/../php/System.php");
+$system = new System();
 
-    // Database check
-    if(@$_REQUEST['db']){
-        if(! $system->init(@$_REQUEST['db']) ){
-            //@todo - redirect to error page
-            print_r($system->getError(),true);
-            exit();
-        }
-    }else{
-        header('Location: /../php/databases.php');
+// Database check
+if(@$_REQUEST['db']){
+    if(! $system->init(@$_REQUEST['db']) ){
+        //@todo - redirect to error page
+        print_r($system->getError(),true);
         exit();
     }
+}else{
+    header('Location: /../php/databases.php');
+    exit();
+}
 ?>
 
 <html>
@@ -65,7 +65,7 @@
         <script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
         <!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
-        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL; ?>common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>common/js/temporalObjectLibrary.js"></script>
         <script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
         <link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
 
@@ -90,42 +90,42 @@
         <script type="text/javascript" src="../apps/bubble.js"></script>
 
         <!-- minimum set of required set - @todo load it dynamically for standalone case -->
-<!--  remove this comment to run map.php as standalone
+        <!--  remove this comment to run map.php as standalone
         <script type="text/javascript" src="../js/search_minimal.js"></script>
         <script type="text/javascript" src="../js/recordset.js"></script>
         <script type="text/javascript" src="../js/utils.js"></script>
         <script type="text/javascript" src="../js/utils_msg.js"></script>
         <script type="text/javascript" src="../js/hapi.js"></script>
--->
+        -->
 
         <style>
             #helper p, #helper h2, #helper h4{
                 padding:10px;
             }
-            .ui-map-document { background-image: url('../assets/267.png') !important;}
-            .ui-map-layer { background-image: url('../assets/268.png') !important;}
+            .ui-map-document { background-image: url('../assets/mapdocument.png') !important;}
+            .ui-map-layer { background-image: url('../assets/maplayer.png') !important;}
 
             /*
             .vis-item-overflow{
-                position:absolute;
+            position:absolute;
             }
             .vis-item-overflow .vis-item{
-                left:0px;
-                top:0px;
-                height:100%;
-                 border:none;
+            left:0px;
+            top:0px;
+            height:100%;
+            border:none;
             }
             .vis-item-overflow .vis-item-content{
-                position:relative;
-                left: 4px;
+            position:relative;
+            left: 4px;
             }
             .vis-item-overflow .vis-selected{
-                z-index:2;
-                background-color:#bee4f8 !important;
-                border:none;
+            z-index:2;
+            background-color:#bee4f8 !important;
+            border:none;
             }
             .vis-item.vis-selected{
-                background-color:#bee4f8 !important;
+            background-color:#bee4f8 !important;
             }
             */
 
@@ -146,12 +146,13 @@
 
         <!-- Initializing -->
 
-<?php
-    if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
-        //HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'
-        //HEURIST_ICON_URL.RT_MAP_LAYER.'.png'
-    }
-?>
+        <?php
+        if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
+            // TODO: remove this code or explain why it needs to stay
+            //HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'
+            //HEURIST_ICON_URL.RT_MAP_LAYER.'.png'
+        }
+        ?>
 
         <script type="text/javascript">
 
@@ -172,23 +173,23 @@
 
             function loadStyles(){
 
-                    var prefs = top.HAPI4.get_prefs();
-                    if(!top.HR){
-                        //loads localization
-                        top.HR = top.HAPI4.setLocale(prefs['layout_language']);
-                    }
-                    if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
-                        cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
-                            prefs['layout_theme']+'/jquery-ui.css" />');
-                    }else{
-                        //default BASE theme
-                        cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
-                    }
-                    $("head").append(cssLink);
+                var prefs = top.HAPI4.get_prefs();
+                if(!top.HR){
+                    //loads localization
+                    top.HR = top.HAPI4.setLocale(prefs['layout_language']);
+                }
+                if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
+                    cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
+                        prefs['layout_theme']+'/jquery-ui.css" />');
+                }else{
+                    //default BASE theme
+                    cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
+                }
+                $("head").append(cssLink);
 
-                    if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){ //digital harlem - @todo move style to layout
-                         $("head").append($('<link rel="stylesheet" type="text/css" href="../apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
-                    }
+                if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){ //digital harlem - @todo move style to layout
+                    $("head").append($('<link rel="stylesheet" type="text/css" href="../apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
+                }
 
             }
 
@@ -239,18 +240,18 @@
                 layout_opts.south__spacing_open = 7;
                 layout_opts.south__spacing_closed = 7;
                 layout_opts.south__onresize_end = function() {
-                   if(mapping) mapping.setTimelineMinheight();
+                    if(mapping) mapping.setTimelineMinheight();
                 };
 
 
-<?php if(@$_REQUEST['notimeline']){ ?>
-                layout_opts.south__size = 0;
-                layout_opts.south__spacing_open = 0;
-                layout_opts.south__spacing_closed = 0;
-<?php }
-      if(@$_REQUEST['noheader']){ ?>
-                layout_opts.north__size = 0;
-<?php } ?>
+                <?php if(@$_REQUEST['notimeline']){ ?>
+                    layout_opts.south__size = 0;
+                    layout_opts.south__spacing_open = 0;
+                    layout_opts.south__spacing_closed = 0;
+                    <?php }
+                if(@$_REQUEST['noheader']){ ?>
+                    layout_opts.north__size = 0;
+                    <?php } ?>
 
 
                 var mylayout = $('#mapping').layout(layout_opts);
@@ -288,26 +289,26 @@
 
                 //init popup for timeline  ART14072015
                 $( document ).bubble({
-                            items: ".timeline-event-icon" //deprecated since
+                    items: ".timeline-event-icon" //deprecated since
                 });
                 $( document ).bubble({
-                            items: ".vis-item,.vis-item-overflow"
+                    items: ".vis-item,.vis-item-overflow"
                 });
 
                 $( window ).resize(function() {
-                            var w = $(this).width();
-                            if (w < 400) {
-                                $("#map-doc-select").hide();
-                                $("#map-doc-select-lbl").hide();
-                            }else{
-                                $("#map-doc-select").show();
-                                if (w < 490) {
-                                    $("#map-doc-select-lbl").hide();
-                                }else{
-                                    $("#map-doc-select-lbl").show();
-                                }
-                            }
-                    });
+                    var w = $(this).width();
+                    if (w < 400) {
+                        $("#map-doc-select").hide();
+                        $("#map-doc-select-lbl").hide();
+                    }else{
+                        $("#map-doc-select").show();
+                        if (w < 490) {
+                            $("#map-doc-select-lbl").hide();
+                        }else{
+                            $("#map-doc-select-lbl").show();
+                        }
+                    }
+                });
 
                 $( "#timeline" ).mousedown(function(){
                     $( document ).bubble("closeAll");
@@ -319,26 +320,26 @@
                 $("#btnExportKML").button().click(exportKML);
 
                 $("#btnPrint").button({text:false, icons: {
-                            primary: "ui-icon-print"
-                 }})
-                 .click(mapping.printMap);
+                    primary: "ui-icon-print"
+                }})
+                .click(mapping.printMap);
 
                 $("#btnEmbed").button({text:false, icons: {
-                            primary: "ui-icon-gear"
-                 }})
-                 .click(showEmbedDialog);
+                    primary: "ui-icon-gear"
+                }})
+                .click(showEmbedDialog);
 
-                 $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, function(){
-                        var $helper = $("#helper");
-                        if($helper.dialog( "isOpen" )){
-                            $helper.dialog( "close" );
-                        }else{
-                            $helper.dialog( "open" );
-                        }
-                 });
-                 $( "#helper" ).load('../context_help/mapping_overview.html #content');
-                 //$( "#helper" ).find('p').css('padding','10px');
-                 $( "#helper" ).dialog({
+                $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, function(){
+                    var $helper = $("#helper");
+                    if($helper.dialog( "isOpen" )){
+                        $helper.dialog( "close" );
+                    }else{
+                        $helper.dialog( "open" );
+                    }
+                });
+                $( "#helper" ).load('../context_help/mapping_overview.html #content');
+                //$( "#helper" ).find('p').css('padding','10px');
+                $( "#helper" ).dialog({
                     autoOpen: false, //(top.HAPI4.get_prefs('help_on')=='1'),
                     width:'90%', height:570,
                     position: { my: "right top", at: "right bottom", of: $('#btn_help') },
@@ -352,142 +353,142 @@
                         direction : 'right',
                         duration: 1000
                     }
-                 });
+                });
 
-<?php
-        if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
+                <?php
+                if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
 
-              function checkRt($rt){
-                    global $rtDefines;
-                    if(defined($rt) && constant($rt)>0){
-                        return constant($rt);
-                    }else{
-                        if(@$rtDefines[$rt]){
-
-                            switch ($rt) {
-                                case "RT_TILED_IMAGE_LAYER":
-                                    $msg = "Map image file (tiled)";
-                                    break;
-                                case "RT_KML_LAYER":
-                                    $msg = "KML";
-                                    break;
-                                case "RT_SHP_LAYER":
-                                    $msg = "Shapefile";
-                                    break;
-                                case "RT_GEOTIFF_LAYER":
-                                    $msg = "Map image file (non-tiled)";
-                                    break;
-                                case "RT_QUERY_LAYER":
-                                    $msg = "Mappable query";
-                                    break;
-                                case "RT_MAP_DOCUMENT":
-                                    $msg = "Map Document";
-                                    break;
-                                case "RT_MAP_LAYER":
-                                    $msg = "Heurist Map Layer";
-                                    break;
-                            }
-
-                            return "(".$msg.", Concept ".$rtDefines[$rt][0]."-".$rtDefines[$rt][1].")";
+                    function checkRt($rt){
+                        global $rtDefines;
+                        if(defined($rt) && constant($rt)>0){
+                            return constant($rt);
                         }else{
-                            return "";
+                            if(@$rtDefines[$rt]){
+
+                                switch ($rt) {
+                                    case "RT_TILED_IMAGE_LAYER":
+                                        $msg = "Map image file (tiled)";
+                                        break;
+                                    case "RT_KML_LAYER":
+                                        $msg = "KML";
+                                        break;
+                                    case "RT_SHP_LAYER":
+                                        $msg = "Shapefile";
+                                        break;
+                                    case "RT_GEOTIFF_LAYER":
+                                        $msg = "Map image file (non-tiled)";
+                                        break;
+                                    case "RT_QUERY_LAYER":
+                                        $msg = "Mappable query";
+                                        break;
+                                    case "RT_MAP_DOCUMENT":
+                                        $msg = "Map Document";
+                                        break;
+                                    case "RT_MAP_LAYER":
+                                        $msg = "Heurist Map Layer";
+                                        break;
+                                }
+
+                                return "(".$msg.", Concept ".$rtDefines[$rt][0]."-".$rtDefines[$rt][1].")";
+                            }else{
+                                return "";
+                            }
                         }
                     }
-              }
 
 
-                $items = '';
-                $items = $items.'<li rtid="'.checkRt('RT_KML_LAYER').'"><a href="#">KML</a></li>';
-                $items = $items.'<li rtid="'.checkRt('RT_SHP_LAYER').'"><a href="#">SHP</a></li>';
-                $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_LAYER').'"><a href="#">GeoTiff</a></li>';
-                $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_LAYER').'"><a href="#">Tiled image</a></li>';
-                $items = $items.'<li rtid="'.checkRt('RT_QUERY_LAYER').'"><a href="#">Query layer</a></li>';
-?>
-                $("#btnMapNew").button({ text:false,
-                         icons: {primary: "ui-map-document" }})
-                        .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
-                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
-                $("#btnMapEdit").button({text:false,
+                    $items = '';
+                    $items = $items.'<li rtid="'.checkRt('RT_KML_LAYER').'"><a href="#">KML</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_SHP_LAYER').'"><a href="#">SHP</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_LAYER').'"><a href="#">GeoTiff</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_LAYER').'"><a href="#">Tiled image</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_QUERY_LAYER').'"><a href="#">Query layer</a></li>';
+                    ?>
+                    $("#btnMapNew").button({ text:false,
+                        icons: {primary: "ui-map-document" }})
+                    .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
+                    .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
+                    $("#btnMapEdit").button({text:false,
                         icons: {primary: "ui-icon-pencil"}})
-                        .click(mapEdit);
-                $("#btnMapLayer").button({text:false,
+                    .click(mapEdit);
+                    $("#btnMapLayer").button({text:false,
                         icons: {primary: "ui-map-layer"}})
-                        .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
-                        .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
+                    .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
+                    .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
 
-                menu_datasets = $('<ul><?=$items?></ul>')
+                    menu_datasets = $('<ul><?=$items?></ul>')
                     .addClass('menu-or-popup')
                     .css('position','absolute')
                     .appendTo( $('body') )
                     .menu({
                         select: function( event, ui ) {
-                        var mode = ui.item.attr('rtid');
-                        addNewRecord(mode);
+                            var mode = ui.item.attr('rtid');
+                            addNewRecord(mode);
                     }})
-                .hide();
+                    .hide();
 
-                btn_datasets = $("#btnMapDataSource").button({text:false,
+                    btn_datasets = $("#btnMapDataSource").button({text:false,
                         icons: {
                             primary: "ui-icon-bars",  //icon-reorder
                             secondary: "ui-icon-triangle-1-s"}});
 
-                btn_datasets.click( function(e) {
-                                $('.menu-or-popup').hide(); //hide other
-                                var $menu_layers = $( menu_datasets )
-                                .show()
-                                .position({my: "right top", at: "right bottom", of: btn_datasets });
-                                $( document ).one( "click", function() { $menu_layers.hide(); });
-                                return false;
-                                });
+                    btn_datasets.click( function(e) {
+                        $('.menu-or-popup').hide(); //hide other
+                        var $menu_layers = $( menu_datasets )
+                        .show()
+                        .position({my: "right top", at: "right bottom", of: btn_datasets });
+                        $( document ).one( "click", function() { $menu_layers.hide(); });
+                        return false;
+                    });
 
 
-                 $("#mapToolbar").buttonset();
-<?php } else { ?>
-                 $("#mapSelector").hide();
-                 $("#mapToolbar").hide();
-<?php
-     }
-?>
+                    $("#mapToolbar").buttonset();
+                    <?php } else { ?>
+                    $("#mapSelector").hide();
+                    $("#mapToolbar").hide();
+                    <?php
+                }
+                ?>
 
 
             }
 
             function showEmbedDialog(){
 
-                 var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
-                 query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
-                 var url = top.HAPI4.basePathV4+'page/map.php' + query;
+                var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+                query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
+                var url = top.HAPI4.basePathV4+'page/map.php' + query;
 
-                 //document.getElementById("linkTimeline").href = url;
+                //document.getElementById("linkTimeline").href = url;
 
-                 document.getElementById("code-textbox").value = '<iframe src="' + url +
-                                             '" width="800" height="650" frameborder="0"></iframe>';
+                document.getElementById("code-textbox").value = '<iframe src="' + url +
+                '" width="800" height="650" frameborder="0"></iframe>';
 
-                 //document.getElementById("linkKml").href = url_kml;
+                //document.getElementById("linkKml").href = url_kml;
 
-                 var $dlg = $("#embed-dialog");
+                var $dlg = $("#embed-dialog");
 
-                 $dlg.dialog({
+                $dlg.dialog({
                     autoOpen: true,
                     height: 320,
                     width: 700,
                     modal: true,
                     resizable: false,
                     title: top.HR('Publish Map')
-                 });
+                });
             }
 
             function exportKML(){
 
-                 var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
-                 if(query=='?'){
-                     top.HEURIST4.msg.showMsgDlg("Define query and perform search");
-                 }else{
-                     query = query + '&a=1&depth=1&db='+top.HAPI4.database;
-                     var url_kml = top.HAPI4.basePathV3+"export/xml/kml.php" + query;
+                var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
+                if(query=='?'){
+                    top.HEURIST4.msg.showMsgDlg("Define query and perform search");
+                }else{
+                    query = query + '&a=1&depth=1&db='+top.HAPI4.database;
+                    var url_kml = top.HAPI4.basePathV3+"export/xml/kml.php" + query;
 
-                     var win = window.open(url_kml, "_new");
-                 }
+                    var win = window.open(url_kml, "_new");
+                }
             }
 
             function mapEdit(){
@@ -506,7 +507,7 @@
                         "The required record type "+rt+" has not been defined.<br><br>"+
                         "Please download from the H3ReferenceSet database using Database > Import Structure.",
                         {'Show Mapping Help':function() {  $("#helper").dialog( "open" ); var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) },
-                         'Close':function() { var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) }
+                            'Close':function() { var $dlg = top.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" ) }
                         }
                         , "Missing record type"
                     );
@@ -521,6 +522,7 @@
     </head>
 
     <!-- HTML -->
+
     <body>
         <div id="mapping" style="height:100%; width:100%;">
             <!-- Map -->
@@ -530,7 +532,7 @@
             </div>
 
             <!-- Toolbar -->
-            <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px important; z-index:999;">
+            <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px; z-index:999;">
 
                 <span id="map-settingup-message" style="padding-left:1em;line-height:2em">
                     Setting up map ...
@@ -556,12 +558,13 @@
                     <button id="btn_help">Help</button>
                 </div>
 
+                <!-- TODO: Explain, use or remove -->
                 <!-- Menu -->
                 <!--<select id="menu" style="position: fixed; right: 10">
-                    <option value="-1" selected="selected" disabled="disabled">Menu</option>
-                    <option>Google Map/Timeline</option>
-                    <option>Google Earth</option>
-                    <option>Embed Map Code</option>         style="position: fixed; right: 40"
+                <option value="-1" selected="selected" disabled="disabled">Menu</option>
+                <option>Google Map/Timeline</option>
+                <option>Google Earth</option>
+                <option>Embed Map Code</option> style="position: fixed; right: 40"
                 </select>-->
 
                 <!-- Legend overlay -->
@@ -582,7 +585,7 @@
             <p>Embed this Google Map (plus timeline) in your own web page:</p>
             <p style="padding:1em 0 1em 0">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. </p>
             <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
-            <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status. </p>
+            <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status - private records will not appear on the map, which could therefore be empty. </p>
             <p style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>
         </div>
 
@@ -590,10 +593,10 @@
         </div>
 
         <div id="layer-edit-dialog"  style="display:none">
-            <fieldset>
+            <fieldset> <legend>Map layer name</legend>
                 <div>
                     <!-- What would you like to call<br>the new map layer -->
-                    <div class="header"><label for="layer_name">Name of map layer:</label></div>
+                    <div class="header"><label for="layer_name">Name for map layer:</label></div>
                     <input type="text" id="layer_name" class="text ui-widget-content ui-corner-all" />
                 </div>
                 <div>

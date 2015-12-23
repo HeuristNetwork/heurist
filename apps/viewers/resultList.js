@@ -573,10 +573,11 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
         }
 
+        // Show a key icon and popup if there is a password reminder string
         var html_pwdrem = '';
         var pwd = top.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(pwd){
-            html_pwdrem =  '<span class="ui-icon ui-icon-locked rec_pwdrem" style="display: inline-block;"></span>';
+            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display: inline-block;"></span>';
             pwd = ' pwd="'+pwd+'" ';
         }else{
             pwd = '';
