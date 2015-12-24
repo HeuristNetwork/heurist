@@ -256,8 +256,6 @@ if (array_key_exists('mode', $_REQUEST)) {
                             'Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)');
                         menuEntry('','Define mime types','structure/mimetypes/manageMimetypes.php?db='.HEURIST_DBNAME,
                             'Define the relationship between file extension and mime type for uploaded and externally referenced files');
-                        menuEntry('---','XForms (deprecated)','describe/getDBStructureAsXForms.php?db='.HEURIST_DBNAME,
-                            'Save selected record types as XForms definitions - this function is not maintained, please use FAIMS export instead');
                         ?>
                     </ul>
                 </div>
@@ -352,8 +350,6 @@ if (array_key_exists('mode', $_REQUEST)) {
 
                         menuEntry('','Inter-database transfer','../import/direct/getRecordsFromDB.php?db='.HEURIST_DBNAME,
                             'Import records directly from one database to another, mapping record types, fields types and terms');
-                        menuEntry('','Schedule Smarty reports','../export/publish/manageReports.html?db='.HEURIST_DBNAME,
-                            'Add new / modify existing scheduled Smarty reports');
                         ?>
                     </ul>
                 </div>

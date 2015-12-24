@@ -16,6 +16,8 @@
 /**
 * utilsMail.php - main email sending function
 *
+*  TODO: Rationalise: THIS FILE IS DUPLICATED IN /php/common
+*
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>

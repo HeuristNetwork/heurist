@@ -186,6 +186,7 @@ else
         $source_db_name = $_REQUEST["dbName"];
         $source_db_prefix = @$_REQUEST["dbPrefix"] && @$_REQUEST["dbPrefix"] != "" ? @$_REQUEST["dbPrefix"] : null;
 
+
         $regurl = $_REQUEST['dbURL'];
 
         // TODO: Remove this temporary fudge once Heurist_Master_Index updated to remove all references to H3
@@ -196,9 +197,11 @@ else
 
         // This is the correct URL for vsn 3.1.8 and above, March 2014, with a hiccup in latter half of 2015
         // when H3 code moved to a /migrated subdirectory, corrected just before Chrristmas 2015
-        $source_url = $regurl."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+        // TODO: buildcrosswalks.php line 200 - remove 'migrated' once h4 updated to new version
+        $source_url = $regurl."migrated/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
     }
 
+    //TODO: why is the second parameter 60? It's specified as bypasProxy = true
     $data = loadRemoteURLContent($source_url, 60); // get the structure data
 
     // TODO: is this check for the word 'unable' really a good check of failure???
@@ -217,16 +220,15 @@ else
 
 } // getting data from source database for import of definitions to an existing database
 
-
 // Split received data into data sets for one table defined by >>StartData>> and >>EndData>> markers.
 
 $startToken = ">>StartData>>"; // also defined in getDBStructureAsSQL.php
 
 if(!strpos($data, $startToken)){
-    die("<br>The data returned from the selected database <a href=$source_url>$source_url</a> did not correspond with the expected format. ".
+
+    die("<br>The data returned from the structure script on the selected database ( <a href=$source_url>$source_url</a> ) did not correspond with the expected format. ".
         "<p/>Please advise Heurist team. The first few lines returned are shown below :<xmp>".substr($data,1,2000)."</xmp>");
 }
-
 
 $splittedData = explode($startToken, $data);
 $tableNumber =1;

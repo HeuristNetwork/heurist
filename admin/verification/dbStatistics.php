@@ -20,7 +20,7 @@
 */
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../configIni.php');
+    require_once(dirname(__FILE__).'/../../configIni.php');
 
     if(isForAdminOnly("to get information on all databases on this server")){
         return;

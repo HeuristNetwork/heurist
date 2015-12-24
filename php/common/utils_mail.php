@@ -3,6 +3,9 @@
     /**
     * utils_mail.php - main email sending
     *
+    * TODO: Rationalise: THIS FILE IS DUPLICATED IN /common/php
+
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney

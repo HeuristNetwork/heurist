@@ -15,7 +15,7 @@
 */
 
 /**
-* getDatabaseURL.php - requests URL for registered DB by its ID from HeuristScholar.org
+* getDatabaseURL.php - requests URL for registered DB by its ID from Heurist Master Index
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
