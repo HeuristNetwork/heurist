@@ -15,8 +15,8 @@
 */
 
 /**
-* resolver.php
-* acts as a PID redirector to view record  - provides a minimal URL for redirection
+* /redirects/viewRecord.php
+* acts as a PID redirector to viewRecord.php
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -29,14 +29,14 @@
 */
 
 
-require_once(dirname(__FILE__).'/common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
 
-// Input is of the form .../resolver.php?db=mydatabase&recID=3456
+// Input is of the form .../viewRecord.php?db=mydatabase&recID=3456
 
 $id = @$_REQUEST["recID"];
 
 // Redirect to .../records/view/viewRecord.php
-// TODO: change this to an XML feed with parameterisation for a human-readable view
+// TODO: change to use /records/view/renderRecordAsXML.php (XML with parameterisation for human-readable view)
 
 header('Location: '.HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
 
