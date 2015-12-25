@@ -34,8 +34,11 @@ define('SKIP_VERSIONCHECK2', 1);
 
 define('SAVE_URI', 'disabled');
 require_once(dirname(__FILE__).'/applyCredentials.php');
-require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../php/dbUtils.php');
+require_once(HEURIST_DIR.'common/php/dbMySqlWrappers.php');
+require_once(HEURIST_DIR.'common/php/dbUtils.php');
+
+//require_once(dirname(__FILE__).'/../php/dbMySqlWrappers.php');
+//require_once(dirname(__FILE__).'/../php/dbUtils.php');
 //require_once('applyCredentials.php');
 //require_once('../php/dbMySqlWrappers.php');
 session_start();
