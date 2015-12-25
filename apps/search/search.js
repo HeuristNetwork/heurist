@@ -723,7 +723,7 @@ $.widget( "heurist.search", {
                     
                     if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
                         window.history.pushState("object or string", "Title", location.pathname+'?'+ 
-                            top.HEURIST4.util.composeHeuristQuery(data, false) );
+                            top.HEURIST4.util.composeHeuristQueryFromRequest(data, false) );
                     }                    
                     
 

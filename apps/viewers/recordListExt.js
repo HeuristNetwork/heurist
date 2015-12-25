@@ -72,6 +72,7 @@ $.widget( "heurist.recordListExt", {
 
                 if(data){
                     that._query_request = jQuery.extend(true, {}, data);  //keep current query request (clone)
+                    that.option("selection", null);
                     that.option("recordset", null);
                     if(data.q!='')
                         that.loadanimation(true);
@@ -79,11 +80,15 @@ $.widget( "heurist.recordListExt", {
                 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
                 
-                if(data && data.source!=that.element.attr('id') && that.options.is_single_selection) { 
-                   
-                   data = data.selection;
-                   that.option("selection", top.HAPI4.getSelection(data, true) );    
-                   
+                if(that.options.is_single_selection){
+                    if(data){
+                        if(data.source!=that.element.attr('id')) { //selection happened somewhere else
+                            data = data.selection;
+                            that.option("selection", top.HAPI4.getSelection(data, true) );    
+                        }
+                    }else{
+                       that.option("selection",  null);    
+                    }
                 }
             }
             //that._refresh();
@@ -167,7 +172,7 @@ $.widget( "heurist.recordListExt", {
 
             var query_string_all = null,
                 query_string_sel = null,
-                query_string_main = top.HEURIST4.util.composeHeuristQuery( this._query_request, true );
+                query_string_main = top.HEURIST4.util.composeHeuristQueryFromRequest( this._query_request, true );
 
             if (top.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
                   var recIDs_list = this.options.selection;

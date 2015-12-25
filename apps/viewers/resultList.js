@@ -212,7 +212,7 @@ $.widget( "heurist.resultList", {
 
                 }else  if(e.type == top.HAPI4.Event.LOGOUT)
                 {
-                    that._clearAllRecordDivs();
+                    that._clearAllRecordDivs('');
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
@@ -235,16 +235,7 @@ $.widget( "heurist.resultList", {
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                             //new search from outside
                             var new_title = top.HR(data.qname || that.options.title || 'Search Result');
-                            var $header = $(".header"+that.element.attr('id'));
-                            if($header.length>0){
-                                $header.html('<h3>'+new_title+'</h3>');
-                                $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
-                            }
-                            if(that.innerHeader){
-                                that.innerHeader.html('<h3>'+new_title+'</h3>');
-                            }
-
-                            that._clearAllRecordDivs();
+                            that._clearAllRecordDivs(new_title);
 
                             if(!top.HEURIST4.util.isempty(data.q)){
                                 that.loadanimation(true);
@@ -258,7 +249,7 @@ $.widget( "heurist.resultList", {
                         that._query_request = data;  //keep current query request
 
                     }else{ //fake restart
-                            that._clearAllRecordDivs();
+                            that._clearAllRecordDivs('');
                             //that.loadanimation(true);
                     }
 
@@ -423,9 +414,10 @@ $.widget( "heurist.resultList", {
         this.mode_selector.buttonset('refresh');
     },
 
-    _clearAllRecordDivs: function(){
+    _clearAllRecordDivs: function(new_title){
 
         //this.currentRecordset = null;
+        this._lastSelectedIndex = -1;
 
         if(this.div_content){
             var $allrecs = this.div_content.find('.recordDiv');
@@ -433,15 +425,32 @@ $.widget( "heurist.resultList", {
             this.div_content[0].innerHTML = '';//.empty();  //clear
         }
 
+        if(new_title!=null){
+            
+            var $header = $(".header"+this.element.attr('id'));
+            if($header.length>0){
+                $header.html('<h3>'+new_title+'</h3>');
+                $('a[href="#'+this.element.attr('id')+'"]').html(new_title);
+            }
+           
+            if(this.innerHeader) {
+                this.innerHeader.html('<h3>'+new_title+'</h3>');
+            }
+            if(new_title==''){
+                this.triggerSelection();
+            }
+        }
+        
+        
         this._count_of_divs = 0;
     },
 
     //
-    // this is public methid, it is called on search complete (if events are not used)
+    // this is public method, it is called on search complete (if events are not used)
     //
     updateResultSet: function( recordset, request ){
 
-        this._clearAllRecordDivs();
+        this._clearAllRecordDivs(null);
         this.span_pagination.show();
         this._renderPagesNavigator();
         this._renderRecordsIncrementally(recordset);
@@ -1037,7 +1046,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
 
                     if(!recordset){
                         recordset = this.currentRecordset;
-                        this._clearAllRecordDivs();
+                        this._clearAllRecordDivs(null);
                     }
 
                     this._renderPagesNavigator(); //redraw paginator
@@ -1153,7 +1162,11 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
 
                         });
 
+                    }else{
+                        this.triggerSelection();    
                     }
+                    
+                    
 
     }
 

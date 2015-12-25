@@ -161,7 +161,8 @@ $.widget( "heurist.search_faceted", {
                               current_query_request_id = data.id;
                         }else{
                             //search from ourside - close this widget
-                            that.doClose();
+                            that._trigger( "onclose");
+                            //that.doClose();
                         }
                     }
                 

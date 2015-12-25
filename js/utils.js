@@ -88,6 +88,37 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
       }  
     },
 
+    //
+    // from object to query string
+    //
+    composeHeuristQueryFromRequest: function(query_request, encode){
+            var query_string = 'db=' + top.HAPI4.database;
+        
+            if(!top.HEURIST4.util.isnull(query_request)){
+
+                query_string = query_string + '&w='+query_request.w;
+                
+                if(!top.HEURIST4.util.isempty(query_request.q)){
+                    
+                    if($.isArray(query_request.q)){
+                        sq = JSON.stringify(query_request.q);
+                    }else{
+                        sq = query_request.q;
+                    }
+                    
+                    query_string = query_string + '&q=' + (encode?encodeURIComponent(sq):sq);
+                }
+                if(!top.HEURIST4.util.isempty(query_request.rules)){
+                    //@todo simplify rules array - rempove redundant info
+                    query_string = query_string + '&rules=' + 
+                        (encode?encodeURIComponent(query_request.rules):query_request.rules);
+                }
+            }else{
+                query_string = query_string + '&w=all';
+            }        
+            return query_string;        
+    },
+
     composeHeuristQuery2: function(params){
         if(params)
             return top.HEURIST4.util.composeHeuristQuery(params.q, params.w, params.rules, params.notes);
@@ -129,37 +160,6 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return {q:qsearch, w:domain, rules:rules, notes:notes};
     },
     
-    //
-    // from object to query string
-    //
-    composeHeuristQuery: function(query_request, encode){
-            var query_string = 'db=' + top.HAPI4.database;
-        
-            if(!top.HEURIST4.util.isnull(query_request)){
-
-                query_string = query_string + '&w='+query_request.w;
-                
-                if(!top.HEURIST4.util.isempty(query_request.q)){
-                    
-                    if($.isArray(query_request.q)){
-                        sq = JSON.stringify(query_request.q);
-                    }else{
-                        sq = query_request.q;
-                    }
-                    
-                    query_string = query_string + '&q=' + (encode?encodeURIComponent(sq):sq);
-                }
-                if(!top.HEURIST4.util.isempty(query_request.rules)){
-                    //@todo simplify rules array - rempove redundant info
-                    query_string = query_string + '&rules=' + 
-                        (encode?encodeURIComponent(query_request.rules):query_request.rules);
-                }
-            }else{
-                query_string = query_string + '&w=all';
-            }        
-            return query_string;        
-    },
-
     getUrlParameter: function getUrlParameter(name, query){
 
         if(!query){
