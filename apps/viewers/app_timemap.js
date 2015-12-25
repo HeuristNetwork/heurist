@@ -103,10 +103,13 @@ $.widget( "heurist.app_timemap", {
                     // Record selection
                 }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
 
-                    if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
-
-                        //console.log("_doVisualizeSelection");
-                        that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
+                    if(data){
+                        if(data.source!=that.element.attr('id')) { //selection happened somewhere else
+                            //console.log("_doVisualizeSelection");
+                            that._doVisualizeSelection( top.HAPI4.getSelection(data.selection, true) );
+                        }
+                    }else{
+                        that.option("selection",  null);
                     }
                 }else if (e.type == top.HAPI4.Event.ON_SYSTEM_INITED){
 
@@ -120,7 +123,10 @@ $.widget( "heurist.app_timemap", {
         // (this.mapframe).load(that._initmap);
         // init map on frame load
         this._on( this.mapframe, {
-            load: this._refresh   // this._initmap
+                load: function(){
+                    this.recordset_changed = true;
+                    this._refresh();   // this._initmap
+                }
             }
         );
 
