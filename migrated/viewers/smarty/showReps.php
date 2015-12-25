@@ -155,16 +155,25 @@ function executeSmartyTemplate($params){
 	}
 
 	//get name of template file
-	$template_file = (array_key_exists('template',$params)?$params['template']:null);
+	$template_file = @$params['template'];
     
 	//get template body from request (for execution from editor)
 	$template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);
     
-    if($template_file){
+    if(null!=$template_file){
         if(substr($template_file,-4)!=".tpl"){
             $template_file = $template_file.".tpl";
         }
-        $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
+        if(file_exists(HEURIST_SMARTY_TEMPLATES_DIR.$template_file)){
+            $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
+        }else{
+            $error = "<b><font color='#ff0000'>Template file $template_file does noot exist</font></b>";
+            echo $error;
+            if($publishmode>0 && $outputfile!=null){ //save empty output into file
+                save_report_output2($error); 
+            }
+            exit();
+        }
     }else{
         $content = $template_body; 
     }

@@ -157,7 +157,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         }
 
         if(!title) title = 'Info';
-        if (typeof buttons === "function"){
+        if ($.isFunction(buttons)){ //}typeof buttons === "function"){
 
             var titleYes = top.HR('Yes'),
             titleNo = top.HR('No'),
@@ -210,6 +210,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         }
 
         $dlg.dialog(options);
+        //$dlg.dialog('option','buttons',buttons);
 
         return $dlg;
         //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
@@ -378,6 +379,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                             top.HEURIST4.msg.showMsgDlg(txt, null, "Info");
                             return true;
                         }
+                        
                         /*
                         content.confirm = function(txt){
                             var resConfirm = false,
@@ -389,11 +391,11 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                             
                             $confirm_dlg.dialog('option','close',
                                 function(){
-                                    isClose = true;        
+                                    isClosed = true;        
                                 });
                             
                             while(!isClosed){
-                               $.delay(300);
+                               $.wait(1000);
                             }
                             
                             return resConfirm;
@@ -500,3 +502,27 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
 };
 
+/* neither work
+$.wait = function(ms) {
+  
+console.log('wait');
+    ms   = ms || 1000;
+    type = "fx";
+    return this.queue(type, function() {
+        var self = this;
+        setTimeout(function() {
+            $(self).dequeue();
+        }, ms);
+    });
+    
+    //2d 
+    var defer = $.Deferred();
+    setTimeout(function() { defer.resolve(); }, ms);
+    return defer;
+    
+};
+  //third
+  button.delay(10000).queue(function() {
+    $(this).click().dequeue();
+  });
+*/  

@@ -177,7 +177,7 @@ function ShowReps() {
                 visible: false,
                 draggable: false,
                 close: true,
-                header: 'Warning',
+                header: 'Warning!',
                 text: "some text",
                 icon: YAHOO.widget.SimpleDialog.WARNING,
                 buttons: [
@@ -255,6 +255,9 @@ function ShowReps() {
             if(Hul.isnull(template_file)){
                 template_file = _getSelectedTemplate();
             }
+            if(Hul.isnull(template_file)){
+                return;
+            }
 
             squery =  'db='+_db+'&template='+template_file+'&recordset='+JSON.stringify(_currentRecordset);
 
@@ -291,7 +294,7 @@ function ShowReps() {
 
     function _onbeforeunload() {
         if(_iseditor && _keepTemplateValue && _keepTemplateValue!=codeEditor.getValue()){
-            return "Template was changed. Are you sure you wish to exit and lose all modifications?";
+            return "Template was changed. Are you sure you wish to exit and lose all modifications?!!!";
         }
     }
 
@@ -648,9 +651,29 @@ function ShowReps() {
                 ];
                 mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
 
-                mySimpleDialog.setHeader("Warning!");
-                mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");
-                mySimpleDialog.show();
+                if(top.HEURIST4){
+                    top.HEURIST4.msg.showMsgDlg(
+                        'Template was changed. Are you sure you wish to exit and lose all modifications?',
+                       {'Save': function() { 
+                           _operationEditor(2); 
+                           var $dlg = top.HEURIST4.msg.getMsgDlg();
+                           $dlg.dialog( 'close' );},
+                        'Discard': function() { 
+                            _setLayout(true, false); 
+                            var $dlg = top.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( 'close' );},
+                        'Cancel':function() {
+                            var $dlg = top.HEURIST4.msg.getMsgDlg();
+                            $dlg.dialog( 'close' );
+                        }
+                       },
+                    'Warning');
+                    
+                }else{
+                    mySimpleDialog.setHeader("Warning!");
+                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");   
+                    mySimpleDialog.show();
+                }
             }else{
                 _setLayout(true, false);
             }
