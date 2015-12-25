@@ -143,20 +143,21 @@ window.HEURIST.edit = {
 		}
 	}
 };
+    window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
+    var db = (window.HEURIST.parameters["db"] || "");
 
 	if(!top.HEURIST.edit){
 		//for admin part - editRecord.js is not loaded initially
 		top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"records/edit/editRecord.js");		// edit-specific HEURIST functions
 	}
 
+//"../../common/php/loadHAPI.php"
 
 	//
 	// detect what rectype user has to fill and send by email
 	//
-	window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
 
 	var editFrame = document.getElementById("edit-frame");
-	var db = (window.HEURIST.parameters["db"] || "");
 
 	var sparam = window.HEURIST.parameters["rectype"];
 	//var rectype = parseInt(sparam);

@@ -42,7 +42,13 @@
 		<link rel=stylesheet href="../../common/css/edit.css">
 		<link rel=stylesheet href="../../common/css/admin.css">
 
-
+        <script src="../../common/php/loadHAPI.php"></script>
+        <script>
+           if (!top.HAPI && typeof HAPI == "object"){
+                   HAPI.importSymbols(this,top);
+            }
+        </script>
+        
 		<script type="text/javascript">
 
 			function submit_email() {
@@ -171,6 +177,7 @@
 	<body class="popup" width="600" height="400" onLoad="addFileUploadInput()"> <!-- size set at call -->
 		<script src="../../common/js/utilsLoad.js"></script>
 		<script src="../../common/php/displayPreferences.php"></script>
+
 
 		<form method=post enctype="multipart/form-data"
 			onsubmit="return verifyInput();"

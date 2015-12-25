@@ -78,6 +78,7 @@ if($_POST["rectype"] == RT_BUG_REPORT){
 
     $bug_title = $_POST["type:".DT_BUG_REPORT_NAME];
 
+    
     $geekMail->from("bugs@heuristscholar.org", "Bug reporter"); //'noreply@heuristscholar.org', 'Bug Report');
     $geekMail->subject('Bug report or feature request: '.$bug_title[0]);
 
@@ -114,7 +115,7 @@ if($_POST["rectype"] == RT_BUG_REPORT){
     array_push($ext_info, "   Heurist user: ".get_user_name());
     $_POST[$key_extra] = $ext_info;
 }else{
-    $geekMail->from("bugs@heuristscholar.org", "Record sender"); //'noreply@heuristscholar.org', 'Bug Report');
+    $geekMail->from('bugs@heuristscholar.org', "Record sender"); //'noreply@heuristscholar.org', 'Bug Report');
     $geekMail->subject('Record from '.DATABASE);
 }
 

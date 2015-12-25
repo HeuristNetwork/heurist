@@ -901,6 +901,10 @@ if (! top.HEURIST.edit) {
         * @returns {top.HEURIST.edit.inputs.BibDetailFreetextInput}
         */
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
+            
+            if(!top) {
+                window.top = window.self;    
+            }
             // Get Detail Type info
             // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
             // 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
