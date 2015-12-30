@@ -17,7 +17,7 @@
 /**
 * work in progress to output HTML pages using HML published record sets.
 *
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0

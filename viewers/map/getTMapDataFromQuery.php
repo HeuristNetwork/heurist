@@ -18,7 +18,7 @@
 * brief description of file
 *
 * @author      Kim Jackson
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://Sydney.edu.au/Heurist

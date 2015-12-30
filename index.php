@@ -247,7 +247,7 @@ if(@$_REQUEST['db']){
                                         }
                                     }
 
-                                    if(!(top.HAPI4.sysinfo.db_total_records>0)){
+                                    if(!(top.HAPI4.sysinfo.db_total_records>10)){
                                         showTipOfTheDay(false);
                                     }
 

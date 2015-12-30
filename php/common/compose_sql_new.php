@@ -6,7 +6,7 @@
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
+    * @author      Stephen White   
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     3.1      
     */
