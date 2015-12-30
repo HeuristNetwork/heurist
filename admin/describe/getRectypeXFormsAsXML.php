@@ -17,9 +17,9 @@
  * returns database definitions (rectypes, details etc.)
  * as form data ready for use in mobile app - primarily intended for NeCTAR FAIMS projectbrief description of file
  *
- * @author      Stephen White  
+ * @author      Stephen White
  * @copyright   (C) 2005-2015 University of Sydney
- * @link        http://HeuristNetwork.org/about.html
+ * @link        http://HeuristNetwork.org
  * @version     3.1.0
  * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @package     Heurist academic knowledge management system
