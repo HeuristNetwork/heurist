@@ -1,5 +1,7 @@
 <?php
 
+// Note: This function is no-longer used/maintained (Dec 2015) but is retained for potential future use
+
 /*
 * Copyright (C) 2005-2015 University of Sydney
 *
@@ -15,21 +17,21 @@
 */
 
 /**
-* rectypeXFormLibrary contains the functions which translate a heurist rectype definition info an XForm xml document
-* following the ODK Collect xForms guidelines.
+* rectypeXFormLibrary contains the functions which translate a heurist rectype definition into
+* an XForm xml document following the ODK Collect xForms guidelines.
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+*
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
+
 
 /**
  * Function list:
@@ -41,6 +43,8 @@
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
+
+
 /*
 	http://opendatakit.org/help/form-design/xlsform/
 
@@ -63,6 +67,8 @@ require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 	Note: the 'appearance " attribute can be used to launch android intents that can be serviced by
 	arbritrary android applications - it's assumed that the app returns the correct type
 */
+
+
 /**
  * mapping function that maps Heurist base types into XForm ui types.
  * @param    string [$sDetailBasetype] base type of HERUIST detail
@@ -118,6 +124,8 @@ function getXFormTypeFromBaseType($sDetailBasetype) {
  * @uses        HEURIST_BASE_URL
  * @uses        HEURIST_DBNAME
  */
+
+
 function buildform($rt_id) {
 	// mappings and lookups - static so we only retrieve once per service call
 	static $dettypes, $di, $rectypes, $ri, $rid, $terms, $ti, $termLookup, $relnLookup;
@@ -293,6 +301,9 @@ function buildform($rt_id) {
 	$form = "<?xml version=\"1.0\"?>\n" . "<h:html xmlns=\"http://www.w3.org/2002/forms\" xmlns:h=\"http://www.w3.org/1999/xhtml\" " . "xmlns:ev=\"http://www.w3.org/2001/xml-events\" " . "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " . "xmlns:jr=\"http://openrosa.org/javarosa\">\n" . "<h:head>\n" . "<h:title>$rtName</h:title>\n" . "<model>\n" . $model . $bind . "</model>\n" . "</h:head>\n" . $body . "</h:html>";
 	return array($form, $rtName, $rtConceptID, $rtDescription, $report);
 }
+
+
+
 /**
  * creates an xForms select lookup list using the rectitles and heurist record ids
  *
@@ -316,6 +327,9 @@ function createRecordLookup($rtIDs) {
 	}
 	return $ret;
 }
+
+
+
 /**
  * creates an xForm item list for the set of terms passed in.
  *
