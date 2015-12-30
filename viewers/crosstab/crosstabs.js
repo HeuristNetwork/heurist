@@ -17,7 +17,7 @@
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
-* @link        http://sydney.edu.au/heurist
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system

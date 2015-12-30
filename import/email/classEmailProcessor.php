@@ -19,7 +19,7 @@
 * EmailProcessor class, used to process emails by external callback procedure.
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
