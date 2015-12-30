@@ -1,0 +1,106 @@
+<html>
+ <head>
+  <title>Heurist Record Types - HAPI sample application</title>
+
+  <script src=http://hapi.heuristscholar.org/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
+
+  <script>
+	function showRecordTypes() {
+		var table = document.getElementById("record-types");
+		var recordTypes = HRecordTypeManager.getRecordTypes();
+		var recordType, tr, td, a;
+		for (var i in recordTypes) {
+			recordType = recordTypes[i];
+			tr = table.appendChild(document.createElement("tr"));
+			tr.appendChild(document.createElement("td")).appendChild(document.createTextNode(recordType.getID()));
+
+			var a = document.createElement("a");
+				a.href = "#";
+				a.title = "show detail requirements";
+				a.onclick = function() { showDetails(this); return false; };
+				a.appendChild(document.createTextNode(recordType.getName()));
+			tr.appendChild(document.createElement("td")).appendChild(a);
+		}
+	}
+
+	function showDetails(elem) {
+		if (elem.getAttribute("details")) {
+			elem.parentNode.removeChild(elem.parentNode.lastChild);
+			elem.setAttribute("details", null);
+			return;
+		}
+
+		var id = elem.parentNode.previousSibling.textContent;
+
+		var div = document.createElement("div");
+		div.appendChild(document.createElement("b")).appendChild(document.createTextNode("Details:"));
+		var table = div.appendChild(document.createElement("table"));
+		table.cellPadding = "5px";
+		var tr = table.appendChild(document.createElement("tr"));
+		tr.appendChild(document.createElement("th")).appendChild(document.createTextNode("ID"));
+		tr.appendChild(document.createElement("th")).appendChild(document.createTextNode("Name"));
+		tr.appendChild(document.createElement("th")).appendChild(document.createTextNode("Variety"));
+		tr.appendChild(document.createElement("th")).appendChild(document.createTextNode("Requiremence"));
+		tr.appendChild(document.createElement("th")).appendChild(document.createTextNode("Repeatable"));
+
+		var recordType = HRecordTypeManager.getRecordTypeById(id);
+		var detailTypes = HDetailManager.getDetailTypesForRecordType(recordType);
+		for (var i in detailTypes) {
+			var detailType = detailTypes[i];
+			tr = table.appendChild(document.createElement("tr"));
+			tr.appendChild(document.createElement("td")).appendChild(document.createTextNode(detailType.getID()));
+			tr.appendChild(document.createElement("td")).appendChild(document.createTextNode(HDetailManager.getDetailNameForRecordType(recordType, detailType)));
+			var variety = detailType.getVariety();
+			if (variety == "reference") {
+				var constrainedType = detailType.getConstrainedRecordType();
+				variety += " (" + (constrainedType ? constrainedType.getName() : "unconstrained") + ")";
+			}
+			tr.appendChild(document.createElement("td")).appendChild(document.createTextNode(variety));
+			var requiremence;
+			switch (HDetailManager.getDetailRequiremence(recordType, detailType)) {
+			case HRequiremence.REQUIRED:
+				requiremence = "required";
+				break;
+			case HRequiremence.RECOMMENDED:
+				requiremence = "recommended";
+				break;
+			case HRequiremence.OPTIONAL:
+				requiremence = "optional";
+				break;
+			case HRequiremence.FORBIDDEN:
+				requiremence = "forbidden";
+				break;
+			}
+			tr.appendChild(document.createElement("td")).appendChild(document.createTextNode(requiremence));
+			tr.appendChild(document.createElement("td")).appendChild(document.createTextNode(HDetailManager.getDetailRepeatable(recordType, detailType)));
+		}
+
+
+		div.id = "details";
+		div.title = "click to close";
+		div.onclick = function() {
+			div.parentNode.removeChild(div);
+			elem.setAttribute("details", null);
+		};
+		elem.parentNode.appendChild(div);
+		elem.setAttribute("details", true);
+	}
+  </script>
+  <style>
+	body { font-family: sans-serif; }
+	td { vertical-align: top; }
+	#details {
+		cursor: pointer;
+		border: 1px solid black;
+	}
+  </style>
+ </head>
+
+ <body onload="showRecordTypes();">
+  <h3>Heurist record types</h3>
+  <table id=record-types>
+   <tr><th>ID</th><th>Name</th></tr>
+  </table>
+ </body>
+
+</html>
