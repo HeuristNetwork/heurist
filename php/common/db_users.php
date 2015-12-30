@@ -304,7 +304,7 @@
                     }
                     //check capture
                     if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != @$record['ugr_Captcha']) {
-                        $system->addError(HEURIST_UNKNOWN_ERROR, 'Are you bot? Please enter correct value into Challenge field');
+                        $system->addError(HEURIST_UNKNOWN_ERROR, 'Are you a bot? Please enter the correct answer to the challenge question');
                         return false;
                     }
                     if (@$_SESSION["captcha_code"]){

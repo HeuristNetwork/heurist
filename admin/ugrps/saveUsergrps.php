@@ -346,16 +346,16 @@ function updateUserGroup( $type, $colNames, $recID, $groupID, $values ) {
 
         if (($type=='user' && $isInsert && !is_logged_in()) || $isApprovement){
 
-                if(!checkSmtp()){
+            if(!checkSmtp()){
 
-                    if(!is_logged_in()){
-                        $ret = 'Your registration is not possible since registration ';
-                    }else{
-                        $ret = 'Approval is not possible since ';
-                    }
-                    $ret = $ret.'email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation';
-                    return $ret;
+                if(!is_logged_in()){
+                    $ret = 'Your registration is not possible since registration ';
+                }else{
+                    $ret = 'Approval is not possible since ';
                 }
+                $ret = $ret.'email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation';
+                return $ret;
+            }
         }
 
         if($query!=""){
@@ -479,20 +479,12 @@ function sendApprovalEmail($recID, $tmp_password){
             $ugr_eMail = $row['ugr_eMail'];
 
             if($tmp_password!=null){
-                $email_text = "<b>Welcome! A new Heurist account has been created for you</b>";
+                $email_text = "Welcome! A new Heurist account has been created for you";
             }else{
-                $email_text = "<b>Welcome! Your Heurist account registration has been approved</b>";
+                $email_text = "Welcome! Your Heurist account registration has been approved";
             }
 
-            // point them to the home page.
-            // TODO: this is inelegant b/c HEURIST_BASE_URL points to eg. /var/ww/html/HEURIST/h4 not to /var/www/html/HEURIST
-            $email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."/index.html and create yourself a database with the username: " . $ugr_Name;
-
-            //give them a pointer to the search page for the database.
-            // Removed Ian 9/10/15 - you don't want them creating data in the sandpit
-            // $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at ".
-            // HEURIST_BASE_URL."?db=".HEURIST_DBNAME. "\n"."with the username: " . $ugr_Name;
-
+            $email_text .= "\n\nPlease open an existing database with ".HEURIST_BASE_URL." or go to: ".HEURIST_BASE_URL."admin/setup/dbcreate/createNewDB.php to create a new database Your username: " . $ugr_Name;
 
             if($tmp_password!=null){
                 $email_text = $email_text." and password: ".$tmp_password.
@@ -578,6 +570,8 @@ function deleteUser($recID) {
     return $ret;
 }
 
+
+
 /**
 * put your comment there...
 *
@@ -642,6 +636,8 @@ function deleteGroup($recID) {
     return $ret;
 }
 
+
+
 /**
 * check if given user is the last admin in group
 *
@@ -675,6 +671,7 @@ function checkLastAdmin($recID, $groupID){
 
     return null;
 }
+
 
 
 /**
