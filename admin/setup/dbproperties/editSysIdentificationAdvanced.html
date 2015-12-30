@@ -40,7 +40,7 @@
             function showMessage(){
                 var is_processed = top.HEURIST.util.getUrlParameter('was', this.location.search);
                 if(document.getElementById('divErrors').innerHTML=="" && is_processed){
-                    
+
                     if(top.HEURIST4 && top.HEURIST4.msg){
                         top.HEURIST4.msg.showMsgFlash('Database Properties have been saved', 1000);
                     }else{
@@ -97,22 +97,26 @@
                     <div class="input-header-cell">IMAP server for server receiving emails which can be harvested
                     </div>
                     <div class="input-cell">[textbox : sys_eMailImapServer : : size=30]
-                        Port [textbox : sys_eMailImapPort : : size=4] Protocol [textbox : sys_eMailImapProtocol : : size=10]
+                        &nbsp;&nbsp;&nbsp;Port &nbsp;[textbox : sys_eMailImapPort : : size=4]
+                        &nbsp;&nbsp;&nbsp;Protocol &nbsp;[textbox : sys_eMailImapProtocol : : size=10]
                     </div>
                 </div>
                 <div class="input-row">
                     <div class="input-header-cell">IMAP user name / password for incoming mail
                     </div>
-                    <div class="input-cell">[textbox : sys_eMailImapUsername : : size=30] / [textbox : sys_eMailImapPassword : : size=30]
+                    <div class="input-cell">[textbox : sys_eMailImapUsername : : size=30]
+                    &nbsp;&nbsp;/&nbsp;&nbsp; [textbox : sys_eMailImapPassword : : size=30]
                     </div>
                 </div>
                 <div class="input-row">
                     <div class="input-header-cell">Addresses from which incoming mail to be harvested may be received
                     </div>
-                    <div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=100] <br />
+                    <div class="input-cell">[textbox : sys_IncomingEmailAddresses : : size=180] <br />
                         comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored
                     </div>
                 </div>
+
+                <!--  not yet implemented
                 <div class="input-row">
                     <div class="input-header-cell">Potential email addresses to which database records may be sent
                     </div>
@@ -121,8 +125,9 @@
                         <br/>(function not yet implemented)
                     </div>
                 </div>
+                -->
 
-                <h3>Locations</h3>
+                <h3>Synchronisation and Indexing</h3>
 
                 <!--
                 <div class="input-row">
@@ -134,20 +139,24 @@
 
                 <div class="input-row">
                     <div class="input-header-cell">Zotero web library key(s) and IDs for synchronisation</div>
-                    <div class="input-cell">[textbox : sys_SyncDefsWithDB : : size=160] <br />
+                    <div class="input-cell">[textbox : sys_SyncDefsWithDB : : size=180] <br />
                         enter as Title,UserID,GroupID,Key, separated by |
                         eg. Artem's library,1958388,268611,YjUxZzcgq1fhCd9YyxgzzVNX | Ian's library,1836383,274864,DuFHBTyVYVhuIhttUotyqBSjb
                     </div>
                 </div>
 
                 <div class="input-row">
-                    <div class="input-header-cell">File extensions to index</div>
-                    <div class="input-cell">[textbox : sys_MediaExtensions : : size=160] <br />comma separated list
+                    <div class="input-header-cell">File extensions to index (FieldHelper function creates records + metadata)</div>
+                    <div class="input-cell">[textbox : sys_MediaExtensions : : size=180] <br />comma separated list
                     </div>
                 </div>
 
+                <!-- These options should only be enabled for tightly controlled installations as they
+                     allow files to be indexed/written outside the database directory. This may not only
+                     be undesirable, but may cause failure if permissions are not correctly set.
+
                 <div class="input-row">
-                    <div class="input-header-cell">Additional folder(s) containing files for indexing (Picasa/FieldHelper compatibility)
+                    <div class="input-header-cell">Additional folder(s) containing files for indexing (Picasa/FieldHelper compatibility). A fieldhelper.xml file is written in each (sub)directory.
                     </div>
                     <div class="input-cell">[textbox : sys_MediaFolders : : size=160] <br />
                         separated by semi-colon ( ; ), child folders are included automatically</div>
@@ -167,8 +176,10 @@
                     </div>
                 </div>
 
+                -->
 
-                <!-- None of this seems to be referenced anywhere else in the code, I long since forgot what this was even meant to do ...-->
+                <!-- Ian 2015: None of this seems to be referenced anywhere else in the code.
+                               I long since forgot what this was even meant to do ...-->
                 <!-- If included it causes an error when saving
                 <div class="input-row" style="visibility:hidden">
                     <div class="input-header-cell">Default constraints behaviour (advanced)  </div>

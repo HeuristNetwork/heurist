@@ -16,7 +16,7 @@
  * A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
  * it may call another pop-ups: selectTerms and selectRecType
  *
- * @author      Stephen White   <stephen.white@sydney.edu.au>
+ * @author      Stephen White   
  * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
  * @author      Juan Adriaanse
  * @copyright   (C) 2005-2015 University of Sydney

@@ -8,7 +8,7 @@
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
+    * @author      Stephen White   
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

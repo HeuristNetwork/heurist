@@ -24,12 +24,8 @@
 define('ROOTINIT', 1);
 require_once (dirname(__FILE__) . '/../common/connect/applyCredentials.php');
 
-// TODO: something fishy: above path appears wrong, although phpEd navigates from this to the applyCredentials file
-// However /common/etc. and ../common/etc. - both of which are correct paths and work with phpEd - cause the admin menu to hang.
-
 if (!is_logged_in()) {
     header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME . "&last_uri=" . urlencode(HEURIST_CURRENT_URL));
-    //HEURIST_BASE_URL.'admin/adminMenu.php?db='.HEURIST_DBNAME);
     return;
 }
 
@@ -127,15 +123,15 @@ if (array_key_exists('mode', $_REQUEST)) {
         </a>
 
         <!-- Quicklinks section - top right -->
-        <div id="quicklinks" style="top:10px;right:135px;">
+        <div id="quicklinks" style="top:15px;right:50px;">
             <ul id=quicklink-cell>
-                <li id="reportBug" class="button white">
+                <li id="reportBug" class="button white" style="width: auto;">
                     <a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 400,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;"
-                        title="Click to send a bug report or feature request to the Heurist developers" >
-                        &nbsp;Bug report</a></li>
+                        title="Click to send an issue report or feature request to the Heurist developers" >
+                        &nbsp;Report an issue&nbsp;&nbsp;</a></li>
                 <li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
                     title="Click to clear and reload the internal working memory of Heurist" >
-                    Refresh</a></li>
+                    Refresh memory</a></li>
             </ul>
         </div> <!-- end quicklinks -->
 
@@ -184,8 +180,8 @@ if (array_key_exists('mode', $_REQUEST)) {
                                 'Clear all data (records, values, attached files) from the current database. '.
                                 'Database atructure - record types, fields, terms, constraints - is unaffected');
 
-                            menuEntry('---','Registration','setup/dbproperties/registerDB.php?db='.HEURIST_DBNAME,
-                                'Register this database with the Heurist Master Index at HeuristScholar.org - '.
+                            menuEntry('---','Register database','setup/dbproperties/registerDB.php?db='.HEURIST_DBNAME,
+                                'Register this database with the Heurist Master Index - '.
                                 'this makes the structure (but not data) available for import by other databases');
 
                             menuEntry('','Properties','setup/dbproperties/editSysIdentification.php?db='.HEURIST_DBNAME,
@@ -197,7 +193,6 @@ if (array_key_exists('mode', $_REQUEST)) {
                                 'for harvesting email from external servers');
 
                             // June 2014: TODO: need to fix the triggers on record creation and editing for this function to work.
-                            // Warning in function
                             /*
                             menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
                             'Selectively roll back the data in the database to a specific date and time)');
@@ -233,8 +228,8 @@ if (array_key_exists('mode', $_REQUEST)) {
 
                         /* This has not been reliably tested and is better left out. IJ 7/7/15
                         menuEntry('','Relationship constraints','structure/rectypes/editRectypeConstraints.php?db='.HEURIST_DBNAME,
-                            'Define overal constraints on the record types which can be related, including allowable '.
-                            'relationship types between specific record types');
+                        'Define overal constraints on the record types which can be related, including allowable '.
+                        'relationship types between specific record types');
                         */
                         menuEntry('---','Simple fields schema','describe/listRectypeRelations.php?db='.HEURIST_DBNAME.'&action=simple',
                             'Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts');
@@ -326,19 +321,25 @@ if (array_key_exists('mode', $_REQUEST)) {
                             'Attempt to clean up invalid characters in the wysiwyg text fields');
                         ?>
                         <li><a href="<?=HEURIST_BASE_URL?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-                            title="Find bookmarked records which you have not tagged">
-                            Bookmarks without tags</a>
+                            title="Search showing bookmarked records which you have not tagged">
+                            Bookmarks w/o tags
+                            <img src="../common/images/external_link_16x16.gif"
+                                width="12" height="12" border="0" alt="Search showing bookmarks without tags">
+                                </a>
                         </li>
                         <li><a href="<?=HEURIST_BASE_URL?>?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-                            title="Show records with URLs which point to a non-existant or otherwise faulty address">
-                            Verify URLs</a>
+                            title="Show records with URLs which point to a non-existant or otherwise faulty address - this only works if nightly verification is turned ON in Database > Properties">
+                            Broken URLs
+                            <img src="../common/images/external_link_16x16.gif"
+                                width="12" height="12" border="0" alt="Search showing records with broken URLs">
+                                </a>
                         </li>
                         <?php
                         // INSTALLATION AND STATS
                         menuEntry('---','Verify installation','verification/verifyInstallation.php?db='.HEURIST_DBNAME.'',
                             'Verifies that all required JS libraries, other components and directories are in expected locations');
 
-                        /* Removd b/c Lucene installation generated high risk warnings on security check
+                        /* Removed 2014 b/c Lucene installation generated high risk warnings on security check
                         menuEntry('','Rebuild Lucene<br />(work in progress)','verification/rebuildLuceneIndices.php?db='.HEURIST_DBNAME,
                         'Rebuilds the Lucence indices used by Elastic Search, for all record types');
                         */
