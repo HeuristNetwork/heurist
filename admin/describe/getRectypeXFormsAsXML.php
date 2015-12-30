@@ -1,7 +1,5 @@
 <?php
 
-// Note: This function is no-longer used/maintained (Dec 2015) but is retained for potential future use
-
 /*
  * Copyright (C) 2005-2015 University of Sydney
  *
@@ -15,12 +13,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-
 /**
- * getRectypeXFormsAsXML.php
- * returns database definitions (rectypes, details etc.) as Xform data
+ * returns database definitions (rectypes, details etc.)
+ * as form data ready for use in mobile app - primarily intended for NeCTAR FAIMS projectbrief description of file
  *
- * @author      Stephen White
+ * @author      Stephen White  
  * @copyright   (C) 2005-2015 University of Sydney
  * @link        http://HeuristNetwork.org/about.html
  * @version     3.1.0
@@ -30,13 +27,10 @@
  * @uses        HEURIST_DBNAME
  * @uses        HEURIST_BASE_URL
  */
-
-
 require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
 require_once (dirname(__FILE__) . '/../../common/php/dbMySqlWrappers.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 require_once (dirname(__FILE__) . '/../../admin/describe/rectypeXFormLibrary.php');
-
 mysql_connection_select(DATABASE);
 if (mysql_error()) {
 	die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
