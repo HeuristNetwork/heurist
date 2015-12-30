@@ -18,7 +18,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -1562,14 +1562,14 @@ function EditRecStructure() {
                     //alert('It appears that you removed some field(s) that are in use in the title mask. Please edit the title mask to correct it. '+obj);
                     var ele = document.getElementById("dlgWrongTitleMask");
 
-                    
+
                     var $dlg = Hul.popupTinyElement(window, ele,
                                 { "no-titlebar": false, "no-close": false, width: 400, height:160 });
 
                     $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
                             /*if($dlg!=null){
-                                $dlg.dialog('close');  
-                            }*/ 
+                                $dlg.dialog('close');
+                            }*/
                             _doEditTitleMask();
                     });
 
@@ -1578,7 +1578,7 @@ function EditRecStructure() {
             }, squery);
     }
 
-    
+
     //show edit title mask
     function _doEditTitleMask(){
         top.HEURIST.util.closePopupLast();
@@ -1611,10 +1611,10 @@ function EditRecStructure() {
 
         var index_toinsert = _getRecordById(rst_ID).row_index+1;
         _myDataTable.unselectAllRows();
-        
+
         onAddNewDetail(index_toinsert);
     }
-    
+
     //Ian decided to remove this feature -however it may be helpful in another place
     var onMenuClick = function (eventName, eventArgs, subscriptionArg){
             var clonearr = top.HEURIST.util.cloneObj(subscriptionArg);
@@ -1959,7 +1959,7 @@ function EditRecStructure() {
 		onAddSeparator: function(index_toinsert){
 			_onAddSeparator(index_toinsert);
 		},
-        
+
         onAddFieldAtIndex: function(e){
            _onAddFieldAtIndex(e);
         },
@@ -2026,7 +2026,7 @@ function onAddNewDetail(index_toinsert){
 		"admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
 		{	"close-on-blur": false,
 			"no-resize": false,
-            title: 'Add Field',
+            title: 'Add Field or Section Header',
 			height: dim.h*0.9,
 			width: 700, //back to fixed width    dim.w*0.5,
 

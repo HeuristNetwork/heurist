@@ -75,14 +75,15 @@ $infoEmail - redirect info@ emails to this address
 
 /*
 HEURIST_DOMAIN       - host (domain name) WITHOUT port
-HEURIST_SERVER_NAME  - host (domain name) with port  eg. heuristscholar.org:80
-HEURIST_SERVER_URL   - with protocol  http://heuristscholar.org
+HEURIST_SERVER_NAME  - host (domain name) with port  eg. heurist.sydney.edu.au:80
+HEURIST_SERVER_URL   - with protocol  http://heurist.sydney.edu.au
 HEURIST_CURRENT_URL  - current url
 
-//toremove HEURIST_SERVER_ROOT_DIR - server root         eg. /var/www/html/             @todo - remove
+// @todo - remove:   HEURIST_SERVER_ROOT_DIR - server root eg. /var/www/html/
+
 HEURIST_DIR          - full path to heurist    /var/www/html/h4/
 
-HEURIST_BASE_URL     - full url     http://heuristscholar.org:80/h4/        @todo - rename to HEURIST_URL
+HEURIST_BASE_URL     - full url     http://heuristscholar.org:80/h4/  @todo - rename to HEURIST_URL
 HEURIST_SITE_PATH    - /h4/       (used only in this file to make other constants)
 
 HEURIST_UPLOAD_ROOT      - path to root filestore folder
@@ -159,7 +160,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 // This is only used in this file to set other values
 define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // eg. /h4/
 
-define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heuristscholar.org/h4/
+define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heurist.sydney.edu.au/h4/
 
 $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
 if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
