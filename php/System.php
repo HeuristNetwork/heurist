@@ -326,7 +326,7 @@ class System {
         $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
         if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 
-        $topDirs = "admin|applications|apps|assets|common|context_help|export|ext|external|hapi|help|import|js|page|php|records|search|viewers";
+        $topDirs = "admin|applications|apps|assets|common|context_help|export|ext|external|hapi|help|import|js|page|php|records|redirects|search|viewers"; // Upddate in 3 places if changed
         $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 
         if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
