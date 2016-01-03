@@ -88,12 +88,12 @@
 
     }else {
 
-        //temorary!!!
-        //verify than recLinks does not exist
+        // TODO: temporary (for backward compatibility) should be part of all databases
+        // Check whether recLinks (relationships cache) table exists and create if not
         $isok = true;
         $value = mysql__select_value($system->get_mysqli(), "SHOW TABLES LIKE 'recLinks'");
         if($value==null || $value==""){
-            include(dirname(__FILE__).'/../common/utils_db_script.php');
+            include(dirname(__FILE__).'/../common/utils_db_load_script.php'); // used to execute SQL script
 
             if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../common/sqlCreateRecLinks.sql")){
                 $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");

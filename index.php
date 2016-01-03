@@ -127,7 +127,10 @@ if(@$_REQUEST['db']){
 
         <!-- DOCUMENTATION TODO: What are these, why are they commented out -->
         <!-- these widgets are loaded dynamically, but for debug they should be loaded explicitely
+
+        @TODO: FOLLOWING FILE IS NOT IN THIS LOCATION
         <script type="text/javascript" src="apps/profile/profile.js"></script>
+
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/topmenu/mainMenu.js"></script>

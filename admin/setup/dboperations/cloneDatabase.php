@@ -25,7 +25,7 @@
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
+require_once(dirname(__FILE__).'/../../../php/common/utils_db_load_script.php');
 
 if(isForAdminOnly("to clone a database")){
     return;

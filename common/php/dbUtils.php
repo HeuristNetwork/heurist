@@ -32,10 +32,10 @@
     * - db_drop()
     * - db_dump()
     * - db_clean()
-    * - db_script()  - see dbScript.php
+    * - db_script()  - see utils_db_load_script.php
     */
 
-    require_once(dirname(__FILE__).'/dbScript.php');
+    require_once(dirname(__FILE__).'../../php/common/utils_db_load_script.php');
 
     function server_connect($verbose = true){
 

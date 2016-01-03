@@ -24,7 +24,7 @@
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
+    require_once(dirname(__FILE__).'/../../../php/common/utils_db_load_script.php');
 
     /*if(isForAdminOnly("to upgrade database structure")){
     return;

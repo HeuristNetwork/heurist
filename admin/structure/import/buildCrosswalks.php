@@ -52,7 +52,7 @@
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
+require_once(dirname(__FILE__).'/../../../php/common/utils_db_load_script.php');
 
 
 // ------Administrative stuff ------------------------------------------------------------------------------------

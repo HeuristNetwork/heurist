@@ -1,6 +1,7 @@
 <?php
 /**
-* filename: Executes SQL script
+* utils_db_load_script.php: Executes SQL script. Heavily modified from bigdump.php (ozerov.de/bigdump)
+*                           allowing processing of very large MySQL dump files
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
