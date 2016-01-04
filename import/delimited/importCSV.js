@@ -112,7 +112,7 @@ function init() {
         if(rectype){
             $('#btnSkipMatch').removeAttr("disabled");
             $('#btnSkipMatch').css('color','#666');
-            
+
             $("#div_idfield").show();
             $('input[id^="cbsa_dt_"]').parent().show();
             $('input[id^="cbsa_keyfield_"]').parent().show();
@@ -546,7 +546,7 @@ function onFtSelect2(ind){
             isok  = isok && ($('select[id="'+this.id.substr(2)+'"]').val()!="");
         });
     }
-    
+
     if(isok){
         $('#btnStartMatch').removeAttr("disabled"); //.show();
         $('#btnStartMatch').css('color','#666');
@@ -666,9 +666,9 @@ function showRecords(divname){
             currDialog.dialog('close');
         }
     }else{
-        
+
         var $dlg = $('div[id="main_'+divname+'"]');
-                        
+
         $dlg.dialog({
                             autoOpen: false,
                             height: 550,
@@ -678,12 +678,12 @@ function showRecords(divname){
                             draggable: false,
                             title: 'Import delimited'
                     });
-        
-        
+
+
         $dlg.dialog('open');
         currDialog = $dlg;
     }
-    
+
     //$('div[id^="main_"]').hide();
     //$('div[id="main_'+divname+'"]').show();
 
@@ -787,7 +787,7 @@ function verifySubmit()
                 }
 
             }else{
-                alert("To search/match records you have to select at least one key field in import data");
+                alert("To search/match records you must select at least one key field in import data");
             }
 
 
@@ -798,7 +798,7 @@ function verifySubmit()
             if(select_fieldtype.length>0){
                 return true;
             }else{
-                alert("You have to map import data to record's fields. Select at least one field type!");
+                alert("You need to map import data to record's fields. Please select at least one field type.");
             }
         }
 

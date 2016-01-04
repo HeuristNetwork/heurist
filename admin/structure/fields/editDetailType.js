@@ -707,7 +707,7 @@ function DetailTypeEditor() {
             var dd = Dom.get("dty_JsonTermIDTree").value;
             if( dd==="" || dd==="{}" ) {
                 if(isShowWarn) {
-                    top.HEURIST.util.showError("For an enum field types you msut select at least one term. Please click 'Change vocabulary'");
+                    top.HEURIST.util.showError("For a terms list field you must select at least one term. Please click 'Change vocabulary'");
                 }
                 _updatedFields = [];
                 return "mandatory";
@@ -716,7 +716,7 @@ function DetailTypeEditor() {
         var val = Dom.get("dty_Type").value;
         if(Hul.isempty(val)){
             if(isShowWarn) {
-                top.HEURIST.util.showError("Data Type is madatory field");
+                top.HEURIST.util.showError("Data Type is mandatory field");
             }
             Dom.get("dty_Type").focus();
             _updatedFields = [];

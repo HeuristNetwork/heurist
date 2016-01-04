@@ -8,10 +8,10 @@
 ---------------------------------------------------------------------
 
 
-Directory:	/saved_searches
+Directory:	/search/saved
 
-Overview:	Actionbson saved searches - legacy from H3
+Overview:	Actions on saved searches - legacy from H3
 
-Notes:		manageCollection.php is the only function from this directory stull used by h4
+Notes:		manageCollection.php is the only function from this directory still used by h4
 
 Updated: 	16 Sep 2015
