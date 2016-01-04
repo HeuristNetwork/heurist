@@ -1527,7 +1527,7 @@ DROP TABLE IF EXISTS `sysIdentification`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sysIdentification` (
   `sys_ID` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Only 1 record should exist in this table',
-  `sys_dbRegisteredID` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Allocated by HeuristScholar.org, 0 indicates not yet registered',
+  `sys_dbRegisteredID` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Allocated by Heurist master index, 0 indicates not yet registered',
   `sys_dbVersion` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Major version for the database structure',
   `sys_dbSubVersion` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Sub version',
   `sys_dbSubSubVersion` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Sub-sub version',
