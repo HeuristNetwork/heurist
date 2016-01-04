@@ -24,9 +24,10 @@ $.widget( "heurist.editing_input", {
     options: {
         varid:null,
         recID: null,
-        rectypeID: null,
-        dtID: null,
+        rectypeID: null, //field description is taken either from rectypes[rectypeID] or from dtFields
         rectypes: null,
+        dtFields: null, 
+        dtID: null,
         values: null,
         readonly: false,
         title: '',  //label (overwrite Display label from record structure)
@@ -37,8 +38,16 @@ $.widget( "heurist.editing_input", {
     // the constructor
     _create: function() {
 
-        if (!(this.options.rectypeID && this.options.rectypes &&
-            this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])){
+        //field description is taken either from rectypes[rectypeID] or from dtFields
+        if(this.options.dtFields==null){
+            if (!(this.options.rectypeID && this.options.rectypes &&
+                this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])){
+                    
+                    this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+                }
+        }
+                
+        if(this.options.dtFields==null){ //field description is not defined
             return;
         }
 
@@ -159,13 +168,17 @@ $.widget( "heurist.editing_input", {
     */
     f: function(fieldname){
         //get field defintion
-        if(isNaN(Number(this.options.dtID))){
-            return this.options['dtFields'][fieldname];
+        if (isNaN(Number(this.options.dtID)) || top.HEURIST4.util.isnull(this.options['dtFields'][fieldname])){
+            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
+            return this.options['dtFields'][fi[fieldname]];
         }else{
+            return this.options['dtFields'][fieldname];
+        }
+        /*}else{
             var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
             return rfrs[fi[fieldname]];
-        }
+        }*/
     },
 
     /**
@@ -234,12 +247,12 @@ $.widget( "heurist.editing_input", {
 
             }else if(detailType=="resource"){
 
-                if(!this.rec_search_dialog){
+                /*if(!this.rec_search_dialog){
                     this.rec_search_dialog = this.element.rec_search({
                         isdialog: true,
                         search_domain: 'a'
                     });
-                }
+                }*/
 
 
                 var $btn_rec_search_dialog = $( "<button>", {title: "Click to search resource record"})
@@ -249,7 +262,23 @@ $.widget( "heurist.editing_input", {
 
                 function __show_select_dialog(event){
                     event.preventDefault();
-
+                    
+                    var url = top.HAPI4.basePathV4 + 
+                            'page/recordSelect.php?db='+top.HAPI4.database+
+                            '&rectype_set='+that.f('rst_PtrFilteredIDs');
+                    top.HEURIST4.msg.showDialog(url, {height:600, width:600, 
+                            title: top.HR('Select linked record'), 
+                            class:'ui-heurist-bg-light',
+                            callback: function(recordset){
+                                if(recordset && $.isFunction(recordset.isA) && recordset.isA("hRecordSet") ){
+                                    var record = recordset.getFirstRecord();
+                                    var name = recordset.fld(record,'rec_Title');
+                                    $input.val(name);
+                                    that.options.values[idx] = recordset.fld(record,'rec_ID');
+                                }
+                            }           
+                    } );
+                    /*        
                     that.rec_search_dialog.rec_search("option",{
                         //retuns selected recrod
                         rectype_set: that.f('rst_PtrFilteredIDs'),
@@ -265,6 +294,7 @@ $.widget( "heurist.editing_input", {
                     });
 
                     that.rec_search_dialog.rec_search( "show" );
+                    */
                 };
 
                 this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
