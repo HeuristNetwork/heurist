@@ -2166,6 +2166,17 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
 
     },
+    
+    getRectypeName: function(recTypeID)
+    {
+        if(recTypeID && top.HEURIST.rectypes && top.HEURIST.rectypes.names[recTypeID]){
+            return top.HEURIST.rectypes.names[recTypeID];
+        }else{
+            return "";
+        }
+
+    },
+    
 /**
 * TODO: Artem to doc where this comes from
 *

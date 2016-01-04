@@ -38,17 +38,28 @@
 
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <link rel=stylesheet href="../../common/css/global.css">
+  
+  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+  <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+  
 </head>
 
-<body width="760" height="560" style="overflow:hidden; background:#ffffff; padding 0px !important;">
+<body width="760" height="560" style="overflow:hidden; background:#ffffff; padding:0px !important;">
 
-  <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-  <script type="text/javascript" src="../../common/js/temporalObjectLibrary.js"></script>
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/js/temporalObjectLibrary.js"></script>
+        <script src="../../common/php/getMagicNumbers.php"></script> <!-- xxx -->
+        <script src="../../records/edit/relationshipsObjectLibrary.js"></script>
+        <script src="../../common/php/loadUserInfo.php"></script> <!-- xxx -->
 
-  <script type="text/javascript" src="../../records/edit/relationshipsObjectLibrary.js"></script>
-  <!-- script type="text/javascript" src="../../records/edit/inputUrlInclude.js"></script -->
-  <script src="../../common/php/displayPreferences.php"></script>
+        <script src="../../records/edit/digitizer/mapViewer.js"></script>
 
+        <script src="../../common/php/loadCommonInfo.php"></script> <!-- xxx -->
+        <script src="../../common/php/displayPreferences.php"></script>
+
+        <script src="../../records/edit/editRecord.js"></script>  
+  
+  
 <div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
 <div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record">
@@ -187,6 +198,20 @@ if (! rectype) {  //rectype is not defined - select from dropdown
 }
 
 </script>
+
+<div id=notes-container></div>
+
+<div>
+
+    <div id="popup-saved" class="popup-message" style="display: none">
+        <b>Record saved</b>
+    </div>
+    <div id="popup-nothingchanged" class="popup-message" style="display: none">
+        <b>Nothing changed</b>
+    </div>
+
+</div>
+
 <script src="../disambig/similarRecordsPopup.js"></script>
 <script>
 function popupDisambiguation(matches) {

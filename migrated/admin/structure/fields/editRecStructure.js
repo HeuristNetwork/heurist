@@ -1073,7 +1073,7 @@ function EditRecStructure() {
 
 			//hide width for some field types
 			if(fieldnames[k] === "rst_DisplayWidth" && _isNoWidth(rst_type) ){
-					edt.parentNode.parentNode.style.display = "none";
+					edt.parentNode.style.display = "none";
 			}
 
 			}

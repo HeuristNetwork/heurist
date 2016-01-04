@@ -512,7 +512,8 @@ function ImageAnnotation(imageviewer, _recID) {
 					window.open(top.HEURIST.baseURL_V3+"/records/edit/editRecord.html?recID="+marker[6]+"&db="+_db,"_blank");
 			}else if(_recordID>0){
 
-				var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(rectype);
+                //was  getRectypeIconAndName
+				var title = "Add new record "+top.HEURIST.util.getRectypeName(rectype);
 
 				top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?rectype='+
 							rectype+ //top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']+

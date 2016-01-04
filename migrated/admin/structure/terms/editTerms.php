@@ -127,7 +127,10 @@
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
                 <div id="formEditor" style="display:none;width:500px;">
-                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;">Edit selected term / vocabulary</h3>
+                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block">Edit selected term / vocabulary</h3>
+                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+                                <b>term saved</b>
+                            </div>
 
                     <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
 
@@ -137,9 +140,6 @@
                             <input id="edParentId" type="hidden"/>
                             &nbsp;&nbsp;&nbsp;
                             <div id="div_ConceptID" style="display: inline-block;">
-                            </div>
-                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                                <b>term saved</b>
                             </div>
                         </div>
 
@@ -195,7 +195,7 @@
                             <label for="cbInverseTermItself">Term is inverse of another term</label>
                         </div>
                         <div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term</label>
-                            <input id="edInverseTerm" readonly="readonly" style="width:250px"/>
+                            <input id="edInverseTerm" readonly="readonly" style="width:250px;background-color:#DDD;"/>
                             <input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
@@ -249,10 +249,10 @@
 
 
                 <!-- search for and set inverse terms, only for relationship types -->
-                <div id="formInverse" style="display:none;">
+                <div id="formInverse" style="display:none;width:500px;">
 
-                    <h3 style="border-style: none;">Select Inverse Term</h3>
-                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
+                    <h3 style="border-style: none;margin-left:10px;">Select Inverse Term</h3>
+                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;margin-left:10px;">
 
                         <div style="display:inline-block;vertical-align: top; width:130px;">
                             <label class="dtyLabel" style="width:30px;">Find:</label>

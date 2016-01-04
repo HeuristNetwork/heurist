@@ -2361,10 +2361,10 @@ function closeWithValue() {
     }
   }
 
-  if(top.HAPI){
+  if(true || top.HAPI){
     window.close(type, value);
   }else{
-    alert(type+" "+value);
+    //DEBUG alert(type+" "+value);
   }
 }
 

@@ -741,7 +741,9 @@
         " Word:" + annoStruct.addr.startWord + "\n" +
         "End  Elem:" + annoStruct.addr.endElems.join(":") +
         " Word:" + annoStruct.addr.endWord)+ " ?"; */
-        var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(top.HEURIST.magicNumbers['RT_ANNOTATION']);
+        
+        //was  getRectypeIconAndName
+        var title = "Add new record "+top.HEURIST.util.getRectypeName(top.HEURIST.magicNumbers['RT_ANNOTATION']);
 
         top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?rectype='+
           top.HEURIST.magicNumbers['RT_ANNOTATION']+

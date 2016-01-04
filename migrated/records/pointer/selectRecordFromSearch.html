@@ -182,14 +182,16 @@
                 
                 var recTypeId = document.getElementById('t').value;
 
-                var title = "Add new record "+top.HEURIST.util.getRectypeIconAndName(recTypeId);
-
+                //was  getRectypeIconAndName
+                var title = "Add new record "+top.HEURIST.util.getRectypeName(recTypeId);
+                
+                /*
+                top.HEURIST.util.getRectypeIconAndName(recTypeId);
                 var forrectype = top.HEURIST.util.getRectypeIconAndName(window.HEURIST.parameters["target_recordtype"]);
                 if(forrectype){
                     title = title + " for " + forrectype;
                 }
-
-
+                */
                 var _db = (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters.db ? window.HEURIST.parameters.db :
                     (top.HEURIST.parameters.db?top.HEURIST.parameters.db:
                         (top.HEURIST.database.name? top.HEURIST.database.name:'')));

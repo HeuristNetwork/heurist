@@ -386,7 +386,7 @@ function EditTerms() {
                 }else{
                     node.data.inverseid = null;
                     Dom.get('edInverseTermId').value = '0';
-                    Dom.get('edInverseTerm').value = '';
+                    Dom.get('edInverseTerm').value = 'click me to select inverse term...';
                     Dom.get('btnInverseSetClear').value = 'set';
 
                     Dom.get('divInverse').style.display = "none"; //(_currTreeView === _termTree2)?"block":"none";
@@ -471,12 +471,14 @@ function EditTerms() {
         if(disable){
             Dom.get("btnDelete").onclick = _disableWarning;
             Dom.get("btnInverseSetClear").onclick = _disableWarning2;
+            Dom.get('edInverseTerm').onclick = _disableWarning2;
 
             Dom.get("cbInverseTermItself").onclick= _disableWarning2;
             Dom.get("cbInverseTermOther").onclick= _disableWarning2;
         }else{
             Dom.get("btnDelete").onclick = _doDelete;
             Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
+            Dom.get('edInverseTerm').onclick = _setOrclearInverseTermId2;
 
             Dom.get("cbInverseTermItself").onclick= _onInverseTypeClick;
             Dom.get("cbInverseTermOther").onclick= _onInverseTypeClick;
@@ -499,13 +501,18 @@ function EditTerms() {
         }
     }
 
+    function _setOrclearInverseTermId2(){
+        Dom.get('formInverse').style.display = "block";
+        Dom.get('edInverseTerm').value = "";
+    }
+    
     /**
     * Clear button listener
     */
     function _setOrclearInverseTermId(){
         if(Dom.get('btnInverseSetClear').value==='cancel'){
             Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
-            Dom.get('formInverse').style.display = "none";
+            Dom.get('formInverse').style.display = "block";
         }else if(Dom.get('edInverseTermId').value==="0"){
             //show inverse div
             Dom.get('btnInverseSetClear').value = 'cancel';
@@ -515,6 +522,7 @@ function EditTerms() {
 
         }else{
             Dom.get('btnInverseSetClear').value = 'set';
+            Dom.get('formInverse').style.display = "block";
             Dom.get('edInverseTerm').value = "";
             Dom.get('edInverseTermId').value = "0";
         }

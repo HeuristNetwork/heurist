@@ -41,8 +41,7 @@
   <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
   <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
   <script src="../../common/js/hintDiv.js"></script>
-  <script src="../../records/edit/editRecord.js"></script>
-  
+ 
   <style type="text/css">
 	#record-count {
 		font-weight: bold;
@@ -61,7 +60,8 @@
   <script src="../../common/php/getMagicNumbers.php"></script>
   <script src="../../common/js/calendarViewer.js"></script>
   <script src="../../common/js/calendar.js"></script>
-
+  <script src="../../records/edit/editRecord.js"></script>
+ 
   <script>
 
 var recIDs, rtyID, dtyID, value, fileID, wkt;
@@ -96,7 +96,7 @@ function init () {
 //fill Field select  - formated with rectypename.filedname sorted
   fillFields();
 //bind onchange to add/replace field entry input depending on type selected and asynch call to check change validity
-  createInputElement();
+  //AR TEMP createInputElement();
 }
 
 function fillScope(){
@@ -193,7 +193,7 @@ function fillFields(){
     rty = rtyIDs[i];
     rtyName = top.HEURIST.rectypes.names[rty];
     for (dty in top.HEURIST.rectypes.typedefs[rty].dtFields) {
-      if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in {"separator":1,"relmarker":1}){
+      if(top.HEURIST.detailTypes.typedefs[dty].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex['dty_Type']] in {"separator":1,"relmarker":1}){  //skip
         continue;
       }
       dtyName = top.HEURIST.detailTypes.names[dty];

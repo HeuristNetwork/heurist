@@ -259,8 +259,8 @@
 
                         print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.
                         (($details['type']=="resource")?" <i>[pointer ":" <i>[".$details['type']);
-                        if(@$details[req]){
-                            print ", ".substr($details[req],0,3)." ";
+                        if(@$details['req']){
+                            print ", ".substr($details['req'],0,3)." ";
                         }
                         $mv = intval(@$details['max']);
                         print ", ".($mv==1?"sng":($mv>1?"lim":"rpt"))." ";

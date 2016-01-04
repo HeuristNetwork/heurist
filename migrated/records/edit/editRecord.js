@@ -903,8 +903,13 @@ if (! top.HEURIST.edit) {
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
             
             if(!top) {
+console.log('top not defined');                
                 window.top = window.self;    
             }
+            if(!top.HEURIST){
+console.log('heurist not defined'); 
+            }               
+            
             // Get Detail Type info
             // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
             // 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
@@ -1469,6 +1474,7 @@ if (! top.HEURIST.edit) {
         * @param options
         */
         createDraggableTextarea: function(name, value, parentElement, options) {
+
             var elt = parentElement;
             do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
             var ownerDocument = elt;
@@ -1680,6 +1686,7 @@ if (! top.HEURIST.edit) {
             dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
 
             var popupOptions = {
+                title: 'Temporal Object',
                 callback: function(str) {
                     if(str!==undefined){
 
@@ -2337,7 +2344,7 @@ if (! top.HEURIST.edit) {
                 if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
 
                         var dim = top.HEURIST.util.innerDimensions(window);
-                        var options = {height:dim.h*0.9, width:700, 'close-on-blur':true};
+                        var options = {height:dim.h*0.9, width:700, 'close-on-blur':true, title:'Record Details'};
 
                         top.HEURIST.util.popupURL(top, url, options);
                         return false;
@@ -2376,6 +2383,7 @@ if (! top.HEURIST.edit) {
         if (element.input.constrainrectype)
             url += "&t="+element.input.constrainrectype;
         top.HEURIST.util.popupURL(window, url, {
+            title: 'Select Record',
             callback: function(bibID, bibTitle) {
                 if (bibID) element.input.setResource(element, bibID, bibTitle);
                 thisRef.choosing = false;
@@ -2651,6 +2659,7 @@ if (! top.HEURIST.edit) {
                         "no-resize": true,
                         height: 280,
                         width: 650,
+                        title:'Edit Term',
                         callback: function(context) {
                             if(context=="ok") {
                                 onSelecTermsUpdate(sAllTerms, "");
@@ -2666,6 +2675,7 @@ if (! top.HEURIST.edit) {
                     {//options
                         "close-on-blur": false,
                         "no-resize": true,
+                        title:'Select Term',
                         height: 500,
                         width: 750,
                         callback: onSelecTermsUpdate
@@ -3072,6 +3082,7 @@ if (! top.HEURIST.edit) {
                                 if(frame &&  frame.contentWindow)
                                  frame.contentWindow.loadParameters( input.value );
                             },
+                            title: 'Heurist digitizer',
                             callback: function(type, value)
                             {
                                 thisRef.setGeo(newDiv, value? (type+" "+value) : "");
@@ -3921,6 +3932,7 @@ if (! top.HEURIST.edit) {
             height: 480,
             width: 640,
             "no-close": true,
+            title:'Upload file or define URL',
             callback: function(isChanged, fileJSON) {
 
                 if(isChanged){
