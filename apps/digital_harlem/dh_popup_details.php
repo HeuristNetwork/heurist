@@ -214,8 +214,8 @@
 [end-foreach][not-found]<li>Nobody recorded</li>[end-not-found]
 
 
-
-</p></ul>
+</ul>
+</p>
 
 
 

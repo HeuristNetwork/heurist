@@ -237,8 +237,9 @@ $.widget( "heurist.resultListMenu", {
                 }
                 var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                top.HEURIST4.msg.showDialog(url, { callback:
-                    function(res){
+                top.HEURIST4.msg.showDialog(url, { 
+                    title: top.HR('Advanced search builder'),
+                    callback: function(res){
                         if(!Hul.isempty(res)) {
                                 that.reloadSearch(res);
                         }
@@ -321,6 +322,10 @@ $.widget( "heurist.resultListMenu", {
 
                 this.addDetailPopup();
 
+          }else if(action == "menu-selected-value-add2"){
+
+                this.addDetailPopup2();
+                
           }else if(action == "menu-selected-value-replace"){
 
                 this.replaceDetailPopup();
@@ -915,6 +920,40 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST4.msg.showDialog(url, {height:500, width:600, title: top.HR('Add field value')} );
     },
 
+    
+    addDetailPopup2: function() {
+
+        var recIDs_all = top.HAPI4.getSelection("all", true);
+        if (Hul.isempty(recIDs_all)) {
+            top.HEURIST4.msg.showMsgDlg("No results found. Please run a query with at least one result record. You can use selection to direct your change.");
+            return;
+        }
+        top.HAPI4.currentRecordsetSelection = this.getSelectionIds();
+   /*
+        var that = this;
+
+        if(!top.HEURIST.rectypes){
+            $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addDetailPopup(); } );
+            return
+        }
+
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + 
+                top.HAPI4.database + '&t='+Math.random();
+                //(new Date().time) ;
+
+        //substitutes
+        top.HEURIST.search4 = {};
+        top.HEURIST.search4.recids_all = recIDs_all;
+        top.HEURIST.search4.recids_sel = recIDs_sel;
+        top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
+        top.HEURIST.search4.executeAction = this.executeAction;
+   */     
+        var url = top.HAPI4.basePathV4 + 'page/recordAction.php?db='+top.HAPI4.database+'&action=add_detail';
+
+        top.HEURIST4.msg.showDialog(url, {height:400, width:600, title: top.HR('Add field value'), class:'ui-heurist-bg-light'} );
+    },
+    
+    
     replaceDetailPopup: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);

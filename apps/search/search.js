@@ -1,5 +1,8 @@
 /**
 * Builds and manages display of the main Heurist page - search and visualisation
+* 
+* Before this widget was generic, however search on main page became very distinctive and got lot of additional ui comonents. 
+* Thus, we have the specific search widget and this one remains for main ui
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -26,21 +29,24 @@ $.widget( "heurist.search", {
         search_domain: 'a', //current search domain all|bookmark|recently added|recently selected  or a|b|r|s
         search_domain_set: null, // comma separated list of allowed domains  a,b,c,r,s
 
-        isrectype: false,  // show rectype selector
-        rectype_set: null, // comma separated list of rectypes, if not defined - all rectypes
-
-        isapplication:true,  // send and recieve the global events
-
         isloginforced:true,
-        has_paginator: false,
+
         btn_visible_dbstructure: false, //show get db strucuture button
 
-        islinkmode: false, //show buttons or links
-        btn_visible_newrecord: true, //show add record button
+        islinkmode: false, //show buttons or links below search input
 
         is_progress_visible:false, //show progress bar while searching
 
 
+        btn_visible_newrecord: true, //show add record button
+        
+        // before this widget was generic, however search on main page became very distinctive and got 
+        // lot of additional ui comonents. thus, we have the specific search widget and this one remains for main ui
+        // for dialog mode - remove into separate widget
+        isrectype: false,  // show rectype selector
+        rectype_set: null, // comma separated list of rectypes, if not defined - all rectypes
+
+        isapplication:true,  // send and recieve the global events
         // callbacks
         onsearch: null,  //on start search
         onresult: null   //on search result
@@ -175,7 +181,7 @@ $.widget( "heurist.search", {
             .addClass('div-table-cell')
             .appendTo( this.div_search );
 
-        this.input_search = $( "<textarea>" )   //, {'rows':1}this.options.has_paginator?'30%':'50%'} )
+        this.input_search = $( "<textarea>" )   
         .css({'margin-right':'0.2em', 'height':'2.5em', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
@@ -495,82 +501,6 @@ $.widget( "heurist.search", {
                 }
             }
         });
-
-        if(this.options.has_paginator){
-            /* EXEREMENTAL - not used anymore
-            if($.isFunction($('body').pagination)){
-                this._initPagination();
-            }else{
-                $.getScript(top.HAPI4.basePathV4+'apps/pagination.js', function() {
-                    if($.isFunction($('body').pagination)){
-                        that._initPagination();
-                    }else{
-                        top.HEURIST4.msg.showMsgErr('Widget pagination not loaded!');
-                    }
-                });
-            }
-            */
-        }else{
-
-
-/*  @TODO - move tp preferences
-            this.btn_search_limit = $( "<button>", {
-                text: this.limit,
-                title: top.HR('records per chunk')
-            })
-            //.css('width', '4em')
-            .appendTo( this.div_search )
-            .button({icons: { secondary: "ui-icon-triangle-1-s" }});
-
-            var smenu =
-            '<li id="search-limit-100"><a href="#">100</a></li>'+
-            '<li id="search-limit-200"><a href="#">200</a></li>'+
-            '<li id="search-limit-500"><a href="#">500</a></li>'+
-            '<li id="search-limit-1000"><a href="#">1000</a></li>';
-
-            this.menu_search_limit = $('<ul>'+smenu+'</ul>')   //<a href="#">
-            .zIndex(9999)
-            .css('position','absolute')
-            .appendTo( this.document.find('body') )
-            .menu({
-                select: function( event, ui ) {
-                    var newlimit = Number(ui.item.attr('id').substring(13));
-                    if(newlimit!=that.limit){
-
-                        top.HAPI4.currentUser['ugr_Preferences']['search_limit'] = newlimit;
-                        if(top.HAPI4.is_logged()){
-                            //save preference in session
-                            top.HAPI4.SystemMgr.save_prefs({'search_limit': newlimit},
-                                function(response){
-                                    if(response.status != top.HAPI4.ResponseStatus.OK){
-                                        top.HEURIST4.msg.showMsgErr(response);
-                                    }
-                                }
-                            );
-                        }
-
-                        that.limit = newlimit;
-                        that.btn_search_limit.button( "option", "label", that.limit );
-                        //that._doSearch3(0);
-                    }
-            }})
-            .hide();
-
-            this._on( this.btn_search_limit, {
-                click: function() {
-                    $('.ui-menu').not('.horizontalmenu').hide(); //hide other
-                    var menu = $( this.menu_search_limit )
-                    .show()
-                    .position({my: "right top", at: "right bottom", of: this.btn_search_limit });
-                    $( document ).one( "click", function() { menu.hide(); });
-                    return false;
-                }
-            });
-*/
-
-
-        }
-
 
         //-----------------------
 

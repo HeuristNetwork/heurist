@@ -29,7 +29,12 @@ regional['en'] = {
     'Password_Reset':'Your password has been reset. You should receive an email shortly with your new password',
     
     'Error_Mail_Recovery':'Your password recovery email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
-    'Error_Mail_Registration':'Your registration is not possible since registration email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation'
+    'Error_Mail_Registration':'Your registration is not possible since registration email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
+    'mailto_fail': 'Could not perform this operation because the default mail client is not properly installed.<br/>Compose email and send it at info@heuristscholar.org',
+    
+    'record_action_add_detail':'This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).'
+    
+    
 };
 
 regional['ru'] = {

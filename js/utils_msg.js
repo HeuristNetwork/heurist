@@ -1,6 +1,27 @@
 if (!top.HEURIST4){
     top.HEURIST4 = {};
 }
+
+/*
+showMsgErrJson - check if response is json 
+showMsgErr
+showMsgDlgUrl  - loads content url into dialog (getMsgDlg) and show it (showMsgDlg)
+
+getMsgDlg      - creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
+getPopupDlg    - creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
+
+showMsgDlg     - MAIN 
+showMsgWorkInProgress - shows standard work in progress message
+showPrompt    - show simple input value dialog with given prompt message
+    
+showMsgFlash - show buttonless dialog with given timeout
+checkLength  - fill given element with error message and highlight it
+checkLength2 - get message if input value beyound given ranges
+
+showDialog - creates div with frame, loads url content into it and shows it as popup dialog, on close this div will be removed
+showElementAsDialog
+
+*/
 if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
     EMPTY_MESSAGE:("No response received from server. This may be due to a temporary network outage. Please reload page."
@@ -61,8 +82,8 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         top.HEURIST4.msg.showMsgDlg(msg, null, "Error");
     },
 
-    //load content to dialog and show it
     //
+    // loads content url into dialog (getMsgDlg) and show it (showMsgDlg)
     //
     showMsgDlgUrl: function(url, buttons, title){
 
@@ -73,8 +94,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             });
         }
     },
-
+    
     //
+    //  shows standard work in progress message (not used)
     //
     showMsgWorkInProgress: function( message ){
 
@@ -91,7 +113,26 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     },
 
     //
+    // show simple input value dialog with given message
     //
+    showPrompt: function(message, callbackFunc){
+        
+        top.HEURIST4.msg.showMsgDlg(
+        //'<div class="ui-heurist-bg-light" style="width:100%;height:100%"></div>'+
+        message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
+        + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>', 
+        function(){
+            if($.isFunction(callbackFunc)){
+                var $dlg = top.HEURIST4.msg.getMsgDlg();            
+                callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
+            }
+        },
+        'Enter value');
+        
+    },
+    
+    //
+    // creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
     //
     getMsgDlg: function(){
         var $dlg = $( "#dialog-common-messages" );
@@ -101,7 +142,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         return $dlg.removeClass('ui-heurist-border');
     },
 
-    //similar to  dialog-common-messages - but without width limit
+    //
+    // creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
+    //
     getPopupDlg: function(){
         var $dlg = $( "#dialog-popup" );
         if($dlg.length==0){
@@ -112,6 +155,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     },
 
     //
+    // MAIN method
     // buttons - callback function or objects of buttons for dialog option
     //
     showMsgDlg: function(message, buttons, title, position_to_element, isPopupDlg){
@@ -219,6 +263,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
     },
 
+    //
+    // show buttonless dialog with given timeout
+    //
     showMsgFlash: function(message, timeout, title, position_to_element){
 
         if(!$.isFunction(top.HR)){
@@ -269,6 +316,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         top.HEURIST4.msg.showMsgDlg(message, null, 'Error');
     },
 
+    //
+    // fill given element with error message and highlight it
+    //
     checkLength: function( input, title, message, min, max ) {
         var message_text = top.HEURIST4.msg.checkLength2( input, title, min, max );
         if(message_text!=''){
@@ -288,6 +338,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
     },
 
+    //
+    // get message if input value beyound given ranges
+    //
     checkLength2: function( input, title, min, max ) {
 
         var len = input.val().length;
@@ -314,6 +367,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         }
     },
 
+    //
+    //
+    //
     checkRegexp:function ( o, regexp ) {
         if ( !( regexp.test( o.val() ) ) ) {
             o.addClass( "ui-state-error" );
@@ -322,7 +378,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             return true;
         }
     },
-
+    
     /**
     * show url in iframe within popup dialog
     */
@@ -338,6 +394,10 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
                 //create new div for dialogue with $(this).uniqueId();
                 var $dlg = $('<div>').addClass('loading').appendTo( $(opener.document).find('body') ).uniqueId();
+                if(options.class){
+                    $dlg.addClass(options.class);
+                }
+                
                 var $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
                             .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
                 $dosframe.hide();
@@ -501,28 +561,3 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     },
 
 };
-
-/* neither work
-$.wait = function(ms) {
-  
-console.log('wait');
-    ms   = ms || 1000;
-    type = "fx";
-    return this.queue(type, function() {
-        var self = this;
-        setTimeout(function() {
-            $(self).dequeue();
-        }, ms);
-    });
-    
-    //2d 
-    var defer = $.Deferred();
-    setTimeout(function() { defer.resolve(); }, ms);
-    return defer;
-    
-};
-  //third
-  button.delay(10000).queue(function() {
-    $(this).click().dequeue();
-  });
-*/  

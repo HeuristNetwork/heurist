@@ -484,7 +484,7 @@
         }
 
         /**
-        * Returns Workgroup ID if given id is id of database owner or admin of given group otehrwise it returns FALSE
+        * Returns Workgroup ID if id is id of database owner or admin of given group otehrwise it returns FALSE
         *
         * @param mixed $ugrID - Workgroup id, if it is omitted it takes current user ID
         */
@@ -525,6 +525,13 @@
             }
         }
 
+        public function is_logged_in(){
+            return ($this->get_user_id()>0);
+        }
+        
+        public function is_dbowner(){
+            return ($this->get_user_id()==2);
+        }
 
 
         /**

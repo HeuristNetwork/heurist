@@ -2,6 +2,9 @@
 * Minimal search
 * returns only ids
 * rules are searched on server side
+* 
+* It keeps result in HAPI4.currentRecordset
+* 
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -91,8 +94,8 @@ function hSearchMinimal() {
             }
 
              
-             //perform search
-             top.HAPI4.RecordMgr.search(request, _onSearchResult);
+            //perform search
+            top.HAPI4.RecordMgr.search(request, _onSearchResult);
         
     }
     

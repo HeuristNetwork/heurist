@@ -38,7 +38,7 @@ function hRecordSet(initdata) {
     order = [], //array of record IDs in specified order
     mainset = null, //array of record IDs that belong to main result set (without applied rules)
     
-    rectypes = [],      // unique list of record types
+    rectypes = [],      // unique list of record types with counts
     structures = null,  //record structure definitions for all rectypes in this record set
     relationship = null; //relationship records within this recordset
     
@@ -57,11 +57,11 @@ function hRecordSet(initdata) {
             total_count = Number(response.count);
             offset = Number(response.offset);
             
-            if( top.HEURIST4.util.isArrayNotEmpty(response.mainset) ){
+            if( !$.isEmptyObject(response.mainset) ){
                 mainset = response.mainset;
             }
             
-            if( top.HEURIST4.util.isArrayNotEmpty(response['fields']) ){
+            if( !$.isEmptyObject(response['fields']) ){
                 fields = response.fields;
                 rectypes = response.rectypes;
                 structures = response.structures;
@@ -405,11 +405,17 @@ function hRecordSet(initdata) {
         }
 
         var idx = $.inArray(fldname, fields);
-        if(idx>-1){
+        if(isnull(record)){
+            return null;
+        }else if(idx>-1){
             return record[idx];
         }else{
-            return top.HEURIST4.util.isnull(record[fldname])?null:record[fldname]; //return null;
+            return isnull(record[fldname])?null:record[fldname]; //return null;
         }
+    }
+    
+    function isnull(obj){
+        return ( (typeof obj==="undefined") || (obj===null));
     }
     
     function _setFieldValue(record, fldname, newvalue){
@@ -570,7 +576,7 @@ function hRecordSet(initdata) {
             var _records = {};
             //find all records
             
-            if(!top.HEURIST4.util.isArrayNotEmpty(fields)) return null;
+            if($.isEmptyObject(fields)) return null;
             
             var recID;
             if(Object.keys(records).length<rec_ids.length){
@@ -602,8 +608,8 @@ function hRecordSet(initdata) {
                 return;
             }
             
-            if(!top.HEURIST4.util.isArrayNotEmpty(fields)) fields = recordset2.getFields();
-            if(top.HEURIST4.util.isArrayNotEmpty(rectypes)) {
+            if($.isEmptyObject(fields)) fields = recordset2.getFields();
+            if(!$.isEmptyObject(rectypes)) {
                 rectypes2 = recordset2.getRectypes();
                 jQuery.merge( rectypes2, rectypes );
                 rectypes = jQuery.unique( rectypes2 );
@@ -759,7 +765,7 @@ function hRecordSet(initdata) {
         //  or relationship records
         //
         getMainSet: function(){
-            if( top.HEURIST4.util.isArrayNotEmpty(mainset) ){
+            if( !$.isEmptyObject(mainset) ){
                 return mainset;
             }else{
                 return order;
@@ -767,7 +773,7 @@ function hRecordSet(initdata) {
         },
 
         setMainSet: function(_mainset){
-            if( top.HEURIST4.util.isArrayNotEmpty(_mainset) ){
+            if( !$.isEmptyObject(_mainset) ){
                 mainset = _mainset;
             }else{
                 mainset = null;

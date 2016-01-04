@@ -603,19 +603,6 @@ function hAPI(_db, _oninit) { //, _currentUser
         return that;
     }
 
-    /**
-    * Localization
-    *
-    * Returns string resouce according to current region setting
-    */
-    function _key(res){
-        if(_regional && _regional[_region] && _regional[_region][res]){
-            return _regional[_region][res];
-        }else{
-            return res;
-        }
-    }
-
     //public members
     var that = {
 
@@ -730,7 +717,13 @@ function hAPI(_db, _oninit) { //, _currentUser
         currentUser: _guestUser,
         sysinfo: {},
 
-        currentRecordset: null,
+        // main result set that is filled in search_minimal - keeps all 
+        // purposes: 
+        // 1) to keep main set of records (original set) to apply rules set
+        // 2) to get selected records by ids
+        // 3) to pass result set into popup record action dialogs
+        currentRecordset: null, 
+        
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -764,11 +757,26 @@ function hAPI(_db, _oninit) { //, _currentUser
             if(_regional && _regional[region]){
                 _region = region;
             }
-            return _key;  //_key is function
+            // function that returns string resouce according to current region setting
+            return function key(res){
+                if(_regional && _regional[_region] && _regional[_region][res]){
+                    return _regional[_region][res];
+                }else{
+                    return res;
+                }
+            }
         }
 
         /**
-        *   if needIds is true  it returns array of record ids
+        * 
+        *   Returns subset of currentRecordset or array of its ids
+        *   @param selection :
+        *           all - returns all records of currentRecordset
+        *           array of ids 
+        *           recordset
+        *           @todo array of recordtype 
+        * 
+        *   @param needIds if it is true  it returns array of record ids
         */
         , getSelection: function(selection, needIds){
 
@@ -784,7 +792,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(selection.length()>0){
                             return (needIds) ?selection.getIds():selection; //array of record ids
                         }
-                    }else{
+                    }else{  //selection is array of ids
                             return (needIds) ?selection
                                         :((that.currentRecordset)?that.currentRecordset.getSubSetByIds(selection):null);
                     }

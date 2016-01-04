@@ -122,7 +122,7 @@ $.widget( "heurist.mainMenu", {
                                 .css({'float':'right'})
                                 .appendTo( this.element );
 
-        this._initMenu('Database_lo', this.divMainMenuItems_lo);
+        this._initMenu('Database_lo', this.divMainMenuItems_lo); //logout case
         this._initMenu('Help_lo', this.divMainMenuItems_lo);
         this.menu_Help_lo.find('.logged-in-only').hide();
         this.divMainMenuItems_lo.menu();
@@ -410,6 +410,22 @@ $.widget( "heurist.mainMenu", {
                     //
                 });
             }
+        });
+        
+        menu.find("a[href^='mailto']").click(function(e)
+        {
+          var el = $(this);
+          //top.HEURIST4.util.checkProtocolSupport(el.data("href"));
+          var t;
+          $(window).blur(function() {
+                // The browser apparently responded, so stop the timeout.
+                clearTimeout(t);
+          });
+
+          t = setTimeout(function() {
+                // The browser did not respond after 500ms, so open an alternative URL.
+                top.HEURIST4.msg.showMsgErr('mailto_fail');
+          }, 500);
         });
 
     },

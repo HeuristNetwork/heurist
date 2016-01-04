@@ -22,11 +22,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
 if (!top.HEURIST4){
     top.HEURIST4 = {};
 }
-if (! top.HEURIST4.util) top.HEURIST4.util = {
+//init only once
+if (!top.HEURIST4.util) 
+{
+
+top.HEURIST4.util = {
 
 
     isnull: function(obj){
@@ -70,6 +73,9 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return (input / emSize);
     },
 
+    //
+    // enable or disable element
+    //
     setDisabled: function(element, mode){
       if(element){
           if(!$.isArray(element)){
@@ -86,6 +92,46 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
               }
           });
       }  
+    },
+    
+    isIE: function () {
+        var myNav = navigator.userAgent.toLowerCase();
+        return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+    },
+    
+    //
+    //
+    //
+    checkProtocolSupport: function(url){
+        
+        if (top.HEURIST4.util.isIE()) { //This bastard always needs special treatment
+        
+            if (typeof (navigator.msLaunchUri) == typeof (Function)) {
+                
+                navigator.msLaunchUri(url,
+                    function () { /* Success */ },
+                    function () { /* Failure */ top.HEURIST4.util.showMsgErr('Not supported') });
+                return;
+            }
+                
+            try {
+                var flash = new ActiveXObject("Plugin.mailto");
+            } catch (e) {
+                //not installed
+            }
+        } else { //firefox,chrome,opera
+            //navigator.plugins.refresh(true);
+            var mimeTypes = navigator.mimeTypes;
+            var mime = navigator.mimeTypes['application/x-mailto'];
+            if(mime) {
+                //installed
+            } else {
+                //not installed
+                 top.HEURIST4.util.showMsgErr('Not supported');
+            }
+        }      
+      
+        
     },
 
     //
@@ -1028,8 +1074,71 @@ if (! top.HEURIST4.util) top.HEURIST4.util = {
         return (format==0)?shape:{bounds:bounds, points:points};
     },//end parseCoordinates
 
+    //
+    // Get CSS property value for a not yet applied class
+    //
+    getCSS: function (prop, fromClass) {
+        var $inspector = $("<div>").css('display', 'none').addClass(fromClass);
+        $("body").append($inspector); // add to DOM, in order to read the CSS property
+        try {
+            return $inspector.css(prop);
+        } finally {
+            $inspector.remove(); // and remove from DOM
+        }
+    },
 
-    }//end util
+    //
+    // init helper div and button
+    //
+    initHelper: function(help_button, content_title, content_url){
+
+        //add helper div
+        if($(document.body).find('#helper').length==0){
+            $(document.body).append($('<div>',{id:'helper'}));
+        }
+        
+        var $help_button = $(help_button);
+        var $helper_div = $(document.body).find('#helper');
+        
+        $help_button.button({icons: { primary: "ui-icon-help" }, text:false})
+                    .on('click', 3, function(){
+                        var $helper_div = $(document.body).find('#helper');
+                        
+                        if($helper_div.dialog( "isOpen" )){
+                            $helper_div.dialog( "close" );
+                        }else{
+                            var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
+                            var div_width  = Math.min(600, $(document.body).width() *0.8);
+                            
+                            $helper_div.dialog('option',{width:div_width, height: div_height});
+                            $helper_div.dialog( "open" );
+                        }
+                 });
+                 
+                 
+        $helper_div.load(content_url);
+        
+        //var div_height = Math.min(500, (document.body).height()-$help_button.top());
+        //var div_width  = Math.min(600, (document.body).width() *0.8);
+        
+        $helper_div.dialog({
+                    autoOpen: false, 
+                    title: top.HR(content_title),
+                    position: { my: "right top", at: "right bottom", of: $help_button },
+                    show: {
+                        effect: "slide",
+                        direction : 'right',
+                        duration: 1000
+                    },
+                    hide: {
+                        effect: "slide",
+                        direction : 'right',
+                        duration: 1000
+                    }
+                 });        
+    }
+
+}//end util
 
 String.prototype.htmlEscape = function() {
     return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
@@ -1056,4 +1165,20 @@ if (!Array.prototype.indexOf)
         }
         return -1;
     };
+}
+
+}
+
+
+
+$.getMultiScripts = function(arr, path) {
+    var _arr = $.map(arr, function(scr) {
+        return $.getScript( (path||"") + scr );
+    });
+
+    _arr.push($.Deferred(function( deferred ){
+        $( deferred.resolve );
+    }));
+
+    return $.when.apply($, _arr);
 }

@@ -187,7 +187,8 @@ function hLayout(args) {
 
         // 3) add tabs/apps to panes
 
-        var bg_color = $('.ui-widget-content:first').css('background-color');
+        var bg_color = top.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
+        //$('.ui-widget-content:first').css('background-color');
         $('body').css('background-color', bg_color);
 
         layoutInitPane('north', bg_color);

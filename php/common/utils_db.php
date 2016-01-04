@@ -49,8 +49,12 @@
         try{
             $mysqli = new mysqli($dbHost, $dbUsername, $dbPassword);
         } catch (Exception $e)  {
+            //return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
+        }
+        if(!$mysqli){
             return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
         }
+        
         /* check connection */
         if (mysqli_connect_errno()) {
 

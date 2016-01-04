@@ -32,8 +32,10 @@ $.widget( "heurist.resultList", {
         showmenu: true,
         innerHeader: false,
         title: null,
-        eventbased:true
+        eventbased:true, 
         //searchsource: null,
+        
+        onselect: null  //on select event for non event based
     },
 
 
@@ -50,9 +52,7 @@ $.widget( "heurist.resultList", {
     pagesize: 100,
     hintDiv:null, // rollover for thumbnails
 
-    currentRecordset:null,
-
-
+    _currentRecordset:null,
 
     // the constructor
     _create: function() {
@@ -411,12 +411,13 @@ $.widget( "heurist.resultList", {
 
         //this.btn_view.button( "option", "label", top.HR(newmode));
         $('#list_layout_'+newmode).attr('checked','checked');
-        this.mode_selector.buttonset('refresh');
+        //if(this.mode_selector.data('uiButtonset'))
+        //        this.mode_selector.buttonset('refresh');
     },
 
     _clearAllRecordDivs: function(new_title){
 
-        //this.currentRecordset = null;
+        //this._currentRecordset = null;
         this._lastSelectedIndex = -1;
 
         if(this.div_content){
@@ -467,7 +468,7 @@ $.widget( "heurist.resultList", {
         if(recordset)
         {
 
-            this.currentRecordset = recordset;
+            this._currentRecordset = recordset;
 
             var total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
 
@@ -475,8 +476,6 @@ $.widget( "heurist.resultList", {
 
             if( total_count_of_curr_request > 0 )
             {
-
-console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_page);
                 if(this._count_of_divs<this.pagesize){//01
 
                     this._renderPage(0, recordset);
@@ -699,8 +698,8 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
                 var isview = ($target.parents('.rec_view_link').length>0); //this is edit click
                 if(isview){
 
-                    var recInfoUrl = (this.currentRecordset)
-                                        ?this.currentRecordset.fld( this.currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' )
+                    var recInfoUrl = (this._currentRecordset)
+                                        ?this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' )
                                         :null;
                     if( !recInfoUrl ){
                         recInfoUrl = top.HAPI4.basePathV3 + "records/view/renderRecordData.php?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
@@ -775,21 +774,24 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
 
     triggerSelection: function(){
 
-        if(this.options.isapplication){
-            var selected = this.getSelected();
-            $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
-        }
 
-        //this._trigger( "onselect", event, selected );
+        if(this.options.isapplication){
+            var selected_ids = this.getSelected( true );
+            $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected_ids, source:this.element.attr('id')} );
+        }
+        if(this.options.onselect){
+            var selected_recs = this.getSelected( false );
+            this._trigger( "onselect", null, selected_recs );
+        }
     },
 
     /**
     * return hRecordSet of selected records
     */
-    getSelected: function(){
+    getSelected: function( idsonly ){
 
         var selected = []
-        if(this.currentRecordset){
+        if(this._currentRecordset){
             var that = this;
             this.div_content.find('.selected').each(function(ids, rdiv){
                 var rec_ID = $(rdiv).attr('recid');
@@ -801,7 +803,15 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
                 selected.push(""+this._lastSelectedIndex);
             }
         }
-        return selected;
+        
+        if(idsonly){
+            return selected;
+        }else if(this._currentRecordset){
+            return this._currentRecordset.getSubSetByIds(selected);
+        }else{
+            return null;
+        }
+        
     },
 
     /**
@@ -875,9 +885,9 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
     //
     _renderPagesNavigator: function(){
 
-        this.count_total = (this.currentRecordset!=null)?this.currentRecordset.length():0;
+        this.count_total = (this._currentRecordset!=null)?this._currentRecordset.length():0;
         // length() - downloaded records, count_total() - number of records in query
-        var total_inquery = (this.currentRecordset!=null)?this.currentRecordset.count_total():0;
+        var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
 
         this.max_page = 0;
         //this.current_page = 0;
@@ -1045,7 +1055,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
     , _renderPage: function(pageno, recordset){
 
                     if(!recordset){
-                        recordset = this.currentRecordset;
+                        recordset = this._currentRecordset;
                         this._clearAllRecordDivs(null);
                     }
 
@@ -1130,7 +1140,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
                         $(this.div_content).find('.logged-in-only').css('visibility','hidden');
                     }
 
-                    //load missed info - record header
+                    //load full record info - record header
                     if(rec_toload.length>0){
 
                         var that = this;
@@ -1151,7 +1161,7 @@ console.log('draw page '+this._count_of_divs+'  '+this.pagesize+' '+this.max_pag
 
                                 if(response.data.queryid==that.current_page) {
 
-                                    that.currentRecordset.fillHeader( new hRecordSet( response.data ));
+                                    that._currentRecordset.fillHeader( new hRecordSet( response.data ));
 
                                     that._renderPage( that.current_page );
                                 }

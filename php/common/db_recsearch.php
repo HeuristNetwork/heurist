@@ -561,9 +561,18 @@ if(@$params['debug']) echo $query."<br>";
 
                                 $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
                                 foreach( array_keys($response['data']['records']) as $rt){
-                                    if(!array_key_exists(@$rt['4'], $fin_result['data']['rectypes'])){
-                                        $fin_result['data']['rectypes'][$rt['4']] = 1;
+                                    $rectype_id = @$rt['4'];
+                                    if($rectype_id){
+                                        /*if(@$fin_result['data']['rectypes'][$rectype_id]){
+                                            $fin_result['data']['rectypes'][$rectype_id]++;
+                                        }else{
+                                            $fin_result['data']['rectypes'][$rectype_id]=1;
+                                        }*/
+                                        if(!array_key_exists($rectype_id, $fin_result['data']['rectypes'])){
+                                            $fin_result['data']['rectypes'][$rectype_id] = 1;
+                                        }
                                     }
+                                    
                                 }
                             }
 
@@ -762,8 +771,8 @@ if(@$params['debug']) echo $query."<br>";
                             //array_push( $row, $row[4] ); //by default icon if record type ID
                             $records[$row[2]] = $row;
                             array_push($order, $row[2]);
-                            if(!array_key_exists($row[4], $rectypes)){
-                                $rectypes[$row[4]] = 1;
+                            if(!@$rectypes[$row[4]]){
+                                $rectypes[$row[4]]=1;
                             }
                         }
                         $res->close();
