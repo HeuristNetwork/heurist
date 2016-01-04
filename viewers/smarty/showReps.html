@@ -21,7 +21,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -75,11 +75,11 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
         -->
-        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
 
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
@@ -185,8 +185,8 @@
                         </td>
                         <td>
                             <select id="selInsertModifiers"
-                                    onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
-                                    style="width:120px">
+                                onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
+                                style="width:120px">
                                 <option>choose modifier</option>
                                 <option>capitalize</option>
                                 <option>cat</option>
@@ -272,11 +272,11 @@
                 <button id="btnRepPrint2" style="position: absolute; right: 40px; top:4px;">Print</button>
 
                 <!-- <div id="btnRepPrint2" onclick="onPrint()"  class="button"
-                    style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
-                                                                   -->
+                style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
+                -->
                 <ul id="rep_list" class="horizontal menu" style="float:right">
                     <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
-                       <!-- <span id="btnRepMenu2" class="button"></span> -->
+                        <!-- <span id="btnRepMenu2" class="button"></span> -->
                         <ul id="toolMenuItems" style="zdisplay:block;">
                         </ul>
                     </li>
@@ -293,10 +293,10 @@
             </div>
             <div id="templateTree">
                 <div>
-                    <a href="../../../context_help/smarty_reports.html" 
-                            onClick="top.HEURIST.util.popupURL(window, this.href);return false;"
-                            title="Read full documentation on the Smarty templating language">
-                            <b>Help on using this function</b></a><br />
+                    <a href="../../context_help/smarty_reports.html"
+                        onClick="top.HEURIST.util.popupURL(window, this.href);return false;"
+                        title="Read full documentation on the Smarty templating language">
+                        <b>Help on using this function</b></a><br />
                     Position cursor in text on left before selecting actions below
 
                     <!-- what does this do? -->
@@ -417,22 +417,13 @@
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
                 Hul.popupURL(this, top.HEURIST.baseURL_V3 + 'viewers/smarty/repMenu.html?template_file='+template_file,
-                     { callback: function(filename){
-                                    if(!Hul.isnull(filename)) {
-                                        window.showReps.onPublish( filename )
-                                    }
-                                 }
-                     } );
+                    { callback: function(filename){
+                        if(!Hul.isnull(filename)) {
+                            window.showReps.onPublish( filename )
+                        }
+                        }
+                } );
 
-                /* OLD WAY
-                var surl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php?"+
-                window.showReps.getQuery() + '&publish=1&debug=0&template='+template_file;
-
-                window.prompt (
-                "                                         Copy to clipboard by hitting Ctrl-C or [Enter]\n\n"+
-                "                Note: The URL will only show records to which the viewer has access.\n"+
-                "External viewers will not be able to see any records unless they are marked as Public visibility\n\n", surl);
-                */
             }
 
             //
@@ -555,13 +546,13 @@
                 //setupMCE();
 
                 $("#btnRepPrint2").button({text:false, icons: {
-                            primary: "ui-icon-print"
-                 }})
-                 .click(onPrint);
+                    primary: "ui-icon-print"
+                }})
+                .click(onPrint);
 
                 $("#btnRepMenu2").button({text:false, icons: {
-                            primary: "ui-icon-gear"
-                 }});
+                    primary: "ui-icon-gear"
+                }});
 
 
 
@@ -578,7 +569,7 @@
                 if(top.HEURIST.is_logged_in()){
                     if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
                         s =  '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
-                             '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
+                        '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
                     } else {
                         s = s + '<li> <a href="#" >Manage (Admins only)</a></li>';
                     }
@@ -592,7 +583,7 @@
                         s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
                     }
                 }
-                 s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (top.HEURIST.is_logged_in()?'class="separator"':'') +'>Refresh</a></li>';
+                s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (top.HEURIST.is_logged_in()?'class="separator"':'') +'>Refresh</a></li>';
 
 
                 /* OLD MENU ORDER
@@ -601,18 +592,18 @@
                 '<li><a href="#" onClick="onFile()">Get URL for report</a></li>';
 
                 if(top.HEURIST.is_logged_in()){
-                    s = s + '<li><a href="#" onClick="onPublish()">Publish report</a></li>';
+                s = s + '<li><a href="#" onClick="onPublish()">Publish report</a></li>';
 
-                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
-                        s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>'+
-                        '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
-                        '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
-                    } else {
-                        s = s + '<li> <a href="#" >Manage (Admins only)</a></li>'
-                    }
+                if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>'+
+                '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
+                '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
+                } else {
+                s = s + '<li> <a href="#" >Manage (Admins only)</a></li>'
+                }
 
-                    s = s + '<li><a href="#" onClick="onExportTemplate()">Export</a></li>' +
-                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
+                s = s + '<li><a href="#" onClick="onExportTemplate()">Export</a></li>' +
+                '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
 
                 }
                 */

@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -32,11 +32,12 @@
 
 
 
-  function loadRemoteURLContent($url, $bypassProxy = true) {
+function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
-  }
+}
 
-  function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=20) {
+
+function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=20) {
 
     if(!function_exists("curl_init"))  {
         return false;
@@ -58,14 +59,14 @@
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
 
     if($range){
-      curl_setopt($ch, CURLOPT_RANGE, $range);
+        curl_setopt($ch, CURLOPT_RANGE, $range);
     }
 
     if ( (!$bypassProxy) && defined("HEURIST_HTTP_PROXY") ) {
-      curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-      if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
-          curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
-      }
+        curl_setopt($ch, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
+        if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
+        }
     }
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
@@ -85,126 +86,121 @@
     }
 
 
-  }
+}
 
-  /**
-   * save remote url as file and returns the size of saved file
-   *
-   * @param mixed $url
-   * @param mixed $filename
-   */
-  function saveURLasFile($url, $filename)
-  { //Download file from remote server
+
+// TODO: rationalise: saveURLasFile.php in same dir seems to be in the same territory
+/**
+* save remote url as file and returns the size of saved file
+*
+* @param mixed $url
+* @param mixed $filename
+*/
+function saveURLasFile($url, $filename)
+{ //Download file from remote server
     $rawdata = loadRemoteURLContent($url);
     return saveAsFile($rawdata, $filename);
-  }
+}
 
-  function saveAsFile($rawdata, $filename)
-  {
+function saveAsFile($rawdata, $filename)
+{
     if($rawdata){
-      if(file_exists($filename)){
-        unlink($filename);
-      }
-      $fp = fopen($filename,'x');
-      fwrite($fp, $rawdata);
-      fclose($fp);
+        if(file_exists($filename)){
+            unlink($filename);
+        }
+        $fp = fopen($filename,'x');
+        fwrite($fp, $rawdata);
+        fclose($fp);
 
-      return filesize($filename);
+        return filesize($filename);
     }else{
-      return 0;
+        return 0;
     }
-  }
+}
 
 
-  /**
-   *
-   *
-   * @param mixed $filedata
-   */
-  function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true){
+
+// only used by annotatedTemplateProxy.php and downloadFile.php
+/**
+*
+*
+* @param mixed $filedata
+*/
+function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true){
 
     if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
 
-      $rawdata = loadRemoteURLContent($url, $bypassProxy);
+        $rawdata = loadRemoteURLContent($url, $bypassProxy);
 
-      saveAsFile($rawdata, $filename);
-      /*
-      if ($raw) {
+        saveAsFile($rawdata, $filename);
+        /*
+        if ($raw) {
 
-      if(file_exists($filename)){
-      unlink($filename);
-      }
-      $fp = fopen($filename, "w");
-      //$fp = fopen($filename, "x");
-      fwrite($fp, $raw);
-      //fflush($fp);    // need to insert this line for proper output when tile is first requestet
-      fclose($fp);
-      }
-      */
+        if(file_exists($filename)){
+        unlink($filename);
+        }
+        $fp = fopen($filename, "w");
+        //$fp = fopen($filename, "x");
+        fwrite($fp, $raw);
+        //fflush($fp);    // need to insert this line for proper output when tile is first requestet
+        fclose($fp);
+        }
+        */
     }
 
     if(file_exists($filename)){
-      downloadFile($mimeType, $filename);
+        downloadFile($mimeType, $filename);
     }
-  }
+}
 
-  /**
-   * direct file download
-   *
-   * @param mixed $mimeType
-   * @param mixed $filename
-   */
-  function downloadFile($mimeType, $filename){
-    /*
 
-    if($mimeType!="video/mp4"){
-      header('access-control-allow-origin: *');
-      header('access-control-allow-credentials: true');
-    }
-    readfile($filename);
-      */
+// TODO: REMOVE - function is duplicated in newer code in file_download.php
+/**
+* direct file download
+*
+* @param mixed $mimeType
+* @param mixed $filename
+*/
+function downloadFile($mimeType, $filename){
 
-        /*
-        if($mimeType!="video/mp4"){
-        header('access-control-allow-origin: *');
-        header('access-control-allow-credentials: true');
-        }*/
-        if (file_exists($filename)) {
+    if (file_exists($filename)) {
 
-                //??? ob_start();
-                header('Content-Description: File Transfer');
-                if ($mimeType) {
-                  header('Content-type: ' .$mimeType);
-                }else{
-                  header('Content-type: binary/download');
-                }
-                if($mimeType!="video/mp4"){
-                    header('access-control-allow-origin: *');
-                    header('access-control-allow-credentials: true');
-                }
-                //header('Content-Type: application/octet-stream');
-                //force fownload header('Content-Disposition: attachment; filename='.basename($filename));
-                header('Content-Transfer-Encoding: binary');
-                header('Expires: 0');
-                header('Cache-Control: must-revalidate');
-                header('Pragma: public');
-                header('Content-Length: ' . filesize($filename));
-                @ob_clean();
-                flush();
-
-                readfile($filename);
-
+        header('Content-Description: File Transfer');
+        if ($mimeType) {
+            header('Content-type: ' .$mimeType);
+        }else{
+            header('Content-type: binary/download');
         }
+        if($mimeType!="video/mp4"){
+            header('access-control-allow-origin: *');
+            header('access-control-allow-credentials: true');
+        }
+        //header('Content-Type: application/octet-stream');
+        //force fownload header('Content-Disposition: attachment; filename='.basename($filename));
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filename));
+        @ob_clean();
+        flush();
 
-  }
+        readfile($filename);
 
-  /**
-   *
-   *
-   * @param mixed $dir
-   * @param mixed $zipfile
-   */
-  function zipDirectory($dir, $zipfile){
+    }
+
+}
+
+
+
+// TODO: This is not used - only referenced, but commented out, in exportMyDataPopup.php
+/**
+*
+*
+* @param mixed $dir
+* @param mixed $zipfile
+*/
+function zipDirectory($dir, $zipfile){
 
     // Adding files to a .zip file, no zip file exists it creates a new ZIP file
 
@@ -216,7 +212,7 @@
 
     // open archive
     if ($zip->open($zipfile, ZIPARCHIVE::CREATE) !== TRUE) {
-      return false;
+        return false;
     }
 
     // initialize an iterator
@@ -226,17 +222,19 @@
     // iterate over the directory
     // add each file found to the archive
     foreach ($iterator as $key=>$value) {
-      if(! $zip->addFile(realpath($key), $key)){
-        return false;
-        //or die ("ERROR: Could not add file: $key");
-      }
+        if(! $zip->addFile(realpath($key), $key)){
+            return false;
+            //or die ("ERROR: Could not add file: $key");
+        }
     }
 
     // close and save archive
     $zip->close();
     return true;
 
-  }
+}
+
+
 
 //
 // remove folder and all its content
@@ -245,12 +243,6 @@ function delFolderTree($dir, $rmdir) {
 
     array_map('unlink', glob($dir."/*"));
 
-    /* OLD WAY
-    $files = array_diff(scandir($dir), array('.','..'));
-    foreach ($files as $file) {
-      (is_dir("$dir/$file")) ? delFolderTree("$dir/$file", true) : unlink("$dir/$file");
-    }
-    */
     if($rmdir){
         return rmdir($dir);
     }else{

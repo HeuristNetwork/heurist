@@ -1901,33 +1901,15 @@ function doImport($mysqli, $imp_session, $params){
                                 if($r_value!=""){
 
                                     if(ctype_digit($r_value)
-                                            && isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
+                                    && isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
 
-                                            $value = $r_value;
+                                        $value = $r_value;
                                     }
 
                                     if($value == null){
                                         $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
                                     }
                                 }
-
-                                /* OLD WAY
-                                if ($r_value!="" && isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type )){
-
-                                if($fieldtype_type == "enum"){
-                                if(!$terms_enum) { //find ALL term IDs
-                                $terms_enum = mysql__select_array3($mysqli,
-                                "select LOWER(trm_Label), trm_ID  from defTerms where trm_Domain='enum' order by trm_Label");
-                                }
-                                $value = @$terms_enum[$r_value];
-                                }else if($fieldtype_type == "relationtype"){
-                                if(!$terms_relation){ //find ALL relation IDs
-                                $terms_relation = mysql__select_array3($mysqli,
-                                "select LOWER(trm_Label), trm_ID from defTerms where trm_Domain='relation'");
-                                }
-                                $value = @$terms_relation[$r_value];
-                                }
-                                }*/
 
                             }else if($fieldtype_type == "geo"){
 

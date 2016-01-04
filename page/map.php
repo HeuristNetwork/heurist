@@ -366,19 +366,19 @@ if(@$_REQUEST['db']){
                             if(@$rtDefines[$rt]){
 
                                 switch ($rt) {
-                                    case "RT_TILED_IMAGE_LAYER":
+                                    case "RT_TILED_IMAGE_SOURCE":
                                         $msg = "Map image file (tiled)";
                                         break;
-                                    case "RT_KML_LAYER":
+                                    case "RT_KML_SOURCE":
                                         $msg = "KML";
                                         break;
-                                    case "RT_SHP_LAYER":
+                                    case "RT_SHP_SOURCE":
                                         $msg = "Shapefile";
                                         break;
-                                    case "RT_GEOTIFF_LAYER":
+                                    case "RT_GEOTIFF_SOURCE":
                                         $msg = "Map image file (non-tiled)";
                                         break;
-                                    case "RT_QUERY_LAYER":
+                                    case "RT_QUERY_SOURCE":
                                         $msg = "Mappable query";
                                         break;
                                     case "RT_MAP_DOCUMENT":
@@ -398,11 +398,11 @@ if(@$_REQUEST['db']){
 
 
                     $items = '';
-                    $items = $items.'<li rtid="'.checkRt('RT_KML_LAYER').'"><a href="#">KML</a></li>';
-                    $items = $items.'<li rtid="'.checkRt('RT_SHP_LAYER').'"><a href="#">SHP</a></li>';
-                    $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_LAYER').'"><a href="#">GeoTiff</a></li>';
-                    $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_LAYER').'"><a href="#">Tiled image</a></li>';
-                    $items = $items.'<li rtid="'.checkRt('RT_QUERY_LAYER').'"><a href="#">Query layer</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_KML_SOURCE').'"><a href="#">KML</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_SHP_SOURCE').'"><a href="#">SHP</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
+                    $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
                     ?>
                     $("#btnMapNew").button({ text:false,
                         icons: {primary: "ui-map-document" }})

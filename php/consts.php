@@ -22,9 +22,12 @@
 */
 
 
+// TODO: Rationalise th duplication of constants across /php/consts.php and /common/connect/initialise.php
+//       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
+
 define('HEURIST_VERSION', $version);
 define('HEURIST_MIN_DBVERSION', "1.1.0");
-define('HEURIST_HELP', "http://heuristscholar.org/help");
+define('HEURIST_HELP', "http://heurist.sydney.edu.au/help");
 
 if (!@$serverName) {
     $serverName = $_SERVER["SERVER_NAME"] . ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "");
@@ -130,6 +133,9 @@ $usrTags = array(
 //---------------------------------
 
 /** RECORD TYPE DEFINITIONS */
+
+// NOTE: These duplicate those in initialise.php
+
 $rtDefines = array(
     // Standard core record types (H3CoreDefinitions: DB = 2)
     'RT_RELATION' => array(2, 1),
@@ -142,8 +148,9 @@ $rtDefines = array(
     'RT_INTERPRETATION' => array(2, 8),
     'RT_PERSON' => array(2, 10),
 
-    'RT_IMAGE_LAYER' => array(2, 11), //TODO : change RT_TILED_IMAGE
-    'RT_TILED_IMAGE_LAYER' => array(2, 11), // added Ian 23/10/14 for consistency
+    // see also spatial data types below
+    'RT_IMAGE_SOURCE' => array(2, 11), //TODO : change RT_TILED_IMAGE
+    'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
 
     // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 H3ToolExtensions
     'RT_FILTER' => array(2, 12),
@@ -163,12 +170,12 @@ $rtDefines = array(
     'RT_FACTOID' => array(3, 22), // Deprecated
 
     // Spatial data
-    'RT_KML_LAYER' => array(3, 1014),
-    'RT_SHP_LAYER' => array(3, 1017),
-    'RT_GEOTIFF_LAYER' => array(3, 1018),
+    'RT_KML_SOURCE' => array(3, 1014),
+    'RT_SHP_SOURCE' => array(3, 1017),
+    'RT_GEOTIFF_SOURCE' => array(3, 1018),
     'RT_MAP_DOCUMENT' => array(3, 1019), // H3ReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
-    'RT_QUERY_LAYER' => array(3, 1021)
+    'RT_QUERY_SOURCE' => array(3, 1021)
 
 );
 

@@ -18,7 +18,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -43,30 +43,8 @@ function switchDev (toAsym) {
 		$("input[name=stdDEV][value=sym]").attr("checked","checked");
 	}
 }
-/* old way
-var windowRef = document.parentWindow  ||  document.defaultView  ||  this.document._parentWindow;
-var popupOptions = {
-	callback: function(date) {
-		if (date) {
-			document.getElementById("simpleDate").value = date;
-		}
-	},
-	"close-on-blur": true,
-	"no-titlebar": true,
-	"no-resize": true
-};
-*/
 
-//ART - to remove
 function calendarPopup(buttonElt) {
-/* old way
-	var buttonPos = top.HEURIST.getPosition(buttonElt, true);
-	popupOptions.x = buttonPos.x + 8 - 120;
-	popupOptions.y = buttonPos.y + 8 - 80;
-
-	top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "common/html/calendarTemplate.html#"+
-		document.getElementById("simpleDate").value, popupOptions);
-*/
 
 	var callback =	function(date)
 	{
@@ -81,9 +59,9 @@ function calendarPopup(buttonElt) {
 	var date = document.getElementById("simpleDate").value;
 	if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
 		date = top.HEURIST.util.getDisplayPreference("record-edit-date");
-	}
+    }
 
-	calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback);
+    calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback);
 }
 
 function setPDBtoTPQ () {
@@ -260,16 +238,16 @@ var TemporalPopup = (function () {
 		dRangeDraw();
 
         _initJqCalendar(that.curTemporal);
-        
+
         $(".withCalendarsPicker").change(_updateGeorgianDate);
         _updateGeorgianDate();
-        
+
 	};
 
-    function _updateGeorgianDate(){    
+    function _updateGeorgianDate(){
         var type = that.curTemporal.getType();
         if(calendar && calendar.name.toLowerCase()!='gregorian' && type){
-            
+
             var value = '';
             if (type === "s") {
                 value = convert($("#simpleDate"), true);
@@ -277,11 +255,11 @@ var TemporalPopup = (function () {
                 value = convert($("#fDAT"), true);
             }else  if (type === "p") {
                 value = convert($("#TPQ"), true) + " " + convert($("#TAQ"), true);
-                //PDB  PDE 
+                //PDB  PDE
             }
-            
+
             $("#dateGregorian").text(value?"gregorian: "+value:'');
-        
+
         }else{
             $("#dateGregorian").text('');
         }
@@ -304,7 +282,7 @@ var TemporalPopup = (function () {
 				$("#tzone").val(tDate.toString("z"));
 			}
 		}
-        
+
 		var fields = Temporal.getFieldsForType(type);
 		for(var i =0; i< fields.length; i++) {
 			var code = fields[i];
@@ -353,14 +331,14 @@ var TemporalPopup = (function () {
 		}//for
 
 	};
-    
+
 	function _updateTemporalFromUI (temporal, togregorian) {
 		var type = temporal.getType();
 
-        //store oirginal value        
+        //store oirginal value
         if(togregorian){
             if(calendar && calendar.name.toLowerCase()!='gregorian'){
-                
+
                 var isj = (calendar.name.toLowerCase()=='julian');
 
                 var value = '';
@@ -376,12 +354,12 @@ var TemporalPopup = (function () {
                     }
                 }
                 temporal.addObjForString("CL2", value);
-        
+
             }else{
                   temporal.removeObjForCode("CL2");
             }
         }
-                
+
 		var fields = Temporal.getFieldsForType(type);
 		for(var i =0; i< fields.length; i++) {
 			var code = fields[i];
@@ -422,7 +400,7 @@ var TemporalPopup = (function () {
 			}
 		}
 		if (type === "s") {
-            
+
 			var strDate = ($("#simpleTime").val());
 			if (strDate && $("#tzone").val()) {
 				var zone = $("#tzone").val().match(/^\s*(?:UTC|GMT)?\s*([\+|\-]?\d?\d:?(?:\d\d)?)?/)[1];
@@ -447,7 +425,7 @@ var TemporalPopup = (function () {
 			}
 			if (strDate) temporal.addObjForString("DAT", strDate);
 		}
-        
+
         if(calendar && calendar.name!='gregorian'){
             temporal.addObjForString("CLD", calendar.name);
         }else{
@@ -460,7 +438,7 @@ var TemporalPopup = (function () {
     function _initJqCalendar(temporal){
 
         var defaultDate = null;
-        var calendar_name = temporal.getStringForCode("CLD");        
+        var calendar_name = temporal.getStringForCode("CLD");
         if(!calendar_name){
             calendar_name = "gregorian";
         }
@@ -469,7 +447,7 @@ var TemporalPopup = (function () {
         if (!type) {
             return;
         }
-        
+
         $('.withCalendarsPicker').calendarsPicker({
             calendar: $.calendars.instance('gregorian'),
             showOnFocus: false,
@@ -483,7 +461,7 @@ var TemporalPopup = (function () {
                         replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
             showTrigger: '<img src="../images/cal.gif" alt="Popup" class="trigger">'}
         );
-        
+
         //change current calendar
         $('#selectCLD').change(function() {
 
@@ -496,12 +474,12 @@ var TemporalPopup = (function () {
             if(!calendar) return;
             //assign new calendar for all pickers
             $('.withCalendarsPicker').each(function() {
-                
+
                 $(this).calendarsPicker('option', {calendar: calendar,
                         defaultDate: convert($(this), false)
                 });
-               
-                
+
+
                 /*
                 var current = $(this).calendarsPicker('option');
                 $(this).calendarsPicker('option', {calendar: calendar,
@@ -540,7 +518,7 @@ var TemporalPopup = (function () {
 
     // mode 0 - to gregorian (no assign), 1 - to
     var convert = function($inpt, togregorian) {
-        
+
             //current value
             var tDate = TDate.parse($inpt.val());
             var value = null;
@@ -552,41 +530,41 @@ var TemporalPopup = (function () {
 
                     var month = hasMonth? tDate.getMonth(): 1;
                     var day = hasDay? tDate.getDay(): 1;
-                    
+
                     dformat = dformat + (hasMonth?'-mm':'');
                     dformat = dformat + (hasDay?'-dd':'');
-                    
+
                     /*var value = $inpt.calendarsPicker('getDate');
                     if(value && Object.prototype.toString.apply(value) === '[object Array]' && value.length>0){
                             value = value[0];
                     }*/
-                    
+
                     var fromcal = $inpt.calendarsPicker('option', 'calendar');
                     value = fromcal.newDate(tDate.getYear(),month, day);
             }
             //var value = $inpt.calendarsPicker('getDate');
-            
+
             function noNeedConvert(from, to){
-                
+
                 var cc = ['taiwan','julian','gregorian'];
-                
+
                 return (from.name.toLowerCase()==to.name.toLowerCase()) ||
-                (!hasMonth && 
-                 ((cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0) || 
+                (!hasMonth &&
+                 ((cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0) ||
                   (cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0)));
             }
-        
+
             var newval = '';
             if(value){
-                        
+
                         var tocalendar = togregorian ?$.calendars.instance('gregorian') :calendar;
                         if(noNeedConvert(value._calendar, tocalendar)){
                             if(togregorian){
                                 newval = $inpt.val();
                             }else{
-                                //newval = togregorian ?$inpt.val():value;    
-                                newval = value; 
-                                newval._calendar.local.name = tocalendar.local.name;   
+                                //newval = togregorian ?$inpt.val():value;
+                                newval = value;
+                                newval._calendar.local.name = tocalendar.local.name;
                                 newval._calendar.name  = tocalendar.local.name;
                             }
                         }else{
@@ -601,7 +579,7 @@ var TemporalPopup = (function () {
                                     $inpt.val('');
                                 }
                             }
-                            
+
                             if(togregorian){
                                 newval = tocalendar.formatDate(dformat, newval);
                             }else {
@@ -611,9 +589,9 @@ var TemporalPopup = (function () {
             }else {
                 $inpt.val('');
             }
-                
+
             return newval;
-    };    
+    };
 	//public members
 	var that = {
 			originalInputString : "",

@@ -116,6 +116,9 @@ require_once (dirname(__FILE__) . "/../php/dbMySqlWrappers.php");
 
 $talkToSysAdmin="Please advise your system administrator or email info - a t - HeuristNetwork.org for assistance.";
 
+// TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
+//       in particular this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
+
 define('HEURIST_VERSION', $version);
 define('HEURIST_MIN_DBVERSION', "1.1.0");
 
@@ -505,6 +508,8 @@ define('DT_BUG_REPORT_EXTRA_INFO', "2-51");
 define('DT_BUG_REPORT_STATUS', "2-810");
 define('DT_ALL_ASSOC_FILE', '2-38');
 
+
+// NOTE: These duplicate those in consts.php
 $rtDefines = array(
     // Standard core record types (H3CoreDefinitions: DB = 2)
     'RT_RELATION' => array(2, 1),
@@ -534,15 +539,15 @@ $rtDefines = array(
     'RT_FACTOID' => array(3, 22), // Deprecated
 
     // Spatial data
-    'RT_IMAGE_LAYER' => array(2, 11), //TODO : change RT_TILED_IMAGE
-    'RT_TILED_IMAGE_LAYER' => array(2, 11), // added Ian 23/10/14 for consistency
+    'RT_IMAGE_SOURCE' => array(2, 11), //TODO : change RT_TILED_IMAGE
+    'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
     'RT_PLACE' => array(3, 1009),
-    'RT_KML_LAYER' => array(3, 1014),
-    'RT_SHP_LAYER' => array(3, 1017),
-    'RT_GEOTIFF_LAYER' => array(3, 1018),
+    'RT_KML_SOURCE' => array(3, 1014),
+    'RT_SHP_SOURCE' => array(3, 1017),
+    'RT_GEOTIFF_SOURCE' => array(3, 1018),
     'RT_MAP_DOCUMENT' => array(3,1019), // H3ReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3,1020),
-    'RT_QUERY_LAYER' => array(3,1021)
+    'RT_QUERY_SOURCE' => array(3,1021)
 
 );
 

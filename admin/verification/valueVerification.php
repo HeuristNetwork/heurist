@@ -39,17 +39,17 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     $allowed_terms = null;
 
     if($dtyID==null || !@$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
-    
+
         if ( $dtyID == DT_RELATION_TYPE) {
-                //get all root terms (vocabs)
-                $allowed_terms = getTermListAll('relation');
-                $dtyIDDefs[$dtyID] = $allowed_terms;
-                
+            //get all root terms (vocabs)
+            $allowed_terms = getTermListAll('relation');
+            $dtyIDDefs[$dtyID] = $allowed_terms;
+
         } else {
-            
+
             $terms = getTermsFromFormat($defs);
             if (($cntTrm = count($terms)) > 0) {
-                
+
                 if ($cntTrm == 1) {  //vocabulary
                     $terms = getTermOffspringList($terms[0]);
 
@@ -68,7 +68,7 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
                 if($dtyID!=null){ //keep for future use
                     $dtyIDDefs[$dtyID] = $allowed_terms;
                 }
-                
+
             }
         }
     }else{
@@ -109,7 +109,7 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
 
         //ids
         $allowed_terms = getAllowedTerms($defs, $defs_nonsel, $dtyID);
-                
+
         //get labels
         if(is_array($allowed_terms)){
             $allowed_terms = getTermLabels($allowed_terms);
@@ -134,7 +134,6 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
 
     return $term_ID;
 
-    //OLD WAY return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
 }
 
 function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
@@ -168,22 +167,22 @@ function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
 //
 function getTermsFromFormat($formattedStringOfTermIDs){
 
-        if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
-            return array();
+    if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
+        return array();
+    }
+
+
+    if (strpos($formattedStringOfTermIDs,"{")!== false) {
+        $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
+        if (strrpos($temp,":") == strlen($temp)-1) {
+            $temp = substr($temp,0, strlen($temp)-1);
         }
-        
-        
-        if (strpos($formattedStringOfTermIDs,"{")!== false) {
-            $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
-            if (strrpos($temp,":") == strlen($temp)-1) {
-                $temp = substr($temp,0, strlen($temp)-1);
-            }
-            $termIDs = explode(":",$temp);
-        } else {
-            $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
-            $termIDs = explode(",",$temp);
-        }
-        return $termIDs;
+        $termIDs = explode(":",$temp);
+    } else {
+        $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
+        $termIDs = explode(",",$temp);
+    }
+    return $termIDs;
 }
 
 //-------------------------------------
@@ -195,17 +194,17 @@ function isValidPointer($constraints, $rec_id, $dtyID ){
     if ($res){
         $tempRtyID = mysql_fetch_row($res);
         if ($tempRtyID){
-              $tempRtyID = @$tempRtyID[0];
+            $tempRtyID = @$tempRtyID[0];
         } else {
-             return false;
+            return false;
         }
 
         $allowed_types = "all";
         if ($constraints!=null && $constraints != "") {
-                $temp = explode(",",$constraints); //get allowed record types
-                if (count($temp)>0) {
-                       $allowed_types = $temp;
-                }
+            $temp = explode(",",$constraints); //get allowed record types
+            if (count($temp)>0) {
+                $allowed_types = $temp;
+            }
         }
 
         return ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));

@@ -202,9 +202,9 @@ function ShowReps() {
 
     function _getSelectedTemplate(){
 
-                var sel = document.getElementById('selTemplates');
-                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
-                return sel.options[sel.selectedIndex].value; // by default first entry
+        var sel = document.getElementById('selTemplates');
+        if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+        return sel.options[sel.selectedIndex].value; // by default first entry
     }
 
     /**
@@ -1129,11 +1129,11 @@ function ShowReps() {
     function _insertRootForEach(){
         var textedit = Dom.get("edTemplateBody");
         var _text = '{foreach $results as $r}\n\n  {if ($r.recOrder==0)}\n    \n  '+
-            '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
+        '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
 
         insertAtCursor(textedit, _text, false, -12);
     }
-//
+    //
 
     /*
     * insertPattern: inserts a pattern/template/example for different actions into the editor text
@@ -1150,14 +1150,14 @@ function ShowReps() {
 
             case 1: // Heading for record type
                 _text=  "{* Use a saved search sorted by record type (in this example) *} \n" +
-                    "{* Modify the sorting variable and the test according to your needs *} \n" +
-                    "{* Put the following at top of file: {$lastRecordType = 0}  *} \n\n" +
+                "{* Modify the sorting variable and the test according to your needs *} \n" +
+                "{* Put the following at top of file: {$lastRecordType = 0}  *} \n\n" +
 
-                    "{* Section heading *} \n" +
-                    "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
-                    "   <hr> \n<p/> \n"+
-                    "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
-                    "{/if} {* section heading *} ";
+                "{* Section heading *} \n" +
+                "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
+                "   <hr> \n<p/> \n"+
+                "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
+                "{/if} {* section heading *} ";
                 break;
 
             case 2: // simple table
@@ -1207,17 +1207,17 @@ function ShowReps() {
 
             case 99: // outer records loop
                 _text=  '{*------------------------------------------------------------*} \n' +
-                    '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
-                    '{*------------------------------------------------------------*} \n' +
-                    ' \n\n' +
-                    '  {* put the data you want output for each record here - insert the *} \n' +
-                    '  {* fields using the tree of record types and fields on the right *} \n' +
-                    ' \n' +
-                    '<br/> {* line break between each record *} \n' +
-                    ' \n' +
-                    '{*------------------------------------------------------------*} \n' +
-                    '{/foreach} {* end records loop, do not remove *} \n' +
-                    '{*------------------------------------------------------------*}';
+                '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
+                '{*------------------------------------------------------------*} \n' +
+                ' \n\n' +
+                '  {* put the data you want output for each record here - insert the *} \n' +
+                '  {* fields using the tree of record types and fields on the right *} \n' +
+                ' \n' +
+                '<br/> {* line break between each record *} \n' +
+                ' \n' +
+                '{*------------------------------------------------------------*} \n' +
+                '{/foreach} {* end records loop, do not remove *} \n' +
+                '{*------------------------------------------------------------*}';
                 break;
 
             default:
@@ -1288,7 +1288,7 @@ function ShowReps() {
                     modal: false,
                     title: title,
                     position: { my: "right top", at: "left bottom", of: $(elt) }
-                 });
+                });
 
             }else{
                 var topWindowDims = top.HEURIST.util.innerDimensions(window);
@@ -1327,10 +1327,10 @@ function ShowReps() {
     function _insertSelectedVars( varid, inloop, isif ){
 
         if(top.HEURIST4){
-             if(insertPopupID){
-                  $(insertPopupID).dialog('close');
-                  insertPopupID = null;
-             }
+            if(insertPopupID){
+                $(insertPopupID).dialog('close');
+                insertPopupID = null;
+            }
         }else{
             top.HEURIST.util.closePopupAll();
         }
@@ -1369,8 +1369,8 @@ function ShowReps() {
 
             // for loop we also add the variable in the loop
             /*if(_inloop){
-                _varname = _nodep.parent_id+"."+_nodep.this_id;
-                _text = _text + _addVariable(_nodep, _varname);
+            _varname = _nodep.parent_id+"."+_nodep.this_id;
+            _text = _text + _addVariable(_nodep, _varname);
             }*/
 
         }
@@ -1723,7 +1723,7 @@ function ShowReps() {
 
         // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599....."}
         assignRecordset: function(recordset){
-             _currentRecordset = recordset;
+            _currentRecordset = recordset;
         },
 
         isNeedSelection: function(){

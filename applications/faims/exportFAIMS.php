@@ -126,14 +126,14 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
     if (! @$wg_ids  &&  function_exists('get_user_id')) {
 
         $mrt = array();
-        if(defined('RT_GEOTIFF_LAYER')){
-            array_push($mrt, RT_GEOTIFF_LAYER);
+        if(defined('RT_GEOTIFF_SOURCE')){
+            array_push($mrt, RT_GEOTIFF_SOURCE);
         }
-        if(defined('RT_SHP_LAYER')){
-            array_push($mrt, RT_SHP_LAYER);
+        if(defined('RT_SHP_SOURCE')){
+            array_push($mrt, RT_SHP_SOURCE);
         }
-        if(defined('RT_KML_LAYER')){
-            array_push($mrt, RT_KML_LAYER);
+        if(defined('RT_KML_SOURCE')){
+            array_push($mrt, RT_KML_SOURCE);
         }
 
         if(count($mrt)>0){

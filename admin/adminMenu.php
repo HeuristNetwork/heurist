@@ -111,15 +111,18 @@ if (array_key_exists('mode', $_REQUEST)) {
             window.history.pushState("object or string", "Title", location.pathname+'?db=<?=HEURIST_DBNAME?>');
         </script>
 
-        <a id=home-link href="../../?db=<?=HEURIST_DBNAME?>">
-            <div id=logo title="Click the logo at top left of any Heurist page to return to your default search page"></div>
+        <a id=home-link href="../?db=<?=HEURIST_DBNAME?>">
+            <div id=logo title="Click the logo at top left of any Heurist page to return to the main (search/filter) page"></div>
         </a>
 
         <div id=version></div>
 
         <!-- database name = link back to default search (Uaeer View) -->
-        <a id="dbSearch-link" href="../../?db=<?=HEURIST_DBNAME?>">
-            <div id="dbname" ><?=HEURIST_DBNAME?> <span>Database administration</span></div>
+        <a id="dbSearch-link" href="../?db=<?=HEURIST_DBNAME?>">
+            <div id="dbname">
+                <?=HEURIST_DBNAME?>
+                <span style="margin-left: 40px;">Database Administration</span>
+            </div>
         </a>
 
         <!-- Quicklinks section - top right -->
@@ -148,7 +151,7 @@ if (array_key_exists('mode', $_REQUEST)) {
         <div id="sidebar">
 
             <div class="banner" style="padding-left:20px;padding-top:4px;border-bottom:1px solid #696969;">
-                <button id="link_admin" onclick="{location.href='../../?db=<?=HEURIST_DBNAME?>';}"
+                <button id="link_admin" onclick="{location.href='../?db=<?=HEURIST_DBNAME?>';}"
                     title="Click to return to the default search page" class="button"><b>go to main page</b></button>
             </div>
 

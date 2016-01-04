@@ -101,7 +101,7 @@ echo
 echo Copying installer and update shellscripts from root of current instance
 echo The installer and update scripts are accessed directly to download and install tarballs
 cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-cp migrated/installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
+cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
 echo
 echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, and help

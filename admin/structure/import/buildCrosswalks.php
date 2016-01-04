@@ -197,8 +197,7 @@ else
 
         // This is the correct URL for vsn 3.1.8 and above, March 2014, with a hiccup in latter half of 2015
         // when H3 code moved to a /migrated subdirectory, corrected just before Chrristmas 2015
-        // TODO: buildcrosswalks.php line 200 - remove 'migrated' once h4 updated to new version
-        $source_url = $regurl."migrated/admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
+        $source_url = $regurl."admin/describe/getDBStructureAsSQL.php?db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
     }
 
     //TODO: why is the second parameter 60? It's specified as bypasProxy = true

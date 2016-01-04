@@ -90,8 +90,8 @@ function receiveMessage(event)
                     }
             });
         }else if(event.data.indexOf('heurist:check:')===0){ //RecTypeSource=
-            
-            
+
+
             var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
             var _url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
@@ -185,12 +185,12 @@ var dv = jQuery('#HeuristRecTypeSource');
 if(event.data=="heurist"){
 
 //document.getElementById('topbar').style.display = 'none';
-//hide elements - old way 
+//hide elements - old way
 //jQuery('#header-full').hide();
 //jQuery('#topbar').hide();
 //jQuery('#footer').hide();
 
-//new way 
+//new way
 jQuery('#sidebar').hide();
 jQuery('#main-header').hide();
 jQuery('#main-footer').hide();

@@ -917,24 +917,6 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             print "<h3>Update records in H3 accoring to the most current Record set in FAIMS</h3><br>";
 
-            //asText(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate
-            /* OLD WAY
-            $query = "SELECT ae.uuid, ae.AEntTimestamp, ae.AEntTypeID, asText(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate,
-            av.freeText, av.VocabID, av.AttributeID, av.Measure, av.Certainty
-            FROM aentvalue av
-            JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp, archentity.deleted as entDel, aentvalue.deleted as valDel
-            FROM aentvalue
-            JOIN archentity USING (uuid)
-
-            GROUP BY uuid, attributeid
-            HAVING MAX(ValueTimestamp)
-            AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-            JOIN archentity ae using (uuid, aenttimestamp)
-            WHERE entDel is NULL
-            AND valDel is NULL
-            ORDER BY ae.uuid asc";
-            */
-            //NEW WAY
             $query = "select uuid, aenttimestamp, aenttypeid, astext(transform(geometryn(geospatialcolumn, 1), 4326)) as Coordinate, freetext, vocabid, attributeid, measure, Certainty
             from latestnondeletedaentvalue join latestnondeletedarchent using (uuid) ORDER BY uuid asc";
 

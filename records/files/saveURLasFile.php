@@ -21,7 +21,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2015 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -39,83 +39,83 @@ require_once(dirname(__FILE__).'/fileUtils.php');
 
 /*
 if (! defined("USING-XSS")) {
-	function outputAsRedirect($text) {
-		$val = base64_encode($text);
-		header("Location: ".HEURIST_BASE_URL."/#data=" . $val);
-		return "";
-	}
-	ob_start("outputAsRedirect");
+function outputAsRedirect($text) {
+$val = base64_encode($text);
+header("Location: ".HEURIST_BASE_URL."/#data=" . $val);
+return "";
+}
+ob_start("outputAsRedirect");
 
-	if ($_POST["heurist-sessionid"] != $_COOKIE["heurist-sessionid"]) {	// saw TODO: check that this is ok or should this be the database session?
-		// saveFile is only available through dispatcher.php, or if heurist-sessionid is known (presumably only our scripts will know this)
-		getError("unauthorised HAPI user");
-	}
+if ($_POST["heurist-sessionid"] != $_COOKIE["heurist-sessionid"]) {	// saw TODO: check that this is ok or should this be the database session?
+// saveFile is only available through dispatcher.php, or if heurist-sessionid is known (presumably only our scripts will know this)
+getError("unauthorised HAPI user");
+}
 }
 */
 
 if(@$_REQUEST['url']){
-	$sURL = $_REQUEST['url']; //url to be thumbnailed
-	$res = generate_thumbnail($sURL, true);
-	print json_format($res);
-	exit;
+    $sURL = $_REQUEST['url']; //url to be thumbnailed
+    $res = generate_thumbnail($sURL, true);
+    print json_format($res);
+    exit;
 }
 //
 // main function
 //
 function generate_thumbnail($sURL, $needConnect){
 
-	if (! is_logged_in()) {
-		return getError("no logged-in user");
-	}
+    if (! is_logged_in()) {
+        return getError("no logged-in user");
+    }
 
-	$res = array();
-	//get picture from service
-	//"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
-	$remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
-	$heurist_path = tempnam(HEURIST_FILESTORE_DIR, "_temp_"); // . $file_id;
-
-
-	$filesize = saveURLasFile($remote_path, $heurist_path);
+    $res = array();
+    //get picture from service
+    //"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
+    $remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
+    $heurist_path = tempnam(HEURIST_FILESTORE_DIR, "_temp_"); // . $file_id;
 
 
-	if($filesize>0){
+    $filesize = saveURLasFile($remote_path, $heurist_path);
 
-		//check the dimension of returned thumbanil in case it less than 50 - consider it as error
-		if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
 
-			$image_info = getimagesize($heurist_path);
-			if($image_info[1]<50){
-				//remove temp file
-				unlink($heurist_path);
-				return getError("Thumbnail generator service can't create the image for specified URL");
-			}
-		}
+    if($filesize>0){
 
-		$fileID = upload_file("snapshot.jpg", "jpg", $heurist_path, null, $filesize, $sURL, $needConnect);
+        //check the dimension of returned thumbanil in case it less than 50 - consider it as error
+        if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
 
-		if (is_numeric($fileID)) {
-			$res = get_uploaded_file_info($fileID, $needConnect);
-		}
-		else {
-			$res = getError("File upload was interrupted. ".$fileID);
-		}
+            $image_info = getimagesize($heurist_path);
+            if($image_info[1]<50){
+                //remove temp file
+                unlink($heurist_path);
+                return getError("Thumbnail generator service can't create the image for specified URL");
+            }
+        }
 
-	}else{
-		$res = getError("Cannot download image");
-	}
+        $fileID = upload_file("snapshot.jpg", "jpg", $heurist_path, null, $filesize, $sURL, $needConnect);
 
-	return $res;
+        if (is_numeric($fileID)) {
+            $res = get_uploaded_file_info($fileID, $needConnect);
+        }
+        else {
+            $res = getError("File upload was interrupted. ".$fileID);
+        }
+
+    }else{
+        $res = getError("Cannot download image");
+    }
+
+    return $res;
 }
 
 //***** END OF OUTPUT *****/
 function save_image3($inPath, $outPath){
-	file_put_contents($outPath, file_get_contents($inPath));
-	return filesize($outPath);
+    file_put_contents($outPath, file_get_contents($inPath));
+    return filesize($outPath);
 }
 //
 //
 function getError($message) {
-	//mysql_query("rollback");
-	return array("error" => addslashes($message));
+    //mysql_query("rollback");
+    return array("error" => addslashes($message));
 }
 ?>

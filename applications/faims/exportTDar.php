@@ -466,7 +466,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                                                 addRegistration($dtype, $metadata_file,  $metadata_content, $filename, $filename_orig);
                                             }else{
-                                                print "<p class='error'>".$row[5].$row[6]."<br>File is not found. Please contact system administrator</p>";
+                                                print "<p class='error'>".$row[5].$row[6]."<br>File was not found. Please contact system administrator</p>";
                                             }
                                         }
                                     }

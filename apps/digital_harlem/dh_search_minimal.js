@@ -425,12 +425,6 @@ function hSearchMinimalDigitalHarlem() {
                         // add path shape to first pathAddr (start parade for example)
                         var pathAddr = res_records[ path[0].recID ];
                         recordset.setFld(pathAddr, 'rec_Shape', [{polyline:vertices}] );
-                        /* old way
-                        var newrec = {"2":linkID, "4":DH_LINKS, "rec_Info":false, "rec_Shape":{polyline:vertices} };
-                        res_records[linkID] = newrec;
-                        res_orders.push(linkID);
-                        linkID++;
-                        */
                         continue;
                     }
                 }
