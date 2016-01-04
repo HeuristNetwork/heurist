@@ -1611,10 +1611,10 @@ if($intofile){ // flags HuNI manifest + separate files per record
     if (array_key_exists('error', $result)) {
         makeTag('error', null, $result['error']);
     } else {
-        makeTag('resultCount', null, $result['resultCount'] ? $result['resultCount'] : " 0 ");
-        makeTag('recordCount', null, $result['recordCount'] ? $result['recordCount'] : " 0 ");
+        makeTag('resultCount', null, @$result['resultCount']>0 ? $result['resultCount'] : " 0 ");
+        makeTag('recordCount', null, @$result['recordCount']>0 ? $result['recordCount'] : " 0 ");
         // Output all the records as XML blocks
-        if ($result['recordCount'] > 0) outputRecords($result);
+        if (@$result['recordCount'] > 0) outputRecords($result);
     }
     closeTag('hml');
 }

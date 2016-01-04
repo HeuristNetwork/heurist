@@ -719,8 +719,8 @@ function add_index_html($directory) {
 function echo_flush($msg){
     ob_start();
     print $msg;
-    ob_flush();
-    flush();
+    @ob_flush();
+    @flush();
 }
 
 

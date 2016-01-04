@@ -114,18 +114,24 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     //$_REQUEST['idonly'] = 1;
     //$_REQUEST['vo'] = 'h3';
     //$result = recordSearch($system, $_REQUEST, false, false, $PUBONLY);
-    $url = HEURIST_BASE_URL."../../../php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3";  //call h4
+    $url = HEURIST_BASE_URL."php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3";  //call h4
     $reclist = loadRemoteURLContent($url);
     $reclist = json_decode($reclist, true);
 
-    if (array_key_exists('error', $reclist)) {
-        print "Error: ".$reclist['error'];
+    $reccount = @$reclist['resultCount'];
+
+    if (@$reclist['error']!=null){
+        print 'Error: '.$reclist['error'];
+        printCloseTags();
         return;
     }
+    if(!($reccount>0)) {
+        print 'Empty result set';
+        printCloseTags();
+        return;
+    }    
 
-    $reccount = $reclist['resultCount'];
     $reclist = explode(",", $reclist['recIDs']);
-
 
 }else{
 
@@ -252,13 +258,16 @@ if ($reccount>0)
 
 }
 
-if($isAtom){
-    print '</feed>';
-}else{
-    print '</channel>';
-    print '</rss>';
+
+printCloseTags();
+
+function printCloseTags(){        
+        global $isAtom;
+        if($isAtom){
+            print '</feed>';
+        }else{
+            print '</channel>';
+            print '</rss>';
+        }    
 }
-
-
-
 ?>

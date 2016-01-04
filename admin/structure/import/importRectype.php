@@ -647,7 +647,7 @@ if($outputFormat=="json"){
                 $idx_ccode = $defs['terms']['fieldNamesToIndex']["trm_ConceptID"];
 
                 foreach ($terms_correspondence as $imp_id=>$trg_id){
-                    if($terms_correspondence_existed[$imp_id]) continue;
+                    if(@$terms_correspondence_existed[$imp_id]) continue;
 
                     if(@$defs['terms']['termsByDomainLookup']['enum'][$imp_id]){
                         $domain = 'enum';
@@ -898,7 +898,7 @@ function importVocabulary($term_id, $domain, $children=null){
             $term_import[$idx_inverseid] = @$terms_correspondence[$term_import[$idx_inverseid]]; //@todo - after all terms addition?
 
             //get level - all terms of the same level - to search same name and codes
-            if(@$term_import[$idx_parentid]){
+            if(@$term_import[$idx_parentid] && @$trg_terms['treesByDomain'][$domain][$term_import[$idx_parentid]]){
                 $lvl_src = $trg_terms['treesByDomain'][$domain][$term_import[$idx_parentid]];
             }else{
                 $lvl_src = $trg_terms['treesByDomain'][$domain];

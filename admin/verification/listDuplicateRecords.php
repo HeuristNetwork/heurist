@@ -49,7 +49,7 @@
         array_push($dupeDifferences,$row['snd_SimRecsList']);
     }
 
-    if ($_REQUEST['dupeDiffHash']){
+    if (@$_REQUEST['dupeDiffHash']){
         foreach($_REQUEST['dupeDiffHash'] as $diffHash){
             if (! in_array($diffHash,$dupeDifferences)){
                 array_push($dupeDifferences,$diffHash);

@@ -82,7 +82,7 @@
                 left join defRecTypes on rty_ID = rec_RecTypeID
                 where dty_Type = "resource"
                 and dty_PtrTargetRectypeIDs > 0
-                and (INSTR(concat(dty_PtrTargetRectypeIDs,','), concat(rec_RecTypeID,',')) = 0)');
+                and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
             // it does not work and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
             $bibs = array();
             while ($row = mysql_fetch_assoc($res))

@@ -127,19 +127,19 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             $url = HEURIST_BASE_URL."/php/api/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
             $reclist = loadRemoteURLContent($url, false);
             $reclist = json_decode($reclist, true);
+            $reccount = @$reclist['resultCount'];
 
-            if (array_key_exists('error', $reclist)) {
+            if (@$reclist['error']!=null || !($reccount>0)) {
+                print '</Document></kml>';
                 return;
             }
-
-            $reccount = $reclist['resultCount'];
+            
             $reclist = explode(",", $reclist['recIDs']);
 
             $reclist = array_slice($reclist,0,1000);
 
             $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", $reclist).") ".$ourwhere;
             $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $reclist).") ".$ourwhere2;
-
 
         }else{
 
@@ -171,14 +171,17 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
     if($squery){
 
         $res = mysql_query($squery);
+        if($res===false){
+            print '</Document></kml>';
+            return;
+        }
         $wkt_reccount = mysql_num_rows($res);
 
-
+        $kml_reccount = 0;
         if($isSearchKml){
             $res2 = mysql_query($squery2);
-            $kml_reccount = mysql_num_rows($res2);
-        }else{
-            $kml_reccount = 0;
+            if($res2!==false)
+                $kml_reccount = mysql_num_rows($res2);
         }
 
     }
