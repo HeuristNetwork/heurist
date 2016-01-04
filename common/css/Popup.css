@@ -1,0 +1,141 @@
+/*
+* Copyright (C) 2005-2015 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* brief description of file
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2015 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+
+iframe.coverall {
+	display: block;
+	position: absolute;
+	z-index: 9999;
+
+	left: 0px; top: 0px;
+	width: 100%; height: 100%;
+
+	border: 0;
+	padding: 0;
+	margin: 0;
+
+	-moz-opacity: 0;
+	opacity: 0;
+}
+iframe.coverall { filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0); }	/* IE only */
+
+div.frosted_glass {
+	display: block;
+	position: absolute;
+	left: 0px; top: 0px;
+	background-color: white;
+	background-image: url(../images/ice.jpg);
+	-moz-opacity: 0.6;
+	opacity: 0.6;
+}
+div.frosted_glass { filter:progid:DXImageTransform.Microsoft.Alpha(opacity=60); }	/* IE only */
+
+
+div.coverall {
+	display: block;
+	position: absolute;
+	z-index: 10000;
+
+	left: 0px; top: 0px;
+	width: 100%; height: 100%;
+}
+
+
+.outer_popup {
+	display: block;
+	position: absolute;
+
+	left: -1000px;
+}
+
+div.inner_popup, .shadow_popup {
+	display: block;
+	position: absolute;
+
+	-moz-border-radius: 12px;	/* eye-candy for gecko browsers */
+	border: 1px solid black;
+	padding: 0;
+}
+
+div.inner_popup {
+	left: 0px; top: 0px;
+	z-index: 2;
+	background-color: #ffffdd;
+	background-repeat: no-repeat;
+	background-position: top left;
+}
+.shadow_popup {
+	-moz-opacity: 0.5;
+	opacity: 0.5;
+	left: 5px; top: 5px;
+	z-index: 1;
+	background-color: black;
+}
+.shadow_popup { filter:progid:DXImageTransform.Microsoft.Alpha(opacity=50); }	/* IE only */
+
+
+iframe.inner_popup {
+	width: 600px;
+	height: 400px;
+
+	border: 0;
+	padding: 5px 7px 5px 5px;
+	margin: 0;
+}
+
+table.title_bar {
+	width: 100%;
+	height: 12px;
+	border: 0;
+	border-spacing: 0;
+	padding: 0;
+	margin: 0;
+}
+table.title_bar .cancel {
+	width: 20px;
+	padding: 2px 0px;
+	margin: 0px 6px;
+	cursor: pointer;
+}
+
+table.title_bar .drag_bar {
+	background-image: url(../images/dragbar.gif);	/* relative to script location */
+	cursor: move;
+}
+
+.coverall_cover {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	display: none;
+	z-index: 111111;
+}

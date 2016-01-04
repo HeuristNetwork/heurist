@@ -1,9 +1,9 @@
 <?php
 
-    /** 
+    /**
     * Application interface. See hRecordMgr in hapi.js
-    *   tags and bookmarks manipulation 
-    * 
+    *   tags and bookmarks manipulation
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -72,9 +72,9 @@
                 $res = tagReplace($system, $_REQUEST['ids'], $_REQUEST['new_id'], @$_REQUEST['UGrpID']);
 
             } else if ($action=="rating" ) {
-                
+
                 $res = bookmarkRating($system, @$_REQUEST['recIDs'], @$_REQUEST['rating'], @$_REQUEST['UGrpID']);
-                
+
             } else if ($action=="set") {  // assign/remove tags to records
 
                 if(@$_REQUEST['assign']){
@@ -86,7 +86,7 @@
                 if(!is_bool($res) && @$_REQUEST['remove']){
                     $res2 = tagsRemove($system, @$_REQUEST['recIDs'], @$_REQUEST['remove'], null, @$_REQUEST['UGrpID']);
                     if(is_bool($res) && !$res){
-                        $res = false;       
+                        $res = false;
                     }else{
                         $res = array_merge($res, $res2);
                     }

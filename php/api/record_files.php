@@ -3,7 +3,7 @@
     /**
     * Application interface. See hRecordMgr in hapi.js
     * uploaded and registered external files manipulation
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
@@ -65,13 +65,13 @@
                     $res['recIDs'] = @$_REQUEST['recIDs'];
                 }
 
-            } else if ($action=="viewer" ) {    
+            } else if ($action=="viewer" ) {
 
                 //find all files for given set of records
                 $res = fileSearch($system, true, @$_REQUEST['recIDs']);
-                if(@$_REQUEST['mode']=="yox"){ 
+                if(@$_REQUEST['mode']=="yox"){
                     //generate html output for yoxviewer in frame ???? or on client side ????
-                    exit();                
+                    exit();
                 }else if ( is_array($res) ) {
                     $res['recIDs'] = @$_REQUEST['recIDs'];
                 }

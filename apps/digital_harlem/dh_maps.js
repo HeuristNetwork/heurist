@@ -1,5 +1,6 @@
 /**
-* Template to define new widget
+*
+* dh_maps.js (Digital Harlem) : JS for special functions on the map panel
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -9,7 +10,7 @@
 * @version     4.0
 */
 
-/*  
+/*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
@@ -24,7 +25,7 @@ $.widget( "heurist.dh_maps", {
     options: {
         // callbacks
     },
-    
+
     _resultset:null,
 
     // the widget's constructor
@@ -36,8 +37,8 @@ $.widget( "heurist.dh_maps", {
         //this.element.disableSelection();
 
         // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);   
-        
+        //this._focusable($element);
+
         this.div_content = $( "<div>" )
         .css({'width':'100%','height':'100%','overflow-y':'auto','padding':'0.5em'})
         .addClass('thumbs2')
@@ -47,32 +48,32 @@ $.widget( "heurist.dh_maps", {
 
         //perform search for maps
         var that = this;
-        
+
         $(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {
-            
+
             var request = {q:'t:19', w: 'a', detail: 'header', l:3000, source:that.element.attr('id') };
 
             //perform search
-            top.HAPI4.RecordMgr.search(request, 
-                    function(response) {
-                        
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
-                                that._resultset = new hRecordSet(response.data);
-                            }else{
-                                that._resultset = null;
-                                top.HEURIST4.msg.showMsgErr(response);
-                            }
-                            
-                            that._refresh();
+            top.HAPI4.RecordMgr.search(request,
+                function(response) {
+
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                        that._resultset = new hRecordSet(response.data);
+                    }else{
+                        that._resultset = null;
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
+
+                    that._refresh();
+                }
             );
-                
-                
+
+
         });
-        
+
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash, 
+    // Any time the widget is called with no arguments or with only an option hash,
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
     },
@@ -83,18 +84,18 @@ $.widget( "heurist.dh_maps", {
         this._superApply( arguments );
     },
 
-    /* 
-    * private function 
+    /*
+    * private function
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
-        
+
         this.div_content.empty();
-        
+
         if(!this._resultset) return;
-        
+
         var recs = this._resultset.getRecords();
-        
+
         var recorder = this._resultset.getOrder();
 
         var html = '';
@@ -106,7 +107,7 @@ $.widget( "heurist.dh_maps", {
             }
         }
         this.div_content[0].innerHTML += html;
-        
+
         $allrecs = this.div_content.find('.recordDiv');
         this._on( $allrecs, {
             click: this._recordDivOnClick,
@@ -114,15 +115,15 @@ $.widget( "heurist.dh_maps", {
         });
 
     },
-    // 
+    //
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
         $(this.document).off(top.HAPI4.Event.ON_SYSTEM_INITED);
         this.div_content.remove();
     },
-    
-    
+
+
     _renderRecord_html: function(recordset, record){
 
         function fld(fldname){
@@ -156,27 +157,27 @@ $.widget( "heurist.dh_maps", {
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>'
         }
 
-        
+
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
-            + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
-            + html_thumb
-            + '<div title="'+recTitle+'" class="recordTitle">'
-            +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
-            + '</div>'
-            + '</div>';
+        + '<div class="recTypeThumb" style="background-image: url(&quot;'+ top.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>'
+        + html_thumb
+        + '<div title="'+recTitle+'" class="recordTitle">'
+        +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
+        + '</div>'
+        + '</div>';
 
 
         return html;
     },
-    
+
     _recordDivOnHover: function(event){
         var $rdiv = $(event.target);
         if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
 
-              $rdiv = $rdiv.parents('.recordDiv')
-              var rectypeID = $rdiv.attr('rectype');
-              var title = top.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
-              $rdiv.attr('title', title);
+            $rdiv = $rdiv.parents('.recordDiv')
+            var rectypeID = $rdiv.attr('rectype');
+            var title = top.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
+            $rdiv.attr('title', title);
         }
     },
 
@@ -184,28 +185,28 @@ $.widget( "heurist.dh_maps", {
     * loads the selected map document
     */
     _recordDivOnClick: function(event){
-        
+
         var $target = $(event.target),
-            $rdiv;
+        $rdiv;
 
         if(!$target.hasClass('recordDiv')){
             $rdiv = $target.parents('.recordDiv');
         }else{
             $rdiv = $target;
         }
-        
+
         var recId = $rdiv.attr('recid');
-        
+
         //hack $('#map-doc-select').click();
-        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51'); 
+        var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51');
         if(app && app.widget){
             //switch to Map Tab
             top.HAPI4.LayoutMgr.putAppOnTop('app_timemap');
-            
+
             //load Map Document
             $(app.widget).app_timemap('loadMapDocumentById', recId);
         }
-        
-    }    
+
+    }
 
 });

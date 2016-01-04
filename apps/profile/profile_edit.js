@@ -1,6 +1,6 @@
-/** 
+/**
 * Dialog to edit user's profile (logged in) or register new user (not logged in)
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -22,14 +22,14 @@ $.widget( "heurist.profile_edit", {
 
     // default options
     options: {
-        isdialog: true,  
+        isdialog: true,
 
         ugr_ID:0,
         edit_data: {},
         isregistration: false,
 
         needclear: true, //clear input everytime for registration
-        
+
         // callbacks
         callback:null
     },
@@ -47,13 +47,13 @@ $.widget( "heurist.profile_edit", {
         .appendTo( this.element );
 
         // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);   
+        //this._focusable($element);
 
         this._refresh();
 
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash, 
+    // Any time the widget is called with no arguments or with only an option hash,
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
 
@@ -61,7 +61,7 @@ $.widget( "heurist.profile_edit", {
 
             var that = this;
 
-            this.edit_form.load(top.HAPI4.basePathV4+"apps/profile/profile_edit.html?t="+(new Date().getTime()), 
+            this.edit_form.load(top.HAPI4.basePathV4+"apps/profile/profile_edit.html?t="+(new Date().getTime()),
                 function(){
 
                     //find all labels and apply localization
@@ -85,7 +85,7 @@ $.widget( "heurist.profile_edit", {
                     }
 
                     if(that.options.isdialog){
-                        
+
                         that.edit_form.dialog({
                             autoOpen: false,
                             height: 630,
@@ -125,18 +125,18 @@ $.widget( "heurist.profile_edit", {
     _setOption: function( key, value ){
         if(key==='ugr_ID'){
             this.options.ugr_ID = value;
-            this._init();          
+            this._init();
         }
     },
 
-    /* 
-    * private function 
+    /*
+    * private function
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
 
     },
-    // 
+    //
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
@@ -147,7 +147,7 @@ $.widget( "heurist.profile_edit", {
     _fromDataToUI: function(){
 
         var allFields = this.edit_form.find('input, textarea');
-        
+
         allFields.val( "" ).removeClass( "ui-state-error" );
 
         /*if(this.options.ugr_ID == top.HAPI4.currentUser.ugr_ID){
@@ -183,7 +183,7 @@ $.widget( "heurist.profile_edit", {
             this.edit_form.find(".mode-registration").hide();
             this.edit_form.find(".mode-edit").show();
         }else{
-            this.options.edit_data = {}; 
+            this.options.edit_data = {};
             this.edit_form.find("#ugr_Password").addClass('mandatory');
             this.edit_form.find(".mode-edit").hide();
 
@@ -191,15 +191,15 @@ $.widget( "heurist.profile_edit", {
                 this.edit_form.find(".mode-registration").hide();
             }else{ //registration
                 this.edit_form.find(".mode-registration").show();
-                
+
                 //init captcha
                 this.edit_form.find('#imgdiv').show();
                 /*that.edit_form.find('#btnCptRefresh')
                         .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
                         .show()
                         .click( __refreshCaptcha );*/
-                        
-                this._refreshCaptcha();                
+
+                this._refreshCaptcha();
             }
         }
 
@@ -219,15 +219,15 @@ $.widget( "heurist.profile_edit", {
 
 
         if(this.options.isdialog){
-            this.edit_form.dialog('option', 'title', 
-                Number(this.options.ugr_ID)>0 ? top.HR('Edit profile')+': '+this.options.edit_data['ugr_FirstName'] + ' ' + this.options.edit_data['ugr_LastName'] //this.options.edit_data['ugr_FullName'] 
+            this.edit_form.dialog('option', 'title',
+                Number(this.options.ugr_ID)>0 ? top.HR('Edit profile')+': '+this.options.edit_data['ugr_FirstName'] + ' ' + this.options.edit_data['ugr_LastName'] //this.options.edit_data['ugr_FullName']
                 : top.HR('Registration')  );
             this.edit_form.dialog("open");
             this.edit_form.parent().addClass('ui-dialog-heurist');
 
         }
     },
-    
+
     _refreshCaptcha: function(){
             var that = this;
             var $dd = that.edit_form.find('#imgdiv');
@@ -257,30 +257,30 @@ $.widget( "heurist.profile_edit", {
         if(this.options.isregistration){
             var ss = top.HEURIST4.msg.checkLength2( this.edit_form.find("#ugr_Captcha"), '', 1, 0 );
             if(ss!=''){
-                err_text = err_text + ', Are you human';
+                err_text = err_text + ', Answer question below to prove you are human';
             }
         }
 
         if(err_text==''){
-            // validate email 
+            // validate email
             // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
             var email = this.edit_form.find("#ugr_eMail");
             var bValid = top.HEURIST4.msg.checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i );
             if(!bValid){
                 err_text = err_text + ', '+top.HR('Wrong email format');
-            }                                                         
+            }
 
             // validate login
             var login = this.edit_form.find("#ugr_Name");
             if(!top.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
-                err_text = err_text + ', '+top.HR('Wrong user name format');   // "Username may consist of a-z, 0-9, _, @, begin with a letter." 
+                err_text = err_text + ', '+top.HR('Wrong user name format');   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
                 var ss = top.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
             }
-            // validate passwords    
+            // validate passwords
             var password = this.edit_form.find("#ugr_Password");
             var password2 = this.edit_form.find("#password2");
             if(password.val()!=password2.val()){
@@ -303,7 +303,7 @@ $.widget( "heurist.profile_edit", {
 
 
         }else{
-            err_text = top.HR('Missed required fields')+': '+err_text.substring(2);
+            err_text = top.HR('Missing required field(s)')+': '+err_text.substring(2);
         }
 
         if(err_text==''){
@@ -324,12 +324,12 @@ $.widget( "heurist.profile_edit", {
             that.options.edit_data['ugr_IsModelUser'] = (that.options.edit_data['ugr_IsModelUser']=='y')?1:0;
 
             if( !top.HEURIST4.util.isnull(that.options.callback) && $.isFunction(that.options.callback) ){
-                
+
                 that.edit_form.dialog("close");
                 that.options.callback.call(that);
-                
+
             }else{
-            
+
                 top.HAPI4.SystemMgr.user_save( that.options.edit_data,
                     function(response){
                         var  success = (response.status == top.HAPI4.ResponseStatus.OK);
@@ -352,10 +352,10 @@ $.widget( "heurist.profile_edit", {
                         }
                     }
                 );
-            
+
             }
 
-        }else{       
+        }else{
             top.HEURIST4.msg.showMsgErr(err_text);
             /*var message = $dlg.find('.messages');
             message.html(err_text).addClass( "ui-state-highlight" );
@@ -365,7 +365,7 @@ $.widget( "heurist.profile_edit", {
         }
 
     },
-    
+
     open:function(){
         this.edit_form.dialog("open");
     }

@@ -24,6 +24,7 @@
     $system = new System();
     $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 
+<<<<<<< HEAD
     if( !$isSystemInited ){  //can not init system (apparently connection to Database Server is wrong or server is down)
         $err = $system->getError();
         $error_msg = @$err['message'];
@@ -36,11 +37,10 @@
         $list =  mysql__getdatabases4($system->get_mysqli());
         if(count($list)<1){
             //reditrect to create database
-            header('Location: ' . HEURIST_BASE_URL_V3 . 'admin/setup/dbcreate/createNewDB.php');
+            header('Location: ' . HEURIST_BASE_URL . 'admin/setup/dbcreate/createNewDB.php');
             return;
         }
     }
-
 ?>
 <html>
     <head>

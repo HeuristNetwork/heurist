@@ -51,9 +51,11 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         //
-        var installDir = top.location.pathname.replace(/(((\?|apps|js|php|page|migrated)\/.*)|(index.*))/, "");
+        var installDir = top.location.pathname.replace(/(((\?|admin|applications|apps|assets|common|context_help|export|ext|external|hapi|help|import|js|page|php|records|redirects|search|viewers)\/.*)|(index.*))/, ""); // Upddate in 3 places if changed
         that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
+        // TODO: This is actually a proto URL rather than a base URL. Rename.
         that.iconBaseURL= that.basePathV4 + 'php/common/rt_icon.php?db='+_database+'&id=';
+        // TODO: why is this todo? Explain or delete
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
         that.database = _database;
 
@@ -85,22 +87,22 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         if(that.database){
 
-        // Get current user if logged in, and global database settings
-        that.SystemMgr.sys_info(
-            function(response){
-                var  success = (response.status == top.HAPI4.ResponseStatus.OK);
-                if(success){
-                    that.setCurrentUser(response.data.currentUser);
-                    that.sysinfo = response.data.sysinfo;
-                    that.basePathV3 = that.sysinfo['basePathV3'];
-                }else{
-                    top.HEURIST4.util.showMsgErr(response.message);
+            // Get current user if logged in, and global database settings
+            that.SystemMgr.sys_info(
+                function(response){
+                    var  success = (response.status == top.HAPI4.ResponseStatus.OK);
+                    if(success){
+                        that.setCurrentUser(response.data.currentUser);
+                        that.sysinfo = response.data.sysinfo;
+                        that.basePathV3 = that.sysinfo['basePathV3'];
+                    }else{
+                        top.HEURIST4.util.showMsgErr(response.message);
+                    }
+                    if(_oninit){
+                        _oninit(success);
+                    }
                 }
-                if(_oninit){
-                    _oninit(success);
-                }
-            }
-        );
+            );
 
         }else if(_oninit){
             _oninit( false );
@@ -159,6 +161,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
     }
 
+    // TODO: Remove, enable or explain
     /**
     * User class
     *
@@ -180,10 +183,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     ,logout: function(callback){
     _callserver('usr_info', {a:'logout'}, callback);
     }
-
-
     }
-
     }
     */
 
@@ -438,7 +438,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(!$.isFunction(callback)){   //@todo - remove all this stuff since it is implemented in SearchMgr
 
                     if(!request.increment || top.HEURIST4.util.isnull(request.id)){
-                            request.id = Math.round(new Date().getTime() + (Math.random() * 100));
+                        request.id = Math.round(new Date().getTime() + (Math.random() * 100));
                     }
 
                     var document = callback;

@@ -194,7 +194,7 @@
     * @param mixed $table_name
     * @param mixed $table_prefix
     * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
-    *                          fields that don't have specified prefix are ignored 
+    *                          fields that don't have specified prefix are ignored
     */
     function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
@@ -245,8 +245,6 @@
         }else{
             $query = $query." where ".$table_prefix."ID=".$rec_ID;
         }
-
-        //DEBUG print $query."<br>";
 
         $stmt = $mysqli->prepare($query);
         if($stmt){
@@ -342,8 +340,8 @@
 
             }else{
 
-                include('utils_db_script.php'); //
-                if(db_script(HEURIST_DBNAME_FULL, HEURIST_BASE_URL_V3.'/admin/setup/dbcreate/addProceduresTriggers.sql')){
+                include(dirname(__FILE__).'utils_db_load_script.php'); // used to load procedures/triggers
+                if(db_script(HEURIST_DBNAME_FULL, HEURIST_BASE_URL.'admin/setup/dbcreate/addProceduresTriggers.sql')){
                     $res = true;
                 }
             }

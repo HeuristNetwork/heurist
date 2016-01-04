@@ -92,7 +92,6 @@ cd /var/www/html
 $2 ln -s HEURIST/$1 $1
 cd HEURIST/$1
 $2 ln -s ../HEURIST_SUPPORT/external_h4 ext
-cd migrated
 $2 ln -s ../../HEURIST_SUPPORT/external external
 $2 ln -s ../../HEURIST_SUPPORT/help help
 
@@ -103,7 +102,7 @@ echo "Heurist unpacked"
 # We are therefore removing it pending investigation. Sept 2014
 # $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-# $2 wget http://heuristscholar.org/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
+# $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
 # $2 tar -zxvf elasticsearch-1.3.2.tar.gz
 # cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 # ./bin/elasticsearch -d

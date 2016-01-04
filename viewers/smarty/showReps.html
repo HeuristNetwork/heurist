@@ -1,0 +1,668 @@
+<!--
+
+/*
+* Copyright (C) 2005-2015 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* showReps.html
+* List of available report templates based on Smarty
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2015 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+
+-->
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title></title>
+
+        <!-- yui layout -->
+
+        <!--<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
+        -->
+        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
+
+        <!-- Skin CSS files resize.css must load before layout.css -->
+        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/resize.css">
+        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/assets/skins/sam/layout.css">
+        <!-- Utility Dependencies -->
+        <script src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script src="../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+        <script src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+        <!-- Optional Animation Support
+        <script src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script> -->
+        <!-- Optional Resize Support -->
+        <script src="../../external/yui/2.8.2r1/build/resize/resize-min.js"></script>
+        <!-- Source file for the Layout Manager -->
+        <script src="../../external/yui/2.8.2r1/build/layout/layout-min.js"></script>
+
+        <!-- TREEVIEW DEFS -->
+        <!-- Required CSS -->
+        <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/treeview/assets/skins/sam/treeview.css">
+        <!-- Optional dependency source file -->
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/animation/animation-min.js"></script>
+        <!-- Optional dependency source file to decode contents of yuiConfig markup attribute-->
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js" ></script>
+        <!-- TreeView source file -->
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
+        <!-- END TREEVIEW DEFS-->
+        <!-- for yui simply dialog -->
+        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
+
+        <!--
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        -->
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
+
+        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
+
+        <link rel="stylesheet" href="../../external/js/codemirror-3.20/lib/codemirror.css">
+        <script src="../../external/js/codemirror-3.20/lib/codemirror.js"></script>
+        <script src="../../external/js/codemirror-3.20/mode/xml/xml.js"></script>
+        <script src="../../external/js/codemirror-3.20/mode/javascript/javascript.js"></script>
+        <script src="../../external/js/codemirror-3.20/mode/css/css.js"></script>
+        <script src="../../external/js/codemirror-3.20/mode/htmlmixed/htmlmixed.js"></script>
+        <script src="../../external/js/codemirror-3.20/mode/smarty/smarty.js"></script>
+        <script src="../../external/js/codemirror-3.20/mode/smartymixed/smartymixed.js"></script>
+
+        <style type="text/css">
+            /* hide header in top layout */
+            .yui-skin-sam .yui-layout .yui-layout-hd {
+                background: none;
+                border: 1px solid #ff0000;
+                display: none;
+                height: 0px;
+            }
+            /*display: none !important;
+            display: block;
+            */
+            .linkadmin {
+                visibility: hidden;
+            }
+            #editor, .CodeMirror {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+            }
+            .CodeMirror *{
+                font-family: Courier, Monospace !important;
+                font-size: 14px;
+            }
+
+            .insert-popup{
+                visibility:visible;
+            }
+            .insert-intree{
+                display:none;
+            }
+        </style>
+        <script type="text/javascript">
+            var showReps, isEditorVisible=false;
+
+            // inserts variable (false,false), repeat loop (true,false, or if test (false,true)
+            function insertVar(isloop, isif){
+                if(showReps){
+                    showReps.insertSelectedVars( null, isloop, isif );
+                }
+            }
+
+        </script>
+    </head>
+
+    <body class="yui-skin-sam"  onresize="onResize()">
+        <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
+        <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+        <script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
+
+        <script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
+
+
+        <iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
+
+        <div id="insert-popup" style="display:none;">
+            <div style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;">
+
+                <table border="0">
+                    <tr>
+                        <td colspan="2">
+                            <select id="selInsertPattern" style="width:200px">
+                                <option value="1">Heading for record type</option>
+                                <option value="2">Simple table</option>
+                                <option value="3">Information on first element of a loop</option>
+                                <option value="4">Information on last element of a loop</option>
+                                <option value="99">Outer records loop</option>
+                            </select>
+                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                                Insert pattern
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            <hr>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <select id="selInsertMode" style="width:120px">
+                                <option value="0">Field only</option>
+                                <option value="1">Field + Label</option>
+                                <option value="2">Field + function wrapper</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id="selInsertModifiers"
+                                onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
+                                style="width:120px">
+                                <option>choose modifier</option>
+                                <option>capitalize</option>
+                                <option>cat</option>
+                                <option>count_characters</option>
+                                <option>count_paragraphs</option>
+                                <option>count_sentences</option>
+                                <option>count_words</option>
+                                <option>date_format</option>
+                                <option>default</option>
+                                <option>escape</option>
+                                <option>indent</option>
+                                <option>lower</option>
+                                <option>nl2br</option>
+                                <option>regex_replace</option>
+                                <option>replace</option>
+                                <option>spacify</option>
+                                <option>string_format</option>
+                                <option>strip</option>
+                                <option>strip_tags</option>
+                                <option>truncate</option>
+                                <option>upper</option>
+                                <option>wordwrap</option>
+                            </select>
+                        </td>
+                    </tr>
+
+
+                    <!-- shows buttons in all cases, plus message if within loop -->
+                    <tr>
+                        <td colspan="2"><div class="ins_isloop">Use these buttons for normal insertion</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><button onclick="top.HEURIST.insertVar(null, false, false )">
+                            Insert field</button>
+                        </td>
+                        <td>
+                            <button onclick="top.HEURIST.insertVar(null,  false, true )">
+                                Insert test (If)</button>
+                        </td>
+                    </tr>
+
+                    <!-- only shows if there is a within-loop option -->
+                    <tr>
+                        <td colspan="2"><div class="ins_isloop">Use these buttons if inserting within a repeat loop</div>
+                        </td>
+                    </tr>
+                    <tr class="ins_isloop">
+                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, false )">
+                            Insert field</button></div>
+                        </td>
+                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, true )">
+                            Insert test (If)</button></div>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <br />
+                <b>Note</b> For repeating value fields (including pointers) you should first insert a repeat loop
+                by clicking "repeat" next to the name of the field, then place further field specifications
+                inside the {foreach}...{/foreach} loop that is inserted.
+                <div class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</div>
+            </div>
+        </div>
+
+
+        <div id="viewercontainer">
+            <div id="toolbardiv" style="width:100%;height:30px;">
+                <div style="padding:5px;display:inline-block;">
+                    <select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
+                        <option value="all" selected="selected">All on page</option>
+                        <option value="selected">Selected only</option>
+                        <option value="main">Query result</option>
+                    </select>
+                </div>
+                <div style="padding:5px;display:inline-block;">
+                    <label style="width:100px;padding-left:5px;white-space:nowrap;">Select template:</label>
+                    <select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;margin-right:100px"></select>
+
+                    <span id="recordCount"></span>
+                </div>
+                <button id="btnRepPrint2" style="position: absolute; right: 40px; top:4px;">Print</button>
+
+                <!-- <div id="btnRepPrint2" onclick="onPrint()"  class="button"
+                style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
+                -->
+                <ul id="rep_list" class="horizontal menu" style="float:right">
+                    <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
+                        <!-- <span id="btnRepMenu2" class="button"></span> -->
+                        <ul id="toolMenuItems" style="zdisplay:block;">
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+            <div id="rep_container"></div>
+        </div>
+        <div id="editorcontainer" style="display:none">
+            <h2>Template <span id="edTemplateName"></span></h2>
+            <div id="templateCode">
+                <!-- PLAIN MODE <textarea id="edTemplateBody" name="edTemplateBody"></textarea>
+                <div id="editor"></div>-->
+            </div>
+            <div id="templateTree">
+                <div>
+                    <a href="../../../context_help/smarty_reports.html" 
+                            onClick="top.HEURIST.util.popupURL(window, this.href);return false;"
+                            title="Read full documentation on the Smarty templating language">
+                    <b>Help on using this function</b></a><br />
+                    <div>
+                        <label style="font-weight:bold;width:auto;">Select Record Type</label><span id="rectype_selector"></span>
+                    </div>
+                    Position cursor in text on left before selecting actions below
+
+                    <!-- what does this do? -->
+                    <div style="float:right;display:none">in popup&nbsp;
+                        <input type="checkbox" checked="checked" onclick="insertMode(event)"/>&nbsp;
+                    </div>
+
+                </div>
+
+                <div id="treeContainer">
+                    <div id="varsTree" class="ygtv"></div>
+                </div>
+
+            </div>
+
+            <div class="actionButtons">
+                <button onClick="doExecuteFromEditor()" title="Test your template" style="font-size:1.1em;">TEST</button>
+                &nbsp;
+                <div style="display:inline-block;">
+                    <select id="cbErrorReportLevel">
+                        <option value="0" selected="selected">Ignore errors</option>
+                        <option value="1">Show warnings</option>
+                        <option value="2">Show errors</option>
+                        <option value="3">Debug info</option>
+                    </select>
+                    <select id="cbUseAllRecords2" onChange="setQueryMode(event)" style="width:90px">
+                        <option value="all" selected="selected">All on page</option>
+                        <option value="selected">Selected only</option>
+                        <option value="main">Query result</option>
+                    </select>
+                </div>
+                <button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
+                <button onClick="doEditor(1)">Save As</button>
+                <!--		<button onClick="doEditor(3)">Delete</button>
+                -->
+                <button onClick="doEditor(0)">Close Editor</button>
+                &nbsp;&nbsp;&nbsp;
+                <button onClick="onExportTemplate()" title="Export template with concept codes">Export</button>
+
+                <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
+
+                <span class="fileinput-button" style="visibility: hidden;">
+                    <input id="fileupload" type="file" name="import_template" accept=".gpl">
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <script type="text/javascript">
+
+            var isInited = false;
+            function setupMCE() {
+                if(isInited){
+                    tinyMCE.execCommand('mceToggleEditor',false,'edTemplateBody');
+                    isEditorVisible = !isEditorVisible;
+                }else{
+                    tinyMCE.init({
+                        mode : "textareas",
+                        theme : "advanced",
+                        editor_selector : "mceAdvanced",
+                        /*"advanced"
+                        plugins : "pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,
+                        searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
+
+                        theme_advanced_buttons1 : "bold,italic,underline,strikethrough,forecolor,backcolor,|,justifyleft,justifycenter,justifyright,
+                        justifyfull,|,formatselect,fontselect,fontsizeselect,|,sub,sup,|,charmap,emotions",
+                        theme_advanced_buttons2 : "cut,copy,paste,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,
+                        unlink,anchor,|,insertdate,inserttime",
+                        theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid", //",iespell,media,advhr",
+                        */
+                        /*
+                        theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,
+                        justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+                        theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,
+                        redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
+                        theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,
+                        advhr,|,print,|,ltr,rtl,|,fullscreen",
+                        theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,|,cite,abbr,acronym,del,ins,
+                        attribs,|,visualchars,nonbreaking,template,pagebreak",
+                        */
+                        theme_advanced_toolbar_location : "top",
+                        theme_advanced_toolbar_align : "left",
+                        theme_advanced_statusbar_location : "bottom",
+                        theme_advanced_resizing : true
+                    });
+                    isInited = true;
+                    isEditorVisible = true;
+                }
+
+            }
+
+            //
+            function onPrint()
+            {
+                try{
+                    var oIframe = document.getElementById("ifrmPrint");
+                    var oContent = document.getElementById("rep_container").innerHTML;
+                    var oDoc = (oIframe.contentWindow || oIframe.contentDocument);
+                    if (oDoc.document) oDoc = oDoc.document;
+                    oDoc.write("<head><title></title>");
+                    oDoc.write("</head><body onload=\"this.focus(); this.print();\">");
+                    oDoc.write(oContent + "</body>");
+                    oDoc.close();
+                }
+                catch(e){
+                    //self.print();
+                }
+            }
+
+            //
+            function onFile(){
+
+                var sel = document.getElementById('selTemplates');
+                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
+
+                var template_file = sel.options[sel.selectedIndex].value; // by default first entry
+
+                Hul.popupURL(this, top.HEURIST.baseURL_V3 + 'viewers/smarty/repMenu.html?template_file='+template_file,
+                    { callback: function(filename){
+                        if(!Hul.isnull(filename)) {
+                            window.showReps.onPublish( filename )
+                        }
+                        }
+                } );
+
+            }
+
+            //
+            function onShowEditor()
+            {
+                var sel = document.getElementById('selTemplates');
+
+                if(sel.selectedIndex>=0){
+                    var template_file = sel.options[sel.selectedIndex].value;
+                    window.showReps.showEditor(template_file);
+                }
+            }
+
+            //
+            function onDeleteTemplate()
+            {
+                var sel = document.getElementById('selTemplates');
+
+                if(sel.selectedIndex>=0){
+                    window.showReps.originalFileName(sel.options[sel.selectedIndex].value);
+                    doEditor(3);
+                }
+            }
+
+            //
+            function onPublish()
+            {
+                var sel = document.getElementById('selTemplates');
+
+                if(sel.selectedIndex>=0){
+                    window.showReps.onPublish(sel.options[sel.selectedIndex].value);
+                }
+            }
+
+            function onExportTemplate()
+            {
+                var sel = document.getElementById('selTemplates');
+                if(sel.selectedIndex>=0){
+                    window.showReps.doExportTemplate(sel.options[sel.selectedIndex].value);
+                }
+                return false;
+            }
+
+            //
+            //
+            function onGenerate()
+            {
+                if(window.showReps.isNeedSelection()){
+                    alert('You have to select some records');
+                }else{
+                    var name=jQuery.trim(prompt("Please enter template name",""));
+                    if (!Hul.isempty(name))
+                    {
+                        window.showReps.generateTemplate(name);
+                    }
+                }
+            }
+
+            //
+            function doExecuteFromEditor()
+            {
+                window.showReps.doExecuteFromEditor();
+            }
+
+            //
+            function doEditor(action)
+            {
+                window.showReps.operationEditor(action);
+            }
+
+            //
+            function onSelectTemplate()
+            {
+                var sel = document.getElementById('selTemplates');
+                if(sel.selectedIndex>=0){
+
+                    var template_file = sel.options[sel.selectedIndex].value;
+
+                    top.HEURIST.util.setDisplayPreference("viewerCurrentTemplate", template_file);
+                    window.showReps.processTemplate(template_file);
+                }
+            }
+
+            function onSelectModifier(){
+                var sel = document.getElementById('selInsertModifiers');
+                if(sel.selectedIndex>0){
+                    window.showReps.insertModifier(sel.value);
+                    sel.selectedIndex = 0;
+                }
+            }
+
+            function setQueryMode(event,needReload){
+                var elem = event.target;
+                window.showReps.setQueryMode(elem.value);
+            }
+
+            function insertMode(event){
+                //$(".insert-popup").css("visibility",event.target.checked?"visible":"hidden")
+                //            $(".insert-intree").css("visibility",event.target.checked?"hidden":"visible")
+
+                if(event.target.checked){
+                    $(".insert-popup").show();
+                    $(".insert-intree").hide();
+                }else{
+                    $(".insert-popup").hide();
+                    $(".insert-intree").show();
+                }
+            }
+
+            function onResize(){
+                window.showReps.onResize(this.innerWidth);
+            }
+
+            //
+            //  starts initialization on load completion of this window
+            function loadHandler(){
+                window.showReps = new ShowReps();
+
+                window.showReps.onResize(this.innerWidth);
+                //setupMCE();
+
+                $("#btnRepPrint2").button({text:false, icons: {
+                    primary: "ui-icon-print"
+                }})
+                .click(onPrint);
+
+                $("#btnRepMenu2").button({text:false, icons: {
+                    primary: "ui-icon-gear"
+                }});
+
+
+
+            }
+
+            function loadUserInfoHandler(){
+                //$('.linkadmin').css('display', 'block  !important');
+                //$('.linkadmin').css('display', 'none  !important');
+                //$('#lnkDel').css('display', 'none  !important');
+                //$('.linkadmin').css('visibility', 'visible');
+
+                var s = '';
+
+                if(top.HEURIST.is_logged_in()){
+                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                        s =  '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
+                        '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
+                    } else {
+                        s = s + '<li> <a href="#" >Manage (Admins only)</a></li>';
+                    }
+
+                    s = s + '<li><a href="#" onClick="onFile()" class="separator">Publish report</a></li>';
+
+                    s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export Template</a></li>' +
+                    '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import Template</a></li>';
+
+                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                        s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
+                    }
+                }
+                s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (top.HEURIST.is_logged_in()?'class="separator"':'') +'>Refresh</a></li>';
+
+
+                /* OLD MENU ORDER
+
+                var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print report</a></li>'+
+                '<li><a href="#" onClick="onFile()">Get URL for report</a></li>';
+
+                if(top.HEURIST.is_logged_in()){
+                s = s + '<li><a href="#" onClick="onPublish()">Publish report</a></li>';
+
+                if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>'+
+                '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
+                '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
+                } else {
+                s = s + '<li> <a href="#" >Manage (Admins only)</a></li>'
+                }
+
+                s = s + '<li><a href="#" onClick="onExportTemplate()">Export</a></li>' +
+                '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
+
+                }
+                */
+
+                //$('#btnRepPrint').button( {icon:'ui-icon-print'} );
+                //$('#btnRepMenu2').button( {icon:'ui-icon-gear'} );
+
+                var elem = document.getElementById('toolMenuItems');
+                elem.innerHTML = s;
+            }
+
+            if(!top.HEURIST.rectypes){
+                top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadCommonInfo.php")
+            }
+
+            YAHOO.util.Event.addListener(window, "load", loadHandler );
+
+            var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            $.getScript( top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php?db="+_db, loadUserInfoHandler);
+            //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );
+            //top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php");
+
+
+            $(function () {
+                'use strict';
+
+                var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
+                $('#fileupload').fileupload({
+                    url: 'templateOperations.php',
+                    formData: [{name:'db', value: _db}, {name:'mode', value:'import'}],
+                    dataType: 'json',
+                    done: function (e, data) {
+
+                        var obj = data.jqXHR.responseJSON; //Hul.evalJson(data.jqXHR.responseJSON);
+                        if (obj  &&  obj.error) {
+                            alert(obj.error);
+                        }else if(obj.ok) {
+                            window.showReps.showEditor(obj.ok, true);
+                            if(obj.details_not_found){
+                                alert('Conversion of template file to internal codes. '+
+                                    'Unable to convert '+obj.details_not_found.length+
+                                    '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
+                                    'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+
+                                    'which failed to convert are enclosed in [[ ]] in the template file eg. f[[2-27]]'
+                                );
+                            }
+                        }
+
+                        /*$.each(data.result.files, function (index, file) {
+                        $('<p/>').text(file.name).appendTo('#files');
+                        });*/
+                    },
+                });
+            });
+
+        </script>
+    </body>
+</html>

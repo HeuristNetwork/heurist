@@ -511,7 +511,7 @@ $.widget( "heurist.svs_list", {
                          {
 
                              continueFunc();
-                                 
+
                          }else{
                              top.HAPI4.currentUser.ugr_SvsTreeData[groupID] = newdata[groupID];
 
@@ -593,7 +593,7 @@ $.widget( "heurist.svs_list", {
                         if(hasrules==1){ //withrules
                             s = '<span class="ui-icon ui-icon-plus svs-type-icon"></span>'
                                 +'<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
-                                
+
                             s_hint = this._HINT_WITHRULES;
                         }else if(hasrules==2){ //rules only
                             s = '<span class="ui-icon ui-icon-shuffle svs-type-icon" title="rules" ></span>';
@@ -741,7 +741,7 @@ $.widget( "heurist.svs_list", {
 
                     if(node.folder){
                         if(node.countChildren()>0){
-                            top.HEURIST4.msg.showMsgDlg('Can not delete non-empty folder. Delete dependent entries first.',null,top.HR('Warning'));
+                            top.HEURIST4.msg.showMsgDlg('Cannot delete non-empty folder. Please delete dependent entries first.',null,top.HR('Warning'));
                         }else{
                             __removeNode();
                         }
@@ -1136,7 +1136,7 @@ $.widget( "heurist.svs_list", {
                 }
                 if(!facet_params || !Hul.isArray(facet_params.facets)){
                     // Do something about the exception here
-                    top.HEURIST4.msg.showMsgDlg(top.HR('Can not init faceted search. Corrupted parameters. Remove this search'), null, "Error");
+                    top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise faceted search. Corrupted parameters. Please remove this search'), null, "Error");
                     return;
                 }
 

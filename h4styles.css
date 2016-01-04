@@ -1,4 +1,5 @@
 /**
+*
 * h4styles.css : global stylesheet for Heurist Vsn 4
 *
 * @package     Heurist academic knowledge management system
@@ -66,6 +67,7 @@ body {
     width: 100%;
 }
 
+/* TODO: opacity=20 appears to be wrong, ? should be opacity 20 */
 .ui-layout-mask {
     background: #C00 !important;
     opacity: .20 !important;
@@ -350,10 +352,10 @@ div.recordDiv > .rec_view_link {
 
 /*
 h3 > #rec_edit_link{
-    display: none;
-    height: 16px;
-    width: 16px;
-    float: right;
+display: none;
+height: 16px;
+width: 16px;
+float: right;
 }*/
 
 
@@ -634,21 +636,21 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     margin:1em 0;
     padding:.5em 10px;
     background:#71b5e9 url(bg_tags.gif) repeat-x;*/
-    }
+}
 .tagsCloud li{
     margin:0;
     padding:0;
     list-style:none;
     display:inline-block;
-    }
+}
 .tagsCloud li a{
     /*text-decoration:none;
     color:#fff;*/
     padding:0 2px;
-    }
+}
 .tagsCloud li a:hover{
     /*color:#cff400;*/
-    }
+}
 
 .tag1{font-size:0.8em;}
 .tag2{font-size:0.9em;}
@@ -665,9 +667,9 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 
 .truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .horizontalmenu {
@@ -685,12 +687,12 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 }
 
 /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
-     Remove the jQuery UI Icon
-     Remove the jQuery UI Text Indent
-     Bump it up - jQuery UI is -8px
+Remove the jQuery UI Icon
+Remove the jQuery UI Text Indent
+Bump it up - jQuery UI is -8px
 
-     Bump it - jQuery UI is -8px
-     Allow use of icon-large to be properly aligned
+Bump it - jQuery UI is -8px
+Allow use of icon-large to be properly aligned
 */
 /*
 .ui-icon[class*=" icon-"] {
@@ -710,11 +712,11 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     overflow:hidden !important;
 }
 .fancytree-title{
-   margin:0 !important;
-   padding: 0 !important;
+    margin:0 !important;
+    padding: 0 !important;
 }
 .fancytree-edit-input{
-   min-width: 12em !important;
+    min-width: 12em !important;
 }
 
 .fancytree-has-children span.fancytree-checkbox
@@ -785,7 +787,7 @@ div > .svs-contextmenu {
 
 /*
 ::-webkit-scrollbar-button {
-    background: #8ea9b9
+background: #8ea9b9
 }*/
 .div-table-cell{
     display: table-cell;

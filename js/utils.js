@@ -56,7 +56,7 @@ top.HEURIST4.util = {
         try{
             return JSON.parse(JSON.stringify(data));
         }catch (ex2){
-            console.log('can not clone json array '+data);
+            console.log('cannot clone json array '+data);
             return [];
         }
     },
@@ -91,7 +91,7 @@ top.HEURIST4.util = {
                     ele.removeClass('ui-state-disabled');
               }
           });
-      }  
+      }
     },
     
     isIE: function () {
@@ -205,7 +205,7 @@ top.HEURIST4.util = {
 
         return {q:qsearch, w:domain, rules:rules, notes:notes};
     },
-    
+
     getUrlParameter: function getUrlParameter(name, query){
 
         if(!query){

@@ -58,14 +58,29 @@ mkdir /var/www/html/HEURIST/h4-build/$1
 cp -r *.* /var/www/html/HEURIST/h4-build/$1
 
 # Remember to add any new directories here
+
+# H4 directories
 cp -r apps /var/www/html/HEURIST/h4-build/$1
 cp -r assets /var/www/html/HEURIST/h4-build/$1
-cp -r context_help /var/www/html/HEURIST/h4-build/$1
-cp -r documentation_and_templates /var/www/html/HEURIST/h4-build/$1
-cp -r js /var/www/html/HEURIST/h4-build/$1
-cp -r migrated /var/www/html/HEURIST/h4-build/$1
 cp -r page /var/www/html/HEURIST/h4-build/$1
 cp -r php /var/www/html/HEURIST/h4-build/$1
+cp -r js /var/www/html/HEURIST/h4-build/$1
+
+# H3 directories
+cp -r admin /var/www/html/HEURIST/h4-build/$1
+cp -r applications /var/www/html/HEURIST/h4-build/$1
+cp -r common /var/www/html/HEURIST/h4-build/$1
+cp -r export /var/www/html/HEURIST/h4-build/$1
+cp -r hapi /var/www/html/HEURIST/h4-build/$1
+cp -r import /var/www/html/HEURIST/h4-build/$1
+cp -r installers  /var/www/html/HEURIST/h4-build/$1
+cp -r records  /var/www/html/HEURIST/h4-build/$1
+cp -r search  /var/www/html/HEURIST/h4-build/$1
+cp -r viewers /var/www/html/HEURIST/h4-build/$1
+
+# Shared directories
+cp -r context_help /var/www/html/HEURIST/h4-build/$1
+cp -r documentation_and_templates /var/www/html/HEURIST/h4-build/$1
 
 # remove any superfluous files - add others as appropriate
 # add here as required ...
@@ -86,7 +101,7 @@ echo
 echo Copying installer and update shellscripts from root of current instance
 echo The installer and update scripts are accessed directly to download and install tarballs
 cp *.sh /var/www/html/HEURIST/DISTRIBUTION
-cp migrated/installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
+cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
 echo
 echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, and help

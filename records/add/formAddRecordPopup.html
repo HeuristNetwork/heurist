@@ -1,0 +1,232 @@
+<!--
+
+/*
+* Copyright (C) 2005-2015 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* Popup lightweight wrapper for Shared Information tab to allow editing of nested records added from the edit record form. 
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2015 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  Records/Add
+*/
+
+-->
+
+<html>
+<head>
+  <title>Add new record !!!</title>
+
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <link rel=stylesheet href="../../common/css/global.css">
+  
+  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+  <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
+  
+</head>
+
+<body width="760" height="560" style="overflow:hidden; background:#ffffff; padding:0px !important;">
+
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script src="../../common/js/temporalObjectLibrary.js"></script>
+        <script src="../../common/php/getMagicNumbers.php"></script> <!-- xxx -->
+        <script src="../../records/edit/relationshipsObjectLibrary.js"></script>
+        <script src="../../common/php/loadUserInfo.php"></script> <!-- xxx -->
+
+        <script src="../../records/edit/digitizer/mapViewer.js"></script>
+
+        <script src="../../common/php/loadCommonInfo.php"></script> <!-- xxx -->
+        <script src="../../common/php/displayPreferences.php"></script>
+
+        <script src="../../records/edit/editRecord.js"></script>  
+  
+  
+<div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
+<div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
+<div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record">
+<input type=button onClick="window.close();" value="Cancel"></div>
+  <script>
+
+window.HEURIST.edit = {
+	publicHasChanged: false,
+	save_in_progress:false,
+
+	unchanged: function() {
+		window.HEURIST.edit.publicHasChanged = false;
+	},
+
+	changed: function() {
+		window.HEURIST.edit.publicHasChanged = true;
+	},
+
+	userCanEdit: function(){
+		return true;
+	},
+
+	save: function() {
+		// Attempt to save the public tab
+		if(!window.HEURIST.edit.save_in_progress){
+
+			window.HEURIST.edit.save_in_progress = true;
+			var editFrame = document.getElementById("edit-frame");
+			var contentWindow = editFrame.contentWindow;
+			if (contentWindow) {
+
+				var form = contentWindow.document.forms[0];
+				if (form && form.onsubmit  &&  ! form.onsubmit()) {
+					window.HEURIST.edit.save_in_progress = false;
+					return;	// submit failed ... up to the individual form handlers to display messages
+				}
+
+				top.HEURIST.registerEvent(editFrame, "load", function() {
+					window.HEURIST.edit.save_in_progress = false;
+					var record = (window.HEURIST.record ? window.HEURIST.record :
+									(window.HEURIST.edit.record ? window.HEURIST.edit.record : null));
+					if (!record) return;
+					window.close(record.title, record.bdValuesByType, record.bibID);
+				});
+
+				(form.heuristSubmit || form.submit)();
+
+				return;
+			}
+
+		}
+		// If we get here, there were no unsaved changes.
+		// Grab the biblio title from the saved document, and close the window.
+	}
+};
+
+window.HEURIST.parameters = top.HEURIST.parseParams(window.location.search);
+var rectype = parseInt(window.HEURIST.parameters["rectype"]);
+var titleBits = (window.HEURIST.parameters["title"] || "").split(/\s+/);
+var db = (window.HEURIST.parameters["db"] || "");
+// capitalise the first letter of each word in the title
+for (var i=0; i < titleBits.length; ++i) {
+	titleBits[i] = titleBits[i].charAt(0).toUpperCase() + titleBits[i].substring(1);
+}
+var title = titleBits.join(" ");
+document.getElementById("title-val").appendChild(document.createTextNode(title || ""));
+var url = window.HEURIST.parameters["url"];
+var addr = window.HEURIST.parameters["addr"];
+var trgRecID = window.HEURIST.parameters["trgRecID"];
+var trgRecTitle = window.HEURIST.parameters["trgRecTitle"];
+var type = window.HEURIST.parameters["type"];
+var text = window.HEURIST.parameters["text"];
+
+if (! rectype) {  //rectype is not defined - select from dropdown
+	var setInitialrectype = function() {
+		var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
+
+		var editFrame = document.getElementById("edit-frame");
+		editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype;
+		editFrame.style.display = "block";
+
+		rectypeDropdown.onchange = setrectype;
+	}
+	var setrectype = function() {
+		if (! confirm("Existing details will be lost - continue?")) return;
+
+		var rectype = rectypeDropdown.options[rectypeDropdown.selectedIndex].value;
+
+		var editFrame = document.getElementById("edit-frame");
+		editFrame.contentWindow.setrectype(rectype);
+	}
+
+
+	var rectypeDiv = document.getElementById("rectype-val");
+	var rectypeDropdown = document.createElement("select");
+		rectypeDropdown.id = "rectype";
+
+	var j = 0;
+	var firstOption = rectypeDropdown.options[j++] = new Option("(select a record type)", "");
+		firstOption.disabled = true;
+		firstOption.selected = true;
+
+	// rectypes displayed in Groups by group display order then by display order within group
+	var index;
+	for (index in top.HEURIST.rectypes.groups){
+		if (index == "groupIDToIndex" ||
+		top.HEURIST.rectypes.groups[index].showTypes.length < 1) continue;
+		var grp = document.createElement("optgroup");
+		grp.label = top.HEURIST.rectypes.groups[index].name;
+		rectypeDropdown.appendChild(grp);
+		for (var recTypeIDIndex in top.HEURIST.rectypes.groups[index].showTypes) {
+			var recTypeID = top.HEURIST.rectypes.groups[index].showTypes[recTypeIDIndex];
+			var name = top.HEURIST.rectypes.names[recTypeID];
+			rectypeDropdown.appendChild(new Option(name, recTypeID));
+		}
+	}
+
+
+	rectypeDropdown.onchange = setInitialrectype;
+	rectypeDiv.appendChild(rectypeDropdown);
+
+} else {
+	var editFrame = document.getElementById("edit-frame");
+	editFrame.src = "../edit/tabs/publicInfoTab.html?db="+db+"&rectype="+rectype+
+					(title ? "&title="+encodeURIComponent(title):"") +
+					(addr ? "&addr="+addr : "") +
+					(type ? "&type="+type : "") +
+					(text ? "&text="+text : "") +
+					(trgRecID ? "&trgRecID="+trgRecID : "") +
+					(trgRecTitle ? "&trgRecTitle="+trgRecTitle : "");
+	editFrame.style.display = "block";
+
+	//ART: no need anymore since name of record type is specified in title of popup
+	//document.getElementById("rectype-val").appendChild(document.createTextNode(top.HEURIST.rectypes.names[rectype]));
+	document.getElementById("rectype-val").innerHTML = "";
+}
+
+</script>
+
+<div id=notes-container></div>
+
+<div>
+
+    <div id="popup-saved" class="popup-message" style="display: none">
+        <b>Record saved</b>
+    </div>
+    <div id="popup-nothingchanged" class="popup-message" style="display: none">
+        <b>Nothing changed</b>
+    </div>
+
+</div>
+
+<script src="../disambig/similarRecordsPopup.js"></script>
+<script>
+function popupDisambiguation(matches) {
+	_popupDisambiguation(matches, function(choice) {
+		if (choice.value == -1) {
+			window.HEURIST.record.forceSave = true;
+			var editFrame = document.getElementById("edit-frame");
+			editFrame.contentWindow.document.forms[0].heuristSubmit();
+		}
+		else {
+			window.close(choice.details.title, [], choice.details.bibID);
+		}
+	});
+}
+</script>
+
+ </body>
+</html>

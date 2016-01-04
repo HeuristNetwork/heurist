@@ -127,7 +127,7 @@
                     $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Recovery');
                     return false;
                 }
-                
+
                 $new_passwd = generate_passwd();
                 $record = array("ugr_ID"=>$user['ugr_ID'], "ugr_Password"=>hash_it($new_passwd) );
                 $res= mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
@@ -150,7 +150,7 @@
                     }
 
                 }else{
-                    $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 }
             }
 
@@ -305,7 +305,7 @@
 
             }else if ($is_registration || $system->is_admin2($recID)) {
 
-                //do not allow registration if approvement mail can not be sent
+                //do not allow registration if approvement mail cannot be sent
                 if($is_registration){
                     if(false && !checkSmtp()){
                         $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
@@ -313,7 +313,7 @@
                     }
                     //check capture
                     if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != @$record['ugr_Captcha']) {
-                        $system->addError(HEURIST_UNKNOWN_ERROR, 'Are you bot? Please enter correct value into Challenge field');
+                        $system->addError(HEURIST_UNKNOWN_ERROR, 'Are you a bot? Please enter the correct answer to the challenge question');
                         return false;
                     }
                     if (@$_SESSION["captcha_code"]){
@@ -323,7 +323,7 @@
                 if(@$record['ugr_Captcha']){
                     unset($record['ugr_Captcha']);
                 }
-                
+
                 $mysqli = $system->get_mysqli();
 
                 $res = mysql__select_value($mysqli,
@@ -381,7 +381,7 @@
 
                     return $res; //returns affected record id
                 }else{
-                    $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 }
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 'Operation denied. Not enough rights');
@@ -456,7 +456,7 @@
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below to review further details and approve the registration:\n".
-            HEURIST_BASE_URL_V3."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
+            HEURIST_BASE_URL."admin/adminMenu.php?db=".HEURIST_DBNAME."&recID=$recID&mode=users";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 
@@ -492,10 +492,6 @@
             }else{
                 $email_text = "A new Heurist account has been created for you.";
             }
-
-            // point them to the home page
-            // This is confusing for the user who has a specific database, and the URL is wrong b/c it goes to an H3 address which doesn't exist ...
-            //$email_text .= "\n\nPlease go to: ".HEURIST_BASE_URL."?db=".HEURIST_DBNAME." with the username: " . $ugr_Name;
 
             //give them a pointer to the search page for the database
             $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at ".

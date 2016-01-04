@@ -29,7 +29,7 @@ require_once(dirname(__FILE__)."/page/initPage.php");
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
         <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
-             number of widgets. Currently it is commented out of the code in layout_default.js -->
+        number of widgets. Currently it is commented out of the code in layout_default.js -->
 
         <!-- for gridster layout, development version - remove comments to use
         <link rel="stylesheet" type="text/css" href="ext/gridster/jquery.gridster.css" />
@@ -57,7 +57,7 @@ require_once(dirname(__FILE__)."/page/initPage.php");
 
         <script type="text/javascript" src="apps/topmenu/help_tips.js"></script>
 
-        <script type="text/javascript" src="<?php echo HEURIST_BASE_URL_V3; ?>common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>common/js/temporalObjectLibrary.js"></script>
 
         <!-- DOCUMENTATION TODO: explain this -->
         <!-- these scripts are loaded explicitely - for debug purposes
@@ -78,7 +78,10 @@ require_once(dirname(__FILE__)."/page/initPage.php");
 
         <!-- DOCUMENTATION TODO: What are these, why are they commented out -->
         <!-- these widgets are loaded dynamically, but for debug they should be loaded explicitely
+
+        @TODO: FOLLOWING FILE IS NOT IN THIS LOCATION
         <script type="text/javascript" src="apps/profile/profile.js"></script>
+
         <script type="text/javascript" src="apps/viewers/connections.js"></script>
         <script type="text/javascript" src="apps/viewers/recordDetails.js"></script>
         <script type="text/javascript" src="apps/topmenu/mainMenu.js"></script>
@@ -95,7 +98,7 @@ require_once(dirname(__FILE__)."/page/initPage.php");
         <!-- todo: load dynamically
         <script type="text/javascript" src="apps/editing/rec_search.js"></script>
         <script type="text/javascript" src="apps/editing/rec_relation.js"></script>
-         -->
+        -->
         <!-- script type="text/javascript" src="page/editing.js"></script -->
 
         <!-- move to profile.js dynamic load -->
@@ -105,8 +108,8 @@ require_once(dirname(__FILE__)."/page/initPage.php");
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
 
         <script type="text/javascript">
-        
-            function onPageInit(success){
+
+           function onPageInit(success){
                 
                 if(!success) return;
                 
@@ -141,7 +144,22 @@ require_once(dirname(__FILE__)."/page/initPage.php");
                             top.HAPI4.SearchMgr.doSearch(document, request);
                         }, 3000);
                     }
-                }
+                }        
+                //definition of ABOUT dialog, called from Help > About, see content below
+                $( "#heurist-about" ).dialog(
+                    {
+                        autoOpen: false,
+                        height: 400,
+                        width: 450,
+                        modal: true,
+                        resizable: false,
+                        draggable: false,
+                        hide: {
+                            effect: "puff",
+                            duration: 500
+                        }
+                    }
+                );
 
                 //if database is empty show welcome screen
                 if(!(top.HAPI4.sysinfo.db_total_records>0)){
@@ -160,12 +178,10 @@ require_once(dirname(__FILE__)."/page/initPage.php");
 
 
         <!-- These are old H3 stuff - needed to support existing features in popups -->
-        <script>top.installDirFromH4="<?=HEURIST_BASE_URL_V3?>";</script>
-        <script src="<?=HEURIST_BASE_URL_V3?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL_V3?>common/php/displayPreferences.php"></script>
+        <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
+        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
+        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
 
-        <!-- TODO: H4 currently not using Magic Numbers, but should be using them -->
-        <!-- <script src="../../common/php/getMagicNumbers.php"></script> -->
 
         <div id="layout_panes" style="height:100%">
             &nbsp;

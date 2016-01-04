@@ -1,0 +1,340 @@
+<!--
+
+/**
+* editPreferences.html: edits user's preferences for behaviour of program, plus sets bookmarklet
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+-->
+
+<html>
+    <head>
+        <title>User Preferences</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel=stylesheet href="../../common/css/global.css">
+        <link rel=stylesheet href="../../common/css/edit.css">
+        <link rel=stylesheet href="../../common/css/admin.css">
+        <style>
+            .input-row, .input-row .input-header-cell, .input-row div.input-cell {vertical-align:middle}
+            .input-header-cell{
+                width:250px !important;
+            }
+            h3{
+                width: 200px;
+                padding: 0px;
+                text-align: right;
+            }
+        </style>
+    </head>
+
+    <body class="popup" onLoad="showPreferences()" width="640" height="660">
+        <script src="../../common/js/utilsLoad.js"></script>
+        <script>
+            var mybkm, agg, navi, favsrch;
+
+            // Note: "Preferences are defined in /common/php/displayPreferences
+            function showPreferences() {
+                document.getElementById("results-per-page").value
+                = top.HEURIST.util.getDisplayPreference("results-per-page");
+                document.getElementById("defaultSearch").value
+                = top.HEURIST.util.getDisplayPreference("defaultSearch");
+                document.getElementById("favourites").value
+                = top.HEURIST.util.getDisplayPreference("favourites");
+                // document.getElementById("loadRelatedOnSearch").value
+                // = top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch");
+                var rel = top.HEURIST.util.getDisplayPreference("loadRelatedOnSearch");
+                document.getElementById("loadRelatedOnSearch").checked
+                = (rel==='true');
+                var rec = top.HEURIST.util.getDisplayPreference("defaultRecentPointerSearch"); // pointer field editing
+                document.getElementById("defaultRecentPointerSearch").checked
+                = (rec==='true');
+                var rec2 = top.HEURIST.util.getDisplayPreference("findFuzzyMatches"); // search similar on rec addition
+                document.getElementById("findFuzzyMatches").checked
+                = (rec2==='true');
+                var bkm = top.HEURIST.util.getDisplayPreference("defaultMyBookmarksSearch"); // main search default on [enter]
+                document.getElementById("defaultMyBookmarksSearch").checked
+                = (bkm==='true');
+                mybkm = top.HEURIST.util.getDisplayPreference("showMyBookmarks");
+                document.getElementById("showMyBookmarks").checked = (mybkm!=='false');
+                var asr = top.HEURIST.util.getDisplayPreference("autoSelectRelated"); // auto select related records (one level for now)
+                document.getElementById("autoSelectRelated").checked
+                = (asr!=='false');
+                var adl = top.HEURIST.util.getDisplayPreference("autoDeselectOtherLevels"); // main search default on [enter]
+                document.getElementById("autoDeselectOtherLevels").checked
+                = (adl!=='false');
+
+                var ptd = top.HEURIST.util.getDisplayPreference("tagging-popup");
+                document.getElementById("promptTagOnDataAddition").checked = (ptd!=='false');
+
+                agg = top.HEURIST.util.getDisplayPreference("showAggregations");
+                document.getElementById("showAggregations").checked = (agg!=='false');
+
+                navi = top.HEURIST.util.getDisplayPreference("showNavMenuAlways");
+                document.getElementById("showNavMenuAlways").checked = (navi!=='false');
+
+                favsrch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
+                document.getElementById("showFavouritesSearch").checked = (favsrch!=='false');
+
+                var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
+                if(isNaN(mol) || parseInt(mol)<1) mol = 1000;
+                document.getElementById("report-output-limit").value = mol;
+
+                var showquery = top.HEURIST.util.getDisplayPreference("searchQueryInBrowser");
+                document.getElementById("showSearchQueryInBrowser").checked = (showquery!=='false');
+
+                var edadv = top.HEURIST.util.getDisplayPreference("record-edit-advancedmode");
+                document.getElementById("record-edit-advancedmode").checked = (edadv!=='false');
+            }
+
+            function save() {
+                var reload_nav = false;
+                var reload_menu = false;
+
+                var rpp = parseInt(document.getElementById("results-per-page").value);
+                var def = document.getElementById("defaultSearch").value;
+                var fav = document.getElementById("favourites").value;
+                var rel = (document.getElementById("loadRelatedOnSearch").checked)?'true':'false';
+                var rec = (document.getElementById("defaultRecentPointerSearch").checked)?'true':'false';
+                var rec2 = (document.getElementById("findFuzzyMatches").checked)?'true':'false';
+                var bkm = (document.getElementById("defaultMyBookmarksSearch").checked)?'true':'false';
+                var asr = (document.getElementById("autoSelectRelated").checked)?'true':'false';
+                var adl = (document.getElementById("autoDeselectOtherLevels").checked)?'true':'false';
+                var ptd = (document.getElementById("promptTagOnDataAddition").checked)?'true':'false';
+                var showquery = (document.getElementById("showSearchQueryInBrowser").checked)?'true':'false';
+                var edadv = (document.getElementById("record-edit-advancedmode").checked)?'true':'false';
+
+                if (isNaN(rpp) || rpp < 1 || rpp > 500) {
+                    alert("Results per page must be between 1 and 500");
+                    return;
+                }
+
+                var mol = parseInt(document.getElementById("report-output-limit").value);
+                if(favsrch != new_val){
+                    reload_nav = true;
+                    favsrch = new_val;
+                }
+                
+                if(mol>5000){
+                    if(! confirm("Large limit for report output may delay map rendereing and smarty processing. Do you confirm?") ){
+                        return;
+                    }
+                }
+
+                var new_val = (document.getElementById("showMyBookmarks").checked)?'true':'false';
+                if(mybkm != new_val){
+                    reload_nav = true;
+                    mybkm = new_val;
+                }
+                new_val = (document.getElementById("showAggregations").checked)?'true':'false';
+                if(agg != new_val){
+                    reload_nav = true;
+                    agg = new_val;
+                }
+                new_val = (document.getElementById("showNavMenuAlways").checked)?'true':'false';
+                if(navi != new_val){
+                    reload_menu = true;
+                    navi = new_val;
+                }
+                new_val = (document.getElementById("showFavouritesSearch").checked)?'true':'false';
+                if(favsrch != new_val){
+                    reload_nav = true;
+                    favsrch = new_val;
+                }
+
+                top.HEURIST.util.setDisplayPreference(["results-per-page",
+                    "defaultSearch",
+                    "favourites",
+                    "loadRelatedOnSearch",
+                    "defaultRecentPointerSearch",
+                    "findFuzzyMatches",
+                    "defaultMyBookmarksSearch",
+                    "showMyBookmarks",
+                    "autoSelectRelated",
+                    "autoDeselectOtherLevels",
+                    "tagging-popup",
+                    "showAggregations",
+                    "showNavMenuAlways",
+                    "showFavouritesSearch",
+                    "report-output-limit",
+                    "searchQueryInBrowser",
+                    "record-edit-advancedmode"],
+                    [rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery,edadv]);
+
+                // Update underlaying search UI
+                if(top.HEURIST.search){
+                    if(reload_nav){
+                        top.HEURIST.search.show_hideItemsInNavigation();
+                    }
+                    if(reload_menu){
+                        top.HEURIST.search.show_hideNavigationMenu();
+                    }
+
+                }
+                
+                window.close();
+                
+            }
+            
+            function closeThis(){
+                window.close();    
+            }
+        </script>
+
+        <br /><i>Drag this link </i> &nbsp;&nbsp;<b><u>
+        
+        <script>
+            var hBase = (top.HEURIST && top.HEURIST.baseURL_V3)? top.HEURIST.baseURL_V3
+            : document.location.href.replace(/admin\/.*/,"");
+            var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
+
+            var bookmarkletname = top.HEURIST.VERSION;
+
+            var html =
+            "<a id=\"bookmarklet-link\" onclick=\"alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link,"
+            +" choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;\" title=\"Heurist Bookmarklet."+
+            " Drag this link to your browser bookmarks toolbar, or right-click the link,"
+            + " choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.\""
+            + " href=\"javascript:(function(){h='" + hBase + "';"
+            + "d=document;c=d.contentType;"
+            + "if(c=='text/html'||!c){"
+            + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+            + "s=d.createElement('script');s.type='text/javascript';"
+            + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+database+"';"
+            + "d.getElementsByTagName('head')[0].appendChild(s);}"
+            + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+database+"&t='+e(d.title)+'&u='+e(location.href));"
+            + "window.setTimeout('w.focus()',200);}"
+            + "})();\"><b>>> "+database+" </b></a>";
+            document.write(html);
+        </script>
+
+        </u></b><i>&nbsp;&nbsp;&nbsp; to your bookmarks bar to provide bookmarking of web pages</i>
+
+        <br /><br /><hr size="1">
+
+        <div class="input-row">
+            <div class="input-header-cell">Search results per page (20 - 500)</div><div  class="input-cell" style="size:10"><input id="results-per-page">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">Limit number of lines in report output (no warning if limit exceeded)
+            </div>
+            <div  class="input-cell"><input id="report-output-limit">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">Heurist search string to execute when loading the search page<br> for example, tag:Favourites
+            </div>
+            <div  class="input-cell"><input id="defaultSearch"><br><input type="checkbox" id="defaultMyBookmarksSearch" style="vertical-align:middle">
+                Search MyBookmarks only
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">How do you spell Favourites/Favorites?</div><div  class="input-cell"><input id="favourites"></div>
+        </div>
+
+        <h3>Search</h3>
+
+        <div class="input-row">
+            <div class="input-header-cell">Show current search query in browser address field
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="showSearchQueryInBrowser">
+            </div>
+
+            <div class="input-header-cell">Show Favourites link in search screen navigation panel
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="showFavouritesSearch">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">Show Aggregations link in search screen navigation panel
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="showAggregations">
+            </div>
+
+            <div class="input-header-cell">Show My Bookmarks section in the search screen navigation panel
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="showMyBookmarks">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">Show Navigation menu in search screen even when navigation panel is open
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="showNavMenuAlways">
+            </div>
+        </div>
+
+        <h3>Relationships</h3>
+
+        <div class="input-row">
+            <div class="input-header-cell">Load related records below search<br/>(leave off if not required)
+            </div>
+            <div class="input-cell"><input type="checkbox" id="loadRelatedOnSearch">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">Automatically select related records
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="autoSelectRelated">
+            </div>
+            <div class="input-header-cell">Automatically deselect records when changing active level in search
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="autoDeselectOtherLevels">
+            </div>
+        </div>
+
+        <h3>Editing</h3>
+
+        <div class="input-row">
+            <div class="input-header-cell">When saving record, prompt for tags if no tags have been set
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="promptTagOnDataAddition">
+            </div>
+
+            <div class="input-header-cell">When entering a pointer field in record edit, default to recent records search (otherwise All Records)
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="defaultRecentPointerSearch">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="input-header-cell">Check for similar records on creation (can slow down new record save significantly)
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="findFuzzyMatches">
+            </div>
+            <div class="input-header-cell">Advanced edit mode
+            </div>
+            <div  class="input-cell"><input type="checkbox" id="record-edit-advancedmode">
+            </div>
+        </div>
+
+        <div id="buttons" class="actionButtons">
+            <input type="button" value="save" onClick="save();">
+            <input type="button" value="cancel" onClick="closeThis()">
+        </div>
+    </body>
+</html>
+

@@ -35,7 +35,7 @@ if(!$system->init(@$_REQUEST['db']) ){
         <title>Database Summary</title>
 
         <!-- Css -->
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL_V3?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
         <style>
             #rectypes {
                 height: 100%;

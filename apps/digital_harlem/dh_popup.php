@@ -1,6 +1,8 @@
 <?php
+
 /**
-* dh_popup.php : Content for map bubble and info popup
+*
+* dh_popup.php (Digital Harlem): Content for map bubble and info popup
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -23,7 +25,7 @@
     require_once (dirname(__FILE__).'/../../php/common/db_recsearch.php');
     require_once (dirname(__FILE__).'/../../php/common/db_structure.php');
     require_once (dirname(__FILE__).'/../../php/common/utils_db.php');
-    
+
     $response = array();
 
     $system = new System();
@@ -37,7 +39,7 @@
     }
 
     //echo '>1>'.@$_REQUEST['recID'];
-    
+
     $recID = $_REQUEST['recID'];
     $ids = $recID;
     $need_cnt = 1;
@@ -48,9 +50,9 @@
     if($addrID) { $ids = $ids.','.$addrID;  $need_cnt++;}
 
     //find record and details
-    
+
     $records = recordSearch_2('ids:'.$ids);
-  
+
     if(count(@$records['records'])<$need_cnt){
         echo 'Some records not found '.$ids.'  '.print_r($records,true);
         return;
@@ -60,7 +62,7 @@
     define('RT_ADDRESS', 12);
     define('RT_EVENT', 14);
     define('RT_PLACE_ROLE', 16);
-    
+
     define('DT_EVENT_TYPE', 74);
     define('DT_EVENT_TIME_START', 75);
     define('DT_EVENT_TIME_END', 76);
@@ -72,67 +74,69 @@
     define('DT_CHARGE_FINAL', 81);
     define('DT_JUDICIAL_OUTCOME', 83);
     define('DT_OUTCOME_DATE', 84);
-    
+
 
     define('DT_PLACE_USAGE_TYPE', 89);
 
     define('DT_PERSON_OCCUPATION', 92);
     define('DT_PERSON_AGE', 93);
     define('DT_PERSON_SECONDNAME', 96);
-    
+
     define('DT_PERSON_RACE', 98);
     define('DT_PERSON_BIRTHPLACE', 97);
 
-    
-    
+
+
     define('TERM_MAIN_CRIME_LOCATION', 4536);
 
     global $terms;
     //echo '<br>A'.print_r($records, true);
 
     $recTypeID = getFieldValue($records, $recID, 'rec_RecTypeID');
-    
-    
+
+
     $moredetailLink =  '<p><a href="javascript:void(0)" class="moredetail" '.
         'onClick="top.HEURIST4.msg.showDialog(\''.$_SERVER['REQUEST_URI'].'&full=1\');">More Detail</a></p>';
-    
-    
+
+
     if($recTypeID==RT_ADDRESS){
-        
+
         if( @$_REQUEST['full']==1 ){
             require ('dh_popup_place.php');
         }
-        
+
         $comment = getFieldValue($records, $recID, DT_SHORT_SUMMARY);
-?>        
+?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title'); ?></h3>
     <?php echo $comment? 'Building details:<br/>'.$comment:''; ?>
-    <?php echo $moredetailLink; ?>        
-</div>  
-<?php 
+    <?php echo $moredetailLink; ?>
+</div>
+
+<?php
     }else{
-        
+
         if(!isset($terms)){   //global
             $terms = dbs_GetTerms($system);
         }
-     
+
     if($recTypeID==RT_PERSON){
 
         if( @$_REQUEST['full']==1 ){
             require ('dh_popup_person.php');
         }
-        
+
         if($eventID){
-             
+
              // get person role in the event
              $person_role = getTermById_2( recordGetRealtionshipType( $system, $eventID, $recID ) );
-             
-             //$relation1 = recordGetRealtionship_2($system, $eventID, $recID, 'event for person' );        
+
+             // TODO: Remove, enable or explain: $relation1 = recordGetRealtionship_2($system, $eventID, $recID, 'event for person' );
 
              //get relationship record for address of related event
-             $relation2 = recordGetRealtionship_2($system, $eventID, $addrID, 'address for event' );   
-                          
+             $relation2 = recordGetRealtionship_2($system, $eventID, $addrID, 'address for event' );
+
              $event_address = '';
              $term_id = getFieldValue($relation2, 0, DT_RELATION_TYPE);
              if($term_id==TERM_MAIN_CRIME_LOCATION){
@@ -141,50 +145,51 @@
                  $event_address = 'which '.getTermById_2( $term_id );
              }
              $event_address = $event_address.' this address ,';
-             
+
              $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
-             
-             //date and time 
+
+             //date and time
              $date_out = composeDates( $records, $eventID, '<b>Date: </b>' );
              $time_out = composeTime( $records, $eventID, '<b>Time: </b>' );
-             
-             
+
+
 ?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
-    
-    <p><b><?php echo $person_role; ?></b> 
-    
+
+    <p><b><?php echo $person_role; ?></b>
+
     in the event: <b><?php echo getFieldValue($records, $eventID, DT_NAME); ?></b>
-    
+
     <?php echo $event_address;?>
-    
+
     <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
     <p><?php echo $comment; ?></p>
-        
+
     <p>
         <?php echo $date_out; ?>&nbsp;
         <?php echo $time_out; ?>&nbsp;
     </p>
-    <?php echo $moredetailLink; ?>        
+    <?php echo $moredetailLink; ?>
 </div>
 
 <?php
         }else{
-            
+
              //get relationship record for related address
-             $relation1 = recordGetRealtionship_2($system, $recID , $addrID, 'address for person');        
+             $relation1 = recordGetRealtionship_2($system, $recID , $addrID, 'address for person');
 
              // get person role in the event
              $term_id  = getFieldValue($relation1, 0, DT_RELATION_TYPE);
              $person_role = getTermById_2($term_id);
-            
+
              $comment = getFieldValue($relation1, 0, DT_EXTENDED_DESCRIPTION);
-             
-             //date and time 
+
+             //date and time
              $date_out = composeDates( $relation1, 0, '<b>Date: </b>');
-?>            
-        
+?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, 'rec_Title') ?></h3>
 
@@ -192,20 +197,21 @@
         <p><b>At</b>: <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
         <p><?php echo $comment;?></p>
         <p><?php echo $date_out;?></p>
-        <?php echo $moredetailLink; ?>        
-</div>        
-<?php            
+        <?php echo $moredetailLink; ?>
+</div>
+
+<?php
         }
     }else if($recTypeID==RT_EVENT){
-        
+
         if( @$_REQUEST['full']==1 ){
             require ('dh_popup_event.php');
         }
-        
-        
+
+
              //get relationship record for related address
-             $relation2 = recordGetRealtionship_2($system, $recID, $addrID, 'address for event' );   
-                          
+             $relation2 = recordGetRealtionship_2($system, $recID, $addrID, 'address for event' );
+
              $event_address = '';
              $term_id = getFieldValue($relation2, 0, DT_RELATION_TYPE);
              if($term_id==TERM_MAIN_CRIME_LOCATION){
@@ -213,60 +219,60 @@
              }else{
                  $event_address = 'This event '. getTermById( $term_id ).' this address: ';
              }
-             
+
              $comment = getFieldValue($relation2, 0, DT_EXTENDED_DESCRIPTION);
-             
-             //date and time 
+
+             //date and time
              $date_out = composeDates( $records, $recID, '<b>Date: </b>');
              $time_out = composeTime( $records, $recID, '<b>Time: </b>' );
-?>        
+?>
+
 <div class="infowindow infowindow-map">
     <h3><?php echo getFieldValue($records, $recID, DT_NAME) ?></h3>
         <p><b><?php echo getTermById(getFieldValue($records, $recID, DT_EVENT_TYPE)) ?> </b></p>
-        
+
         <p><?php echo $event_address;?>
-        
+
         <?php echo getFieldValue($records, $addrID, 'rec_Title'); ?></p>
         <p><?php echo $comment; ?></p>
-            
+
         <p>
             <?php echo $date_out; ?>&nbsp;
             <?php echo $time_out; ?>&nbsp;
         </p>
-        <?php echo $moredetailLink; ?>        
-</div>        
-<?php        
+        <?php echo $moredetailLink; ?>
+</div>
+
+<?php
     }
     }
-    
+
 //
 //
 //
 function getFieldValue($records, $recID, $fieldID, $needall=false){
-    
+
     if(!@$records['records']){
         return null;
     }
     $recs = $records['records'];
-    
+
     if($recID<1){
         //if recID is not defined - get first in array
         $recs = array_values($recs);
         $record = $recs[0];
-        
+
         //echo 'B>'.print_r($record, true);
     }else{
-        $record = @$recs[$recID];    
+        $record = @$recs[$recID];
     }
-    
+
     if(!$record) return null;
 
     //echo 'B>'.print_r($record, true);
-    
+
     if(is_numeric($fieldID)){ //detail
-    
-    
-    
+
         $detail = @$record['d'][$fieldID];
         if($needall){
             return $detail;
@@ -283,6 +289,8 @@ function getFieldValue($records, $recID, $fieldID, $needall=false){
     }
 }
 
+
+
 function composeDates( $records, $recID, $prefix='') {
      $date_out = '';
      $date_start = getFieldValue($records, $recID, DT_START_DATE);
@@ -295,14 +303,16 @@ function composeDates( $records, $recID, $prefix='') {
         }
      }
      return $date_out;
-} 
+}
+
+
 
 function composeTime( $records, $recID, $prefix='') {
-    
+
              if(!($recID>0)){
-                 $recID = @$records['order'][0]; 
+                 $recID = @$records['order'][0];
              }
-    
+
              $time_out = '';
              $time_start = getFieldValue($records, $recID, DT_EVENT_TIME_START);
              if($time_start){
@@ -313,9 +323,11 @@ function composeTime( $records, $recID, $prefix='') {
                     $time_out = $time_out.(' to '.getTermById($time_end) );
                 }
              }
-             
+
              return $time_out;
 }
+
+
 
 //
 // find term by termid, returns human readable message if not found
@@ -329,50 +341,54 @@ function getTermById_2($term_id, $type_suffix=''){
     }
 }
 
+
+
 //
 //
 //
 function recordGetRealtionship_2($system, $sourceID, $targetID, $remark=' record' ){
-    
+
     $res = recordGetRealtionship($system, $sourceID, $targetID );
      if(@$res['status']!='ok'){
-        echo 'Can not get related '.$remark.'. '.@$res['message'];
+        echo 'Cannot get related '.$remark.'. '.@$res['message'];
         exit();
      }else{
-        return $res['data']; 
+        return $res['data'];
      }
 }
+
+
 
 function recordSearch_2( $query ){
 
      global $system;
 
      $records = recordSearch($system, array(
-            'q'=>$query, 
+            'q'=>$query,
             'detail'=>'detail'));
-            
+
      if(@$records['status']!='ok'){
-        echo 'Can not get records '.$records['message'];
+        echo 'Cannot get records '.$records['message'];
         exit();
      }else{
-        return $records['data']; 
-     }         
+        return $records['data'];
+     }
 }
+
 
 
 //
 // returns relationship records(s) for given source and target records
 //
 function recordGetRealtionship($system, $sourceID, $targetID ){
-    
+
     $mysqli = $system->get_mysqli();
-    
+
     //find all target related records
     $query = 'SELECT rl_RelationID FROM recLinks '
         .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
-   
-//error_log("1>>>".$query);
-    
+
+
     $res = $mysqli->query($query);
     if (!$res){
         return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
@@ -381,21 +397,23 @@ function recordGetRealtionship($system, $sourceID, $targetID ){
             while ($row = $res->fetch_row()) {
                 array_push($ids, intval($row[0]));
             }
-            $res->close(); 
-            
+            $res->close();
+
             return recordSearch($system, array('q'=>'ids:'.implode(',', $ids), 'detail'=>'detail'));
-    }        
-    
-    
+    }
+
+
 }
-    
+
+
+
 //
 // returns only first relationship type ID for 2 given records
 //
 function recordGetRealtionshipType($system, $sourceID, $targetID ){
 
     $mysqli = $system->get_mysqli();
-    
+
     //find all target related records
     $query = 'SELECT rl_RelationTypeID FROM recLinks '
         .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
@@ -409,5 +427,6 @@ function recordGetRealtionshipType($system, $sourceID, $targetID ){
             return null;
         }
     }
-} 
+}
+
 ?>

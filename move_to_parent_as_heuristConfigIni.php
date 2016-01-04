@@ -39,7 +39,7 @@ if (!@$dbHost) {
 
 if (!@$sysAdminEmail) $sysAdminEmail = ""; // recommended
 if (!@$infoEmail) $infoEmail = ""; // recommended
-if (!@$bugEmail) $bugEmail = ""; // recommended, set to info@heuristscholar.org if your server is running a standard Heurist installation
+if (!@$bugEmail) $bugEmail = ""; // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
 
 
 // -------- THE REST IS OPTIONAL ----------------------------------------------------------------------------------------------

@@ -1,0 +1,243 @@
+/*
+* Copyright (C) 2005-2015 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
+
+/**
+* printview.css
+* Global styles for Heurist import popupsbrief description of file
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2015 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
+
+
+body {padding:0;overflow: hidden;}
+
+*|* {font-family: Helvetica, Arial, Verdana !important;font-size: 11px;}
+
+H1, H2, H3 {color:#6A7C99;font-size: 12px;display: inline;}
+h3 {color:#DC8501;font-size:12px;display: block;}
+H4 {color:#000;font-size: 11px}
+H5 {color:#999;font-size: 10px}
+P {color:#333333;font-size:11px;line-height:21px;}
+A:link {color:#6A7C99;text-decoration: none;}
+A:visited {color:#6A7C99;text-decoration: none;}
+A:active {color:#6A7C99;text-decoration: none;}
+A:hover {text-decoration: underline;}
+img a:link {border: none;}
+.banner {background-color:#FFF;border-collapse:collapse;color:#999999;height:12px;left:-3px;overflow:visible;padding:10px;position:fixed;right:0;top:-3px;z-index:1;}
+.banner A, .banner A:hover, .banner input {text-decoration:none;color:#6A7C99 !important;}
+.banner A:hover{text-decoration:underline;color:#6A7C99 !important;}
+form {line-height:18px;margin: 3px;} */
+h2 {text-transform:none;font-size: 12px;}
+h3 {display: inline;}
+#q {-moz-border-radius:10px; -webkit-border-radius:10px; border-radius:10px}
+
+-container { overflow: auto; }
+#results { bottom:25px;left:0;overflow:auto;position:absolute;right:0;top:50px;background-color:#FFF;padding: 0;}
+#results .record * { vertical-align: middle; }
+#results .record .id { padding-right: 2ex; float: left; text-align: right; width: 7ex;color:#666 }
+#results .record .title { padding: 0 2ex; margin: 0;}
+
+.radio *, #t, #t * { font-size: 11px; line-height: 15px;  vertical-align: middle; }
+
+input { padding: 0; margin: 0; }
+
+#help-div {position: absolute;height: 2ex; width: 100%;font-size: 1.6ex; padding: 1px;color:#7D9AAA}
+#search {	text-align: left;	padding: 0;	border-bottom: 1px solid #999;	vertical-align: middle;	background-color: RGBA(0, 0, 0, 0.1);	position:absolute;	right:0;	top:0;	left:0px;height:50px}
+#add_records_footer {position:absolute; right:0; left:0; bottom:0; height:20px;background-image: url("../images/backgrounds/banner_bg.png");background-position: bottom;background-repeat: repeat-x;padding: 0 1ex;}
+#add_records_footer a img {vertical-align: text-bottom;}
+.tab {background-color: #ECF1FB !important;} /* to match tabs in edit */
+#rectype-val {left:2ex;position:relative;top:2.5ex;}
+#mainbody {margin-top:2ex}
+input[type="radio"] {vertical-align: text-top;}
+.div-section {padding: 5px 0;}
+.prompt {color:#999999;font-size:10px;font-weight:normal;}
+
+/**** record view styles ****/
+
+.detailType {width:90px;display: table-cell;color: #999999;vertical-align: top;padding: 0 10px 0 0;text-align: right;text-transform: none;}
+.related-records .detailType {background-position:right center;background-repeat:no-repeat;color:#AAAAAA;display:table-cell;margin:10px;padding-bottom:0;padding-left:0;padding-top:0;text-align:right;text-transform:none;vertical-align:top;width:16px;}
+.detail {display: table-cell;padding-left: 15px;text-transform: none;color: #000;}
+.related-records .detail {color: #666;}
+.detailRow {display: table;padding: 5px 0 5px 0;font-size: 11px;overflow: visible;}
+.detailRowHeader {display: table;padding: 5px 0 5px 0;width:100%;border-top: 1px solid #7D9AAA;font-size: 11px;overflow: visible;text-align: left;color:#7D9AAA; text-transform: uppercase;}
+.personPhoto {max-width: 150px;padding:0 16px 0 0;}
+.thumbnail {float:right;margin-right: 10px;margin: 0 0 0 10px;}
+div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
+img {border:0 none;vertical-align:middle;}
+#recID {float:left}
+.headerRow #recID {float:right}
+.HeaderRow {overflow:hidden; position: relative;padding:10px 0;display: block;text-align: left;}
+#footer {position: absolute;top:0; right:0;left:0;}
+.record.selected {display:block; padding: 10px;}
+.record.result_thumb.selected {display:inline-block;}
+.record.full_result_thumb.selected {display:inline-block;}
+.record, .record.result_thumb {display:none; padding:0; text-align: left;}
+.record, .record.full_result_thumb {display:none; padding:0; text-align: left;}
+#style_select {background-color:rgba(255, 255, 255, 0.5);border:1px solid #AAAAAA;width:180px;}
+#loading{position: absolute;top:0;bottom:0;left:0;right:0; background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;}
+.loading{background-image: url("../images/loading-animation-white.gif");background-position: 50% 50%;background-repeat: no-repeat;height:100px}
+.separator_row {height: 1px; border-bottom: 1px solid #A4B4CB;clear:both}
+.rectype { color: #999999;vertical-align: top; }
+.record-table {margin-bottom: 10px;}
+record {display: block;margin:10px}
+records {margin:20px}
+hml {margin:10px}
+#displayResult {bottom:0;left:0;overflow-y:auto;position:absolute;right:0;top:30px;text-align: center;}
+
+#all-table { width: 100%; height: 100%; }
+
+#map, #timeline { width: 100%; height: 100%; }
+#timeline-cell { height: 200px; }
+#info-cell { height: 2em; padding: 0 1ex; }
+
+#timeline-cell * { font-size: 11px; }
+
+#resizer, #resizer div { font-size: 4px; line-height: 4px; overflow: hidden; height: 4px; background-color: white; cursor: n-resize; }
+
+body div { line-height: 1.5em; }
+
+.maplabel {background-color:RGBA(0,0,0,0.6);border: 2px solid #FFF;-moz-border-radius: 6px;-moz-box-shadow: 0 2px 4px #666;-webkit-border-radius: 6px;-webkit-box-shadow: 0 2px 4px #666;border-radius: 6px;box-shadow: 0 2px 4px #666;background-repeat:no-repeat;font-size:10px;line-height:10px;padding:0;min-width:45px; width:auto;color:#FFF;margin-bottom: 16px;margin-left:-50%;display:table;}
+.icon {overflow:hidden;width:48px; height:48px; background-position: center; background-repeat: no-repeat;-moz-background-size:auto 48px;-webkit-background-size:auto 48px;background-size:auto 48px;}
+.icon img {width:auto;height:48px;}
+.iconIMG {width:48px; height:48px;overflow:hidden; padding:0;background-position: center;-moz-background-size:auto 48px;-webkit-background-size:auto 48px;background-size:auto 48px;}
+.iconIMG img{min-width:48px;}
+.iconCount{position: absolute;background-color: #AA0000;-moz-border-radius:8px;-webkit-border-radius:8px;border-radius:8px;min-width:16px;max-width:18px;height:16px; font-weight: bold;font-size: 11px;left:50%;line-height:16px;margin-left:-12px; top:-6px;display: block;padding:0;text-align: center;overflow: hidden;}
+.recInfo{position: absolute;width:16px;height:16px; font-weight: bold;font-size: 11px;left:50%;margin-left:-12px;top:-6px;display: block;padding:0;text-align: center;overflow: hidden;-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px; border:2px solid #FFF;}
+.titlesList {width:200px; background-color:RGBA(0,0,0,0.5);font-weight: normal;text-align: left;padding:6px;line-height: 10px;font-size: 10px;position: relative;left:-88px;top:0px;-moz-border-radius:6px;-webkit-border-radius:6px;border-radius:6px;box-shadow:0 3px 6px #000000;-moz-box-shadow:0 3px 6px #000000;-webkit-box-shadow:0 3px 6px #000000;border:1px solid #FFF;}
+.mapPointer {background-image: url(../images/pointerMapWhite.png);background-position:center top;background-repeat: no-repeat; background-color: transparent;position: absolute;bottom:0;height:16px;width:100%;margin-left:-3px;}
+
+/*  HEURIST map markers  */
+.geomarker {height:45px;width:26px;margin-left:-18px;}
+.geomarker50 {height:45px;width:51px;margin-left:-24px;}
+.geomarker76 {height:45px;width:75px;margin-left:-36px;}
+.geomarker76 > .marker{margin-left:-18px;}
+.geomarker76 a .indicator.large {margin-left:-6px}
+.marker {text-decoration:none;background-color: #FFF; border: 1px solid #FFF;border-collapse:collapse; box-shadow:0 2px 4px #000000;-moz-box-shadow:0 2px 4px #000000;-webkit-box-shadow:0 2px 4px #000000;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;}
+.icon {margin-right:0px; background-color:#CCC;overflow:visible; width:24px; height: 30px; display: inline-block;}
+.refCount {display:table-cell;vertical-align: middle; position:absolute;padding:0; bottom:14px;height:10px; width:24px;background-color: RGBA(0,0,0,0.5); font-size: 10px; line-height:10px;font-weight: bold; color: #FFF;text-align:center}
+.recInfo { position:absolute;color:#FFF;left:-61px;top:-110px;width:150px;height:100px; overflow-y: auto; background-color:RGBA(0,0,0,0.5);font-weight: normal;text-align: left;padding:6px;line-height: 10px;font-size: 10px;-moz-border-radius:6px;-webkit-border-radius:6px;border-radius:6px;box-shadow:0 3px 6px #000000;-moz-box-shadow:0 3px 6px #000000;-webkit-box-shadow:0 3px 6px #000000;border:1px solid #FFF;}
+.indicator {clear: both; width:100%; height:16px; background-position:top center; background-repeat:no-repeat; }
+.marker a .icon .recInfo p {color:#FFF; line-height:12px; border-bottom :none}
+.marker a {color:#FFF; text-decoration: none;}
+.indicator.single {background-image: url(../images/pointerMapWhite.png);}
+.indicator.small {background-image: url(../images/cluster_small.png);height:21px}
+.indicator.small .numMarkers{line-height:14px}
+.indicator.large .numMarkers{line-height:32px}
+.indicator.medium {background-image: url(../images/cluster_medium.png);height:32px; width:40px}
+.indicator.large {background-image: url(../images/cluster_large.png);height:43px; width:53px}
+.geomarker a .indicator.medium  {margin-left:-6px}
+.geomarker a .indicator.large  {margin-left:-14px}
+.geomarker50 a .indicator.single, .geomarker50 a .indicator.small, .geomarker50 a .indicator.medium, .geomarker50 a .indicator.large {min-width:50px}
+.geomarker76 a .indicator.single, .geomarker76 a .indicator.small, .geomarker76 a .indicator.medium, .geomarker76 a .indicator.large, {min-width:75px}
+.numMarkers {text-align: center; font-size: 14px; color: #FFF;}
+.spacer {display:inline-block; width:1px}
+
+
+/* Turn on a 10x10 scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-button:vertical {
+    background-color: transparent;
+    border: 1px none blue;
+}
+
+/* Turn on single button up on top, and down on bottom */
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+    display: none;
+}
+
+/* Turn off the down area up on top, and up area on bottom */
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none;
+}
+
+/* Place The scroll down button at the bottom */
+::-webkit-scrollbar-button:vertical:increment {
+    background-color: black;
+    border: 1px dashed blue;
+}
+
+/* Place The scroll up button at the up */
+::-webkit-scrollbar-button:vertical:decrement {
+    background-color: purple;
+    border: 1px none blue;
+}
+
+::-webkit-scrollbar-track:vertical {
+    background-color: transparent;
+    border: 1px none pink;
+}
+
+/* Top area above thumb and below up button */
+::-webkit-scrollbar-track-piece:vertical:start {
+    border: 1px none #000;
+}
+
+/* Bottom area below thumb and down button */
+::-webkit-scrollbar-track-piece:vertical:end {
+    border: 1px none pink;
+}
+
+/* Track below and above */
+::-webkit-scrollbar-track-piece {
+	background:transparent;
+	-webkit-border-radius: 4px;
+	-webkit-box-shadow:inset 0px 2px 4px rgba(0,0,0,1);
+}
+#result-container::-webkit-scrollbar-track-piece {
+	background:-webkit-gradient(linear, left top, left bottom, from(#B9C8CE), to(#8F9BAB))transparentder-radius: 4px;
+    -webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
+}
+
+/* The thumb itself */
+::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+	background:-webkit-gradient(linear, left top, left bottom, from(#BBB), to(#888));
+	-webkit-border-radius: 4px;
+	border: 1px solid #000;
+	-webkit-box-shadow:inset 0px 0px 6px rgba(0,0,0,0.5);
+	}
+#result-container::-webkit-scrollbar-thumb:vertical {
+    height: 25px;
+	background-color:#A5B3C8;
+	/* background:-webkit-gradient(linear, left top, left bottom, from(#A5B3C8), to(#8798B3)); */
+	-webkit-border-radius: 4px;
+	border: 1px solid #8C989E;
+	-webkit-box-shadow:inset 0px -2px 4px #8798B3;
+}
+
+/* Corner */
+::-webkit-scrollbar-corner:vertical {
+    background-color: black;
+}
+
+/* Resizer */
+::-webkit-scrollbar-resizer:vertical {
+    background-color: gray;
+}

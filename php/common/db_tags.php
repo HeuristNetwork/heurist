@@ -1,16 +1,16 @@
 <?php
 
-    /** 
+    /**
     * CRUD for tags and bookmarks (usrTags, usrRecTagLinks, usrBookmarks)
-    * 
+    *
     * tag and bookmark - prefixes for functions
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -31,7 +31,7 @@
     * Get tag IDs by tag names
     *
     * @param mixed $tag_names
-    * @param mixed $ugrID                                
+    * @param mixed $ugrID
     */
     function tagGetByName($system, $tag_names, $ugrID=null){
 
@@ -64,7 +64,7 @@
     /**
     * not used
     * Get tags for given usergroup ID
-    * 
+    *
     * @param mixed $system
     * @param mixed $isfull
     * @param mixed $ugrID
@@ -98,16 +98,16 @@
             $res->close();
             return $result;
         }else{
-            $system->addError(HEURIST_DB_ERROR, 'Can not get tags', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get tags', $mysqli->error);
             return false;
         }
     }
 
     /**
     * Returns tags for given array of records for specified users
-    * 
+    *
     * @param mixed $system
-    * @param mixed $isfull if true returns name and description 
+    * @param mixed $isfull if true returns name and description
     * @param mixed $recIDs - array of record ids
     * @param mixed $ugrIDs - cs list of user/groups or 'all' - all groups of current user
     */
@@ -128,7 +128,7 @@
             $system->addError(HEURIST_REQUEST_DENIED, 'No user or group defined');
             return false;
         }
-        
+
         $mysqli = $system->get_mysqli();
 
         $supinfo = $isfull?", tag_Text, tag_Description, tag_Modified ":"";
@@ -147,7 +147,7 @@
         ." FROM usrTags left join usrRecTagLinks on rtl_TagID = tag_ID ".$recs
         ." WHERE tag_UGrpID in (".implode(",", $ugrIDs)
         .") group by tag_UGrpID, tag_ID".$supinfo
-        ." order by tag_UGrpID";            
+        ." order by tag_UGrpID";
 
 
         $res = $mysqli->query($query);
@@ -167,7 +167,7 @@
             $res->close();
             return $result;
         }else{
-            $system->addError(HEURIST_DB_ERROR, 'Can not get tags', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get tags', $mysqli->error);
             return false;
         }
     }
@@ -203,7 +203,7 @@
             if(is_numeric($res) && $res>0){
                 return $res; //returns affected record id
             }else{
-                $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+                $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 return false;
             }
 
@@ -238,7 +238,7 @@
                     $cnt = $mysqli->affected_rows;
                     return $cnt;
                 }else{
-                    $system->addError(HEURIST_DB_ERROR,"Can not delete tag", $mysqli->error );
+                    $system->addError(HEURIST_DB_ERROR,"Cannot delete tag", $mysqli->error );
                     return false;
                 }
 
@@ -284,7 +284,7 @@
                     return false;
                 }
 
-                //add new links                
+                //add new links
                 $query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
                 . 'select distinct rtl_RecId, '.$tag_id_new.' from usrRecTagLinks where rtl_TagID in ('. implode(', ', $tag_ids) .')';
 
@@ -302,7 +302,7 @@
                         return false;
                     }
                 }else{
-                    $system->addError(HEURIST_DB_ERROR,"Can not replase tag links", $mysqli->error );
+                    $system->addError(HEURIST_DB_ERROR,"Cannot replace tag links", $mysqli->error );
                     return false;
                 }
 
@@ -313,7 +313,7 @@
 
         }
     }
-    
+
     //
     function tagReplace_OLD_TODELETE($system, $tag_id_old, $tag_id_new, $ugrID=null){
         $ugrID = $system->is_admin2($ugrID);
@@ -332,7 +332,7 @@
                         $res->close();
                         return $cnt; //array("status"=>HEURIST_OK, "data"=> $cnt);
                     }else{
-                        $system->addError(HEURIST_DB_ERROR,"Can not replace tag", $mysqli->error );
+                        $system->addError(HEURIST_DB_ERROR,"Cannot replace tag", $mysqli->error );
                         return false;
                     }
                 }else{
@@ -386,7 +386,7 @@
                 . ' and tag_ID in (' . implode(',', $tag_ids) . ')'
                 . ' and tag_UGrpID = '.$ugrID);
             if(!$res){
-                $system->addError(HEURIST_DB_ERROR,"Can not assign tags", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Cannot assign tags", $mysqli->error );
                 return false;
             }
             $tag_count = $mysqli->affected_rows;
@@ -413,7 +413,7 @@
                 $res = $mysqli->prepare($query);
 
                 if(!$res){
-                    $system->addError(HEURIST_DB_ERROR,"Can not add bookmarks", $mysqli->error);
+                    $system->addError(HEURIST_DB_ERROR,"Cannot add bookmarks", $mysqli->error);
                     return false;
                 }
                 $bookmarks_added = $mysqli->affected_rows;
@@ -460,7 +460,7 @@
 
             $res = $mysqli->query($query);
             if(!$res){
-                $system->addError(HEURIST_DB_ERROR,"Can not remove tags", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Cannot remove tags", $mysqli->error );
                 return false;
             }
             $tag_count = $mysqli->affected_rows;
@@ -493,12 +493,12 @@
 
             $res = $mysqli->query('delete usrRecTagLinks from usrBookmarks left join usrRecTagLinks on rtl_RecID=bkm_RecID where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
             if(!$res){
-                $system->addError(HEURIST_DB_ERROR,"Can not remove tags", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Cannot remove tags", $mysqli->error );
                 return false;
             }
             $res = $mysqli->query('delete from usrBookmarks where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
             if(!$res){
-                $system->addError(HEURIST_DB_ERROR,"Can not remove bookmarks", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Cannot remove bookmarks", $mysqli->error );
                 return false;
             }
             $bookmarks_removed = $mysqli->affected_rows;
@@ -535,7 +535,7 @@
                 .$rating
                 .' where bkm_RecID in ('.implode(',', $record_ids).') and bkm_UGrpID=' . $ugrID);
             if(!$res){
-                $system->addError(HEURIST_DB_ERROR,"Can not set rating", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Cannot set rating", $mysqli->error );
                 return false;
             }
             $bookmarks_updated = $mysqli->affected_rows;

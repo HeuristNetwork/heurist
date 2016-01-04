@@ -1,6 +1,6 @@
 /**
 * Login dialogue
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -20,15 +20,15 @@
 //isforsed - if true - it is not possible to get out from login other than switch database
 function doLogin(isforsed){
 
-    
+
         var login_dialog = $('#heurist-login-dialog');
-    
+
 
         if(login_dialog.length<1)  // login_dialog.is(':empty') )
         {
-    
+
             login_dialog = $( '<div id="heurist-login-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
-            
+
             var $dlg = login_dialog;
 
             //load login dialogue
@@ -38,10 +38,10 @@ function doLogin(isforsed){
                 $dlg.find('label').each(function(){
                     $(this).html(top.HR($(this).html()));
                 });
-               
+
                 if(false){
                     //init captcha
-                    
+
                     function __refreshCaptcha(){
                         var $dd = $dlg.find('#imgdiv');
                         var id = Math.random();
@@ -52,16 +52,16 @@ function doLogin(isforsed){
                             $('<img id="img" src="php/captcha.php?img='+id+'"/>').appendTo($dd);
                         }
                     }
-                    
+
                     $dlg.find('#imgdiv').show();
                     $dlg.find('#btnCptRefresh')
                             .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
                             .show()
                             .click( __refreshCaptcha );
-                            
+
                     __refreshCaptcha();
                 }
-                
+
 
                 var allFields = $dlg.find('input');
                 var message = $dlg.find('.messages');
@@ -146,8 +146,8 @@ function doLogin(isforsed){
                 arr_buttons.push({text:top.HR('Cancel'), click: function() {    //isforsed?'Change database':
                             $( this ).dialog( "close" );
                         }});
-                
-                
+
+
                 // login dialog definition
                 $dlg.dialog({
                     autoOpen: false,
@@ -172,10 +172,10 @@ function doLogin(isforsed){
                         $dlg.find("#fld_reset").hide();
                         $dlg.find("#fld_login").show();
                         $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
-                        
+
                     }
                 });
-                
+
                 $dlg.dialog("open");
                 $dlg.parent().addClass('ui-dialog-heurist');
 
@@ -194,12 +194,12 @@ function doLogin(isforsed){
 }
 
 function doRegister(){
-        
+
         if($.isFunction($('body').profile_edit)){
 
             var profile_edit_dialog = $('#heurist-profile-dialog');
             if(profile_edit_dialog.length<1){
-                profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );               
+                profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
             }
             profile_edit_dialog.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
 
@@ -208,9 +208,9 @@ function doRegister(){
                 if($.isFunction($('body').profile_edit)){
                     doRegister();
                 }else{
-                    top.HEURIST4.msg.showMsgErr('Widget "Pprofile edit" can not be loaded!');
-                }        
-            });          
+                    top.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
+                }
+            });
         }
-        
+
 }

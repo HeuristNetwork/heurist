@@ -20,8 +20,11 @@
 */
 -->
 
-<!-- Note: h3link class implies location of H3 codebase, which is prepended to the URLs
-     See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
+<!--
+Note: h3link class implies location of H3 codebase, which is prepended to the URLs.
+However H3 code is now at root level (Jan 2016).
+See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth
+-->
 
 <li>EXPORT RESULTS SET</li>
 
@@ -33,27 +36,28 @@
 
 <li id="menu-export-hml-0" style="padding-left:5px;">
     <a href="#"
-    title="Generate HML (Heurist XML format) for current set of search results (current query)">
-    HML</a>
+        title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
+        HML</a>
 </li>
 
 <li id="menu-export-kml" style="padding-left:5px;">
     <a href="#"
-    title="Generate KML for current set of search results (current query)">
-    KML</a>
+        title="Generate KML for current set of search results (current query + expansion)">
+        KML</a>
 </li>
 
 <li  id="menu-export-rss" style="padding-left:5px;">
     <a href="#"
-    title="Generate RSS feed for current set of search results (current query)">
-    RSS</a>
+        title="Generate RSS feed for current set of search results (current query + expansion)">
+        RSS</a>
 </li>
 
 <li  id="menu-export-atom" style="padding-left:5px;">
     <a href="#"
-    title="Generate Atom feed current set of search results (currrent query)">
-    Atom</a>
+        title="Generate Atom feed current set of search results (currrent query + expansion)">
+        Atom</a>
 </li>
+
 
 <li>-</li>
 
@@ -62,20 +66,20 @@
 
 <li id="menu-export-hml-1" style="padding-left:5px;">
     <a href="#"
-    title="Generate HML for selected records in search results (current selection)">
-    Selected records</a>
+        title="Generate HML (Heurist XML format) for current selection">
+        Selected records</a>
 </li>
 
 <li id="menu-export-hml-2" style="padding-left:5px;">
     <a href="#"
-    title="Generate HML for current set of search results and related records">
-    Selected with related records</a>
+        title="Generate HML (Heurist XML format) for current selection and related records">
+        Selected with related records</a>
 </li>
 
 <li id="menu-export-hml-3" style="padding-left:5px;">
     <a href="#"
-    title="Generate HML for current set of search results (current query) with one record per file, plus manifest">
-    One file per record</a>
+        title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
+        One file per record</a>
 </li>
 
 <li>-</li>
@@ -83,6 +87,6 @@
 <li>ARCHIVE</li>
 
 <li class="admin-only" style="padding-left:5px;"><a href="export/backup/exportMyDataPopup.php" name="auto-popup" class="portrait h3link"
-    title="Retrieves and writes all the data in the database that you own or have bookmarked, including attached files, to a ZIP file which you can download from a hyperlink">
-    External archive package</a>
+    title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+    Complete data package</a>
 </li>

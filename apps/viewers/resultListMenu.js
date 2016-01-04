@@ -60,7 +60,7 @@ $.widget( "heurist.resultListMenu", {
         var sevents = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT+' '+top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SELECT;
         /*top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT;
         if(this.options.isapplication){
-            sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
+        sevents = sevents + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + top.HAPI4.Event.ON_REC_SELECT;
         }*/
 
         $(this.document).on(sevents, function(e, data) {
@@ -72,9 +72,9 @@ $.widget( "heurist.resultListMenu", {
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                    if(data) {
-                        that._query_request = jQuery.extend({}, data); //keep current query request
-                    }
+                if(data) {
+                    that._query_request = jQuery.extend({}, data); //keep current query request
+                }
 
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
 
@@ -152,22 +152,22 @@ $.widget( "heurist.resultListMenu", {
 
         //show hide function
         var _hide = function(ele) {
-                myTimeoutId = setTimeout(function() {
-                    $( ele ).hide();
+            myTimeoutId = setTimeout(function() {
+                $( ele ).hide();
                 }, 800);
-                //$( ele ).delay(800).hide();
-            },
-            _show = function(ele, parent) {
-                clearTimeout(myTimeoutId);
+            //$( ele ).delay(800).hide();
+        },
+        _show = function(ele, parent) {
+            clearTimeout(myTimeoutId);
 
-                $('.menu-or-popup').hide(); //hide other
-                var menu = $( ele )
-                //.css('width', this.btn_user.width())
-                .show()
-                .position({my: "left top", at: "left bottom", of: parent });
-                //$( document ).one( "click", function() { menu.hide(); });
-                return false;
-            };
+            $('.menu-or-popup').hide(); //hide other
+            var menu = $( ele )
+            //.css('width', this.btn_user.width())
+            .show()
+            .position({my: "left top", at: "left bottom", of: parent });
+            //$( document ).one( "click", function() { menu.hide(); });
+            return false;
+        };
 
         var link = $('<a>',{
             text: top.HR(name), href:'#'
@@ -216,26 +216,26 @@ $.widget( "heurist.resultListMenu", {
 
     _menuActionHandler: function(action){
 
-          var that = this;
+        var that = this;
 
-          //var action = ui.item.attr('id');
-          if(action == "menu-search-quick"){  //H4
+        //var action = ui.item.attr('id');
+        if(action == "menu-search-quick"){  //H4
 
-                //hack $('#btn_search_assistant').click();
-                var app = top.HAPI4.LayoutMgr.appGetWidgetByName('search');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha10');
-                if(app && app.widget){
-                    $(app.widget).search('showSearchAssistant');
-                }
+            //hack $('#btn_search_assistant').click();
+            var app = top.HAPI4.LayoutMgr.appGetWidgetByName('search');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha10');
+            if(app && app.widget){
+                $(app.widget).search('showSearchAssistant');
+            }
 
-          }else if(action == "menu-search-advanced"){ //H3
+        }else if(action == "menu-search-advanced"){ //H3
 
-                //call H3 search builder
-                var q = "",
-                    that = this;
-                if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
-                    q ="&q=" + encodeURIComponent(this._query_request.q);
-                }
-                var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+            //call H3 search builder
+            var q = "",
+            that = this;
+            if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
+                q ="&q=" + encodeURIComponent(this._query_request.q);
+            }
+            var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
                 top.HEURIST4.msg.showDialog(url, { 
                     title: top.HR('Advanced search builder'),
@@ -245,208 +245,208 @@ $.widget( "heurist.resultListMenu", {
                         }
                     }});
 
-          }else if(action == "menu-search-save"){  //H4
+        }else if(action == "menu-search-save"){  //H4
 
-                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-                if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method editRules
-                    //$(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
-                }
+            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            if(app && app.widget){
+                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method editRules
+                //$(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
+            }
 
-          }else if(action == "menu-search-rulebuilder"){
+        }else if(action == "menu-search-rulebuilder"){
 
-                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-                if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method editRules
-                    // $(app.widget).search_links('editRules', null); //call public method editRules
-                }
+            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            if(app && app.widget){
+                $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method editRules
+                // $(app.widget).search_links('editRules', null); //call public method editRules
+            }
 
 
-          }else if(action == "menu-selected-select-all"){
+        }else if(action == "menu-selected-select-all"){
 
-                this.selectAll();
+            this.selectAll();
 
-          }else if(action == "menu-selected-select-none"){
+        }else if(action == "menu-selected-select-none"){
 
-                this.selectNone();
+            this.selectNone();
 
-          }else if(action == "menu-selected-select-show"){  //show selection as separate search
+        }else if(action == "menu-selected-select-show"){  //show selection as separate search
 
-                this.selectShow();
+            this.selectShow();
 
-          }else if(action == "menu-selected-relateto"){  //show add relation dialog
+        }else if(action == "menu-selected-relateto"){  //show add relation dialog
 
-                this.addRelationshipsPopup();
+            this.addRelationshipsPopup();
 
-          }else if(action == "menu-selected-merge"){  //show add relation dialog
+        }else if(action == "menu-selected-merge"){  //show add relation dialog
 
-                this.fixDuplicatesPopup();
+            this.fixDuplicatesPopup();
 
-          }else if(action == "menu-selected-tag"){
+        }else if(action == "menu-selected-tag"){
 
-                this.addRemoveTagsPopup(true);
+            this.addRemoveTagsPopup(true);
 
-          }else if(action == "menu-selected-wgtags"){
+        }else if(action == "menu-selected-wgtags"){
 
-                this.addRemoveKeywordsPopup();
+            this.addRemoveKeywordsPopup();
 
-          }else if(action == "menu-selected-bookmark"){
+        }else if(action == "menu-selected-bookmark"){
 
-                this.addBookmarks();
+            this.addBookmarks();
 
-          }else if(action == "menu-selected-unbookmark"){
+        }else if(action == "menu-selected-unbookmark"){
 
-                this.deleteBookmarks();
+            this.deleteBookmarks();
 
-          }else if(action == "menu-selected-rate"){
+        }else if(action == "menu-selected-rate"){
 
-                this.setRatingsPopup();
+            this.setRatingsPopup();
 
-          }else if(action == "menu-selected-email") {
+        }else if(action == "menu-selected-email") {
 
-              this.openEmailForm();
+            this.openEmailForm();
 
-          }else if(action == "menu-selected-ownership"){
+        }else if(action == "menu-selected-ownership"){
 
-                this.setWorkgroupPopup();
+            this.setWorkgroupPopup();
 
-          }else if(action == "menu-selected-delete"){
+        }else if(action == "menu-selected-delete"){
 
-                this.deleteRecords();
+            this.deleteRecords();
 
-          }else if(action == "menu-selected-notify"){
+        }else if(action == "menu-selected-notify"){
 
-                this.notificationPopup();
+            this.notificationPopup();
 
-          }else if(action == "menu-selected-value-add"){
+        }else if(action == "menu-selected-value-add"){
 
-                this.addDetailPopup();
-
-          }else if(action == "menu-selected-value-add2"){
+            this.addDetailPopup();
+/*
+        }else if(action == "menu-selected-value-add2"){
 
                 this.addDetailPopup2();
-                
-          }else if(action == "menu-selected-value-replace"){
+*/                
+        }else if(action == "menu-selected-value-replace"){
 
-                this.replaceDetailPopup();
+            this.replaceDetailPopup();
 
-          }else if(action == "menu-selected-value-delete"){
+        }else if(action == "menu-selected-value-delete"){
 
-                this.deleteDetailPopup();
+            this.deleteDetailPopup();
 
-          }else if(action == "menu-collected-add"){
+        }else if(action == "menu-collected-add"){
 
-              this.collectionAdd();
+            this.collectionAdd();
 
-          }else if(action == "menu-collected-del"){
+        }else if(action == "menu-collected-del"){
 
-              this.collectionDel();
+            this.collectionDel();
 
 
-          }else if(action == "menu-collected-clear"){
+        }else if(action == "menu-collected-clear"){
 
-              this.collectionClear();
+            this.collectionClear();
 
-          }else if(action == "menu-collected-show"){
+        }else if(action == "menu-collected-show"){
 
-              this.collectionShow();
+            this.collectionShow();
 
-          }else if(action == "menu-collected-save"){
+        }else if(action == "menu-collected-save"){
 
-              this.collectionSave();
+            this.collectionSave();
 
-          }
+        }
 
 
 
     },
 
-     /**    H3
-     * action - name of action
-     * _data - array of parameters
-     * cbAction - callback
-     */
+    /**    H3
+    * action - name of action
+    * _data - array of parameters
+    * cbAction - callback
+    */
     executeAction: function(action, _data, cbAction){
 
-            var that = this;
+        var that = this;
 
-            function _requestCallBack(context) {
+        function _requestCallBack(context) {
 
-                if(!Hul.isnull(context)){
+            if(!Hul.isnull(context)){
 
-                    if(context.problem){
-                        top.HEURIST4.msg.showMsgErr(context.problem);
-                    }else if(context.none){
-                        top.HEURIST4.msg.showMsgFlash(context.none);
-                    }else if(context.execute){
-                        var fname = context.execute.shift();
-                        var args = context.execute;
-                        if(fname=="addRemoveTagsPopup"){
-                             that.addRemoveTagsPopup.apply(that, args);
-                        }
-
-                        //$(that).resultListMenu(fname, args);
-                        /*$.each($(that).data(), function(key, val) {
-                            if ($.isFunction(val[fname])) {
-                              $this[key].apply($this, args);
-                              // break out of the loop
-                              return false;
-                            }
-                        });*/
-
-                        //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
-                    }else if(context.ok){
-
-                        top.HEURIST4.msg.showMsgFlash(context.ok);
-                        that.reloadSearch();
-
-                        /*top.HEURIST4.msg.showMsgDlg(context.ok+
-                        "<br><br>Information changes will be visible on re-run the current search."+
-                        "<br>Reloading will reset filters and selection."+
-                        "<br>'Yes' to re-run, 'No' to leave display as-is",
-                            function(){
-                                 that._query_request.source = this.element.attr('id');
-                                 top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                            });*/
+                if(context.problem){
+                    top.HEURIST4.msg.showMsgErr(context.problem);
+                }else if(context.none){
+                    top.HEURIST4.msg.showMsgFlash(context.none);
+                }else if(context.execute){
+                    var fname = context.execute.shift();
+                    var args = context.execute;
+                    if(fname=="addRemoveTagsPopup"){
+                        that.addRemoveTagsPopup.apply(that, args);
                     }
+
+                    //$(that).resultListMenu(fname, args);
+                    /*$.each($(that).data(), function(key, val) {
+                    if ($.isFunction(val[fname])) {
+                    $this[key].apply($this, args);
+                    // break out of the loop
+                    return false;
+                    }
+                    });*/
+
+                    //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
+                }else if(context.ok){
+
+                    top.HEURIST4.msg.showMsgFlash(context.ok);
+                    that.reloadSearch();
+
+                    /*top.HEURIST4.msg.showMsgDlg(context.ok+
+                    "<br><br>Information changes will be visible on re-run the current search."+
+                    "<br>Reloading will reset filters and selection."+
+                    "<br>'Yes' to re-run, 'No' to leave display as-is",
+                    function(){
+                    that._query_request.source = this.element.attr('id');
+                    top.HAPI4.RecordMgr.search(that._query_request, $(that.document));
+                    });*/
                 }
             }
-                                                             //encodeURIComponent(JSON.stringify(_data))
-            var str = JSON.stringify(_data);
-            var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //h3 action handler
+        }
+        //encodeURIComponent(JSON.stringify(_data))
+        var str = JSON.stringify(_data);
+        var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //h3 action handler
 
-            /* it can not prase reponse properly
-            var request = {db:top.HAPI4.database, data: str, action: action }
-            $.ajax({
-                url: baseurl,
-                type: "POST",
-                data: request,
-                dataType: "json",
-                cache: false,
-                error: function(jqXHR, textStatus, errorThrown ) {
-                    var context = {problem:jqXHR.responseText};
-                    _requestCallBack();
-                },
-                success: (typeof cbAction == "function" ? cbAction : _requestCallBack)
-            });*/
+        /* it cannot parse reponse properly
+        var request = {db:top.HAPI4.database, data: str, action: action }
+        $.ajax({
+        url: baseurl,
+        type: "POST",
+        data: request,
+        dataType: "json",
+        cache: false,
+        error: function(jqXHR, textStatus, errorThrown ) {
+        var context = {problem:jqXHR.responseText};
+        _requestCallBack();
+        },
+        success: (typeof cbAction == "function" ? cbAction : _requestCallBack)
+        });*/
 
 
-            var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
-            var params = "db="+top.HAPI4.database+"&action="+action+"&data=" + encodeURIComponent(str);
-            top.HEURIST.util.getJsonData(baseurl, callback, params);
+        var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
+        var params = "db="+top.HAPI4.database+"&action="+action+"&data=" + encodeURIComponent(str);
+        top.HEURIST.util.getJsonData(baseurl, callback, params);
 
 
     },
 
     reloadSearch: function(query){
 
-            if(!Hul.isempty(query)){
-                this._query_request.q = query;
-            }
+        if(!Hul.isempty(query)){
+            this._query_request.q = query;
+        }
 
-            this._query_request.id = null;
-            this._query_request.source = this.element.attr('id');
-            top.HAPI4.SearchMgr.doSearch( this, this._query_request );
+        this._query_request.id = null;
+        this._query_request.source = this.element.attr('id');
+        top.HAPI4.SearchMgr.doSearch( this, this._query_request );
     },
 
     getSelectionIds: function(msg, limit){
@@ -467,7 +467,7 @@ $.widget( "heurist.resultListMenu", {
 
     },
 
-//-------------------------------------- ADD, REMOVE TAGS, BOOKMARKS. RATING -------------------------------
+    //-------------------------------------- ADD, REMOVE TAGS, BOOKMARKS. RATING -------------------------------
 
 
     /**
@@ -494,7 +494,7 @@ $.widget( "heurist.resultListMenu", {
         var hasRecordsNotBkmkd = false;
         if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
             //nothing selected
-            top.HEURIST4.msg.showMsgDlg("Select at least one record to add tags");
+            top.HEURIST4.msg.showMsgDlg("Please select at least one record to add tags");
             return;
         }else if (recIDs_list.length > bkmkIDs_list.length) {
             // at least one unbookmarked record selected
@@ -505,22 +505,22 @@ $.widget( "heurist.resultListMenu", {
 
         top.HEURIST4.msg.showDialog(url, { width:600, height:400, title:top.HR('Add / Remove User Tags'), callback:
 
-                        function(add, tags) {//options
-                            if (! tags) { //no tags added
-                                if (reload) {
-                                    //@todo top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
-                                }
-                                return;
-                            }
+            function(add, tags) {//options
+                if (! tags) { //no tags added
+                    if (reload) {
+                        //@todo top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
+                    }
+                    return;
+                }
 
-                            var saction = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
+                var saction = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
 
-                            var _data = {bkmk_ids:bkmkIDs_list, rec_ids: recIDs_list, tagString:tags, reload:(reload ? "1" : "")};
+                var _data = {bkmk_ids:bkmkIDs_list, rec_ids: recIDs_list, tagString:tags, reload:(reload ? "1" : "")};
 
-                            that.executeAction(saction, _data);
+                that.executeAction(saction, _data);
 
-                        }
-            });
+            }
+        });
 
     },
 
@@ -529,7 +529,7 @@ $.widget( "heurist.resultListMenu", {
     */
     addRemoveKeywordsPopup: function() {
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to add / remove workgroup tags");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to add / remove workgroup tags");
         if(Hul.isempty(recIDs_list)) return;
 
         var that = this;
@@ -539,51 +539,51 @@ $.widget( "heurist.resultListMenu", {
         var url = top.HAPI4.basePathV3+ "records/tags/editUsergroupTagsPopup.html?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, {
-                        width: 800, height:700,
-                        title:top.HR('Add / Remove Workgroup Keywords'),
-                        callback: function(add, wgTag_ids) {//options
-                            if (! wgTag_ids) return;
+            width: 800, height:700,
+            title:top.HR('Add / Remove Workgroup Keywords'),
+            callback: function(add, wgTag_ids) {//options
+                if (! wgTag_ids) return;
 
-                            var saction = (add ? "add" : "remove") + "_wgTags_by_id";
-                            var _data = {rec_ids:recIDs_list, wgTag_ids:wgTag_ids};
+                var saction = (add ? "add" : "remove") + "_wgTags_by_id";
+                var _data = {rec_ids:recIDs_list, wgTag_ids:wgTag_ids};
 
-                            that.executeAction(saction, _data);
-                        }
-            });
+                that.executeAction(saction, _data);
+            }
+        });
     },
 
     getBookmarkMessage: function(operation) {
-            return "Select at least one bookmark " + operation
-            + (this._query_request.w=="all"
-                ? "<br>(operation can only be carried out on bookmarked records, shown by a red star )"
-                : "");
+        return "Please select at least one bookmark " + operation
+        + (this._query_request.w=="all"
+            ? "<br>(operation can only be carried out on bookmarked records, shown by a red star )"
+            : "");
     },
 
     convertGroupsForH3: function() {
 
-            var groups = top.HAPI4.currentUser.usr_GroupsList;
-            var workgroups = [];
-            var workgroups2 = {};
-            for (var idx in groups)
-            {
-                if(idx){
-                    var groupID = idx;
-                    var name = groups[idx][1];
+        var groups = top.HAPI4.currentUser.usr_GroupsList;
+        var workgroups = [];
+        var workgroups2 = {};
+        for (var idx in groups)
+        {
+            if(idx){
+                var groupID = idx;
+                var name = groups[idx][1];
 
-                    if(!Hul.isnull(name))
-                    {
-                        workgroups.push(groupID);
-                        workgroups2[groupID] = {name: name};
-                    }
+                if(!Hul.isnull(name))
+                {
+                    workgroups.push(groupID);
+                    workgroups2[groupID] = {name: name};
                 }
             }
-            top.HEURIST.user.workgroups = workgroups;
-            top.HEURIST.workgroups = workgroups2;
+        }
+        top.HEURIST.user.workgroups = workgroups;
+        top.HEURIST.workgroups = workgroups2;
     },
 
     openEmailForm: function() {
         // Selection check
-        var ids = this.getSelectionIds("Select at least one record to e-mail");
+        var ids = this.getSelectionIds("Please select at least one record to e-mail");
         if(Hul.isempty(ids)) {
             return;
         }
@@ -598,7 +598,7 @@ $.widget( "heurist.resultListMenu", {
     setRatingsPopup: function(bkmkID) {
 
         var bkmkIDs_list = [],
-            that = this;
+        that = this;
 
         if(bkmkID){
             bkmkIDs_list = [bkmkID];
@@ -614,20 +614,20 @@ $.widget( "heurist.resultListMenu", {
         var url = top.HAPI4.basePathV3+ "search/actions/setRatingsPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, {
-                        width:250, height:220, title: top.HR('Set Record rating'),
-                        callback: function(value) {//options
-                            if(Number(value)>=0){
-                               var _data = {bkmk_ids:bkmkIDs_list, ratings: value};
-                               that.executeAction('set_ratings', _data);
-                            }
-                        }
-            });
+            width:250, height:220, title: top.HR('Set Record rating'),
+            callback: function(value) {//options
+                if(Number(value)>=0){
+                    var _data = {bkmk_ids:bkmkIDs_list, ratings: value};
+                    that.executeAction('set_ratings', _data);
+                }
+            }
+        });
 
     },
 
     addBookmarks: function() {
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to bookmark");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to bookmark");
         if(Hul.isempty(recIDs_list)) return;
 
         this.executeAction( "bookmark_reference", {rec_ids: recIDs_list} );
@@ -636,7 +636,7 @@ $.widget( "heurist.resultListMenu", {
     deleteBookmarks: function(bkmkID) {
 
         var bkmkIDs_list = [],
-            that = this;
+        that = this;
         if(bkmkID){
             bkmkIDs_list = [bkmkID];
         }else if (this._selection!=null) {
@@ -646,7 +646,7 @@ $.widget( "heurist.resultListMenu", {
         var sMsg = "";
 
         if (bkmkIDs_list.length == 0) {
-            top.HEURIST4.msg.showMsgDlg("Select at least one bookmark to delete");
+            top.HEURIST4.msg.showMsgDlg("Please select at least one bookmark to delete");
             return;
         }else if (bkmkIDs_list.length == 1) {
             sMsg = "Do you want to delete one bookmark?<br>(this ONLY removes the bookmark from your resources,<br>it does not delete the record entry)";
@@ -661,7 +661,7 @@ $.widget( "heurist.resultListMenu", {
 
     setWorkgroupPopup: function() {
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to set workgroup ownership and visibility");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to set workgroup ownership and visibility");
         if(Hul.isempty(recIDs_list)) return;
 
         var that = this;
@@ -671,29 +671,29 @@ $.widget( "heurist.resultListMenu", {
         var url = top.HAPI4.basePathV3+ "records/permissions/setRecordOwnership.html?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, { height:300, width:650, title: top.HR('Set workgroup / access'),
-                    callback:function(wg, viewable, hidden, pending) {
-                        if (wg === undefined) return;
+            callback:function(wg, viewable, hidden, pending) {
+                if (wg === undefined) return;
 
-                        var _data = {rec_ids: recIDs_list,
-                            wg_id  : wg,
-                            vis : (hidden ? "hidden" :
-                                viewable ? "viewable" :
-                                pending ? "pending" : "public") };
-                        that.executeAction( "set_wg_and_vis", _data );
-                    }
-            });
+                var _data = {rec_ids: recIDs_list,
+                    wg_id  : wg,
+                    vis : (hidden ? "hidden" :
+                        viewable ? "viewable" :
+                        pending ? "pending" : "public") };
+                that.executeAction( "set_wg_and_vis", _data );
+            }
+        });
     },
 
-//-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------
+    //-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------
 
     selectAll: function(){
-         this._selection = top.HAPI4.getSelection('all', false);
-         $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:"all", source:this.element.attr('id')} );
+        this._selection = top.HAPI4.getSelection('all', false);
+        $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:"all", source:this.element.attr('id')} );
     },
 
     selectNone: function(){
-         this._selection = null;
-         $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:null, source:this.element.attr('id')} );
+        this._selection = null;
+        $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:null, source:this.element.attr('id')} );
     },
 
     selectShow: function(){
@@ -706,11 +706,11 @@ $.widget( "heurist.resultListMenu", {
         }
     },
 
-//-------------------------------------- COLLECTIONS -------------------------------
+    //-------------------------------------- COLLECTIONS -------------------------------
 
     collectionAdd: function(){
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to add to collection basket");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to add to collection basket");
         if(Hul.isempty(recIDs_list)) return;
 
         var params = {db:top.HAPI4.database, fetch:1, add:recIDs_list.join(",")};
@@ -722,7 +722,7 @@ $.widget( "heurist.resultListMenu", {
 
     collectionDel: function(){
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to remove from collection basket");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to remove from collection basket");
         if(Hul.isempty(recIDs_list)) return;
 
         var params = {db:top.HAPI4.database, fetch:1, remove:recIDs_list.join(",")};
@@ -792,31 +792,31 @@ $.widget( "heurist.resultListMenu", {
         }
     },
 
-//-------------------------------------- VARIOUS: DELETE RECORD, SEND NOTIFICATION -------------------------------
+    //-------------------------------------- VARIOUS: DELETE RECORD, SEND NOTIFICATION -------------------------------
 
     deleteRecords: function() {
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to delete");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to delete");
         if(Hul.isempty(recIDs_list)) return;
 
         var that = this;
         var url = top.HAPI4.basePathV3+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, {
-                    title: top.HR('Delete Records'),
-                    height: 300, width: 600,
-                    onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
-                            var ele = frame.contentDocument.getElementById("ids");
-                            if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
-                            ele.value = recIDs_list.join(",");
-                            frame.contentDocument.forms[0].submit();
-                        },
-                    callback: function(context) {
-                            if (context==="reload") { //something was deleted - refresh
-                                that.reloadSearch();
-                            }
-                        }
-            });
+            title: top.HR('Delete Records'),
+            height: 300, width: 600,
+            onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
+                var ele = frame.contentDocument.getElementById("ids");
+                if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
+                ele.value = recIDs_list.join(",");
+                frame.contentDocument.forms[0].submit();
+            },
+            callback: function(context) {
+                if (context==="reload") { //something was deleted - refresh
+                    that.reloadSearch();
+                }
+            }
+        });
     },
 
     notificationPopup: function() {
@@ -831,11 +831,11 @@ $.widget( "heurist.resultListMenu", {
     },
 
 
-//-------------------------------------- RELATION, MERGE -------------------------------
+    //-------------------------------------- RELATION, MERGE -------------------------------
 
     addRelationshipsPopup: function(){
 
-        var recIDs_list = this.getSelectionIds("Select at least one record to add relationships");
+        var recIDs_list = this.getSelectionIds("Please select at least one record to add relationships");
         if(Hul.isempty(recIDs_list)) return;
 
         var that = this;
@@ -848,19 +848,19 @@ $.widget( "heurist.resultListMenu", {
         var url = top.HAPI4.basePathV3 + "search/actions/setRelationshipsPopup.html?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, {
-                    title: top.HR('Add Relationships'),
-                    onpopupload: function(frame){
-                            var ele = frame.contentDocument.getElementById("record-count");
-                            if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
+            title: top.HR('Add Relationships'),
+            onpopupload: function(frame){
+                var ele = frame.contentDocument.getElementById("record-count");
+                if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
 
-                            ele.innerHTML = recIDs_list.length;
-                            ele = frame.contentDocument.getElementById("record-selected");
-                            ele.innerHTML = recIDs_list.join(",");
-                        },
-                    callback: function(context) {
-                              that.reloadSearch();
-                        }
-            });
+                ele.innerHTML = recIDs_list.length;
+                ele = frame.contentDocument.getElementById("record-selected");
+                ele.innerHTML = recIDs_list.join(",");
+            },
+            callback: function(context) {
+                that.reloadSearch();
+            }
+        });
 
     },
 
@@ -869,7 +869,7 @@ $.widget( "heurist.resultListMenu", {
 
         var recIDs_list = this.getSelectionIds(null);
         if(Hul.isempty(recIDs_list) || recIDs_list.length<2){
-            top.HEURIST4.msg.showMsgDlg("Select at least two records to identify/merge duplicate records");
+            top.HEURIST4.msg.showMsgDlg("Please select at least two records to identify/merge duplicate records");
             return;
         }
 
@@ -879,14 +879,14 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST4.msg.showDialog(url, {
             title: top.HR('Combine duplicate records'),
             callback: function(context) {
-                              that.reloadSearch();
-                        }
-            });
+                that.reloadSearch();
+            }
+        });
 
     },
 
 
-//-------------------------------------- ADD, REPLACE, DELETE FIELD VALUES -------------------------------
+    //-------------------------------------- ADD, REPLACE, DELETE FIELD VALUES -------------------------------
 
     // These functions are used to batch modify/recode values for records in a resultset
 

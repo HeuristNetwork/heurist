@@ -32,7 +32,7 @@
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_searchfacets.php');
 
-    require_once ( dirname(__FILE__).'../../../migrated/common/php/Temporal.php');
+    require_once ( dirname(__FILE__).'/../../common/php/Temporal.php');
 
     /**
     * Find minimal and maximal values for given detail type and record type
@@ -636,7 +636,6 @@ if(@$params['debug']) echo $query."<br>";
 
                     }else{
                         //@todo terminate execution and return error
-/*****DEBUG****///error_log("ERROR ".print_r($response, true));
                     }
 
                     $k = $k + 3000;
@@ -707,7 +706,6 @@ if(@$params['debug']) echo $query."<br>";
 
         }
 
-/*****DEBUG****///error_log("Q: ".$is_ids_only.'   user='.print_r($currentUser, true).'   Q='.$query);
 
         $res = $mysqli->query($query);
         if (!$res){

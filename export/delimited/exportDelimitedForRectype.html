@@ -1,0 +1,153 @@
+
+<!--
+
+/**
+* filename: explanation
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White   
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+-->
+
+<html>
+    <head>
+        <title>Export Records to delimited text (CSV/TSV - comma/tab-separated values)</title>
+
+        <!--
+        This HAPI tool is designed to export multiple details for a selected resource
+        type. For REFERENCE it is designed to export a key detail for the refernced record
+        type. It is written generically to allow any HRecordType and HDetailType
+        REFERENCE between any 2 HRecords.  The tool reads the record types from Heurist
+        and requires the user to select the HDetailTypes to export and if any of the
+        HDetailTypes are REFERENCE the user is requested to select the output HDetail for
+        the REFERENCE object. The user is allowed to select the delimiters for the output
+        data which is output to a textarea for cut and paste. Multivalued fields are delimited
+        with a vertical bar (|).
+        -->
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <script src="../../common/php/loadHAPI.php"></script>
+        <script src="../../common/php/getMagicNumbers.php"></script>
+
+        <script>
+            if (!(HCurrentUser.isLoggedIn()&& HCurrentUser.isAdministrator())) {
+                //	   window.location =  HAPI.HeuristBaseURL + "common/connect/login.php"; // saw TODO: add instance code here
+            }
+        </script>
+
+        <script src="exportDelimitedForRectype.js"></script>
+
+        <link href="../../common/css/global.css" type="text/css" rel="stylesheet">
+        <link href="../../common/css/edit.css" type="text/css" rel="stylesheet">
+
+        <style>
+            #csv-textarea { /* Box at bottom of popup which displays the result of the export */
+                width: 100%;
+                height: 200px;
+                border: 1px solid black;
+            }
+
+            #csv-separator, #csv-terminator { width: 30px; }
+            table { border-collapse: collapse; }
+            td { width: 100px; border: 1px solid gray; padding: 2px; }
+            td select { width: 100px; }
+            td.error { color: red; }
+            #col-select-row td { border: none; padding: 1px 5px 5px 0px; vertical-align: top; }
+
+            .input-header-cell{
+                width:300px !important;
+            }
+            select {
+                width:200px;
+            }
+        </style>
+
+    </head>
+
+    <body class="popup" onload = "getRecTypes();">
+
+        <!-- <h2>Delimited text file data export (CSV/TSV)</h2 -->
+        <p>
+            This function exports data for specified fields of a selected record type in comma or tab delimited format (CSV/TSV).
+            An additional query string using normal Heurist query structure can be used to select a subset of the record type.
+            Due to the limitations of the delimited text format, only one record type can be exported at a time.
+
+        <div style="width:750px"> </div> <!-- Determines width of output text area -->
+
+        <div class="input-row">
+            <label class="input-header-cell">
+                Select record type</label>
+            <div class="input-cell" id="select-rec-type"></div>
+        </div>
+
+        <div class="input-row">
+            <label class="input-header-cell">
+                Additional filter (Heurist query string - optional)</label>
+            <div class="input-cell"><input type="text"  style="width:280px;" id="queryInput" onkeydown="clearOutput()"/></div>
+        </div>
+
+        <div class="input-row">
+            <label class="input-header-cell">
+                Select fields to export (use ctrl or shift to multi-select)</label>
+            <div class="input-cell" id="select-detail-type"><select size="15"></select></div>
+        </div>
+
+        <div class="input-row">
+            <label class="input-header-cell">
+                Field delimeter</label>
+            <div class="input-cell">
+                <select style="width:80px" id="delimiterSelect" onchange="refreshRecordData()">
+                    <option value="," selected>comma</option><option value="&#9;" >tab</option></select>
+                &nbsp;&nbsp;&nbsp;Quotemark for text fields:
+                <select  style="width:40px" id="quoteSelect" onchange="refreshRecordData()">
+                    <option selected value='0'>&nbsp;</option><option value='"' selected>"</option><option value="'">'</option></select><br/>
+                </div>
+        </div>
+
+            <div class="input-row">
+                <label class="input-header-cell">
+                    Include field names as first output row</label>
+                <div class="input-cell" style="padding-top: 4px;"><input type="checkbox" checked id="includeFieldNamesCheckbox" onchange="refreshRecordData()"/></div>
+            </div>
+
+            <div class="input-row">
+                <label class="input-header-cell">
+                    Precede values with column containing internal code</label>
+                <div class="input-cell" style="padding-top: 4px;">
+                <input type="checkbox" id="dtIDsCheckbox" onchange="updateExportMap()" /> </div>
+            </div>
+
+            <div class="input-row" style="text-align: center;">
+                <input type="button" onclick="getRecords()" value="Generate data"/>
+            </div>
+
+        </div>
+
+        <!-- List of fields above output box, but also used in building data so cannot be removed -->
+        <div id="export-detail-map" style="padding-top:10px;"></div>
+
+        <!-- Count of records + instructions to cut and paste -->
+        <div id="results"></div>
+
+        <!-- CSV data -->
+        <p id=records-p></p>
+
+    </body>
+</html>

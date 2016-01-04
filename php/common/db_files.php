@@ -1,16 +1,16 @@
 <?php
 
-    /** 
+    /**
     * CRUD for files : recUploadedFiles
 
     * file - prefix for functions
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -44,9 +44,9 @@
 
 
     /**
-    * Get array of local paths, external links, mimtypes and parameters (mediatype and source)  
+    * Get array of local paths, external links, mimtypes and parameters (mediatype and source)
     * for list of file id (may be obsfucated)
-    * 
+    *
     * @param mixed $system
     * @param mixed $file_ids
     */
@@ -92,7 +92,7 @@
                 $res->close();
                 return $result;
             }else{
-                $system->addError(HEURIST_DB_ERROR, 'Can not get files', $mysqli->error);
+                $system->addError(HEURIST_DB_ERROR, 'Cannot get files', $mysqli->error);
                 return false;
             }
         }else{
@@ -103,7 +103,7 @@
 
     /**
     * Return full URL to thumbnail for given record ID
-    * 
+    *
     * @param mixed $system
     * @param mixed $recIDs
     */
@@ -133,16 +133,16 @@
         }
 
 
-        return $thumb_url;            
+        return $thumb_url;
     }
 
     /**
     * Returns files for given array of records for specified users
-    * 
+    *
     * @param mixed $system
-    * @param mixed $isfull if true returns name and description 
+    * @param mixed $isfull if true returns name and description
     * @param mixed $recIDs - array of record ids
-    * 
+    *
     * @todo search by type
     */
     function fileSearch($system, $isfull, $recIDs, $mediatype=null, $ugrIDs=null){
@@ -191,7 +191,7 @@
 
 
         }else{
-            $query = "SELECT distinct ulf_ID, ulf_OrigFileName, ulf_ObfuscatedFileID ".$supinfo.", 0 as ulf_Usage "        
+            $query = "SELECT distinct ulf_ID, ulf_OrigFileName, ulf_ObfuscatedFileID ".$supinfo.", 0 as ulf_Usage "
             ." FROM recUploadedFiles, recDetails where dtl_UploadedFileID = ulf_ID ".$recs;
         }
 
@@ -212,7 +212,7 @@
             $res->close();
             return $result;
         }else{
-            $system->addError(HEURIST_DB_ERROR, 'Can not get files', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 'Cannot get files', $mysqli->error);
             return false;
         }
     }
@@ -242,14 +242,14 @@
 
             $isinsert = (!@$file['ulf_ID']);
 
-            if($isinsert){ //insert 
+            if($isinsert){ //insert
                 $file['ulf_UploaderUGrpID'] = $system->get_user_id();
             }
 
             $res = mysql__insertupdate($system->get_mysqli(), "recUploadedFiles", "ulf", $file);
             if(is_numeric($res) && $res>0){
 
-                if($isinsert){ //define obfuscation     
+                if($isinsert){ //define obfuscation
                     $file2 = array();
                     $file2['ulf_ID'] = $res;
                     $file2['ulf_ObfuscatedFileID'] = addslashes(sha1($res.'.'.rand()));
@@ -258,7 +258,7 @@
 
                 return $res; //returns affected record id
             }else{
-                $system->addError(HEURIST_DB_ERROR, 'Can not update record in database', $res);
+                $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
                 return false;
             }
 
@@ -296,7 +296,7 @@
                     if(is_array($listpaths)){
                         foreach($listpaths as $fileinfo){
                             if(file_exists($fileinfo[0])){
-                                unlink($fileinfo[0]);        
+                                unlink($fileinfo[0]);
                             }
                         }
                     }
@@ -304,7 +304,7 @@
                     $cnt = $mysqli->affected_rows;
                     return $cnt;
                 }else{
-                    $system->addError(HEURIST_DB_ERROR,"Can not delete file", $mysqli->error );
+                    $system->addError(HEURIST_DB_ERROR,"Cannot delete file", $mysqli->error );
                     return false;
                 }
 

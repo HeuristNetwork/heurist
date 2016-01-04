@@ -148,7 +148,7 @@ $.widget( "heurist.ruleBuilder", {
         //that._refresh();
         });*/
 
-        /* can not bind event handler for parent document - need to be triggered directly
+        /* cannot bind event handler for parent document - need to be triggered directly
         if(top && top.document)
         $(top.document).on(top.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
 
