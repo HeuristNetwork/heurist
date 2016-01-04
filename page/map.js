@@ -26,7 +26,7 @@
 */
 
 
-function hMapping(_map, _timeline, _basePath, _mylayout) {
+function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     var _className = "Mapping",
     _version   = "0.4";
 
@@ -66,8 +66,8 @@ function hMapping(_map, _timeline, _basePath, _mylayout) {
     * Initialization
     * _basePath - redundant
     */
-    function _init(_map, _timeline, _basePath, _mylayout) {
-        mapdiv_id = _map;
+    function _init(_mapdiv_id, _timeline, _basePath, _mylayout) {
+        mapdiv_id = _mapdiv_id;
         timelinediv_id = _timeline;
         mylayout = _mylayout;
 
@@ -1581,6 +1581,6 @@ ed_html +
         map_timeline: null,   //@todo vis timeline functionality
     }
 
-    _init(_map, _timeline, _basePath, _mylayout);
+    _init(_mapdiv_id, _timeline, _basePath, _mylayout);
     return that;  //returns object
 }

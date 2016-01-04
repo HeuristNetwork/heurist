@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Standalone mapping page (for development purposes )
+    * Mapping page. It can be loaded in app_timemap widget or launched as standalone page
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -19,45 +19,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    // System manager
-    require_once(dirname(__FILE__)."/../php/System.php");
-    $system = new System();
-
-    // Database check
-    if(@$_REQUEST['db']){
-        if(! $system->init(@$_REQUEST['db']) ){
-            //@todo - redirect to error page
-            print_r($system->getError(),true);
-            exit();
-        }
-    }else{
-        header('Location: /../php/databases.php');
-        exit();
-    }
+require_once(dirname(__FILE__)."/initPage.php");
 ?>
-
-<html>
-    <!-- HEAD -->
-    <head>
-        <title><?=HEURIST_TITLE ?></title>
-
-        <link rel=icon href="../favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-        <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
-        <meta content="telephone=no" name="format-detection">
-
-        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-        
-        <!-- Styles
-        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" /> -->
-        <link rel="stylesheet" type="text/css" href="../h4styles.css" />
-
-        <!-- jQuery -->
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <script type="text/javascript" src="../ext/layout/jquery.layout-latest.js"></script>
 
         <!-- Timemap -->
@@ -66,6 +29,7 @@
         <!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
         <script type="text/javascript" src="<?php echo HEURIST_BASE_URL_V3; ?>common/js/temporalObjectLibrary.js"></script>
+        <!-- timeline -->
         <script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
         <link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
 
@@ -89,19 +53,7 @@
         <script type="text/javascript" src="map_overlay.js"></script>
         <script type="text/javascript" src="../apps/bubble.js"></script>
 
-        <!-- minimum set of required set - @todo load it dynamically for standalone case -->
-<!--  remove this comment to run map.php as standalone
-        <script type="text/javascript" src="../js/search_minimal.js"></script>
-        <script type="text/javascript" src="../js/recordset.js"></script>
-        <script type="text/javascript" src="../js/utils.js"></script>
-        <script type="text/javascript" src="../js/utils_msg.js"></script>
-        <script type="text/javascript" src="../js/hapi.js"></script>
--->
-
         <style>
-            #helper p, #helper h2, #helper h4{
-                padding:10px;
-            }
             .ui-map-document { background-image: url('../assets/267.png') !important;}
             .ui-map-layer { background-image: url('../assets/268.png') !important;}
 
@@ -146,82 +98,15 @@
 
         <!-- Initializing -->
 
-<?php
-    if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
-        //HEURIST_ICON_URL.RT_MAP_DOCUMENT.'.png'
-        //HEURIST_ICON_URL.RT_MAP_LAYER.'.png'
-    }
-?>
-
         <script type="text/javascript">
 
             var mapping, menu_datasets, btn_datasets;
 
-            // Standalone check
-            $(document).ready(function() {
-                if(!top.HAPI4){
-                    //load minimum set of required scripts
-
-                    // In case of standalone page
-                    top.HAPI4 = new hAPI('<?=$_REQUEST['db']?>', onHapiInit);//, < ?=json_encode($system->getCurrentUser())? > );
-                }else{
-                    // Not standalone, use HAPI from parent window
-                    onHapiInit( true );
-                }
-            });
-
-            function loadStyles(){
-
-                    var prefs = top.HAPI4.get_prefs();
-                    if(!top.HR){
-                        //loads localization
-                        top.HR = top.HAPI4.setLocale(prefs['layout_language']);
-                    }
-                    if(prefs['layout_theme'] && !(prefs['layout_theme']=="heurist" || prefs['layout_theme']=="base")){
-                        cssLink = $('<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'+
-                            prefs['layout_theme']+'/jquery-ui.css" />');
-                    }else{
-                        //default BASE theme
-                        cssLink = $('<link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
-                    }
-                    $("head").append(cssLink);
-
-                    if(top.HAPI4.sysinfo['layout']=='DigitalHarlem'){ //digital harlem - @todo move style to layout
-                         $("head").append($('<link rel="stylesheet" type="text/css" href="../apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
-                    }
-
-            }
-
-            // Callback function on hAPI initialization
-            function onHapiInit(success)
-            {
-                if(success) // Successfully initialized system
-                {
-                    loadStyles();
-
-                    if(!top.HEURIST4.rectypes){
-                        top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                            if(response.status == top.HAPI4.ResponseStatus.OK){
-                                top.HEURIST4.rectypes = response.data.rectypes;
-                                top.HEURIST4.terms = response.data.terms;
-                                top.HEURIST4.detailtypes = response.data.detailtypes;
-
-                                onMapInit();
-                            }else{
-                                top.HEURIST4.msg.showMsgErr('Can not obtain database definitions');
-                            }
-                        });
-                    }else{
-                        onMapInit();
-                    }
-
-                }else{
-                    top.HEURIST4.msg.showMsgErr('Can not init HAPI');
-                }
-            }
-
             // Callback function on map initialization
-            function onMapInit(){
+            function onPageInit(success){
+                
+                if(!success) return;
+                
                 // Layout options
                 var layout_opts =  {
                     applyDefaultStyles: true,
@@ -251,11 +136,7 @@
       if(@$_REQUEST['noheader']){ ?>
                 layout_opts.north__size = 0;
 <?php } ?>
-
-
                 var mylayout = $('#mapping').layout(layout_opts);
-
-
 
                 // Mapping data
                 var mapdata = [];
