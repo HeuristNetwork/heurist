@@ -25,31 +25,38 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-if(!defined('PDIR')){
+require_once(dirname(__FILE__)."/../php/System.php");
+    
+$is_index_page = defined('PDIR');
+    
+if($is_index_page){
     //if PDIR is defined this script is main (root)
+    define('ERROR_REDIR','php/databases.php');
+}else{
     define('PDIR','../');
     define('ERROR_REDIR','errorSystem.php');
-}else{
-    define('ERROR_REDIR','php/databases.php');
 }
 
-require_once(dirname(__FILE__)."/../php/System.php");
+$error_msg = '';
+$isSystemInited = false;
 
 // init main system class
 $system = new System();
 
 if(@$_REQUEST['db']){ 
     //if database is defined then connect to given database
-    if(! $system->init(@$_REQUEST['db']) ){
-        //cannot connect to given database
+    $isSystemInited = $system->init(@$_REQUEST['db']);
+}
+
+if(!$isSystemInited){ 
+    
+    if($is_index_page){
+        require (ERROR_REDIR);
+    }else{
         $err = $system->getError();
-        $msg = @$err['message'];
-        header('Location: '.ERROR_REDIR.'?msg='.rawurlencode($msg));
-        exit();
+        $error_msg = @$err['message']?$err['message']:'';
+        header('Location: '.ERROR_REDIR.'?msg='.rawurlencode($error_msg));
     }
-}else{
-    //db parameter is missing, redirects to database selection or error page
-    header('Location: '.ERROR_REDIR);
     exit();
 }
 

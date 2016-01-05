@@ -30,16 +30,15 @@
     require_once (dirname(__FILE__).'/../consts.php');
 
     /**
-    * Connect to db server and open database if its name is supplied
+    * Connect to db server 
     *
     * @param mixed $dbHost
     * @param mixed $dbUsername
     * @param mixed $dbPassword
-    * @param mixed $dbname
     *
     * @return a MySQL link identifier on success or array with code and error message on failure.
     */
-    function mysql_connection($dbHost, $dbUsername, $dbPassword, $dbname){
+    function mysql_connection($dbHost, $dbUsername, $dbPassword){
 
 
         if(null==$dbHost || $dbHost==""){
@@ -59,7 +58,18 @@
         if (mysqli_connect_errno()) {
 
             return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
-        }else if($dbname){
+        }
+        return $mysqli;
+    }
+
+    /**
+    * open database
+    * 
+    * @param mixed $dbname
+    */
+    function mysql__usedatabase($mysqli, $dbname){
+        
+        if($dbname){
 
             $success = $mysqli->select_db($dbname);
             if(!$success){
@@ -69,11 +79,14 @@
             $mysqli->query('set character set "utf8"');
             $mysqli->query('set names "utf8"');
 
-            //ARTEM???  if (function_exists('get_user_id')) $mysqli->query('set @logged_in_user_id = ' . get_user_id());
+            // @todo verify that in stored procedures we use user_id
+            // if so, set this mysql variable on session open 
+            // if (function_exists('get_user_id')) $mysqli->query('set @logged_in_user_id = ' . get_user_id());
         }
-        return $mysqli;
+        return true;
     }
-
+    
+    
     /**
     * returns list of databases as array
     * @param    mixed $with_prefix - if false it remove "hdb_" prefix

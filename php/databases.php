@@ -17,27 +17,34 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
+    if(!defined('PDIR')){
+        define('PDIR','../');
+    }
 
-
-    require_once(dirname(__FILE__)."/System.php");
-
-    $system = new System();
-    $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
+    if(isset($system)){
+        //this is inclusion into index.php
+        if(!$isSystemInited){
+            $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
+        }
+    }else{
+        require_once(dirname(__FILE__)."/System.php");
+        $system = new System();
+        $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
+    }
 
     if( !$isSystemInited ){  //can not init system (apparently connection to Database Server is wrong or server is down)
         $err = $system->getError();
         $error_msg = @$err['message'];
-    }else {
+    }
+    
+    if($system->get_mysqli()!=null) { //server is connected 
         
-        if (@$_REQUEST['msg']){
-            $error_msg = $_REQUEST['msg'];
-        }
-
         $list =  mysql__getdatabases4($system->get_mysqli());
         if(count($list)<1){
             //reditrect to create database
             header('Location: ' . HEURIST_BASE_URL . 'admin/setup/dbcreate/createNewDB.php');
-            return;
+            exit();
         }
     }
 ?>
@@ -45,11 +52,10 @@
     <head>
         <title><?=HEURIST_TITLE?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
 
-        <link rel=icon href="../favicon.ico" type="image/x-icon">
-
-        <link rel="stylesheet" href="../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../h4styles.css">
+        <link rel="stylesheet" href="<?php echo PDIR?>ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>h4styles.css">
 
         <script type="text/javascript">
         </script>
@@ -63,7 +69,7 @@
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 
 <?php
-    if(isset($error_msg)){
+    if(isset($error_msg) && $error_msg!=''){
             echo '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">';
             echo '<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>';
             echo $error_msg.'</div>';
@@ -71,25 +77,21 @@
     }else{
             $list_top = '6em';
     }
-    //<div style="width:70%; height:100%;margin:0px auto; padding: 0.5em;">
-    //position:absolute;top:12em;bottom:0.2em;
-//            <div style="overflow-y:auto;width:90%;">
-//style="overflow-y:auto;height: echo $list_height;;"
 
-    if($isSystemInited){
+    if(isset($list)){
 ?>
             <div style="padding: 0.5em;">Please select a database from the list</div>
-                <ul class="db-list" style="overflow-y:auto;position:absolute;top:<?php echo $list_top;?>;bottom:0.5em;left:1em;right:0.5em">
-                    <?php
-                        /* DEBUG for($i=0;$i<100;$i++) {
-                        array_push($list, "database".$i);
-                        }*/
-                        foreach ($list as $name) {
-                            print("<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>");
-                        }
+            <ul class="db-list" style="overflow-y:auto;position:absolute;top:<?php echo $list_top;?>;bottom:0.5em;left:1em;right:0.5em">
+                <?php
+                    /* DEBUG for($i=0;$i<100;$i++) {
+                    array_push($list, "database".$i);
+                    }*/
+                    foreach ($list as $name) {
+                        print("<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>");
+                    }
 
-                    ?>
-                </ul>
+                ?>
+            </ul>
 
 <?php
     }

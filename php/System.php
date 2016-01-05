@@ -95,8 +95,9 @@ class System {
         }
 
         //dbutils
-        $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $this->dbname_full);
+        $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
         if ( is_array($res) ){
+            //connection to server failed
             $this->addError($res[0], $res[1]);
             $this->mysqli = null;
             return false;
@@ -105,6 +106,13 @@ class System {
 
             if($this->dbname_full)  //database is defined
             {
+                $res = mysql__usedatabase($this->mysqli, $this->dbname_full);
+                if ( is_array($res) ){
+                    //open of database failed
+                    $this->addError($res[0], $res[1]);
+                    return false;
+                }
+                
                 if(!$this->get_system()){
                     return false;
                 }
