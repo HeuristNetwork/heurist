@@ -28,9 +28,9 @@
 if(!defined('PDIR')){
     //if PDIR is defined this script is main (root)
     define('PDIR','../');
-    define('ERROR_REDIR','php/databases.php');
-}else{
     define('ERROR_REDIR','errorSystem.php');
+}else{
+    define('ERROR_REDIR','php/databases.php');
 }
 
 require_once(dirname(__FILE__)."/../php/System.php");

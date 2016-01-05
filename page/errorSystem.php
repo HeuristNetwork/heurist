@@ -23,28 +23,27 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     
-require_once(dirname(__FILE__)."/System.php");
-   
+require_once(dirname(__FILE__)."/../php/System.php");
+
+
 // init main system class
 $system = new System();
-$isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 $layout_theme = null;
+$isSystemInited = $system->init(@$_REQUEST['db'], true);
 
-if(!$isSystemInited){ 
+if($isSystemInited){ 
+    $user = $system->getCurrentUser();
+    $layout_theme = @$user['ugr_Preferences']['layout_theme'];
+    $error_msg = @$_REQUEST['msg'];   
+    if(!$error_msg){
+        $error_msg = 'Unknown error.';
+    }
+}else{
     //cannot connect to given database
     $err = $system->getError();
     $error_msg = @$err['message'];
     if(!$error_msg){
         $error_msg = 'Unknown error. Can not init Heurist system';
-    }
-}else{
-    $error_msg = @$_REQUEST['msg'];
-    
-    $user = $system->getCurrentUser();
-    $layout_theme = @$user['ugr_Preferences']['layout_theme'];
-    
-    if(!$error_msg){
-        $error_msg = 'Unknown error.';
     }
 }
 
@@ -69,8 +68,8 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
         <link rel="stylesheet" href="<?php echo $cssLink;?>" />
         <link rel="stylesheet" type="text/css" href="../h4styles.css">
     </head>
-    <body style="padding:44px;">
-        <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; margin:0px auto; padding: 0.5em;">
+    <body style="padding:44px;" class="ui-heurist-header1">
+        <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 

@@ -39,6 +39,22 @@ body {
     width: 190px;
     height: 38px;
 }
+
+.db-list {
+    
+    -webkit-column-width:   250px;
+    -moz-column-width:      250px;
+    -o-column-width:        250px;
+    -ms-column-width:       250px;
+    column-width:           250px;
+/*
+    -webkit-column-rule-style:  solid;
+    -moz-column-rule-style:     solid;
+    -o-column-rule-style:       solid;
+    -ms-column-rule-style:      solid;
+    column-rule-style:      solid;*/
+}
+
 .db-list li {
     list-style: none;
     background-image: url(assets/database.png);

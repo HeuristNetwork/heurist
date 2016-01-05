@@ -112,7 +112,7 @@ class System {
                 $this->start_my_session();
 
                 define('HEURIST_DBNAME', $this->dbname);
-                define('HEURIST_DBNAME_FULL',$this->dbname_full);
+                define('HEURIST_DBNAME_FULL', $this->dbname_full);
                 //@todo  - test upload and thumb folder exist and writeable
                 if(!$this->initPathConstants()){
                     $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
