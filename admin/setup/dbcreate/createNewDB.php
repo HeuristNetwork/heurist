@@ -76,7 +76,7 @@ function errorOut($msg){
             /localization does not even exist -->
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-            <script type="text/javascript" src="../../../localization.js"></script>
+            <script type="text/javascript" src="../../../hclient/core/localization.js"></script>
             <script type="text/javascript" src="../../../hclient/core/utils.js"></script>
             <script type="text/javascript" src="../../../hclient/core/utils_msg.js"></script>
             <script type="text/javascript" src="../../../hclient/core/hapi.js"></script>
