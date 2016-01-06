@@ -1063,10 +1063,11 @@ function EditRecStructure() {
 					//show disable target pnr rectype
 
 			}else if(rst_type === "separator"  &&
-					fieldnames[k] !== "rst_DisplayName"){
+					!(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth")){
 					//hide all but name
 					edt.parentNode.parentNode.style.display = "none";
-			}else if(rst_type === "fieldsetmarker" && !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){
+			}else if(rst_type === "fieldsetmarker" && 
+                    !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" || fieldnames[k] === "rst_Status")){
 					//hide all, required - once
 					edt.parentNode.parentNode.style.display = "none";
 			}
@@ -1074,7 +1075,10 @@ function EditRecStructure() {
 			//hide width for some field types
 			if(fieldnames[k] === "rst_DisplayWidth" && _isNoWidth(rst_type) ){
 					edt.parentNode.style.display = "none";
-			}
+			}else if(fieldnames[k] === "rst_DisplayName"){
+                    edt.parentNode.parentNode.style.display = "block";
+            }
+            
 
 			}
 		}//for
@@ -1113,7 +1117,7 @@ function EditRecStructure() {
 	* These field types have no width
 	*/
 	function _isNoWidth(typ){
-		   return ((typ === "enum") || (typ==="resource") ||
+		   return ((typ === "enum") || (typ==="resource") ||  (typ==="fieldsetmarker") || 
 					(typ==="relmarker") || (typ === "relationtype") ||
 					(typ==="file") || (typ==="geo") || (typ==="separator"));
 	}
