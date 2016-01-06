@@ -22,8 +22,8 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_users.php');
-    require_once (dirname(__FILE__).'/../common/db_svs.php');
+    require_once (dirname(__FILE__).'/../dbaccess/db_users.php');
+    require_once (dirname(__FILE__).'/../dbaccess/db_svs.php');
 
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
 

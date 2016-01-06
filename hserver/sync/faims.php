@@ -19,7 +19,7 @@
 
 
 require_once(dirname(__FILE__)."/../System.php");
-require_once(dirname(__FILE__)."/../../common/db_records.php");
+require_once(dirname(__FILE__)."/../../dbaccess/db_records.php");
 
 //@todo HARDCODED id of OriginalID
 $dt_SourceRecordID = 36;

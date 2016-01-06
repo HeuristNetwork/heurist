@@ -572,7 +572,7 @@ if(@$params['debug']) echo $query."<br>";
                                             $fin_result['data']['rectypes'][$rectype_id] = 1;
                                         }
                                     }
-                                    
+
                                 }
                             }
 

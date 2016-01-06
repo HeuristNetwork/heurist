@@ -21,7 +21,7 @@
 
 
 require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/../common/db_files.php');
+require_once (dirname(__FILE__).'/../db_files.php');
 
 $system = new System(); //without connection
 $db = @$_REQUEST['db'];

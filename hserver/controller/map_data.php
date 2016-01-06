@@ -22,7 +22,7 @@
 */
 
 require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/../common/db_files.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
 $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";

@@ -124,7 +124,7 @@ $.widget( "heurist.profile", {
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/sync/faims.php?db="+top.HAPI4.database+" .utility-content", function(){
+                    $dlg.load("hserver/sync/faims.php?db="+top.HAPI4.database+" .utility-content", function(){
                         $dlg.dialog({
                             autoOpen: true,
                             height: 480,

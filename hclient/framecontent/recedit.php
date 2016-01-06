@@ -21,7 +21,7 @@
 
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
-require_once(dirname(__FILE__).'/../../hserver/common/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 
 $system = new System();
 

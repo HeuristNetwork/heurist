@@ -57,7 +57,7 @@ var cfg_widgets = [
 
     {id:'ha52', name:'Report', title:'Smarty report system', url:'apps/rep_smarty.php'},
     {id:'ha53', name:'Transform', url:'apps/rep_xslt.php'},
-    {id:'ha54', name:'Crosstabs', url:'php/sync/crosstabs.php', isframe:true},
+    {id:'ha54', name:'Crosstabs', url:'hserver/sync/crosstabs.php', isframe:true},
     {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'apps/exp/rec_viewer_ext.js'},
     */
 

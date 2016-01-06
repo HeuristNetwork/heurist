@@ -22,8 +22,8 @@
 
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_structure.php');
-    require_once (dirname(__FILE__).'/../common/db_structure_tree.php');
+    require_once (dirname(__FILE__).'/../dbaccess/db_structure.php');
+    require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
 
     /* DEBUG
     $_REQUEST['db'] = 'dos_3';

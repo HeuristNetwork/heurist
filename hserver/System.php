@@ -24,9 +24,9 @@ require_once (dirname(__FILE__).'/../configIni.php'); // read in the configurati
 require_once (dirname(__FILE__).'/consts.php');
 
 
-require_once (dirname(__FILE__).'/common/utils_db.php');
-require_once (dirname(__FILE__).'/common/db_users.php');
-require_once (dirname(__FILE__).'/common/utils_file.php');
+require_once (dirname(__FILE__).'/dbaccess/utils_db.php');
+require_once (dirname(__FILE__).'/dbaccess/db_users.php');
+require_once (dirname(__FILE__).'/dbaccess/utils_file.php');
 
 
 /**

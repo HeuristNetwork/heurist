@@ -21,8 +21,8 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../common/db_recsearch.php');
-    require_once (dirname(__FILE__).'/../common/utils_db.php');
+    require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
+    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     /*
      parameters
@@ -93,9 +93,9 @@
         $isok = true;
         $value = mysql__select_value($system->get_mysqli(), "SHOW TABLES LIKE 'recLinks'");
         if($value==null || $value==""){
-            include(dirname(__FILE__).'/../common/utils_db_load_script.php'); // used to execute SQL script
+            include(dirname(__FILE__).'/../dbaccess/utils_db_load_script.php'); // used to execute SQL script
 
-            if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../common/sqlCreateRecLinks.sql")){
+            if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../dbaccess/sqlCreateRecLinks.sql")){
                 $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
                 $response = $system->getError();
                 $isok = false;
