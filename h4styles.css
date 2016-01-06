@@ -41,13 +41,13 @@ body {
 }
 
 .db-list {
-
+    
     -webkit-column-width:   250px;
     -moz-column-width:      250px;
     -o-column-width:        250px;
     -ms-column-width:       250px;
     column-width:           250px;
-    /*
+/*
     -webkit-column-rule-style:  solid;
     -moz-column-rule-style:     solid;
     -o-column-rule-style:       solid;
@@ -712,9 +712,9 @@ Allow use of icon-large to be properly aligned
 */
 /*
 .ui-icon[class*=" icon-"] {
-background: none repeat scroll 0 0 transparent;
-text-indent: 0;
-margin-top: -0.5em;
+    background: none repeat scroll 0 0 transparent;
+    text-indent: 0;
+    margin-top: -0.5em;
 }
 */
 .ui-button-icon-only .ui-icon[class*=" icon-"] {
@@ -815,7 +815,7 @@ background: #8ea9b9
 }
 
 .loading{
-    background: url('hclient/assets/loading-animation-white.gif') no-repeat center center !important;
+/*    background: url('hclient/assets/loading-animation-white.gif') no-repeat center center !important;*/
 }
 
 .labelBold{

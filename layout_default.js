@@ -17,7 +17,7 @@
 
 /**
 * Layout configuration fails  ????? files ????
-* @see hclient/core/layout.js
+* @see js/layout.js
 *
 * @type Array widgets - list of widgets/applications
 * @type Array layouts - list of layouts
@@ -39,43 +39,43 @@
 
 var cfg_widgets = [
 
-    {id:'h4_search', name:'Search', widgetname:'search', script:'apps/search/search.js'},
+    {id:'h4_search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js'},
 
-    {id:'ha_search_tree', name:'Saved searches', widgetname:'svs_list', script:'apps/search/svs_list.js'},
+    {id:'ha_search_tree', name:'Saved searches', widgetname:'svs_list', script:'hclient/widgets/search/svs_list.js'},
 
 
     /* experimental - widgets for future implementation
-    {id:'ha14', name:'Tags', url:'apps/search_tags.php'},
-    {id:'ha01', name:'About', widgetname:'about', script:'apps/about.js', minsize:[200,200], size:[300,300], isframe:false },
-    {id:'ha02', name:'Profile', widgetname:'profile', script:'apps/profile.js'},
-    {id:'ha15', name:'Navigation', widgetname:'pagination', script:'apps/pagination.js'},
-    {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'apps/exp/rec_list.js'},
-    {id:'ha31', name:'Record', widgetname:'rec_viewer', script:'apps/rec_viewer.js'},
-    {id:'ha32', name:'Media', title:'Record media viewer', url:'apps/rec_media.php'},
-    {id:'ha33', name:'Relations', title:'Record relations viewer', url:'apps/rec_relation.php'},
-    {id:'ha34', name:'Comments', title:'Discussion over record', url:'apps/rec_comments.php'},
+    {id:'ha14', name:'Tags', url:'hclient/widgets/search_tags.php'},
+    {id:'ha01', name:'About', widgetname:'about', script:'hclient/widgets/about.js', minsize:[200,200], size:[300,300], isframe:false },
+    {id:'ha02', name:'Profile', widgetname:'profile', script:'hclient/widgets/profile.js'},
+    {id:'ha15', name:'Navigation', widgetname:'pagination', script:'hclient/widgets/pagination.js'},
+    {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'hclient/widgets/exp/rec_list.js'},
+    {id:'ha31', name:'Record', widgetname:'rec_viewer', script:'hclient/widgets/rec_viewer.js'},
+    {id:'ha32', name:'Media', title:'Record media viewer', url:'hclient/widgets/rec_media.php'},
+    {id:'ha33', name:'Relations', title:'Record relations viewer', url:'hclient/widgets/rec_relation.php'},
+    {id:'ha34', name:'Comments', title:'Discussion over record', url:'hclient/widgets/rec_comments.php'},
 
-    {id:'ha52', name:'Report', title:'Smarty report system', url:'apps/rep_smarty.php'},
-    {id:'ha53', name:'Transform', url:'apps/rep_xslt.php'},
-    {id:'ha54', name:'Crosstabs', url:'hserver/sync/crosstabs.php', isframe:true},
-    {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'apps/exp/rec_viewer_ext.js'},
+    {id:'ha52', name:'Report', title:'Smarty report system', url:'hclient/widgets/rep_smarty.php'},
+    {id:'ha53', name:'Transform', url:'hclient/widgets/rep_xslt.php'},
+    {id:'ha54', name:'Crosstabs', url:'php/sync/crosstabs.php', isframe:true},
+    {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'hclient/widgets/exp/rec_viewer_ext.js'},
     */
 
-    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'apps/topmenu/mainMenu.js'},
-    {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'apps/viewers/resultList.js'},
-    {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'apps/viewers/recordDetails.js'},
-    {id:'h3_recordListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'apps/viewers/recordListExt.js'},
+    {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/topmenu/mainMenu.js'},
+    {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
+    {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'hclient/widgets/viewers/recordDetails.js'},
+    {id:'h3_recordListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
 
-    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'apps/viewers/app_timemap.js'},  // map in iframe
-    {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'apps/viewers/staticPage.js'},
+    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
+    {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
-    {id:'h4_connections', name:'Connections', widgetname:'connections', script:'apps/viewers/connections.js'},
+    {id:'h4_connections', name:'Connections', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
 
     // DIGITAL HARLEM APPS
-    {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'apps/digital_harlem/dh_search.js'},
-    {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'apps/digital_harlem/dh_maps.js'},
-    {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'apps/digital_harlem/dh_results.js'},
-    {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'apps/digital_harlem/dh_legend.js'}
+    {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'hclient/widgets/digital_harlem/dh_search.js'},
+    {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'hclient/widgets/digital_harlem/dh_maps.js'},
+    {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'hclient/widgets/digital_harlem/dh_results.js'},
+    {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'hclient/widgets/digital_harlem/dh_legend.js'}
 
 ];
 
@@ -109,32 +109,30 @@ var cfg_layouts = [
         west:{size:260, minsize:230, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, innerHeader:true, dockable:false, dragable:false, css:{'background-color':'white'}, options:{innerHeader: true} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
-            tabs:[{dockable:true, dragable:false, resizable:false,
-                apps:[
-                    {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
-                    {appid:'ha51'}, // H4 map V2
-                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
-                    {appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}  //H4 connections
-                    //{appid:'h3_recordListExt', name:'Related', options:{ url:'hclient/framecontent/relatedRecords.php?db=[dbname]' }} // H4 related records
-                ]
-            }]
+        tabs:[{dockable:true, dragable:false, resizable:false,
+            apps:[
+                {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer        
+                {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
+                {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
+                {appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
+            ]}]
         }
     },
 
     // Position of widgets are specified in CSS, all widgets can be dragged around and repositioned
     /* This layout needs to be defiend spcifically to be useful
     {id:'FreeLayout', name:'Free example', theme:'heurist', type:'free',
-    mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
-    apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
-    {appid:'h4_search', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
-    {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
-    {appid:'h3_resultList', name: 'Search result' },
-    {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
-    {appid:'ha51'}, // H4 map V2
-    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
-    {appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}  //H4 connections
-    ]}]
-    }
+        mainpane: {dropable:true, tabs:[{dockable:true, dragable:true, resizable:true,
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
+                {appid:'h4_search', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
+                {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
+                {appid:'h3_resultList', name: 'Search result' },
+                {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
+                {appid:'ha51'}, // H4 map V2
+                {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
+                {appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}  //H4 connections
+            ]}]
+        }
     },
     */
 
@@ -142,7 +140,7 @@ var cfg_layouts = [
         north:{size:140, resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_static', hasheader:false,
-                    options:{url: 'apps/digital_harlem/dh_header.php?db=[dbname]'}
+                    options:{url: 'hclient/widgets/digital_harlem/dh_header.php?db=[dbname]'}
                     //css:{width:'100%',height:'100%'}},
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0, border:'none', 'background':'none', 'min-width':'75em'}},    //top panel
         ]},
@@ -162,19 +160,19 @@ var cfg_layouts = [
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
                     {appid:'dh_maps', name: 'Maps'},     // saved searches(maps)
-                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'apps/digital_harlem/dh_legend.php?db=[dbname]'}}
+                    {appid:'h4_static', name:'Legend', options:{title:'Legend', url: 'hclient/widgets/digital_harlem/dh_legend.php?db=[dbname]'}}
                 ]
             }]
         },
         south:{size:40, resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_static', hasheader:false,
-                    options:{url: 'apps/digital_harlem/dh_footer.html'}
+                    options:{url: 'hclient/widgets/digital_harlem/dh_footer.html'}
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
         ]},
     },
 
-    // Alternative (Gridster) layout (like Windows tiles) - not very useful unless a small set of widgets
+        // Alternative (Gridster) layout (like Windows tiles) - not very useful unless a small set of widgets
     /*   {id:'Gridster', name:'gridster example', theme:'smoothness', type:'gridster',
     options:{widget_base_dimensions:[50, 50]},
     mainmenu: { col:1, row:1, size_x:10, size_y:1, apps:[{appid:'h3_mainMenu', hasheader:false, css:{width:'100%', height:'100%', border:'none', 'background':'none'} } ]},

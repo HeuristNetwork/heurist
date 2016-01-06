@@ -3,7 +3,7 @@
 * 
 * @param action_type - name of action - used to access help, widget name and method on server side
 * @returns {Object}
-* @see  apps/record for widgets
+* @see  hclient/framecontent/record for widgets
 * @see  migrated/search/actions
 * @see  record_action_help_xxxx in localization.js for description and help
 * 

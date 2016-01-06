@@ -266,7 +266,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                 $(".show").slideToggle(500);
                 $("#visualisation-column").slideToggle(500);
 
-                // VISUALISATION CALL
+                // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
                 var url = "../../hserver/controller/rectype_relations.php" + window.location.search;
                 console.log("Loading data from: " + url);
                 d3.json(url, function(error, json) {

@@ -1,13 +1,4 @@
 <?php
-
-
-
-
-// TODO: This file is never called
-
-
-
-
 /**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

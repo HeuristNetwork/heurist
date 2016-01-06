@@ -2,7 +2,7 @@
 
     /**
     * Page for popup modal dialog to perform various acvtions related to records
-    *
+    * 
     *    add/edit/delete details
     *    set relationship
     *    bookmark/unbookmark
@@ -10,12 +10,12 @@
     *    assign wg tags
     *    rating
     *    ownership(who can edit), access(visibility)
-    *
+    *    
     *    merge
     *    delete
     *    mailing list based on records
-    *
-    *    STRUCTURE:
+    *    
+    *    STRUCTURE:        
     *    header that describes the action
     *    selector of records: all, selected, by record type
     *    widget to enter data
@@ -25,7 +25,7 @@
     *        processed
     *        rejected (rights)
     *        error
-    *
+    *    
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -42,7 +42,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
+    
 require_once(dirname(__FILE__)."/initPage.php");
 
 //verify that user is logged in
@@ -119,9 +119,9 @@ if(!in_array($action_type, $allowed_actions)){
 */
 
 ?>
-        <script type="text/javascript" src="recordAction.js"></script>
-        <script type="text/javascript" src="../../apps/editing/editing_input.js"></script>
-
+        <script type="text/javascript" src="hclient/framecontent/recordAction.js"></script>
+        <script type="text/javascript" src="hclient/widgets/editing/editing_input.js"></script>
+        
         <script type="text/javascript">
             // Callback function on map initialization
             function onPageInit(success){
@@ -135,7 +135,7 @@ if(!in_array($action_type, $allowed_actions)){
     <!-- HTML -->
     <body>
         <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
-
+        
         </div>
 
         <fieldset>
@@ -148,15 +148,15 @@ if(!in_array($action_type, $allowed_actions)){
                 <select id="sel_fieldtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
         </fieldset>
-
+        
         <div id="div_widget" tyle="padding: 0.2em; width: 100%;">
             <fieldset>
             </fieldset>
         </div>
 
         <div id="div_result" tyle="padding: 0.2em; width: 100%;">
-
+        
         </div>
-
+        
     </body>
 </html>

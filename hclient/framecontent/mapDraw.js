@@ -140,6 +140,9 @@ function hMappingDraw(_mapdiv_id) {
        //end color
        
 
+    //
+    // init map 
+    //
     function _init(_mapdiv_id) {
         mapdiv_id = _mapdiv_id;
 
@@ -191,22 +194,17 @@ function hMappingDraw(_mapdiv_id) {
             }
             deleteMenu.open(map, shape.getPath(), e.vertex);
           });           
-
-          google.maps.event.addListener(thePath, 'set_at', function() {
-            // complete functions
-            $('#coords1').html(thePath.getArray().join(' '));  
-          });
-
-          google.maps.event.addListener(thePath, 'insert_at', function() {
-            // complete functions
-            $('#coords1').html(thePath.getArray().join(' '));  
-          });
           
-          google.maps.event.addListener(thePath, 'remove_at', function() {
-            // complete functions
+          //fill coordinates        
+          function _fillCoordinated() {
             $('#coords1').html(thePath.getArray().join(' '));  
-          });
-
+          }
+                    
+          google.maps.event.addListener(thePath, 'set_at', _fillCoordinated);
+          google.maps.event.addListener(thePath, 'insert_at', _fillCoordinated);
+          google.maps.event.addListener(thePath, 'remove_at', _fillCoordinated);
+          
+          _fillCoordinated();
         }
         
         google.maps.event.addListener(drawingManager,'polygoncomplete',_onPathComplete);
@@ -269,8 +267,7 @@ function hMappingDraw(_mapdiv_id) {
                 deleteMenu.open(map, newShape, newShape.getPosition());
               });                     
           }else{
-                //fill coordinatedes
-                $('#coords1').html(newShape.getPath().getArray().join(' '));  
+
           }
             
           

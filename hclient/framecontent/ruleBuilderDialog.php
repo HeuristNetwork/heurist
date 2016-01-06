@@ -1,65 +1,28 @@
 <?php
 
-/**
-* Rule Set Builder Dialog
-*
-* @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+    /**
+    * Rule Set Builder Dialog
+    *
+    * @package     Heurist academic knowledge management system
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2015 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     4.0
+    */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
 
-
-require_once(dirname(__FILE__)."/../../hserver/System.php");
-//require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php'); //may be removed
-
-$system = new System();
-
-if(@$_REQUEST['db']){
-    if(! $system->init(@$_REQUEST['db']) ){
-        //@todo - redirect to error page
-        print_r($system->getError(),true);
-        exit();
-    }
-}else{
-    header('Location: /../../hserver/databases.php');
-    exit();
-}
+    require_once(dirname(__FILE__)."/initPage.php");
 ?>
-<html>
-    <head>
-        <title>Rule Set Builder</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
-
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-
-
-        <script type="text/javascript" src="../core/recordset.js"></script>
-        <script type="text/javascript" src="../core/utils.js"></script>
-        <script type="text/javascript" src="../core/hapi.js"></script>
-
-        <script type="text/javascript" src="../../apps/search/ruleBuilder.js"></script>
-        <!-- ???        <script type="text/javascript" src="../../apps/viewers/resultList.js"></script> -->
-
-        <script type="text/javascript">
-            var db =  '<?=$_REQUEST['db']?>';
-            var rules = <?=@$_REQUEST['rules']?$_REQUEST['rules']:'[]'?>;
-        </script>
-        <script type="text/javascript" src="ruleBuilderDialog.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/ruleBuilder.js"></script>
+        <script type="text/javascript" src="hclient/framecontent/ruleBuilderDialog.js"></script>
 
         <style>
             .rulebuilder{

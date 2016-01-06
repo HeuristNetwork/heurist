@@ -18,35 +18,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){
-    //fill database definitions  - remove comments for standalone usage/testing
-    //print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
-    //print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
-}
-
-$(document).ready(function() {
-
-    if(!top.HAPI4){
-        //this is case of standaloe page
-        var db = top.HEURIST4.util.getUrlParameter('db',location.search)
-
-        top.HAPI4 = new hAPI(db, onInit);//, < ?=json_encode($system->getCurrentUser())? > );
-    }else{
-        //otherwise we take everything from parent window
-        onInit(true);
-    }
-
-});
-
-function onInit(success) //callback function of hAPI initialization
+function onPageInit(success) //callback function of hAPI initialization
 {
     if(success)  //system is inited
     {
-        if(!top.HR){
-            var prefs = top.HAPI4.get_prefs();
-            //loads localization
-            top.HR = window.HAPI4.setLocale(prefs['layout_language']);
-        }
+       
+        var rules = top.HEURIST4.util.getUrlParameter('rules', window.location.search);
+        if(!rules) rules = '[]'
+        else rules = decodeURIComponent(rules);
 
         //init toolbar buttons
         $('#btn_add_level1').attr('title', 'explanatory rollover' ).button().on('click', null, addLevel );
@@ -71,7 +50,6 @@ function onInit(success) //callback function of hAPI initialization
         });
 
         //create rule sets builders in case there is parameter 'rules'
-        //var rules = top.HEURIST4.util.getUrlParameter('rules',location.search);
         if(!top.HEURIST4.util.isempty(rules)){
 
             if(!top.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);

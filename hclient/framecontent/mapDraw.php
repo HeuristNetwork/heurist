@@ -21,11 +21,11 @@
 
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="../../ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
 
-        <script type="text/javascript" src="mapDraw.js"></script>
+        <script type="text/javascript" src="hclient/contentframe/mapDraw.js"></script>
 
         <!-- Initializing -->
 
@@ -35,16 +35,16 @@ require_once(dirname(__FILE__)."/initPage.php");
 
             // Callback function on map initialization
             function onPageInit(success){
-
+                
                 if(!success) return;
 
                 // Mapping data
                 mapping = new hMappingDraw('map_digitizer');
-
+                
                 // init helper (see utils.js)
-                top.HEURIST4.util.initHelper( $('#btn_help'),
-                            'Mapping Drawing Overview',
-                            '../../context_help/mapping_overview.html #content');
+                top.HEURIST4.util.initHelper( $('#btn_help'), 
+                            'Mapping Drawing Overview', 
+                            '../context_help/mapping_overview.html #content');
 
             } //onPageInit
 
@@ -57,7 +57,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 right: 135px;
                 bottom: 0px;
                 background-color: #ffffff;
-            }
+            }  
             .color-button {
                 width: 14px;
                 height: 14px;
@@ -65,7 +65,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 margin: 2px;
                 float: left;
                 cursor: pointer;
-            }
+            }      
             #rightpanel{
                 position: absolute;
                 top: 30px;
@@ -81,7 +81,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 border:1px solid #000000;
                 font-size:0.9em;
             }
-
+            
           .delete-menu {
             position: absolute;
             background: white;
@@ -98,7 +98,7 @@ require_once(dirname(__FILE__)."/initPage.php");
           }
           .delete-menu:hover {
             background: #eee;
-          }
+          }            
         </style>
 
     </head>
@@ -108,10 +108,10 @@ require_once(dirname(__FILE__)."/initPage.php");
         <div style="height:100%; width:100%;">
 
             <div id="mapToolbarDiv" style="height: 30px;padding:0.2em">
-
+                    
                 <div class="div-table-cell">
                     <label>Geocode:</label>
-                    <input id="input_search" class="text ui-widget-content ui-corner-all"
+                    <input id="input_search" class="text ui-widget-content ui-corner-all" 
                             style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
                     <div id="btn_search_start"></div>
                 </div>
@@ -123,12 +123,12 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </div>
                 <div class="div-table-cell" id="coords2" style="padding-left: 1em;">
                 </div>
-
+            
                 <div style="position: absolute; right: 0.2em; top:0.2em;" class="ui-buttonset map-inited">
                     <button id="btn_help">Help</button>
                 </div>
             </div>
-
+            
             <div id="map_digitizer">Mapping</div>
 
             <div id="rightpanel">
@@ -136,11 +136,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div id="color-palette"></div>
                 <button id="delete-button">Delete Selected</button>
                 <button id="delete-all-button">Clear Map</button>
-
+                 
                 <textarea id="coords1" cols="2" rows="2">
                         Click on the map. The code for the shape you create will be presented here.
                 </textarea>
-            </div>
+            </div>            
         </div>
 
     </body>

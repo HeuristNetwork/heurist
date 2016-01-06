@@ -51,7 +51,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         //
-        var installDir = top.location.pathname.replace(/(((\?|admin|applications|apps|common|context_help|export|ext|external|hapi|hclient|hserver|help|import|records|redirects|search|viewers)\/.*)|(index.*))/, ""); // Upddate in 3 places if changed
+        var installDir = top.location.pathname.replace(/(((\?|admin|applications|common|context_help|hclient|hserver|export|ext|external|hapi|help|import|records|redirects|hsearch|viewers)\/.*)|(index.*))/, ""); // Upddate in 3 places if changed
         that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
         // TODO: This is actually a proto URL rather than a base URL. Rename.
         that.iconBaseURL= that.basePathV4 + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
@@ -60,7 +60,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         that.database = _database;
 
         //path to old interface - it will be get from server sysinfo
-        installDir = top.location.pathname.replace(/(((\?|admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+        installDir = top.location.pathname.replace(/(((\?|admin|applications|common|hclient|hserver|export|ext|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
         that.basePathV3 = top.location.protocol + '//'+top.location.host  + installDir;
 
         //global variable defined in localization.js
@@ -712,18 +712,18 @@ function hAPI(_db, _oninit) { //, _currentUser
         is_ui_normal: function(){
             return (top.HAPI4.get_prefs('layout_style')=='normal');
         },
-
+        
 
         currentUser: _guestUser,
         sysinfo: {},
 
-        // main result set that is filled in search_minimal - keeps all
-        // purposes:
+        // main result set that is filled in search_minimal - keeps all 
+        // purposes: 
         // 1) to keep main set of records (original set) to apply rules set
         // 2) to get selected records by ids
         // 3) to pass result set into popup record action dialogs
-        currentRecordset: null,
-
+        currentRecordset: null, 
+        
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -768,36 +768,36 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         /**
-        *
+        * 
         *   Returns subset of currentRecordset or array of its ids
         *   @param selection :
         *           all - returns all records of currentRecordset
-        *           array of ids
+        *           array of ids 
         *           recordset
-        *           @todo array of recordtype
-        *
+        *           @todo array of recordtype 
+        * 
         *   @param needIds if it is true  it returns array of record ids
         */
         , getSelection: function(selection, needIds){
 
-            if (selection == "all") {
-                if(this.currentRecordset){
-                    selection = needIds ?this.currentRecordset.getIds() :this.currentRecordset;
-                }else{
-                    return null;
-                }
-            }
-            if( selection ) {
-                if( (typeof selection.isA == "function") && selection.isA("hRecordSet") ){
-                    if(selection.length()>0){
-                        return (needIds) ?selection.getIds():selection; //array of record ids
+                if (selection == "all") {
+                    if(this.currentRecordset){
+                        selection = needIds ?this.currentRecordset.getIds() :this.currentRecordset;
+                    }else{
+                        return null;
                     }
-                }else{  //selection is array of ids
-                    return (needIds) ?selection
-                    :((that.currentRecordset)?that.currentRecordset.getSubSetByIds(selection):null);
                 }
-            }
-            return null;
+                if( selection ) {
+                    if( (typeof selection.isA == "function") && selection.isA("hRecordSet") ){
+                        if(selection.length()>0){
+                            return (needIds) ?selection.getIds():selection; //array of record ids
+                        }
+                    }else{  //selection is array of ids
+                            return (needIds) ?selection
+                                        :((that.currentRecordset)?that.currentRecordset.getSubSetByIds(selection):null);
+                    }
+                }
+                return null;
         }
     }
 

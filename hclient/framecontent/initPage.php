@@ -1,7 +1,7 @@
 <?php
     /**
-    * Main header for all heurist pages.
-    * It
+    * Main header for all heurist pages. 
+    * It 
     * 1) initializes System.php
     * 2) prints out html header with minimum set of scripts
     * 3) init client side hAPI
@@ -26,15 +26,15 @@
     */
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
-
+    
 $is_index_page = defined('PDIR');
-
+    
 if($is_index_page){
     //if PDIR is defined this script is main (root)
     define('ERROR_REDIR','hserver/databases.php');
 }else{
     define('PDIR','../../');
-    define('ERROR_REDIR','errorSystem.php');
+    define('ERROR_REDIR','errorPage.php');
 }
 
 $error_msg = '';
@@ -43,13 +43,13 @@ $isSystemInited = false;
 // init main system class
 $system = new System();
 
-if(@$_REQUEST['db']){
+if(@$_REQUEST['db']){ 
     //if database is defined then connect to given database
     $isSystemInited = $system->init(@$_REQUEST['db']);
 }
 
-if(!$isSystemInited){
-
+if(!$isSystemInited){ 
+    
     if($is_index_page){
         require (ERROR_REDIR);
     }else{
@@ -66,7 +66,7 @@ if(!$layout_theme) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
-    $cssLink = PDIR.'ext/jquery-ui-1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
+    $cssLink = 'ext/jquery-ui-1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
     $cssLink = 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
@@ -103,31 +103,33 @@ function dbOwnerRequired(){
 
         <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
         <meta content="telephone=no" name="format-detection">
+        
+        <base href="<?php echo PDIR;?>">
 
-        <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
+        <link rel=icon href="favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-        <script type="text/javascript" src="<?php echo PDIR?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR?>ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-
+        <link rel="stylesheet" type="text/css" href="ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" />
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="h4styles.css" />
 
-        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/utils.js"></script>
+        <script type="text/javascript" src="hclient/core/utils.js"></script>
 
-        <!-- for debug -->
-        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/hapi.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/search_minimal.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/recordset.js"></script>
-
+        <!-- for debug  remark it and use getMultiScripts for production -->
+        <script type="text/javascript" src="hclient/core/hapi.js"></script>
+        <script type="text/javascript" src="hclient/core/search_minimal.js"></script>
+        <script type="text/javascript" src="hclient/core/recordset.js"></script>
+        
         <script type="text/javascript">
-
-            // overwrite the standard jquery show method
+        
+            // overwrite the standard jquery show method 
             // apply listener in widgets on this page to refresh content on show
             // example
-            //        var that = this;
+            //        var that = this;                      
             //        this.element.on("myOnShowEvent", function(event){
             //            if( event.target.id == that.element.attr('id')){
             //                that._refresh();
@@ -141,34 +143,34 @@ function dbOwnerRequired(){
                 $(this).trigger( 'myOnShowEvent' );
                 return this;
             }
-
-
+        
+        
             // if hAPI is not defined in parent(top most) window we have to create new instance
             $(document).ready(function() {
                 // Standalone check
                 if(!top.HAPI4){
                     // In case of standalone page
                     //load minimum set of required scripts
-                    $.getMultiScripts(['localization.js', 'utils_msg.js'/*,
-                                       'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR?>hclient/core/')
+                    $.getMultiScripts(['localization.js', 'utils_msg.js'/*, 
+                                       'search_minimal.js', 'recordset.js', 'hapi.js'*/], 'hclient/core/')
                     .done(function() {
                         // all done
                         top.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
-
+                        
                     }).fail(function(error) {
                         // one or more scripts failed to load
                         onHapiInit(false);
-
+                        
                     }).always(function() {
                         // always called, both on success and error
-                    });
-
+                    });                    
+                    
                 }else{
                     // Not standalone, use HAPI from parent window
                     onHapiInit( true );
                 }
             });
-
+        
             // Callback function on hAPI initialization
             function onHapiInit(success)
             {
@@ -190,7 +192,7 @@ function dbOwnerRequired(){
                             if($.isFunction(onPageInit)){
                                 onPageInit(success);
                             }
-
+                            
                         });
                         return;
                     }
@@ -199,12 +201,12 @@ function dbOwnerRequired(){
                     top.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
                     success = false;
                 }
-
+                
                 if($.isFunction(onPageInit)){
                     onPageInit(success);
                 }
             }
-
+            
             //
             // it itakes name of theme from preferences , oherwise default theme is heurist
             //
@@ -215,7 +217,7 @@ function dbOwnerRequired(){
                         //loads localization
                         top.HR = top.HAPI4.setLocale(prefs['layout_language']);
                     }
-
+                    
                     /* unfortunately dynamic addition of theme and style is not applied properly.
                       Browser takes some time on its parsing while we have already created some ui elements, need timeout.
                       So, its better to detecct current theme on server side
@@ -225,12 +227,12 @@ function dbOwnerRequired(){
                             prefs['layout_theme']+'/jquery-ui.css" />');
                     }else{
                         //default BASE or HEURIST theme
-                        cssLink = $('<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
+                        cssLink = $('<link rel="stylesheet" type="text/css" href="ext/jquery-ui-1.10.2/themes/'+prefs['layout_theme']+'/jquery-ui.css" />');
                     }
                     $("head").append(cssLink);
-                    $("head").append($('<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css?t='+(new Date().getTime())+'">'));
+                    $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
                     */
-
+                    
                     var layoutid = '<?=@$_REQUEST['ll']?>';
                     if(top.HEURIST4.util.isempty(layoutid)){
                         layoutid = top.HAPI4.get_prefs('layout_id');
@@ -241,16 +243,16 @@ function dbOwnerRequired(){
                     top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
                     if(layoutid=='DigitalHarlem'){ //digital harlem - @todo move style to layout
-                         $("head").append($('<link rel="stylesheet" type="text/css" href="<?php echo PDIR?>apps/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
-                         $.getScript('<?php echo PDIR?>apps/digital_harlem/dh_search_minimal.js').fail(function(){
+                         $("head").append($('<link rel="stylesheet" type="text/css" href="hclient/widget/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
+                         $.getScript(top.HAPI4.basePathV4+'hclient/widget/digital_harlem/dh_search_minimal.js').fail(function(){
                              top.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
                          });
                     }
 
-
-
+                    
+                    
                     //add version to title
                     window.document.title = window.document.title+' V'+top.HAPI4.sysinfo.version;
-            }
-
+            }            
+        
         </script>
