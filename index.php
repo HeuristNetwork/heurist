@@ -49,7 +49,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script type="text/javascript" src="ext/js/date.format.js"></script>
 
 <!-- init layout and loads all apps.widgets -->
-<script type="text/javascript" src="js/layout.js"></script>
+<script type="text/javascript" src="hclient/core/layout.js"></script>
 <!-- array of possible layouts -->
 <script type="text/javascript" src="layout_default.js"></script>
 

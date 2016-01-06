@@ -17,7 +17,7 @@
 
 /**
 * Layout configuration fails  ????? files ????
-* @see js/layout.js
+* @see hclient/core/layout.js
 *
 * @type Array widgets - list of widgets/applications
 * @type Array layouts - list of layouts

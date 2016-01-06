@@ -115,12 +115,12 @@ function dbOwnerRequired(){
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" />
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
-        <script type="text/javascript" src="<?php echo PDIR?>js/utils.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/utils.js"></script>
 
         <!-- for debug -->
-        <script type="text/javascript" src="<?php echo PDIR?>js/hapi.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR?>js/search_minimal.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR?>js/recordset.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/hapi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/search_minimal.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR?>hclient/core/recordset.js"></script>
 
         <script type="text/javascript">
 
@@ -150,7 +150,7 @@ function dbOwnerRequired(){
                     // In case of standalone page
                     //load minimum set of required scripts
                     $.getMultiScripts(['localization.js', 'utils_msg.js'/*,
-                                       'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR?>js/')
+                                       'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR?>hclient/core/')
                     .done(function() {
                         // all done
                         top.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
