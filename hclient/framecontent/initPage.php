@@ -66,7 +66,7 @@ if(!$layout_theme) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
-    $cssLink = 'ext/jquery-ui-1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
+    $cssLink = PDIR.'ext/jquery-ui-1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
     $cssLink = 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
@@ -95,6 +95,10 @@ function dbOwnerRequired(){
         exit();
     }
 }
+
+// base does not suit because some jquery widgets uses href (tabcontrol for example)
+//        <base href="<?php echo PDIR;">
+
 ?>
 <html>
     <head>
@@ -104,25 +108,24 @@ function dbOwnerRequired(){
         <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
         <meta content="telephone=no" name="format-detection">
         
-        <base href="<?php echo PDIR;?>">
 
-        <link rel=icon href="favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-        <script type="text/javascript" src="ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" />
-        <link rel="stylesheet" type="text/css" href="h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
-        <script type="text/javascript" src="hclient/core/utils.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
         <!-- for debug  remark it and use getMultiScripts for production -->
-        <script type="text/javascript" src="hclient/core/hapi.js"></script>
-        <script type="text/javascript" src="hclient/core/search_minimal.js"></script>
-        <script type="text/javascript" src="hclient/core/recordset.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
         
         <script type="text/javascript">
         
@@ -152,7 +155,7 @@ function dbOwnerRequired(){
                     // In case of standalone page
                     //load minimum set of required scripts
                     $.getMultiScripts(['localization.js', 'utils_msg.js'/*, 
-                                       'search_minimal.js', 'recordset.js', 'hapi.js'*/], 'hclient/core/')
+                                       'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
                     .done(function() {
                         // all done
                         top.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);

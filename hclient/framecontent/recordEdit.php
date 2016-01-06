@@ -20,11 +20,11 @@
     */
     require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="hclient/widgets/search/search.js"></script>
-        <script type="text/javascript" src="hclient/widgets/editing/rec_relation.js"></script>
-        <script type="text/javascript" src="hclient/widgets/editing/editing_input.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/rec_relation.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         
-        <script type="text/javascript" src="hclient/framecontent/recordEdit.js"></script>
+        <script type="text/javascript" src="recordEdit.js"></script>
 
         <script type="text/javascript">
             var editing;

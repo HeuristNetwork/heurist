@@ -21,11 +21,11 @@
 
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
 
-        <script type="text/javascript" src="hclient/contentframe/mapDraw.js"></script>
+        <script type="text/javascript" src="mapDraw.js"></script>
 
         <!-- Initializing -->
 

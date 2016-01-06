@@ -1117,7 +1117,7 @@ function EditRecStructure() {
 	* These field types have no width
 	*/
 	function _isNoWidth(typ){
-		   return ((typ === "enum") || (typ==="resource") ||  (typ==="fieldsetmarker") || 
+		   return ((typ === "enum") || (typ==="resource") ||  (typ==="fieldsetmarker") ||    
 					(typ==="relmarker") || (typ === "relationtype") ||
 					(typ==="file") || (typ==="geo") || (typ==="separator"));
 	}

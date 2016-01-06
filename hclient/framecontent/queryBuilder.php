@@ -21,8 +21,8 @@
 
     require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="hclient/widgets/search/queryBuilder.js"></script>
-        <script type="text/javascript" src="hclient/framecontent/queryBuilder.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/queryBuilder.js"></script>
+        <script type="text/javascript" src="queryBuilder.js"></script>
 
         <script type="text/javascript">
             

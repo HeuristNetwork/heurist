@@ -21,8 +21,8 @@
 
     require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="hclient/widgets/search/ruleBuilder.js"></script>
-        <script type="text/javascript" src="hclient/framecontent/ruleBuilderDialog.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/ruleBuilder.js"></script>
+        <script type="text/javascript" src="ruleBuilderDialog.js"></script>
 
         <style>
             .rulebuilder{

@@ -23,8 +23,8 @@
 
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
-        <script type="text/javascript" src="hclient/framecontent/recordSelect.js"></script>
-        <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
+        <script type="text/javascript" src="recordSelect.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
         
         <script type="text/javascript">
             // Callback function on map initialization
