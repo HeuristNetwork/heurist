@@ -61,10 +61,8 @@ cp -r *.* /var/www/html/HEURIST/h4-build/$1
 
 # H4 directories
 cp -r apps /var/www/html/HEURIST/h4-build/$1
-cp -r assets /var/www/html/HEURIST/h4-build/$1
-cp -r page /var/www/html/HEURIST/h4-build/$1
-cp -r php /var/www/html/HEURIST/h4-build/$1
-cp -r js /var/www/html/HEURIST/h4-build/$1
+cp -r hclient /var/www/html/HEURIST/h4-build/$1
+cp -r hserver /var/www/html/HEURIST/h4-build/$1
 
 # H3 directories
 cp -r admin /var/www/html/HEURIST/h4-build/$1

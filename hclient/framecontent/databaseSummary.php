@@ -181,7 +181,7 @@ if(!$system->init(@$_REQUEST['db']) ){
 
                             // Image
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='../hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -225,7 +225,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                             // Image
                             $title = $row["title"];
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='../hclient/assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type

@@ -32,9 +32,9 @@ $.widget( "heurist.resultList", {
         showmenu: true,
         innerHeader: false,
         title: null,
-        eventbased:true, 
+        eventbased:true,
         //searchsource: null,
-        
+
         onselect: null  //on select event for non event based
     },
 
@@ -93,7 +93,7 @@ $.widget( "heurist.resultList", {
 
         this.div_loading = $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
-            'z-index':'99999999', 'background':'url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center' })
+            'z-index':'99999999', 'background':'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
         .appendTo( this.element ).hide();
 
         /*
@@ -249,8 +249,8 @@ $.widget( "heurist.resultList", {
                         that._query_request = data;  //keep current query request
 
                     }else{ //fake restart
-                            that._clearAllRecordDivs('');
-                            //that.loadanimation(true);
+                        that._clearAllRecordDivs('');
+                        //that.loadanimation(true);
                     }
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
@@ -427,13 +427,13 @@ $.widget( "heurist.resultList", {
         }
 
         if(new_title!=null){
-            
+
             var $header = $(".header"+this.element.attr('id'));
             if($header.length>0){
                 $header.html('<h3>'+new_title+'</h3>');
                 $('a[href="#'+this.element.attr('id')+'"]').html(new_title);
             }
-           
+
             if(this.innerHeader) {
                 this.innerHeader.html('<h3>'+new_title+'</h3>');
             }
@@ -441,8 +441,8 @@ $.widget( "heurist.resultList", {
                 this.triggerSelection();
             }
         }
-        
-        
+
+
         this._count_of_divs = 0;
     },
 
@@ -526,7 +526,7 @@ $.widget( "heurist.resultList", {
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" >'
         + '<div class="recordIcons">'
-        +     '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif" class="unbookmarked">'
+        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="unbookmarked">'
         + '</div>'
         + '<div class="recordTitle">id ' + recID
         + '...</div>'
@@ -590,7 +590,7 @@ $.widget( "heurist.resultList", {
         }else{
             pwd = '';
         }
-        
+
         function __getOwnerName(ugr_id){
             return top.HAPI4.sysinfo.db_usergroups[ugr_id];
         }
@@ -604,7 +604,7 @@ $.widget( "heurist.resultList", {
             // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
             var clr  = (visibility=='hidden')? 'red': ((visibility=='viewable')? 'orange' : ((visibility=='pending')? 'green' : 'blue'));
             var hint = __getOwnerName(owner_id)+', '+
-             ((visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)");
+            ((visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)");
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner" style="color:' + clr + '" title="' + hint + '">&nbsp;&nbsp;<b>' + owner_id + '</b></span>';
@@ -613,9 +613,9 @@ $.widget( "heurist.resultList", {
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
         + html_thumb
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-        +     '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif'
+        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);">'
-        +     '<img src="'+top.HAPI4.basePathV4+'assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
         +     html_owner
         +     html_pwdrem
         + '</div>'
@@ -805,7 +805,7 @@ $.widget( "heurist.resultList", {
                 selected.push(""+this._lastSelectedIndex);
             }
         }
-        
+
         if(idsonly){
             return selected;
         }else if(this._currentRecordset){
@@ -813,7 +813,7 @@ $.widget( "heurist.resultList", {
         }else{
             return null;
         }
-        
+
     },
 
     /**
@@ -853,7 +853,7 @@ $.widget( "heurist.resultList", {
     loadanimation: function(show){
         if(show){
             this.div_loading.show();
-            //this.div_content.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
+            //this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_loading.hide();
             //this.div_content.css('background','none');
@@ -1057,8 +1057,8 @@ $.widget( "heurist.resultList", {
     , _renderPage: function(pageno, recordset){
 
         if(!recordset){
-               recordset = this._currentRecordset;
-               this._clearAllRecordDivs(null);
+            recordset = this._currentRecordset;
+            this._clearAllRecordDivs(null);
         }
 
         this._renderPagesNavigator(); //redraw paginator

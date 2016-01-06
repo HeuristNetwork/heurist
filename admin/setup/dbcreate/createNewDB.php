@@ -480,7 +480,7 @@ function errorOut($msg){
                             </div>
 
                             <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
-                                background:url(../../../assets/loading-animation-white.gif) no-repeat center center;">
+                                background:url(../../../hclient/assets/loading-animation-white.gif) no-repeat center center;">
                                 <!-- list of registered DATABASEs  -->
                             </div>
 

@@ -1,7 +1,7 @@
 /**
 * Builds and manages display of the main Heurist page - search and visualisation
-* 
-* Before this widget was generic, however search on main page became very distinctive and got lot of additional ui comonents. 
+*
+* Before this widget was generic, however search on main page became very distinctive and got lot of additional ui comonents.
 * Thus, we have the specific search widget and this one remains for main ui
 *
 * @package     Heurist academic knowledge management system
@@ -39,8 +39,8 @@ $.widget( "heurist.search", {
 
 
         btn_visible_newrecord: true, //show add record button
-        
-        // before this widget was generic, however search on main page became very distinctive and got 
+
+        // before this widget was generic, however search on main page became very distinctive and got
         // lot of additional ui comonents. thus, we have the specific search widget and this one remains for main ui
         // for dialog mode - remove into separate widget
         isrectype: false,  // show rectype selector
@@ -63,8 +63,8 @@ $.widget( "heurist.search", {
 
 
         /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js
-            $.getScript(top.HAPI4.basePathV4+'js/search_incremental.js', function(){ that._create(); } );
-            return;
+        $.getScript(top.HAPI4.basePathV4+'js/search_incremental.js', function(){ that._create(); } );
+        return;
         }*/
         this.element.css({'height':'6em', 'min-width':'1100px'}).addClass('ui-heurist-header1');
 
@@ -72,8 +72,8 @@ $.widget( "heurist.search", {
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
 
         var sz_search = '500px',
-            sz_input = '350px',
-            sz_search_padding = '0';
+        sz_input = '350px',
+        sz_search_padding = '0';
 
 
         var div_left_visible = (!this.options.isloginforced || this.options.btn_visible_dbstructure);
@@ -81,14 +81,14 @@ $.widget( "heurist.search", {
         if(div_left_visible)
         {
 
-        // database summary, login and register buttons in navigation panel
-        var div_left  = $('<div>')
-                        .css({'height':'2em','width':'200px', 'padding':'1.8em','float':'left'})
-                        .appendTo( this.element );
+            // database summary, login and register buttons in navigation panel
+            var div_left  = $('<div>')
+            .css({'height':'2em','width':'200px', 'padding':'1.8em','float':'left'})
+            .appendTo( this.element );
 
-        if(!this.options.isloginforced){
-            // Login button if not already logged in
-            this.btn_login = $( "<button>", {
+            if(!this.options.isloginforced){
+                // Login button if not already logged in
+                this.btn_login = $( "<button>", {
                     text: top.HR("Login")
                 }) // login button
                 .css('width',(top.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
@@ -100,33 +100,33 @@ $.widget( "heurist.search", {
                 }})
                 .click( function(){ that._doLogin(); });
 
-            // Register button if the database permits user registration
-            if(top.HAPI4.sysinfo.registration_allowed==1){
-            this.btn_register = $( "<button>", {
-                    text: top.HR("Register")
+                // Register button if the database permits user registration
+                if(top.HAPI4.sysinfo.registration_allowed==1){
+                    this.btn_register = $( "<button>", {
+                        text: top.HR("Register")
+                    })
+                    .css('width','80px')
+                    .addClass('logged-out-only')
+                    .addClass('ui-heurist-btn-header1')
+                    .appendTo(div_left)
+                    .button()
+                    .click( function(){ that._doRegister(); });
+                } // register button
+
+            } // not bypassing login
+
+            // Database summary button
+            if(this.options.btn_visible_dbstructure){
+                this.btn_databasesummary = $( "<button>", {
+                    text: top.HR("Database Summary")
                 })
-                .css('width','80px')
-                .addClass('logged-out-only')
+                .css('width','160px')
+                .addClass('logged-in-only')
                 .addClass('ui-heurist-btn-header1')
                 .appendTo(div_left)
                 .button()
-                .click( function(){ that._doRegister(); });
-            } // register button
-
-        } // not bypassing login
-
-        // Database summary button
-        if(this.options.btn_visible_dbstructure){
-            this.btn_databasesummary = $( "<button>", {
-                text: top.HR("Database Summary")
-            })
-            .css('width','160px')
-            .addClass('logged-in-only')
-            .addClass('ui-heurist-btn-header1')
-            .appendTo(div_left)
-            .button()
-            .click( function(){ that._showDbSummary(); });
-        } // database summary
+                .click( function(){ that._showDbSummary(); });
+            } // database summary
 
         }else{ // lefthand - navigation - panel not visible
             sz_search = '600px';
@@ -152,27 +152,27 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_header );
 
         var link = $('<a>',{href:'#'})
-            .html('<img src="'+top.HAPI4.basePathV4+'assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
-            .css('padding-right','1em')
-            .appendTo(this.div_search_header);
-            this._on( link, {  click: function(){
-                window.open('context_help/advanced_search.html','_blank');
-            } });
+        .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
+        .css('padding-right','1em')
+        .appendTo(this.div_search_header);
+        this._on( link, {  click: function(){
+            window.open('context_help/advanced_search.html','_blank');
+        } });
 
 
         /*
         $( "<button>", {
-                text: top.HR("Show syntax and examples of the Heurist query language")
-            })
-            .addClass('ui-heurist-btn-header1-fa')
-            .appendTo( this.div_search_header )
-            .button({icons: {
-                primary: 'icon-info-sign'
-            }, text:false})
-            .css({'margin-right':'0.2em'}) //, 'background-position':'240px 224px !important'})
-            .click( function(){
-                window.open('context_help/advanced_search.html','_blank');
-            });
+        text: top.HR("Show syntax and examples of the Heurist query language")
+        })
+        .addClass('ui-heurist-btn-header1-fa')
+        .appendTo( this.div_search_header )
+        .button({icons: {
+        primary: 'icon-info-sign'
+        }, text:false})
+        .css({'margin-right':'0.2em'}) //, 'background-position':'240px 224px !important'})
+        .click( function(){
+        window.open('context_help/advanced_search.html','_blank');
+        });
         */
 
         //
@@ -180,10 +180,10 @@ $.widget( "heurist.search", {
 
         // Search field
         this.div_search_input = $('<div>')
-            .addClass('div-table-cell')
-            .appendTo( this.div_search );
+        .addClass('div-table-cell')
+        .appendTo( this.div_search );
 
-        this.input_search = $( "<textarea>" )   
+        this.input_search = $( "<textarea>" )
         .css({'margin-right':'0.2em', 'height':'2.5em', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
@@ -196,26 +196,26 @@ $.widget( "heurist.search", {
 
 
         this.input_search.mouseup(function () {
-                var $this = $(this);
-                if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
-                        //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
-                       if($this.outerHeight()<25){
-                            //aaa  that.div_search.css('padding-top','1.8em');
-                            $this.height(23);
-                       }else{
-                            if($this.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
-                                $this.height(that.element.height()-menu_h-10);
-                                pt = '2px';
-                            }else{
-                                //parseFloat(that.div_search.css('padding-top'))
-                                pt =  (that.element.height() - $this.height())/2 - menu_h;
-                            }
-                            //aaa that.div_search.css('padding-top', pt );
-                       }
+            var $this = $(this);
+            if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
+                //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
+                if($this.outerHeight()<25){
+                    //aaa  that.div_search.css('padding-top','1.8em');
+                    $this.height(23);
+                }else{
+                    if($this.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
+                        $this.height(that.element.height()-menu_h-10);
+                        pt = '2px';
+                    }else{
+                        //parseFloat(that.div_search.css('padding-top'))
+                        pt =  (that.element.height() - $this.height())/2 - menu_h;
+                    }
+                    //aaa that.div_search.css('padding-top', pt );
                 }
-                // set new height/width
-                $this.data('x', $this.outerWidth());
-                $this.data('y', $this.outerHeight());
+            }
+            // set new height/width
+            $this.data('x', $this.outerWidth());
+            $this.data('y', $this.outerHeight());
         }) // this.input_search.mouseup
 
 
@@ -327,9 +327,9 @@ $.widget( "heurist.search", {
         if(this.options.btn_visible_newrecord){
 
             this.div_add_record = $('<div>')
-                .addClass('div-table-cell  logged-in-only')
-                .css('padding-left','1em')
-                .appendTo( this.div_search );
+            .addClass('div-table-cell  logged-in-only')
+            .css('padding-left','1em')
+            .appendTo( this.div_search );
 
             this.btn_add_record = $( "<button>", {
                 text: top.HR("Add Record")
@@ -354,7 +354,7 @@ $.widget( "heurist.search", {
         if(this.options.islinkmode){
 
             this.div_search_links = $('<div>').css({'text-align':'right','width':sz_input,'padding-top':'0.3em'}) //, 'width':'30%', 'max-width':'500px' })
-                    .appendTo(  this.div_search_input );
+            .appendTo(  this.div_search_input );
 
             var link = $('<a>',{
                 text: 'Quick', href:'#'
@@ -372,8 +372,8 @@ $.widget( "heurist.search", {
             }).appendTo(this.div_search_links);
 
             link = $('<a>',{ text: 'Rule Set', href:'#' })
-                    .addClass('logged-in-only')
-                    .appendTo(this.div_search_links);
+            .addClass('logged-in-only')
+            .appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
@@ -382,8 +382,8 @@ $.widget( "heurist.search", {
             }});
 
             link = $('<a>',{ text: 'Save As ', href:'#' })
-                   .addClass('logged-in-only')
-                   .appendTo(this.div_search_links);
+            .addClass('logged-in-only')
+            .appendTo(this.div_search_links);
             this._on( link, {  click: function(){
                 var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
                 if(app && app.widget){
@@ -401,38 +401,38 @@ $.widget( "heurist.search", {
 
         { // Quick search assistant = dropdown search builder
 
-                this.div_buttons = $('<div>')
-                    .addClass('div-table-cell logged-in-only')
-                    .insertBefore( this.div_search_stop );
+            this.div_buttons = $('<div>')
+            .addClass('div-table-cell logged-in-only')
+            .insertBefore( this.div_search_stop );
 
-                // Quick search builder wizard button
-                var link = $('<a>',{href:'#'})
-                .html('<img src="'+top.HAPI4.basePathV4+'assets/magicwand.png" width="20" title="'+
-                        top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
-                .css({'padding-right':'1em','padding-left':'1em'})
-                .appendTo( this.div_buttons );
-                this._on( link, {  click: this.showSearchAssistant });
+            // Quick search builder wizard button
+            var link = $('<a>',{href:'#'})
+            .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/magicwand.png" width="20" title="'+
+                top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
+            .css({'padding-right':'1em','padding-left':'1em'})
+            .appendTo( this.div_buttons );
+            this._on( link, {  click: this.showSearchAssistant });
 
-                // Save search popup button
-                link = $('<a>',{href:'#'})
-                .html('<img src="'+top.HAPI4.basePathV4+'assets/savefloppy.png" width="20" title="'+
-                        top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
-                .css('padding-right','1em')
-                .appendTo( this.div_buttons );
-                this._on( link, {  click: function(){
-                    var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-                    if(app && app.widget){
-                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                    }
-                } });
+            // Save search popup button
+            link = $('<a>',{href:'#'})
+            .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/savefloppy.png" width="20" title="'+
+                top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
+            .css('padding-right','1em')
+            .appendTo( this.div_buttons );
+            this._on( link, {  click: function(){
+                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+                if(app && app.widget){
+                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                }
+            } });
 
         } // quick search assistant
 
 
         this.search_assistant = null;
 
-//        .addClass('heurist-bookmark-search')
-//        .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
+        //        .addClass('heurist-bookmark-search')
+        //        .css('display', (top.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
 
 
         if(this.options.isrectype){
@@ -474,21 +474,21 @@ $.widget( "heurist.search", {
 
 
         this.progress_bar = $("<div>")
-            .css({'width':'450px', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
-            .progressbar().appendTo(this.div_progress);
+        .css({'width':'450px', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
+        .progressbar().appendTo(this.div_progress);
 
         this.progress_lbl = $("<div>").css({'position':'absolute', 'top': '1.6em', 'text-shadow': '1px 1px 0 #fff' })
-            .appendTo(this.progress_bar);
-            //font-weight: bold;
+        .appendTo(this.progress_bar);
+        //font-weight: bold;
 
         // Stop search button which is displayed in place of search button while resultset loads
         this.btn_stop_search = $( "<button>", {text: "Stop"} )
-              .css({'display':'inline-block', 'margin-bottom':'15px'})
-              .addClass('ui-heurist-btn-header1')
-              .appendTo( this.div_progress )
-              .button({icons: {
-                  secondary: "ui-icon-cancel"
-                 },text:true});
+        .css({'display':'inline-block', 'margin-bottom':'15px'})
+        .addClass('ui-heurist-btn-header1')
+        .appendTo( this.div_progress )
+        .button({icons: {
+            secondary: "ui-icon-cancel"
+            },text:true});
 
         this._on( this.btn_stop_search, {
             click: function(e) {
@@ -504,28 +504,28 @@ $.widget( "heurist.search", {
             that._refresh();
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
-                            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data) { that._onSearchGlobalListener(e, data) } );
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data) { that._onSearchGlobalListener(e, data) } );
 
         this._refresh();
 
         /* search on load
         if(!top.HEURIST4.util.isnull(top.HEURIST4.query_request)){
-              this.input_search.val(top.HEURIST4.query_request.q);
-              this.options.search_domain = top.HEURIST4.query_request.w;
+        this.input_search.val(top.HEURIST4.query_request.q);
+        this.options.search_domain = top.HEURIST4.query_request.w;
         }
         if(!top.HEURIST4.util.isnull(top.HEURIST4.query_request)){
-            this._doSearch()
+        this._doSearch()
         }*/
 
     }, //end _create
 
     /* EXEREMENTAL
     _initPagination: function(){
-        this.div_paginator = $('<span>')
-        .css('display', 'inline-block')
-        .appendTo( this.div_search )
-        .pagination();
+    this.div_paginator = $('<span>')
+    .css('display', 'inline-block')
+    .appendTo( this.div_search )
+    .pagination();
     },
     */
 
@@ -568,21 +568,21 @@ $.widget( "heurist.search", {
     },
 
     _showAdvancedAssistant: function(){
-                //call H3 search builder
-                var q = "",
-                    that = this;
-                if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
-                    q ="&q=" + encodeURIComponent(this.query_request.q);
-                }
-                var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
+        //call H3 search builder
+        var q = "",
+        that = this;
+        if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
+            q ="&q=" + encodeURIComponent(this.query_request.q);
+        }
+        var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                top.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
-                    function(res){
-                        if(!Hul.isempty(res)) {
-                                that.input_search.val(res);
-                                that._doSearch();
-                        }
-                    }});
+        top.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
+            function(res){
+                if(!Hul.isempty(res)) {
+                    that.input_search.val(res);
+                    that._doSearch();
+                }
+        }});
     },
 
 
@@ -596,54 +596,54 @@ $.widget( "heurist.search", {
             //topids not defined - this is not rules request
             if(data!=null && top.HEURIST4.util.isempty(data.topids)){
 
-                    //request is from some other widget (outside)
-                    if(data.source!=that.element.attr('id')){
-                        if($.isArray(data.q)){
-                            that.input_search.val(JSON.stringify(data.q));
-                        }else{
-                            that.input_search.val(data.q);
-                        }
-
-                        that.options.search_domain = data.w;
-                        that._refresh();
+                //request is from some other widget (outside)
+                if(data.source!=that.element.attr('id')){
+                    if($.isArray(data.q)){
+                        that.input_search.val(JSON.stringify(data.q));
+                    }else{
+                        that.input_search.val(data.q);
                     }
 
-                    if( data.q!='' ){
-                        if(that.options.is_progress_visible){
-                            that.div_search.css('display','none');
-                            that.div_progress.width(this.div_search.width());
-                            that.div_progress.css('display','inline-block');
-                        }else{
-                            that.div_search_stop.css('display','table-cell');
-                            that.div_search_as_user.css('display','none');
-                        }
-                    }
+                    that.options.search_domain = data.w;
+                    that._refresh();
+                }
 
-                    if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
-                        window.history.pushState("object or string", "Title", location.pathname+'?'+ 
-                            top.HEURIST4.util.composeHeuristQueryFromRequest(data, false) );
+                if( data.q!='' ){
+                    if(that.options.is_progress_visible){
+                        that.div_search.css('display','none');
+                        that.div_progress.width(this.div_search.width());
+                        that.div_progress.css('display','inline-block');
+                    }else{
+                        that.div_search_stop.css('display','table-cell');
+                        that.div_search_as_user.css('display','none');
                     }
+                }
 
-                    that._renderProgress( null );
+                if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
+                    window.history.pushState("object or string", "Title", location.pathname+'?'+
+                        top.HEURIST4.util.composeHeuristQueryFromRequest(data, false) );
+                }
+
+                that._renderProgress( null );
             }
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
 
-                if(data){
-                    that._renderProgress( data.getProgressInfo() );
-                }
+            if(data){
+                that._renderProgress( data.getProgressInfo() );
+            }
 
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
-                 that._renderProgress( null );
-                 if(that.options.is_progress_visible){
-                    that.div_progress.css('display','none');
-                    that.div_search.css('display','inline-block');
-                 }else{
-                    that.div_search_stop.css('display','none');
-                    that.div_search_as_user.css('display','table-cell');
-                 }
+            that._renderProgress( null );
+            if(that.options.is_progress_visible){
+                that.div_progress.css('display','none');
+                that.div_search.css('display','inline-block');
+            }else{
+                that.div_search_stop.css('display','none');
+                that.div_search_as_user.css('display','table-cell');
+            }
 
         }
 
@@ -698,11 +698,11 @@ $.widget( "heurist.search", {
             }
 
             var request = { q: qsearch,
-                            w: this.options.search_domain,
-                            detail: 'detail',
-                            source: this.element.attr('id') };
+                w: this.options.search_domain,
+                detail: 'detail',
+                source: this.element.attr('id') };
 
-          top.HAPI4.SearchMgr.doSearch( this, request );
+            top.HAPI4.SearchMgr.doSearch( this, request );
 
         }
 
@@ -716,36 +716,36 @@ $.widget( "heurist.search", {
     * @returns {Boolean}
     */
     , showSearchAssistant: function() {
-                $('.ui-menu').not('.horizontalmenu').hide(); //hide other
-                $('.menu-or-popup').hide(); //hide other
+        $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+        $('.menu-or-popup').hide(); //hide other
 
-                if(this.search_assistant){ //inited already
+        if(this.search_assistant){ //inited already
 
-                    var popup = $( this.search_assistant );
-                    var inpt = $(this.input_search).offset();
-                    popup.css({'left': inpt.left, 'top':inpt.top+$(this.input_search).height()+3 });
-                    //popup.position({my: "left top+3", at: "left bottom", of: this.input_search })
+            var popup = $( this.search_assistant );
+            var inpt = $(this.input_search).offset();
+            popup.css({'left': inpt.left, 'top':inpt.top+$(this.input_search).height()+3 });
+            //popup.position({my: "left top+3", at: "left bottom", of: this.input_search })
 
-                    popup.show( "blind", {}, 500 );
+            popup.show( "blind", {}, 500 );
 
 
-                    function _hidethispopup(event) {
-                        if($(event.target).closest(popup).length==0 && $(event.target).attr('id')!='menu-search-quick-link'){
-                            popup
-                                 //.position({my: "left top+3", at: "left bottom", of: this.input_search })
-                                 .hide( "blind", {}, 500 );
-                        }else{
-                            $( document ).one( "click", _hidethispopup);
-                            //return false;
-                        }
-                    }
-
-                    $( document ).one( "click", _hidethispopup);//hide itself on click outside
-                }else{ //not inited yet
-                    this._initSearchAssistant();
+            function _hidethispopup(event) {
+                if($(event.target).closest(popup).length==0 && $(event.target).attr('id')!='menu-search-quick-link'){
+                    popup
+                    //.position({my: "left top+3", at: "left bottom", of: this.input_search })
+                    .hide( "blind", {}, 500 );
+                }else{
+                    $( document ).one( "click", _hidethispopup);
+                    //return false;
                 }
+            }
 
-                return false;
+            $( document ).one( "click", _hidethispopup);//hide itself on click outside
+        }else{ //not inited yet
+            this._initSearchAssistant();
+        }
+
+        return false;
     }
 
     , _initSearchAssistant: function(){
@@ -774,10 +774,10 @@ $.widget( "heurist.search", {
                 primary: "ui-icon-triangle-1-n"
                 }, text:false});
             that._on( search_quick_close, {
-                    click: function(event){
-                        $dlg.hide( "blind", {}, 500 );
-                    }
-                });
+                click: function(event){
+                    $dlg.hide( "blind", {}, 500 );
+                }
+            });
 
 
             var dv = $dlg.find('#btns')
@@ -789,9 +789,9 @@ $.widget( "heurist.search", {
             .css('font-size','1em')
             .appendTo( dv );
             that._on( link, {  click: function(event){
-                        $dlg.hide( "blind", {}, 500 );
-                        that._showAdvancedAssistant();
-                    } });
+                $dlg.hide( "blind", {}, 500 );
+                that._showAdvancedAssistant();
+            } });
 
 
             var search_quick_go = $( "<button>", {
@@ -804,11 +804,11 @@ $.widget( "heurist.search", {
             .css('float', 'right')
             .button();
             that._on( search_quick_go, {
-                    click: function(event){
-                        $dlg.hide( "blind", {}, 500 );
-                        that._doSearch();
-                    }
-                });
+                click: function(event){
+                    $dlg.hide( "blind", {}, 500 );
+                    that._doSearch();
+                }
+            });
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
@@ -978,10 +978,10 @@ $.widget( "heurist.search", {
     //
     , _renderProgress: function( data ){
 
-            if(!data) data = {text:'', value:0};
+        if(!data) data = {text:'', value:0};
 
-            this.progress_lbl.html( data.text );
-            this.progress_bar.progressbar( "value", data.value );
+        this.progress_lbl.html( data.text );
+        this.progress_bar.progressbar( "value", data.value );
 
     }
 
@@ -991,21 +991,21 @@ $.widget( "heurist.search", {
         var url = top.HAPI4.basePathV3+ "records/add/addRecordPopup.php?db=" + top.HAPI4.database;
 
         top.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
-                    callback:function(responce) {
-/*
+            callback:function(responce) {
+                /*
                 var sURL = top.HAPI4.basePathV3 + "common/php/reloadCommonInfo.php";
                 top.HEURIST.util.getJsonData(
-                    sURL,
-                    function(responce){
-                        if(responce){
-                            top.HEURIST.rectypes.usageCount = responce;
-                            top.HEURIST.search.createUsedRectypeSelector(true);
-                        }
-                    },
-                    "db="+_db+"&action=usageCount");
-*/
-                    }
-            });
+                sURL,
+                function(responce){
+                if(responce){
+                top.HEURIST.rectypes.usageCount = responce;
+                top.HEURIST.search.createUsedRectypeSelector(true);
+                }
+                },
+                "db="+_db+"&action=usageCount");
+                */
+            }
+        });
 
     }
 
@@ -1044,20 +1044,20 @@ $.widget( "heurist.search", {
         /*
         if($.isFunction($('body').profile_edit)){
 
-            if(!this.div_profile_edit || this.div_profile_edit.is(':empty') ){
-                this.div_profile_edit = $('<div>').appendTo( this.element );
-            }
-            this.div_profile_edit.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
+        if(!this.div_profile_edit || this.div_profile_edit.is(':empty') ){
+        this.div_profile_edit = $('<div>').appendTo( this.element );
+        }
+        this.div_profile_edit.profile_edit({'ugr_ID': top.HAPI4.currentUser.ugr_ID});
 
         }else{
-            var that = this;
-            $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
-                if($.isFunction($('body').profile_edit)){
-                    that._doRegister();
-                }else{
-                    top.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
-                }
-            });
+        var that = this;
+        $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
+        if($.isFunction($('body').profile_edit)){
+        that._doRegister();
+        }else{
+        top.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
+        }
+        });
         }
         */
 

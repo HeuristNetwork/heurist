@@ -1,8 +1,8 @@
 /**
-* Class UI for edit Heurist record. It has methods to add new or edit (HAPI.RecordMgr) existing record (it can search and load beforehand) 
-* 
+* Class UI for edit Heurist record. It has methods to add new or edit (HAPI.RecordMgr) existing record (it can search and load beforehand)
+*
 * @see editing_input.js
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -40,7 +40,7 @@ function hEditing() {
 
     /**
     * define the container and clear it
-    * 
+    *
     * @param _container - html element id or element
     */
     function _setcontainer(_container){
@@ -52,7 +52,7 @@ function hEditing() {
         }
         if($container.length==0){
             _isdialog = true;
-            $container = $("#heurist-dialog"); //this div in index.php 
+            $container = $("#heurist-dialog"); //this div in index.php
         }else{
             _isdialog = false;
         }
@@ -64,7 +64,7 @@ function hEditing() {
     /**
     * Set container and create new record for given record type
     * on load of new record ir call _load() to init input controls
-    * 
+    *
     * @param _recordtype
     * @param _container
     */
@@ -92,9 +92,9 @@ function hEditing() {
 
     /**
     * Init container and load record data for edit
-    * 
-    * @param _recdata - either recordSet or  record id. 
-    *           if it is record id, it performs the search         
+    *
+    * @param _recdata - either recordSet or  record id.
+    *           if it is record id, it performs the search
     * @param _container - element - edit form will be added in it, if null will be opened in popup dialog
     */
     function _edit(_recdata, _container){
@@ -132,7 +132,7 @@ function hEditing() {
     /**
     * Load record data (@see hRecordSet)
     *   adds html elements - header and input control widgets, save/cancel buttons
-    * 
+    *
     */
     function _load() {
         if (!($container && recdata)) return;
@@ -162,7 +162,7 @@ function hEditing() {
         $('<h2>' + recdata.fld(record, 'rec_Title') + '</h2>')
         .appendTo($header);
 
-        // control buttons - save and cancel         
+        // control buttons - save and cancel
         var btn_div = $('<div>')
         .css({position:'absolute', right:'0.4em', top:'0.4em'})
         .appendTo($header);
@@ -177,7 +177,7 @@ function hEditing() {
         $('<div>')
         .css('display','inline-block')
         .append( $('<img>',{
-            src:  top.HAPI4.basePathV4+'assets/16x16.gif',
+            src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
             })
             .css({'background-image':'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
@@ -256,7 +256,7 @@ function hEditing() {
                 title: top.HR(_isaddnewrecord?"Add new record":"Edit record"),
                 resizeStop: function( event, ui ) {
                     $container.css('width','100%');
-                }                        
+                }
             });
 
         }
@@ -265,7 +265,7 @@ function hEditing() {
 
     /**
     * @todo - verify the required fields
-    * 
+    *
     * @returns {Boolean}
     */
     function _verify(){
@@ -274,7 +274,7 @@ function hEditing() {
 
     /**
     * call RecordMgr.save method
-    * 
+    *
     * @returns {Boolean}
     */
     function _save(){
@@ -285,7 +285,7 @@ function hEditing() {
         for (idx in _inputs) {
             ele = $(_inputs[idx]);
             var vals = ele.editing_input('getValues');
-            //var vals = ele.list("getValues"); 
+            //var vals = ele.list("getValues");
             //var vals = ele.data("editing_input").getValues();
             if(vals && vals.length>0){
                 details[ "t:"+ele.editing_input('option', 'dtID') ] = vals;

@@ -71,7 +71,7 @@ $.widget( "heurist.mainMenu", {
         $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
             'background-position': 'left center',
             'background-repeat': 'no-repeat',
-            'background-image': 'url("'+top.HAPI4.basePathV4+'assets/database.png")' }).text(top.HAPI4.database).appendTo( this.div_dbname );
+            'background-image': 'url("'+top.HAPI4.basePathV4+'hclient/assets/database.png")' }).text(top.HAPI4.database).appendTo( this.div_dbname );
 
         // MAIN MENU-----------------------------------------------------
 
@@ -422,21 +422,21 @@ $.widget( "heurist.mainMenu", {
                 });
             }
         });
-        
-        menu.find("a[href^='mailto']").click(function(e)
-        {
-          var el = $(this);
-          //top.HEURIST4.util.checkProtocolSupport(el.data("href"));
-          var t;
-          $(window).blur(function() {
-                // The browser apparently responded, so stop the timeout.
-                clearTimeout(t);
-          });
 
-          t = setTimeout(function() {
-                // The browser did not respond after 500ms, so open an alternative URL.
-                top.HEURIST4.msg.showMsgErr('mailto_fail');
-          }, 500);
+        menu.find("a[href^='mailto']").click(function(e)
+            {
+                var el = $(this);
+                //top.HEURIST4.util.checkProtocolSupport(el.data("href"));
+                var t;
+                $(window).blur(function() {
+                    // The browser apparently responded, so stop the timeout.
+                    clearTimeout(t);
+                });
+
+                t = setTimeout(function() {
+                    // The browser did not respond after 500ms, so open an alternative URL.
+                    top.HEURIST4.msg.showMsgErr('mailto_fail');
+                    }, 500);
         });
 
     },

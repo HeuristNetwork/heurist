@@ -1,6 +1,6 @@
 /**
 * Filed type manager - list of field types by groups or by record type structure. Requires utils.js
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -25,20 +25,20 @@ $.widget( "heurist.fieldtype_manager", {
         isdialog: false, //show in dialog or embedded
         list_top: '80px',
         isselector: false, //show in checkboxes to select
-        
-        selection:[], 
+
+        selection:[],
 
         forRecordTypes: null, //if record type is defined - do not show grouping
-        allowedFieldTypes: null, 
-        
+        allowedFieldTypes: null,
+
         callback: null,  //callback function
-        
+
         current_GrpID: null,
         // we take tags from top.HAPI4.currentUser.usr_Tags - array of tags in form [ {ugrp_id:[{tagid:[label, description, usage]}, ....]},...]
         current_order: 1  // order by name
     },
-    
-    entries: [], 
+
+    entries: [],
 
     // the constructor
     _create: function() {
@@ -48,9 +48,9 @@ $.widget( "heurist.fieldtype_manager", {
         this.wcontainer = $("<div>");
 
         if(this.options.isdialog){
-            
-            
-    
+
+
+
             var onDialogClose = function(){
                 if(this.options.callback){
                      var fields = [];
@@ -63,15 +63,15 @@ $.widget( "heurist.fieldtype_manager", {
                      this.options.callback.call(this, fields);
                 }
             }
-    
-            
-            
+
+
+
 
             this.wcontainer
             .css({overflow: 'none !important', width:'100% !important' })
             .appendTo(this.element);
 
-            this.element.css({overflow: 'none !important'})                
+            this.element.css({overflow: 'none !important'})
 
             this.element.dialog({
                 autoOpen: false,
@@ -82,7 +82,7 @@ $.widget( "heurist.fieldtype_manager", {
                 resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':'100%'});
                 },
-                close: onDialogClose, 
+                close: onDialogClose,
                 buttons: [
                     {text:top.HR('Select'),
                         click: function() {
@@ -116,12 +116,12 @@ $.widget( "heurist.fieldtype_manager", {
         });
 
         //---------------------------------------- SEARCH
-        this.search_div = $( "<div>").css({'display':'inline-block', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer ); // width:'36%', 
+        this.search_div = $( "<div>").css({'display':'inline-block', height:'2.2em', 'padding-top':'4px' }).appendTo( this.wcontainer ); // width:'36%',
 
         this.lbl_message = $( "<label>").css({'padding-right':'5px'})
         .html(top.HR('Filter'))
         .appendTo( this.search_div );
-        
+
         this.input_search = $( "<input>" ) //, {width:'100%'}
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo( this.search_div );
@@ -130,7 +130,7 @@ $.widget( "heurist.fieldtype_manager", {
             keyup: function(event) {
                 //filter tags
                 var tagdivs = $(this.element).find('.recordTitle');
-                tagdivs.each(function(i,e){   
+                tagdivs.each(function(i,e){
                     var s = $(event.target).val().toLowerCase();
                     $(e).parent().css('display', (s=='' || e.innerHTML.toLowerCase().indexOf(s)>=0)?'block':'none');
                 });
@@ -165,7 +165,7 @@ $.widget( "heurist.fieldtype_manager", {
         /*if(this.options.isdialog){
             css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};
         }else{
-            css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};  
+            css1 =  {'overflow-y':'auto','padding':'0.4em','top':'80px','bottom':0,'position':'absolute','left':0,'right':0};
         }*/
 
         this.div_content = $( "<div>" )
@@ -179,7 +179,7 @@ $.widget( "heurist.fieldtype_manager", {
         if(this.options.forRecordTypes){
             this._refersh();
         }else{
-            this._updateGroups();    
+            this._updateGroups();
         }
 
     }, //end _create
@@ -196,14 +196,14 @@ $.widget( "heurist.fieldtype_manager", {
 
     /* private function */
     _refresh: function(){
-        
+
         //hide group selector if for record types
         if(this.options.forRecordTypes){
-            this.select_grp.hide();    
+            this.select_grp.hide();
         }else{
             this.select_grp.show();
         }
-        
+
         this._renderItems();
     },
 
@@ -222,7 +222,7 @@ $.widget( "heurist.fieldtype_manager", {
         this.wcontainer.remove();
     },
 
-    //fill selector with groups  
+    //fill selector with groups
     _updateGroups: function(){
 
         var selObj = this.select_grp.get(0);
@@ -244,15 +244,15 @@ $.widget( "heurist.fieldtype_manager", {
 
         entries = [],
         entryID, name, usage, is_selected;
-        
+
         var idx_dty_type = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
-        
+
         if(this.options.forRecordTypes){ //show that belong to particular record type only
-        
+
             //add default set recTitle and recModified
             entries.push(['title', 'RecTitle', 0, this.options.selection.indexOf('title'), 'header']);
             entries.push(['modified', 'Modified', 0, this.options.selection.indexOf('modified'), 'header']);
-            
+
             var rectypes = this.options.forRecordTypes;
 
             if(rectypes!='all'){
@@ -261,7 +261,7 @@ $.widget( "heurist.fieldtype_manager", {
                 if(!top.HEURIST4.util.isArray(rectypes)){
                     rectypes = [rectypes];
                 }
-                
+
                 var fieldtypes_ids = [], fieldtypes_ids2;
 
                 $.arrayIntersect = function(a, b)
@@ -270,7 +270,7 @@ $.widget( "heurist.fieldtype_manager", {
                         {
                             return $.inArray(i, b) > -1;
                     });
-                };                
+                };
 
                 //find common fields
                 for (var i=0; i<rectypes.length; i++){
@@ -282,17 +282,17 @@ $.widget( "heurist.fieldtype_manager", {
                                 fieldtypes_ids2.push(entryID);
                         }
                         if(fieldtypes_ids.length>0){
-                            fieldtypes_ids = $.arrayIntersect(fieldtypes_ids, fieldtypes_ids2)            
+                            fieldtypes_ids = $.arrayIntersect(fieldtypes_ids, fieldtypes_ids2)
                         }else{
                             fieldtypes_ids = fieldtypes_ids2;
                         }
                     }
                 }
-                
+
 
                 //allowedFieldTypes:allowedtypes
                 for (var i=0; i<fieldtypes_ids.length; i++){
-                        
+
                         entryID = fieldtypes_ids[i];
 
                         if(rectypes.length>1){ //take from generallist
@@ -309,13 +309,13 @@ $.widget( "heurist.fieldtype_manager", {
                             is_selected =  this.options.selection.indexOf(entryID);
                             entries.push([entryID, name, usage, is_selected, dttype]);
                         }
-                                
+
                 }
 
             }
-            
+
         }else{    //show by groups
-            
+
             var idx_dty_grpid = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
             for (entryID in  top.HEURIST4.detailtypes.names)
             {
@@ -328,7 +328,7 @@ $.widget( "heurist.fieldtype_manager", {
 
                     entries.push([entryID, name, usage, is_selected, dttype]);
                 }
-            }           
+            }
         }
 
         var val = this.options.current_order;
@@ -338,7 +338,7 @@ $.widget( "heurist.fieldtype_manager", {
             }else{
                 return a[val]<b[val]?1:-1;
             }
-        });               
+        });
 
         var that = this;
         var filter_name = this.input_search.val().toLowerCase();
@@ -389,7 +389,7 @@ $.widget( "heurist.fieldtype_manager", {
 
             //record type icon
             $('<img>',{
-                src:  top.HAPI4.basePathV4+'assets/16x16.gif'
+                src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
             })
             .css('background-image', 'url('+ top.HAPI4.iconBaseURL + entryID + '.png)')
             .appendTo($iconsdiv);
@@ -410,14 +410,14 @@ $.widget( "heurist.fieldtype_manager", {
             .css('display','inline-block')
             .html( dtype )
             .appendTo($itemdiv);
-            
-            //usage 
+
+            //usage
             /*$('<div>')
             .css({'margin':'0.4em', 'height':'1.4em', 'position':'absolute','right':'60px'})
             .css('display','inline-block')
             .html( usage )
             .appendTo($itemdiv);*/
-        }           
+        }
     },
 
 
@@ -434,7 +434,7 @@ $.widget( "heurist.fieldtype_manager", {
 function showManageFieldTypes( recordtypes, fields, allowedtypes, callback ){
 
     var manage_dlg = $('#heurist-fieldtype-dialog');
-    
+
 
     if(manage_dlg.length<1){
 

@@ -44,7 +44,7 @@ $.widget( "heurist.app_timemap", {
 
         this.framecontent = $('<div>').addClass('frame_container')
         //.css({position:'absolute', top:'2.5em', bottom:0, left:0, right:0,
-        //     'background':'url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center'})
+        //     'background':'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
         .appendTo( this.element );
 
         if($(".header"+that.element.attr('id')).length===0){
@@ -56,8 +56,8 @@ $.widget( "heurist.app_timemap", {
         .attr('id', 'map-frame')
         //.attr('src', 'php/map.php?db='+top.HAPI4.database)
         .appendTo( this.framecontent );
-          
-          
+
+
         if(this.options.eventbased){
 
             this._events = top.HAPI4.Event.LOGOUT
@@ -117,7 +117,7 @@ $.widget( "heurist.app_timemap", {
 
                 }
 
-            
+
             });
         }
         // (this.mapframe).load(that._initmap);
@@ -180,7 +180,7 @@ $.widget( "heurist.app_timemap", {
             // var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
 
 //console.log('ini map from app_timemap');
-            
+
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids
                 this.options.startup,    //map document on load
@@ -231,7 +231,7 @@ $.widget( "heurist.app_timemap", {
     , loadanimation: function(show){
         if(show){
             //this.dosframe.hide();
-            this.framecontent.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
+            this.framecontent.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.framecontent.css('background','none');
             //this.dosframe.show();
@@ -266,7 +266,7 @@ $.widget( "heurist.app_timemap", {
             mapping.map_control.addRecordsetLayer(params);
         }
     }
-    
+
     , editLayerProperties: function( dataset_id, callback ){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){

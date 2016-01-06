@@ -1,11 +1,11 @@
 /**
-* Query result listing. 
-* 
+* Query result listing.
+*
 * Requires apps/rec_actions.js (must be preloaded)
-* 
+*
 * @todo - remove action buttons and use rec_action widget
-* 
-* 
+*
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -45,7 +45,7 @@ $.widget( "heurist.rec_list", {
     _create: function() {
 
         var that = this;
-        
+
         //this.uniqueId();
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%'}).appendTo( this.element );
@@ -54,7 +54,7 @@ $.widget( "heurist.rec_list", {
         //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
         .appendTo( this.element );
 
-        
+
         this.action_buttons = $('<div>')
         .css('display','inline-block')
         .rec_actions({actionbuttons: this.options.actionbuttons})
@@ -91,7 +91,7 @@ $.widget( "heurist.rec_list", {
         }})
         .hide();
 
-        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');        
+        var view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
         if(view_mode){
             this._applyViewMode(view_mode);
         }
@@ -137,19 +137,19 @@ $.widget( "heurist.rec_list", {
                 $header.html(new_title);
                 $('a[href="#'+that.element.attr('id')+'"]').html(new_title);
 
-                that._query_request = data;  //keep current query request 
+                that._query_request = data;  //keep current query request
                 that.option("recordset", null);
                 that.loadanimation(true);
-                
+
             }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
-                
-                   if(data) data = data.selection;
-                   
-                   var res = top.HAPI4.getSelection(data, true);
-                   if(res!=null){
-                       that.action_buttons.rec_actions('option','record_ids', res);
-                   }
-                    
+
+                if(data) data = data.selection;
+
+                var res = top.HAPI4.getSelection(data, true);
+                if(res!=null){
+                    that.action_buttons.rec_actions('option','record_ids', res);
+                }
+
             }
             //that._refresh();
         });
@@ -162,10 +162,10 @@ $.widget( "heurist.rec_list", {
         }
         */
 
-        
 
-        
-        
+
+
+
         this._refresh();
 
     }, //end _create
@@ -320,7 +320,7 @@ $.widget( "heurist.rec_list", {
                         ?'Note: some records are only visible to members of particular workgroups'
                         :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
                 )
-                .appendTo(this.div_content);                   
+                .appendTo(this.div_content);
 
                 if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
                     var domain = this._query_request.w
@@ -403,7 +403,7 @@ $.widget( "heurist.rec_list", {
 
         //record type icon
         $('<img>',{
-            src:  top.HAPI4.basePathV4+'assets/16x16.gif',
+            src:  top.HAPI4.basePathV4+'hclient/assets/16x16.gif',
             title: '@todo rectypeTitle'.htmlEscape()
         })
         //!!! .addClass('rtf')
@@ -412,7 +412,7 @@ $.widget( "heurist.rec_list", {
 
         //bookmark icon - asterics
         $('<img>',{
-            src:  top.HAPI4.basePathV4+'assets/13x13.gif'
+            src:  top.HAPI4.basePathV4+'hclient/assets/13x13.gif'
         })
         .addClass(fld('bkm_ID')?'bookmarked':'unbookmarked')
         .appendTo($iconsdiv);
@@ -487,7 +487,7 @@ $.widget( "heurist.rec_list", {
         var selected = this.getSelected();
 
         if(this.options.isapplication){
-                $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
+            $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected, source:this.element.attr('id')} );
         }
         this._trigger( "onselect", event, selected );
     },
@@ -508,22 +508,22 @@ $.widget( "heurist.rec_list", {
     },
 
     setSelected: function(record_ids){
-/* to implent
+        /* to implent
         var selected = [];
         var that = this;
         this.div_content.find('.selected').each(function(ids, rdiv){
-            var record = that.options.recordset.getById($(rdiv).attr('recid'));
-            selected.push(record);
+        var record = that.options.recordset.getById($(rdiv).attr('recid'));
+        selected.push(record);
         });
 
         return that.options.recordset.getSubSet(selected);
-*/        
+        */
     },
-    
-    
+
+
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }
@@ -540,7 +540,7 @@ $.widget( "heurist.rec_list", {
         }
 
         return false;
-    }, 
+    },
 
 
 });

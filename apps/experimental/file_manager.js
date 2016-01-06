@@ -1,13 +1,13 @@
 /**
 * Assign/remove tags on selected records, upload files, requires utils.js
-* TODO: Correct description above 
-* 
+* TODO: Correct description above
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0      
+* @version     4.0
 */
 
 /*
@@ -32,9 +32,9 @@ $.widget( "heurist.file_manager", {
 
         current_order: 0,  // order by name  - index corresponds to order in response data array
 
-        view_mode: 'list', // list|thumbnails 
+        view_mode: 'list', // list|thumbnails
 
-        current_filter: '',  
+        current_filter: '',
 
         header:[]
     },
@@ -134,7 +134,7 @@ $.widget( "heurist.file_manager", {
                                 var idx;
                                 for(idx in response.data) {
                                     if(idx>0){
-                                        files.push(response.data[idx]);     
+                                        files.push(response.data[idx]);
                                     }
                                 }
                                 top.HAPI4.currentUser.usr_Files[val] = files;
@@ -244,7 +244,7 @@ $.widget( "heurist.file_manager", {
 
         if(!this.options.isdialog)
         {
-            /* @todo - perhaps to use this dialog in edit record ??????        
+            /* @todo - perhaps to use this dialog in edit record ??????
             this.div_toolbar = $( "<div>" )
             .css({'width': '100%', height:'2.4em'})
             .appendTo( this.wcontainer );
@@ -278,7 +278,7 @@ $.widget( "heurist.file_manager", {
             .button();
 
             this._on( this.btn_assign, { click: "_assignTags" } );
-            */        
+            */
         }
 
     }, //end _create
@@ -289,14 +289,14 @@ $.widget( "heurist.file_manager", {
         if(key=='record_ids'){
             this._reloadFiles();
         }
-    },     
+    },
 
     _reloadFiles: function(mediaType){
         if(mediaType){
             top.HAPI4.currentUser.usr_Files[mediaType] = null;
         }else{
-            top.HAPI4.currentUser.usr_Files = {}; //clear all  
-        }      
+            top.HAPI4.currentUser.usr_Files = {}; //clear all
+        }
         this.options.current_mediatype = null;
         this.select_mediatype.change();
     },
@@ -324,12 +324,12 @@ $.widget( "heurist.file_manager", {
         this.btn_add.remove();
         this.div_toolbar.remove();
         }
-        */    
+        */
 
         this.wcontainer.remove();
     },
 
-    // 
+    //
     _renderItems: function(){
 
         if(this.div_content){
@@ -345,7 +345,7 @@ $.widget( "heurist.file_manager", {
 
         if(top.HAPI4.currentUser.usr_Files && top.HAPI4.currentUser.usr_Files[this.options.current_mediatype])
         {
-            //convert from object to array 
+            //convert from object to array
             var that = this;
             var recfiles = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype];
 
@@ -359,7 +359,7 @@ $.widget( "heurist.file_manager", {
                 }else{
                     return a[val]<b[val]?1:-1;
                 }
-            });               
+            });
 
             var i, recID;
             for(i=0; i<recfiles.length; ++i) {
@@ -369,7 +369,7 @@ $.widget( "heurist.file_manager", {
                 function fld(fldname){
                     if(that.options.header && that.options.header.indexOf(fldname)>=0){
                         var idx_fld = that.options.header.indexOf(fldname);
-                        return recfile[idx_fld];    
+                        return recfile[idx_fld];
                     }else{
                         return "";
                     }
@@ -388,7 +388,7 @@ $.widget( "heurist.file_manager", {
                 .appendTo(this.div_content);
 
 
-                var obf_recID = fld('ulf_ObfuscatedFileID');     
+                var obf_recID = fld('ulf_ObfuscatedFileID');
                 if(obf_recID){
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
@@ -398,7 +398,7 @@ $.widget( "heurist.file_manager", {
                     //@todo - thumbnail and icons for all mediatype
                     $(document.createElement('div'))
                     .addClass('recTypeThumb')
-                    .css('background-image', 'url('+ top.HAPI4.basePathV4 + 'assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)') 
+                    .css('background-image', 'url('+ top.HAPI4.basePathV4 + 'hclient/assets/75x75.gif' )    //+ 'thumb/th_' + rectypeID + '.png)')
                     .appendTo($recdiv);
                 }
 
@@ -413,10 +413,10 @@ $.widget( "heurist.file_manager", {
                 .click(function(event){
 
                 top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][$(this).attr('tagID')][5] = event.target.checked;
-                //event.target.keepmark = event.target.checked; 
+                //event.target.keepmark = event.target.checked;
 
-                if(that.options.isdialog){  //tag management                               
-                var checkboxes = $(that.element).find('input:checked'); 
+                if(that.options.isdialog){  //tag management
+                var checkboxes = $(that.element).find('input:checked');
                 var btns = $('.recs-actions');
                 if(checkboxes.length>0){
                 btns.removeAttr('disabled');
@@ -430,7 +430,7 @@ $.widget( "heurist.file_manager", {
                 })
                 //.css({'display':'inline-block', 'margin-right':'0.2em'})
                 .appendTo($tagdiv);
-                */      
+                */
 
                 $('<div>',{
                     title: fld('ulf_OrigFileName')
@@ -441,7 +441,7 @@ $.widget( "heurist.file_manager", {
                 .html( fld('ulf_OrigFileName') )
                 .appendTo($recdiv);
 
-                /*                        
+                /*
                 if(this.options.isdialog){
                 //$tagdiv.find('.recordTitle').css('right','36px');
 
@@ -461,7 +461,7 @@ $.widget( "heurist.file_manager", {
                 }) )
                 );
                 }
-                */                    
+                */
 
 
             }//for
@@ -491,18 +491,18 @@ $.widget( "heurist.file_manager", {
         this.btn_view.button( "option", "label", top.HR(newmode));
 
         this._applyFilter(null);
-    },  
+    },
 
     _applyFilter: function(sfilter){
 
         if(sfilter!=null){
             this.options.current_filter = sfilter;
         }else{
-            sfilter = this.options.current_filter;  
+            sfilter = this.options.current_filter;
         }
         var sblock = this.options.view_mode=='list'?'block':'inline-block';
         var tagdivs = $(this.element).find('.recordTitle');
-        tagdivs.each(function(i,e){   
+        tagdivs.each(function(i,e){
             $(e).parent().css('display', (sfilter=='' || e.innerHTML.indexOf(sfilter)>=0) ?sblock :'none');
         });
     },
@@ -516,12 +516,12 @@ $.widget( "heurist.file_manager", {
     _deleteFile: function(fileID){
 
         var tagIDs = [];
-        if(fileID){     
+        if(fileID){
             var tag = top.HAPI4.currentUser.usr_Files[this.options.current_mediatype][tagID];
             if(!tag) return;
             tagIDs.push(tagID);
         }else{
-            var checkboxes = $(this.element).find('input:checked'); 
+            var checkboxes = $(this.element).find('input:checked');
             checkboxes.each(function(i,e){ tagIDs.push($(e).attr('tagID')); });
         }
         if(tagIDs.length<1) return;
@@ -572,8 +572,8 @@ $.widget( "heurist.file_manager", {
                 tag_id.val(tagID);
                 tag_name.val(tag[0]);
                 tag_desc.val(tag[1]);
-            }else{ //add new 
-                $dlg.find('input').val('');  //clear all 
+            }else{ //add new
+                $dlg.find('input').val('');  //clear all
                 tag_name.val(this.input_search.val());
             }
 
@@ -584,7 +584,7 @@ $.widget( "heurist.file_manager", {
 
     /**
     * Show dialogue to add/edit tag
-    * 
+    *
     * if tagIDs is defined - replace old tags in this list to new one
     */
     _editTag: function(tagID, tagIDs){
@@ -657,7 +657,7 @@ $.widget( "heurist.file_manager", {
                                         top.HAPI4.currentUser.usr_Files[that.options.current_mediatype][tagID] = [tag_text, tag_desc, new Date(), 0, tagID, 0];
                                     }
 
-                                    if(!top.HEURIST4.util.isnull(tag_ids)){ 
+                                    if(!top.HEURIST4.util.isnull(tag_ids)){
                                         //send request to replace selected tags with new one
                                         var request = {ids: tag_ids,
                                             new_id: tagID,
@@ -678,7 +678,7 @@ $.widget( "heurist.file_manager", {
 
                                     }else{
                                         $dlg.dialog( "close" );
-                                        that._renderItems();    
+                                        that._renderItems();
                                     }
 
 
@@ -724,7 +724,7 @@ $.widget( "heurist.file_manager", {
             });
         }else{
 
-            var message = this.edit_dialog.find('.messages');        
+            var message = this.edit_dialog.find('.messages');
             message.removeClass( "ui-state-highlight" );
             message.text("");
 
@@ -751,7 +751,7 @@ $.widget( "heurist.file_manager", {
     */
     _assignTags: function(){
 
-        //find checkbox that has usage>0 and unchecked 
+        //find checkbox that has usage>0 and unchecked
         // and vs  usage==0 and checked
         var t_added = $(this.element).find('input[type="checkbox"][usage="0"]:checked');
         var t_removed = $(this.element).find('input[type="checkbox"][usage!="0"]:not(:checked)');

@@ -2,7 +2,7 @@
 * Integration with existing H3 applications - mapping and smarty reports
 * Working with current result set and selection
 * External application are loaded in iframe
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -27,26 +27,26 @@ $.widget( "heurist.staticPage", {
         title: '',
         url:null
     },
-    
+
     _loaded_url:null,
 
     // the constructor
     _create: function() {
 
         var that = this;
-        
+
         this.div_content = $('<div>')  //.css('overflow','auto')
-                   /*.css({
-                        position:'absolute', top:(this.options.title==''?0:'2.5em'), bottom:0, left:0, right:0,
-                        'background':'url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center'})*/
-                   .appendTo( this.element );
-                   
+        /*.css({
+        position:'absolute', top:(this.options.title==''?0:'2.5em'), bottom:0, left:0, right:0,
+        'background':'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center'})*/
+        .appendTo( this.element );
+
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
                 that._refresh();
             }
         });
-        
+
         that._refresh();
         //$(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {});
 
@@ -58,19 +58,19 @@ $.widget( "heurist.staticPage", {
         this._superApply( arguments );
         this._refresh();
     },
-/*    
+    /*
     _setOption: function( key, value ) {
-        if(key=='url'){
-            value = top.HAPI4.basePathV3 + value;
-        }else if (key=='title'){
-             var id = this.element.attr('id');
-             $(".header"+id).html(value);
-             $('a[href="#'+id+'"]').html(value);
-        }
+    if(key=='url'){
+    value = top.HAPI4.basePathV3 + value;
+    }else if (key=='title'){
+    var id = this.element.attr('id');
+    $(".header"+id).html(value);
+    $('a[href="#'+id+'"]').html(value);
+    }
 
-        this._super( key, value );
-        this._refresh();
-    },*/  
+    this._super( key, value );
+    this._refresh();
+    },*/
 
     /* private function */
     _refresh: function(){
@@ -80,15 +80,15 @@ $.widget( "heurist.staticPage", {
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
         }
-        
-        //refesh if element is visible only - otherwise it costs much resources        
+
+        //refesh if element is visible only - otherwise it costs much resources
         if(!this.element.is(':visible') || top.HEURIST4.util.isempty(this.options.url)) return;
-        
+
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
             if(this.options.url.indexOf('http')<0){
                 this.options.url = top.HAPI4.basePathV4 +  this.options.url.replace("[dbname]",  top.HAPI4.database);
-                
+
                 //var that=this;
                 $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
             }else{
@@ -100,7 +100,7 @@ $.widget( "heurist.staticPage", {
             this._loaded_url = this.options.url;
             //
         }
-        
+
     },
 
     // events bound via _on are removed automatically
@@ -114,10 +114,10 @@ $.widget( "heurist.staticPage", {
         //this.dosframe.remove();
         this.div_content.remove();
     },
-    
+
     loadanimation: function(show){
         if(show){
-            this.div_content.css('background','url('+top.HAPI4.basePathV4+'assets/loading-animation-white.gif) no-repeat center center');
+            this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
         }
