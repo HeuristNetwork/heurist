@@ -1426,7 +1426,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 }, text:false})
             .click(function( event ) {
                 event.preventDefault();
-                //window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+                //window.open(top.HAPI4.basePathV4 + "hclient/framecontent/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
                 window.open(top.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+recID, "_new");
             });
         }

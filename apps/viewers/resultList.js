@@ -649,7 +649,7 @@ $.widget( "heurist.resultList", {
         text:false})
         .click(function( event ) {
         event.preventDefault();
-        window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
+        window.open(top.HAPI4.basePathV4 + "hclient/framecontent/recedit.php?db="+top.HAPI4.database+"&q=ids:"+recID, "_blank");
         })
         .appendTo($recdiv);*/
 

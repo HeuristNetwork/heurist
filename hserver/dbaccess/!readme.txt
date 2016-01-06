@@ -1,5 +1,5 @@
 
-Directory:    /page/common
+Directory:    hserver/dbaccess
 
 Overview:       Libraries of functions to work with particular tables in heurist database
 

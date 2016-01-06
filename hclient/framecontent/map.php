@@ -339,7 +339,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
         query = query + ((query=='?')?'':'&') + 'db='+top.HAPI4.database;
-        var url = top.HAPI4.basePathV4+'page/map.php' + query;
+        var url = top.HAPI4.basePathV4+'hclient/framecontent/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 

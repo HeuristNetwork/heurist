@@ -1,6 +1,6 @@
 /**
 * Widget for input controls on edit form
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2015 University of Sydney
@@ -26,7 +26,7 @@ $.widget( "heurist.editing_input", {
         recID: null,
         rectypeID: null, //field description is taken either from rectypes[rectypeID] or from dtFields
         rectypes: null,
-        dtFields: null, 
+        dtFields: null,
         dtID: null,
         values: null,
         readonly: false,
@@ -42,11 +42,11 @@ $.widget( "heurist.editing_input", {
         if(this.options.dtFields==null){
             if (!(this.options.rectypeID && this.options.rectypes &&
                 this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])){
-                    
-                    this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
-                }
+
+                this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+            }
         }
-                
+
         if(this.options.dtFields==null){ //field description is not defined
             return;
         }
@@ -175,15 +175,15 @@ $.widget( "heurist.editing_input", {
             return this.options['dtFields'][fieldname];
         }
         /*}else{
-            var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
-            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-            return rfrs[fi[fieldname]];
+        var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+        var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
+        return rfrs[fi[fieldname]];
         }*/
     },
 
     /**
     * add input according field type
-    * 
+    *
     * @param value
     * @param idx - index for repetative values
     */
@@ -248,10 +248,10 @@ $.widget( "heurist.editing_input", {
             }else if(detailType=="resource"){
 
                 /*if(!this.rec_search_dialog){
-                    this.rec_search_dialog = this.element.rec_search({
-                        isdialog: true,
-                        search_domain: 'a'
-                    });
+                this.rec_search_dialog = this.element.rec_search({
+                isdialog: true,
+                search_domain: 'a'
+                });
                 }*/
 
 
@@ -262,35 +262,35 @@ $.widget( "heurist.editing_input", {
 
                 function __show_select_dialog(event){
                     event.preventDefault();
-                    
-                    var url = top.HAPI4.basePathV4 + 
-                            'page/recordSelect.php?db='+top.HAPI4.database+
-                            '&rectype_set='+that.f('rst_PtrFilteredIDs');
-                    top.HEURIST4.msg.showDialog(url, {height:600, width:600, 
-                            title: top.HR('Select linked record'), 
-                            class:'ui-heurist-bg-light',
-                            callback: function(recordset){
-                                if(recordset && $.isFunction(recordset.isA) && recordset.isA("hRecordSet") ){
-                                    var record = recordset.getFirstRecord();
-                                    var name = recordset.fld(record,'rec_Title');
-                                    $input.val(name);
-                                    that.options.values[idx] = recordset.fld(record,'rec_ID');
-                                }
-                            }           
-                    } );
-                    /*        
-                    that.rec_search_dialog.rec_search("option",{
-                        //retuns selected recrod
-                        rectype_set: that.f('rst_PtrFilteredIDs'),
-                        onselect: function(event, recordset){
 
-                            if(recordset && recordset.length()>0){
+                    var url = top.HAPI4.basePathV4 +
+                    'hclient/framecontent/recordSelect.php?db='+top.HAPI4.database+
+                    '&rectype_set='+that.f('rst_PtrFilteredIDs');
+                    top.HEURIST4.msg.showDialog(url, {height:600, width:600,
+                        title: top.HR('Select linked record'),
+                        class:'ui-heurist-bg-light',
+                        callback: function(recordset){
+                            if(recordset && $.isFunction(recordset.isA) && recordset.isA("hRecordSet") ){
                                 var record = recordset.getFirstRecord();
-                                $input.val(recordset.fld(record,'rec_Title'));
+                                var name = recordset.fld(record,'rec_Title');
+                                $input.val(name);
                                 that.options.values[idx] = recordset.fld(record,'rec_ID');
                             }
-
                         }
+                    } );
+                    /*
+                    that.rec_search_dialog.rec_search("option",{
+                    //retuns selected recrod
+                    rectype_set: that.f('rst_PtrFilteredIDs'),
+                    onselect: function(event, recordset){
+
+                    if(recordset && recordset.length()>0){
+                    var record = recordset.getFirstRecord();
+                    $input.val(recordset.fld(record,'rec_Title'));
+                    that.options.values[idx] = recordset.fld(record,'rec_ID');
+                    }
+
+                    }
                     });
 
                     that.rec_search_dialog.rec_search( "show" );
@@ -361,24 +361,24 @@ $.widget( "heurist.editing_input", {
         //var $btn_clear = $( "<div>")
         if(this.options.showclear_button)
         {
-        
-        var $btn_clear = $('<button>',{
-            id: 'btn_input_clear',
-            title: 'Clear entered value'
-        })
-        .addClass("smallbutton")
-        .css({'vertical-align': (detailType=="blocktext")?'top':'' })
-        .appendTo( $inputdiv )
-        .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
 
-        // bind click events
-        this._on( $btn_clear, {
-            click: function(){
-                that.options.values[idx] = '';
-                $input.val('');
-            }
-        });
-        
+            var $btn_clear = $('<button>',{
+                id: 'btn_input_clear',
+                title: 'Clear entered value'
+            })
+            .addClass("smallbutton")
+            .css({'vertical-align': (detailType=="blocktext")?'top':'' })
+            .appendTo( $inputdiv )
+            .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
+
+            // bind click events
+            this._on( $btn_clear, {
+                click: function(){
+                    that.options.values[idx] = '';
+                    $input.val('');
+                }
+            });
+
         }
 
     },
@@ -392,9 +392,9 @@ $.widget( "heurist.editing_input", {
         var allTerms = this.f('rst_FilteredJsonTermIDTree');
         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
-        top.HEURIST4.util.createTermSelectExt2($input.get(0), 
-            {datatype:detailType, termIDTree:allTerms, headerTermIDsList:headerTerms, 
-             defaultTermID:value, topOptions:true, supressTermCode:true});
+        top.HEURIST4.util.createTermSelectExt2($input.get(0),
+            {datatype:detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
+                defaultTermID:value, topOptions:true, supressTermCode:true});
     },
 
     setValue: function(value, idx, display_value){
@@ -438,15 +438,15 @@ $.widget( "heurist.editing_input", {
             }
         } else if(detailType=="file"){
 
-            disp_value = "@todo file "+value;   
+            disp_value = "@todo file "+value;
 
         } else if(detailType=="resource"){
 
-            disp_value = "@todo resource "+value;   
+            disp_value = "@todo resource "+value;
 
         } else if(detailType=="relmarker"){
 
-            disp_value = "@todo relation "+value;   
+            disp_value = "@todo relation "+value;
 
         }else{
             disp_value = value;
@@ -458,7 +458,7 @@ $.widget( "heurist.editing_input", {
 
         this.input_cell.html(disp_value);
 
-    }  
+    }
 
 
 });

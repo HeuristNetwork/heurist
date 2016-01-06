@@ -1,6 +1,6 @@
 /**
 * app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for /page/map.php
+* This widget acts as a wrapper for /hclient/framecontent/map.php
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -123,10 +123,10 @@ $.widget( "heurist.app_timemap", {
         // (this.mapframe).load(that._initmap);
         // init map on frame load
         this._on( this.mapframe, {
-                load: function(){
-                    this.recordset_changed = true;
-                    this._refresh();   // this._initmap
-                }
+            load: function(){
+                this.recordset_changed = true;
+                this._refresh();   // this._initmap
+            }
             }
         );
 
@@ -148,7 +148,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap()
             }else {
-                var url = top.HAPI4.basePathV4 + '/page/map.php?db='+top.HAPI4.database;
+                var url = top.HAPI4.basePathV4 + '/hclient/framecontent/map.php?db='+top.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
@@ -179,7 +179,7 @@ $.widget( "heurist.app_timemap", {
             // all this is now done in addRecordsetLayer
             // var mapdataset = this.options.recordset == null? null: this.options.recordset.toTimemap();
 
-//console.log('ini map from app_timemap');
+            //console.log('ini map from app_timemap');
 
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids
@@ -210,7 +210,7 @@ $.widget( "heurist.app_timemap", {
             return;
         }
 
-        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see page/map.js
+        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see hclient/framecontent/map.js
     }
 
 
@@ -245,7 +245,7 @@ $.widget( "heurist.app_timemap", {
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
-            mapping.map_control.loadMapDocumentById(recId);  //see page/map.js
+            mapping.map_control.loadMapDocumentById(recId);  //see hclient/framecontent/map.js
         }
     }
 

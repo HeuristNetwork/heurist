@@ -237,13 +237,13 @@ $.widget( "heurist.resultListMenu", {
             }
             var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                top.HEURIST4.msg.showDialog(url, { 
-                    title: top.HR('Advanced search builder'),
-                    callback: function(res){
-                        if(!Hul.isempty(res)) {
-                                that.reloadSearch(res);
-                        }
-                    }});
+            top.HEURIST4.msg.showDialog(url, {
+                title: top.HR('Advanced search builder'),
+                callback: function(res){
+                    if(!Hul.isempty(res)) {
+                        that.reloadSearch(res);
+                    }
+            }});
 
         }else if(action == "menu-search-save"){  //H4
 
@@ -321,11 +321,11 @@ $.widget( "heurist.resultListMenu", {
         }else if(action == "menu-selected-value-add"){
 
             this.addDetailPopup();
-/*
-        }else if(action == "menu-selected-value-add2"){
+            /*
+            }else if(action == "menu-selected-value-add2"){
 
-                this.addDetailPopup2();
-*/                
+            this.addDetailPopup2();
+            */
         }else if(action == "menu-selected-value-replace"){
 
             this.replaceDetailPopup();
@@ -589,7 +589,7 @@ $.widget( "heurist.resultListMenu", {
         }
 
         // Open URL
-        var url = top.HAPI4.basePathV4+ "page/send_email.php?db=" + top.HAPI4.database;
+        var url = top.HAPI4.basePathV4+ "hclient/framecontent/send_email.php?db=" + top.HAPI4.database;
         top.HAPI4.selectedRecordIds = ids;  //the only place it is assigned
         top.HEURIST4.msg.showDialog(url, { width:500, height:600, title: top.HR('Email information') });
 
@@ -906,9 +906,9 @@ $.widget( "heurist.resultListMenu", {
             return
         }
 
-        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + 
-                top.HAPI4.database + '&t='+Math.random();
-                //(new Date().time) ;
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" +
+        top.HAPI4.database + '&t='+Math.random();
+        //(new Date().time) ;
 
         //substitutes
         top.HEURIST.search4 = {};
@@ -920,7 +920,7 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST4.msg.showDialog(url, {height:500, width:600, title: top.HR('Add field value')} );
     },
 
-    
+
     addDetailPopup2: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);
@@ -929,17 +929,17 @@ $.widget( "heurist.resultListMenu", {
             return;
         }
         top.HAPI4.currentRecordsetSelection = this.getSelectionIds();
-   /*
+        /*
         var that = this;
 
         if(!top.HEURIST.rectypes){
-            $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addDetailPopup(); } );
-            return
+        $.getScript(top.HAPI4.basePathV3 + 'common/php/loadCommonInfo.php?db='+top.HAPI4.database, function(){ that.addDetailPopup(); } );
+        return
         }
 
-        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + 
-                top.HAPI4.database + '&t='+Math.random();
-                //(new Date().time) ;
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" +
+        top.HAPI4.database + '&t='+Math.random();
+        //(new Date().time) ;
 
         //substitutes
         top.HEURIST.search4 = {};
@@ -947,13 +947,13 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.recids_sel = recIDs_sel;
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
-   */     
-        var url = top.HAPI4.basePathV4 + 'page/recordAction.php?db='+top.HAPI4.database+'&action=add_detail';
+        */
+        var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='+top.HAPI4.database+'&action=add_detail';
 
         top.HEURIST4.msg.showDialog(url, {height:400, width:600, title: top.HR('Add field value'), class:'ui-heurist-bg-light'} );
     },
-    
-    
+
+
     replaceDetailPopup: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);

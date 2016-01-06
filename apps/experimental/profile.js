@@ -1,5 +1,5 @@
 /**
-* Central access point/menu 
+* Central access point/menu
 * If not logged in: Login button
 * If logged in:     Addd New Record, Profile and Options button with drop down menus
 *
@@ -302,7 +302,7 @@ $.widget( "heurist.profile", {
                 .position({my: "right top", at: "right bottom", of: that.btn_record });
                 $( document ).one( "click", function() { that.select_rectype.hide(); });
                 return false;
-                //window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database, "_blank");
+                //window.open(top.HAPI4.basePathV4 + "hclient/framecontent/recedit.php?db="+top.HAPI4.database, "_blank");
             }
         });
         this._on( this.select_rectype, {
@@ -317,7 +317,7 @@ $.widget( "heurist.profile", {
                 top.HEURIST4.editing.add(recordtype);
 
                 /* open in new window
-                window.open(top.HAPI4.basePathV4 + "page/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
+                window.open(top.HAPI4.basePathV4 + "hclient/framecontent/recedit.php?db="+top.HAPI4.database+"&rt="+recordtype, "_blank");
                 */
             }
         });

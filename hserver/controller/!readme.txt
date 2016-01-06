@@ -1,5 +1,5 @@
 
-Directory:    /page/api
+Directory:    /hserver/controller
 
 Overview:   All files in this folder are services. They are utilized in hapi.js to obtain various data (ajax) from server side.
 

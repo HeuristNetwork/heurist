@@ -1,5 +1,5 @@
 
-Directory:    /page/visualize
+Directory:    /hclient/framecontent/visualize
 
 Overview:   Connection diagram visualisation - shows current resultset as a network of linked records
 
