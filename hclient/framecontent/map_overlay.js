@@ -49,7 +49,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     function _loadMapDocuments(startup_mapdocument) {
 
         // Load Map Documents & Map Layers       @TODO - change it to HAPI method!!!!
-        var api = top.HAPI4.basePathV4 + "php/api/map_data.php?db=" + top.HAPI4.database; // window.location.search;
+        var api = top.HAPI4.basePathV4 + "hserver/controller/map_data.php?db=" + top.HAPI4.database; // window.location.search;
         //console.log("API call URL: " + api);
         $.getJSON(api, function(_data) {
             map_data = _data;

@@ -267,7 +267,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                 $("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL
-                var url = "../php/api/rectype_relations.php" + window.location.search;
+                var url = "../hserver/controller/rectype_relations.php" + window.location.search;
                 console.log("Loading data from: " + url);
                 d3.json(url, function(error, json) {
                     // Error check

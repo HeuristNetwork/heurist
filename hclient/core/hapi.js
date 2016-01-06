@@ -113,7 +113,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
     *
-    * @param action   - name of php script in php/api foolder on server side
+    * @param action   - name of php script in hserver/controller foolder on server side
     * @param request - data to be sent to server side
     * @param callback - callback function, it obtains object with 2 properties:
     *       status - see ResponseStatus
@@ -128,7 +128,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             request.notes = null; //unset to reduce traffic
         }
 
-        var url = that.basePathV4+"php/api/"+action+".php"; //+(new Date().getTime());
+        var url = that.basePathV4+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
         //top.HEURIST4.ajax.getJsonData(url, callback, request);
 

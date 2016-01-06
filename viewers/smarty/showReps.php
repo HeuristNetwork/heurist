@@ -129,7 +129,7 @@ function executeSmartyTemplate($params){
         }
 
 
-        $url = HEURIST_BASE_URL."php/api/record_search.php?".$url."&detail=ids&vo=h3";
+        $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
         $result = loadRemoteURLContent($url);
         $qresult = json_decode($result, true);
 
@@ -164,7 +164,7 @@ function executeSmartyTemplate($params){
 
     //get template body from request (for execution from editor)
     $template_body = (array_key_exists('template_body',$params)?$params['template_body']:null);
-    
+
     if(null!=$template_file){
         if(substr($template_file,-4)!=".tpl"){
             $template_file = $template_file.".tpl";
@@ -175,12 +175,12 @@ function executeSmartyTemplate($params){
             $error = "<b><font color='#ff0000'>Template file $template_file does noot exist</font></b>";
             echo $error;
             if($publishmode>0 && $outputfile!=null){ //save empty output into file
-                save_report_output2($error); 
+                save_report_output2($error);
             }
             exit();
         }
     }else{
-        $content = $template_body; 
+        $content = $template_body;
     }
 
     $k = strpos($content, "{*depth");

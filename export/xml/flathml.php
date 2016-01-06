@@ -1391,7 +1391,7 @@ if (@$_REQUEST['pathfilename']) {
 
 if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
-    $url = HEURIST_BASE_URL."php/api/record_search.php";
+    $url = HEURIST_BASE_URL."hserver/controller/record_search.php";
 
     $url = $url.'?'.$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3&needall=1";    //call h4
     if($PUBONLY){
