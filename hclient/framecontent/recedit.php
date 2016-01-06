@@ -1,40 +1,40 @@
 <?php
 
-    /**
-    *  Standalone record edit page. It may be used separately or wihin widget (in iframe)
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2015 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+*  Standalone record edit page. It may be used separately or wihin widget (in iframe)
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    require_once(dirname(__FILE__)."/../php/System.php");
-    require_once(dirname(__FILE__).'/../php/common/db_structure.php');
+require_once(dirname(__FILE__)."/../php/System.php");
+require_once(dirname(__FILE__).'/../php/common/db_structure.php');
 
-    $system = new System();
+$system = new System();
 
-    if(@$_REQUEST['db']){
-        if(! $system->init(@$_REQUEST['db']) ){
-            //@todo - redirect to error page
-            print_r($system->getError(),true);
-            exit();
-        }
-    }else{
-        header('Location: php/databases.php');
+if(@$_REQUEST['db']){
+    if(! $system->init(@$_REQUEST['db']) ){
+        //@todo - redirect to error page
+        print_r($system->getError(),true);
         exit();
     }
+}else{
+    header('Location: php/databases.php');
+    exit();
+}
 ?>
 <html>
     <head>
@@ -56,15 +56,15 @@
 
         <script type="text/javascript" src="editing.js"></script>
 
-        <script type="text/javascript" src="../js/recordset.js"></script>
-        <script type="text/javascript" src="../js/utils.js"></script>
-        <script type="text/javascript" src="../js/hapi.js"></script>
+        <script type="text/javascript" src="../core/recordset.js"></script>
+        <script type="text/javascript" src="../core/utils.js"></script>
+        <script type="text/javascript" src="../core/hapi.js"></script>
 
         <script type="text/javascript">
             <?php
-                //@ todo - load this stuff in hEditing
-                print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 0) ).";\n";
-                print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
+            //@ todo - load this stuff in hEditing
+            print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 0) ).";\n";
+            print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
             ?>
 
             var editing;

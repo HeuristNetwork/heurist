@@ -63,7 +63,7 @@ $.widget( "heurist.search", {
 
 
         /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js
-        $.getScript(top.HAPI4.basePathV4+'js/search_incremental.js', function(){ that._create(); } );
+        $.getScript(top.HAPI4.basePathV4+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
         this.element.css({'height':'6em', 'min-width':'1100px'}).addClass('ui-heurist-header1');

@@ -77,9 +77,9 @@ function errorOut($msg){
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
             <script type="text/javascript" src="../../../localization.js"></script>
-            <script type="text/javascript" src="../../../js/utils.js"></script>
-            <script type="text/javascript" src="../../../js/utils_msg.js"></script>
-            <script type="text/javascript" src="../../../js/hapi.js"></script>
+            <script type="text/javascript" src="../../../hclient/core/utils.js"></script>
+            <script type="text/javascript" src="../../../hclient/core/utils_msg.js"></script>
+            <script type="text/javascript" src="../../../hclient/core/hapi.js"></script>
 
             <script type="text/javascript" src="../../../apps/profile/profile_edit.js"></script>
 

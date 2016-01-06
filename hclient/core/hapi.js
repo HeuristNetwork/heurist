@@ -67,7 +67,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         if(!(typeof regional === 'undefined')){
             _regional = regional;
             /*todo
-            $.getScript(that.basePathV4+'js/localization.js', function() {
+            $.getScript(that.basePathV4+'hclient/core/localization.js', function() {
             _regional = regional;
             });
             */

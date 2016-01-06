@@ -1,43 +1,43 @@
 <?php
 
-    /**
-    * NOT USED - the idea was to retieve related records dynamically with the help of ruleBuilder widget
-    *
-    *
-    * Standalone search for related records. It may be used separately or wihin widget in iframe (for example in recordListExt )
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2015 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* NOT USED - the idea was to retieve related records dynamically with the help of ruleBuilder widget
+*
+*
+* Standalone search for related records. It may be used separately or wihin widget in iframe (for example in recordListExt )
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2015 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    require_once(dirname(__FILE__)."/../php/System.php");
-    require_once(dirname(__FILE__).'/../php/common/db_structure.php');
+require_once(dirname(__FILE__)."/../php/System.php");
+require_once(dirname(__FILE__).'/../php/common/db_structure.php');
 
-    $system = new System();
+$system = new System();
 
-    if(@$_REQUEST['db']){
-        if(! $system->init(@$_REQUEST['db']) ){
-            //@todo - redirect to error page
-            print_r($system->getError(),true);
-            exit();
-        }
-    }else{
-        header('Location: /../php/databases.php');
+if(@$_REQUEST['db']){
+    if(! $system->init(@$_REQUEST['db']) ){
+        //@todo - redirect to error page
+        print_r($system->getError(),true);
         exit();
     }
+}else{
+    header('Location: /../php/databases.php');
+    exit();
+}
 ?>
 <html>
     <head>
@@ -54,20 +54,20 @@
         <!-- script type="text/javascript" src="../apps/search.js"></script>
         <script type="text/javascript" src="relatedRecords.js"></script-->
 
-        <script type="text/javascript" src="../js/recordset.js"></script>
-        <script type="text/javascript" src="../js/utils.js"></script>
-        <script type="text/javascript" src="../js/hapi.js"></script>
+        <script type="text/javascript" src="../core/recordset.js"></script>
+        <script type="text/javascript" src="../core/utils.js"></script>
+        <script type="text/javascript" src="../core/hapi.js"></script>
 
         <script type="text/javascript" src="../apps/search/ruleBuilder.js"></script>
         <script type="text/javascript" src="../apps/search/resultList.js"></script>
 
         <script type="text/javascript">
             if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){
-            <?php
+                <?php
                 //fill database definitions
                 print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
                 print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
-            ?>
+                ?>
             }
 
             var relatedRecords, ruleBuilder;
@@ -76,33 +76,33 @@
 
             function onInit(success) //callback function of hAPI initialization
             {
-                        if(success)  //system is inited
-                        {
-                            if(!top.HR){
-                                var prefs = top.HAPI4.get_prefs();
-                                //loads localization
-                                top.HR = window.HAPI4.setLocale(prefs['layout_language']);
-                            }
+                if(success)  //system is inited
+                {
+                    if(!top.HR){
+                        var prefs = top.HAPI4.get_prefs();
+                        //loads localization
+                        top.HR = window.HAPI4.setLocale(prefs['layout_language']);
+                    }
 
-                            //init toolbar buttons
-                            $('#btn_add_level1').button().on('click', 1, addRuleBuilder);
-                            $('#btn_add_level2').button().button("disable").on('click', 2, addRuleBuilder);
-                            $('#btn_add_level3').button().button("disable").on('click', 3, addRuleBuilder);
+                    //init toolbar buttons
+                    $('#btn_add_level1').button().on('click', 1, addRuleBuilder);
+                    $('#btn_add_level2').button().button("disable").on('click', 2, addRuleBuilder);
+                    $('#btn_add_level3').button().button("disable").on('click', 3, addRuleBuilder);
 
 
-                            /*
-                            ruleBuilder = $("<div>").appendTo($("body"));
-                            var options = {};
-                            //add rule sets builder
-                            ruleBuilder.ruleBuilder( options );
-                            */
+                    /*
+                    ruleBuilder = $("<div>").appendTo($("body"));
+                    var options = {};
+                    //add rule sets builder
+                    ruleBuilder.ruleBuilder( options );
+                    */
 
-                            //add record list widget
-                            /*options = { showmenu: false };
-                            var $container = $("<div>").appendTo($("body"));
-                            $container.resultList( options );*/
+                    //add record list widget
+                    /*options = { showmenu: false };
+                    var $container = $("<div>").appendTo($("body"));
+                    $container.resultList( options );*/
 
-                        }
+                }
             }
 
             function addRuleBuilder(event){
@@ -168,8 +168,8 @@
             function updateRuleBuilder(rectypes, query_request){
                 /*
                 if(ruleBuilder && rectypes){
-                    ruleBuilder.ruleBuilder('option', 'recordtypes', rectypes );
-                    ruleBuilder.ruleBuilder('option', 'query_request', query_request );
+                ruleBuilder.ruleBuilder('option', 'recordtypes', rectypes );
+                ruleBuilder.ruleBuilder('option', 'query_request', query_request );
                 }
                 */
             }

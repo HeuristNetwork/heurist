@@ -48,9 +48,9 @@
         <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
 
-        <script type="text/javascript" src="../js/recordset.js"></script>
-        <script type="text/javascript" src="../js/utils.js"></script>
-        <script type="text/javascript" src="../js/hapi.js"></script>
+        <script type="text/javascript" src="../core/recordset.js"></script>
+        <script type="text/javascript" src="../core/utils.js"></script>
+        <script type="text/javascript" src="../core/hapi.js"></script>
 
         <script type="text/javascript" src="../apps/search/queryBuilder.js"></script>
 
@@ -81,13 +81,13 @@
     <body style="overflow:hidden">
         <div style="height:100%">
             <div style="position:absolute;width:99%;top:0" class="rulebuilder">
-                
-                
+
+
                 <div style="width:330px;font-weight:bold">Search for</div>
                 <div style="width:195px;font-weight:bold">Field</div>
                 <div style="width:195px;font-weight:bold">Compare/Relationship Type</div>
                 <div style="font-weight:bold">Value</div>
-                
+
             </div>
 
             <div style="position:absolute;width:99%;top:2em;bottom:4em;overflow-y:auto" id="level1">
