@@ -35,7 +35,7 @@
 * - db_script()  - see utils_db_load_script.php
 */
 
-require_once(dirname(__FILE__).'/../../php/common/utils_db_load_script.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/utils_db_load_script.php');
 
 function server_connect($verbose = true){
 

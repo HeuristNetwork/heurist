@@ -20,8 +20,8 @@
 */
 
 
-require_once(dirname(__FILE__)."/../php/System.php");
-require_once(dirname(__FILE__).'/../php/common/db_structure.php');
+require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once(dirname(__FILE__).'/../../hserver/common/db_structure.php');
 
 $system = new System();
 
@@ -41,18 +41,18 @@ if(@$_REQUEST['db']){
         <title><?=HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../style.css">
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css"> <!-- Ian 6/1/16 changed from style.css which does not exist in / -->
 
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
         <!-- @todo load this 4 scripts dynamically -->
-        <script type="text/javascript" src="../apps/search/search.js"></script>
-        <!-- script type="text/javascript" src="../apps/rec_list.js"></script -->
-        <script type="text/javascript" src="../apps/editing/rec_search.js"></script>
-        <script type="text/javascript" src="../apps/editing/rec_relation.js"></script>
-        <script type="text/javascript" src="../apps/editing/editing_input.js"></script>
+        <script type="text/javascript" src="../../apps/search/search.js"></script>
+        <!-- script type="text/javascript" src="../../apps/rec_list.js"></script -->
+        <script type="text/javascript" src="../../apps/editing/rec_search.js"></script>
+        <script type="text/javascript" src="../../apps/editing/rec_relation.js"></script>
+        <script type="text/javascript" src="../../apps/editing/editing_input.js"></script>
 
         <script type="text/javascript" src="editing.js"></script>
 

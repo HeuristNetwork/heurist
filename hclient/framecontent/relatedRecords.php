@@ -23,8 +23,8 @@
 */
 
 
-require_once(dirname(__FILE__)."/../php/System.php");
-require_once(dirname(__FILE__).'/../php/common/db_structure.php');
+require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 
 $system = new System();
 
@@ -35,7 +35,7 @@ if(@$_REQUEST['db']){
         exit();
     }
 }else{
-    header('Location: /../php/databases.php');
+    header('Location: /../../hserver/databases.php');
     exit();
 }
 ?>
@@ -44,22 +44,22 @@ if(@$_REQUEST['db']){
         <title><?=HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-1.10.2/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
 
         <!-- @todo load this 4 scripts dynamically -->
-        <!-- script type="text/javascript" src="../apps/search.js"></script>
+        <!-- script type="text/javascript" src="../../apps/search.js"></script>
         <script type="text/javascript" src="relatedRecords.js"></script-->
 
         <script type="text/javascript" src="../core/recordset.js"></script>
         <script type="text/javascript" src="../core/utils.js"></script>
         <script type="text/javascript" src="../core/hapi.js"></script>
 
-        <script type="text/javascript" src="../apps/search/ruleBuilder.js"></script>
-        <script type="text/javascript" src="../apps/search/resultList.js"></script>
+        <script type="text/javascript" src="../../apps/search/ruleBuilder.js"></script>
+        <script type="text/javascript" src="../../apps/search/resultList.js"></script>
 
         <script type="text/javascript">
             if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){

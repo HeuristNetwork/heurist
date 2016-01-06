@@ -22,9 +22,9 @@
 */
 
     require_once (dirname(__FILE__).'/../../php/System.php');
-    require_once (dirname(__FILE__).'/../../php/common/db_recsearch.php');
-    require_once (dirname(__FILE__).'/../../php/common/db_structure.php');
-    require_once (dirname(__FILE__).'/../../php/common/utils_db.php');
+    require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+    require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+    require_once (dirname(__FILE__).'/../../hserver/dbaccess/utils_db.php');
 
     $response = array();
 

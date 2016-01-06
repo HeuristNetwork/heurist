@@ -1,14 +1,14 @@
 <?php
 
-    /** 
-    * shorten path to access files - redirects to php/common/file_download.php
-    * 
+    /**
+    * shorten path to access files - redirects to hserver/dbaccess/file_download.php
+    *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2015 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0      
+    * @version     4.0
     */
 
     /*
@@ -19,6 +19,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    header( 'Location: php/common/file_download.php?'.$_SERVER['QUERY_STRING'] );
-    
+    header( 'Location: hserver/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
+
 ?>

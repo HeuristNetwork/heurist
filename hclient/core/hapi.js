@@ -54,7 +54,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         var installDir = top.location.pathname.replace(/(((\?|admin|applications|apps|common|context_help|export|ext|external|hapi|hclient|hserver|help|import|records|redirects|search|viewers)\/.*)|(index.*))/, ""); // Upddate in 3 places if changed
         that.basePathV4 = top.location.protocol + '//'+top.location.host + installDir;
         // TODO: This is actually a proto URL rather than a base URL. Rename.
-        that.iconBaseURL= that.basePathV4 + 'php/common/rt_icon.php?db='+_database+'&id=';
+        that.iconBaseURL= that.basePathV4 + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
         // TODO: why is this todo? Explain or delete
         //top.location.protocol + '//'+top.location.host+'/HEURIST_FILESTORE/'+_database+'/rectype-icons/';      //todo!!!!
         that.database = _database;

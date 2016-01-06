@@ -21,42 +21,42 @@
 
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
-<script type="text/javascript" src="../ext/layout/jquery.layout-latest.js"></script>
+<script type="text/javascript" src="../../ext/layout/jquery.layout-latest.js"></script>
 
 <!-- Timemap -->
 <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
-<script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
-<!-- script type="text/javascript" src="../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
+<script type="text/javascript" src="../../ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
+<!-- script type="text/javascript" src="../../ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
 <script type="text/javascript" src="<?php echo HEURIST_BASE_URL; ?>common/js/temporalObjectLibrary.js"></script>
 <!-- timeline -->
-<script type="text/javascript" src="../ext/vis/dist/vis.js"></script>
-<link rel="stylesheet" type="text/css" href="../ext/vis/dist/vis.css" />
+<script type="text/javascript" src="../../ext/vis/dist/vis.js"></script>
+<link rel="stylesheet" type="text/css" href="../../ext/vis/dist/vis.css" />
 
-<script type="text/javascript" src="../ext/timemap.js/2.0.1/src/timemap2.js"></script>
-<script type="text/javascript" src="../ext/timemap.js/2.0.1/src/param.js"></script>
-<script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
-<script type="text/javascript" src="../ext/timemap.js/2.0.1/src/loaders/kml.js"></script>
-<script type="text/javascript" src="../ext/timemap.js/2.0.1/src/manipulation2.js"></script>
+<script type="text/javascript" src="../../ext/timemap.js/2.0.1/src/timemap2.js"></script>
+<script type="text/javascript" src="../../ext/timemap.js/2.0.1/src/param.js"></script>
+<script type="text/javascript" src="../../ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
+<script type="text/javascript" src="../../ext/timemap.js/2.0.1/src/loaders/kml.js"></script>
+<script type="text/javascript" src="../../ext/timemap.js/2.0.1/src/manipulation2.js"></script>
 
 <!-- Shape file converting -->
-<script type="text/javascript" src="../ext/shapefile/stream.js"></script>
-<script type="text/javascript" src="../ext/shapefile/shapefile.js"></script>
-<script type="text/javascript" src="../ext/shapefile/dbf.js"></script>
+<script type="text/javascript" src="../../ext/shapefile/stream.js"></script>
+<script type="text/javascript" src="../../ext/shapefile/shapefile.js"></script>
+<script type="text/javascript" src="../../ext/shapefile/dbf.js"></script>
 
-<script type="text/javascript" src="../ext/js/jqColorPicker.min.js"></script>
+<script type="text/javascript" src="../../ext/js/jqColorPicker.min.js"></script>
 
 <!-- Mapping -->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
 <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
 <script type="text/javascript" src="map.js"></script>
 <script type="text/javascript" src="map_overlay.js"></script>
-<script type="text/javascript" src="../apps/bubble.js"></script>
+<script type="text/javascript" src="../../apps/bubble.js"></script>
 
 
 <style>
-    .ui-map-document { background-image: url('../hclient/assets/mapdocument.png') !important;}
-    .ui-map-layer { background-image: url('../hclient/assets/maplayer.png') !important;}
+    .ui-map-document { background-image: url('../../hclient/assets/mapdocument.png') !important;}
+    .ui-map-layer { background-image: url('../../hclient/assets/maplayer.png') !important;}
 
     /*
     .vis-item-overflow{
@@ -219,7 +219,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 $helper.dialog( "open" );
             }
         });
-        $( "#helper" ).load('../context_help/mapping_overview.html #content');
+        $( "#helper" ).load('../../context_help/mapping_overview.html #content');
         //$( "#helper" ).find('p').css('padding','10px');
         $( "#helper" ).dialog({
             autoOpen: false, //(top.HAPI4.get_prefs('help_on')=='1'),

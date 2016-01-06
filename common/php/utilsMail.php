@@ -16,7 +16,7 @@
 /**
 * utilsMail.php - main email sending function
 *
-*  TODO: Rationalise: THIS FILE IS DUPLICATED IN /php/common
+*  TODO: Rationalise: THIS FILE IS DUPLICATED IN /hserver/dbaccess
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once (dirname(__FILE__).'/../php/System.php');
+require_once (dirname(__FILE__).'/../../hserver/System.php');
 
 $system = new System();
 if(!$system->init(@$_REQUEST['db']) ){
@@ -102,15 +102,15 @@ if(!$system->init(@$_REQUEST['db']) ){
         </style>
 
         <!-- jQuery -->
-        <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
 
         <!-- D3 -->
-        <script type="text/javascript" src="../ext/d3/d3.js"></script>
-        <script type="text/javascript" src="../ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="../../ext/d3/d3.js"></script>
+        <script type="text/javascript" src="../../ext/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="../ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="../ext/colpick/colpick.css">
+        <script type="text/javascript" src="../../ext/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../ext/colpick/colpick.css">
 
         <!-- Visualize plugin -->
         <script type="text/javascript" src="visualize/settings.js"></script>
@@ -181,7 +181,7 @@ if(!$system->init(@$_REQUEST['db']) ){
 
                             // Image
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../hclient/assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='../assets/16x16.gif' title='".$title. "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -225,7 +225,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                             // Image
                             $title = $row["title"];
                             $rectypeImg = "style='background-image:url(".HEURIST_ICON_URL.$rt_ID.".png)'";
-                            $img = "<img src='../hclient/assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
+                            $img = "<img src='../assets/16x16.gif' title='".htmlspecialchars($rectypeTitle). "' ".$rectypeImg." class='rft' />";
                             echo "<td align='center'>$img</td>";
 
                             // Type
@@ -267,7 +267,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                 $("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL
-                var url = "../hserver/controller/rectype_relations.php" + window.location.search;
+                var url = "../../hserver/controller/rectype_relations.php" + window.location.search;
                 console.log("Loading data from: " + url);
                 d3.json(url, function(error, json) {
                     // Error check

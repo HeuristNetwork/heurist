@@ -26,7 +26,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once(dirname(__FILE__).'/../php/common/utils_mail.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/utils_mail.php');
 
 // POST request
 if(isset($_POST['data'])) {
@@ -62,9 +62,9 @@ if(isset($_POST['data'])) {
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Bulk email sender</title>
 
-  <script type="text/javascript" src="../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-  <link rel="stylesheet" type="text/css" href="../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
-  <link rel="stylesheet" type="text/css" href="../h4styles.css">
+  <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css" />
+  <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 
   <style>
     #btn_redo {

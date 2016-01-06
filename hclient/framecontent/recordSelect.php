@@ -2,7 +2,7 @@
 
     /**
     * Search and select record. It is used in relationship editor and pointer selector
-    * 
+    *
     * It is combination of generic record search by title (maybe it should be separated into widget) abd resultList widget
     *
     * @package     Heurist academic knowledge management system
@@ -24,8 +24,8 @@
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
         <script type="text/javascript" src="recordSelect.js"></script>
-        <script type="text/javascript" src="../apps/viewers/resultList.js"></script>
-        
+        <script type="text/javascript" src="../../apps/viewers/resultList.js"></script>
+
         <script type="text/javascript">
             // Callback function on map initialization
             function onPageInit(success){
@@ -38,11 +38,11 @@ require_once(dirname(__FILE__)."/initPage.php");
 
     <!-- HTML -->
     <body>
-    
+
         <div style="height: 30px; padding:0.2em">
             <div class="div-table-cell">
                 <label>Title:</label>
-                <input id="input_search" class="text ui-widget-content ui-corner-all" 
+                <input id="input_search" class="text ui-widget-content ui-corner-all"
                         style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
             </div>
             <div class="div-table-cell" style="display: none;">
@@ -55,12 +55,12 @@ require_once(dirname(__FILE__)."/initPage.php");
                 in
                 <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
             </div>
-            
+
             <div style="padding-left: 1em;">
                 <div id="btn_add_record"></div>
             </div>
         </div>
         <div id="recordList" style="position: absolute;top:40px;bottom:1px;width:99%">
-        </div>    
+        </div>
     </body>
 </html>
