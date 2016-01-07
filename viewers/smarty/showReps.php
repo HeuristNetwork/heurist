@@ -132,8 +132,7 @@ function executeSmartyTemplate($params){
         $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
         $result = loadRemoteURLContent($url);
         $qresult = json_decode($result, true);
-
-
+        
     }else{
         $qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
     }

@@ -33,8 +33,6 @@ $.widget( "heurist.search", {
 
         btn_visible_dbstructure: false, //show get db strucuture button
 
-        islinkmode: false, //show buttons or links below search input
-
         is_progress_visible:false, //show progress bar while searching
 
 
@@ -322,13 +320,33 @@ $.widget( "heurist.search", {
             }
         });
 
+        // Save search popup button
+        this.btn_search_save = $( "<button>", {
+            text: top.HR("Save Filter"),
+            title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
+        })
+        .css({'vertical-align':'top', 'margin-left':'1em'})
+        .appendTo( this.div_search_as_user )
+        .addClass('ui-heurist-btn-header1')
+        .button({icons: {
+            primary: "ui-icon-disk"
+        }});
+        
+        this._on( this.btn_search_save, {  click: function(){
+                    var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+                    if(app && app.widget){
+                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                    }
+                } });
+
+        
 
         // Add record button
         if(this.options.btn_visible_newrecord){
 
             this.div_add_record = $('<div>')
                 .addClass('div-table-cell  logged-in-only')
-                .css('padding-left','1em')
+                .css('padding-left','4em')
                 .appendTo( this.div_search );
 
             this.btn_add_record = $( "<button>", {
@@ -345,63 +363,7 @@ $.widget( "heurist.search", {
 
         } // add record button
 
-
-
-        //
-        // search function links below filter expression field
-        // TODO: the search function links are no longer below the filter field - ? does this section do anything?
-        //
-        if(this.options.islinkmode){
-
-            this.div_search_links = $('<div>').css({'text-align':'right','width':sz_input,'padding-top':'0.3em'}) //, 'width':'30%', 'max-width':'500px' })
-                    .appendTo(  this.div_search_input );
-
-            var link = $('<a>',{
-                text: 'Quick', href:'#'
-            }).appendTo(this.div_search_links);
-            this._on( link, {  click: this.showSearchAssistant });
-
-            link = $('<a>',{
-                text: 'Advanced', href:'#'
-            }).appendTo(this.div_search_links);
-            this._on( link, {  click: this._showAdvancedAssistant });
-
-            $('<a>',{
-                text: 'Syntax',
-                href:  'context_help/advanced_search.html', target:'_blank'
-            }).appendTo(this.div_search_links);
-
-            link = $('<a>',{ text: 'Rule Set', href:'#' })
-                    .addClass('logged-in-only')
-                    .appendTo(this.div_search_links);
-            this._on( link, {  click: function(){
-                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-                if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method
-                }
-            }});
-
-            link = $('<a>',{ text: 'Save As ', href:'#' })
-                   .addClass('logged-in-only')
-                   .appendTo(this.div_search_links);
-            this._on( link, {  click: function(){
-                var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-                if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                }
-            }});
-
-            //set color of links as text in button
-            this.div_search_links.find('a').css({ 'text-decoration':'none', 'font-size':'0.9em',
-                'padding-right':'1em' ,'color':this.btn_search_as_user.css('color')}); // 'color':  this.div_search_links.find('.ui-widget-content').css('color') });
-
-        } // link buttons under filter expression field
-
-        else
-
-        { // Quick search assistant = dropdown search builder
-
-                this.div_buttons = $('<div>')
+        this.div_buttons = $('<div>')
                     .addClass('div-table-cell logged-in-only')
                     .insertBefore( this.div_search_stop );
 
@@ -409,24 +371,9 @@ $.widget( "heurist.search", {
                 var link = $('<a>',{href:'#'})
                 .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/magicwand.png" width="20" title="'+
                         top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
-                .css({'padding-right':'1em','padding-left':'1em'})
+                .css({'padding-right':'0.5em'})
                 .appendTo( this.div_buttons );
                 this._on( link, {  click: this.showSearchAssistant });
-
-                // Save search popup button
-                link = $('<a>',{href:'#'})
-                .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/savefloppy.png" width="20" title="'+
-                        top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')+'" />')
-                .css('padding-right','1em')
-                .appendTo( this.div_buttons );
-                this._on( link, {  click: function(){
-                    var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-                    if(app && app.widget){
-                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                    }
-                } });
-
-        } // quick search assistant
 
 
         this.search_assistant = null;
