@@ -279,8 +279,13 @@ function errorOut($msg){
                         var reginfo = registeredDBs[bd_reg_idx];
 
                         regurl = reginfo[1];
+                        // TODO: Temporary fudge 8/1/16 to point at h4-ij pending publish of new h4 without the 'migrated' path
                         if(regurl=='http://heurist.sydney.edu.au/h3/'){
-                            regurl = 'http://heurist.sydney.edu.au/h4/';
+                            regurl = 'http://heurist.sydney.edu.au/h4-ij/';
+                        }
+                        // TODO: Temporary fudge 8/1/16 to point at h4-ij pending publish of new h4 without the 'migrated' path
+                        if(regurl=='http://heurist.sydney.edu.au/h4/'){
+                            regurl = 'http://heurist.sydney.edu.au/h4-ij/';
                         }
 
                         //url + script + db
