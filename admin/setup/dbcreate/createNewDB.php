@@ -81,7 +81,7 @@ function errorOut($msg){
             <script type="text/javascript" src="../../../hclient/core/utils_msg.js"></script>
             <script type="text/javascript" src="../../../hclient/core/hapi.js"></script>
 
-            <script type="text/javascript" src="../../../apps/profile/profile_edit.js"></script>
+            <script type="text/javascript" src="../../../hclient/widgets/profile/profile_edit.js"></script>
 
             <script type="text/javascript">
                 $(document).ready(function() {
@@ -146,7 +146,7 @@ function errorOut($msg){
 
 
                     }else{
-                        $.getScript(top.HAPI4.basePathV4+'apps/profile/profile_edit.js', function() {
+                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/profile/profile_edit.js', function() {
                             if($.isFunction($('body').profile_edit)){
                                 doRegister();
                             }else{
