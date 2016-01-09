@@ -225,8 +225,13 @@ $startToken = ">>StartData>>"; // also defined in getDBStructureAsSQL.php
 
 if(!strpos($data, $startToken)){
 
-    die("<br>The data returned from the structure script on the selected database ( <a href=$source_url>$source_url</a> ) did not correspond with the expected format. ".
+    if($isNewDB){
+        die("<br>The data in Core Definitions file ( $definitions_filename ) did not correspond with the expected format. ".
+        "<p/>Please advise Heurist team. The first few lines from this line are shown below :<xmp>".substr($data,1,2000)."</xmp>");
+    }else{
+        die("<br>The data returned from the structure script on the selected database ( <a href=$source_url>$source_url</a> ) did not correspond with the expected format. ".
         "<p/>Please advise Heurist team. The first few lines returned are shown below :<xmp>".substr($data,1,2000)."</xmp>");
+    }
 }
 
 $splittedData = explode($startToken, $data);
