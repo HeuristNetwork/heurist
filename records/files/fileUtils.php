@@ -44,9 +44,10 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     }
 
     if(strpos($url, HEURIST_SERVER_URL)===0){
-        $url= str_replace(HEURIST_SERVER_URL,'http://localhost',$url);
+        return loadRemoteURLviaSocket($url);
+        //$url= str_replace(HEURIST_SERVER_URL,'localhost',$url);
     }
-
+    
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
@@ -249,5 +250,53 @@ function delFolderTree($dir, $rmdir) {
         return true;
     }
 }
+
+function loadRemoteURLviaSocket($url) {
+    
+    $hostname = '127.0.0.1'; //HEURIST_DOMAIN;
+    $url = str_replace(HEURIST_DOMAIN, $hostname, $url);
+
+    $headers[] = "GET ".$url." HTTP/1.1";
+    $headers[] = "Host: ".$hostname;
+    $headers[] = "Accept-language: en";
+
+    $cookies = array();
+    foreach ($_COOKIE as $id=>$val){
+        array_push($cookies, $id.'='.$val );
+    }
+    $headers[] = "Cookie: ".implode($cookies,';').';';
+    $headers[] = "";
+
+    $CRLF = "\r\n";
+    $remote = fsockopen($hostname, 80, $errno, $errstr, 5);
+    if($remote===false){
+       $result = '[]';//array();
+    }else{
+        // a pinch of error handling here
+        fwrite($remote, implode($CRLF, $headers).$CRLF);
+        $response = '';
+        while ( ! feof($remote))
+        {
+            // Get 100K from buffer
+            $response .= fread($remote, 102400);
+        }
+        fclose($remote);
+
+
+        // split the headers and the body
+        $response2 = preg_split("|(?:\r?\n){2}|m", $response, 2);
+        $response2 = (isset($response2[1]))?$response2[1]:"";
+
+        if(strpos($response2,$CRLF)>0){
+            $response2 = explode($CRLF, $response2);
+            $response2 = $response2[1];
+        }
+
+        $result = $response2; //json_decode($response2, true);
+    }
+    
+    return $result;
+}
+
 
 ?>

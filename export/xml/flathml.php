@@ -1402,49 +1402,9 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     $result = loadRemoteURLContent($url);
     $result = json_decode($result, true);
     */
-
-    $hostname = '127.0.0.1'; //HEURIST_DOMAIN;
-    $url = str_replace(HEURIST_DOMAIN, $hostname, $url);
-
-    $headers[] = "GET ".$url." HTTP/1.1";
-    $headers[] = "Host: ".$hostname;
-    $headers[] = "Accept-language: en";
-
-    $cookies = array();
-    foreach ($_COOKIE as $id=>$val){
-        array_push($cookies, $id.'='.$val );
-    }
-    $headers[] = "Cookie: ".implode($cookies,';').';';
-    $headers[] = "";
-
-    $CRLF = "\r\n";
-    $remote = fsockopen($hostname, 80, $errno, $errstr, 5);
-    if($remote===false){
-       $result = array();
-    }else{
-        // a pinch of error handling here
-        fwrite($remote, implode($CRLF, $headers).$CRLF);
-        $response = '';
-        while ( ! feof($remote))
-        {
-            // Get 100K from buffer
-            $response .= fread($remote, 102400);
-        }
-        fclose($remote);
-
-
-        // split the headers and the body
-        $response2 = preg_split("|(?:\r?\n){2}|m", $response, 2);
-        $response2 = (isset($response2[1]))?$response2[1]:"";
-
-        if(strpos($response2,$CRLF)>0){
-            $response2 = explode($CRLF, $response2);
-            $response2 = $response2[1];
-        }
-
-        $result = json_decode($response2, true);
-    }
-
+    $result = loadRemoteURLContent($url, false);
+    $result = json_decode($result, true);
+    
     /* it requires pecl http
     $r = new HttpRequest($url, HttpRequest::METH_GET);
     $r->addCookies($_COOKIE);
