@@ -1997,6 +1997,9 @@ Number.prototype.toRad = function() {
 Number.prototype.toDeg = function() {
   return this * 180 / Math.PI;
 }
+//
+// get point within given radius
+//
 function destinationPoint(lat1, lon1, brng, dist) {
   dist = dist / 6371000;
   brng = brng.toRad();
@@ -2047,7 +2050,7 @@ function applyManualEntry(){
 
   var islng = true;
   for (k=0; k<arc.length; k++){
-    if(k==2 && type=="c" && arc[k].indexOf("r=")==0){
+    if(k==2 && type=="c" && arc[k].indexOf("r=")==0){   //circle
       var d = Number(arc[k].substr(2));
       if(isNaN(d)){
         alert(arc[k]+" is wrong radius value");

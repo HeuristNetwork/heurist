@@ -23,7 +23,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing,geometry"></script>
 
         <script type="text/javascript" src="mapDraw.js"></script>
 
@@ -44,7 +44,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 // init helper (see utils.js)
                 top.HEURIST4.util.initHelper( $('#btn_help'), 
                             'Mapping Drawing Overview', 
-                            '../context_help/mapping_overview.html #content');
+                            '../../context_help/mapping_drawing.html #content');
 
             } //onPageInit
 
@@ -54,7 +54,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 position: absolute;
                 top: 30px;
                 left: 0px;
-                right: 135px;
+                right: 200px;
                 bottom: 0px;
                 background-color: #ffffff;
             }  
@@ -66,21 +66,6 @@ require_once(dirname(__FILE__)."/initPage.php");
                 float: left;
                 cursor: pointer;
             }      
-            #rightpanel{
-                position: absolute;
-                top: 30px;
-                width: 135px;
-                right: 0px;
-                bottom: 0px;
-            }
-            #coords1 {
-                padding: 5px;
-                font-weight: normal;
-                width:130px;
-                height:290px;
-                border:1px solid #000000;
-                font-size:0.9em;
-            }
             
           .delete-menu {
             position: absolute;
@@ -98,7 +83,32 @@ require_once(dirname(__FILE__)."/initPage.php");
           }
           .delete-menu:hover {
             background: #eee;
-          }            
+          }         
+          
+            #rightpanel{
+                text-align:center;
+                position: absolute;
+                top: 30px;
+                width: 200px;
+                right: 0px;
+                bottom: 0px;
+            }
+            #rightpanel > div{
+                width:100%;
+                padding:0.2em;
+            }   
+            #rightpanel > div > button{
+                width:14em;
+            }   
+            #coords1 {
+                padding: 5px;
+                font-weight: normal;
+                width:190px;
+                height:290px;
+                border:1px solid #000000;
+                font-size:0.9em;
+                text-align:left;
+            }
         </style>
 
     </head>
@@ -134,13 +144,43 @@ require_once(dirname(__FILE__)."/initPage.php");
             <div id="rightpanel">
 
                 <div id="color-palette"></div>
-                <button id="delete-button">Delete Selected</button>
-                <button id="delete-all-button">Clear Map</button>
-                 
-                <textarea id="coords1" cols="2" rows="2">
-                        Click on the map. The code for the shape you create will be presented here.
-                </textarea>
+                <div>
+                    <button id="delete-button">Delete Selected</button>
+                </div> 
+                <div>
+                    <button id="delete-all-button">Clear Map</button>
+                </div> 
+                <div>
+                    <textarea id="coords1" cols="2" rows="2">
+                        Click on the map. The code for the selected shape you create will be presented here.
+                    </textarea>
+                    <button id="apply-coords-button">Apply Coordinates</button>
+                </div> 
+                <div>
+                    <button id="load-geometry-button">Add Geometry</button>
+                </div> 
+                <div>
+                    <button id="get-geometry-button">Get Geometry</button>
+                </div> 
+                <div>
+                    <button id="save-button">Save</button>
+                </div> 
+                <div>
+                    <button id="cancel-button">Cancel</button>
+                </div>
             </div>            
+        </div>
+        
+        <div id="get-set-coordinates" style="display: none;">
+            <!--
+            
+            
+            -->
+            <div>
+                <label>Paste geo data in supported format (GeoJSON,.....)</label>
+            </div>
+            <textarea cols="" rows="" id="geodata-textarea"
+                style="position:absolute;top:2em;bottom:0;width:97%;resize:none"></textarea>
         </div>
 
     </body>

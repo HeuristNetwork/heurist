@@ -546,6 +546,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                     resizable: (options['no-resize']==true),
                     //draggable: false,
                     title: options["title"],
+                    buttons: options["buttons"],
                     close: function(event, ui){
 
                         //var element = popup.element.parentNode.removeChild(popup.element);

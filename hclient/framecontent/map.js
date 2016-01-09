@@ -181,14 +181,14 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 _updateLayout();   //show hide panels
 
-console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
+//console.log('add dataset '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+//console.log('map: '+_mapdata.mapenabled+'  time:'+_mapdata.timeenabled);
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 _reloadDataset( dataset_id );
 
 
-console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+//console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
 
@@ -198,7 +198,7 @@ console.log('ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) 
             //reload timeline content
             _loadVisTimeline();
 
-console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+//console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
                 top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
 

@@ -38,6 +38,7 @@ function hMappingDraw(_mapdiv_id) {
       var selectedColor;
       var colorButtons = {};
       var gmap;
+      var deleteMenu;
       var overlays = []; //all objects on map
       var geocoder = null;
       var map_viewpoints = []; //saved in user preferences (session) map viewpoints (bounds)
@@ -47,6 +48,7 @@ function hMappingDraw(_mapdiv_id) {
           if(selectedShape.type != google.maps.drawing.OverlayType.MARKER) selectedShape.setEditable(false);
           selectedShape = null;
         }
+        $('#coords1').val('');
       }
 
       function setSelection(shape) {
@@ -54,6 +56,7 @@ function hMappingDraw(_mapdiv_id) {
         selectedShape = shape;
         if(shape.type != google.maps.drawing.OverlayType.MARKER) shape.setEditable(true);
         selectColor(shape.get('fillColor') || shape.get('strokeColor'));
+        _fillCoordinates(shape);
       }
 
       function _deleteSelectedShape() {
@@ -65,19 +68,21 @@ function hMappingDraw(_mapdiv_id) {
               }
           }  
             
-            
           selectedShape.setMap(null);
-          selectedShape = null;
+          clearSelection();
         }
       }
 
       function _deleteAllShapes() {
+          clearSelection();
           while(overlays[0]){
             overlays.pop().setMap(null);
           }          
       }
       
-      //start color
+      //
+      // start color methods ------------------------------------------------------
+      //
       function selectColor(color) {
         selectedColor = color;
         for (var i = 0; i < colors.length; ++i) {
@@ -137,13 +142,128 @@ function hMappingDraw(_mapdiv_id) {
          }
          selectColor(colors[0]);
        }
-       //end color
-       
+      //
+      // END color methods ------------------------------------------------------
+      //
+    function _fillCoordinates(shape){
+        if(shape!=null){
+            sCoords = '';
+            if(shape.type==google.maps.drawing.OverlayType.POLYGON || 
+               shape.type==google.maps.drawing.OverlayType.POLYLINE) {
+                
+                processPoints(shape.getPath(), function(latLng){
+                    sCoords = sCoords+formatPnt(latLng)+'\n';
+                }, shape);
+            }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE){
+                
+                var bnd = shape.getBounds();
+                sCoords = formatPnt(bnd.getSouthWest()) + '\n' + formatPnt(bnd.getNorthEast());  
+                
+            }else if(shape.type==google.maps.drawing.OverlayType.CIRCLE){
+                
+                var radius = shape.getRadius();
+                if(radius>0)
+                    sCoords = formatPnt(shape.getCenter())+'\nr='+radius.toFixed(2);
+                
+            }else if(shape.type==google.maps.drawing.OverlayType.MARKER){
+
+                sCoords = formatPnt(shape.getPosition());
+                
+            }
+            $('#coords1').val(sCoords);
+        }
+    }
+    
+    function processPoints(geometry, callback, thisArg) {
+      if (geometry instanceof google.maps.LatLng) {
+        callback.call(thisArg, geometry);
+      } else if (geometry instanceof google.maps.Data.Point) {
+        callback.call(thisArg, geometry.get());
+      } else {
+        geometry.getArray().forEach(function(g) {
+          processPoints(g, callback, thisArg);
+        });
+      }
+    }    
+    
+    //
+    // on vertex edit
+    //
+    function _onPathComplete(shape) {
+
+        // complete functions
+        var thePath = shape.getPath();
+
+        google.maps.event.addListener(shape, 'rightclick', function(e) {
+            // Check if click was on a vertex control point
+            if (e.vertex == undefined) {
+                return;
+            }
+            deleteMenu.open(gmap, shape.getPath(), e.vertex);
+        });           
+
+        //fill coordinates on vertex edit
+        function __fillCoordinates() {
+            _fillCoordinates(shape);
+        }
+        google.maps.event.addListener(thePath, 'set_at', __fillCoordinates);
+        google.maps.event.addListener(thePath, 'insert_at', __fillCoordinates);
+        google.maps.event.addListener(thePath, 'remove_at', __fillCoordinates);
+
+        _fillCoordinates(shape);
+    } 
+    //
+    // on circle complete
+    //   
+    function _onCircleComplete(shape) {
+        google.maps.event.addListener(shape, 'radius_changed', function(){ _fillCoordinates(shape); });
+        google.maps.event.addListener(shape, 'center_changed', function(){ _fillCoordinates(shape); });
+        _fillCoordinates(shape);
+    }
+    //
+    //
+    //
+    function _onRectangleComplete(shape) {
+        google.maps.event.addListener(shape, 'bounds_changed', function(){ _fillCoordinates(shape); });
+        //google.maps.event.addListener(rectangle, 'dragend', __fillCoordinates);
+        _fillCoordinates(shape);
+    }
+    //
+    //
+    //
+    function _onMarkerAdded(newShape){
+        overlays.push(newShape);
+        google.maps.event.addListener(newShape, 'rightclick', function(e) {
+            deleteMenu.open(gmap, newShape, newShape.getPosition());
+        });                     
+        google.maps.event.addListener(newShape, 'click', function() {
+            setSelection(newShape);
+        });
+        google.maps.event.addListener(newShape, 'dragend', function(event) {
+            setSelection(newShape);
+        });
+    }
+    //
+    //
+    //
+    function _onNonMarkerAdded(newShape){
+            overlays.push(newShape);
+            drawingManager.setDrawingMode(null);
+            setSelection(newShape);
+            // Add an event listener that selects the newly-drawn shape when the user
+            // mouses down on it.
+            google.maps.event.addListener(newShape, 'click', function() {
+                setSelection(newShape);
+            });
+    }
 
     //
     // init map 
     //
     function _init(_mapdiv_id) {
+        
+        _initUIcontrols();
+        
         mapdiv_id = _mapdiv_id;
 
         map_viewpoints = top.HAPI4.get_prefs('map_viewpoints');
@@ -176,124 +296,53 @@ function hMappingDraw(_mapdiv_id) {
           rectangleOptions: polyOptions,
           circleOptions: polyOptions,
           polygonOptions: polyOptions,
-          map: map
+          map: gmap
         });
         
-        var deleteMenu = new DeleteMenu();
+        deleteMenu = new DeleteMenu();
                 
-        //for plygon and polyline
-        function _onPathComplete(shape) {
-
-          // complete functions
-          var thePath = shape.getPath();
-           
-          google.maps.event.addListener(shape, 'rightclick', function(e) {
-            // Check if click was on a vertex control point
-            if (e.vertex == undefined) {
-              return;
-            }
-            deleteMenu.open(map, shape.getPath(), e.vertex);
-          });           
-          
-          //fill coordinates        
-          function _fillCoordinated() {
-            $('#coords1').html(thePath.getArray().join(' '));  
-          }
-                    
-          google.maps.event.addListener(thePath, 'set_at', _fillCoordinated);
-          google.maps.event.addListener(thePath, 'insert_at', _fillCoordinated);
-          google.maps.event.addListener(thePath, 'remove_at', _fillCoordinated);
-          
-          _fillCoordinated();
-        }
-        
-        google.maps.event.addListener(drawingManager,'polygoncomplete',_onPathComplete);
-        google.maps.event.addListener(drawingManager,'polylinecomplete',_onPathComplete);
-        
-        google.maps.event.addListener(drawingManager, 'circlecomplete', function (circle) {
-            google.maps.event.addListener(circle, 'radius_changed', function () {
-                console.log('radius changed');
-            });
-            google.maps.event.addListener(circle, 'center_changed', function () {
-                console.log('radius changed');
-            });
-        });        
-        
+        google.maps.event.addListener(drawingManager, 'polygoncomplete',_onPathComplete);
+        google.maps.event.addListener(drawingManager, 'polylinecomplete',_onPathComplete);
+        google.maps.event.addListener(drawingManager, 'circlecomplete', _onCircleComplete);        
+        google.maps.event.addListener(drawingManager, 'rectanglecomplete', _onRectangleComplete);        
 
         google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
             var newShape = e.overlay;
             newShape.type = e.type;
             
-            overlays.push(newShape);
-                
           if (e.type != google.maps.drawing.OverlayType.MARKER) {
-              
                 // Switch back to non-drawing mode after drawing a shape.
-                drawingManager.setDrawingMode(null);
-
-           
-                // Add an event listener that selects the newly-drawn shape when the user
-                // mouses down on it.
-                google.maps.event.addListener(newShape, 'click', function() {
-                  setSelection(newShape);
-                });
-                setSelection(newShape);
-          }
-                
-          if (e.type == google.maps.drawing.OverlayType.RECTANGLE) {
-
-              
-                var bnd = newShape.getBounds();
-                
-                //bnd.getNorthEast();
-                //bnd.getSouthWest();
-              
-                $('#coords1').html(              
-                    bnd.toUrlValue()
-                );
-              
-          }else if (e.type == google.maps.drawing.OverlayType.CIRCLE) {
-              
-              
-          }else if (e.type == google.maps.drawing.OverlayType.MARKER) {
-
-                setSelection(newShape);
-                $('#coords1').html(              
-                newShape.getPosition().lng()+' '+newShape.getPosition().lat()
-                );
-                
-                
-              google.maps.event.addListener(newShape, 'rightclick', function(e) {
-                deleteMenu.open(map, newShape, newShape.getPosition());
-              });                     
+                _onNonMarkerAdded(newShape);
           }else{
-
+                _onMarkerAdded(newShape);
+                setSelection(newShape);
           }
-            
-          
-          
+          //google.maps.drawing.OverlayType.MARKER
         });
 
         // Clear the current selection when the drawing mode is changed, or when the
         // map is clicked.
-        google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection); //clearSelection);
-        google.maps.event.addListener(map, 'click', clearSelection);
-        google.maps.event.addListener(map, 'mousemove', function (event) {
+        google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection); 
+        google.maps.event.addListener(gmap, 'click', clearSelection);
+        google.maps.event.addListener(gmap, 'mousemove', function (event) {
                     var pnt = event.latLng;
-                    var lat = pnt.lat();
-                    lat = lat.toFixed(4);
-                    var lng = pnt.lng();
-                    lng = lng.toFixed(4);
-                    //console.log("Latitude: " + lat + "  Longitude: " + lng);
-                    $('#coords2').html(lat + " " + lng);               
+                    $('#coords2').html(formatPnt(pnt),4);
           });        
         
-        _initUIcontrols();
-
         buildColorPalette();
     } 
     
-    
+    //
+    //
+    //
+    function formatPnt(pnt, d){
+            if(isNaN(d)) d = 7;
+            var lat = pnt.lat();
+            lat = lat.toFixed(d);
+            var lng = pnt.lng();
+            lng = lng.toFixed(d);
+            return lat + " " + lng;               
+    }
     //
     //
     //
@@ -324,11 +373,482 @@ function hMappingDraw(_mapdiv_id) {
         });        
     }
     
+    function _zoomToSelection() {
+        
+        var bounds = null;
+        var shape = selectedShape;
+        if(shape!=null){
+            if(shape.type==google.maps.drawing.OverlayType.POLYGON || 
+               shape.type==google.maps.drawing.OverlayType.POLYLINE) {
+
+                    bounds = new google.maps.LatLngBounds();
+                    //map.data.forEach(function(feature) {
+                    //    processPoints(feature.getGeometry(), bounds.extend, bounds);
+                    //});
+                    processPoints(shape.getPath(), bounds.extend, bounds);
+                    
+            }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE ||
+                     shape.type==google.maps.drawing.OverlayType.CIRCLE){
+                
+                    bounds = shape.getBounds();
+                
+            }else if(shape.type==google.maps.drawing.OverlayType.MARKER){
+                    gmap.setCenter(shape.getPosition());   
+            }
+        
+        }
+        
+        if(bounds!=null){
+            gmap.fitBounds(bounds);
+        }
+    }
+    
+    //
+    //
+    //
+    function _applyCoordsForSelectedShape(){
+        
+        var type = drawingManager.getDrawingMode();
+        
+        if (selectedShape!=null) {
+            type = selectedShape.type;
+        }
+        if(type==null){
+            alert(top.HR('Select shape on map first or define drawing mode'));
+            return;
+        }
+        
+        var sCoords = $("#coords1").val();
+        var coords = _parseManualEntry(sCoords, type);
+        var res = _loadShape(coords, type);
+        if(res && selectedShape!=null){
+            _zoomToSelection();
+        }
+    }
+    
+    Number.prototype.toRad = function() {
+      return this * Math.PI / 180;
+    }
+    Number.prototype.toDeg = function() {
+      return this * 180 / Math.PI;
+    }
+    //
+    // get point within given radius
+    //
+    function _destinationPoint(latLong, brng, dist) {
+      dist = dist / 6371000;
+      brng = brng.toRad();
+
+      var lat1 = latLong.lat.toRad();
+      var lon1 = latLong.lng.toRad();
+
+      var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
+        Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
+
+      var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
+        Math.cos(lat1),
+        Math.cos(dist) - Math.sin(lat1) *
+        Math.sin(lat2));
+
+      if (isNaN(lat2) || isNaN(lon2)) return null;
+
+      return {lat:lat2.toDeg(), lng:lon2.toDeg()};
+    }
+    
+    //
+    //
+    //
+    function _getDistance(latLong1, latLong2) {
+        var R = 6371000; // earth's radius in meters
+        var dLat = (latLong2.lat-latLong1.lat).toRad(); //* Math.PI / 180;
+        var dLon = (latLong2.lng-latLong1.lng).toRad(); //* Math.PI / 180;
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(latLong1.lat.toRad() ) * Math.cos(latLong2.lat.toRad() ) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var d = R * c;
+        return d;
+    }    
+    
+    //
+    //
+    //        
+    function _parseManualEntry(sCoords, type){
+        
+        var s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' ');
+        s = s.replace("  "," ").trim();
+        var arc = s.split(" ");  
+        var coords = []; //Array of LatLngLiteral
+        
+        var islat = true, k;
+        for (k=0; k<arc.length; k++){
+            
+            //special case for circle
+            if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE && arc[k].indexOf("r=")==0){
+              var d = Number(arc[k].substr(2));
+              if(isNaN(d)){
+                alert(arc[k]+" is wrong radius value");
+                return null;
+              }
+
+              var resc = _destinationPoint(coords[0], 90, d);
+              if(resc!=null){
+                    coords.push({radius:d});
+              }else{
+                    alert("Can not create circle");
+                    return null;
+              }
+              break;
+            }
+            
+            var crd = Number(arc[k]);
+            if(isNaN(crd)){
+              alert(arc[k]+" is not number value");
+              return null;
+            }else if(!islat && Math.abs(crd)>180){
+              alert(arc[k]+" is wrong longitude value");
+              return null;
+            }else if(islat && Math.abs(crd)>90){
+              alert(arc[k]+" is wrong latitude value");
+              return null;
+            }
+            islat = !islat;
+            if(islat)
+                coords.push({lat:Number(arc[k-1]), lng:crd});
+        }//for
+        
+        return coords;
+    }
+    
+    //coords  Array of LatLngLiteral
+    function _loadShape(coords, type){
+
+      var res = false;  
+    
+      if (coords && coords.length>0){
+        if(type==google.maps.drawing.OverlayType.POLYGON){
+            if(coords.length<3){
+                alert("Not enough coordinates for rectangle. Need at least 3 pairs");
+            }else{
+                if (selectedShape) {
+                    selectedShape.setPath(coords);
+                }else{
+                    var opts = drawingManager.get('polygonOptions');
+                    opts.paths = coords;
+                    
+                    var newShape = new google.maps.Polygon(opts);
+                    newShape.setMap(gmap);   
+                    newShape.type = google.maps.drawing.OverlayType.POLYGON;
+                    
+                    _onNonMarkerAdded(newShape);
+                }
+                _onPathComplete(selectedShape);
+                res = true;
+            }
+        }else if(type==google.maps.drawing.OverlayType.POLYLINE){
+            if(coords.length<2){
+                alert("Not enough coordinates for path. Need at least 2 pairs");
+            }else{
+                if (selectedShape) {
+                    selectedShape.setPath(coords);
+                }else{
+                    var opts = drawingManager.get('polylineOptions');
+                    opts.path = coords;
+                    
+                    var newShape = new google.maps.Polyline(opts);
+                    newShape.setMap(gmap);   
+                    newShape.type = google.maps.drawing.OverlayType.POLYLINE;
+                    
+                    _onNonMarkerAdded(newShape);
+                }
+                _onPathComplete(selectedShape);
+                res = true;
+            }
+            
+            
+        }else if (type==google.maps.drawing.OverlayType.MARKER){
+            
+                if (selectedShape) {
+                    selectedShape.setPosition(coords[0]);
+                }else{
+                    var k, newShape;
+                    for(k=0; k<coords.length; k++){
+                        var opts = drawingManager.get('markerOptions');
+                        opts.position = coords[k];
+                        newShape = new google.maps.Marker(opts);
+                        newShape.setMap(gmap);   
+                        newShape.type = google.maps.drawing.OverlayType.MARKER;
+                        _onMarkerAdded(newShape);
+                    }
+                    setSelection(newShape);
+                }
+                res = true;
+
+        }else if (type==google.maps.drawing.OverlayType.RECTANGLE){
+            if(coords.length<2){
+                alert("Not enough coordinates for rectangle. Need at least 2 pairs");
+            }else{
+                
+                var bounds = {south:coords[0].lat, west:coords[0].lng,  north:coords[1].lat, east:coords[1].lng };
+
+                if (selectedShape) {
+                    selectedShape.setBounds( bounds );
+                }else{
+                    var opts = drawingManager.get('rectangleOptions');
+                    opts.bounds = bounds;
+                    var newShape = new google.maps.Rectangle(opts);
+                    newShape.setMap(gmap);   
+                    newShape.type = google.maps.drawing.OverlayType.RECTANGLE;
+                    
+                    _onNonMarkerAdded(newShape);
+                    _onRectangleComplete(newShape);
+                }
+                res = true;
+            }
+          
+        }else if (type==google.maps.drawing.OverlayType.CIRCLE){
+
+            if(coords.length<2){
+                alert("Not enough coordinates for circle. Need at least 2 pairs or center and radius");
+            }else{
+                
+                var radius = (coords[1].radius>0)
+                                    ?coords[1].radius
+                                    :_getDistance(coords[0], coords[1]) ;
+
+                if (selectedShape) {
+                    selectedShape.setCenter( coords[0] );
+                    selectedShape.setRadius( radius );
+                }else{
+                    var opts = drawingManager.get('circleOptions');
+                    opts.center = coords[0];
+                    opts.radius = radius;
+                    var newShape = new google.maps.Circle(opts);
+                    newShape.setMap(gmap);   
+                    newShape.type = google.maps.drawing.OverlayType.CIRCLE;
+                    
+                    _onNonMarkerAdded(newShape);
+                    _onCircleComplete(newShape);
+                }
+                res = true;
+            }
+            
+        }
+      }        
+        
+      return res;
+    }
+    
+    //
+    // show GeoJSON as a set of separate overlays
+    //
+    function _loadGeoJSON(mdata){
+        
+        if (typeof(mdata) === "string" && !top.HEURIST4.util.isempty(mdata)){
+            try{
+                mdata = $.parseJSON(mdata);
+                //mdata = JSON.parse( mdata );
+            }catch(e){
+                mdata = null;
+                console.log('Not well formed JSON provided. Property names be quoted with double-quote characters');
+            }
+        }
+        if(top.HEURIST4.util.isnull(mdata) || $.isEmptyObject(mdata)){
+            alert('Wrong GeoJSON provided');
+            return;            
+        }
+        
+//FeatureCollection.features[feature]        
+//feature.geometry.type  , coordinates
+//GeometryCollection.geometries[{type: ,coordinates: },...]
+        
+        if(mdata.type == 'FeatureCollection'){
+            var k = 0;
+            for (k=0; k<mdata.features.length; k++){
+                 _loadGeoJSON(mdata.features[k]); //another collection or feature
+            }
+        }else if(mdata.type == 'Feature' && !$.isEmptyObject(mdata.geometry)){
+            
+            function __loadGeoJSON_primitive(geometry){
+            
+                if($.isEmptyObject(geometry)){
+                
+                }else if(geometry.type=="GeometryCollection"){
+                    var l;
+                    for (l=0; l<geometry.geometries.length; l++){
+                         _loadGeoJSON_primitive(geometry.geometries[l]); //another collection or feature
+                    }
+                }else{
+                    
+                    function _extractCoords(shapes, coords){
+                        
+                        function _isvalid_pnt(pnt){
+                           return ($.isArray(pnt) && pnt.length==2 && 
+                                    $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]) &&
+                                    Math.abs(pnt[0])<=180.0 && Math.abs(pnt[1])<=90.0);
+                        }
+                        
+                        if(_isvalid_pnt(coords)){ //Marker
+                            shapes.push([{lat:coords[1], lng:coords[0]}]);
+                        }else if(_isvalid_pnt(coords[0])){
+                            //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
+                            var shape = [], m;
+                            for (m=0; m<coords.length; m++){
+                                pnt = coords[m];
+                                if(_isvalid_pnt(pnt)){
+                                    shape.push({lat:pnt[1], lng:pnt[0]});
+                                }
+                            }
+                            shapes.push(shape);
+                        }else{
+                            var n;
+                            for (n=0; n<coords.length; n++){
+                                if($.isArray(coords[n]))
+                                    _extractCoords(shapes, coords[n]);
+                            }
+                        }
+                    }
+                    
+                    var shapes = [];
+                    _extractCoords(shapes, geometry.coordinates);
+                    
+                    if(shapes.length>0){
+                    
+                        var type = null;
+                        
+                        if( geometry.type=="Point" || 
+                            geometry.type=="MultiPoint"){
+                           type = google.maps.drawing.OverlayType.MARKER;
+                        }else if(geometry.type=="LineString" ||
+                                 geometry.type=="MultiLineString"){
+                           type = google.maps.drawing.OverlayType.POLYLINE;
+                        }else if(geometry.type=="Polygon"||
+                                 geometry.type=="MultiPolygon"){
+                           type = google.maps.drawing.OverlayType.POLYGON;
+                        }       
+                        if(type!=null){
+                            var i;
+                            for (i=0; i<shapes.length; i++){
+                                clearSelection();          
+                                _loadShape(shapes[i], type);   
+                            }
+                        }
+                    }
+                    
+                }
+                
+            }
+            
+            __loadGeoJSON_primitive(mdata.geometry)
+        }
+        
+    }
+
+    //
+    //
+    //
+    function _getGeoJSON(){
+        
+        var k, points=[], polylines=[], polygones=[];
+        for (k=0; k<overlays.length; k++){
+            
+            var shape = overlays[k];
+            
+            if(shape!=null){
+                coords = [];
+                if(shape.type==google.maps.drawing.OverlayType.POLYGON){
+                    
+                    processPoints(shape.getPath(), function(latLng){
+                        coords.push([latLng.lng(), latLng.lat()]);
+                    }, shape);
+                    polygones.push(coords);
+                    
+                }else if (shape.type==google.maps.drawing.OverlayType.POLYLINE) {
+                    
+                    processPoints(shape.getPath(), function(latLng){
+                        coords.push([latLng.lng(), latLng.lat()]);
+                    }, shape);
+                    polylines.push(coords);
+                    
+                }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE){
+                    
+                    var bnd = shape.getBounds();
+                    var pnt1 = bnd.getSouthWest(),
+                        pnt2 = bnd.getNorthEast();  
+                    
+                    coords = [[pnt1.lng(), pnt1.lat()],[pnt1.lng(), pnt2.lat()],
+                                [pnt2.lng(), pnt2.lat()],[pnt2.lng(), pnt1.lat()]];
+                    
+                    polygones.push(coords);
+                    
+                }else if(shape.type==google.maps.drawing.OverlayType.CIRCLE){
+                    
+                        var latLng = shape.getCenter()
+                        var radius = shape.getRadius();
+                        
+                      var degreeStep = 360 / 40;
+
+                      for(var i = 0; i < 40; i++){
+                        var gpos = google.maps.geometry.spherical.computeOffset(latLng, radius, degreeStep * i);
+                        coords.push([gpos.lng(), gpos.lat()]);
+                      };                        
+/*
+                        for (var i=0; i <= 40; ++i) {
+                            var x = latLng.lng() + radius * Math.cos(i * 2*Math.PI / 40);
+                            var y = latLng.lat() + radius * Math.sin(i * 2*Math.PI / 40);
+                            coords.push([x, y]);
+                        }                        
+ */                       
+                        polygones.push(coords);
+                    
+                }else if(shape.type==google.maps.drawing.OverlayType.MARKER){
+
+                    var latLng = shape.getPosition();
+                    coords.push([latLng.lng(), latLng.lat()]);
+                    points.push(coords);
+                    
+                }
+            }
+        }//for overlays
+        
+        var geometries = [];
+        
+        if(points.length==1){
+            geometries.push({type: "Point", coordinates: points[0]});
+        }else if(points.length>1){
+            geometries.push({type: "MultiPoint", coordinates: points});   
+        }
+        if(polylines.length==1){
+            geometries.push({type: "LineString", coordinates: polylines[0]});
+        }else if(polylines.length>1){
+            geometries.push({type: "MultiLineString", coordinates: polylines});   
+        }
+        if(polygones.length==1){
+            geometries.push({type: "Polygon", coordinates: polygones });
+        }else if(polygones.length>1){
+            geometries.push({type: "MultiPolygon", coordinates: polygones});   
+        }
+        
+        var res = { type: "FeatureCollection", features: [{ type: "Feature", geometry: {},
+        "properties": {}
+        }]};
+        
+        if(geometries.length==1){
+            res.features[0].geometry = geometries[0];
+        }else{
+            res.features[0].geometry = { type: "GeometryCollection", geometries:geometries };
+        }
+        
+        
+        return res;
+    }    
+    
     //
     // init UI controls
     //
     function _initUIcontrols(){
-                
+
+        //geocoding ------------------------------------------------------               
         $('#btn_search_start')
           .button({label: top.HR("Start search"), text:false, icons: {
                       secondary: "ui-icon-search"
@@ -346,12 +866,11 @@ function hMappingDraw(_mapdiv_id) {
                             }
                     });          
         
+        //clear/delete buttons --------------------------------------------
         $('#delete-button').button().click(_deleteSelectedShape);
         $('#delete-all-button').button().click(_deleteAllShapes);
         
-        //get save bounds (viewpoints)
-        //map_viewpoints = top.HAPI4.get_prefs('map_viewpoints');
-        
+        //get save bounds (viewpoints) ------------------------------------
         var $sel_viepoints = $('#sel_viewpoints');
         
         //fill sel_viewpoints with bounds
@@ -420,6 +939,45 @@ function hMappingDraw(_mapdiv_id) {
             $sel_viepoints.find('option:last-child').attr('selected', 'selected');
             $sel_viepoints.change();
         }     
+        
+        // apply coordinates
+        $('#apply-coords-button').button().click(_applyCoordsForSelectedShape);
+        
+        $('#load-geometry-button').button().click(function(){
+
+                var titleYes = top.HR('Yes'),
+                    titleNo = top.HR('No'),
+                    buttons = {};
+                
+                buttons[titleYes] = function() {
+                    _loadGeoJSON( $('#geodata-textarea').val() );
+                    $dlg.dialog( "close" );
+                };
+                buttons[titleNo] = function() {
+                    $dlg.dialog( "close" );
+                };
+
+                var $dlg = top.HEURIST4.msg.showElementAsDialog({window:top, 
+                        element: document.getElementById( "get-set-coordinates" ),
+                        'no-resize':true,
+                        width:690, height:400,
+                        title:top.HR('Paste or upload geo data'),
+                        buttons:buttons    
+                });
+            
+        });
+        
+        $('#get-geometry-button').button().click(function(){
+                
+                $('#geodata-textarea').val(JSON.stringify(_getGeoJSON()));    
+        
+                var $dlg = top.HEURIST4.msg.showElementAsDialog({window:top, 
+                        element: document.getElementById( "get-set-coordinates" ),
+                        'no-resize':true,
+                        width:690, height:400,
+                        title:top.HR('Copy the result')
+                });
+        });
     }     
       
       
