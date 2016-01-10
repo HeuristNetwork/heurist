@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Kim Jackson
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

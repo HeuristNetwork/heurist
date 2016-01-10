@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Tom Murtagh
@@ -147,7 +147,7 @@ define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 
 // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
-$topDirs = "admin|applications|common|context_help|documentation|export|exemplars|external|hapi|help|import|records|search|viewers";
+$topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external";
 
 // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
 $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.

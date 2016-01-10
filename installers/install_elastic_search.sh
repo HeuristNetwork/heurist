@@ -5,7 +5,7 @@
 # install.sh: installation script for ElasticSearch (Lucene index wrapper)
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2015 University of Sydney
+# @copyright   (C) 2005-2016 University of Sydney
 # @author      Ian Johnson       <ian.johnson@sydney.edu.au>
 # @author      Artem Osmakov     <artem.osmakov@sydney.edu.au>
 # @author      Jan Jaap de Groot <jjedegroot@gmail.com>
