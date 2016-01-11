@@ -520,6 +520,10 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                                 }
                         };
                         $dlg.dialog(opts);
+                        
+                        if(options['padding'])
+                            $dlg.css('padding', options.padding);
+                        
                         //start content loading
                         $dosframe.attr('src', url);
 

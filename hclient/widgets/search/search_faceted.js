@@ -807,7 +807,9 @@ $.widget( "heurist.search_faceted", {
                     return;
                 }
             }*/
-                window.HAPI4.RecordMgr.get_facets(request, function(response){ that._redrawFacets(response) });            
+                window.HAPI4.RecordMgr.get_facets(request, function(response){ 
+                    that._redrawFacets(response) 
+                });            
                                 
                 break;
             }
@@ -867,7 +869,7 @@ $.widget( "heurist.search_faceted", {
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
                         
-                        var term = top.HEURIST4.util.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
+                        var term = top.HEURIST4.ui.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
                         
                         //field.selectedvalue = {text:label, value:value, step:step};                    
                         

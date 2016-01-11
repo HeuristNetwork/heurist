@@ -613,7 +613,7 @@ function hLayout(args) {
                             if($.isFunction($content[app.widgetname])){
                                 $content[app.widgetname]( options );   //call function
                             }else{
-                                top.HEURIST4.util.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
+                                top.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                             }
                         });
                     }

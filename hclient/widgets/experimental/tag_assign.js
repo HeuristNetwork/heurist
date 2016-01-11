@@ -210,7 +210,7 @@ $.widget( "heurist.tag_assign", {
 
         // list of groups for current user
         var selObj = this.select_ugrp.get(0);
-        top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+        top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
             [{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('Personal Tags')}],
             function(){
                 that.select_ugrp.val(top.HAPI4.currentUser.ugr_ID);

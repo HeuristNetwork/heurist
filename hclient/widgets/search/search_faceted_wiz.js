@@ -476,7 +476,7 @@ $.widget( "heurist.search_faceted_wiz", {
             svs_name.removeClass( "ui-state-error" );
 
             if($(opt_rectypes).is(':empty')){
-                top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
+                top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
             }
 
 
@@ -486,7 +486,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             //fill with list of Workgroups in case non bookmark search
             var selObj = svs_ugrid.get(0); //select element
-            top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+            top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
                 function(){
                     svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
@@ -537,7 +537,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
 
             if($(opt_rectypes).is(':empty')){
-                top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
+                top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
 
                 this._on( opt_mode, {
                     click: function(e){
@@ -588,7 +588,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 //fill with list of Workgroups in case non bookmark search
                 var selObj = svs_ugrid.get(0); //select element
-                top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+                top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                     [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
                     function(){
                         svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);

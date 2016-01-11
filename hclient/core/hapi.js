@@ -96,7 +96,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         that.sysinfo = response.data.sysinfo;
                         that.basePathV3 = that.sysinfo['basePathV3'];
                     }else{
-                        top.HEURIST4.util.showMsgErr(response.message);
+                        top.HEURIST4.msg.showMsgErr(response.message);
                     }
                     if(_oninit){
                         _oninit(success);
@@ -353,13 +353,15 @@ function hAPI(_db, _oninit) { //, _currentUser
     /**
     * System class that responsible for record's edit, search and tags
     *
-    * see record_edit.php, record_tags.php and record_search.php
+    * see record_edit.php, record_details.php, record_tags.php and record_search.php
     *
     * methods:
     *   add       - creates new temporary record
     *   save      - save record
     *   remove    - delete record
     *
+    *   details   - batch edition of record details for many records
+    * 
     *   search
     *   minmax
     *   get
@@ -419,6 +421,25 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'd';
                 _callserver('record_edit', request, callback);
             }
+            
+            /**
+            * Batch edition of record details
+            *
+            * @param request a: add,replace,delete
+            *               
+            * recIDs - list of records IDS to be processed
+            * rtyID - optional filter by record type
+            * dtyID  - detail field to be added
+            * for add: val, geo or ulfID
+            * for replace: sVal - search value, rVal - replace value
+            * for delete:  sVal - search value
+            * tag 0|1  - add system tag to mark processed records
+            * 
+            * @param callback
+            */
+            ,details: function(request, callback){
+                _callserver('record_details', request, callback);
+            }
 
             /**
             * Search for records
@@ -453,7 +474,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                             resdata = new hRecordSet(response.data);
                         }else{
 
-                            top.HEURIST4.util.showMsgErr(response);
+                            top.HEURIST4.msg.showMsgErr(response);
 
                             if(!top.HEURIST4.util.isnull(document)){
                                 document.trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event

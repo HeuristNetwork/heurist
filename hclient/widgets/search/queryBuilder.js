@@ -90,7 +90,7 @@ $.widget( "heurist.queryBuilder", {
         .addClass('text ui-corner-all')
         .appendTo( cont );
         
-        top.HEURIST4.util.createSelector(this.select_predicate.get(0), 
+        top.HEURIST4.ui.createSelector(this.select_predicate.get(0), 
             [{key:'t',title:'entity type'},{key:'f',title:'field'},{key:'tag',title:'tag'},
              {key:'user',title:'bookmarked by user'},
              {key:'owner',title:'owner'},{key:'addedby',title:'added by user'},
@@ -188,7 +188,7 @@ $.widget( "heurist.queryBuilder", {
     this._super( key, value );
     if ( key === "recordtypes" ) {
 
-    top.HEURIST4.util.createRectypeSelect(this.select_source_rectype.get(0), value, false);
+    top.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false);
     this._onSelectRectype();
     this._refresh();
     }
@@ -409,7 +409,7 @@ $.widget( "heurist.queryBuilder", {
         //this._arr_rectypes_subset = arr_rectypes;
 
         //fill selectors
-        /*top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
+        /*top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
 
         if(this.select_target_rectype.find("option").length>2){
         this.select_target_rectype.show();
@@ -426,7 +426,7 @@ $.widget( "heurist.queryBuilder", {
             this.select_fields.prop('disabled', true);
         }
 
-        top.HEURIST4.util.createSelector(this.select_fields.get(0), arr_fields);
+        top.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_fields);
         this.select_fields.val('');
         this._onSelectFieldtype();
 
@@ -467,10 +467,10 @@ $.widget( "heurist.queryBuilder", {
                         //this.label_3.show();
                         this.select_reltype.show();
                         this.select_reltype.prop('disabled', false);
-                        top.HEURIST4.util.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false);
+                        top.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false);
                     }
                     //reduced list of constraints
-                    top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
+                    top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
                     if(arr_field.rectypes.length>1){
                         top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
                         this.select_target_rectype.prop('disabled', false);
@@ -485,7 +485,7 @@ $.widget( "heurist.queryBuilder", {
             if(is_not_relation){
                 //this.label_3.hide();
                 this.select_reltype.show();
-                top.HEURIST4.util.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
+                top.HEURIST4.ui.createSelector(this.select_reltype.get(0), [{key:'pointer', title:'pointer'}]);
                 this.select_reltype.prop('disabled', true);
             }
         }else{
@@ -493,7 +493,7 @@ $.widget( "heurist.queryBuilder", {
         }
         if(is_not_selected){
             //show all constraints
-            top.HEURIST4.util.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
+            top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
             if(this._arr_rectypes.length>1){
                 top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
             }

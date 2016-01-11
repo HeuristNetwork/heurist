@@ -392,7 +392,7 @@ $.widget( "heurist.editing_input", {
         var allTerms = this.f('rst_FilteredJsonTermIDTree');
         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
-        top.HEURIST4.util.createTermSelectExt2($input.get(0), 
+        top.HEURIST4.ui.createTermSelectExt2($input.get(0), 
             {datatype:detailType, termIDTree:allTerms, headerTermIDsList:headerTerms, 
              defaultTermID:value, topOptions:true, supressTermCode:true});
     },
@@ -431,7 +431,7 @@ $.widget( "heurist.editing_input", {
 
         }else if(detailType=="enum" || detailType=="relationtype"){
 
-            disp_value = top.HEURIST4.util.getTermValue(detailType, value, true);
+            disp_value = top.HEURIST4.ui.getTermValue(detailType, value, true);
 
             if(top.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missed. id '+termID

@@ -291,7 +291,7 @@ $.widget( "heurist.profile", {
         this.select_rectype.position({my: "right top", at: "right bottom", of: that.btn_record })
         .hide();
 
-        top.HEURIST4.util.createRectypeSelect(this.select_rectype.get(0), null, false);
+        top.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), null, false);
 
 
 

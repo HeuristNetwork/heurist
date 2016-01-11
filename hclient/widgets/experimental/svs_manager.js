@@ -181,7 +181,7 @@ $.widget( "heurist.svs_manager", {
         var that = this;
         // list of groups for current user
         var selObj = this.select_grp.get(0);
-        top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+        top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
             [{key:"bookmark"+top.HAPI4.currentUser.ugr_ID, title:top.HR('My Bookmarks')},{key:top.HAPI4.currentUser.ugr_ID, title:top.HR('All Records')}],
             function(){
                 that.select_grp.val(top.HAPI4.currentUser.ugr_ID);
@@ -332,7 +332,7 @@ $.widget( "heurist.svs_manager", {
 
                 //fill with list of Workgroups in case non bookmark search
                 var selObj = svs_ugrid.get(0);
-                top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+                top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                     [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
                     function(){
                         svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);

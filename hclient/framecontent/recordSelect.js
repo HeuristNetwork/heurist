@@ -79,7 +79,7 @@ function hRecordSelect(rectype_set) {
                     }
                 );
                 selectRectype.empty();
-                top.HEURIST4.util.createRectypeSelect(selectRectype.get(0), rectype_set, 
+                top.HEURIST4.ui.createRectypeSelect(selectRectype.get(0), rectype_set, 
                     rectype_set?null:top.HR('Any Record Type'));
                           
                 //init record list          

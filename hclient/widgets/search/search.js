@@ -510,7 +510,7 @@ $.widget( "heurist.search", {
 
         if(this.select_rectype){
             this.select_rectype.empty();
-            top.HEURIST4.util.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
+            top.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), this.options.rectype_set, !this.options.rectype_set);
         }
     },
 
@@ -769,8 +769,7 @@ $.widget( "heurist.search", {
             var sortasc =  $('#sa_sortasc');
             $dlg.find("#fld_enum").hide();
 
-            top.HEURIST4.util.createRectypeSelect( select_rectype.get(0), null, top.HR('Any record type'));
-            //top.HEURIST4.util.createRectypeDetailSelect( select_fieldtype.get(0), 0, null, top.HR('Any record type'));
+            top.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), null, top.HR('Any record type'));
 
             var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
@@ -781,7 +780,7 @@ $.widget( "heurist.search", {
                 change: function (event){
 
                     var rectype = (event)?Number(event.target.value):0;
-                    top.HEURIST4.util.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, top.HR('Any field type'), true);
+                    top.HEURIST4.ui.createRectypeDetailSelect(select_fieldtype.get(0), rectype, allowed, top.HR('Any field type'));
 
                     /*select_sortby.html("<option value=t>"+top.HR("record title")+"</option>"+
                     "<option value=rt>"+top.HR("record type")+"</option>"+
@@ -806,7 +805,7 @@ $.widget( "heurist.search", {
                         select_sortby.get(0).appendChild(grp);
                         */
                     }
-                    top.HEURIST4.util.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions, false);
+                    top.HEURIST4.ui.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions);
 
                     $("#sa_fieldvalue").val("");
                     $dlg.find("#fld_contain").show();
@@ -828,7 +827,7 @@ $.widget( "heurist.search", {
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
-                        top.HEURIST4.util.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false);
+                        top.HEURIST4.ui.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false);
                     }else{
                         $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();

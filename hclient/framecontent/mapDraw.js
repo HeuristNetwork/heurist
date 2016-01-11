@@ -874,7 +874,7 @@ function hMappingDraw(_mapdiv_id) {
         var $sel_viepoints = $('#sel_viewpoints');
         
         //fill sel_viewpoints with bounds
-        top.HEURIST4.util.createSelector( $sel_viepoints.get(0), 
+        top.HEURIST4.ui.createSelector( $sel_viepoints.get(0), 
             $.isEmptyObject(map_viewpoints)?top.HR('none defined'): map_viewpoints);
             
         $sel_viepoints.change(function(){

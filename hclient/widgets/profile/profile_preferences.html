@@ -30,7 +30,7 @@
             sel = sel.get(0);
             for(key in regional){
                 if(key){
-                    top.HEURIST4.util.addoption(sel, key, regional[key].language);
+                    top.HEURIST4.ui.addoption(sel, key, regional[key].language);
                 }
             }
         }
@@ -43,7 +43,7 @@
             sel = sel.get(0);
             for(key in cfg_layouts){
                 if(key){
-                    top.HEURIST4.util.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
+                    top.HEURIST4.ui.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
                 }
             }
         }

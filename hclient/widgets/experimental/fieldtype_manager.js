@@ -226,7 +226,7 @@ $.widget( "heurist.fieldtype_manager", {
     _updateGroups: function(){
 
         var selObj = this.select_grp.get(0);
-        top.HEURIST4.util.createRectypeGroupSelect( selObj, top.HR('all groups') );
+        top.HEURIST4.ui.createRectypeGroupSelect( selObj, top.HR('all groups') );
 
         this.select_grp.val( top.HEURIST4.detailtypes.groups[0].id);
         this.select_grp.change();

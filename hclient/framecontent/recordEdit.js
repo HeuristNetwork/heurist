@@ -83,7 +83,7 @@ function hEditing() {
                     _load();
 
                 }else{
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
             }
 
@@ -119,13 +119,13 @@ function hEditing() {
                         _load();
 
                     }else{
-                        top.HEURIST4.util.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
                 }
             );
 
         }else{
-            top.HEURIST4.util.showMsgErr('Wrong parameters for record edit');
+            top.HEURIST4.msg.showMsgErr('Wrong parameters for record edit');
         }
     }
 
@@ -303,7 +303,7 @@ function hEditing() {
 
                 }else{
 
-                    top.HEURIST4.util.showMsgErr(response);
+                    top.HEURIST4.msg.showMsgErr(response);
                 }
             }
 
