@@ -4,7 +4,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -20,12 +20,12 @@
 */
 
 function hSvsEdit(args) {
-     var _className = "SvsEdit",
-         _version   = "0.4",
-         edit_dialog = null,
-         callback_method;
+    var _className = "SvsEdit",
+    _version   = "0.4",
+    edit_dialog = null,
+    callback_method;
 
-     const _NAME = 0, _QUERY = 1, _GRPID = 2;
+    const _NAME = 0, _QUERY = 1, _GRPID = 2;
 
     /**
     * Initialization
@@ -60,8 +60,8 @@ function hSvsEdit(args) {
             var selObj = svs_ugrid.get(0);
             top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:top.HR('My Bookmarks (private)')},
-                 {key:'all', title:top.HR('My Filters (private)')},
-                 {key:0, title:top.HR('Searches for guests')}],
+                    {key:'all', title:top.HR('My Filters (private)')},
+                    {key:0, title:top.HR('Searches for guests')}],
                 function(){
                     svs_ugrid.val(top.HEURIST4.util.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
             });
@@ -130,17 +130,17 @@ function hSvsEdit(args) {
             }
 
             var isRules = top.HEURIST4.util.isempty(svs_query.val()) && !top.HEURIST4.util.isempty(svs_rules.val());
-            
+
             if(isRules){
-                 svs_query.parent().hide();
-                 return true;
+                svs_query.parent().hide();
+                return true;
             }else{
-                 svs_query.parent().show();
-                 return false;
+                svs_query.parent().show();
+                return false;
             }
 
         }
-     }
+    }
 
     /**
     * Show faceted search wizard
@@ -162,48 +162,48 @@ function hSvsEdit(args) {
     //
     function _editRules(ele_rules, squery, groupID) {
 
-               var that = this;
+       var that = this;
 
-                var url = top.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + top.HAPI4.database;
-                if(!top.HEURIST4.util.isnull(ele_rules)){
-                    url = url + '&rules=' + encodeURIComponent(ele_rules.val());
-                }
+        var url = top.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+        if(!top.HEURIST4.util.isnull(ele_rules)){
+            url = url + '&rules=' + encodeURIComponent(ele_rules.val());
+        }
 
-                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
-                    function(res){
-                        if(!top.HEURIST4.util.isempty(res)) {
+        top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
+            function(res){
+                if(!top.HEURIST4.util.isempty(res)) {
 
-                            if(res.mode == 'save') {
-                                if(top.HEURIST4.util.isnull(ele_rules)){ //call from resultListMenu - create new rule
+                    if(res.mode == 'save') {
+                        if(top.HEURIST4.util.isnull(ele_rules)){ //call from resultListMenu - create new rule
 
-                                     //replace rules
-                                     if(!top.HEURIST4.util.isObject(squery)){
-                                        squery = top.HEURIST4.util.parseHeuristQuery(squery);
-                                     }
-                                     squery.rules = res.rules;
-                                     //squery = top.HEURIST4.util.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
+                             //replace rules
+                             if(!top.HEURIST4.util.isObject(squery)){
+                                squery = top.HEURIST4.util.parseHeuristQuery(squery);
+                             }
+                             squery.rules = res.rules;
+                             //squery = top.HEURIST4.util.composeHeuristQuery(params.q, params.w, res.rules, params.notes);
 
-                                    //mode, groupID, svsID, squery, callback
-                                    _showDialog('saved', groupID, null, squery ); //open new dialog
-                                }else{
-                                    ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
-                                }
-                            }
+                            //mode, groupID, svsID, squery, callback
+                            _showDialog('saved', groupID, null, squery ); //open new dialog
+                        }else{
+                            ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
                         }
-                    }});
+                    }
+                }
+        }});
 
 
     }
 
-     /**
-     * put your comment there...
-     *
-     * @param svsID
-     * @param squery
-     * @param mode - faceted, rules or saved
-     * @param callback
-     */
-     function _showDialog( mode, groupID, svsID, squery, callback ){
+    /**
+    * put your comment there...
+    *
+    * @param svsID
+    * @param squery
+    * @param mode - faceted, rules or saved
+    * @param callback
+    */
+    function _showDialog( mode, groupID, svsID, squery, callback ){
 
         if(parseInt(svsID)>0){
             var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
@@ -230,7 +230,7 @@ function hSvsEdit(args) {
                     }
                     catch (err) {
                         // TODo something about the exception here
-                        top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove this search.'), null, "Error");
+                        top.HEURIST4.msg.showMsgDlg(top.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
                         return;
                     }
                 }
@@ -241,12 +241,13 @@ function hSvsEdit(args) {
 
         }else if (mode == 'rules' && top.HEURIST4.util.isnull(svsID)){ //it happens for new rules only
 
+
             if(top.HEURIST4.util.isnull(squery)) squery = {};
              squery.q = ''; // from rule builder we always save pure query only
              _editRules(null, squery, groupID);
 
         }else if(null == edit_dialog){
-                //create new dialog
+            //create new dialog
 
             var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
 
@@ -261,21 +262,21 @@ function hSvsEdit(args) {
                 $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
 
                 $dlg.find("#svs_Rules_edit")
-                    .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                    .attr('title', top.HR('Edit Rule Set'))
-                    .css({'height':'16px', 'width':'16px'})
-                    .click(function( event ) {
-                        //that.
-                        _editRules( $dlg.find('#svs_Rules'), '', groupID );
-                    });
+                .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                .attr('title', top.HR('Edit Rule Set'))
+                .css({'height':'16px', 'width':'16px'})
+                .click(function( event ) {
+                    //that.
+                    _editRules( $dlg.find('#svs_Rules'), '', groupID );
+                });
 
                 $dlg.find("#svs_Rules_clear")
-                    .button({icons: {primary: "ui-icon-close"}, text:false})
-                    .attr('title', top.HR('Clear Rule Set'))
-                    .css({'height':'16px', 'width':'16px'})
-                    .click(function( event ) {
-                        $dlg.find('#svs_Rules').val('');
-                    });
+                .button({icons: {primary: "ui-icon-close"}, text:false})
+                .attr('title', top.HR('Clear Rule Set'))
+                .css({'height':'16px', 'width':'16px'})
+                .click(function( event ) {
+                    $dlg.find('#svs_Rules').val('');
+                });
 
                 var allFields = $dlg.find('input, textarea');
 
@@ -301,12 +302,12 @@ function hSvsEdit(args) {
                         var bOk = top.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
                         if(!bOk) bOk = top.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
                         if(!bOk){
-                                message.text("Define query, rules or both.");
-                                message.addClass( "ui-state-highlight" );
-                                setTimeout(function() {
-                                    message.removeClass( "ui-state-highlight", 1500 );
+                            message.text("Define query, rules or both.");
+                            message.addClass( "ui-state-highlight" );
+                            setTimeout(function() {
+                                message.removeClass( "ui-state-highlight", 1500 );
                                 }, 500 );
-                                bValid = false;
+                            bValid = false;
                         }
                     }
 
@@ -320,6 +321,7 @@ function hSvsEdit(args) {
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID;
                             //if(domain!="all"){query_to_save.push('w='+domain);}
                         }
+
                         /*if(top.HEURIST4.util.isempty(svs_query.val()) && !top.HEURIST4.util.isempty(svs_rules.val())){   //PURE RULE SET
                             domain = 'rules';
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
@@ -405,7 +407,7 @@ function hSvsEdit(args) {
             edit_dialog.dialog("open");
         }
 
-     } //end  _showDialog
+    } //end  _showDialog
 
 
     //public members
@@ -417,12 +419,12 @@ function hSvsEdit(args) {
 
         remove: function () {
             //remove edit dialog from body
-             edit_dialog.remove();
-             edit_dialog = null;
+            edit_dialog.remove();
+            edit_dialog = null;
         },
 
         show: function( mode, groupID, svsID, squery, callback ) {
-             _showDialog( mode, groupID, svsID, squery, callback );
+            _showDialog( mode, groupID, svsID, squery, callback );
         }
 
     }
