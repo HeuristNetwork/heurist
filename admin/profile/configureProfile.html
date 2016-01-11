@@ -15,11 +15,11 @@
 */
 
 /**
-* manageTags.html 
+* manageTags.html
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -37,73 +37,73 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href= "../../common/css/admin.css">
-        
+
         <style type="text/css">
             #tag_scroll_region {
-	            background-color: #FFFFFF;
-	            bottom: 50px;
-	            left: 20px;
-	            overflow: auto;
-	            padding: 3px;
-	            position: absolute;
-	            right: 20px;
-	            top: 80px;
+                background-color: #FFFFFF;
+                bottom: 50px;
+                left: 20px;
+                overflow: auto;
+                padding: 3px;
+                position: absolute;
+                right: 20px;
+                top: 80px;
             }
             .actionButtons {
-	            bottom: 10px;
-	            left: 20px;
-	            position: absolute;
-	            right: 20px;
+                bottom: 10px;
+                left: 20px;
+                position: absolute;
+                right: 20px;
             }
             #tag_scroll_region .textinput, #tag_scroll_region select {
-	            width: 200px;
-	            background-color: #ECF1FB;
-	            border: 1px solid #DCDCDC;
-	            min-width: 40ex;
-	            padding:3px;
-	            height:20px
+                width: 200px;
+                background-color: #ECF1FB;
+                border: 1px solid #DCDCDC;
+                min-width: 40ex;
+                padding:3px;
+                height:20px
             }
             #tag_scroll_region .replace input {
-	            width: 60px;
+                width: 60px;
             }
             #tag_scroll_region img {
-	            vertical-align: middle;
-	            cursor: pointer;
-	            margin: 1px;
+                vertical-align: middle;
+                cursor: pointer;
+                margin: 1px;
             }
             .u-cell {
-	            width: 100%;
+                width: 100%;
             }
             .u {
-	            background-color: #EEE;
-	            width: 100%;
-	            height: 10px;
+                background-color: #EEE;
+                width: 100%;
+                height: 10px;
             }
             .u div {
-	            background-color: #6A7C99;
-	            height: 10px;
+                background-color: #6A7C99;
+                height: 10px;
             }
             .count {
-	            text-align:right;
-	            margin:0 5px;
+                text-align:right;
+                margin:0 5px;
             }
             .search {}
             .search a{}
             .success {
-	            padding: 3px;
-	            font-weight: bold;
-	            color: green;
+                padding: 3px;
+                font-weight: bold;
+                color: green;
             }
             .failure {
-	            padding: 3px;
-	            font-weight: bold;
-	            color: red;
+                padding: 3px;
+                font-weight: bold;
+                color: red;
             }
             #ignored_hyperlinks {
-	            height: 80px;
-	            overflow: auto;
-	            background-color: #EEEEEE;
-	            padding-left: 5px;
+                height: 80px;
+                overflow: auto;
+                background-color: #EEEEEE;
+                padding-left: 5px;
             }
             .externalLink:hover {
                 background-color: rgba(100, 100, 100, 0.4);
@@ -117,172 +117,175 @@
                 width: 16px;
             }
         </style>
-        
+
         <script type="text/javascript">
-        <!--
-	        function delete_kwd(tag_ID, tag_Text, use_count) {
-		        if (use_count == 0) {
-			        if (! confirm('Tag "'+tag_Text+'" is currently unused. Remove forever?')) return;
-		        } else if (use_count == 1) {
-			        if (! confirm('Tag "'+tag_Text+'" is used by one bookmark. Do you want to remove the tag?')) return;
-		        } else {
-			        if (! confirm('Tag "'+tag_Text+'" is used by '+use_count+' bookmarks. Do you want to remove the tag?')) return;
-		        }
+            <!--
+            function delete_kwd(tag_ID, tag_Text, use_count) {
+                if (use_count == 0) {
+                    if (! confirm('Tag "'+tag_Text+'" is currently unused. Remove forever?')) return;
+                } else if (use_count == 1) {
+                    if (! confirm('Tag "'+tag_Text+'" is used by one bookmark. Do you want to remove the tag?')) return;
+                } else {
+                    if (! confirm('Tag "'+tag_Text+'" is used by '+use_count+' bookmarks. Do you want to remove the tag?')) return;
+                }
 
-		        document.forms['kwd_edit_form'].elements['delete_kwd_id'].value = tag_ID;
-		        document.forms['kwd_edit_form'].submit();
-	        }
+                document.forms['kwd_edit_form'].elements['delete_kwd_id'].value = tag_ID;
+                document.forms['kwd_edit_form'].submit();
+            }
 
-	        function delete_multiple() {
-		        document.forms['kwd_edit_form'].elements['delete_multiple_kwds'].value = 1;
-		        document.forms['kwd_edit_form'].submit();
-	        }
+            function delete_multiple() {
+                document.forms['kwd_edit_form'].elements['delete_multiple_kwds'].value = 1;
+                document.forms['kwd_edit_form'].submit();
+            }
 
-	        function rename_kwd(tag_ID, kwd_obj) {
-		        if (kwd_obj.value == '') {
-			        alert('Tag cannot be empty');
-			        kwd_obj.value = kwd_obj.defaultValue;
-			        kwd_obj.focus();
-			        return false;
-		        }
+            function rename_kwd(tag_ID, kwd_obj) {
+                if (kwd_obj.value == '') {
+                    alert('Tag cannot be empty');
+                    kwd_obj.value = kwd_obj.defaultValue;
+                    kwd_obj.focus();
+                    return false;
+                }
 
-		        if (kwd_obj.value.indexOf(',') >= 0) {
-			        alert('Tag cannot contain commas');
-			        kwd_obj.value = kwd_obj.defaultValue;
-			        kwd_obj.focus();
-			        return false;
-		        }
+                if (kwd_obj.value.indexOf(',') >= 0) {
+                    alert('Tag cannot contain commas');
+                    kwd_obj.value = kwd_obj.defaultValue;
+                    kwd_obj.focus();
+                    return false;
+                }
 
-		        if (kwd[kwd_obj.value.toLowerCase()]  &&  kwd[kwd_obj.value.toLowerCase()] != tag_ID) {
-			        if (confirm('You already have a tag called "'+kwd_obj.value+'".\nDo you want to change all "'+kwd_obj.defaultValue+'" references to "'+kwd_obj.value+'" references, and remove "'+kwd_obj.defaultValue+'"?')) {
-				        document.forms['kwd_edit_form'].elements['update_kwd_from'].value = tag_ID;
-				        document.forms['kwd_edit_form'].elements['update_kwd_to'].value = kwd[kwd_obj.value.toLowerCase()];
-				        document.forms['kwd_edit_form'].submit();
-			        } else {
-				        kwd_obj.value = kwd_obj.defaultValue;
-				        kwd_obj.focus();
-				        return false;
-			        }
-		        }
+                if (kwd[kwd_obj.value.toLowerCase()]  &&  kwd[kwd_obj.value.toLowerCase()] != tag_ID) {
+                    if (confirm('You already have a tag called "'+kwd_obj.value+'".\nDo you want to change all "'+kwd_obj.defaultValue+'" references to "'+kwd_obj.value+'" references, and remove "'+kwd_obj.defaultValue+'"?')) {
+                        document.forms['kwd_edit_form'].elements['update_kwd_from'].value = tag_ID;
+                        document.forms['kwd_edit_form'].elements['update_kwd_to'].value = kwd[kwd_obj.value.toLowerCase()];
+                        document.forms['kwd_edit_form'].submit();
+                    } else {
+                        kwd_obj.value = kwd_obj.defaultValue;
+                        kwd_obj.focus();
+                        return false;
+                    }
+                }
 
-		        kwd[kwd_obj.defaultValue.toLowerCase()] = 0;
-		        kwd[kwd_obj.value.toLowerCase()] = tag_ID;
+                kwd[kwd_obj.defaultValue.toLowerCase()] = 0;
+                kwd[kwd_obj.value.toLowerCase()] = tag_ID;
 
-		        document.forms['kwd_edit_form'].elements['change_names'].value = 1;
-		        return true;
-	        }
+                document.forms['kwd_edit_form'].elements['change_names'].value = 1;
+                return true;
+            }
 
-	        function show_replace_list(elt, tag_ID) {
-		        var replace_link = elt;
-		        var container = replace_link.parentNode;
-		        var sel = document.getElementById("kwd_select").cloneNode(true);
+            function show_replace_list(elt, tag_ID) {
+                var replace_link = elt;
+                var container = replace_link.parentNode;
+                var sel = document.getElementById("kwd_select").cloneNode(true);
 
-		        container.removeChild(replace_link);
+                container.removeChild(replace_link);
 
-		        container.appendChild(document.createTextNode("replace with: "));
+                container.appendChild(document.createTextNode("replace with: "));
 
-		        container.appendChild(sel);
-		        sel.style.display = "";
+                container.appendChild(sel);
+                sel.style.display = "";
 
-		        container.appendChild(document.createTextNode(" "));
+                container.appendChild(document.createTextNode(" "));
 
-		        var b = document.createElement("input");
-		        b.type = "button";
-		        b.value = "replace";
-		        b.onclick = function() {
-			        if (! sel.value) { alert("Select a tag"); return; }
-			        document.forms["kwd_edit_form"].elements["replace_kwd"].value = 1;
-			        document.forms["kwd_edit_form"].elements["replace_kwd_id"].value = tag_ID;
-			        document.forms["kwd_edit_form"].elements["replace_with_kwd_id"].value = sel.value;
-			        document.forms["kwd_edit_form"].submit();
-		        };
-		        container.appendChild(b);
+                var b = document.createElement("input");
+                b.type = "button";
+                b.value = "replace";
+                b.onclick = function() {
+                    if (! sel.value) { alert("Select a tag"); return; }
+                    document.forms["kwd_edit_form"].elements["replace_kwd"].value = 1;
+                    document.forms["kwd_edit_form"].elements["replace_kwd_id"].value = tag_ID;
+                    document.forms["kwd_edit_form"].elements["replace_with_kwd_id"].value = sel.value;
+                    document.forms["kwd_edit_form"].submit();
+                };
+                container.appendChild(b);
 
-		        container.appendChild(document.createTextNode(" "));
+                container.appendChild(document.createTextNode(" "));
 
-		        var b = document.createElement("input");
-		        b.type = "button";
-		        b.value = "cancel";
-		        b.onclick = function() {
-			        while (container.firstChild) container.removeChild(container.firstChild);
-			        container.appendChild(replace_link);
-		        }
-		        container.appendChild(b);
-	        }
-            
+                var b = document.createElement("input");
+                b.type = "button";
+                b.value = "cancel";
+                b.onclick = function() {
+                    while (container.firstChild) container.removeChild(container.firstChild);
+                    container.appendChild(replace_link);
+                }
+                container.appendChild(b);
+            }
+
             var tagsCount = 0;
-            
+
             function onDocumentReady(){
-                if ('{section}' != ''  &&  
-                        (enddoc=document.getElementById('enddoc'))  &&  
-                        (elt=document.getElementById('{section}'))) { 
-                            enddoc.focus(); 
-                            elt.focus(); 
-                            elt.blur(); 
-                }                
+                if ('{section}' != ''  &&
+                    (enddoc=document.getElementById('enddoc'))  &&
+                    (elt=document.getElementById('{section}'))) {
+                    enddoc.focus();
+                    elt.focus();
+                    elt.blur();
+                }
                 //resize parent dialog
                 setTimeout(function(){
-                    
-                    var body = document.body,
-                        html = document.documentElement;
 
-                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
-                                           html.clientHeight, html.scrollHeight, html.offsetHeight );                    
-                    var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth, 
-                                           html.clientWidth, html.scrollWidth, html.offsetWidth ); 
-                                                              
+                    var body = document.body,
+                    html = document.documentElement;
+
+                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight,
+                        html.clientHeight, html.scrollHeight, html.offsetHeight );
+                    var desiredWidth = Math.max( body.scrollWidth, body.offsetWidth,
+                        html.clientWidth, html.scrollWidth, html.offsetWidth );
+
                     if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
-                        doDialogResize(desiredWidth, desiredHeight);              
+                        doDialogResize(desiredWidth, desiredHeight);
                     }
-             
-                }, 500);
+
+                    }, 500);
             }
-            
-        //-->
+
+            //-->
         </script>
     </head>
 
     <body style="padding:20px" class="popup" onLoad="onDocumentReady()">
 
-        <div class="hide_on_bookmark_import"> 
+        <div class="hide_on_bookmark_import">
             <a name="tag_edit"> </a>
             {TagMessage}
-            
-	        <div>
-		        <script type="text/javascript">
+
+            <div>
+                <script type="text/javascript">
                     var kwd = new Object();
                     {ForeachTagJs}
                 </script>
-                
-		        <form method="post" action="configureProfile.php" name="kwd_edit_form">
-			        <input type="hidden" name="db" value="{database}">
-			        {body_only}
-			        <input type="hidden" name="tag_edit" value="{tag_edit}">
-			        {sortby_input}
+
+                <form method="post" action="configureProfile.php" name="kwd_edit_form">
+                    <input type="hidden" name="db" value="{database}">
+                    {body_only}
+                    <input type="hidden" name="tag_edit" value="{tag_edit}">
+                    {sortby_input}
                     {sortby_button}
-			        to change tag labels: edit labels below and click "Update tags" <br>to delete multiple tags, 
+                    to change tag labels: edit labels below and click "Save edits" <br>to delete multiple tags,
                     select with checkboxes and click "Delete selected tags"
-                    
+
                     <br>
                     <br clear="all">
-                    
+
                     <div id=tags-loading>Loading tag data ...</div>
-                    
+
                     <div id="tag_scroll_region">
                         <table border="0" style="display: none;" id=tags-table>
                             {ForeachTag}
                         </table>
                     </div>
-                    
+
                     <script>
                         /* get rid of scary flickery effect that occurs when some numbnut with 1000 tags loads this page */
                         document.getElementById("tags-loading").style.display = "none";
                         document.getElementById("tags-table").style.display = "block";
                     </script>
-                    
+
                     <div class="actionButtons">
-                        <input type="button" value="Update tags" style="font-weight: bold;">
-                        <input type="button" value="Delete selected tags" style="font-weight: bold;" onClick="delete_multiple();">
+                        <input type="button" value="Save edits" style="font-weight: bold;"
+                            title="Edit text in several tags then click this button to save your changes">
+                        &nbsp;&nbsp;&nbsp;
+                        <input type="button" value="Delete selected" style="font-weight: bold;"
+                            onClick="delete_multiple();" title="Select multiple tags with checkboxes, then click this button to delete the selected tags">
                         <input type="hidden" name="delete_kwd_id" value="0">
                         <input type="hidden" name="update_kwd_from" value="0">
                         <input type="hidden" name="update_kwd_to" value="0">
@@ -292,11 +295,11 @@
                         <input type="hidden" name="replace_with_kwd_id" value="0">
                         <input type="hidden" name="delete_multiple_kwds" value="0">
                     </div>
-		        </form>
-	        </div>
+                </form>
+            </div>
         </div>
-        
+
         {kwd_select} <a href="#" style="text-decoration: none;" onClick="return false;" id="enddoc">&nbsp;</a>
-    
+
     </body>
 </html>

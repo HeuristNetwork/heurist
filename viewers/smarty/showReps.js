@@ -299,6 +299,7 @@ function ShowReps() {
     }
 
 
+
     /**
     * Creates new template from the given query
     *
@@ -421,7 +422,7 @@ function ShowReps() {
         if(isLoadGenerated){
             __onGenerateTemplate([]);
         }
-        
+
         var ele = $('#rectype_selector');
         ele.load( top.HEURIST.baseURL_V3 + "common/php/recordTypeSelect.php?db="+_db,
             function(){
@@ -431,23 +432,25 @@ function ShowReps() {
                         var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
                         Hul.getJsonData(baseurl, __onGenerateTemplate, 'db='+_db+'&mode=list&rty_id='+selel);
                     }
-                });        
-                
-            } );
-        
+                });
 
-            /*
-            var squery = _getQuery();
+        } );
 
-            if(Hul.isnull(squery)){
-                alert('Please select some records in search results');
-            }else{
-                var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
-                Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
-            }
-            */
-        
+
+        /*
+        var squery = _getQuery();
+
+        if(Hul.isnull(squery)){
+        alert('Please select some records in search results');
+        }else{
+        var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
+        Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
+        }
+        */
+
     }
+
+
 
     function _initEditor(content) {
         if(codeEditor==null){
@@ -487,6 +490,8 @@ function ShowReps() {
         }
     }
 
+
+
     function _initEditorMode(template_file, template_body){
 
         Dom.get("edTemplateName").innerHTML = template_file;
@@ -495,6 +500,8 @@ function ShowReps() {
         _keepTemplateValue = template_body; //Dom.get("edTemplateBody").value;
         _setLayout(true, true);
     }
+
+
 
     /**
     * Creates new template from the given query
@@ -522,6 +529,8 @@ function ShowReps() {
 
         _generateTemplate(template_file, null, false);
     }
+
+
 
     /**
     * Convert template to global
@@ -553,6 +562,7 @@ function ShowReps() {
             alert('Database must be registered to allow translation of local template to global template');
         }
     }
+
 
 
     /**
@@ -654,24 +664,24 @@ function ShowReps() {
                 if(top.HEURIST4){
                     top.HEURIST4.msg.showMsgDlg(
                         'Template was changed. Are you sure you wish to exit and lose all modifications?',
-                       {'Save': function() { 
-                           _operationEditor(2); 
-                           var $dlg = top.HEURIST4.msg.getMsgDlg();
-                           $dlg.dialog( 'close' );},
-                        'Discard': function() { 
-                            _setLayout(true, false); 
+                        {'Save': function() {
+                            _operationEditor(2);
                             var $dlg = top.HEURIST4.msg.getMsgDlg();
                             $dlg.dialog( 'close' );},
-                        'Cancel':function() {
-                            var $dlg = top.HEURIST4.msg.getMsgDlg();
-                            $dlg.dialog( 'close' );
-                        }
-                       },
-                    'Warning');
-                    
+                            'Discard': function() {
+                                _setLayout(true, false);
+                                var $dlg = top.HEURIST4.msg.getMsgDlg();
+                                $dlg.dialog( 'close' );},
+                            'Cancel':function() {
+                                var $dlg = top.HEURIST4.msg.getMsgDlg();
+                                $dlg.dialog( 'close' );
+                            }
+                        },
+                        'Warning');
+
                 }else{
                     mySimpleDialog.setHeader("Warning!");
-                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");   
+                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");
                     mySimpleDialog.show();
                 }
             }else{
@@ -689,6 +699,8 @@ function ShowReps() {
             */
         }
     }
+
+
 
     /**
     * Executes the template from editor
@@ -746,6 +758,7 @@ function ShowReps() {
             alert('Nothing to execute');
         }
     }
+
 
 
     var layout, _isviewer, _iseditor;
@@ -815,9 +828,8 @@ function ShowReps() {
         }
     }
 
-    //
-    //
-    //
+
+
     function _selectAllChildren(parentNode) {
         var len = parentNode.children?parentNode.children.length:0;
         if( len > 0) {
@@ -840,6 +852,7 @@ function ShowReps() {
     }
 
 
+
     /**
     * Finds node by term id
     */
@@ -860,6 +873,8 @@ function ShowReps() {
         }
     }
 
+
+
     //
     //
     //
@@ -869,6 +884,8 @@ function ShowReps() {
             _selectAllChildren(node);
         }
     }
+
+
 
     //
     //
@@ -883,6 +900,8 @@ function ShowReps() {
         _varsTree.getNodesBy(__resetSelection);
         _varsTree.render();
     }
+
+
 
     /**
     *	Fills the given treeview with the list of variables
@@ -904,10 +923,11 @@ function ShowReps() {
         }
 
 
+
         //top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
         var idx_maxval = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
         var idx_dtype  = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
-        
+
         var first_node = null;
 
         //internal function
@@ -1020,7 +1040,7 @@ function ShowReps() {
 
                     childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
                     childNode.enableHighlight = false;
-                    
+
                     if(first_node==null) first_node = childNode;
 
                     if( is_multiconstrained ){
@@ -1062,6 +1082,7 @@ function ShowReps() {
             }//for
         }//__createChildren
         //end internal function
+
 
 
         //fill treeview with content
@@ -1119,6 +1140,8 @@ function ShowReps() {
         }
     }
 
+
+
     function _addIfOperator(nodedata, varname){
         //var varname = nodedata.id; //was prefix+nodedata.this_id
         var parname = _getVariableName(nodedata.parent_full_id);
@@ -1128,6 +1151,8 @@ function ShowReps() {
         var remark = "{* "+ parname + _getVariableName(nodedata.id) + " *}"; //was this_id
         return "\n{if ($"+varname+")}"+remark+"\n\n   {$"+varname+"} \n\n{/if}\n"+remark+" {* you can also add {/else} before {/if}} *}\n";
     }
+
+
 
     //
     //
@@ -1172,6 +1197,7 @@ function ShowReps() {
     }
 
 
+
     //
     // root loop
     // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next function
@@ -1184,6 +1210,8 @@ function ShowReps() {
         insertAtCursor(textedit, _text, false, -12);
     }
     //
+
+
 
     /*
     * insertPattern: inserts a pattern/template/example for different actions into the editor text
@@ -1199,64 +1227,73 @@ function ShowReps() {
         switch(pattern) {
 
             case 1: // Heading for record type
-                _text=  "{* Use a saved search sorted by record type (in this example) *} \n" +
-                "{* Modify the sorting variable and the test according to your needs *} \n" +
-                "{* Put the following at top of file: {$lastRecordType = 0}  *} \n\n" +
+                _text= "{* Section heading *} \n" +
+                "\n\n {* Make sure your search results are sorted by record type. \n" +
+                "    Move the following line to the top of the file:\n"+
+                "        {$lastRecordType = 0}\n" +
+                "    Modify the sorting variable and the test according to your needs.*} \n\n" +
 
-                "{* Section heading *} \n" +
                 "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
                 "   <hr> \n<p/> \n"+
                 "   <h1>{$r.recTypeName}</h1> {* Replace this with whatever you want as a heading *} \n" +
-                "{/if} {* section heading *} ";
+                "{/if} {* end of section heading *} " +
+                "\n\n";
                 break;
 
             case 2: // simple table
-                _text='{* Use this as a guideline for creating a simple tabular format *} \n' +
-                '{* Put narrow specified width columns at the start and any long text columns at the end *} \n' +
+                _text='\n\n {* Use this as a guideline for creating a simple tabular format *} \n' +
+                '{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
                 '<table> \n' +
                 '   <tr style="padding-top:10px;"> \n' +
                 '      <td style="width:200px"> \n' +
                 '      </td> \n' +
+                '      <td> \n' +
+                '      </td> \n' +
+                '      {* Add more columns as required *}\n' +
                 '   </tr> \n' +
-                '</table>';
+                '</table> ' +
+                '\n\n';
                 break;
 
             case 3: // information on first element of a loop
-                _text='{* The information between {if} ... {/if} will be generated before the first element of a loop is output *} \n' +
-                '{* The information will not be output if the loop is empty - this is often an advantage *} \n' +
-                '{if ?????????} {* Information preceding first element of loop *} \n' +
+                _text='\n\n{* Information before first element of a loop (nothing output if loop is empty). \n' +
+                '     Place this before the fields output in the loop. Replace $r with the name of the loop variable. *}\n' +
+                '{if $r@first} {* Before loop *} \n' +
                 ' \n' +
+                ' {* Add the information you want output here *}}\n' +
                 ' \n' +
-                ' \n' +
-                ' \n' +
-                '{/if} {* Information before first element of loop*}';
+                '{/if} {* End: Before loop*}' +
+                '\n\n';
                 break;
 
-            case 4: // information on last element of a loop
-                _text='{* The information between {if} ... {/if} will be generated after the last element of a loop is output *} \n' +
-                '{* The information will not be output if the loop is empty - this is often an advantage *} \n' +
-                '{if ?????????} {* Information following last element of loop *} \n' +
+            case 4: // information on first element of a loop
+                _text='\n\n{* Information after last element of a loop (nothing output if loop is empty). \n' +
+                '     Place this after the fields output in the loop. Replace $r with the name of the loop variable. *}\n' +
+                '{if $r@last} {* After loop *} \n' +
                 ' \n' +
+                ' {* Add the information you want output here *}}\n' +
                 ' \n' +
-                ' \n' +
-                ' \n' +
-                '{/if} {* Information following last element of loop*}';
+                '{/if} {* End: After loop*}' +
+                '\n\n';
                 break;
 
-            case 5: // using a div to control scpacing
-                _text=  '{* You can use style= on divs, spans, table rows and cells etc. to control spacing *} \n' +
+            case 5: // using a div to control spacing
+                _text=  '\n\n{* You can use style= on divs, spans, table rows and cells etc. to control spacing *} \n' +
                 '<div style="padding-top:5px; margin-left:10px;"> \n' +
                 '   {* Put content here *} \n' +
-                '</div>';
+                '</div>' +
+                '\n\n';
                 break;
 
             case 6: //
-                _text='TO DO';
+                _text='\n\n   TO DO   ' +
+                ' content to add here ' +
+                '\n\n';
                 break;
 
 
             case 99: // outer records loop
-                _text=  '{*------------------------------------------------------------*} \n' +
+                _text=  '\n\n {*------------------------------------------------------------*} \n' +
                 '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
                 '{*------------------------------------------------------------*} \n' +
                 ' \n\n' +
@@ -1267,7 +1304,8 @@ function ShowReps() {
                 ' \n' +
                 '{*------------------------------------------------------------*} \n' +
                 '{/foreach} {* end records loop, do not remove *} \n' +
-                '{*------------------------------------------------------------*}';
+                '{*------------------------------------------------------------*} ' +
+                '\n\n';
                 break;
 
             default:
@@ -1277,6 +1315,7 @@ function ShowReps() {
         insertAtCursor(null, _text, false, 0); // insert text into text buffer
 
     } // _insertPattern
+
 
 
     //
@@ -1293,6 +1332,7 @@ function ShowReps() {
 
         insertAtCursor(textedit, _text, false, -7);
     }
+
 
 
     var insertPopupID, insert_ID;
@@ -1371,6 +1411,8 @@ function ShowReps() {
         }
     }
 
+
+
     //
     // inserts selected variables
     //
@@ -1431,6 +1473,7 @@ function ShowReps() {
     }
 
 
+
     //
     function _insertSelectedVarsAsLoop( varid ){
 
@@ -1455,11 +1498,15 @@ function ShowReps() {
 
     }
 
+
+
     function ucwords (str) {
         return (str + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function ($1) {
             return $1.toUpperCase();
         });
     }
+
+
 
     function _getVariableName(id){
         if(!Hul.isempty(id)){
@@ -1482,6 +1529,8 @@ function ShowReps() {
             return "";
         }
     }
+
+
 
     function _getVariableName_old(id){
         if(!Hul.isempty(id)){
@@ -1506,6 +1555,7 @@ function ShowReps() {
             return "";
         }
     }
+
 
 
     /**
@@ -1557,6 +1607,7 @@ function ShowReps() {
     }
 
 
+
     //
     // utility function - move to HEURIST.utils
     // TODO: What is the difference btween this and the one above. What do the parameters do?
@@ -1595,6 +1646,9 @@ function ShowReps() {
 
         setTimeout(function() {myField.focus(); }, 500);
     }
+
+
+
     //
     // apply line breaks
     //
@@ -1646,6 +1700,8 @@ function ShowReps() {
         return oTextarea;
     }
 
+
+
     //
     //
     //
@@ -1690,6 +1746,8 @@ function ShowReps() {
         */
     }
 
+
+
     //
     function _getQuery(){
         if(_sQueryMode=="all"){
@@ -1700,6 +1758,8 @@ function ShowReps() {
             return top.HEURIST.currentQuery_main;
         }
     }
+
+
 
     //
     function _showLimitWarning(){
@@ -1721,6 +1781,8 @@ function ShowReps() {
         document.getElementById('recordCount').innerHTML = msg;
     }
 
+
+
     //
     function _onPublish(template_file){
 
@@ -1741,6 +1803,8 @@ function ShowReps() {
         });
     }
 
+
+
     function _onResize(newwidth){
 
         var newval = newwidth>490?'30px':'60px';
@@ -1752,6 +1816,7 @@ function ShowReps() {
             }
         }
     }
+
 
     //public members
     var that = {

@@ -18,11 +18,8 @@
 * showReps.html
 * List of available report templates based on Smarty
 *
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
@@ -148,46 +145,34 @@
         <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
 
 
-        <iframe id="ifrmPrint" src="#" style="width:0px; height:0px;"></iframe>
+        <iframe id="ifrmPrint" src="#" style="width:0; height:0;"></iframe>
 
         <div id="insert-popup" style="display:none;">
-            <div style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;">
+            <div style="position:absolute;left:0;right:0;top:0px;bottom:0;padding:15px;overflow:auto;">
 
-                <table border="0">
-                    <tr>
-                        <td colspan="2">
-                            <select id="selInsertPattern" style="width:200px">
-                                <option value="1">Heading for record type</option>
-                                <option value="2">Simple table</option>
-                                <option value="3">Information on first element of a loop</option>
-                                <option value="4">Information on last element of a loop</option>
-                                <option value="99">Outer records loop</option>
-                            </select>
-                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
-                                Insert pattern
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td colspan="2">
-                            <hr>
-                        </td>
-                    </tr>
+                <table style="border: 0px;">
 
                     <tr>
                         <td>
-                            <select id="selInsertMode" style="width:120px">
+                            <select id="selInsertMode" style="width:200px"
+                                title="Choose options for insertion - use fucntion wrapper to format multimedia (images, sound, video) for display">
                                 <option value="0">Field only</option>
-                                <option value="1">Field + Label</option>
                                 <option value="2">Field + function wrapper</option>
                             </select>
                         </td>
+                        <td><button onclick="top.HEURIST.insertVar(null, false, false )"
+                            title="Inserts the value of the field in the output. Customise using the dropdowns.">
+                            Insert field value</button>
+                        </td>
+                    </tr>
+
+                    <tr style="margin-top: 20px;">
                         <td>
-                            <select id="selInsertModifiers"
+                            <select id="selInsertModifiers" style="width:200px"
+                                title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)"
                                 onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
                                 style="width:120px">
-                                <option>choose modifier</option>
+                                <option>choose function ...</option>
                                 <option>capitalize</option>
                                 <option>cat</option>
                                 <option>count_characters</option>
@@ -211,35 +196,47 @@
                                 <option>wordwrap</option>
                             </select>
                         </td>
-                    </tr>
-
-
-                    <!-- shows buttons in all cases, plus message if within loop -->
-                    <tr>
-                        <td colspan="2"><div class="ins_isloop">Use these buttons for normal insertion</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><button onclick="top.HEURIST.insertVar(null, false, false )">
-                            Insert field</button>
-                        </td>
                         <td>
-                            <button onclick="top.HEURIST.insertVar(null,  false, true )">
-                                Insert test (If)</button>
+                            <button onclick="top.HEURIST.insertVar(null,  false, true )"
+                                title="Inserts a test of whether the field is blank (or a specific value).">
+                                Test value (If ...)</button>
                         </td>
                     </tr>
 
                     <!-- only shows if there is a within-loop option -->
-                    <tr>
-                        <td colspan="2"><div class="ins_isloop">Use these buttons if inserting within a repeat loop</div>
+                    <tr style="margin-top: 20px;">
+                        <td colspan="2">
+                            <div class="ins_isloop"><br/>Use buttons below to insert field or test within a repeat loop</div>
                         </td>
                     </tr>
                     <tr class="ins_isloop">
                         <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, false )">
-                            Insert field</button></div>
+                            Insert field value</button></div>
                         </td>
                         <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, true )">
-                            Insert test (If)</button></div>
+                            Test value (If ...)</button></div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2">
+                            <hr>
+                        </td>
+                    </tr>
+
+
+                    <tr style="margin-top: 20px;">
+                        <td colspan="2">
+                            <select id="selInsertPattern" style="width:200px">
+                                <option value="1">Heading for record type</option>
+                                <option value="2">Simple table</option>
+                                <option value="3">Information on first element of a loop</option>
+                                <option value="4">Information on last element of a loop</option>
+                                <option value="99">Outer records loop</option>
+                            </select>
+                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                                Insert pattern
+                            </button>
                         </td>
                     </tr>
 
@@ -249,7 +246,7 @@
                 <b>Note</b> For repeating value fields (including pointers) you should first insert a repeat loop
                 by clicking "repeat" next to the name of the field, then place further field specifications
                 inside the {foreach}...{/foreach} loop that is inserted.
-                <div class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</div>
+                <span class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</span>
             </div>
         </div>
 
@@ -271,9 +268,6 @@
                 </div>
                 <button id="btnRepPrint2" style="position: absolute; right: 40px; top:4px;">Print</button>
 
-                <!-- <div id="btnRepPrint2" onclick="onPrint()"  class="button"
-                style="position: absolute; right: 44px; top:5px;height: 17px !important; ">Print</div>
-                -->
                 <ul id="rep_list" class="horizontal menu" style="float:right">
                     <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
                         <!-- <span id="btnRepMenu2" class="button"></span> -->
@@ -293,11 +287,11 @@
             </div>
             <div id="templateTree">
                 <div>
-                    <a href="../../../context_help/smarty_reports.html" 
-                            onClick="top.HEURIST.util.popupURL(window, this.href);return false;"
-                            title="Read full documentation on the Smarty templating language">
-                    <b>Help on using this function</b></a><br />
-                    <div>
+                    <a href="../../context_help/smarty_reports.html"
+                        onClick="top.HEURIST.util.popupURL(window, this.href);return false;"
+                        title="Read full documentation on the Smarty templating language">
+                        <b>Help on using this function</b></a><br />
+                    <div style="margin-top: 10px;">
                         <label style="font-weight:bold;width:auto;">Select Record Type</label><span id="rectype_selector"></span>
                     </div>
                     Position cursor in text on left before selecting actions below

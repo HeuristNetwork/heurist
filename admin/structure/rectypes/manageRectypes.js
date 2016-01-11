@@ -16,7 +16,7 @@
  * A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
  * it may call another pop-ups: selectTerms and selectRecType
  *
- * @author      Stephen White   
+ * @author      Stephen White
  * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
  * @author      Juan Adriaanse
  * @copyright   (C) 2005-2016 University of Sydney
@@ -182,10 +182,14 @@ function RectypeManager() {
                     content:
                     ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
-                        '<label>Filter by name:&nbsp;&nbsp;</label>'+
-                        '<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+
+                        // These are useless clutter. Filter by name was text, active only was checkbox
+                        //'<label>Filter by name:&nbsp;&nbsp;</label>'+
+                        '<input type="hidden" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
                         // declutter: Probably unecessary to provuide an active/inactive filter
-                        '<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
+                        '<input type="hidden" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">'+
+                        //'&nbsp;Show active only&nbsp;&nbsp;'+
+
                         '</div>'+
                         '<div style="float:right; text-align:right">'+
                         // TODO: remove old code - orginally had to manually save changes

@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -156,7 +156,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
 
                         $rtyNameLookup = array();
                         $res = mysql_query('select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID where rec_ID in ('.$_REQUEST['bib_ids'].')');
-                        //FIXME add code to pprint cross type matching  header " Cross Type - Author Editor with Person with Book"
+                        //TODO: print cross-type matching header " Cross Type : Author Editor with Person with Book"
                         while ($row = mysql_fetch_assoc($res)) $rtyNameLookup[$row['rty_ID']]= $row['rty_Name'];
 
                         $temptypes = '';
