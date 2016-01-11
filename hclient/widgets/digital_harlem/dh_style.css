@@ -21,7 +21,7 @@
 #header       {
     height: 100px;
     background-color: #000000;
-    background: url(assets/banner_dh_east.jpg) no-repeat center right #000000;
+    background: url(dhassets/banner_dh_east.jpg) no-repeat center right #000000;
 }
 
 .intro {
@@ -75,7 +75,7 @@
     height: 100px;
     width: 357px;
     position:absolute;
-    background: url(assets/banner_dh_west.jpg) no-repeat #000000;
+    background: url(dhassets/banner_dh_west.jpg) no-repeat #000000;
 }
 
 #searchbar  {
@@ -139,7 +139,7 @@ a:hover {
 a.menuitem {
     display: block;;
     padding: 7px;
-    background-image: url(assets/menubutton_bg.jpg);
+    background-image: url(dhassets/menubutton_bg.jpg);
     background-size: 99% 95%;
     color: #ffffff;
     font-family: Verdana;
@@ -148,7 +148,7 @@ a.menuitem {
 }
 
 #searchbar a:hover {
-    background-image: url(assets/menubutton_bg_rollover.jpg);
+    background-image: url(dhassets/menubutton_bg_rollover.jpg);
     text-decoration: none;
 }
 
@@ -232,7 +232,7 @@ div.infowindow ul  {
 
 div.infowindow li {
     list-style: none ;
-    background-image: url(assets/arrow.gif) ;
+    background-image: url(dhassets/arrow.gif) ;
     background-repeat: no-repeat;
     background-position: 0px 3px;
     padding-left: 12px;
