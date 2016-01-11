@@ -306,7 +306,7 @@ function errorOut($msg){
             }
 
             //
-            // get list of all registered databases
+            // get list of all registered databases to allow new database to be based on an existing database
             //
             var is_db_got = false;
             function getRegisteredDatabases(){
