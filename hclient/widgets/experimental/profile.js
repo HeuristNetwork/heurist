@@ -93,7 +93,7 @@ $.widget( "heurist.profile", {
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/databases.php .db-list", function(){  //load db-list only
+                    $dlg.load("hserver/utilities/list_databases.php .db-list", function(){  //load db-list only
                         $dlg.dialog({
                             autoOpen: true,
                             height: 420,
@@ -124,7 +124,7 @@ $.widget( "heurist.profile", {
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/sync/faims.php?db="+top.HAPI4.database+" .utility-content", function(){
+                    $dlg.load("hserver/sync/faims_to_heurist.php?db="+top.HAPI4.database+" .utility-content", function(){
                         $dlg.dialog({
                             autoOpen: true,
                             height: 480,

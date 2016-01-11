@@ -195,9 +195,9 @@ $.widget( "heurist.profile_edit", {
                 //init captcha
                 this.edit_form.find('#imgdiv').show();
                 /*that.edit_form.find('#btnCptRefresh')
-                        .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
-                        .show()
-                        .click( __refreshCaptcha );*/
+                .button({text:false, icons:{ secondary: "ui-icon-refresh" }})
+                .show()
+                .click( __refreshCaptcha );*/
 
                 this._refreshCaptcha();
             }
@@ -229,15 +229,15 @@ $.widget( "heurist.profile_edit", {
     },
 
     _refreshCaptcha: function(){
-            var that = this;
-            var $dd = that.edit_form.find('#imgdiv');
-            var id = Math.random();
-            if(true){
-                $dd.load(top.HAPI4.basePathV4+'hserver/captcha.php?id='+id);
-            }else{
-                $dd.empty(); //find("#img").remove();
-                $('<img id="img" src="hserver/captcha.php?img='+id+'"/>').appendTo($dd);
-            }
+        var that = this;
+        var $dd = that.edit_form.find('#imgdiv');
+        var id = Math.random();
+        if(true){
+            $dd.load(top.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
+        }else{
+            $dd.empty(); //find("#img").remove();
+            $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+        }
     },
 
     _doSave: function(){

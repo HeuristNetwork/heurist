@@ -1,6 +1,6 @@
 <?php
     /**
-    * Capture 
+    * Capture
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -27,12 +27,12 @@ if(@$_REQUEST['captcha_code']){
           $response = array('status'=>HEURIST_OK, 'data'=>'ok');
     } else {
           $response = array('status'=>HEURIST_OK, 'data'=>'no');
-    }    
+    }
 
     header('Content-type: text/javascript');
     print json_encode($response);
     exit();
-    
+
 }else */
 if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $captchanumber = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz'; // Initializing PHP variable with string
@@ -40,12 +40,12 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
 
     $_SESSION["captcha_code"] = $captcha_code;
     $target_layer = imagecreatetruecolor(50,24);
-    $captcha_background = imagecolorallocate($target_layer, 255, 160, 119);//#dbdfe6  219, 223, 230);  
+    $captcha_background = imagecolorallocate($target_layer, 255, 160, 119);//#dbdfe6  219, 223, 230);
     imagefill($target_layer,0,0,$captcha_background);
     $captcha_text_color = imagecolorallocate($target_layer, 0, 0, 0);
     imagestring($target_layer, 5, 5, 5, $captcha_code, $captcha_text_color);
     header("Content-type: image/jpeg");
-    imagejpeg($target_layer);    
+    imagejpeg($target_layer);
 }else{  //TRIVIA CAPTCHA
     $planets = array('Sun','Jupiter','Saturn','Uranus','Neptune','Earth','Venus','Mars','Titan','Mercury','Moon','Europa','Triton','Pluto');
     $ran0 = rand(0,13);
@@ -53,6 +53,6 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
     $ran2 = rand(1,9);
     $captcha_code = strtolower($planets[$ran0]).($ran1+$ran2);
     $_SESSION["captcha_code"] = $captcha_code;
-    print 'Enter the word '.strtolower($planets[$ran0]).' followed by the sum of '.$ran1.' and '.$ran2.' in the Challenge field above';
+    print "Answer: the word '".strtolower($planets[$ran0])."' followed by the sum of ".$ran1." and ".$ran2;
 }
 ?>
