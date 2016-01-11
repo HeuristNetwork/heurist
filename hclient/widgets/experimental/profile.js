@@ -1,11 +1,11 @@
 /**
-* Central access point/menu 
+* Central access point/menu
 * If not logged in: Login button
 * If logged in:     Addd New Record, Profile and Options button with drop down menus
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -93,7 +93,7 @@ $.widget( "heurist.profile", {
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/databases.php .db-list", function(){  //load db-list only
+                    $dlg.load("hserver/utilities/list_databases.php .db-list", function(){  //load db-list only
                         $dlg.dialog({
                             autoOpen: true,
                             height: 420,
@@ -117,14 +117,14 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').rectype_manager)){ //already loaded
                         showManageRecordTypes();
                     }else{
-                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/rectype_manager.js', function(){ showManageRecordTypes(); } );
+                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showManageRecordTypes(); } );
                     }
 
                 }else if(action == "menu-options-import-faims"){
 
                     var $dlg = $("#heurist-dialog");
                     $dlg.empty();
-                    $dlg.load("php/sync/faims.php?db="+top.HAPI4.database+" .utility-content", function(){
+                    $dlg.load("hserver/sync/faims_to_heurist.php?db="+top.HAPI4.database+" .utility-content", function(){
                         $dlg.dialog({
                             autoOpen: true,
                             height: 480,

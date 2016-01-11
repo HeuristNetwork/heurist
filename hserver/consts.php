@@ -7,7 +7,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -46,7 +46,7 @@ $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
 $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
 // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
-$topdirs = "admin|applications|common|context_help|export|ext|external|hapi|help|hclient|hserver|import|records|redirects|search|viewers"; // Upddate in 3 places if changed
+$topdirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
 
 $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
@@ -88,7 +88,7 @@ define('HEURIST_DB_PREFIX', $dbPrefix);
 
 //---------------------------------
 
-define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2014 The University of Sydney.');
+define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2016 The University of Sydney.');
 $talkToSysAdmin="Please advise your system administrator or email info - at - heuristscholar.org for assistance.";
 
 /**

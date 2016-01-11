@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2015 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -16,10 +16,10 @@
  * A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
  * it may call another pop-ups: selectTerms and selectRecType
  *
- * @author      Stephen White   
+ * @author      Stephen White
  * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
  * @author      Juan Adriaanse
- * @copyright   (C) 2005-2015 University of Sydney
+ * @copyright   (C) 2005-2016 University of Sydney
  * @link        http://HeuristNetwork.org
  * @version     3.1.0
  * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -182,10 +182,14 @@ function RectypeManager() {
                     content:
                     ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
-                        '<label>Filter by name:&nbsp;&nbsp;</label>'+
-                        '<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+
+                        // These are useless clutter. Filter by name was text, active only was checkbox
+                        //'<label>Filter by name:&nbsp;&nbsp;</label>'+
+                        '<input type="hidden" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
                         // declutter: Probably unecessary to provuide an active/inactive filter
-                        '<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
+                        '<input type="hidden" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">'+
+                        //'&nbsp;Show active only&nbsp;&nbsp;'+
+
                         '</div>'+
                         '<div style="float:right; text-align:right">'+
                         // TODO: remove old code - orginally had to manually save changes

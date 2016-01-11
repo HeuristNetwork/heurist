@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2015 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -306,7 +306,7 @@ function errorOut($msg){
             }
 
             //
-            // get list of all registered databases
+            // get list of all registered databases to allow new database to be based on an existing database
             //
             var is_db_got = false;
             function getRegisteredDatabases(){
@@ -523,12 +523,13 @@ function errorOut($msg){
 
                     <div id="div_register" style="display: none;">
                         <!-- h3 style="margin-left: 38px">Define Database Administrator</h3 -->
-                        <div style="margin-left: 60px; margin-top: 10px;">
+                        <div style="margin-left: 60px; margin-top: 30px;">
                             <button id="btnRegister" style="font-weight: bold;" />
                         </div>
-                        <div style="padding-left: 38px; margin-top: 10px; margin-bottom: 20px;">
-                            You are going to create your first database on this server. Please define the user who will
-                            be database owner and administrator
+                        <div style="padding-left: 38px; margin-top: 20px; margin-bottom: 20px;">
+                            Please register in order to define the user who will become the database owner and administrator.</br><br/>
+                            If you are already a user of another database on this server, we suggest logging into that database (<a href="../../../index.php">select database here</a>)<br/>
+                            and creating your new database with Database > New Database, as this will carry over your login information from the existing database.
                         </div>
                     </div>
 
