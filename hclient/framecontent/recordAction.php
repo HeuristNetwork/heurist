@@ -50,7 +50,7 @@ loginRequired();
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_detail');
+$allowed_actions = array('add_detail','replace_detail','delete_detail');
 
 if(!in_array($action_type, $allowed_actions)){
     header('Location: '.ERROR_REDIR.'?msg=Action is not defined or not allowed');
@@ -130,33 +130,62 @@ if(!in_array($action_type, $allowed_actions)){
                 }
             }
         </script>
+        <style type="text/css">
+            .content_div{
+                padding:10px;
+                position:absolute;
+                top:0;
+                left:0px;
+                right:0px;
+                bottom:3em
+            }
+            .buttons_div{
+                position:absolute;bottom:0;left:0px;right:0px;height:3em;text-align:right;padding: 1em 1em .3em .4em;
+            }
+            #div_result > div > span {
+                width:200px;
+                display:table-cell;
+            }
+        </style>
     </head>
 
     <!-- HTML -->
     <body>
-        <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
+    
+        <div id="div_parameters" class="content_div">
         
-        </div>
+            <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
+            
+            </div>
 
-        <fieldset>
-            <div tyle="padding: 0.2em; width: 100%;" class="input">
-                    <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Records scope:</label></div>
-                    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
-            </div>
-            <div id="div_sel_fieldtype" tyle="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Select field:</label></div>
-                <select id="sel_fieldtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
-            </div>
-        </fieldset>
-        
-        <div id="div_widget" tyle="padding: 0.2em; width: 100%;">
             <fieldset>
+                <div tyle="padding: 0.2em; width: 100%;" class="input">
+                        <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Records scope:</label></div>
+                        <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                </div>
+                <div id="div_sel_fieldtype" tyle="padding: 0.2em; min-width: 600px;display:none;" class="input">
+                    <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Select field:</label></div>
+                    <select id="sel_fieldtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                </div>
             </fieldset>
-        </div>
+            
+            <div id="div_widget" tyle="padding: 0.2em; width: 100%;">
+                <fieldset>
+                </fieldset>
+            </div>
 
-        <div id="div_result" tyle="padding: 0.2em; width: 100%;">
-        
+        </div>
+        <div id="div_result" class="content_div" style="display: none;">
+            Result
+        </div>
+        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix buttons_div">
+            <div class="ui-dialog-buttonset">
+                <div id="btn-ok">OK</div>
+                <div id="btn-cancel">Cancel</div>
+            </div>
         </div>
         
+        <div class="loading" style="width:100%;height:100%;display: none;">
+        </div>
     </body>
 </html>

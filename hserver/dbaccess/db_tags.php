@@ -33,7 +33,7 @@
     * @param mixed $tag_names
     * @param mixed $ugrID
     */
-    function tagGetByName($system, $tag_names, $ugrID=null){
+    function tagGetByName($system, $tag_names, $isadd, $ugrID=null){
 
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
@@ -53,6 +53,11 @@
                     mysqli_real_escape_string($tag_name).'") and tag_UGrpID='.$ugrID);
                 if($res){
                     array_push($tag_ids, $res);
+                }else if($isadd){
+                    $res = tagSave($system, array('tag_UGrpID'=>$ugrID, 'tag_Text'=>$tag_name));
+                    if($res){
+                        array_push($tag_ids, $res);
+                    }
                 }
             }
         }
@@ -172,11 +177,15 @@
         }
     }
 
+    
+    
     /**
     * insert/update tag
     *
     * @param mixed $system
     * @param mixed $tag  - array [ ID, UGrpID, Text, Description, AddedByImport ]
+    * 
+    * return false or new tag_ID
     */
     function tagSave($system, $tag){
 
@@ -192,7 +201,7 @@
         }else{
 
             if(intval(@$tag['tag_ID'])<1){
-                $samename = tagGetByName($system, $tag['tag_Text'], $tag['tag_UGrpID']);
+                $samename = tagGetByName($system, $tag['tag_Text'], false, $tag['tag_UGrpID']);
 
                 if(count($samename)>0){
                     $tag['tag_ID'] = $samename[0];
@@ -355,6 +364,9 @@
     * @param mixed $tag_ids - array of tag ids
     * @param mixed $tag_names - if tag ids are not defined, we use $tag_names to get ids
     * @param mixed $ugrID
+    * 
+    * returns false if error
+    *     or array ('tags_added'=>$tag_count, 'bookmarks_added'=>$bookmarks_added)
     */
     function tagsAssign($system, $record_ids, $tag_ids, $tag_names=null, $ugrID=null){
 
@@ -369,7 +381,7 @@
                     $system->addError(HEURIST_INVALID_REQUEST);
                     return false;
                 }else{
-                    $tag_ids = tagGetByName($system, array_filter(explode(',', $tag_names)), $ugrID);
+                    $tag_ids = tagGetByName($system, array_filter(explode(',', $tag_names)), true, $ugrID);
                 }
             }
             if(!is_array($record_ids) || count($record_ids)<0 || !is_array($tag_ids) || count($tag_ids)<0){
@@ -441,7 +453,7 @@
         }else{
             //find tag_ids by tag name
             if($tag_ids==null && $tag_names!=null){
-                $tag_ids = tagGetByName($system, array_filter(explode(',', $tag_names)), $ugrID);
+                $tag_ids = tagGetByName($system, array_filter(explode(',', $tag_names)), false, $ugrID);
             }
             if(!is_array($record_ids) || count($record_ids)<0){
                 $system->addError(HEURIST_INVALID_REQUEST);

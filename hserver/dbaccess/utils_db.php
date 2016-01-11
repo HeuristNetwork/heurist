@@ -5,9 +5,10 @@
     *
     *  mysql_connection - establish connection
     *  mysql__getdatabases4 - get list of databases
-    *  mysql__select_assoc
-    *  mysql__select_value
-    *  mysql__select_array
+    *  mysql__select_assoc - returns array  key_column=>val_column for given table
+    *  mysql__select_list - returns array of column values
+    *  mysql__select_value   - return the first column of first row
+    *  mysql__select_array   - returns first row
     *  mysql__insertupdate
     *
     * @package     Heurist academic knowledge management system
@@ -160,7 +161,28 @@
         }
         return $matches;
     }
+    /**
+    * returns array of column values
+    */
+    function mysql__select_list($mysqli, $table, $column, $condition) {
 
+        $matches = null;
+        if($mysqli){
+            $query = "SELECT $column FROM $table WHERE $condition";
+            $res = $mysqli->query($query);
+
+            if ($res){
+                $matches = array();
+                while ($row = $res->fetch_row()){
+                    array_push($matches, $row[0]);
+                }
+                $res->close();
+            }
+        }
+
+        return $matches;
+    }
+    
     /**
     * return the first column of first row
     *

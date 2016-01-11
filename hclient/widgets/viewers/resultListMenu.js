@@ -320,19 +320,17 @@ $.widget( "heurist.resultListMenu", {
 
         }else if(action == "menu-selected-value-add"){
 
-            this.addDetailPopup();
-/*
-        }else if(action == "menu-selected-value-add2"){
+            this.detailBatchEditPopup('add_detail');
 
-                this.addDetailPopup2();
-*/                
         }else if(action == "menu-selected-value-replace"){
 
-            this.replaceDetailPopup();
+            this.detailBatchEditPopup('replace_detail');
+            //this.replaceDetailPopup();
 
         }else if(action == "menu-selected-value-delete"){
 
-            this.deleteDetailPopup();
+            this.detailBatchEditPopup('delete_detail');
+            //this.deleteDetailPopup();
 
         }else if(action == "menu-collected-add"){
 
@@ -921,7 +919,7 @@ $.widget( "heurist.resultListMenu", {
     },
 
     
-    addDetailPopup2: function() {
+    detailBatchEditPopup: function(action_type) {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
@@ -948,9 +946,12 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
    */     
-        var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='+top.HAPI4.database+'&action=add_detail';
+        var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='+top.HAPI4.database+'&action='+action_type;
 
-        top.HEURIST4.msg.showDialog(url, {height:400, width:600, title: top.HR('Add field value'), class:'ui-heurist-bg-light'} );
+        top.HEURIST4.msg.showDialog(url, {height:300, width:600, 
+            padding: '0px',
+            title: top.HR(action_type), 
+            class:'ui-heurist-bg-light'} );
     },
     
     

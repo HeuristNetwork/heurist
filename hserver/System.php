@@ -483,6 +483,7 @@ class System {
             }else{
                 $groups = array();
             }
+            //add user itself
             array_push($groups, intval($this->current_User['ugr_ID']));
             return $groups;
         }else{

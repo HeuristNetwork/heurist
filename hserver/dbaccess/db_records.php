@@ -792,6 +792,8 @@
         return true;
     }
 
+    // @todo move terms function in the separate 
+    
     //
     // get terms from json string
     //

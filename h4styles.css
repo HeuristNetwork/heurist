@@ -815,7 +815,7 @@ background: #8ea9b9
 }
 
 .loading{
-/*    background: url('hclient/assets/loading-animation-white.gif') no-repeat center center !important;*/
+   background: url('hclient/assets/loading-animation-white.gif') no-repeat center center !important;
 }
 
 .labelBold{

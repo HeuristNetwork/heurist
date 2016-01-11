@@ -28,7 +28,7 @@ function hRecordAction(_action_type) {
     var _className = "RecordAction",
     _version   = "0.4",
     
-    selectRecordScope, action_type;
+    selectRecordScope, action_type, allSelectedRectypes;
     
     
 /*
@@ -55,6 +55,10 @@ function hRecordAction(_action_type) {
             }
         );
         _fillSelectRecordScope();      
+        
+        //init buttons
+        $('#btn-ok').button({label:top.HR('Action')}).click(_startAction);
+        $('#btn-cancel').button({label:top.HR('Cancel')}).click(function(){window.close();});
     }
 
     //
@@ -66,6 +70,10 @@ function hRecordAction(_action_type) {
       if(!top.HAPI4.currentRecordset) return;
       
       var selScope = selectRecordScope.get(0);
+     
+            var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
+            allowed.splice(allowed.indexOf("separator"),1);
+            allowed.splice(allowed.indexOf("relmarker"),1);     
         
         //add result count option default
       var opt = new Option("Current results set (count="+ top.HAPI4.currentRecordset.length()+")", "All");
@@ -93,9 +101,13 @@ function hRecordAction(_action_type) {
     //
     function _onRecordScopeChange() {
         
-        if(action_type=='add_detail'){
-            $('#div_sel_fieldtype').show();
-            _fillSelectFieldTypes();
+        switch(action_type) {
+            case 'add_detail':
+            case 'replace_detail':
+            case 'delete_detail':
+                $('#div_sel_fieldtype').show();
+                _fillSelectFieldTypes();
+            break;
         }
         
     }
@@ -110,7 +122,6 @@ function hRecordAction(_action_type) {
         var rtyIDs = [], dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
         var rtys = {};
         var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
-            
             
         //get record types
         if(scope_type=="All"){
@@ -133,75 +144,87 @@ function hRecordAction(_action_type) {
                 }
             }
             
+            allSelectedRectypes = rtyIDs;
+            
         }else{
             rtyIDs = [scope_type];
         }
         
-        var dtidx = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
-        var fieldSelect = $('#sel_fieldtype');
-        fieldSelect.empty();
-        fieldSelect = fieldSelect.get(0);
-
-        //for all rectypes find all fields as Detail names sorted
-        for (i in rtyIDs) {
-            rty = rtyIDs[i];
-            rtyName = top.HEURIST4.rectypes.names[rty];
-            for (dty in top.HEURIST4.rectypes.typedefs[rty].dtFields) {
-              if(top.HEURIST4.detailtypes.typedefs[dty].commonFields[dtidx] in {"separator":1,"relmarker":1}){  //skip
-                continue;
-              }
-              dtyName = top.HEURIST4.detailtypes.names[dty];
-              if (!dtys[dtyName]){
-                dtys[dtyName] = [];
-                dtyNameToID[dtyName] = dty;
-                dtyNameToRty[dty] = rty;
-                dtyNames.push(dtyName);
-              }
-              fieldName = rtyName + "." + top.HEURIST4.rectypes.typedefs[rty].dtFields[dty][0];
-              dtys[dtyName].push(fieldName);
-            }
-        }
-        if (dtyNames.length >0) {
-            dtyNames.sort();
-          //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
-            for (i in dtyNames) {
-              dtyName = dtyNames[i];
-              var dtyID = dtyNameToID[dtyName];
-              opt = new Option(dtyName, dtyNameToRty[dtyID]+'-'+dtyID);
-              fieldSelect.appendChild(opt);
-              //sort RectypeName.FieldName
-              dtys[dtyName].sort();
-              for (j in dtys[dtyName]){
-                fieldName = dtys[dtyName][j];
-                opt = new Option(".  ."+fieldName, "");
-                opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
-                opt.disabled = "disabled";
-                fieldSelect.appendChild(opt);
-              }
-            }
-        }else{
-            opt = new Option("no suitable fields", "");
-            fieldSelect.appendChild(opt);
-        }
-        fieldSelect.onchange = _createInputElement;
-        _createInputElement();
+        var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
+            allowed.splice(allowed.indexOf("separator"),1);
+            allowed.splice(allowed.indexOf("relmarker"),1);
+            allowed.splice(allowed.indexOf("geo"),1);
+            allowed.splice(allowed.indexOf("file"),1);
+        
+        var fieldSelect = $('#sel_fieldtype').get(0);
+        
+        top.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
+        
+        fieldSelect.onchange = _createInputElements;
+        _createInputElements();
     }
     
     //
     // crete editing_input element for selected field type
     //
-    function _createInputElement(){
+    function _createInputElements(){
+                   
+        var $fieldset = $('#div_widget>fieldset');
+        $fieldset.empty();
         
-                   var dtID = $('#sel_fieldtype').val().split('-');
+        if(action_type=='add_detail'){
+            _createInputElement('fld-1', top.HR('Value to be added'));
+        }else if(action_type=='replace_detail'){
+            _createInputElement('fld-1', top.HR('Value to search'));
+            _createInputElement('fld-2', top.HR('Value to replace'));
+        }else if(action_type=='delete_detail'){
+
+            $('<div tyle="padding: 0.2em; width: 100%;" class="input">'
+                +'<span></span><div class="header" style="padding-left: 16px;">'
+                +'<label for="cb_remove_all">Remove all occurrences</label></div>'
+                +'<input id="cb_remove_all" type="checkbox" class="text ui-widget-content ui-corner-all">'
+            +'</div>').appendTo($fieldset);
+    
+            _createInputElement('fld-1', top.HR('Remove value matching'));
+            
+        }
+        
+    }            
+        
+        
+    function _createInputElement(input_id, input_label){
+        
+                   var $fieldset = $('#div_widget>fieldset');
+        
+                   var dtID = $('#sel_fieldtype').val();//
+                   
+                   if(top.HEURIST4.util.isempty(dtID)) return;
+
                    var dtidx = top.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
-                   var rectypeID = dtID[0];
-                   dtID = dtID[1];
-        
+                   
+                   var scope_type = selectRecordScope.val();
+                   if(Number(scope_type)>0){
+                       rectypeID = Number(scope_type)
+                   }else{
+                       var i, rtyIDs
+                       if(scope_type=="All"){
+                            rtyIDs = top.HAPI4.currentRecordset.getRectypes();
+                       }else{
+                            rtyIDs = allSelectedRectypes;
+                       }
+                       for (i in rtyIDs){
+                           if(top.HEURIST4.rectypes.typedefs[rtyIDs[i]].dtFields[dtID]){
+                                rectypeID = rtyIDs[i];
+                                break;                               
+                           }
+                       }
+                   }
+      
         //top.HEURIST4.util.cloneObj(
-                   var dtFields = top.HEURIST4.rectypes.typedefs[rectypeID].dtFields[dtID];
+                   var dtFields = top.HEURIST4.util.cloneJSON(top.HEURIST4.rectypes.typedefs[rectypeID].dtFields[dtID]);
                    var fi = top.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
                    
-                   dtFields[fi['rst_DisplayName']] = 'Value to be added';
+                   dtFields[fi['rst_DisplayName']] = input_label;
                    dtFields[fi['rst_RequirementType']] = 'optional';
                    dtFields[fi['rst_MaxValues']] = 1;
                    dtFields[fi['rst_DisplayWidth']] = 0;
@@ -220,13 +243,163 @@ function hRecordAction(_action_type) {
                                 
                         };
                         
-                   var $fieldset = $('#div_widget>fieldset');
-        
-                   $("<div>").editing_input(ed_options).appendTo($fieldset);
+                   $("<div>").attr('id',input_id).editing_input(ed_options).appendTo($fieldset);
+    }
+
+    //
+    //
+    //
+    function getFieldValue(input_id) {
+             var sel = $('#'+input_id).editing_input('getValues');
+             if(sel && sel.length>0){
+                 return sel[0];
+             }else{
+                 return null;
+             }
     }
     
+    function getExternalLink(query){
+        if(query){
+            return '<span><a href="'+encodeURI(top.HAPI4.basePathV4+'?db='+top.HAPI4.database+'&q='+query)+
+        '" target="_blank">view</a></span>';
+        }else{
+            return '';
+        }
+    }
+    
+    //
+    //
+    //
+    function _startAction(){
+        
+        
+        if ($('#div_result').is(':visible')){
+            $('#div_result').hide();
+            $('#div_parameters').show();
+            $('#btn-ok').button('option','label',top.HR('Action'));
+            return;
+        }
+        
 
+        var dtyID = $('#sel_fieldtype').val();
+        if(top.HEURIST4.util.isempty(dtyID)) {
+            alert('Field is not defined');
+            return;
+        }
+        var request = { dtyID:dtyID, tag:1 };
+        
+        if(action_type=='add_detail'){
+                request['a'] = 'add';
+                request['val'] = getFieldValue('fld-1');
+                if(top.HEURIST4.util.isempty(request['val'])){
+                    alert('Define value to add');
+                    return;
+                }
+            
+        }else if(action_type=='replace_detail'){
+            
+                request['a'] = 'replace';
+                request['sVal'] = getFieldValue('fld-1');
+                if(top.HEURIST4.util.isempty(request['sVal'])){
+                    alert('Define value to search');
+                    return;
+                }
+                request['rVal'] = getFieldValue('fld-2');
+                if(top.HEURIST4.util.isempty(request['rVal'])){
+                    alert('Define value to replace');
+                    return;
+                }
+                
+        }else if(action_type=='delete_detail'){
 
+                request['a'] = 'delete';
+                if(!$('#cb_remove_all').is(':checked')){
+                    request['sVal'] = getFieldValue('fld-1');
+                    if(top.HEURIST4.util.isempty(request['sVal'])){
+                        alert('Define value to delete');
+                        return;
+                    }
+                }
+        }
+    
+        var scope_type = selectRecordScope.val();
+        
+        if(scope_type=="Selected"){
+            request['recIDs'] = top.HAPI4.currentRecordsetSelection;
+        }else{
+            request['recIDs'] = top.HAPI4.currentRecordset.getIds();
+            if(scope_type!="All"){
+                request['rtyID'] = scope_type;
+            }
+        }
+
+     
+            /*
+            * recIDs - list of records IDS to be processed
+            * rtyID - optional filter by record type
+            * dtyID  - detail field to be added
+            * for add: val, geo or ulfID
+            * for replace: sVal - search value, rVal - replace value
+            * for delete:  sVal - search value
+            * tag 0|1  - add system tag to mark processed records
+            */
+            
+        // show hourglass
+        $('body > div:not(.loading)').hide();
+        $('.loading').show();
+     
+        top.HAPI4.RecordMgr.details(request, function(response){
+            
+            $('body > div:not(.loading)').show();
+            $('.loading').hide();
+            var  success = (response.status == top.HAPI4.ResponseStatus.OK);
+            if(success){
+                $('#div_parameters').hide();
+                
+                $('#div_result').empty();
+                
+                response = response['data'];
+                
+                if(action_type=='add_detail'){
+                  sLimited = 'Skipped due exceeding repeat values limit';
+                  sUndefined = 'Records with undefined fields';
+                }else if(action_type=='replace_detail'){               
+                  sLimited = 'eee';  
+                  sUndefined = 'Skipped due to no matching';
+                }else if(action_type=='delete_detail'){ 
+                  sLimited = 'Skipped due impossibility to delete required field';              
+                  sUndefined = 'Skipped due to no matching';
+                }
+
+                var sResult = 
+'<div><span>Records passed to process</span><span>'+response['count']['passed']+'</span></div>'
++((response['count']['noaccess']>0)?'<div><span>No editable records found</span><span>'+response['count']['noaccess']+'</span></div>':'')
+
++('<div><span>Records processed</span><span>'+response['count']['processed']+'</span>' 
+                +(response['count']['processed']>0? getExternalLink(response['processed']['queryString']):'')+'</div>')     
+
++((response['count']['undefined']>0)?'<div><span>'+sUndefined+'</span><span>'+response['count']['undefined']+'</span>'+
+                getExternalLink(response['undefined']['queryString'])+'</div>':'')
+
++((response['count']['limitted']>0)?'<div><span>'+sLimited+'</span><span>'+response['count']['limitted']+'</span>'+
+                getExternalLink(response['limitted']['queryString'])+'</div>':'')
+                
++((response['count']['errors']>0)?'<div><span>Database sql errors</span><span>'+response['count']['errors']+'</span>'+
+                getExternalLink(response['errors']['queryString'])+'</div>':'');
+
+                $('#div_result').html(sResult);
+                $('#div_result').show();
+                $('#btn-ok').button('option','label',top.HR('New Action'));
+            
+            }else{
+                $('#div_result').hide();
+                top.HEURIST4.msg.showMsgErr(response.message);
+            }
+        });
+             
+    }
+    
+    
     //public members
     var that = {
 
