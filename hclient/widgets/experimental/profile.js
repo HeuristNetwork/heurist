@@ -1,5 +1,5 @@
 /**
-* Central access point/menu 
+* Central access point/menu
 * If not logged in: Login button
 * If logged in:     Addd New Record, Profile and Options button with drop down menus
 *
@@ -117,7 +117,7 @@ $.widget( "heurist.profile", {
                     if($.isFunction($('body').rectype_manager)){ //already loaded
                         showManageRecordTypes();
                     }else{
-                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/rectype_manager.js', function(){ showManageRecordTypes(); } );
+                        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showManageRecordTypes(); } );
                     }
 
                 }else if(action == "menu-options-import-faims"){

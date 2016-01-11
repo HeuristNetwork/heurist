@@ -56,7 +56,7 @@ type:  "freetext"  - field type
 levels: [t:4 linkedfrom:5-15, t:5 linkedfrom:10-61]   (the last query in this array is ommitted - it will be current query)
 
 search - main query to search results
-            [linked_to:5-61, t:5 linked_to:4-15, t:4 f:1]    (the last query in the top most parent )
+[linked_to:5-61, t:5 linked_to:4-15, t:4 f:1]    (the last query in the top most parent )
 
 currentvalue:
 history:  - to keep facet values (to avoid redundat search)
@@ -97,21 +97,21 @@ $.widget( "heurist.search_faceted_wiz", {
     //  facets:[[{ title:node.title, type: freetext|enum|integer|relmarker, query: "t:id f:id", fieldid: "f:id",
     //                                    currentvalue:{text:label, query:value, termid:termid}, history:[currentvalue] }, ]
 
-/*
-{"isadvanced":false,
- "rectype_as_facets":false,
- "fieldtypes":["enum","freetext","year","date","integer","float"],
- "rectypes":["11"],
- "facets":[
+    /*
+    {"isadvanced":false,
+    "rectype_as_facets":false,
+    "fieldtypes":["enum","freetext","year","date","integer","float"],
+    "rectypes":["11"],
+    "facets":[
     [{"title":"Language - change to required","type":"enum",    "query":"f:99",     "fieldid":"f:99","currentvalue":null,"history":[]}],
     [{"title":"Family name",                  "type":"freetext","query":"t:10 f:1" ,"fieldid":"f:1", "currentvalue":null,"history":[]},
-     {"title":"Person affected",              "type":"resource","query":"t:13 f:16","fieldid":"f:16"},
-     {"title":"Punishment event(s) - SAVE record first","type":"resource", "query":"f:93","fieldid":"f:93"}],
+    {"title":"Person affected",              "type":"resource","query":"t:13 f:16","fieldid":"f:16"},
+    {"title":"Punishment event(s) - SAVE record first","type":"resource", "query":"f:93","fieldid":"f:93"}],
     [{"title":"Given name(s)","type":"freetext","query":"t:10 f:18","fieldid":"f:18","currentvalue":null,"history":[]},         lvl2
-     {"title":"Person affected","type":"resource","query":"t:13 f:16","fieldid":"f:16"},                                        lvl1
-     {"title":"Punishment event(s) - SAVE record first","type":"resource","query":"f:93","fieldid":"f:93"}]],"domain":"all"}    lvl0
+    {"title":"Person affected","type":"resource","query":"t:13 f:16","fieldid":"f:16"},                                        lvl1
+    {"title":"Punishment event(s) - SAVE record first","type":"resource","query":"f:93","fieldid":"f:93"}]],"domain":"all"}    lvl0
 
-*/
+    */
 
 
 
@@ -147,13 +147,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 that.element.css({overflow: 'none !important','width':'100%'});
             },
             beforeClose: function( event, ui ) {
-                            if(event && event.currentTarget){
-                                var that_dlg = this;
-                                top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
-                                        function(){ $( that_dlg ).dialog( "close" ); });
-                                return false;
-                            }
-                        },
+                if(event && event.currentTarget){
+                    var that_dlg = this;
+                    top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
+                        function(){ $( that_dlg ).dialog( "close" ); });
+                    return false;
+                }
+            },
             buttons: [
                 {text:top.HR('Back'), id:'btnBack',
                     click: function() {
@@ -164,9 +164,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         that.navigateWizard(1);
                 }},
                 /*{text:top.HR('Close'), click: function() {
-                    var that_dlg = this;
-                    top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
-                        function(){ $( that_dlg ).dialog( "close" ); });
+                var that_dlg = this;
+                top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
+                function(){ $( that_dlg ).dialog( "close" ); });
                 }}*/
             ]
         });
@@ -303,21 +303,21 @@ $.widget( "heurist.search_faceted_wiz", {
                         $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
 
                         $dlg.find("#svs_Rules_edit")
-                            .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                            .attr('title', top.HR('Edit Rule Set'))
-                            .css({'height':'16px', 'width':'16px'})
-                            .click(function( event ) {
-                                //that.
-                                that._editRules( $dlg.find('#svs_Rules') );
-                            });
+                        .button({icons: {primary: "ui-icon-pencil"}, text:false})
+                        .attr('title', top.HR('Edit Rule Set'))
+                        .css({'height':'16px', 'width':'16px'})
+                        .click(function( event ) {
+                            //that.
+                            that._editRules( $dlg.find('#svs_Rules') );
+                        });
 
                         $dlg.find("#svs_Rules_clear")
-                            .button({icons: {primary: "ui-icon-close"}, text:false})
-                            .attr('title', top.HR('Clear Rule Set'))
-                            .css({'height':'16px', 'width':'16px'})
-                            .click(function( event ) {
-                                $dlg.find('#svs_Rules').val('');
-                            });
+                        .button({icons: {primary: "ui-icon-close"}, text:false})
+                        .attr('title', top.HR('Clear Rule Set'))
+                        .css({'height':'16px', 'width':'16px'})
+                        .click(function( event ) {
+                            $dlg.find('#svs_Rules').val('');
+                        });
 
 
                         var ishelp_on = top.HAPI4.get_prefs('help_on');
@@ -336,10 +336,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 var message = this.step0.find('.messages');
                 var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
                 if(!bValid){
-                        svs_name.focus();
-                        //top.HEURIST4.msg.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
-                        //setTimeout(function(){svs_name.focus();},2200);
-                        return;
+                    svs_name.focus();
+                    //top.HEURIST4.msg.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
+                    //setTimeout(function(){svs_name.focus();},2200);
+                    return;
                 }else{
                     message.empty();
                     svs_name.removeClass( "ui-state-error" );
@@ -347,8 +347,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
                 if(this.isversion==2){
-                       this.step = 1;
-                       newstep = 2; //skip step
+                    this.step = 1;
+                    newstep = 2; //skip step
                 }else{
                     //ART20150810 - to remove
 
@@ -389,15 +389,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 allowed = ['enum','freetext'];
                 var $dlg = this.step0.find("#facets_options");
                 if($dlg.find("#opt_use_freetext").is(":checked")){
-                    allowed.push('freetext');
+                allowed.push('freetext');
                 }
                 if($dlg.find("#opt_use_date").is(":checked")){
-                    allowed.push('year');
-                    allowed.push('date');
+                allowed.push('year');
+                allowed.push('date');
                 }
                 if($dlg.find("#opt_use_numeric").is(":checked")){
-                    allowed.push('integer');
-                    allowed.push('float');
+                allowed.push('integer');
+                allowed.push('float');
                 }
                 this.options.params.fieldtypes = allowed;
                 */
@@ -421,7 +421,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             this._showStep(newstep);
 
-             if(newstep==3)               //skip step - define ranges
+            if(newstep==3)               //skip step - define ranges
                 this.navigateWizard(1);
 
         }
@@ -537,20 +537,20 @@ $.widget( "heurist.search_faceted_wiz", {
             var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
 
             if($(opt_rectypes).is(':empty')){
-                top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
+            top.HEURIST4.util.createRectypeSelect( opt_rectypes, null, null);
 
-                this._on( opt_mode, {
-                    click: function(e){
-                        if($(e.target).val()=="true"){
-                            $dlg.find('.simple-mode').hide();
-                            $dlg.find('.advanced-mode').show();
-                        }else{
-                            $dlg.find('.simple-mode').show();
-                            $dlg.find('.advanced-mode').hide();
-                            if(this.options.params.rectypes) $(opt_rectypes).val(this.options.params.rectypes[0]);
-                        }
-                    }
-                });
+            this._on( opt_mode, {
+            click: function(e){
+            if($(e.target).val()=="true"){
+            $dlg.find('.simple-mode').hide();
+            $dlg.find('.advanced-mode').show();
+            }else{
+            $dlg.find('.simple-mode').show();
+            $dlg.find('.advanced-mode').hide();
+            if(this.options.params.rectypes) $(opt_rectypes).val(this.options.params.rectypes[0]);
+            }
+            }
+            });
 
             }
 
@@ -560,48 +560,48 @@ $.widget( "heurist.search_faceted_wiz", {
             var isEdit = (parseInt(svsID)>0);
 
             if(isEdit){
-                var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
-                svs_id.val(svsID);
-                svs_name.val(svs[0]);
-                this.options.params = $.parseJSON(svs[1]);
-                this.options.domain = this.options.params.domain;
+            var svs = top.HAPI4.currentUser.usr_SavedSearch[svsID];
+            svs_id.val(svsID);
+            svs_name.val(svs[0]);
+            this.options.params = $.parseJSON(svs[1]);
+            this.options.domain = this.options.params.domain;
 
-                svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.domain:svs[2]);
-                svs_ugrid.parent().hide();
+            svs_ugrid.val(svs[2]==top.HAPI4.currentUser.ugr_ID ?this.options.domain:svs[2]);
+            svs_ugrid.parent().hide();
 
-                var ft = this.options.params.fieldtypes;
-                opt_numeric.attr( "checked", ft.indexOf('integer') );
-                opt_date.attr( "checked", ft.indexOf('date') );
-                opt_text.attr( "checked", ft.indexOf('freetext') );
+            var ft = this.options.params.fieldtypes;
+            opt_numeric.attr( "checked", ft.indexOf('integer') );
+            opt_date.attr( "checked", ft.indexOf('date') );
+            opt_text.attr( "checked", ft.indexOf('freetext') );
 
-                this.step0.find("#opt_mode_simple").attr("checked", !this.options.params.isadvanced );
-                if(!this.options.params.isadvanced) this.step0.find("#opt_mode_simple").click();
-                opt_mode_advanced.attr("checked", this.options.params.isadvanced );
-                if(this.options.params.isadvanced) opt_mode_advanced.click();
+            this.step0.find("#opt_mode_simple").attr("checked", !this.options.params.isadvanced );
+            if(!this.options.params.isadvanced) this.step0.find("#opt_mode_simple").click();
+            opt_mode_advanced.attr("checked", this.options.params.isadvanced );
+            if(this.options.params.isadvanced) opt_mode_advanced.click();
 
-                this.step0.find("#opt_rectype_as_facets").attr('checked', this.options.params.rectype_as_facets);
+            this.step0.find("#opt_rectype_as_facets").attr('checked', this.options.params.rectype_as_facets);
 
             }else{ //add new saved search
 
-                svs_id.val('');
-                svs_name.val('');
+            svs_id.val('');
+            svs_name.val('');
 
-                //fill with list of Workgroups in case non bookmark search
-                var selObj = svs_ugrid.get(0); //select element
-                top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
-                    [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
-                    function(){
-                        svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
-                });
-                svs_ugrid.val(this.options.domain);
-                svs_ugrid.parent().show();
+            //fill with list of Workgroups in case non bookmark search
+            var selObj = svs_ugrid.get(0); //select element
+            top.HEURIST4.util.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
+            [{key:'bookmark', title:top.HR('My Bookmarks')}, {key:'all', title:top.HR('All Records')}],
+            function(){
+            svs_ugrid.val(top.HAPI4.currentUser.ugr_ID);
+            });
+            svs_ugrid.val(this.options.domain);
+            svs_ugrid.parent().show();
 
-                opt_numeric.attr( "checked", true );
-                opt_date.attr( "checked", true );
-                opt_text.attr( "checked", true );
+            opt_numeric.attr( "checked", true );
+            opt_date.attr( "checked", true );
+            opt_text.attr( "checked", true );
 
-                opt_mode_simple.attr("checked", (this.options.params.isadvanced) );
-                opt_mode_simple.click();
+            opt_mode_simple.attr("checked", (this.options.params.isadvanced) );
+            opt_mode_simple.click();
             }
             */
         }
@@ -612,19 +612,19 @@ $.widget( "heurist.search_faceted_wiz", {
     //
     , _editRules: function(ele_rules) {
 
-               var that = this;
+        var that = this;
 
-                var url = top.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + top.HAPI4.database;
-                if(!Hul.isnull(ele_rules)){
-                    url = url + '&rules=' + encodeURIComponent(ele_rules.val());
+        var url = top.HAPI4.basePathV4+ "hclient/framecontent/ruleBuilderDialog.php?db=" + top.HAPI4.database;
+        if(!Hul.isnull(ele_rules)){
+            url = url + '&rules=' + encodeURIComponent(ele_rules.val());
+        }
+
+        top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
+            function(res){
+                if(!Hul.isempty(res)) {
+                    ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
                 }
-
-                top.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
-                    function(res){
-                        if(!Hul.isempty(res)) {
-                               ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
-                        }
-                    }});
+        }});
 
 
     }
@@ -650,210 +650,210 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 //load definitions for given rectypes
                 window.HAPI4.SystemMgr.get_defs({rectypes: rectype,
-                        mode:4,
-                        fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() },
+                    mode:4,
+                    fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() },
 
-                function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                        //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
-                        /*
-                        function __set_queries(parentquery, recordtype, fields){
+                            //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
+                            /*
+                            function __set_queries(parentquery, recordtype, fields){
 
-                           var j;
-                           for(j=0; j<fields.length; j++){
+                            var j;
+                            for(j=0; j<fields.length; j++){
 
-                               var field = fields[j];
-                               var recordtype_new = null;
-                               var parentquery_new = null;
+                            var field = fields[j];
+                            var recordtype_new = null;
+                            var parentquery_new = null;
 
-                               if(field.type=='rectype'){
-                                   recordtype_new  = field.key;
-                               }else if(field.type=='resource' || field.type=='relmarker'){
-                                   //@todo for relmarker - separate case
-                                   var prefix;
-                                   if(field['reverse']=='yes'){
-                                        if(field.type=='resource'){
-                                            prefix = 'lf'
-                                        }else{
-                                            prefix = 'rf';
-                                        }
-                                   }else {
-                                       if(field.type=='resource'){
-                                            prefix = 'lt'
-                                       }else{
-                                            prefix = 'rt';
-                                       }
-                                   }
+                            if(field.type=='rectype'){
+                            recordtype_new  = field.key;
+                            }else if(field.type=='resource' || field.type=='relmarker'){
+                            //@todo for relmarker - separate case
+                            var prefix;
+                            if(field['reverse']=='yes'){
+                            if(field.type=='resource'){
+                            prefix = 'lf'
+                            }else{
+                            prefix = 'rf';
+                            }
+                            }else {
+                            if(field.type=='resource'){
+                            prefix = 'lt'
+                            }else{
+                            prefix = 'rt';
+                            }
+                            }
 
 
-                                   var q = recordtype + ':' + prefix + field.key.substr(2);
-                                   if(parentquery!=''){
-                                        q = parentquery + ':' + q;
-                                   }
-                                   parentquery_new = q;
+                            var q = recordtype + ':' + prefix + field.key.substr(2);
+                            if(parentquery!=''){
+                            q = parentquery + ':' + q;
+                            }
+                            parentquery_new = q;
 
-                                   //unconstrained or one-type constraint
-                                   if(top.HEURIST4.util.isempty(field.rt_ids)
-                                     || Number(field.rt_ids) === field.rt_ids
-                                     || field.rt_ids.indexOf(',')<0){
-                                       recordtype_new = field.rt_ids;
-                                       recordtype = field.rt_ids;
-                                   }
+                            //unconstrained or one-type constraint
+                            if(top.HEURIST4.util.isempty(field.rt_ids)
+                            || Number(field.rt_ids) === field.rt_ids
+                            || field.rt_ids.indexOf(',')<0){
+                            recordtype_new = field.rt_ids;
+                            recordtype = field.rt_ids;
+                            }
 
-                               }
+                            }
 
-                               if(field.children && field.children.length>0){
-                                   __set_queries(parentquery_new?parentquery_new:parentquery,
-                                                 recordtype_new?recordtype_new:recordtype, field.children);
-                                   //__set_queries(parentquery, recordtype_new?recordtype_new:recordtype, field.children);
-                               }else{
+                            if(field.children && field.children.length>0){
+                            __set_queries(parentquery_new?parentquery_new:parentquery,
+                            recordtype_new?recordtype_new:recordtype, field.children);
+                            //__set_queries(parentquery, recordtype_new?recordtype_new:recordtype, field.children);
+                            }else{
 
-                                   var q = field.key;
-                                   if(q=="recTitle") q = "title"
-                                   else if(q=="recModified") q = "modified"
-                                   else q = q.substr(2);
+                            var q = field.key;
+                            if(q=="recTitle") q = "title"
+                            else if(q=="recModified") q = "modified"
+                            else q = q.substr(2);
 
-                                   q = recordtype + ':' + q
-                                   if(parentquery!=''){
-                                        q = parentquery + ':' + q;
-                                        //var nums = parentquery.split('(');
-                                        //q = q + new Array( nums.length+1 ).join(')');
-                                   }
-                                   fields[j].code = q;
-                               }
+                            q = recordtype + ':' + q
+                            if(parentquery!=''){
+                            q = parentquery + ':' + q;
+                            //var nums = parentquery.split('(');
+                            //q = q + new Array( nums.length+1 ).join(')');
+                            }
+                            fields[j].code = q;
+                            }
 
-                           }
-                        }//function
+                            }
+                            }//function
 
-                        __set_queries('', '', response.data.rectypes);
-                        */
+                            __set_queries('', '', response.data.rectypes);
+                            */
 
-                        if(!treediv.is(':empty')){
-                            treediv.fancytree("destroy");
-                        }
+                            if(!treediv.is(':empty')){
+                                treediv.fancytree("destroy");
+                            }
 
-                        if(response.data.rectypes) {
-                            response.data.rectypes[0].expanded = true;
-                        }
+                            if(response.data.rectypes) {
+                                response.data.rectypes[0].expanded = true;
+                            }
 
-                        //setTimeout(function(){
-                        treediv.fancytree({
-                            //extensions: ["filter"],
-                            //            extensions: ["select"],
-                            checkbox: true,
-                            selectMode: 3,  // hierarchical multi-selection
-                            source: response.data.rectypes,
-                            beforeSelect: function(event, data){
-                                // A node is about to be selected: prevent this, for folder-nodes:
-                                if( data.node.hasChildren() ){
-                                    return false;
-                                }
-                            },
-                            select: function(e, data) {
-                                /* Get a list of all selected nodes, and convert to a key array:
-                                var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                                return node.key;
-                                });
-                                $("#echoSelection3").text(selKeys.join(", "));
+                            //setTimeout(function(){
+                            treediv.fancytree({
+                                //extensions: ["filter"],
+                                //            extensions: ["select"],
+                                checkbox: true,
+                                selectMode: 3,  // hierarchical multi-selection
+                                source: response.data.rectypes,
+                                beforeSelect: function(event, data){
+                                    // A node is about to be selected: prevent this, for folder-nodes:
+                                    if( data.node.hasChildren() ){
+                                        return false;
+                                    }
+                                },
+                                select: function(e, data) {
+                                    /* Get a list of all selected nodes, and convert to a key array:
+                                    var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
+                                    return node.key;
+                                    });
+                                    $("#echoSelection3").text(selKeys.join(", "));
 
-                                // Get a list of all selected TOP nodes
-                                var selRootNodes = data.tree.getSelectedNodes(true);
-                                // ... and convert to a key array:
-                                var selRootKeys = $.map(selRootNodes, function(node){
-                                return node.key;
-                                });
-                                $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                                $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                                */
-                            },
-                            dblclick: function(e, data) {
-                                data.node.toggleSelected();
-                            },
-                            keydown: function(e, data) {
-                                if( e.which === 32 ) {
+                                    // Get a list of all selected TOP nodes
+                                    var selRootNodes = data.tree.getSelectedNodes(true);
+                                    // ... and convert to a key array:
+                                    var selRootKeys = $.map(selRootNodes, function(node){
+                                    return node.key;
+                                    });
+                                    $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
+                                    $("#echoSelectionRoots3").text(selRootNodes.join(", "));
+                                    */
+                                },
+                                dblclick: function(e, data) {
                                     data.node.toggleSelected();
-                                    return false;
+                                },
+                                keydown: function(e, data) {
+                                    if( e.which === 32 ) {
+                                        data.node.toggleSelected();
+                                        return false;
+                                    }
                                 }
-                            }
-                            // The following options are only required, if we have more than one tree on one page:
-                            //          initId: "treeData",
-                            //cookieId: "fancytree-Cb3",
-                            //idPrefix: "fancytree-Cb3-"
-                        });
-                        //},1000);
+                                // The following options are only required, if we have more than one tree on one page:
+                                //          initId: "treeData",
+                                //cookieId: "fancytree-Cb3",
+                                //idPrefix: "fancytree-Cb3-"
+                            });
+                            //},1000);
 
-                        //restore selection
-                        var facets;
-                        if(that.options.params.facets_new){ //old version
-                            facets = JSON.parse(JSON.stringify(that.options.params.facets_new));
-                            for(var i=0; i<facets.length; i++){
-                                if(facets[i].code){ //change code to new format (with links direction)
-                                      var codes = facets[i].code.split(':');
-                                      if(codes.length>2){
-                                          var k = 1;
-                                          while(k<codes.length-2){
-                                              codes[k] = 'lt'+codes[k];
-                                              k = k+2;
-                                          }
-                                          facets[i].code = codes.join(':');
-                                      }
+                            //restore selection
+                            var facets;
+                            if(that.options.params.facets_new){ //old version
+                                facets = JSON.parse(JSON.stringify(that.options.params.facets_new));
+                                for(var i=0; i<facets.length; i++){
+                                    if(facets[i].code){ //change code to new format (with links direction)
+                                        var codes = facets[i].code.split(':');
+                                        if(codes.length>2){
+                                            var k = 1;
+                                            while(k<codes.length-2){
+                                                codes[k] = 'lt'+codes[k];
+                                                k = k+2;
+                                            }
+                                            facets[i].code = codes.join(':');
+                                        }
+                                    }
                                 }
+                            }else{
+                                facets = that.options.params.facets;
                             }
-                        }else{
-                            facets = that.options.params.facets;
-                        }
 
 
-                        var tree = treediv.fancytree("getTree");
+                            var tree = treediv.fancytree("getTree");
 
-                        if(facets && facets.length>0){
-                            tree.visit(function(node){
+                            if(facets && facets.length>0){
+                                tree.visit(function(node){
 
-                                        if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
-                                            //find it among facets
-                                            for(var i=0; i<facets.length; i++){
-                                                if(facets[i].code && facets[i].code==node.data.code){
-                                                    node.setSelected(true);
-                                                    break;
-                                                }
+                                    if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                                        //find it among facets
+                                        for(var i=0; i<facets.length; i++){
+                                            if(facets[i].code && facets[i].code==node.data.code){
+                                                node.setSelected(true);
+                                                break;
                                             }
                                         }
+                                    }
                                 });
-                        }
+                            }
 
-                        //change default checkbox for branch root
-                        var cb = treediv.find("span.fancytree-checkbox");
-                        if(cb.length>0){
-                            $(cb[0]).removeClass("fancytree-checkbox");
-                        }
+                            //change default checkbox for branch root
+                            var cb = treediv.find("span.fancytree-checkbox");
+                            if(cb.length>0){
+                                $(cb[0]).removeClass("fancytree-checkbox");
+                            }
 
-                        that.current_tree_rectype_ids = rectypeIds;
+                            that.current_tree_rectype_ids = rectypeIds;
 
-                       $("#fsw_showreverse").change(function(event){
+                            $("#fsw_showreverse").change(function(event){
 
                                 var showrev = $(event.target).is(":checked");
 
                                 tree.visit(function(node){
-                                     if(node.data.isreverse==1){ //  top.HEURIST4.util.isArrayNotEmpty(node.children) &&
+                                    if(node.data.isreverse==1){ //  top.HEURIST4.util.isArrayNotEmpty(node.children) &&
                                         if(showrev){
                                             $(node.li).show();
                                         }else{
                                             $(node.li).hide();
                                         }
-                                     }
+                                    }
                                 });
-                        });
+                            });
 
-                        //tree.options.filter.mode = "hide";
-                        //tree.options.filter.highlight = false;
-                        $("#fsw_showreverse").attr('checked', false);
-                        $("#fsw_showreverse").change();
+                            //tree.options.filter.mode = "hide";
+                            //tree.options.filter.highlight = false;
+                            $("#fsw_showreverse").attr('checked', false);
+                            $("#fsw_showreverse").change();
 
 
-                    }else{
-                        top.HEURIST4.msg.redirectToError(response.message);
-                    }
+                        }else{
+                            top.HEURIST4.msg.redirectToError(response.message);
+                        }
                 });
 
             }
@@ -889,7 +889,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     var q = node.key;
                     if(node.data.type=="relmarker") q = "relmarker"
                     else if(q=="recTitle") q = "title"
-                    else if(q=="recModified") q = "modified";
+                        else if(q=="recModified") q = "modified";
 
                     if(isOneRoot){
                         //root rectypes will be added only once - when full_query is creating
@@ -909,7 +909,7 @@ $.widget( "heurist.search_faceted_wiz", {
             //if(false && fieldnode.data.type=="relmarker") q = "f:relmarker"  //ARTEM 0429
             if(node.data.type=="relmarker") q = "relmarker"
             else if(q=="recTitle") q = "title"
-            else if(q=="recModified") q = "modified";
+                else if(q=="recModified") q = "modified";
 
             if(fieldnode.data.rt_ids){ //constrained
                 q_full = "t:"+fieldnode.data.rt_ids+" "+q;
@@ -940,15 +940,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(!top.HEURIST4.util.isArrayNotEmpty(node.children)){  //ignore top levels selection
 
                     var ids = node.data.code.split(":");
-                            //rtid: ids[ids.length-2],
-                            //id:  ids[ids.length-1],
+                    //rtid: ids[ids.length-2],
+                    //id:  ids[ids.length-1],
 
                     facets.push( {
-                            'var': facets.length,
-                            code:node.data.code,
-                            title:(node.data.name?node.data.name:node.title),
-                            type:node.data.type
-                             } );
+                        'var': facets.length,
+                        code:node.data.code,
+                        title:(node.data.name?node.data.name:node.title),
+                        type:node.data.type
+                    } );
                 }
             }
 
@@ -1031,7 +1031,7 @@ $.widget( "heurist.search_faceted_wiz", {
         }
 
         if(!Hul.isempty(svs_rules.val())){
-             this.options.params.rules = svs_rules.val();
+            this.options.params.rules = svs_rules.val();
         }
 
         var svs_ugrid = svs_ugrid.val();
@@ -1088,7 +1088,7 @@ $.widget( "heurist.search_faceted_wiz", {
 function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').rectype_manager)){
-        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
+        $.getScript(top.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
         $.getScript(top.HAPI4.basePathV4+'ext/fancytree/jquery.fancytree-all.min.js', function(){ showSearchFacetedWizard(params); } );
