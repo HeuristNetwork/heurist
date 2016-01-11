@@ -1,21 +1,11 @@
-Directory:    /hclient/core
 
-Overview:     Core client-side functions, H4 onwards.
+Directory:    /hclient
+
+Overview:     Client-side functions, H4 onwards. See also hserver for server-side functions
 
 Notes:
 
 Updated:     18 Oct 2015
-
-
-Javascript classes
-
-hAPI - main class that stores current system values and allows to interact with server API
-hEditing - add/edit record
-hMapping - work with OS Timemap
-hRecordSet - record set container/manipulation
-
-editing_input.js - input control widget
-utils.js - set of utilty functions
 
 ----------------------------------------------------------------------------------------------------------------
 

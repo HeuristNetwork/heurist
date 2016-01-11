@@ -1,7 +1,7 @@
 
-Directory:    /php/sync
+Directory:    /hserver
 
-Overview:       Database synchronisation functions
+Overview:     Server-side functions for H4 onwards, see also hclient for client-side functions
 
 Notes:
 
