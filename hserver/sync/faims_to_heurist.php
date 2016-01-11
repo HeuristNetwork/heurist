@@ -1,6 +1,8 @@
 <?php
 
 /**
+*
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
