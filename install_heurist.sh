@@ -107,19 +107,18 @@ $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 cd /var/www/html
 $2 ln -s /var/www/html/HEURIST/$1 $1
 
-# Note: this install does not update heuristConfigIni.php to avoid overwriting h3 configuration
-#       TODO: This needs updating so that it does update it if there is no previous installation of h3
-
 echo "Heurist unpacked"
 
 echo -e "\n\n"
 echo "Creating directories and setting permissions"
 
+# set up the filestore, copy .htaccess to block direct web access to contents (overridden for rectype icons/thumbs)
 $2 mkdir /var/www/html/HEURIST/HEURIST_FILESTORE
+$2 cp /var/www/html/HEURIST/$1/admin/setup/.htaccess_for_filestore /var/www/html/HEURIST/HEURIST_FILESTORE/.htaccess
 
 # set up override configIni files
-$2 mv /var/www/html/HEURIST/h4/move_to_parent_as_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
-$2 mv /var/www/html/HEURIST/h4/move_to_parent_as_index.html /var/www/html/HEURIST/index.html
+$2 mv /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php /var/www/html/HEURIST/heuristConfigIni.php
+$2 mv /var/www/html/HEURIST/$1/move_to_parent_as_index.html /var/www/html/HEURIST/index.html
 
 # one or other of these will fail harmlessly
 # on a two tier system you may need to map apache to nobody
