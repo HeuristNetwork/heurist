@@ -35,6 +35,8 @@ $.widget( "heurist.resultList", {
         eventbased:true, 
         //searchsource: null,
         
+        empty_remark:'',
+        
         onselect: null  //on select event for non event based
     },
 
@@ -486,11 +488,16 @@ $.widget( "heurist.resultList", {
 
             }else if(this._count_of_divs<1) {
 
-                var $emptyres = this._renderMessage(top.HR('No records match the search')+
+                var empty_message = top.HR('No records match the search')+
                     '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
                         ?'Note: some records may only be visible to members of particular workgroups'
-                        :'To see workgoup-owned and non-public records you may need to log in')+'</div>'
-                );
+                        :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
+                
+                if(this.options['empty_remark']!=''){
+                        empty_message = empty_message + this.options['empty_remark'];
+                }    
+                
+                var $emptyres = this._renderMessage( empty_message );
 
                 if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
                     var domain = this._query_request.w

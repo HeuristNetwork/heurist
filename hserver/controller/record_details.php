@@ -21,7 +21,7 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/db_recdetails.php');
+    require_once (dirname(__FILE__).'/../dbaccess/DbRecDetails.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     $response = array();
@@ -32,22 +32,26 @@
         //get error and response
         $response = $system->getError();
 
-    }else if(@$_REQUEST['a'] == 'add'){
-
-        $res = detailsAdd($system, $_REQUEST);
-
-    }else if(@$_REQUEST['a'] == 'replace'){ //returns
-
-        $res = detailsReplace($system, $_REQUEST);
-
-    }else if(@$_REQUEST['a'] == 'delete'){
-
-        $res = detailsDelete($system, $_REQUEST);
-
     }else {
-
-        $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
         
+        $dbRecDetails = new DbRecDetails($system, $_REQUEST);
+        
+        if(@$_REQUEST['a'] == 'add'){
+
+            $res = $dbRecDetails->detailsAdd();
+
+        }else if(@$_REQUEST['a'] == 'replace'){ //returns
+
+            $res = $dbRecDetails->detailsReplace();
+
+        }else if(@$_REQUEST['a'] == 'delete'){
+
+            $res = $dbRecDetails->detailsDelete();
+
+        }else {
+
+            $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
+        }
     }
 
     

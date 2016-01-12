@@ -300,6 +300,9 @@ $.widget( "heurist.editing_input", {
                 this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                 this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
 
+                $input.css('width', this.options['input_width']?this.options['input_width']:'300px');
+                
+                
             }else if(false && detailType=="relmarker"){
 
                 $input.css('width','auto');
@@ -344,6 +347,8 @@ $.widget( "heurist.editing_input", {
                 this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
                 this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
 
+            }else if(detailType=="freetext" && this.options['input_width']){
+                $input.css('width', this.options['input_width']);
             }
 
         }

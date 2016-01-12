@@ -191,6 +191,7 @@
     */
     function mysql__select_value($mysqli, $query) {
         $row = mysql__select_array($mysqli, $query);
+
         if($row && @$row[0]){
             $result = $row[0];
         }else{

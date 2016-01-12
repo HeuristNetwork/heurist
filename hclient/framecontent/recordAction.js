@@ -67,7 +67,13 @@ function hRecordAction(_action_type) {
     function _fillSelectRecordScope(){
         
       selectRecordScope.empty();
-      if(!top.HAPI4.currentRecordset) return;
+      
+      
+      if(!top.HAPI4.currentRecordset){
+          //debug
+          top.HAPI4.currentRecordset = new hRecordSet({count: "1",offset: 0,reccount: 1,records: [1069], rectypes:[25]});
+          //return;
+      } 
       
       var selScope = selectRecordScope.get(0);
      
@@ -180,14 +186,18 @@ function hRecordAction(_action_type) {
         }else if(action_type=='delete_detail'){
 
             $('<div tyle="padding: 0.2em; width: 100%;" class="input">'
-                +'<span></span><div class="header" style="padding-left: 16px;">'
+                +'<div class="header" style="padding-left: 16px;">'
                 +'<label for="cb_remove_all">Remove all occurrences</label></div>'
                 +'<input id="cb_remove_all" type="checkbox" class="text ui-widget-content ui-corner-all">'
             +'</div>').appendTo($fieldset);
     
             _createInputElement('fld-1', top.HR('Remove value matching'));
             
+            $('#cb_remove_all').change(function(){ $(this).is(':checked')?$('#fld-1').hide():$('#fld-1').show();  });
+            $('.editint-inout-repeat-button').hide();    
         }
+        
+        
         
     }            
         
@@ -238,6 +248,7 @@ function hRecordAction(_action_type) {
                                 readonly: false,
                                 //title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
                                 showclear_button: false,
+                                input_width: '350px', 
                                 //detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                                 dtFields:dtFields
                                 
@@ -257,16 +268,7 @@ function hRecordAction(_action_type) {
                  return null;
              }
     }
-    
-    function getExternalLink(query){
-        if(query){
-            return '<span><a href="'+encodeURI(top.HAPI4.basePathV4+'?db='+top.HAPI4.database+'&q='+query)+
-        '" target="_blank">view</a></span>';
-        }else{
-            return '';
-        }
-    }
-    
+
     //
     //
     //
@@ -286,7 +288,7 @@ function hRecordAction(_action_type) {
             alert('Field is not defined');
             return;
         }
-        var request = { dtyID:dtyID, tag:1 };
+        var request = { dtyID:dtyID, tag: $('#cb_add_tags').is(':checked')?1:0 };
         
         if(action_type=='add_detail'){
                 request['a'] = 'add';
@@ -344,7 +346,7 @@ function hRecordAction(_action_type) {
             * tag 0|1  - add system tag to mark processed records
             */
             
-        // show hourglass
+        // show hourglass/wait icon
         $('body > div:not(.loading)').hide();
         $('.loading').show();
      
@@ -359,33 +361,48 @@ function hRecordAction(_action_type) {
                 $('#div_result').empty();
                 
                 response = response['data'];
-                
-                if(action_type=='add_detail'){
-                  sLimited = 'Skipped due exceeding repeat values limit';
-                  sUndefined = 'Records with undefined fields';
-                }else if(action_type=='replace_detail'){               
-                  sLimited = 'eee';  
-                  sUndefined = 'Skipped due to no matching';
-                }else if(action_type=='delete_detail'){ 
-                  sLimited = 'Skipped due impossibility to delete required field';              
-                  sUndefined = 'Skipped due to no matching';
+               
+               /*             
+                *       passed - count of given rec ids
+                *       noaccess - no rights to edit
+                *       processed - success
+                            _tag   _tag_error
+                *       undefined - value not found
+                *       limitted
+                *       errors     - sql error on search or updata
+                            errors_list
+                */  
+                var sResult = '';          
+                for(key in response){
+                    if(key && key.indexOf('_')<0 && response[key]>0){
+                        //main report entry
+                        var lbl_key = 'record_action_'+key;
+                        var lbl = top.HR(lbl_key);
+                        if(lbl==lbl_key){
+                            //not found - try to find specified for particular action
+                            lbl = top.HR(lbl_key+'_'+action_type);
+                        }
+                        var tag_link = '';
+                        if(response[key+'_tag']){
+                            tag_link = '<span><a href="'+
+                                encodeURI(top.HAPI4.basePathV4+'?db='+top.HAPI4.database
+                                    +'&q=tag:"'+response[key+'_tag']+'"')+
+                                    '" target="_blank">view</a></span>';
+                        }else if(response[key+'_tag_error']){
+                            tag_link = '<span>'+response[key+'_tag_error']+'</span>';
+                        }else if(key=="processed"){
+                            tag_link = '<span><a href="'+
+                                encodeURI(top.HAPI4.basePathV4+'?db='+top.HAPI4.database
+                                    +'&q=sortby:-m after:"5 minutes ago"')+
+                                    '" target="_blank">view recent changes</a></span>';
+                        }
+                        
+                        sResult = sResult + '<div><span>'+lbl+'</span><span>'
+                                +response[key]+'</span>'
+                                +tag_link+'</div>'
+                        
+                    }
                 }
-
-                var sResult = 
-'<div><span>Records passed to process</span><span>'+response['count']['passed']+'</span></div>'
-+((response['count']['noaccess']>0)?'<div><span>No editable records found</span><span>'+response['count']['noaccess']+'</span></div>':'')
-
-+('<div><span>Records processed</span><span>'+response['count']['processed']+'</span>' 
-                +(response['count']['processed']>0? getExternalLink(response['processed']['queryString']):'')+'</div>')     
-
-+((response['count']['undefined']>0)?'<div><span>'+sUndefined+'</span><span>'+response['count']['undefined']+'</span>'+
-                getExternalLink(response['undefined']['queryString'])+'</div>':'')
-
-+((response['count']['limitted']>0)?'<div><span>'+sLimited+'</span><span>'+response['count']['limitted']+'</span>'+
-                getExternalLink(response['limitted']['queryString'])+'</div>':'')
-                
-+((response['count']['errors']>0)?'<div><span>Database sql errors</span><span>'+response['count']['errors']+'</span>'+
-                getExternalLink(response['errors']['queryString'])+'</div>':'');
 
                 $('#div_result').html(sResult);
                 $('#div_result').show();

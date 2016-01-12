@@ -50,7 +50,7 @@
             if(strlen($tag_name)>0){
 
                 $res = mysql__select_value($system->get_mysqli(), 'select tag_ID from usrTags where lower(tag_Text)=lower("'.
-                    mysqli_real_escape_string($tag_name).'") and tag_UGrpID='.$ugrID);
+                    $system->get_mysqli()->real_escape_string($tag_name).'") and tag_UGrpID='.$ugrID);
                 if($res){
                     array_push($tag_ids, $res);
                 }else if($isadd){
@@ -377,32 +377,37 @@
         }else{
             //find tag_ids by tag name
             if($tag_ids==null){
-                if($tag_names=null){
-                    $system->addError(HEURIST_INVALID_REQUEST);
+                if($tag_names==null){
+                    $system->addError(HEURIST_INVALID_REQUEST, 'Tag name is not defined');
                     return false;
                 }else{
                     $tag_ids = tagGetByName($system, array_filter(explode(',', $tag_names)), true, $ugrID);
                 }
             }
-            if(!is_array($record_ids) || count($record_ids)<0 || !is_array($tag_ids) || count($tag_ids)<0){
-                $system->addError(HEURIST_INVALID_REQUEST);
+            if( !is_array($record_ids) || count($record_ids)<0 ){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Record ids are not defined');
+                return false;
+            }
+
+            if( !is_array($tag_ids) || count($tag_ids)<0 ){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Tags ids either not found or not defined');
                 return false;
             }
 
             $mysqli = $system->get_mysqli();
 
             //assign links
-            $res = $mysqli->query('insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
+            $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
                 . 'select rec_ID, tag_ID from usrTags, Records '
                 . ' where rec_ID in (' . implode(',', $record_ids) . ') '
                 . ' and tag_ID in (' . implode(',', $tag_ids) . ')'
-                . ' and tag_UGrpID = '.$ugrID);
+                . ' and tag_UGrpID = '.$ugrID;
+            $res = $mysqli->query($insert_query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR,"Cannot assign tags", $mysqli->error );
                 return false;
             }
             $tag_count = $mysqli->affected_rows;
-
 
             /*$new_rec_ids = mysql__select_column($mysqli,
             'select rec_ID from Records '

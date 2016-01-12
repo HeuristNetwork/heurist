@@ -74,6 +74,7 @@ function hRecordSet(initdata) {
             }else{
                 records = [];
                 order = response.records;
+                if(response.rectypes) rectypes = response.rectypes;
                 _isMapEnabled = false;
             }
         }

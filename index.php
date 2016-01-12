@@ -159,9 +159,16 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                 );
 
                 //if database is empty show welcome screen
-                if(!(top.HAPI4.sysinfo.db_total_records>0)){
-                    showTipOfTheDay(false);
-                }
+                //if(!(top.HAPI4.sysinfo.db_total_records>0)){
+                //    showTipOfTheDay(false);
+                //}
+<?php
+     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');                   
+     if(!($db_total_records>0)){
+         echo showTipOfTheDay(false);
+     }
+?>                    
+                    
 
                 $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
                                                     

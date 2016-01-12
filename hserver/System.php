@@ -68,7 +68,6 @@ class System {
     private $system_settings = null;
 
 
-
     /**
     * Read configuration parameters from config file
     *
@@ -772,7 +771,8 @@ class System {
                 return null;
             }
 
-            $this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
+            // it is required for main page only - so call this request on index.php 
+            //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
         }
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }

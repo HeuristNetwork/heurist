@@ -32,12 +32,24 @@ regional['en'] = {
     'Error_Mail_Registration':'Your registration is not possible since registration email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
     'mailto_fail': 'Could not perform this operation because the default mail client is not properly installed.<br/>Compose email and send it at info@heuristscholar.org',
     
+    //titles    
     'add_detail':'Add field value',
-    'record_action_add_detail':'This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).',
     'replace_detail':'Replace field value',
     'delete_detail':'Delete field value',
+    //helps
+    'record_action_add_detail':'This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).',
     'record_action_replace_detail':'todo define help in localization for record_action_replace_detail',
-    'record_action_delete_detail':'todo define help in localization for record_action_delete_detail'
+    'record_action_delete_detail':'todo define help in localization for record_action_delete_detail',
+    //reports
+    'record_action_passed': 'Records passed to process',
+    'record_action_no_access': 'No editable records found',
+    'record_action_processed': 'Records processed',
+    'record_action_undefined_add_detail': 'Records with undefined fields',
+    'record_action_undefined_replace_detail': 'Skipped due to no matching',
+    'record_action_undefined_delete_detail': 'Skipped due to no matching',
+    'record_action_limitted_add_detail': 'Skipped due exceeding repeat values limit',
+    'record_action_limitted_delete_detail': 'Skipped due impossibility to delete required field',
+    'record_action_errors': 'Database sql errors'
     
 };
 

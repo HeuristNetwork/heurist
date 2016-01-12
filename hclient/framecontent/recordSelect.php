@@ -30,7 +30,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             // Callback function on map initialization
             function onPageInit(success){
                 if(success){
-                    var recordSelect = new hRecordSelect(top.HEURIST4.util.getUrlParameter('rectype_set'), window.location.search);
+                    var recordSelect = new hRecordSelect(top.HEURIST4.util.getUrlParameter('rectype_set',window.location.search));
                 }
             }
         </script>
@@ -39,28 +39,35 @@ require_once(dirname(__FILE__)."/initPage.php");
     <!-- HTML -->
     <body>
     
-        <div style="height: 30px; padding:0.2em">
-            <div class="div-table-cell">
-                <label>Title:</label>
-                <input id="input_search" class="text ui-widget-content ui-corner-all" 
-                        style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
+        <div style="height: 5em; padding:0.2em">
+            <div style="display: table-row;">
+                <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
+                    <label>Find by title</label>
+                </div>
+                <div class="div-table-cell">
+                    <input id="input_search" class="text ui-widget-content ui-corner-all" 
+                            style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
+                    <div id="btn_search_start"></div>        
+                </div>
+                <div class="div-table-cell" style="padding-left:0.5em">
+                    <label>in</label>
+                    <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
+                </div>
             </div>
-            <div class="div-table-cell" style="display: none;">
-                <div id="btn_search_stop"></div>
+            <div style="display: table-row;">
+                <div class="div-table-cell"></div>
+                <div class="div-table-cell heurist-helper1">Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
             </div>
-            <div class="div-table-cell">
-                <div id="btn_search_start"></div>
+            <div style="display: table-row;">
+                <div class="div-table-cell" style="padding-right:0.5em;text-align:right"><label>or</label></div>
+                <div class="div-table-cell">
+                    <div id="btn_add_record"></div>
+                </div>
             </div>
-            <div class="div-table-cell">
-                in
-                <select id="sel_rectypes" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
-            </div>
+                        
             
-            <div style="padding-left: 1em;">
-                <div id="btn_add_record"></div>
-            </div>
         </div>
-        <div id="recordList" style="position: absolute;top:40px;bottom:1px;width:99%">
+        <div id="recordList" style="position: absolute;top:5em;bottom:1px;width:99%">
         </div>    
     </body>
 </html>

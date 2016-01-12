@@ -143,8 +143,9 @@ if(!in_array($action_type, $allowed_actions)){
                 position:absolute;bottom:0;left:0px;right:0px;height:3em;text-align:right;padding: 1em 1em .3em .4em;
             }
             #div_result > div > span {
-                width:200px;
+                min-width:200px;
                 display:table-cell;
+                font-size:1.1em;
             }
         </style>
     </head>
@@ -159,14 +160,19 @@ if(!in_array($action_type, $allowed_actions)){
             </div>
 
             <fieldset>
-                <div tyle="padding: 0.2em; width: 100%;" class="input">
+                <div style="padding: 0.2em; width: 100%;" class="input">
                         <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Records scope:</label></div>
                         <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
                 </div>
-                <div id="div_sel_fieldtype" tyle="padding: 0.2em; min-width: 600px;display:none;" class="input">
+                <div id="div_sel_fieldtype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                     <div class="header" style="padding-left: 16px;"><label for="sel_record_scope">Select field:</label></div>
                     <select id="sel_fieldtype" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
                 </div>
+                
+                <div style="padding: 0.2em; width: 100%;" class="input">
+                    <div class="header" style="padding-left: 16px;"><label for="cb_add_tags">Add system tag to mark affected records</label></div>
+                    <input id="cb_add_tags" type="checkbox" class="text ui-widget-content ui-corner-all">
+                </div>                
             </fieldset>
             
             <div id="div_widget" tyle="padding: 0.2em; width: 100%;">
@@ -176,7 +182,7 @@ if(!in_array($action_type, $allowed_actions)){
 
         </div>
         <div id="div_result" class="content_div" style="display: none;">
-            Result
+            RESULT 
         </div>
         <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix buttons_div">
             <div class="ui-dialog-buttonset">
