@@ -224,7 +224,7 @@ top.HEURIST4.ui = {
     *
     */
     createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
-        return top.HEURIST4.util.createTermSelectExt2(selObj,
+        return top.HEURIST4.ui.createTermSelectExt2(selObj,
             {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
              defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray});
     },

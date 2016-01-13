@@ -517,7 +517,7 @@ $.widget( "heurist.ruleBuilder", {
                     //reduced list of constraints
                     top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
                     if(arr_field.rectypes.length>1){
-                        top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
+                        top.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
                         this.select_target_rectype.prop('disabled', false);
                     }else{
                         this.select_target_rectype.prop('disabled', true);
@@ -540,7 +540,7 @@ $.widget( "heurist.ruleBuilder", {
             //show all constraints
             top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), this._arr_rectypes , null); //this._arr_rectypes.length>1?'any':null);
             if(this._arr_rectypes.length>1){
-                top.HEURIST4.util.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
+                top.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
             }
             this.select_target_rectype.prop('disabled', this.select_target_rectype.find("option").length==1);
 

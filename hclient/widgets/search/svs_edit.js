@@ -121,7 +121,7 @@ function hSvsEdit(args) {
                 /*var selObj = svs_ugrid.get(0);
                 if(domain=="bookmark"){
                     svs_ugrid.empty();
-                    top.HEURIST4.util.addoption(selObj, 'bookmark', top.HR('My Bookmarks'));
+                    top.HEURIST4.ui.addoption(selObj, 'bookmark', top.HR('My Bookmarks'));
                 }else{
                     svs_ugrid.val(domain);
                 }*/

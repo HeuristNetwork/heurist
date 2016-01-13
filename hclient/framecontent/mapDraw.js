@@ -909,7 +909,7 @@ function hMappingDraw(_mapdiv_id) {
                  // remove from selector
                  $sel_viepoints.find('option:selected').remove(); 
                  if($.isEmptyObject(map_viewpoints)){
-                    top.HEURIST4.util.addoption( $sel_viepoints.get(0), 
+                    top.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
                                 '', top.HR('none defined'));
                  }
               }
@@ -928,7 +928,7 @@ function hMappingDraw(_mapdiv_id) {
                       map_viewpoints.push({key:gmap.getBounds().toUrlValue(), title:location_name});
                       top.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
                       // and add to selector
-                      top.HEURIST4.util.addoption( $sel_viepoints.get(0), 
+                      top.HEURIST4.ui.addoption( $sel_viepoints.get(0), 
                                 gmap.getBounds().toUrlValue(), location_name);
                                 
                   }
