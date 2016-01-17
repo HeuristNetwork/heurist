@@ -165,7 +165,7 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 <?php
      $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');                   
      if(!($db_total_records>0)){
-         echo showTipOfTheDay(false);
+         echo 'showTipOfTheDay(false);';
      }
 ?>                    
                     
