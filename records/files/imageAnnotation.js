@@ -18,7 +18,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -129,7 +129,7 @@ function ImageAnnotation(imageviewer, _recID) {
 			lblInfo = document.createElement('label');
 			lblInfo.id = 'lblInfoCoords';
 			lblInfo.style.color = '#ff0000';
-			lblInfo.innerHTML = "To enable image annotation, use Database>Import Structure to obtain Annotation record type (2-15) from HeuristReferenceSet or HeuristToolSupport database";
+			lblInfo.innerHTML = "To enable image annotation, use Database &gt; Structure &gt; Acquire from Databases to obtain Annotation record type (2-15) from HeuristReferenceSet or HeuristToolSupport database";
 			edittoolbar.appendChild(lblInfo);
 			image_digitizer_container.appendChild(edittoolbar);
 
