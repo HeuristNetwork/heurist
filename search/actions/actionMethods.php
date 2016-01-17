@@ -766,7 +766,7 @@ function bookmark_references($data) {
     }
 
     if (mysql_error()) {
-        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no bookmarks added';
+        $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no bookmarks added (all bookmarked)';
     }else  if ($inserted_count < 1  &&  count($existing_bkmk_ids) < 1) {
 
         //neither new bookmarks, nor existing ones - try to add tags in this case
@@ -822,7 +822,7 @@ function bookmark_and_tag_record_ids ( $data ) {
         $bkmk_ids = mysql__select_array('usrBookmarks', 'bkm_ID', 'bkm_recID in ('.join(',',$rec_ids).') and bkm_UGrpID = ' . get_user_id());
 
         if (mysql_error()) {
-            $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no bookmarks added';
+            $result['problem'] = 'MySQL error: ' . addslashes(mysql_error()) . ' : no bookmarks added (all bookmarked)';
         } else if (count($bkmk_ids) < 1) {
             $result['none'] = 'No bookmark found or created for selected records.';
         } else {	//we have bookmarks lets add the tags

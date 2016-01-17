@@ -834,7 +834,7 @@ function errorOut($msg){
                         <p style="padding-left:6em">
                             After logging in to your new database, we suggest you import some additional entity types from one of the<br />
                             curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
-                            using Database &gt; Import Structure or Database &gt; Annotated Templates</p>
+                            using Database &gt; Structure &gt; Acquire from Databases or Database &gt; Structure &gt; Acquire from Templates</p>
                     </div>
                     <?php
                     // TODO: automatically redirect to the new database in a new window

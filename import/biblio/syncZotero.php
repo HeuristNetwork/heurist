@@ -163,7 +163,7 @@
                         $rt_id = getRecTypeLocalID($arr['h3id']);
                         if($rt_id == null){
                             array_push($mapping_rt_errors, "Record type ".$arr['h3id']."  ".$zType.
-                                " was not found in the database (use Import Structure to obtain)");
+                                " was not found in the database (use Database &gt; Structure &gt; Acquire from Databases to obtain)");
                         }else{
 
                             $mapping_dt = array();

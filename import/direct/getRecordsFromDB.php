@@ -22,7 +22,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -133,7 +133,7 @@ This data transfer function saves the original (source) record IDs in the <i>Ori
 <br/>You do not need to add the <i>Original ID</i> field to each record type, it is recorded automatically as additional data.
 <a href="../../admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME ?>" title="Import database structure elements"
             target=_blank><b>Import structure elements</b></a> (loads in new tab)
-<br/>(choose H3 Core definitions database (db#2), import the <i>Original ID container record</i>, then delete it - the required field remains)
+<br/>(choose Heurist Core definitions database (db#2), import the <i>Original ID container record</i>, then delete it - the required field remains)
 <br/>Reload this page after importing the field
 </p>
 <hr/>

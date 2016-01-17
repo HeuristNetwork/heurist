@@ -596,7 +596,8 @@
                         <label for="noRecursion">&nbsp;&nbsp;Direct record types import only (w/out all related types - constrained pointers)
                         </label><br />
                         <input type="checkbox" id="strict" title="Check this for strict import of types!" checked>
-                        <label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct</label>
+                        <label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct
+                        </label><br />
                         <input type="checkbox" id="importVocabs" checked>
                         <label for="importVocabs">&nbsp;&nbsp;Import complete vocabulary even if a limited set of terms is specified</label>
                     </div>
