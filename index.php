@@ -52,7 +52,7 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
         <script type="text/javascript" src="hclient/core/layout.js"></script>
         <!-- array of possible layouts -->
         <script type="text/javascript" src="layout_default.js"></script>
-        
+
         <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
 
         <script type="text/javascript" src="hclient/widgets/topmenu/help_tips.js"></script>
@@ -100,22 +100,22 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
         <!-- move to profile.js dynamic load -->
         <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
-        
+
         <!--  media viewer -->
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
 
         <script type="text/javascript">
 
            function onPageInit(success){
-                
+
                 if(!success) return;
-                
+
                 // OLD H3 stuff
                 window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
                 window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                 window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                 window.HEURIST.database = {  name: window.HAPI4.database };
-                
+
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js
                 //
@@ -141,7 +141,7 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                             top.HAPI4.SearchMgr.doSearch(document, request);
                         }, 3000);
                     }
-                }        
+                }
                 //definition of ABOUT dialog, called from Help > About, see content below
                 $( "#heurist-about" ).dialog(
                     {
@@ -163,16 +163,16 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                 //    showTipOfTheDay(false);
                 //}
 <?php
-     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');                   
+     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');
      if(!($db_total_records>0)){
          echo 'showTipOfTheDay(false);';
      }
-?>                    
-                    
+?>
+
 
                 $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
-                                                    
-                
+
+
             }
 
         </script>
