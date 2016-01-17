@@ -624,7 +624,7 @@ if($outputFormat=="json"){
 
                 foreach ($fields_correspondence as $imp_id=>$trg_id){
 
-                    if($fields_correspondence_existed[$imp_id]) continue;
+                    if(@$fields_correspondence_existed[$imp_id]) continue;
 
                     print "<tr><td>$imp_id</td><td>".$def_dts[$imp_id]['commonFields'][$idx_name]
                     ."</td><td>"
