@@ -126,7 +126,8 @@ $.widget( "heurist.help_tips", {
                 }
             }else{
                 that.options.current_tip = idx;
-                top.HAPI4.SystemMgr.save_prefs({'help_tip':idx, 'help_tip_last':(new Date()) });
+                top.HAPI4.save_pref('help_tip', idx);
+                top.HAPI4.save_pref('help_tip_last', (new Date()));
                 
                 top.HEURIST4.util.setDisabled($.find('#btnTipPrev'), (idx==1));
 

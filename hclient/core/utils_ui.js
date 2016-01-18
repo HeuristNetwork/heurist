@@ -33,7 +33,7 @@ createRectypeGroupSelect - get SELECT for record type groups
 createRectypeSelect - get SELECT for record types   
 createRectypeDetailSelect - get SELECT for details of given recordtype
     
-createUserGroupsSelect - get SELECT for list of give groups, othewise loads list of groups for current user    
+createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
 
 Other UI functions    
 initHelper - Inits helper div (slider) and button   
@@ -681,7 +681,7 @@ top.HEURIST4.ui = {
     },
 
     /**
-    *  get SELECT for list of give groups, othewise loads list of groups for current user    
+    *  get SELECT for list of given groups, othewise loads list of groups for current user    
     */
     createUserGroupsSelect: function(selObj, groups, topOptions, callback) {
 
@@ -741,8 +741,10 @@ top.HEURIST4.ui = {
 
     //
     // Inits helper div (slider) and button
+    // 
+    // position top|button- @todo auto detect position
     //
-    initHelper: function(help_button, content_title, content_url){
+    initHelper: function(help_button, content_title, content_url, position){
 
         //add helper div
         if($(document.body).find('#helper').length==0){
@@ -751,7 +753,7 @@ top.HEURIST4.ui = {
         
         var $help_button = $(help_button);
         var $helper_div = $(document.body).find('#helper');
-        
+
         $help_button.button({icons: { primary: "ui-icon-help" }, text:false})
                     .on('click', 3, function(){
                         var $helper_div = $(document.body).find('#helper');
@@ -772,11 +774,17 @@ top.HEURIST4.ui = {
         
         //var div_height = Math.min(500, (document.body).height()-$help_button.top());
         //var div_width  = Math.min(600, (document.body).width() *0.8);
+        divpos = null;
+        if(position=='top'){ //show div aboe button
+            divpos = { my: "right bottom", at: "right top", of: $help_button }
+        }else{
+            divpos = { my: "right top", at: "right bottom", of: $help_button };
+        }
         
         $helper_div.dialog({
                     autoOpen: false, 
                     title: top.HR(content_title),
-                    position: { my: "right top", at: "right bottom", of: $help_button },
+                    position: divpos,
                     show: {
                         effect: "slide",
                         direction : 'right',

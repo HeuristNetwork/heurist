@@ -43,22 +43,6 @@
     require_once (dirname(__FILE__).'/utils_mail.php');
 
     /**
-    * List of user preferences and their default values
-    *
-    * @var mixed
-    */
-    $prefs = array(
-        "layout_language" => "en",
-        "layout_theme" => "heurist",
-        'search_limit' => 200,
-
-        "edit_open_in_new_window" => "0",
-        "edit_force_tags" => "1",
-        "edit_pointer_recentsearch" => "1"
-    );
-
-
-    /**
     * Get user/group by field value
     *
     * @param mixed $ugr_Name - user name
@@ -251,20 +235,25 @@
     /**
     * Get default set of properties
     */
-    function user_getPreferences(){
-        global $prefs;
-        return $prefs;
+    function user_getDefaultPreferences(){
+        return array(
+        "layout_language" => "en",
+        "layout_theme" => "heurist",
+        'search_limit' => 200,
+
+        "edit_open_in_new_window" => "0",
+        "edit_force_tags" => "1",
+        "edit_pointer_recentsearch" => "1"
+        );
     }
 
     /**
     * Get set of properties from SESSION
     */
     function user_setPreferences($dbname, $params){
-        global $prefs;
+        
         foreach ($params as $property => $value) {
-            //if (array_key_exists($property, $prefs)) {
             @$_SESSION[$dbname]["ugr_Preferences"][$property] = $value;
-            //}
         }
     }
 

@@ -5,7 +5,7 @@ if (!top.HEURIST4){
 /*
 showMsgErrJson - check if response is json 
 showMsgErr
-showMsgDlgUrl  - loads content url into dialog (getMsgDlg) and show it (showMsgDlg)
+showMsgDlgUrl  - loads content url (not frame!) into dialog (getMsgDlg) and show it (showMsgDlg)
 
 getMsgDlg      - creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
 getPopupDlg    - creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit

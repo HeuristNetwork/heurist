@@ -222,7 +222,9 @@ div.input-div:hover > #btn_input_clear {
 div.input-div > #btn_input_clear {
     display: none;
 }
-
+div.input-div{
+    padding-bottom:0.2em;
+}
 /* fieldset for search*/
 .fieldset_search > div, .input-row{
     display:block;
@@ -758,6 +760,7 @@ Allow use of icon-large to be properly aligned
 
 .heurist-helper1{
     font-style:italic;
+    font-size: 0.9em;
 }
 .svs-acordeon{
     border-bottom: #8ea9b9 1px solid;
@@ -809,6 +812,10 @@ background: #8ea9b9
     display: table-cell;
     vertical-align: middle;
 }
+.div-table-cell > input[type=checkbox]{
+    vertical-align:-0.3em;
+    margin-right:0.2em;
+}
 
 .mandatory > label{
     color:red;
@@ -824,4 +831,20 @@ background: #8ea9b9
 
 #helper p, #helper h2, #helper h4{
     padding:10px;
+}
+
+.popup_content_div{
+    padding:10px;
+    position:absolute;
+    top:0;
+    left:0px;
+    right:0px;
+    bottom:3em
+}
+.popup_buttons_div{
+    position:absolute;
+    bottom:0;left:0px;right:0px;
+    height:3em;
+    text-align:right;
+    padding: 1em 1em .3em .4em;
 }

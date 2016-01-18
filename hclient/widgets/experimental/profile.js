@@ -624,10 +624,11 @@ $.widget( "heurist.profile", {
                         if(response.status == top.HAPI4.ResponseStatus.OK){
 
                             var prefs = top.HAPI4.currentUser['ugr_Preferences'];
-                            var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
-                                prefs['layout_theme'] != request['layout_theme']);
+                            var ask_reload = true;
+                            //(prefs['layout_language'] != request['layout_language'] ||
+                            //    prefs['layout_theme'] != request['layout_theme']);
 
-                            top.HAPI4.currentUser['ugr_Preferences'] = request;
+                            top.HAPI4.currentUser['ugr_Preferences'] = request; //wrong: since request can have only some preferences !!!
                             /*allFields.each(function(){
                             top.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
                             });*/

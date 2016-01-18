@@ -276,7 +276,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'save_prefs';
                 _callserver('usr_info', request, callback);
             }
-
+            
             /**
             * Returns detailed description of groupfs for current user
             *
@@ -729,6 +729,35 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(!res && 'search_limit'==name) res = 1000;
                 return res;
             }
+        },
+        
+        save_pref: function(name, value, limit){
+                //top.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
+                
+                if($.isArray(value) && limit>0) {
+                        value = value.slice(0,limit);
+                        
+                        var cur_value = top.HAPI4.get_prefs(name);
+                        cur_value = cur_value.split(',');
+                        
+                        if($.isArray(cur_value)){
+                            var to_remove = Math.min(limit, value.length);
+                            cur_value = cur_value.slice(0, to_remove);
+                            value = cur_value.concat(value);
+                        }
+                        value = value.join(',');
+                }
+                
+                var request = {};
+                request[name] = value;
+                
+                top.HAPI4.SystemMgr.save_prefs(request,
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            that.currentUser['ugr_Preferences'][name] = value;
+                        }
+                    }
+                );
         },
 
         is_ui_normal: function(){

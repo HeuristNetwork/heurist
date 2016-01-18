@@ -487,7 +487,7 @@ function hRecordSet(initdata) {
         getIds: function( limit ){
             
             if(limit>0){
-                return order.slice(0, 1999);
+                return order.slice(0, limit);
             }
             
             return order;

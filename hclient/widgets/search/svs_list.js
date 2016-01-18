@@ -409,7 +409,7 @@ $.widget( "heurist.svs_list", {
                         keep_status[ ui.oldHeader.attr('grpid') ] = false;
                     }
                     //save
-                    top.HAPI4.SystemMgr.save_prefs({'svs_list_status': JSON.stringify(keep_status)});
+                    top.HAPI4.save_pref('svs_list_status', JSON.stringify(keep_status));
                 }
             });
         });
@@ -429,7 +429,7 @@ $.widget( "heurist.svs_list", {
         keep_status[ ui.oldHeader.attr('grpid') ] = false;
         }
         //save
-        top.HAPI4.save_prefs({'svs_list_status': keep_status});
+        top.HAPI4.save_pref('svs_list_status', keep_status);
         }
         });*/
         this.accordeon.show();

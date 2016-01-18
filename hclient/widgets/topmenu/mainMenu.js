@@ -776,7 +776,7 @@ $.widget( "heurist.mainMenu", {
                             }
 
 
-                            top.HAPI4.currentUser['ugr_Preferences'] = request;
+                            top.HAPI4.currentUser['ugr_Preferences'] = request; //wrong since request can have only part of peferences!!!!!
                             /*allFields.each(function(){
                             top.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
                             });*/

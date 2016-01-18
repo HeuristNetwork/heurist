@@ -37,6 +37,7 @@ $.widget( "heurist.resultList", {
         
         empty_remark:'',
         
+        //event
         onselect: null  //on select event for non event based
     },
 
@@ -396,7 +397,7 @@ $.widget( "heurist.resultList", {
             if(oldmode)this.div_content.removeClass(oldmode);
 
             //save viewmode is session
-            top.HAPI4.SystemMgr.save_prefs({'rec_list_viewmode': newmode});
+            top.HAPI4.save_pref('rec_list_viewmode', newmode);
 
         }else{
             //load saved value
@@ -484,9 +485,9 @@ $.widget( "heurist.resultList", {
 
                 }
 
-
-
             }else if(this._count_of_divs<1) {
+                
+                this._renderPagesNavigator();
 
                 var empty_message = top.HR('No records match the search')+
                     '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
@@ -788,10 +789,10 @@ $.widget( "heurist.resultList", {
             var selected_ids = this.getSelected( true );
             $(this.document).trigger(top.HAPI4.Event.ON_REC_SELECT, {selection:selected_ids, source:this.element.attr('id')} );
         }
-        if(this.options.onselect){
-            var selected_recs = this.getSelected( false );
-            this._trigger( "onselect", null, selected_recs );
-        }
+        
+        var selected_recs = this.getSelected( false );
+        this._trigger( "onselect", null, selected_recs );
+        
     },
 
     /**

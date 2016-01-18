@@ -272,7 +272,7 @@ $.widget( "heurist.rec_list", {
             this.div_content.removeClass(oldmode);
 
             //save viewmode is session
-            top.HAPI4.SystemMgr.save_prefs({'rec_list_viewmode': newmode});
+            top.HAPI4.save_pref('rec_list_viewmode', newmode);
 
         }else{
             newmode = this.options.view_mode;
