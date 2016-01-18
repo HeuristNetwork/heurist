@@ -21,7 +21,7 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/DbRecDetails.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbRecDetails.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     $response = array();

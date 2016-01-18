@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Library to update records details in batch
+    * Class to update records details in batch
     * 
     *
     * @package     Heurist academic knowledge management system
