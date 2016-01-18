@@ -31,11 +31,38 @@
 */
 
 
+//
+// if the same server - try to include script instead of full request
+//
+function loadRemoteURLContentSpecial($url){
+
+    if(strpos($url, HEURIST_SERVER_URL)===0){
+        
+//error_log('url '.$url);        
+        
+        $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
+        if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+        $path = str_replace(HEURIST_SERVER_URL, $documentRoot, $url);
+        
+        $path = substr($path,0,strpos($path,'?'));
+        
+        $parsed = parse_url($url);
+
+                parse_str($parsed['query'], $_REQUEST);
+        //$_REQUEST = $params;
+
+        return getScriptOutput($path);
+
+        //return loadRemoteURLviaSocket($url);
+        //$url= str_replace(HEURIST_SERVER_URL,'localhost',$url);
+    }else{
+        return loadRemoteURLContentWithRange($url, null, true);
+    }
+}
 
 function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
 }
-
 
 function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=20) {
 
@@ -45,9 +72,10 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
 
     if(strpos($url, HEURIST_SERVER_URL)===0){
         return loadRemoteURLviaSocket($url);
-        //$url= str_replace(HEURIST_SERVER_URL,'localhost',$url);
     }
     
+    $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
+                 //'Firefox (WindowsXP) - Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);	//return the output as a string from curl_exec
@@ -59,6 +87,11 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);	// timeout after ten seconds
     curl_setopt($ch, CURLOPT_MAXREDIRS, 5);	// no more than 5 redirections
 
+    curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
+    curl_setopt($ch, CURLOPT_FAILONERROR, true);
+    curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+    //curl_setopt($ch, CURLOPT_REFERER, HEURIST_SERVER_URL);    
+    
     if($range){
         curl_setopt($ch, CURLOPT_RANGE, $range);
     }
@@ -282,6 +315,7 @@ function loadRemoteURLviaSocket($url) {
         }
         fclose($remote);
 
+//error_log("RESPONSE ".$response);        
 
         // split the headers and the body
         $response2 = preg_split("|(?:\r?\n){2}|m", $response, 2);
@@ -298,5 +332,26 @@ function loadRemoteURLviaSocket($url) {
     return $result;
 }
 
+//
+//
+//
+function getScriptOutput($path, $print = FALSE)
+{
+    ob_start();
+
+    if( is_readable($path) && $path )
+    {
+        include $path;
+    }
+    else
+    {
+        return FALSE;
+    }
+
+    if( $print == FALSE )
+        return ob_get_clean();
+    else
+        echo ob_get_clean();
+}
 
 ?>

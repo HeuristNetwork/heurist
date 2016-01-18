@@ -25,8 +25,8 @@
 */
 
 
-define('NO_DB_ALLOWED',1);
-define('SKIP_VERSIONCHECK2',1);
+if(!defined('NO_DB_ALLOWED')) define('NO_DB_ALLOWED',1);
+if(!defined('SKIP_VERSIONCHECK2')) define('SKIP_VERSIONCHECK2',1);
 require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
@@ -39,19 +39,24 @@ $is_named = (@$_REQUEST['named']==1); //return assosiated array
 if(@$_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
 
 
-    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
+    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
+    
+    //debug 
+    $reg_url =  "http://heurist.sydney.edu.au/h4-ao/admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
+
+    //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
     if($is_named){
         $reg_url =  $reg_url.'&named=1';    
     }
 
     //get json array of registered databases
-    $data = loadRemoteURLContent($reg_url, true); //without proxy
+    $data = loadRemoteURLContentSpecial($reg_url); //without proxy
 
     if($data){
         $registeredDBs = json_decode($data);
         if(!is_array($registeredDBs)){
             if(defined("HEURIST_HTTP_PROXY")){
-                $data = loadRemoteURLContent($reg_url, false); //with proxy
+                $data = loadRemoteURLContent($reg_url, false); //false = USE PROXY
                 if($data){
                     $registeredDBs = json_decode($data);
                     if(!is_array($data)){

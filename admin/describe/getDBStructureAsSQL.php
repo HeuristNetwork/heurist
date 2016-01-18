@@ -31,15 +31,25 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 $includeUgrps=@$_REQUEST["includeUgrps"];	// returns null if not set
 
 $approvedDefsOnly=@$_REQUEST["approvedDefsOnly"];	// returns null if not set
+
+$isHTML=(@$_REQUEST["plain"]!=1); //no html
 // TO DO: filter for reserved and approved definitions only if this is set
 
 
 // Deals with all the database connections stuff
+if("hdb_".$_REQUEST["db"]!=DATABASE){
+    mysql_connection_select("hdb_".@$_REQUEST["db"]);
+}else{
+    mysql_connection_select(DATABASE);
+}
 
-mysql_connection_select(DATABASE);
+
 if(mysql_error()) {
     die("Could not get database structure from given database source, MySQL error - unable to connect to database.");
 }
+
+//$r = mysql_query("SELECT DATABASE()") or die(mysql_error());
+//error_log("DATABASE IS ".mysql_result($r,0));    
 
 // TODO: use HEURIST_DBVERSION TO SET THE VERSION HERE
 
@@ -61,23 +71,24 @@ if(mysql_error()) {
 // File headers to explain what the listing represents
 // HTML is a fudge to make it readable in a browser, very useful for debug and cut/paste to coreDefinitions.txt
 // rather inelegant from an IT perspective. Should probably be replaced with a more secure format
+if($isHTML){
 print "<html><head>";
 print '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
 print "</head><body>\n";
+}
 print "-- Heurist Definitions Exchange File  generated: ".date("d M Y @ H:i")."<br>\n";
 print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
 print "-- Database = " . HEURIST_DBNAME . "<br>\n";
 print "-- Program Version: ".HEURIST_VERSION."<br>\n";
 print "-- Database Version: ".HEURIST_DBVERSION; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
 print "<br><br>\n";
-
-
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation
 // Each block of data is between a >>StartData>> and >>EndData>> markers
 // This could perhaps be done more elegantly as JSON structures, but SQL inserts help to point up errors in fields
 
 $startToken = ">>StartData>>";
 $endToken = ">>EndData>>";
+$endofFileToken = ">>EndOfFile>>";
 
 // ------------------------------------------------------------------------------------------
 // defRecTypeGroups
@@ -121,12 +132,15 @@ print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defOntologiesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defOntologies";
+
 $res = mysql_query($query);
 $fmt = 'defOntologies'; // update format if fields added
 
 print "<p>";
 print "\n$startToken\n";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
+while ($row = mysql_fetch_assoc($res)) { 
+    @print_row($row, $fmt); 
+}
 print "$endToken\n";
 print "<p>&nbsp;<p>&nbsp;<p>";
 
@@ -349,7 +363,13 @@ print "<p>&nbsp;<p>&nbsp;<p>";
 // ------------------------------------------------------------------------------------------
 // Output the following only if parameter switch set and user is an admin
 
-if (!$includeUgrps) {return;}
+if (!$includeUgrps) {
+    print "\n$endofFileToken\n";
+    if($isHTML){
+        print '</body></html>';
+    }
+    return;
+}
 
 if (! is_admin()) {
     print "<html><body><p>You do not have sufficient privileges to list users</p><p><a href=".HEURIST_BASE_URL.">Return to Heurist</a></p></body></html>";
@@ -423,10 +443,11 @@ while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
 print "\n$endToken\n";
 print "<p>&nbsp;<p>&nbsp;<p>";
 
-
-
-
 // --------------------------------------------------------------------------------------
+print "\n$endofFileToken\n";
+if($isHTML){
+    print '</body></html>';
+}
 
 function print_row($row,$fmt) {
 

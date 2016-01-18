@@ -495,9 +495,12 @@ rep        print '<input type="checkbox" name="add'.$detail_type.'[]"  value="'.
 
 */
 //ART
+//
+// $rd_type - detail type id or term id
+//
 function detail_str($rd_type, $rd_val) {
     global $reference_bdts, $enum_bdts;
-    if (in_array($rd_type, array_keys($reference_bdts))) {
+    if (in_array($rd_type, array_keys($reference_bdts))) { //valid detail type
         if (is_array($rd_val)) {
             foreach ($rd_val as $val){
                 $title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$val));
@@ -505,8 +508,8 @@ function detail_str($rd_type, $rd_val) {
             }
             return $rv;
         }
-        else {
-            $title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$rd_val));
+        else if($rd_val>0) {
+            $title = mysql_fetch_assoc(mysql_query('select rec_Title from Records where rec_ID ='.$rd_val)); //ART HERE
             return '<a target="edit" href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rd_val.'">'.$title['rec_Title'].'</a>';
         }
     }
@@ -608,7 +611,7 @@ function do_fix_dupe() {
     }
     //diff the arrays  don't delet yet as the user might be adding an existing value
     $master_delete_dt_ids = array();
-    if($master_rep_detail_ids) $master_delete_dt_ids = array_diff($master_rep_detail_ids,$master_keep_ids);
+    if($master_rep_detail_ids) $master_delete_dt_ids = array_diff($master_rep_detail_ids,$master_keep_ids); //ART HERE   $master_keep_ids
     //FIXME add code to remove any none repeatable extra details
     //for each update
     if ($update_dt_ids){
