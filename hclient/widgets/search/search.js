@@ -518,9 +518,12 @@ $.widget( "heurist.search", {
                 //call H3 search builder
                 var q = "",
                     that = this;
-                if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
+                if(this.input_search.val()!='') {
+                    q ="&q=" + encodeURIComponent(this.input_search.val());
+                }else if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
                     q ="&q=" + encodeURIComponent(this.query_request.q);
                 }
+                
                 var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
                 top.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:

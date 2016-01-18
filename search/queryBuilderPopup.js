@@ -35,6 +35,13 @@
         allowUpdate = false;
 
     function update(elt) {
+        
+        if(!top.HEURIST.detailTypes && top.HEURIST4){
+            top.HEURIST.detailTypes = top.HEURIST4.util.cloneJSON(top.HEURIST4.detailtypes);
+            top.HEURIST.rectypes = top.HEURIST4.util.cloneJSON(top.HEURIST4.rectypes);
+            top.HEURIST.terms = top.HEURIST4.util.cloneJSON(top.HEURIST4.terms);
+        }
+        
 
         if(!allowUpdate){
             return;
@@ -186,10 +193,16 @@
         var params = top.HEURIST.parseParams(location.search);
 
         var q_str = decodeURIComponent(params["q"]);
-        document.getElementById('q').value = q_str;
+        var q_bits = null;
+        
+        if(top.HEURIST.util.isempty(q_str)){
+            document.getElementById('q').value = '';
+        }else{
+            document.getElementById('q').value = q_str;
+            q_bits = HQuery.parseQuery(q_str);
+        }
 
-        var q_bits = HQuery.parseQuery(q_str);
-        if (q_bits) {
+        if (!top.HEURIST.util.isnull(q_bits)) {
             for (q_key in q_bits) {
                 if (document.getElementById(q_key)) {
                     var val = '';
