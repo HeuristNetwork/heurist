@@ -237,7 +237,8 @@ function hRecordAction(_action_type) {
                    dtFields[fi['rst_DisplayName']] = input_label;
                    dtFields[fi['rst_RequirementType']] = 'optional';
                    dtFields[fi['rst_MaxValues']] = 1;
-                   dtFields[fi['rst_DisplayWidth']] = 0;
+                   dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resourse
+                   //dtFields[fi['rst_DisplayWidth']] = 50;
         
                    var ed_options = {
                                 recID: -1,
@@ -246,9 +247,9 @@ function hRecordAction(_action_type) {
                                 rectypes: top.HEURIST4.rectypes,
                                 values: '',
                                 readonly: false,
-                                //title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
+                                
                                 showclear_button: false,
-                                input_width: '350px', 
+                                //input_width: '350px', 
                                 //detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
                                 dtFields:dtFields
                                 

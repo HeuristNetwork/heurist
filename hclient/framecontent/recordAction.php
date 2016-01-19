@@ -131,17 +131,6 @@ if(!in_array($action_type, $allowed_actions)){
             }
         </script>
         <style type="text/css">
-            .content_div{
-                padding:10px;
-                position:absolute;
-                top:0;
-                left:0px;
-                right:0px;
-                bottom:3em
-            }
-            .buttons_div{
-                position:absolute;bottom:0;left:0px;right:0px;height:3em;text-align:right;padding: 1em 1em .3em .4em;
-            }
             #div_result > div > span {
                 min-width:200px;
                 display:table-cell;
@@ -151,9 +140,9 @@ if(!in_array($action_type, $allowed_actions)){
     </head>
 
     <!-- HTML -->
-    <body>
+    <body style="overflow:hidden">
     
-        <div id="div_parameters" class="content_div">
+        <div id="div_parameters" class="popup_content_div">
         
             <div id="div_header" tyle="padding: 0.2em; min-width: 600px;">
             
@@ -184,7 +173,7 @@ if(!in_array($action_type, $allowed_actions)){
         <div id="div_result" class="content_div" style="display: none;">
             RESULT 
         </div>
-        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix buttons_div">
+        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div">
             <div class="ui-dialog-buttonset">
                 <div id="btn-ok">OK</div>
                 <div id="btn-cancel">Cancel</div>

@@ -96,13 +96,7 @@ $.widget( "heurist.pagination", {
                     top.HAPI4.currentUser['ugr_Preferences']['search_limit'] = newlimit;
                     if(top.HAPI4.is_logged()){
                         //save preference in session
-                        top.HAPI4.SystemMgr.save_prefs({'search_limit': newlimit},
-                            function(response){
-                                if(response.status != top.HAPI4.ResponseStatus.OK){
-                                    top.HEURIST4.msg.showMsgErr(response);
-                                }
-                            }
-                        );
+                        top.HAPI4.save_pref('search_limit', newlimit);
                     }
 
                     that.limit = newlimit;

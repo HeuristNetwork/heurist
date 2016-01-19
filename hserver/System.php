@@ -417,7 +417,7 @@ class System {
         if($user) {
             $user['ugr_Password'] = ''; // do not send password to client side
             $user['ugr_Admin'] = $this->is_admin();
-            if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getPreferences();
+            if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences(); 
         }
 
         $dbowner = user_getDbOwner($this->mysqli);
@@ -629,7 +629,7 @@ class System {
                 $_SESSION[$this->dbname_full]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
             }
             if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
-                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences();
+                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getDefaultPreferences();
             }
 
             $this->current_User = array(
@@ -700,7 +700,7 @@ class System {
                     $user['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
                     $user['ugr_Password'] = '';
                     $user['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $user['ugr_ID'] );
-                    $user['ugr_Preferences'] = user_getPreferences();
+                    $user['ugr_Preferences'] = user_getDefaultPreferences();
                     $this->current_User = $user;
                     /*
                     $this->current_User = array(

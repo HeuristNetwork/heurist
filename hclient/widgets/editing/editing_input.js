@@ -24,14 +24,18 @@ $.widget( "heurist.editing_input", {
     options: {
         varid:null,
         recID: null,
+        
         rectypeID: null, //field description is taken either from rectypes[rectypeID] or from dtFields
         rectypes: null,
-        dtFields: null, 
         dtID: null,
+        
+        dtFields: null, //it is from top.HEURIST4.rectype.typedefs.dtFields or object with some mandatory field names
+        
         values: null,
         readonly: false,
         title: '',  //label (overwrite Display label from record structure)
         showclear_button: true,
+        show_header: true,
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
     },
 
@@ -39,12 +43,11 @@ $.widget( "heurist.editing_input", {
     _create: function() {
 
         //field description is taken either from rectypes[rectypeID] or from dtFields
-        if(this.options.dtFields==null){
-            if (!(this.options.rectypeID && this.options.rectypes &&
-                this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])){
+        if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0 && 
+           this.options.rectypes && this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])
+        {
                     
-                    this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
-                }
+              this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
         }
                 
         if(this.options.dtFields==null){ //field description is not defined
@@ -106,13 +109,15 @@ $.widget( "heurist.editing_input", {
         }
 
         //header
-        this.header = $( "<div>")
-        .addClass('header '+required)
-        .css('width','150px')
-        .css('vertical-align', (detailType=="blocktext")?'top':'')
-        .html('<label for="input'+(this.options.varid?this.options.varid:'0_'+this.options.dtID)+'">'
-            + (top.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
-        .appendTo( this.element );
+        if(this.options.show_header){
+            this.header = $( "<div>")
+            .addClass('header '+required)
+            .css('width','150px')
+            .css('vertical-align', (detailType=="blocktext")?'top':'')
+            .html('<label for="input'+(this.options.varid?this.options.varid:'0_'+this.options.dtID)+'">'
+                + (top.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
+            .appendTo( this.element );
+        }
 
 
         //input
@@ -156,6 +161,8 @@ $.widget( "heurist.editing_input", {
         }
         if(this.header){
             this.header.remove();
+        }
+        if(this.inputs){
             $.each(this.inputs, function(index, value){ value.remove(); } );
             this.input_cell.remove();
         }
@@ -163,17 +170,41 @@ $.widget( "heurist.editing_input", {
 
     /**
     * get value for given record type structure field
+    * 
+    * dtFields - either from rectypes.typedefs and index is taken from dtFieldNamesToIndex
+    *          - or it is object with following list of properties
+        dty_Type,
+        rst_DisplayName,  //label
+        rst_RequirementType,  //requirement
+        rst_MaxValues     //repeatability
+        
+        rst_DisplayWidth - width in characters
+        rst_PtrFilteredIDs
+        rst_FilteredJsonTermIDTree
+        rst_TermIDTreeNonSelectableIDs
+        dty_TermIDTreeNonSelectableIDs    
+    *  
     *
     * @param fieldname
     */
     f: function(fieldname){
-        //get field defintion
-        if (isNaN(Number(this.options.dtID)) || top.HEURIST4.util.isnull(this.options['dtFields'][fieldname])){
+        
+        var val = this.options['dtFields'][fieldname]; //try get by name
+        if(top.HEURIST4.util.isnull(val) && this.options.rectypes){ //try get by index
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-            return this.options['dtFields'][fi[fieldname]];
-        }else{
-            return this.options['dtFields'][fieldname];
+            val = this.options['dtFields'][fi[fieldname]];
         }
+        if(!val){ //some default values
+            if(fieldname=='rst_RequirementType') val = 'optional'
+            else if(fieldname=='rst_MaxValues') val = 1
+            else if(fieldname=='dty_Type') val = 'freetext'
+            else if(fieldname=='rst_DisplayWidth' 
+                && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
+                val = 60;
+            }
+        }
+        return val;
+        
         /*}else{
             var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
@@ -221,6 +252,34 @@ $.widget( "heurist.editing_input", {
 
             this._recreateSelector($input, value);
 
+        }else if(detailType=="rectype"){
+
+            $input = $( "<select>",{id:inputid} )
+            .addClass('text ui-widget-content ui-corner-all')
+            .css('width','auto')
+            .val(value)
+            .appendTo( $inputdiv );
+
+            top.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue')); 
+            if(value){
+                $input.val(value);
+            }
+            
+        }else if(detailType=="user"){
+
+            $input = $( "<select>",{id:inputid} )
+            .addClass('text ui-widget-content ui-corner-all')
+            .css('width','auto')
+            .val(value)
+            .appendTo( $inputdiv );
+
+            top.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
+                    [{key:'',title:top.HR('select user/group...')},
+                     {key:top.HAPI4.currentUser['ugr_ID'], title:top.HAPI4.currentUser['ugr_FullName'] }] ); 
+            if(value){
+                $input.val(value);
+            }
+            
         }else{
             $input = $( "<input>",{id:inputid})
             .addClass('text ui-widget-content ui-corner-all')
@@ -300,7 +359,7 @@ $.widget( "heurist.editing_input", {
                 this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
                 this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
 
-                $input.css('width', this.options['input_width']?this.options['input_width']:'300px');
+                //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
                 
                 
             }else if(false && detailType=="relmarker"){
@@ -347,9 +406,10 @@ $.widget( "heurist.editing_input", {
                 this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
                 this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
 
-            }else if(detailType=="freetext" && this.options['input_width']){
-                $input.css('width', this.options['input_width']);
             }
+            /*else if(detailType=="freetext" && this.options['input_width']){
+                $input.css('width', this.options['input_width']);
+            }*/
 
         }
 

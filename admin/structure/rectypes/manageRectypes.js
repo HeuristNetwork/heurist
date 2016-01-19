@@ -369,7 +369,7 @@ function RectypeManager() {
             });
 
             var myColumnDefs = [
-                { key: "id", label: "Code", sortable:true, minWidth:25, maxAutoWidth:25, width:25, className:'right',
+                { key: "id", label: "Code", sortable:true, minWidth:30, maxAutoWidth:30, width:30, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
                         elLiner.innerHTML = '<a href="#search" title="Click to launch search for '+oRecord.getData("name")+' records">'+ rectypeID + '</a>';

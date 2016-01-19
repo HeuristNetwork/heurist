@@ -320,7 +320,7 @@ $.widget( "heurist.ruleBuilder", {
         this._has_rev_pointers = '0';
 
         var rtyID, dtyID;
-        for (dtyID in details){
+        for (dtyID in details){ //serch on record type structure definition
             if(dtyID){
 
                 if(details[dtyID][fi_type]=='resource' || details[dtyID][fi_type]=='relmarker'){

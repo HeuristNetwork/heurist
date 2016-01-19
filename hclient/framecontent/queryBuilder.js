@@ -18,84 +18,75 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-if(top.HEURIST4.util.isnull(top.HEURIST4.rectypes)){
-    //fill database definitions  - remove comments for standalone usage/testing
-    //print "top.HEURIST4.rectypes = ".json_encode( dbs_GetRectypeStructures($system, null, 2) ).";\n";
-    //print "top.HEURIST4.terms = ".json_encode( dbs_GetTerms($system ) ).";\n";
-}
+function hQueryBuilder(query_original, container) {
+    var _className = "QueryBuilder",
+    _version   = "0.4",
+    
+    container,
+    
+    arr_tokens = [{key:'t',title:'Entity(Record) Type'},  //t,type
+             {key:'f',title:'Field'},                //f,field   
+             {key:'links',title:'Link/relation'},    //linked_to,linkedfrom,related_to,relatedfrom,links
 
-$(document).ready(function() {
+             {key:'',title:'-'},
+             {key:'title',title:'Title'},
+             {key:'ids',title:'ID'},
+             {key:'url',title:'URL'},
+             {key:'notes',title:'Notes'},
+             
+             {key:'added',title:'Added'},
+             {key:'date',title:'Modified'},  //after, since, before
+             {key:'addedby',title:'Added by user'},  
+             {key:'owner',title:'Owner'},  //owner,workgroup,wg
 
-    if(!top.HAPI4){
-        //this is case of standaloe page
-        var db = top.HEURIST4.util.getUrlParameter('db',window.location.search)
-
-        top.HAPI4 = new hAPI(db, onInit);//, < ?=json_encode($system->getCurrentUser())? > );
-    }else{
-        //otherwise we take everything from parent window
-        onInit(true);
+             {key:'',title:'-'},
+             {key:'tag',title:'Tag(Keyword)'},         //tag, keyword, kwd
+             {key:'user',title:'Bookmarked by user'}  //user, usr
+             ];
+    
+    function _init(query_original, _container){
+    
+        container = _container;
+        
+        _loadQuery(query_original);
+        
     }
 
-});
+    //
+    //parses query and recreate query builder items
+    //
+    function _loadQuery(){
+        
+      //detect type of query - json or plain  
+        
+      //parse query on separate tokens
+      
+      //create items  
+      
+      //query not defined - create empty set  
+      $('<div>').queryBuilderItem().appendTo($(container));
+      
+    }
 
-function onInit(success) //callback function of hAPI initialization
-{
-    if(success)  //system is inited
-    {
-        if(!top.HR){
-            var prefs = top.HAPI4.get_prefs();
-            //loads localization
-            top.HR = window.HAPI4.setLocale(prefs['layout_language']);
-        }
+    //create query in given format from query builder items
+    function _getQuery(){
+        
+    }
 
-        //init toolbar buttons
-        $('#btn_add_level1').attr('title', 'explanatory rollover' ).button().on('click', null, addLevel );
+    
+    //public members
+    var that = {
 
-        $('#btn_save').attr('title', 'explanatory rollover' ).button().on('click', 3, saveFilters);
-
-        $('#btn_apply').button().on('click', 3, applyFilters);
-        $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
-        $( "#helper" ).dialog({
-            autoOpen: (top.HAPI4.get_prefs('help_on')=='1'), width:800,
-            position: { my: "right bottom", at: "right top", of: $('#btn_help') },
-            show: {
-                effect: "slide",
-                direction : 'right',
-                duration: 1000
-            },
-            hide: {
-                effect: "slide",
-                direction : 'right',
-                duration: 1000
-            }
-        });
-
-        //fill with exisiting parameters in case there is parameter 'q'
-        //var rules = top.HEURIST4.util.getUrlParameter('rules',location.search);
-        if(!top.HEURIST4.util.isempty(query_orig)){
-
-            if(!top.HEURIST4.util.isArray(query_orig)) query_orig = $.parseJSON(query_orig);
-            var i;
-            for(i=0; i<query_orig.length; i++){
-/* @todo
-                $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule sets builder for level 1
-                    rules: rules[i],
-                    onremove: function(event, data){
-                        $('#'+data.id).remove();    //remove this rule sets builder
-
-                    }
-                }).insertBefore($('#div_add_level'));
-*/
-            }
-
-        }else{
-            addLevel(); //add first level by default
-        }
-
-
+        getClass: function () {return _className;},
+        isA: function (strClass) {return (strClass === _className);},
+        getVersion: function () {return _version;},
 
     }
+
+    _init(query_original, container);
+    return that;  //returns object
 }
+
 
 //
 // add first level (init ruleBuilder widget)
@@ -107,21 +98,6 @@ function addLevel(){
         }
     }).insertBefore($('#div_add_level'));
 }
-
-//
-//  show/hide help panel
-//
-function showHelp(){
-    var $helper = $("#helper");
-    if($helper.dialog( "isOpen" )){
-        $helper.dialog( "close" );
-        //$helper.hide( 'explode', {}, 1000 );
-    }else{
-        $helper.dialog( "open" );
-        //$helper.show( 'drop', {}, 1000 );
-    }
-}
-
 //
 // create filters array as a result of this builder
 //
@@ -160,43 +136,5 @@ function getFiltersArray(){
     });
 
     return res;
-    */
-}
-
-/**
-* Start search with current search
-*/
-function applyFilters(){
-    /*@todo
-    var res = getRulesArray();
-    if(res.length>0){
-        res = {mode:'apply', rules:res};
-        window.close(res);
-    }
-    */
-}
-
-/**
-* Save rules with current search as a saved search
-*/
-function saveFilters(){
-    /* @todo
-    var res = getRulesArray();
-    if(res.length>0){
-        res = {mode:'save', rules:res};
-        window.close(res);
-    }
-    */
-}
-
-//
-//
-//
-function updateRuleBuilder(rectypes, query_request){
-    /*
-    if(ruleBuilder && rectypes){
-    ruleBuilder.ruleBuilder('option', 'recordtypes', rectypes );
-    ruleBuilder.ruleBuilder('option', 'query_request', query_request );
-    }
     */
 }
