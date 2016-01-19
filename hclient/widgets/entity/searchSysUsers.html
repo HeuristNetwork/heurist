@@ -1,0 +1,39 @@
+<div style="display: table-row;">
+    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
+        <label>Find by name</label>
+    </div>
+    <div class="div-table-cell">
+        <input id="input_search" class="text ui-widget-content ui-corner-all" 
+                style="max-width: 250px; min-width: 10em; width: 250px; margin-right:0.2em"/>
+        <div id="btn_search_start"></div>        
+    </div>
+    <div class="div-table-cell" style="padding-left:0.5em">
+        <label>in</label>
+        <select id="sel_groups" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
+    </div>
+</div>
+<div style="display: table-row;">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell heurist-helper1">Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search</div>
+</div>
+<div style="display: table-row;line-height: 2em;">
+    <div class="div-table-cell"></div>
+    <div class="div-table-cell">
+        <input id="rb_all" type="radio"/><label for="rb_all">All</label>
+        <input id="rb_inactive" type="radio"/><label for="rb_inactive">Inactive</label>
+    </div>
+    <div class="div-table-cell" style="padding-left:0.5em">
+        <label>Role</label>
+        <select id="sel_roles" class="text ui-widget-content ui-corner-all" style="max-width:200px">
+            <option value="all">all</option>
+            <option value="admin">admin</option>
+            <option value="member">member</option>
+        </select>
+    </div>
+</div>
+<div style="display: table-row;">
+    <div class="div-table-cell" style="padding-right:0.5em;text-align:right"><label id="lbl_add_record"></label></div>
+    <div class="div-table-cell">
+        <div id="btn_add_record"></div>
+    </div>
+</div>
