@@ -146,22 +146,12 @@ $serverBaseURL = $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME;
 define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 
-// a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
-$topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external";
+$installDir = getInstallationDirectory( @$_SERVER["SCRIPT_NAME"] );
 
-// calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
-$installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
-if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
-}
 
-//the subdir of the server's document directory where heurist is installed
-if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
-    $installDir = '';
-}
 
 // This is only used in this file to set other values
-define('HEURIST_SITE_PATH', ($installDir == '' ? '/' : $installDir) . '/'); // eg. /h4/
+define('HEURIST_SITE_PATH', $installDir); // eg. /h4/
 
 define('HEURIST_BASE_URL', HEURIST_SERVER_URL . HEURIST_SITE_PATH); // eg. http://heurist.sydney.edu.au/h4/
 
@@ -829,5 +819,26 @@ function returnErrorMsgPage($critical, $msg = null) {
 
     exit(); // it will drop through to here without an error message if the system has not been set up yet
 
+}
+
+function getInstallationDirectory($scriptName){
+    
+    // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
+    $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external";
+
+    // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
+    $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", $scriptName); // remove "/top level dir" and everything that follows it.
+    if ($installDir == $scriptName) { // no top directories in this URI must be a root level script file or blank
+        $installDir = preg_replace("/\/[^\/]*$/", "", $scriptName); // strip away everything past the last slash "/index.php" if it's there
+    }
+
+    //the subdir of the server's document directory where heurist is installed
+    if ($installDir == $scriptName || $installDir == '') { 
+        // this should be the path difference between document root and heurist code root
+        $installDir = '/';
+    }else{
+        $installDir = $installDir.'/';
+    }
+    return $installDir;
 }
 ?>

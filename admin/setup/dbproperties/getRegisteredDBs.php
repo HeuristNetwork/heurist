@@ -42,7 +42,7 @@ if(@$_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - r
     $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
     
     //debug 
-    $reg_url =  "http://heurist.sydney.edu.au/h4-ao/admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
+    //$reg_url =  "http://heurist.sydney.edu.au/h4-ao/admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
 
     //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
     if($is_named){

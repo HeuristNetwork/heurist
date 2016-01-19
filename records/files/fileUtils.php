@@ -31,6 +31,29 @@
 */
 
 
+function getInstallationDirectory2($scriptName){
+    
+    // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
+    $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external";
+
+    // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
+    $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", $scriptName); // remove "/top level dir" and everything that follows it.
+    
+    if ($installDir == $scriptName) { // no top directories in this URI must be a root level script file or blank
+        $installDir = preg_replace("/\/[^\/]*$/", "", $scriptName); // strip away everything past the last slash "/index.php" if it's there
+    }
+
+    //the subdir of the server's document directory where heurist is installed
+    if ($installDir == $scriptName || $installDir == '') { 
+        // this should be the path difference between document root and heurist code root
+        $installDir = '/';
+    }else{
+        $installDir = $installDir.'/';
+    }
+    
+    return $installDir;
+}
+
 //
 // if the same server - try to include script instead of full request
 //
@@ -38,18 +61,20 @@ function loadRemoteURLContentSpecial($url){
 
     if(strpos($url, HEURIST_SERVER_URL)===0){
         
-//error_log('url '.$url);        
-        
-        $documentRoot = @$_SERVER["DOCUMENT_ROOT"];
-        if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
-        $path = str_replace(HEURIST_SERVER_URL, $documentRoot, $url);
-        
-        $path = substr($path,0,strpos($path,'?'));
         
         $parsed = parse_url($url);
+        $installDir = getInstallationDirectory2($parsed['path']);
+        
+        //replace http://heurist.sydney.edu.au/h4/ to script path in current installation folder
+        $path = str_replace(HEURIST_SERVER_URL.$installDir, HEURIST_DIR, $url);
 
-                parse_str($parsed['query'], $_REQUEST);
-        //$_REQUEST = $params;
+        //$documentRoot = @$_SERVER["DOCUMENT_ROOT"];
+        //if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+        //$path = str_replace(HEURIST_SERVER_URL, $documentRoot, $url);
+        
+        $path = substr($path,0,strpos($path,'?'));
+
+        parse_str($parsed['query'], $_REQUEST);
 
         return getScriptOutput($path);
 
