@@ -8,7 +8,7 @@
     * @copyright   (C) 2005-2016 University of Sydney
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Stephen White   
+    * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -285,6 +285,7 @@
             <div class="markup" id="filterDiv" style="display:none">
                 <label for="filter">Filter by description:</label> <input type="text" id="filter" value="">
                 <div id="tbl"></div>
+                <br/>Loading databases ...   (Please be patient - this may take several seconds on slow connections)
             </div>
             <div id="topPagination"></div>
             <div id="selectDB"></div>

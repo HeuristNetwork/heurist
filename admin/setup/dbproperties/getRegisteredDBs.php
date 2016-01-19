@@ -10,7 +10,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
@@ -38,15 +38,11 @@ $is_named = (@$_REQUEST['named']==1); //return assosiated array
 
 if(@$_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
 
-
-    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
-    
-    //debug 
-    //$reg_url =  "http://heurist.sydney.edu.au/h4-ao/admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index"; 
+    $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index";
 
     //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
     if($is_named){
-        $reg_url =  $reg_url.'&named=1';    
+        $reg_url =  $reg_url.'&named=1';
     }
 
     //get json array of registered databases

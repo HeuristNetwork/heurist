@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -54,11 +54,6 @@ mysql_connection_select(USERS_DATABASE);
         <!-- script type="text/javascript" src="../common/js/utilsUI.js"></script -->
 
         <div class="advanced-search-row" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
-
-            <!-- TODO: Update Advanced Search to version 4 -->
-            <div style="color: red; margin-bottom: 10px;">
-                THIS FUNCTION NOT FULLY CONVERTED TO VSN 4. Some fields do not work correctly. You may need to edit search string manually.
-            </div>
 
             <b>Search&nbsp;string: &nbsp;</b>
             <div class="searchInput" style="position:relative; display:inline-block;">
