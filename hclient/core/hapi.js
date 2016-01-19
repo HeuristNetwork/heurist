@@ -625,6 +625,42 @@ function hAPI(_db, _oninit) { //, _currentUser
         return that;
     }
 
+    /**
+    * System class that responsible for interaction with server in domains:
+    *       user/groups information/credentials
+    *       database definitions - record structure, field types, terms
+    *       saved searches
+    *
+    * see entityScrud.php and db[TableName].php in dbaccess
+    *
+    * methods:
+    *   login        - login and get current user info
+    *   logout
+    *   reset_password
+    *   sys_info     - get current user info and database settings
+    *   save_prefs   - save user preferences  in session
+    *   mygroups     - description of current Workgroups
+    *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber
+    *   ssearch_save - save saved search in database
+    *   ssearch_delete - delete saved searches by IDs
+    *   ssearch_savetree - save saved search treeview data
+    *   ssearch_gettree - get saved search treeview data
+    *   get_defs     - get the desired database structure definition
+    *
+    * @returns {Object}
+    */
+    function hEntityMgr(){
+        var that = {
+            doRequest:function(request, callback){
+                //todo - verify basic params
+                
+                _callserver('entityScrud', request, callback);
+            }
+        }
+        return that;
+    }
+    
+    
     //public members
     var that = {
 
@@ -738,7 +774,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         value = value.slice(0,limit);
                         
                         var cur_value = top.HAPI4.get_prefs(name);
-                        cur_value = cur_value.split(',');
+                        cur_value = (cur_value?cur_value.split(','):null);
                         
                         if($.isArray(cur_value)){
                             var to_remove = Math.min(limit, value.length);
@@ -790,6 +826,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         },*/
 
         RecordMgr: new hRecordMgr(),
+        
+        EntityMgr: new hEntityMgr(),
 
         //@todo - assign it later since we may have different search managers - incremental, partial...
         //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result

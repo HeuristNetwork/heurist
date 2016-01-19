@@ -26,12 +26,22 @@ require_once(dirname(__FILE__)."/initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecord.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecord.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysUsers.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysUsers.js"></script>
         
         <script type="text/javascript">
             // Callback function on map initialization
             function onPageInit(success){
                 if(success){
                     
+                    testRecords();
+                    //testUsers();
+                    
+                }
+            }
+            
+            function testRecords(){
                     var ispopup = true;
                     var select_mode = 'multi'; //'single',
                     
@@ -47,7 +57,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                                 }
                             };
                     
-                if(ispopup){
+                    if(ispopup){
                        // in popup
                        showManageRecord( options ); 
                         
@@ -55,10 +65,36 @@ require_once(dirname(__FILE__)."/initPage.php");
                         //within page
                         $('#main_div').manageRecord( options );
 
-                    }
-                    
-                }
+                    }                
             }
+            
+            function testUsers(){
+                    var ispopup = true;
+                    var select_mode = 'multi'; //'single',
+                    
+                    var groups_set = top.HEURIST4.util.getUrlParameter('groups_set',window.location.search);
+                    var options = {
+                                groups_set: groups_set,
+                                select_mode: 'multi', //'single',
+                                onselect:function(event, selection){
+                                    if(selection && selection.isA('hRecordSet')){
+                                       // alert( selection.getIds().join(',') );
+                                       top.HAPI4.save_pref('recent_Users', selection.getIds(25), 25);      
+                                    }
+                                }
+                            };
+                    
+                    if(ispopup){
+                       // in popup
+                       showManageSysUsers( options ); 
+                        
+                    }else{
+                        //within page
+                        $('#main_div').manageSysUsers( options );
+
+                    }                
+            }
+            
         </script>
     </head>
 

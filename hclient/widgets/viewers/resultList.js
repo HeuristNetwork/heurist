@@ -37,6 +37,9 @@ $.widget( "heurist.resultList", {
         
         empty_remark:'',
         
+        renderer: null,    // renderer function to draw item
+        searchfull: null,  // search full list data 
+        
         //event
         onselect: null  //on select event for non event based
     },
@@ -551,6 +554,11 @@ $.widget( "heurist.resultList", {
     },
 
     _renderRecord_html: function(recordset, record){
+        
+        if($.isFunction(this.options.renderer)){
+            return this.options.renderer.call(this, recordset, record);
+            return;
+        }
 
         function fld(fldname){
             return recordset.fld(record, fldname);
@@ -1148,36 +1156,55 @@ $.widget( "heurist.resultList", {
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 
-        //load full record info - record header
+        //load full record info - record header111
         if(rec_toload.length>0){
             var that = this;
-
-            var request = { q: 'ids:'+ rec_toload.join(','),
-                w: 'a',
-                detail: 'header',
-                id: that.current_page, //Math.round(new Date().getTime() + (Math.random() * 100)),
-                source:this.element.attr('id') };
-
+            
             that.loadanimation(true);
+            
+            if($.isFunction(this.options.searchfull)){
+                
+                this.options.searchfull.call(this, rec_toload, this.current_page, 
+                    function(response){                
+                        that.loadanimation(false);
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(response.data.queryid==that.current_page) {
+                                that._currentRecordset.fillHeader( new hRecordSet( response.data ));
+                                that._renderPage( that.current_page );
+                            }
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+            }else{
 
-            top.HAPI4.RecordMgr.search(request, function( response ){
+                var ids = rec_toload.join(',');
+                var request = { q: 'ids:'+ ids,
+                    w: 'a',
+                    detail: 'header',
+                    id: that.current_page, //Math.round(new Date().getTime() + (Math.random() * 100)),
+                    source:this.element.attr('id') };
 
-                that.loadanimation(false);
+                top.HAPI4.RecordMgr.search(request, function( response ){
 
-                if(response.status == top.HAPI4.ResponseStatus.OK){
+                    that.loadanimation(false);
 
-                    if(response.data.queryid==that.current_page) {
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                        that._currentRecordset.fillHeader( new hRecordSet( response.data ));
+                        if(response.data.queryid==that.current_page) {
 
-                        that._renderPage( that.current_page );
+                            that._currentRecordset.fillHeader( new hRecordSet( response.data ));
+                            that._renderPage( that.current_page );
+                        }
+
+                    }else{
+                        top.HEURIST4.msg.showMsgErr(response);
                     }
 
-                }else{
-                    top.HEURIST4.msg.showMsgErr(response);
-                }
-
-            });
+                });
+                
+            }
 
 
         }

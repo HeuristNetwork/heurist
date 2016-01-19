@@ -24,7 +24,7 @@ $.widget( "heurist.manageSysUsers", {
     options: {
         isdialog: false,
         select_mode:'single', //'none','multi'
-        rectype_set: null,        
+        groups_set: null,        
         // callbacks
         onselect:null  //selection complete - close dialog if select_mode!='none'
     },
@@ -61,7 +61,9 @@ $.widget( "heurist.manageSysUsers", {
                empty_remark: 
                     (this.options.select_mode!='none')
                     ?'<div style="padding:1em 0 1em 0">Please use the search field above to locate relevant user (partial string match on name)</div>'
-                    :''    
+                    :'',
+               searchfull: this._searchFullData,
+               renderer:   this._rendererListItem
                         });     
 
         this._on( this.recordList, {
@@ -76,13 +78,13 @@ $.widget( "heurist.manageSysUsers", {
             .appendTo(this.element)
             .searchSysUsers({
                 add_new_record: true,
-                rectype_set: this.options.rectype_set,
+                groups_set: this.options.groups_set,
                 
                 //onresult: this.updateRecordList   
             })
             
         this._on( this.searchRecord, {
-                "searchrecordonresult": this.updateRecordList
+                "searchsysusersonresult": this.updateRecordList
                 });
             
         
@@ -117,6 +119,75 @@ $.widget( "heurist.manageSysUsers", {
     //
     //
     //
+    _rendererListItem:function(recordset, record){
+        
+        function fld(fldname){
+            return recordset.fld(record, fldname);
+        }
+        
+        //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
+        
+        var recID   = fld('ugr_ID');
+        var rectype = fld('ugr_Type');
+        var isEnabled = (fld('ugr_Enabled')=='y');
+        
+        var recTitle = top.HEURIST4.util.htmlEscape(fld('ugr_Name'));
+        var recIcon = top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
+
+
+        var html_thumb = '';
+        if(fld('ugr_ThumbnailURL')){
+            html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('ugr_ThumbnailURL') + '&quot;);opacity:1"></div>';
+        }else{
+            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ 
+                top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/thumb/' + rectype + '.png&quot;);"></div>';
+        }
+
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
+        + html_thumb
+        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
+        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);">'
+        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="'+(isEnabled?'bookmarked':'unbookmarked')+'">'
+        + '</div>'
+        + '<div title="'+recTitle+'" class="recordTitle">'
+        +     recTitle
+        + '</div>'
+        + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+        //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathV3+'records/edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+        + '</div>&nbsp;&nbsp;'
+        /*+ '<div title="Click to view record (opens in popup)" '
+        + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + '   role="button" aria-disabled="false">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
+        + '</div>'*/
+        + '</div>';
+
+
+        return html;
+        
+    },
+
+    //
+    //
+    //
+    _searchFullData:function(arr_ids, pageno, callback){
+        
+        var request = {
+                'a'          : 'search',
+                'entity'     : 'sysUGrps',
+                'details'    : 'list',
+                'request_id' : pageno,
+                'ugr_ID'     : arr_ids
+        };
+        
+        top.HAPI4.EntityMgr.doRequest(request, callback);
+    },
+    
+    //
+    //
+    //
     _initDialog: function(){
 
             var options = this.options,
@@ -125,7 +196,7 @@ $.widget( "heurist.manageSysUsers", {
         
             if(options['select_mode']=='multi'){
                 btn_array.push({text:top.HR('Select'),
-                        title: top.HR("Select marked records"),
+                        title: top.HR("Select marked users"),
                         click: function() {
                                     that._trigger( "onselect", null, that.selection() );
                                     that._closeDialog();
@@ -146,7 +217,7 @@ $.widget( "heurist.manageSysUsers", {
                 modal:  (options['modal']!==true),
                 title: options['title']
                             ?options['title']
-                            :(options['select_mode']=='multi')?top.HR("Select Record"):top.HR("Manage Records"),
+                            :(options['select_mode']=='multi')?top.HR("Select User"):top.HR("Manage Users"),
                 resizeStop: function( event, ui ) {//fix bug
                 
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });

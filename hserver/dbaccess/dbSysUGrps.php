@@ -70,7 +70,7 @@ class DbSysUGrps
     //
     private function _validateIds($values, $title){
     
-        if(@$values){
+        if(@$values!=null){
             //array of integer or integer
             if(!is_array($values)){
                 $values = array($values);
@@ -100,14 +100,14 @@ class DbSysUGrps
     
     private function _validateParams(){
         
-        $res = _validateIds(@$this->data['ugr_ID'], 'user/group IDs');
-        if($res===false){
-            return false;
+        $res = $this->_validateIds(@$this->data['ugr_ID'], 'user/group IDs');
+        if(is_bool($res)){
+            if(!$res) return false;
         }else{
             $this->data['ugr_ID'] = $res;
         }
         
-        if(!_validateEnum(@$this->data['ugr_Type'], 'user/group type', array('workgroup','user') )){
+        if(!$this->_validateEnum(@$this->data['ugr_Type'], 'user/group type', array('workgroup','user') )){
             return false;
         }
         
@@ -117,27 +117,27 @@ class DbSysUGrps
             }else if(is_numeric($this->data['ugr_Enabled'])){
                 $this->data['ugr_Enabled'] = $this->data['ugr_Enabled']==1?'y':'n';
             }
-            if(!($this->data['ugr_Enabled']=='y' || $this->data['ugr_Type']=='n')){
+            if(!($this->data['ugr_Enabled']=='y' || $this->data['ugr_Enabled']=='n')){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter user/group enabled: ".$this->data['ugr_Enabled']);
                 return false;
             }
         }
         
-        $res = _validateIds(@$this->data['ugl_GroupID'], 'user/group IDs');
-        if($res===false){
-            return false;
+        $res = $this->_validateIds(@$this->data['ugl_GroupID'], 'user/group IDs');
+        if(is_bool($res)){
+            if(!$res) return false;
         }else{
             $this->data['ugl_GroupID'] = $res;
         }
 
-        $res = _validateIds(@$this->data['ugl_UserID'], 'user/group IDs');
-        if($res===false){
-            return false;
+        $res = $this->_validateIds(@$this->data['ugl_UserID'], 'user/group IDs');
+        if(is_bool($res)){
+            if(!$res) return false;
         }else{
             $this->data['ugl_UserID'] = $res;
         }
         
-        if(!_validateEnum(@$this->data['ugl_Role'], 'user role', array('admin','member') )){
+        if(!$this->_validateEnum(@$this->data['ugl_Role'], 'user role', array('admin','member') )){
             return false;
         }
 
@@ -188,6 +188,8 @@ class DbSysUGrps
     * 
     */
     public function search(){
+        
+//error_log(print_r($this->data,true));        
 
         /*
         if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
@@ -209,7 +211,7 @@ class DbSysUGrps
 
         $mysqli = $this->system->get_mysqli();
 
-        $where = array();    
+        $where = array('(ugr_ID>0)');    
         
         //compose WHERE 
         if(@$this->data['ugr_ID']){
@@ -231,7 +233,7 @@ class DbSysUGrps
         }
        
         if(@$this->data['ugr_Type']){
-            array_push($where, '(ugr_Type = '. $this->data['ugr_Type'].')');
+            array_push($where, '(ugr_Type = "'. $this->data['ugr_Type'].'")');
 
             //find group where this user is member or admin
             if(@$this->data['ugl_UserID']){
@@ -240,17 +242,18 @@ class DbSysUGrps
                 }else{
                     array_push($where, '(sysUsrGrpLinks.ugl_UserID = '. $this->data['ugl_UserID'][0].')');
                 }
-                array_push($where, "(sysUsrGrpLinks.ugl_GroupID = ugr_ID");
+                array_push($where, "(sysUsrGrpLinks.ugl_GroupID = ugr_ID)");
                 $isJoin = true;
             }
             //find users for given groups
             if(@$this->data['ugl_GroupID']){
+                
                 if(count($this->data['ugl_GroupID'])>1){
                     array_push($where, '(sysUsrGrpLinks.ugl_GroupID in ('.implode(',', $this->data['ugl_GroupID']).'))');
                 }else{
                     array_push($where, '(sysUsrGrpLinks.ugl_GroupID = '. $this->data['ugl_GroupID'][0].')');
                 }
-                array_push($where, "(sysUsrGrpLinks.ugl_UserID = ugr_ID");
+                array_push($where, "(sysUsrGrpLinks.ugl_UserID = ugr_ID)");
                 $isJoin = true;
             }
             if(@$this->data['ugl_Role']){
@@ -275,13 +278,14 @@ class DbSysUGrps
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'ugr_ID,ugr_Type,ugr_Name,ugr_Description,ugr_Enabled';
+            $this->data['details'] = 'ugr_ID,ugr_Type,ugr_Name,ugr_Description,ugr_Enabled,ugr_Organisation';
             if($isJoin) $this->data['details'] .= ',ugl_Role';
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled';
-            if($isJoin) $this->data['details'] .= ',ugl_Role';
+            $this->data['details'] = implode(',',  $isJoin
+                        ?DbSysUGrps::$fields 
+                        : array_slice(DbSysUGrps::$fields,0,count(DbSysUGrps::$fields)-1) );
         }
         
         if(!is_array($this->data['details'])){
@@ -302,7 +306,7 @@ class DbSysUGrps
         }
         //ID field is mandatory and MUST be first in the list
         $idx = array_search('ugr_ID', $this->data['details']);
-        if(idx>0){
+        if($idx>0){
             unset($this->data['details'][$idx]);
             $idx = false;
         }
@@ -313,10 +317,14 @@ class DbSysUGrps
             
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM sysUGrps'
-                .$joinSysUsrGrpLinks
-                .' WHERE '.implode(' AND ',$where)
-                .$this->_getOffset()
-                .$this->_getLimit();
+                .$joinSysUsrGrpLinks;
+         if(count($where)>0){
+            $query = $query.' WHERE '.implode(' AND ',$where);
+         }
+         $query = $query.$this->_getOffset()
+                        .$this->_getLimit();
+        
+error_log($query);        
         
         $res = $mysqli->query($query);
         if (!$res){

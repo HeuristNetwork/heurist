@@ -81,6 +81,28 @@ function hRecordSet(initdata) {
         
     }
 
+    /**
+    * Converts recordSet to key:title array (for selector)
+    */
+    function _makeKeyValueArray(namefield){
+        
+        var ids, record, key, title;
+        
+        var result = [];
+        
+        for(idx in records){
+            if(idx)
+            {
+                record = records[idx];
+                
+                key       = record[0],
+                title     = _getFieldValue(record, namefield),
+                
+                result.push({key:key, title:title});
+            }
+        }        
+        return result;
+    }    
 
     /**
     * Converts recordSet to OS Timemap dataset
@@ -850,7 +872,11 @@ function hRecordSet(initdata) {
         
         getRelationship: function(){
             return relationship;
-        }
+        },
+        
+        makeKeyValueArray:function(titlefield){
+            return _makeKeyValueArray(titlefield);
+        },
 
     }
 

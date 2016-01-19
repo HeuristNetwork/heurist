@@ -9,7 +9,7 @@
     </div>
     <div class="div-table-cell" style="padding-left:0.5em">
         <label>in</label>
-        <select id="sel_groups" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
+        <select id="sel_group" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
     </div>
 </div>
 <div style="display: table-row;">
@@ -19,13 +19,13 @@
 <div style="display: table-row;line-height: 2em;">
     <div class="div-table-cell"></div>
     <div class="div-table-cell">
-        <input id="rb_all" type="radio"/><label for="rb_all">All</label>
-        <input id="rb_inactive" type="radio"/><label for="rb_inactive">Inactive</label>
+        <input id="rb_all" type="radio" name="ugr_Enabled" checked="checked"/><label for="rb_all">All</label>
+        <input id="rb_inactive" type="radio" name="ugr_Enabled"/><label for="rb_inactive">Inactive</label>
     </div>
     <div class="div-table-cell" style="padding-left:0.5em">
         <label>Role</label>
-        <select id="sel_roles" class="text ui-widget-content ui-corner-all" style="max-width:200px">
-            <option value="all">all</option>
+        <select id="sel_role" class="text ui-widget-content ui-corner-all" style="max-width:200px">
+            <option value="">all</option>
             <option value="admin">admin</option>
             <option value="member">member</option>
         </select>
