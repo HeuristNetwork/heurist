@@ -134,12 +134,23 @@ function errorOut($msg){
 
                     if($.isFunction($('body').profile_edit)){
 
+                        var edit_data = {};
+                        <?php
+                        //restore use registration parameters in case creation fails
+                        foreach ($_REQUEST as $param_name => $param_value){
+                            if(strpos($param_name,'ugr_')===0 && $param_name!='ugr_Password'){
+//print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';   
+                                   print "edit_data['$param_name'] = '$param_value';";  
+                            }
+                        }
+                        ?>
+                        
                         if(profile_edit_dialog==null){
                             profile_edit_dialog = $('#heurist-profile-dialog');
                             if(profile_edit_dialog.length<1){
                                 profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
                             }
-                            profile_edit_dialog.profile_edit({'ugr_ID': -1, needclear:false, callback:onRegisterDialogClose  });
+                            profile_edit_dialog.profile_edit({'ugr_ID': -1, needclear:false, edit_data:edit_data, callback:onRegisterDialogClose  });
                         }else{
                             profile_edit_dialog.profile_edit('open');
                         }
@@ -519,6 +530,7 @@ function errorOut($msg){
                             </div>
 
                         </div>
+                        
                     </form>
 
                     <div id="div_register" style="display: none;">

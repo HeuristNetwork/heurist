@@ -183,7 +183,7 @@ $.widget( "heurist.profile_edit", {
             this.edit_form.find(".mode-registration").hide();
             this.edit_form.find(".mode-edit").show();
         }else{
-            this.options.edit_data = {};
+            if(!this.options.edit_data) this.options.edit_data = {};
             this.edit_form.find("#ugr_Password").addClass('mandatory');
             this.edit_form.find(".mode-edit").hide();
 
