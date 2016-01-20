@@ -175,11 +175,15 @@ for (var i=0; i < topTags.length; ++i) {
 	addTagLink(topTags[i], topTagsCell);
 }
 var recentTagsCell = document.getElementById("recent-tags-cell");
-var recentTags = top.HEURIST.user.recentTags.slice(0, 5);
+var recentTags = [];//top.HEURIST.user.recentTags.slice(0, 5);
+for (var i=0; i < top.HEURIST.user.recentTags.length; ++i){
+    if(top.HEURIST.user.recentTags[i].indexOf('~')===0) continue;
+    recentTags.push(top.HEURIST.user.recentTags[i]);
+}
 recentTags.sort(alphasort);
-for (var i=0; i < recentTags.length; ++i) {	// only use the last 5 tags here, we are starved for space
-    if(recentTags[i].indexOf('~')===0) continue;
+for (var i=0; i < recentTags.length; ++i) {    // only use the last 5 tags here, we are starved for space
 	addTagLink(recentTags[i], recentTagsCell);
+    if(i>5) break;
 }
 
 top.HEURIST.registerEvent(window, "load", function() {

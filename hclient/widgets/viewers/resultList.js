@@ -716,7 +716,7 @@ $.widget( "heurist.resultList", {
                 if(isview){
 
                     var recInfoUrl = (this._currentRecordset)
-                    ?this.currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' )
+                    ?this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' )
                     :null;
 
                     if( !recInfoUrl ){
