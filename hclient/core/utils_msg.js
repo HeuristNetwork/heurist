@@ -417,13 +417,15 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 //callback function to resize dialog from internal frame functions
                 $dosframe[0].doDialogResize = function(width, height) {
                     //top.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
+                    /*
                     var body = $(this.document).find('body');
-                    var dim = {h:body.innerHeight()-10, w:body.innerWidth()-10};
+                    var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
 
                     if(width>0)
                         $dlg.dialog('option','width', Math.min(dim.w, width));
                     if(height>0)
                         $dlg.dialog('option','height', Math.min(dim.h, height));
+                    */    
                 };
 
 
