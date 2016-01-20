@@ -354,12 +354,21 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                                     if (! $is_master && @$_SESSION['master_details'][$rd_type]){
                                         $master_details =  $_SESSION['master_details'][$rd_type];
                                         foreach ($detail as $i => $d_detail){
+                                            
                                             foreach ($master_details as $m_detail){
-                                                if (($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])) ||
-                                                ($m_detail['dtl_Geo'] && trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])) ||
-                                                ($m_detail['dtl_UploadedFileID'] && trim($d_detail['dtl_UploadedFileID']) == trim($m_detail['dtl_UploadedFileID']))){
-                                                    //mark this detail for removal
-                                                    array_push($removeIndices,$i);
+                                                
+                                                if($m_detail['dtl_Geo']){
+                                                    if(trim($d_detail['dtl_Geo']) == trim($m_detail['dtl_Geo'])){
+                                                        //print $m_detail['dtl_Geo'].'  '.$d_detail['dtl_Geo'];
+                                                        array_push($removeIndices,$i);
+                                                    }
+                                                }else if ($m_detail['dtl_UploadedFileID']) {
+                                                    if(trim($d_detail['dtl_UploadedFileID']) == trim($m_detail['dtl_UploadedFileID'])){
+                                                        array_push($removeIndices,$i);
+                                                    }
+                                                }else if ($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])){
+                                                        //mark this detail for removal
+                                                        array_push($removeIndices,$i);
                                                 }
                                             }
                                         }
@@ -462,22 +471,35 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
     foreach($detail as $rg){
         $detail_id = $rg['dtl_ID'];
         $detail_type = $rg['dtl_DetailTypeID'];
+        
         if ($rg['dtl_Value']) {
-            if ($rg['dtl_Geo']) $detail_val = $rg['dtl_Geo'];
-            else $detail_val = $rg['dtl_Value'];
+            
+            if ($rg['dtl_Geo']) {
+                $detail_val = $rg['dtl_Geo'];   
+            } else if ($rg['trm_Label']){
+                $detail_val = $rg['trm_Label']." (".$rg['dtl_Value'].")";
+                //$temp = $rg['dtl_Value']; //trm_ID
+            }else{
+                $detail_val = $rg['dtl_Value'];
+            }
+            
+            
         }elseif ($rg['dtl_UploadedFileID']) {
             $rd_temp = mysql_fetch_array(mysql_query('select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']));
             $detail_val = $rd_temp[0];
         }
-
+       
         $input = '<input type="'.($is_type_repeatable? "checkbox":"radio").
         '" name="'.($is_type_repeatable? ($is_master?"keep":"add").$detail_type.'[]':"update".$detail_type).
         '" title="'.($is_type_repeatable?($is_master?"check to Keep value in Master record - uncheck to Remove value from Master record":"Check to Add value to Master record"):
-            ($is_master?  "Click to Keep value in Master record": "Click to Replace value in Master record")).
+            ($is_master?  "Click to Keep value in Master record": "Click to Replace value in Master record")).  
         '" '.($is_master?"checked=checked":"").
         ' value="'.($is_type_repeatable?  $detail_id :($is_master? "master":$detail_id)).
         '" id="'.($is_type_repeatable? ($is_master?"keep_detail_id":"add_detail_id"):"update").$detail_id.
         '">'.detail_str($detail_type, $detail_val).'';
+        
+        
+        
         $rv[]= $input;
     }
     return $rv;
