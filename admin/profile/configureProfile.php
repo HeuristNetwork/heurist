@@ -294,6 +294,10 @@ $sortby_input = @$_REQUEST['order_by_popularity']
 	? '<input type="hidden" id="sortby_input" name="order_by_popularity" value="1">'
 	: '<input type="hidden" id="sortby_input" name="order_by_popularity" value="">';
 
+if($tag_message!=''){
+    $tag_message = $tag_message.'<script>setTimeout(function(){document.getElementById("div-tag-message").style.display="none";},2000);</script>';
+}    
+    
 
 $template = str_replace('{ForeachTag}', $foreach_kwd, $template);
 $template = str_replace('{ForeachTagJs}', $foreach_kwd_js, $template);

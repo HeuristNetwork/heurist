@@ -246,7 +246,7 @@
 
         <div class="hide_on_bookmark_import">
             <a name="tag_edit"> </a>
-            {TagMessage}
+            
 
             <div>
                 <script type="text/javascript">
@@ -279,8 +279,9 @@
                         document.getElementById("tags-loading").style.display = "none";
                         document.getElementById("tags-table").style.display = "block";
                     </script>
-
+                    
                     <div class="actionButtons">
+                        <div id='div-tag-message' style="display:inline-block;">{TagMessage}</div>
                         <input type="button" value="Save edits" style="font-weight: bold;"
                             onClick="{document.forms['kwd_edit_form'].submit();}" title="Edit text in several tags then click this button to save your changes">
                         &nbsp;&nbsp;&nbsp;
