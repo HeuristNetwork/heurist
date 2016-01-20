@@ -25,11 +25,16 @@ regional['en'] = {
     'Please contact to register':'Please contact database owner to register and use all features Heurist in full scale',
     'My Searches':'My Filters (private)',
     'My Bookmarks':'My Bookmarks (private)',
+
+    'Error_Empty_Message':'No response received from server. This may be due to a temporary network outage. Please reload page. If issue persists, please consult your system administrator or email the Heurist development team (info at HeuristNetwork dot org)',
     
     'Password_Reset':'Your password has been reset. You should receive an email shortly with your new password',
-    
+
+    'Error_Password_Reset':'Can not complete operation.',
     'Error_Mail_Recovery':'Your password recovery email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
-    'Error_Mail_Registration':'Your registration is not possible since registration email cannot be sent as the smtp mail system has not been properly installed on this server. Please ask your system administrator to correct the installation',
+    'Error_Mail_Registration':'Your registration info is added to database. However, it is not possible to approve it since registration email can not be sent.',
+    'Error_Mail_Approvement':'Can not send registration approvement email.',
+    
     'mailto_fail': 'Could not perform this operation because the default mail client is not properly installed.<br/>Compose email and send it at info@heuristscholar.org',
     
     //titles    

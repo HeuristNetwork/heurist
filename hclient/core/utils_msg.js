@@ -24,10 +24,6 @@ showElementAsDialog
 */
 if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
-    EMPTY_MESSAGE:("No response received from server. This may be due to a temporary network outage. Please reload page."
-                +" If issue persists, please consult your system administrator "
-                +" or email the Heurist development team (info at HeuristNetwork dot org)"),
-
     showMsgErrJson: function(response){
         if(typeof response === "string"){
             showMsgErr(null);
@@ -42,10 +38,11 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             msg = response;
         }else{
             if(top.HEURIST4.util.isempty(response.message)){
-                msg = top.HEURIST4.msg.EMPTY_MESSAGE;
+                msg = 'Error_Empty_Message';
             }else{
                 msg = response.message;
             }
+            msg = top.HR(msg);
 
             if(response.sysmsg){
 
@@ -76,7 +73,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             }
         }
         if(top.HEURIST4.util.isempty(msg)){
-                msg = top.HEURIST4.msg.EMPTY_MESSAGE;
+                msg = 'Error_Empty_Message';
         }
 
         top.HEURIST4.msg.showMsgDlg(msg, null, "Error");

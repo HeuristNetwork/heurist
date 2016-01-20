@@ -28,7 +28,7 @@ Notes:
 
 (in order of development): 1) Records, 2)WorkGroups 2a)Users, 3)Tags, 
 4)UploadedFiles, 5)Reminders, 6)Databases, 7)SavedSearches,
-8)RecordTypes and 9)Groups, 10)FieldTypes and 11)Groups, 12)Terms, 
+8)RecordTypes and 9)RT Groups, 10)FieldTypes and 11)FT  Groups, 12)Terms, 
 14)Record Comments 15)Record Bookmarks
 16)Smarty Reports (from files) and 17)Report Schedules, 
 

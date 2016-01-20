@@ -130,7 +130,7 @@
                     if($rv=="ok"){
                         return true;
                     }else{
-                        $system->addError(HEURIST_SYSTEM_CONFIG, $rv);
+                        $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Password_Reset', $rv);
                     }
 
                 }else{
@@ -354,9 +354,9 @@
                     if($rectype=='user'){
                         $rv = true;
                         if($recID<1 && $system->get_user_id()<1){
-                            $rv = user_EmailAboutNewUser($mysqli, $new_recID);
+                            $rv = user_EmailAboutNewUser($system, $new_recID);
                         }else if($recID<1 || $is_approvement){
-                            $rv = user_EmailApproval($mysqli, $new_recID, $tmp_password, $is_approvement);
+                            $rv = user_EmailApproval($system, $new_recID, $tmp_password, $is_approvement);
                         }
                         if(!$rv){
                             return false;
@@ -425,9 +425,12 @@
     /**
     * Send email to admin about new user
     */
-    function user_EmailAboutNewUser($mysqli, $recID){
+    function user_EmailAboutNewUser($system, $recID){
 
+        $mysqli = $system->get_mysqli();
+        
         $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+
         $user = user_getById($mysqli, $recID); //find user
         if($user)
         {
@@ -451,7 +454,7 @@
 
             $rv = sendEmail($dbowner_Email, $email_title, $email_text, null);
             if($rv != 'ok'){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration');
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Registration', $rv);
                 return false;
             }
         }else{
@@ -464,8 +467,10 @@
     /**
     *   Send approval message to user
     */
-    function user_EmailApproval($mysqli, $recID, $tmp_password, $is_approvement){
+    function user_EmailApproval($system, $recID, $tmp_password, $is_approvement){
 
+        $mysqli = $system->get_mysqli();
+        
         $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
         $user = user_getById($mysqli, $recID); //find user
         if($user)
@@ -500,7 +505,7 @@
             $rv = sendEmail($ugr_eMail, $email_title, $email_text, "From: ".$dbowner_Email);
 
             if($rv != 'ok'){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Approvement');
+                $system->addError(HEURIST_SYSTEM_CONFIG, 'Error_Mail_Approvement', $rv);
             }
         }else{
                 $system->addError(HEURIST_NOT_FOUND, 'User not found');

@@ -41,8 +41,8 @@
             $errorMsg = "Cannot send email "
                     .($email_title?"'".$email_title."'":'')
                     .". This may indicate that mail transport agent is not correctly configured on server."
-                    ." Please advise the system adminstrator";
-
+                    ." Please ask your system administrator to correct the installation";
+                    
             if(!checkSmtp()){
                 return $errorMsg;
             }

@@ -127,6 +127,7 @@ function dbOwnerRequired(){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
         
     <script type="text/javascript">
     
@@ -155,7 +156,7 @@ function dbOwnerRequired(){
             if(!top.HAPI4){
                 // In case of standalone page
                 //load minimum set of required scripts
-                $.getMultiScripts(['localization.js', 'utils_msg.js'/*, 
+                $.getMultiScripts(['localization.js'/*, , 'utils_msg.js'
                                    'utils_ui.js', 'search_minimal.js', 'recordset.js', 'hapi.js'*/], '<?php echo PDIR;?>hclient/core/')
                 .done(function() {
                     // all done
