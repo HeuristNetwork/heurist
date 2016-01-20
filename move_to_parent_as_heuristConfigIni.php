@@ -37,9 +37,10 @@ if (!@$dbHost) {
 	$dbReadonlyPassword = ""; //required
 }
 
-if (!@$sysAdminEmail) $sysAdminEmail = ""; // recommended
-if (!@$infoEmail) $infoEmail = ""; // recommended
-if (!@$bugEmail) $bugEmail = ""; // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
+if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org"; // required, please set to email of the system administrator or mailing group
+
+if (!@$infoEmail) $infoEmail = "info@HeuristNetwork.org"; // recommended, please set to the email of whoever provides user assistance
+if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org"; // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
 
 
 // -------- THE REST IS OPTIONAL ----------------------------------------------------------------------------------------------
