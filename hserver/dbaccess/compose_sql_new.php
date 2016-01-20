@@ -89,7 +89,8 @@ select
 
 */
 $mysqli = null;
-
+$wg_ids = null;
+$publicOnly = false;
 
 /*
 
@@ -110,7 +111,7 @@ $mysqli = null;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli;
+    global $mysqli, $wg_ids, $publicOnly;
 
     $mysqli = $db;
 
@@ -130,7 +131,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     }
     array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
 
-    $publicOnly = (@$params['publiconly']==1); //@todo
+    $publicOnly = (@$params['publiconly']==1); //@todo change to vt - visibility type parameter of query
 
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
@@ -217,6 +218,8 @@ class HQuery {
     }
 
     function makeSQL(){
+        
+        global $publicOnly, $wg_ids;
 
         $res = $this->top_limb->makeSQL();
 
@@ -241,6 +244,30 @@ class HQuery {
             }
         }
         $this->where_clause = $this->where_clause.$this->top_limb->where_clause." ";
+        
+        //add owner access restriction @todo look at parmeter owner
+        if($this->level=='0'){ //apply this restriction for top level only
+            if($publicOnly){
+                $recVisibilityType = "public";
+            }else{
+                $recVisibilityType = null;
+            }
+
+            if($recVisibilityType && $recVisibilityType!="hidden"){
+                $where2 = '(r0.rec_NonOwnerVisibility="'.$recVisibilityType.'")';  //'pending','public','viewable'
+            }else{
+                if($recVisibilityType){ //hidden
+                    $where2 = 'r0.rec_NonOwnerVisibility="hidden" and ';
+                }else{
+                    $where2 = '(not r0.rec_NonOwnerVisibility="hidden") or ';
+                }
+
+                $where2 = '( '.$where2.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+            }
+
+            $this->where_clause = $this->where_clause. ' and ' . $where2;
+        }
+        
     }
 
 }

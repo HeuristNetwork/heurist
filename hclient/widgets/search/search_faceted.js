@@ -1090,6 +1090,7 @@ $.widget( "heurist.search_faceted", {
                         
                         var mmin  = cterm[0];
                         var mmax  = cterm[1];
+                        var daymsec = 86400000; //24*60*60*1000;   1day
                         
                         if(!(top.HEURIST4.util.isempty(mmin) || top.HEURIST4.util.isempty(mmax))){
                             
@@ -1110,7 +1111,6 @@ $.widget( "heurist.search_faceted", {
                                 //find date interval for proper formating
                                 var delta = mmax-mmin;
                                 var date_format = "dd mmm yyyy HH:MM"; //"YYYY-MM-DD hh:mm:ss";
-                                var daymsec = 86400000; //24*60*60*1000;
                                 
                                 if(delta>3*365*daymsec){ //3 years
                                     date_format = "yyyy";
@@ -1127,8 +1127,10 @@ $.widget( "heurist.search_faceted", {
                             
                             var delta = top.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0;
                             
-                            if(mmin==mmax){
-                                delta = field['type']=="date"?86400000:10; 
+                            if(field['type']=="date" && mmax-mmin<daymsec){
+                                delta = daymsec;
+                            }else if(mmin==mmax){ //years
+                                delta = 10;
                             }
                             
                         /*if(mmin==mmax){

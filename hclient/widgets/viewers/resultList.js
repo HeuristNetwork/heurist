@@ -1194,7 +1194,18 @@ $.widget( "heurist.resultList", {
 
                         if(response.data.queryid==that.current_page) {
 
-                            that._currentRecordset.fillHeader( new hRecordSet( response.data ));
+                            var resp = new hRecordSet( response.data );
+                            that._currentRecordset.fillHeader( resp );
+                            
+                            //remove records that we can't recieve data
+                            for(i in rec_toload){
+                               var recID = rec_toload[i];
+                               if(resp.getById(recID)==null){
+                                   that._currentRecordset.removeRecord(recID);
+                                   //that._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Can not get data from server'});
+                               } 
+                            }
+                            
                             that._renderPage( that.current_page );
                         }
 

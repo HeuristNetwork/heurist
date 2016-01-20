@@ -34,7 +34,7 @@ function hRecordSet(initdata) {
     offset = 0,
     //limit = 1000, use length()
     fields = [],       //array of field names
-    records = null,      //list of records objects {idx:[], ....}
+    records = null,      //list of records objects {recID:[], ....}
     order = [], //array of record IDs in specified order
     mainset = null, //array of record IDs that belong to main result set (without applied rules)
     
@@ -634,8 +634,10 @@ function hRecordSet(initdata) {
             if($.isEmptyObject(fields)) fields = recordset2.getFields();
             if(!$.isEmptyObject(rectypes)) {
                 rectypes2 = recordset2.getRectypes();
-                jQuery.merge( rectypes2, rectypes );
-                rectypes = jQuery.unique( rectypes2 );
+                if(!$.isEmptyObject(rectypes2)) {
+                    jQuery.merge( rectypes2, rectypes );
+                    rectypes = jQuery.unique( rectypes2 );
+                }
             }else{
                 rectypes = recordset2.getRectypes();
             }    
@@ -647,7 +649,8 @@ function hRecordSet(initdata) {
             
             for (idx=0;idx<order2.length;idx++){
                 recid = order2[idx];
-                if(recid){ //&& records2[recid]){
+                //todo - check that this id is in order
+                if(recid){ //&& records2[recid]){ 
                     records[recid] = records2[recid];
                 }
             }
@@ -877,7 +880,23 @@ function hRecordSet(initdata) {
         makeKeyValueArray:function(titlefield){
             return _makeKeyValueArray(titlefield);
         },
+        
+        removeRecord:function(recID){
+            delete records[recID];
+            var idx = order.indexOf(recID);
+            if(idx>=0){
+                order.splice(idx,1);
+                total_count = total_count-1;
+            }
+        },
 
+        setRecord:function(recID, record){
+            var idx = order.indexOf(recID);
+            if(idx>=0){
+                records[recID] = record;
+            }
+        },
+        
     }
 
     _init(initdata);
