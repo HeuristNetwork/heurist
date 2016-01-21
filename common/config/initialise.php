@@ -164,8 +164,7 @@ define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h4/
 // DO NOT CHANGE THIS URL
 // Note: had /migrated appended up to 17 Dec 2015, need to update the server with new copy of H4
 // anything using h3 code will still go to the h3 codebase, only h4 code is affected
-// TODO: Temporary fudge 22/12/15 use h4-ij until h4 updated without /migrated
-define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4-ij/");
+define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4/");
 define('HEURIST_INDEX_DBNAME', "HeuristMasterIndex");
 
 //-------------------------------------------------------------------------- MEMCACHE AND PROXY
@@ -460,7 +459,7 @@ if ($bugEmail) {
     define('HEURIST_MAIL_TO_BUG', $bugEmail); //mailto string for heurist installation issues
 
 } else {
-    define('HEURIST_MAIL_TO_BUG', 'prime.heurist@gmail.com'); //mailto string for heurist installation issues
+    define('HEURIST_MAIL_TO_BUG', 'info@HeuristNetwork.org'); // default if not configured
 
 }
 
@@ -468,7 +467,7 @@ if ($infoEmail) {
     define('HEURIST_MAIL_TO_INFO', $infoEmail); //mailto string for heurist installation issues
 
 } else {
-    define('HEURIST_MAIL_TO_INFO', 'prime.heurist@gmail.com'); //mailto string for heurist installation issues
+    define('HEURIST_MAIL_TO_INFO', 'info@HeuristNetwork.org'); //default if not configured
 
 }
 
@@ -822,7 +821,7 @@ function returnErrorMsgPage($critical, $msg = null) {
 }
 
 function getInstallationDirectory($scriptName){
-    
+
     // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
     $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external";
 
@@ -833,7 +832,7 @@ function getInstallationDirectory($scriptName){
     }
 
     //the subdir of the server's document directory where heurist is installed
-    if ($installDir == $scriptName || $installDir == '') { 
+    if ($installDir == $scriptName || $installDir == '') {
         // this should be the path difference between document root and heurist code root
         $installDir = '/';
     }else{

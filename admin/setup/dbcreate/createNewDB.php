@@ -139,12 +139,12 @@ function errorOut($msg){
                         //restore use registration parameters in case creation fails
                         foreach ($_REQUEST as $param_name => $param_value){
                             if(strpos($param_name,'ugr_')===0 && $param_name!='ugr_Password'){
-//print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';   
-                                   print "edit_data['$param_name'] = '$param_value';";  
+//print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
+                                   print "edit_data['$param_name'] = '$param_value';";
                             }
                         }
                         ?>
-                        
+
                         if(profile_edit_dialog==null){
                             profile_edit_dialog = $('#heurist-profile-dialog');
                             if(profile_edit_dialog.length<1){
@@ -290,13 +290,9 @@ function errorOut($msg){
                         var reginfo = registeredDBs[bd_reg_idx];
 
                         regurl = reginfo[1];
-                        // TODO: Temporary fudge 8/1/16 to point at h4-ij pending publish of new h4 without the 'migrated' path
+                        // Backwards compatibility for dbs originally registered with h3
                         if(regurl=='http://heurist.sydney.edu.au/h3/'){
-                            regurl = 'http://heurist.sydney.edu.au/h4-ij/';
-                        }
-                        // TODO: Temporary fudge 8/1/16 to point at h4-ij pending publish of new h4 without the 'migrated' path
-                        if(regurl=='http://heurist.sydney.edu.au/h4/'){
-                            regurl = 'http://heurist.sydney.edu.au/h4-ij/';
+                            regurl = 'http://heurist.sydney.edu.au/h4/';
                         }
 
                         //url + script + db
@@ -530,7 +526,7 @@ function errorOut($msg){
                             </div>
 
                         </div>
-                        
+
                     </form>
 
                     <div id="div_register" style="display: none;">
