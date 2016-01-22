@@ -248,9 +248,8 @@ function dbOwnerRequired(){
         }
         top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
-        if(layoutid=='DigitalHarlem'){ //digital harlem - @todo move style to layout
-            $("head").append($('<link rel="stylesheet" type="text/css" href="hclient/widget/digital_harlem/dh_style.css?t='+(new Date().getTime())+'">'));
-            $.getScript(top.HAPI4.basePathV4+'hclient/widget/digital_harlem/dh_search_minimal.js').fail(function(){
+        if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
+            $.getScript(top.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
                 top.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
             });
         }

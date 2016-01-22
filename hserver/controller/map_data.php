@@ -25,6 +25,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
+$recordWhere = "(not r.rec_FlagTemporary) and (not r.rec_NonOwnerVisibility='hidden') and ";
 $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
 
 
@@ -81,11 +82,11 @@ function _getTermByID($system, $id) {
 * @param mixed $id  Record ID
 */
 function getRecordByID($system, $id) {
-    global $recordQuery;
+    global $recordQuery, $recordWhere;
     $record = new stdClass();
 
     // Select the record
-    $query = $recordQuery." WHERE r.rec_ID=".$id;
+    $query = $recordQuery." WHERE ".$recordWhere."r.rec_ID=".$id;
     $res = $system->get_mysqli()->query($query);
 
     if ($res) {
@@ -330,13 +331,13 @@ function getRecordDetails($system, $record) {
 */
 function getMapDocuments($system) {
     //echo "getMapDocuments() called!";
-    global $recordQuery;
+    global $recordQuery, $recordWhere;
     global $detailQuery;
     $documents = array();
 
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
-        $query = $recordQuery." WHERE rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
+        $query = $recordQuery." WHERE ".$recordWhere." rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if ($res) {

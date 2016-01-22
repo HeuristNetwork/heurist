@@ -180,10 +180,9 @@ require_once(dirname(__FILE__)."/initPage.php");
         $( window ).resize(function() {
             var w = $(this).width();
             if (w < 400) {
-                $("#map-doc-select").hide();
-                $("#map-doc-select-lbl").hide();
+                $("#mapSelector").hide();
             }else{
-                $("#map-doc-select").show();
+                $("#mapSelector").show();
                 if (w < 490) {
                     $("#map-doc-select-lbl").hide();
                 }else{

@@ -133,7 +133,7 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                     setTimeout(function(){
                             top.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
-                }else if( top.HAPI4.sysinfo['layout']!='DigitalHarlem'){
+                }else if(!(top.HAPI4.sysinfo['layout']=='DigitalHarlem' || top.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
                     var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                     if(!top.HEURIST4.util.isempty(init_search)){
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };

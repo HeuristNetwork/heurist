@@ -79,9 +79,15 @@ $.widget( "heurist.dh_search", {
 
         this._refresh();
 
-
+        var query;
         // "Featured Individuals"
-        var request = { q: {"t":"19","f:144":"532"},    //t:19 f:144:532
+        if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+            query = {"t":"19","f:144":"532,4749"};
+        }else{
+            query = {"t":"19","f:144":"532"};
+        }
+        
+        var request = { q: query,
             w: 'a',
             detail: 'header',
             source:this.element.attr('id') };

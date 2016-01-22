@@ -260,7 +260,7 @@ function hLayout(args) {
 
         //1. loop trough all layout panes  - create divs or use existing ones
         var panes = Object.keys(layout);
-        var i, reserved = ['id', 'name', 'theme', 'type', 'options'];
+        var i, reserved = ['id', 'name', 'theme', 'type', 'options', 'cssfile'];
 
         function __layoutAddPane(pos){
             if(layout[pos]){
@@ -312,7 +312,7 @@ function hLayout(args) {
 
         //1. loop trough all layout panes  - create divs or use existing ones
         var panes = Object.keys(layout);
-        var i, reserved = ['id', 'name', 'theme', 'type', 'options'];
+        var i, reserved = ['id', 'name', 'theme', 'type', 'options', 'cssfile'];
 
         if(!layout.options){
             layout.options = {};
@@ -853,6 +853,12 @@ function hLayout(args) {
 
         var $container = $(containerid);
         $container.empty();
+        
+        //add style to header
+        if(!Hul.isempty(layout.cssfile)){
+            $("head").append($('<link rel="stylesheet" type="text/css" href="'+layout.cssfile+'?t='+(new Date().getTime())+'">'));
+        }
+        
 
         if(Hul.isempty(layout.type) || layout.type=='cardinal'){
 

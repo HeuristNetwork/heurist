@@ -69,8 +69,8 @@ function _loadMapDocuments(startup_mapdocument) {
 
             // select listener - load map documents
             ele.change(function(e) {
-                var map_document_id = Number($(this).val());
-                _loadMapDocumentById( map_document_id );
+                //var map_document_id = Number($(this).val());
+                _loadMapDocumentById( null );
             });
             
             if(startup_mapdocument > 0){
@@ -91,10 +91,14 @@ function _loadMapDocumentById(mapdocument_id) {
 //console.log('load document '+mapdocument_id);
 
         var mapdocs = $("#map-doc-select");
-        if(mapdocs.val()==mapdocument_id){
-            return;
+        if(mapdocument_id){
+            if(mapdocs.val()==mapdocument_id){
+                return;
+            }
+            mapdocs.val(mapdocument_id);
+        }else{
+            mapdocument_id = mapdocs.val();
         }
-        mapdocs.val(mapdocument_id);
 
         // Clean old data
         _removeMapDocumentOverlays();

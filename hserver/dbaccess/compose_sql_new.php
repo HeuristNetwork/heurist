@@ -264,6 +264,7 @@ class HQuery {
 
                 $where2 = '( '.$where2.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
             }
+            $where2 = '(not r0.rec_FlagTemporary) and '.$where2;
 
             $this->where_clause = $this->where_clause. ' and ' . $where2;
         }
@@ -942,7 +943,7 @@ class HPredicate {
                 $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
             }
         }
-
+        
         return $res;
 
     }
