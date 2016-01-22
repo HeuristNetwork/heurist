@@ -143,9 +143,9 @@ function hSearchMinimal() {
             }
             
             if(!top.HEURIST4.util.isnull(_owner_doc)){ 
-                if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
+                if(top.HAPI4.currentRecordset){ // && top.HAPI4.currentRecordset.length()>0)
                     $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
-                else{
+                }else{
                     $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
                 }
             }
