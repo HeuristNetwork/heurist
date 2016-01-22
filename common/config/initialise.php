@@ -456,29 +456,9 @@ if (!defined('SKIP_VERSIONCHECK') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) 
 }
 
 // set up email defines
-if ($bugEmail) {
-    define('HEURIST_MAIL_TO_BUG', $bugEmail); //mailto string for heurist installation issues
-
-} else {
-    define('HEURIST_MAIL_TO_BUG', 'prime.heurist@gmail.com'); //mailto string for heurist installation issues
-
-}
-
-if ($infoEmail) {
-    define('HEURIST_MAIL_TO_INFO', $infoEmail); //mailto string for heurist installation issues
-
-} else {
-    define('HEURIST_MAIL_TO_INFO', 'prime.heurist@gmail.com'); //mailto string for heurist installation issues
-
-}
-
-if ($sysAdminEmail) {
-    define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail); //mailto string for heurist installation issues
-
-} else if ($infoEmail) {
-    define('HEURIST_MAIL_TO_ADMIN', $infoEmail); //mailto string for heurist installation issues
-
-}
+define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'prime.heurist@gmail.com'); 
+define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'prime.heurist@gmail.com'); 
+define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO); 
 
 // url of 3d party service that generates thumbnails for given website, set for installation in intialise.php
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);

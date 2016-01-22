@@ -85,29 +85,22 @@ function hAPI(_db, _oninit) { //, _currentUser
         /*if(_currentUser){
         that.currentUser = _currentUser;
         }else{}*/
-
-        if(that.database){
-
-            // Get current user if logged in, and global database settings
-            that.SystemMgr.sys_info(
-                function(response){
-                    var  success = (response.status == top.HAPI4.ResponseStatus.OK);
-                    if(success){
-                        that.setCurrentUser(response.data.currentUser);
-                        that.sysinfo = response.data.sysinfo;
-                        that.basePathV3 = that.sysinfo['basePathV3'];
-                    }else{
-                        top.HEURIST4.msg.showMsgErr(response.message);
-                    }
-                    if(_oninit){
-                        _oninit(success);
-                    }
+        // Get current user if logged in, and global database settings
+        that.SystemMgr.sys_info(
+            function(response){
+                var  success = (response.status == top.HAPI4.ResponseStatus.OK);
+                if(success){
+                    if(response.data.currentUser) that.setCurrentUser(response.data.currentUser);
+                    that.sysinfo = response.data.sysinfo;
+                    that.basePathV3 = that.sysinfo['basePathV3'];
+                }else{
+                    top.HEURIST4.msg.showMsgErr(response.message);
                 }
-            );
-
-        }else if(_oninit){
-            _oninit( false );
-        }
+                if(_oninit){
+                    _oninit(that.database && success);
+                }
+            }
+        );
 
     }
 

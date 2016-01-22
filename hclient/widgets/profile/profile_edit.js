@@ -77,9 +77,16 @@ $.widget( "heurist.profile_edit", {
                     }
 
                     that.options.isregistration = !(Number(that.options.ugr_ID)>0 || top.HAPI4.is_admin());
-                    if(that.options.isregistration && top.HAPI4.sysinfo.dbowner_name){
-                        $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI4.sysinfo.dbowner_name+'  '+
-                            '<a href="mailto:'+top.HAPI4.sysinfo.dbowner_email+'">'+top.HAPI4.sysinfo.dbowner_email+'</a>');
+                    if(that.options.isregistration){
+                        
+                        if(top.HEURIST4.util.isempty(top.HAPI4.sysinfo.dbowner_email)){ //new db creation and not logged in
+                            $("#contactDetails").html(top.HR('Email to')+': System Administrator '+
+                                '<a href="mailto:'+top.HAPI4.sysinfo.sysadmin_email+'">'+top.HAPI4.sysinfo.sysadmin_email+'</a>');
+                        }else{
+                            $("#contactDetails").html(top.HR('Email to')+': '+top.HAPI4.sysinfo.dbowner_name+'  '+
+                                '<a href="mailto:'+top.HAPI4.sysinfo.dbowner_email+'">'+top.HAPI4.sysinfo.dbowner_email+'</a>');
+                        }
+                        
                     }else{
                         $("#contactDetails").html('');
                     }

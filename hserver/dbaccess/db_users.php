@@ -423,13 +423,14 @@
     }
 
     /**
-    * Send email to admin about new user
+    * Send emails to DB Onwer and  System admin about new user
     */
     function user_EmailAboutNewUser($system, $recID){
 
         $mysqli = $system->get_mysqli();
         
         $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
+        //$systemAdmin_Email = HEURIST_MAIL_TO_ADMIN;
 
         $user = user_getById($mysqli, $recID); //find user
         if($user)

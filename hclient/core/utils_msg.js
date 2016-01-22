@@ -37,7 +37,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         if(typeof response === "string"){
             msg = response;
         }else{
-            if(top.HEURIST4.util.isempty(response.message)){
+            if(top.HEURIST4.util.isnull(response) || top.HEURIST4.util.isempty(response.message)){
                 msg = 'Error_Empty_Message';
             }else{
                 msg = response.message;
@@ -103,7 +103,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
         message = "Beta version: we are still working on "
               + message
-              + "<br/><br/>Please email Heurist support (support _at_ HeuristNetwork.org)"
+              + "<br/><br/>Please email Heurist support (info at HeuristNetwork dot org)"
               + "<br/>if you need this feature and we will provide workarounds and/or fast-track your needs.";
 
         top.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");

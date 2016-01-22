@@ -31,6 +31,7 @@ define('NO_DB_ALLOWED',1);
 define('SKIP_VERSIONCHECK2',1);
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
 $blankServer = (HEURIST_DBNAME==''); //@todo check exxistense of other databases
@@ -59,6 +60,32 @@ function errorOut($msg){
     print '<p class="error ui-state-error"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
     .$msg.'<p>';
 }
+
+//
+//
+//
+function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation, $ugr_eMail, $newDatabaseName){
+
+    //create email text for admin
+    $email_text =
+    "There is new Heurist database.\n".
+    "The user who creates new database is:\n".
+    "Database name: ".$newDatabaseName."\n".
+    "Full name:    ".$ugr_FullName."\n".
+    "Email address: ".$ugr_eMail."\n".
+    "Organisation:  ".$ugr_Organisation."\n".
+    "Go to the address below to review further details:\n".
+    HEURIST_BASE_URL."admin/adminMenu.php?db=".$newDatabaseName;
+
+    $email_title = 'New database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
+
+    $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
+    if($rv != 'ok'){
+        return false;
+    }
+    return true;
+}
+
 ?>
 <html>
     <head>
@@ -101,6 +128,7 @@ function errorOut($msg){
 
                         $("#btnRegister").button({label:'Register as User'}).on('click', doRegister);
                         $("#div_register").show();
+                        $("#div_register_entered").hide();
                         $("#div_create").hide();
                     }
                 });
@@ -124,6 +152,7 @@ function errorOut($msg){
                     }
 
                     $("#div_register").hide();
+                    $("#div_register_entered").show();
                     $("#div_create").show();
                     setUserPartOfName();
                 }
@@ -510,10 +539,14 @@ function errorOut($msg){
                                 </div>
                             </div>
                         </div>
+                        
+                        <div id="div_register_entered" style="display: none;">
+                            <h3 style="margin:5px 0 10px 38px;color:darkgreen;">Registration information entered</h3>
+                        </div>
 
                         <div id="div_create">
                             <h3 style="margin-left: 38px">Enter a name for the new database</h3>
-                            <div style="margin-left: 60px; margin-top: 10px;">
+                            <div style="margin-left:60px; margin-top: 10px;">
                                 <!-- user name used as prefix -->
                                 <i>no spaces or punctuation other than underscore</i><br />&nbsp;<br />
                                 <b><?= HEURIST_DB_PREFIX ?>
@@ -604,20 +637,37 @@ function errorOut($msg){
                     // Check that there is a current administrative user who can be made the owner of the new database
                     $message = "MySQL username and password have not been set in configIni.php ".
                     "or heuristConfigIni.php<br/> - Please do so before trying to create a new database.<br>";
-                    if(ADMIN_DBUSERNAME == "") {
-                        if(ADMIN_DBUSERPSWD == "") {
-                            echo $message;
-                            return;
-                        }
-                        echo $message;
-                        return;
-                    }
-                    if(ADMIN_DBUSERPSWD == "") {
-                        echo $message;
-                        return;
+                    if(ADMIN_DBUSERNAME == "" || ADMIN_DBUSERPSWD == ""){
+                        errorOut($message);
+                        return false;
                     } // checking for current administrative user
 
-
+                    if(!is_logged_in()) { //this is creation+registration
+                            
+                        $captcha_code = getUsrField('ugr_Captcha');    
+                            
+                        //check capture
+                        if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
+                            errorOut('Are you a bot? Please enter the correct answer to the challenge question');
+                            $isDefineNewDatabase = true;
+                            return false;
+                        }
+                        if (@$_SESSION["captcha_code"]){
+                            unset($_SESSION["captcha_code"]);
+                        }
+                        
+                        $firstName = getUsrField('ugr_FirstName');
+                        $lastName = getUsrField('ugr_LastName');
+                        $eMail = getUsrField('ugr_eMail');
+                        $name = getUsrField('ugr_Name');
+                        $password = getUsrField('ugr_Password');
+                        if($firstName=='' || $lastName=='' || $eMail=='' || $name=='' || $password==''){
+                            errorOut('Mandatory data for your registration profile are not completed. Please fill registration form');
+                            $isDefineNewDatabase = true;
+                            return false;
+                        }
+                    }
+                    
                     // Create a new blank database
                     $newDBName = trim($_REQUEST['uname']).'_';
 
@@ -752,6 +802,8 @@ function errorOut($msg){
                             return false;
                         }
 
+                        
+                
                         // Get and clean information for the user creating the database
                         if(!is_logged_in()) {
                             $longName = "";
@@ -825,7 +877,10 @@ function errorOut($msg){
                             ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                         // TODO: error check, although this is unlikely to fail
 
+                        
+                        user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName);
                     } //DEBUG
+                    
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
                         <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>

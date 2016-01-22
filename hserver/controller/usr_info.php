@@ -26,9 +26,12 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_svs.php');
 
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
+    $res = false;
 
+    $action = @$_REQUEST['a']; //$system->getError();
+     
     $system = new System();
-    if( ! $system->init(@$_REQUEST['db']) ){
+    if( ! $system->init(@$_REQUEST['db'], ($action!='sysinfo') ) ){ //the only action that is possible without db 
 
         //get error and response
         $response = $system->getError();
@@ -36,13 +39,16 @@
     }else{
 
         $mysqli = $system->get_mysqli();
+        
+        if ($action=="sysinfo") {
+            
+            $res = $system->getCurrentUserAndSysInfo();
 
-        $action = @$_REQUEST['a']; //$system->getError();
-
+        }else        
         //no enough permission for guest
         if ( $system->get_user_id()<1 &&
             !( $action=='login' || $action=='reset_password' || $action=="svs_savetree"  || $action=="svs_gettree"
-               || $action=="usr_save" || $action=="usr_get" || $action=="sysinfo" || $action=="svs_get" ) ) {
+               || $action=="usr_save" || $action=="usr_get" || $action=="svs_get" ) ) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED, "Operation denied. Not enough rights");
 
@@ -73,10 +79,6 @@
                 if($system->logout()){
                     $res = true;
                 }
-
-            } else if ($action=="sysinfo") {
-
-                $res = $system->getCurrentUserAndSysInfo();
 
             } else if ($action == "save_prefs"){ //save preferences into session
 
@@ -136,13 +138,14 @@
             }
 
 
-            if(is_bool($res) && !$res){
-                $response = $system->getError();
-            }else{
-                $response = array("status"=>HEURIST_OK, "data"=> $res);
-            }
-
         }
+        
+        if(is_bool($res) && !$res){
+            $response = $system->getError();
+        }else{
+            $response = array("status"=>HEURIST_OK, "data"=> $res);
+        }
+        
     }
 
     header('Content-type: text/javascript');

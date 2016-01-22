@@ -420,21 +420,36 @@ class System {
             if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences(); 
         }
 
-        $dbowner = user_getDbOwner($this->mysqli);
+        if($this->mysqli && defined('HEURIST_DBNAME')){
+            $dbowner = user_getDbOwner($this->mysqli);
 
-        $res = array(
-            "currentUser"=>$user,
-            "sysinfo"=>array(
-                "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
-                "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
-                "help"=>HEURIST_HELP,
-                "version"=>HEURIST_VERSION,
-                "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
-                "dbowner_email"=>@$dbowner['ugr_eMail'],
-                "db_total_records"=>$this->get_system('sys_RecordCount'),
-                "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
-                "basePathV3"=>HEURIST_BASE_URL)
-        );
+            $res = array(
+                "currentUser"=>$user,
+                "sysinfo"=>array(
+                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
+                    "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
+                    "help"=>HEURIST_HELP,
+                    "version"=>HEURIST_VERSION,
+                    "dbowner_name"=>@$dbowner['ugr_FirstName'] . ' ' . @$dbowner['ugr_LastName'],
+                    "dbowner_email"=>@$dbowner['ugr_eMail'],
+                    "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
+                    "db_total_records"=>$this->get_system('sys_RecordCount'),
+                    "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
+                    "basePathV3"=>HEURIST_BASE_URL)
+            );
+            
+        }else{
+            
+            $res = array(
+                "currentUser"=>null,
+                "sysinfo"=>array(
+                    "help"=>HEURIST_HELP,
+                    "version"=>HEURIST_VERSION,
+                    "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
+                    "basePathV3"=>HEURIST_BASE_URL)
+            );
+            
+        }
 
         return $res;
     }

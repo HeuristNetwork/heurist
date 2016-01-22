@@ -26,7 +26,7 @@ regional['en'] = {
     'My Searches':'My Filters (private)',
     'My Bookmarks':'My Bookmarks (private)',
 
-    'Error_Empty_Message':'No response received from server. This may be due to a temporary network outage. Please reload page. If issue persists, please consult your system administrator or email the Heurist development team (info at HeuristNetwork dot org)',
+    'Error_Empty_Message':'No error message was supplied, please report to Heurist developers',
     
     'Password_Reset':'Your password has been reset. You should receive an email shortly with your new password',
 
