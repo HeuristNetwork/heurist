@@ -123,8 +123,8 @@
                 }
 
                 if ($.isEmptyObject( registeredDBs )) {
-                    top.HEURIST.util.showError('Error: Cannot access index service<br>'+
-                        'Please verify that your proxy settings are not blocking access');
+                    top.HEURIST.util.showError('Unable to access the Heurist index service<br>'+
+                        'Please ask your system administrator, or the Heurist team (info at HeuristNetwork dot org) to verify that your server proxy settings are not blocking access or that the clearinghouse is not down.');
                 }else{
                     initDbTable();
                 }

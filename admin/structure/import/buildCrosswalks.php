@@ -190,8 +190,7 @@ else
 
         // TODO: Remove this temporary fudge once Heurist_Master_Index updated to remove all references to H3
         if($regurl=='http://heurist.sydney.edu.au/h3/'){  //change the registered url on our server to new one
-            // TODO: Remove '-ij' even more temporary fudge once H4 updated to use code without /migrated directory
-            $regurl = 'http://heurist.sydney.edu.au/h4-ij/';
+            $regurl = 'http://heurist.sydney.edu.au/h4/';
         }
 
         // This is the correct URL for vsn 3.1.8 and above, March 2014, with a hiccup in latter half of 2015
@@ -199,15 +198,15 @@ else
         $source_url = $regurl."admin/describe/getDBStructureAsSQL.php?plain=1&db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
     }
 
-// http://heurist.sydney.edu.au/h4-ao/admin/describe/getDBStructureAsSQL.php?db=johns_Esparoutis_rentals    
-    
+// http://heurist.sydney.edu.au/h4-ao/admin/describe/getDBStructureAsSQL.php?db=johns_Esparoutis_rentals
+
     //TODO: why is the second parameter 60? It's specified as bypasProxy = true
     $data = loadRemoteURLContentSpecial($source_url); // get the structure data
 
 //error_log('result '.$data);//substr($data, 0, 500));
     mysql_connection_insert($tempDBName); // Use temp database
-    
-    
+
+
     // TODO: is this check for the word 'unable' really a good check of failure???
     //       why are we not testing for success in the form of a recognisable signature?
     if (!$data || substr($data, 0, 6) == "unable") { // failed
@@ -275,9 +274,9 @@ function getNextDataSet($splittedData) { // returns and removes the first set of
     if(!$tableNumber) {
         $tableNumber = 1;
     }
-    
+
 //error_log(">>>>>DATA ".count($splittedData)."  ".$tableNumber." ".$splittedData[$tableNumber]);
-    
+
     // TODO: this is a horrible approach to splitting out the data. Should be rewritten.
     // Works, so for the moment, "if it ain't broke, don't fix it ..."
     if(count($splittedData) > $tableNumber) { // what the hell does this do? fortunately it is always true!
@@ -365,10 +364,10 @@ function processRecTypes($dataSet) {
             echo "RECTYPES Error inserting data: " . mysql_error() . "<p>FIELDS:$flds<br /><p>VALUES:$dataSet<p>";
             $errorCreatingTables = TRUE;
         }
-        
+
 //$r = mysql_query("SELECT DATABASE()") or die(mysql_error());
-//error_log("DATABASE IS ".mysql_result($r,0));    
-        
+//error_log("DATABASE IS ".mysql_result($r,0));
+
     } // END Imported first set of data to temp table: defRectypes
 } // processRecTypes
 
@@ -467,7 +466,7 @@ function processFileExtToMimetype($dataSet) {
 
 function processRecTypeGroups($dataSet) {
     global $errorCreatingTables;
-    
+
     if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
         include HEURIST_DIR."admin/structure/crosswalk/defRecTypeGroupsFields.inc";
         $query = "INSERT INTO `defRecTypeGroups` ($flds) VALUES " . $dataSet;

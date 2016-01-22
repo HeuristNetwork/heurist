@@ -133,8 +133,8 @@ $usrTags = array(
 //---------------------------------
 // set up email defines
 //
-define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'prime.heurist@gmail.com'); 
-define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'prime.heurist@gmail.com'); 
+define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org'); 
+define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org'); 
 define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO); 
 
 //---------------------------------
