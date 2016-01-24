@@ -21,12 +21,19 @@
 */
 
 require_once(dirname(__FILE__)."/../../../hserver/System.php");
-require_once(dirname(__FILE__)."/../../../hserver/dbaccess/db_recsearch.php");
+//require_once(dirname(__FILE__)."/../../../hserver/dbaccess/db_recsearch.php");
 
 $statistics = "";
 $system = new System();
 // connect to given database
 if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
+    
+    $appcode = @$_REQUEST['app'];
+    if($appcode=='DigitalHarlem1935'){
+        $appcode = 4800; //4751;
+    }else if($appcode=='DigitalHarlem'){
+        $appcode = 4799; //4750; 
+    }
 
     // Building query
     $query = "SELECT rec_RecTypeID as id, count(*) as count FROM Records WHERE rec_RecTypeID in (14,10,12,15) GROUP BY id";
@@ -89,17 +96,33 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
             //query = {"t":"25","f:154":"4799"};
             $query = "t:25 sortby:f:94"; //f:154:4799 
         }
-*/        
+*/      
+        //@todo all this stuff should be implemented on client side since header is not static content anymore  
         
         // Put record types & counts in the table
         $res = $system->get_mysqli()->query($query);
         $stats = array();
         while($row = $res->fetch_assoc()) { // each loop is a complete table row
             if($row["ord"]>0){
-                ?>
-                <div class="menubutton"><a class="menuitem" href="javascript:void(0)"
-                    onClick="{ top.HEURIST4.msg.showMsgDlg('#webcontent<?=$row["id"]?>', null,'<?=$row["title"]?>');}"><?=$row["title"]?></a></div>
-                <?php
+                if($appcode>0){
+                    //detect app
+                    $list = mysql__select_list($system->get_mysqli(), 'recDetails', 'dtl_Value', 
+                        'dtl_recID='.$row["id"].' and dtl_DetailTypeID=154'); //145
+                    $classes = '';    
+                    $isNotFound = true;
+                    if(is_array($list))
+                    foreach($list as $val){
+                        if($val==$appcode){
+                            $isNotFound = false;
+                            break;
+                        }
+                    }
+                    if($isNotFound) continue;
+                }
+                print '<div class="menubutton">';
+                print '<a class="menuitem" href="javascript:void(0) onClick="{ 
+                    top.HEURIST4.msg.showMsgDlg(\'#webcontent'.$row["id"].'\', null,\''.$row["title"].'\');}">'
+                    .$row["title"].'</a></div>';
             }else{
                 ?>
                 <script>

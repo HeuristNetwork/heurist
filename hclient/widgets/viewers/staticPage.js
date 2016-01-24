@@ -87,7 +87,9 @@ $.widget( "heurist.staticPage", {
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
             if(this.options.url.indexOf('http')<0){
-                this.options.url = top.HAPI4.basePathV4 +  this.options.url.replace("[dbname]",  top.HAPI4.database);
+                var url = this.options.url.replace("[dbname]",  top.HAPI4.database);
+                url = url.replace("[layout]",  top.HAPI4.sysinfo['layout']);
+                this.options.url = top.HAPI4.basePathV4 + url;
                 
                 //var that=this;
                 $(this.div_content).load(this.options.url); //, function(){ that.loadanimation(false); });
