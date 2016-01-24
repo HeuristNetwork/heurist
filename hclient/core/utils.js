@@ -523,7 +523,7 @@ top.HEURIST4.util = {
     hashString: function(str) {
     
         var hash = 0, i, c;
-        var strlen = str.length;
+        var strlen = str?str.length:0;
         if (strlen == 0) return hash;
         
         for (i = 0; i < strlen; i++) {

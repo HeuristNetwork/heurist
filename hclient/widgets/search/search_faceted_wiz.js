@@ -1098,7 +1098,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
 function showSearchFacetedWizard( params ){
 
-    if(!$.isFunction($('body').rectype_manager)){
+    if(!$.isFunction($('body').rectype_manager)){ //@todo - replace to new entity/rectypes as soon as it will be implemented
         $.getScript(top.HAPI4.basePathV4+'hclient/widgets/structure/rectype_manager.js', function(){ showSearchFacetedWizard(params); } );
     }else if(!$.isFunction($('body').fancytree)){
 
