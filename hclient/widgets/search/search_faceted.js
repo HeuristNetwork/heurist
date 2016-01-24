@@ -87,7 +87,7 @@ $.widget( "heurist.search_faceted", {
         onclose: null
     },
 
-    cached_counts:[],
+    cached_counts:[], //stored results of get_facets by stringified query index
     _input_fields:{},
     _request_id: 0,
     _first_query:[], //query for all empty values
@@ -503,7 +503,7 @@ $.widget( "heurist.search_faceted", {
                     
                     var btn_add = $( "<button>")
                     .addClass("smallbutton")
-                    .css('position','absolute')
+                    //.css('position','absolute')
                     .appendTo( inpt.find('.input-cell') )
                     .button({icons:{primary: "ui-icon-search"}, text:false})
                     that._on( btn_add, { click: "doSearch" });
@@ -639,11 +639,14 @@ $.widget( "heurist.search_faceted", {
             var div_facets = this.facets_list.find(".facets");
             if(div_facets.length>0)  div_facets.empty();
 
+            //add additional/supplementary filter
+            this._current_query = top.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
             
             //this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
-            this._current_query = query;
             
-            var request = { q: query, 
+//{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
+            
+            var request = { q: this._current_query, 
                             w: this.options.params.domain, 
                             detail: 'ids', 
                             source:this.element.attr('id'), 
@@ -658,6 +661,7 @@ $.widget( "heurist.search_faceted", {
             //that._recalculateFacets(content_id);
     }
     
+    //-------------------------------------------------------------------------------
     //
     // called on ON_REC_SEARCH_FINISH
     // perform search for facet values and redraw facet fields
@@ -751,7 +755,11 @@ $.widget( "heurist.search_faceted", {
                 
                     if(this._isInited){
                         //replace with current query   - @todo check for empty 
-                        query =  this._first_query;
+                        query = this._first_query;
+                        
+                        //add additional/supplementary filter
+                        query = top.HEURIST4.util.mergeHeuristQuery(query, this.options.params.sup_filter);
+                        
                     }else{
                         //replace with list of ids
                         query = {ids: this._currentRecordset.getMainSet().join(',')};
@@ -799,16 +807,19 @@ $.widget( "heurist.search_faceted", {
                                      source:this.element.attr('id') }; //, facets: facets
 
 
-            /* @TODO try to find in cache
-            for (var k=0; k<this.cached_counts.length; k++){
-                if( parseInt(this.cached_counts[k].facet_index) == request.facet_index && 
-                    this.cached_counts[k].q == request.q && this.cached_counts[k].dt == request.dt){
-                    __onResponse(this.cached_counts[k]);
-                    return;
+                // try to find in cache by facet index and query string
+                var hashQuery = top.HEURIST4.util.hashString(JSON.stringify(request.q));
+                for (var k=0; k<this.cached_counts.length; k++){
+                    if( parseInt(this.cached_counts[k].facet_index) == request.facet_index && 
+                        this.cached_counts[k].q == hashQuery) // && this.cached_counts[k].dt == request.dt)
+                    {
+                        that._redrawFacets(this.cached_counts[k], false);
+                        return;
+                    }
                 }
-            }*/
+                
                 window.HAPI4.RecordMgr.get_facets(request, function(response){ 
-                    that._redrawFacets(response) 
+                    that._redrawFacets(response, true) 
                 });            
                                 
                 break;
@@ -820,11 +831,15 @@ $.widget( "heurist.search_faceted", {
     //
     // draw facet values
     //
-    , _redrawFacets: function( response ) {
+    , _redrawFacets: function( response, keep_cache ) {
         
                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                    //@TODO this.cached_counts.push(response);
+                    if(keep_cache){
+                        response.q = top.HEURIST4.util.hashString(JSON.stringify(response.q));
+                        this.cached_counts.push(response);
+                    }
+                    
                     var allTerms = top.HEURIST4.terms;
                     var detailtypes = top.HEURIST4.detailtypes.typedefs;
                     
@@ -1253,8 +1268,6 @@ $.widget( "heurist.search_faceted", {
                             }
                         }
 
-                        
-                        
                         for (i=0;i<response.data.length;i++){
                             var cterm = response.data[i];
 

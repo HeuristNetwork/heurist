@@ -79,12 +79,14 @@ $.widget( "heurist.dh_search", {
 
         this._refresh();
 
+        //find Map Documents (19) for featured individuals ---------------------------------------
+        
         var query;
         // "Featured Individuals"
         if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
-            query = {"t":"19","f:144":"532,4749"};
+            query = {"t":"19","f:144":"4749"};
         }else{
-            query = {"t":"19","f:144":"532"};
+            query = {"t":"19","f:144":"532,4749"};
         }
         
         var request = { q: query,
@@ -102,8 +104,8 @@ $.widget( "heurist.dh_search", {
                     if(idx)
                     {
                         var record = records[idx];
-                        var recID       = resdata.fld(record, 'rec_ID');
-                        recName     = resdata.fld(record, 'rec_Title');
+                        var recID  = resdata.fld(record, 'rec_ID'),
+                            recName = resdata.fld(record, 'rec_Title');
                         smenu = smenu + '<li id="fimap'+recID+'"><a href="#">'+recName+'</a></li>';
                     }
                 }
@@ -157,7 +159,7 @@ $.widget( "heurist.dh_search", {
             }
         });
 
-
+        
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+top.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
                 // show progress div

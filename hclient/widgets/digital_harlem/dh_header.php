@@ -21,6 +21,7 @@
 */
 
 require_once(dirname(__FILE__)."/../../../hserver/System.php");
+require_once(dirname(__FILE__)."/../../../hserver/dbaccess/db_recsearch.php");
 
 $statistics = "";
 $system = new System();
@@ -45,7 +46,8 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
 
 }
 ?>
-
+<html>
+<body>
 <div id="topstuff">
 
     <div  id="header">
@@ -69,13 +71,26 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
 
         <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{location.reload(true);}">HOME</a></div>
         <?php
-
+        if(true){
         // Building query
         $query = "SELECT rec_ID id, rec_Title as title, d1.dtl_Value as content, d2.dtl_Value as ord"
         ." FROM Records left join recDetails d2 on rec_ID=d2.dtl_recID and d2.dtl_DetailTypeID=94, recDetails d1 "
         ." WHERE rec_ID=d1.dtl_recID and rec_RecTypeID=25 and d1.dtl_DetailTypeID=4 "
         ." ORDER BY d2.dtl_Value";
 
+        
+        //find Web Content (25) for header buttons ---------------------------------------
+/*        
+        var query;
+        if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
+            //query = {"t":"25","f:154":"4800"};
+            $query = "t:25 f:154:4800 sortby:f:94";
+        }else{
+            //query = {"t":"25","f:154":"4799"};
+            $query = "t:25 sortby:f:94"; //f:154:4799 
+        }
+*/        
+        
         // Put record types & counts in the table
         $res = $system->get_mysqli()->query($query);
         $stats = array();
@@ -101,10 +116,12 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
 
             <?php
         }
+        }
         ?>
         <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{ window.open('http://digitalharlemblog.wordpress.com/', 'DHBlog'); }">BLOG</a></div>
 
     </div>
 
 </div>  <!-- topstuff -->
-
+</body>
+</html>

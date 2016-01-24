@@ -134,8 +134,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             dataType: "json",
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
-
-                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: jqXHR.responseText }
+                
+                err_message = (top.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
                 //_processerror(response);
 
                 if(callback){
@@ -146,6 +147,14 @@ function hAPI(_db, _oninit) { //, _currentUser
             success: function( response, textStatus, jqXHR ){
 
                 //_processerror(response);
+
+                if(callback){
+                    callback(response);
+                }
+            },
+            fail: function(  jqXHR, textStatus, errorThrown ){
+                err_message = (top.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
 
                 if(callback){
                     callback(response);

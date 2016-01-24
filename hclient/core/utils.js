@@ -190,6 +190,40 @@ top.HEURIST4.util = {
     },
 
     //
+    // both paramater should be JSON array or Object
+    //
+    mergeHeuristQuery: function(query1, query2){
+        //JSON.parse
+        if(jQuery.type(query1) === "string"){
+            try{
+                query1 = JSON.parse(query1);
+            }catch (ex2){
+                query1 = {};
+            }
+        }
+        if(jQuery.type(query2) === "string"){
+            try{
+                query2 = JSON.parse(query2);
+            }catch (ex2){
+                query2 = {};
+            }
+        }
+        if(top.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
+            return query2;
+        }
+        if(top.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
+            return query1;
+        }
+        if(!$.isArray(query1)){
+            query1 = [query1];
+        }
+        if(!$.isArray(query2)){
+            query2 = [query2];
+        }
+        return query1.concat(query2)
+    },
+    
+    //
     // converts query string to object
     //
     parseHeuristQuery: function(qsearch)
@@ -477,8 +511,28 @@ top.HEURIST4.util = {
         } finally {
             $inspector.remove(); // and remove from DOM
         }
-    }
+    },
+    
+    /*: function(e){
+        for(var r=0,i=0;i<e.length;i++){
+            r=(r<<5)-r+e.charCodeAt(i),r&=r;   
+        }
+        return r
+    },*/
 
+    hashString: function(str) {
+    
+        var hash = 0, i, c;
+        var strlen = str.length;
+        if (strlen == 0) return hash;
+        
+        for (i = 0; i < strlen; i++) {
+            c = str.charCodeAt(i);
+            hash = ((hash<<5)-hash)+c;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash;    
+    }
 
 }//end util
 

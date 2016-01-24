@@ -228,7 +228,8 @@ if(@$params['debug']) echo $query."<br>";
 
                     array_push($data, array($row[0], $row[1], $third_element ));
                 }
-                $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], "facet_index"=>@$params['facet_index'] );
+                $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
+                            "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
                 $res->close();
             }
 

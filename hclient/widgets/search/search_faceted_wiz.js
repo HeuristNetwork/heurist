@@ -470,6 +470,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_name = $dlg.find('#svs_Name');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
             var svs_rules = $dlg.find('#svs_Rules');
+            var svs_fitler = $dlg.find('#svs_Query');
             var opt_rectypes = $dlg.find("#opt_rectypes").get(0);
 
             $dlg.find('.messages').empty();
@@ -498,6 +499,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
+                svs_fitler.val( this.options.params.sup_filter?this.options.params.sup_filter:'' );
                 this.options.params = $.parseJSON(svs[1]);
 
                 this.options.domain = this.options.params.domain;
@@ -515,6 +517,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val('');
                 svs_name.val('');
                 svs_rules.val('');
+                svs_fitler.val('');
+
 
                 svs_ugrid.val(this.options.domain);
                 svs_ugrid.removeAttr('disabled');;
@@ -1015,6 +1019,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var svs_name = $dlg.find('#svs_Name');
         var svs_ugrid = $dlg.find('#svs_UGrpID');
         var svs_rules = $dlg.find('#svs_Rules');
+        var svs_fitler = $dlg.find('#svs_Query');
         var message = $dlg.find('.messages');
 
         var allFields = $dlg.find('input');
@@ -1032,9 +1037,13 @@ $.widget( "heurist.search_faceted_wiz", {
             return false;
         }
 
-        if(!Hul.isempty(svs_rules.val())){
+        if(true || !Hul.isempty(svs_rules.val())){
             this.options.params.rules = svs_rules.val();
         }
+        if(true || !Hul.isempty(svs_fitler.val())){
+            this.options.params.sup_filter = svs_fitler.val();
+        }
+
 
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){

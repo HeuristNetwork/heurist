@@ -575,6 +575,9 @@ $.widget( "heurist.search", {
                     }
 
                     that._renderProgress( null );
+                    
+            }else if(data==null){
+                that.input_search.val('');
             }
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server

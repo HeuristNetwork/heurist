@@ -30,6 +30,16 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 <script type="text/javascript" src="<?php echo PDIR;?>common/js/temporalObjectLibrary.js"></script>
 <!-- timeline -->
+
+<!--
+// WARNING: CHANGES MADE TO vis.js
+// These changes are not in our repository
+// line:285 remove margin for item's label
+// line:345,15753, 15860, 16108 correct orientation for bottom order
+// line: 13607 getDataRangeHeurist function
+// line: 13594 catch exception of datetime convertation
+// 
+-->
 <script type="text/javascript" src="<?php echo PDIR;?>ext/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/vis/dist/vis.css" />
 
