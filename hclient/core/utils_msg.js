@@ -498,17 +498,26 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 //    options['callback']
                 //(this.document.find('body').innerHeight()-20)
                         options.height = parseInt(options.height, 10);
-                        if(isNaN(options.height) || options.height<10){
-                            options.height = top.innerHeight-20;
+                        if(isNaN(options.height) || options.height<50){
+                            options.height = 480;
+                        } 
+                        if(options.height > opener.innerHeight-20){
+                            options.height = opener.innerHeight-20;
                         }
                         options.width = parseInt(options.width, 10);
+                        if(isNaN(options.width) || options.width<100){
+                            options.width = 640; 
+                        } 
+                        if(options.width > opener.innerWidth-20){
+                            options.width = opener.innerWidth-20;
+                        }
 
                         var opts = {
                                 autoOpen: true,
-                                width : (options.width>0?options.width+20 :690 ),
+                                width : options.width,
                                 height: options.height,
                                 modal: true,
-                                resizable: (options['no-resize']==true),
+                                resizable: (options['no-resize']!=true),
                                 //draggable: false,
                                 title: options["title"],
                                 resizeStop: function( event, ui ) {
