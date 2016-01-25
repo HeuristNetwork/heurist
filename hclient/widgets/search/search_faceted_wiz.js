@@ -964,12 +964,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     var sContent = 
             '<div>'
                 +'<div class="header"><label for="facet_Title'+k+'">Facet title</label></div>'
-                +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" class="text ui-widget-content ui-corner-all" />'
-            +'</div>'
-            +'<div>'
-                +'<div class="header" style="vertical-align:top;"><label for="facet_Help'+k+'">Help tip</label></div>'
-                +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="2" class="text ui-widget-content ui-corner-all"'
-                    +' style="margin-top:0.4em;width:300px"></textarea>'
+                +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
+                +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
             +'</div>';
             
                     var sTypeLabel = '<div style="font-size:smaller;font-style:italic;"><div class="header"><label></label></div>';
@@ -1002,7 +998,14 @@ $.widget( "heurist.search_faceted_wiz", {
             +'</div>';
                     }
                          
-                sContent = sContent + '<hr style="margin-top:0.2em"/>';
+                sContent = sContent + 
+                '<div>'
+                +'<div class="header" style="vertical-align:top;"><label for="facet_Help'+k+'">Help tip</label></div>'
+                +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="2" '
+                +' styele="font-size:smaller" class="text ui-widget-content ui-corner-all"'
+                    +' style="margin-top:0.4em;width:300px"></textarea>'
+                +'</div>'
+                +'<hr style="margin-top:0.5em;margin-bottom:0.5em;"/>';
                 listdiv.append($(sContent));
             
                 if(facets[k].isfacet==false){
