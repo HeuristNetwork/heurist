@@ -972,23 +972,21 @@ $.widget( "heurist.search_faceted_wiz", {
                     +' style="margin-top:0.4em;width:300px"></textarea>'
             +'</div>';
             
-                    var sTypeLabel = '<div class="header"><label>Type of facet</label></div>';
+                    var sTypeLabel = '<div style="font-size:smaller;font-style:italic;"><div class="header"><label></label></div>';
                     //|| facets[k].type=='blocktext'
                     if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
                         sContent = sContent +
-            '<div>'
-                + sTypeLabel
+                sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'   //true  1
                 +'<label for="facet_Type'+k+'_1">facet first character</label>'    
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_2" value="2"/>'   //2
                 +'<label for="facet_Type'+k+'_2">facet every value</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'   //false 0
-                +'<label for="facet_Type'+k+'_0">input field</label>'
+                +'<label for="facet_Type'+k+'_0">search field</label>'
             +'</div>';
                     }else if(facets[k].type=='date' || facets[k].type=='year'){
                         sContent = sContent +
-            '<div>'
-                + sTypeLabel
+                sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
                 +'<label for="facet_Type'+k+'_1">ranges</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
@@ -996,8 +994,7 @@ $.widget( "heurist.search_faceted_wiz", {
             +'</div>';
                     }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                         sContent = sContent +
-            '<div>'
-                + sTypeLabel
+                sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
                 +'<label for="facet_Type'+k+'_1">facets</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
