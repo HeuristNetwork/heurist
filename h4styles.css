@@ -192,7 +192,11 @@ fieldset > div, .input-row{
 fieldset > div > input.text, fieldset > div > select.text{
     margin-bottom: 0.5em;
 }
-
+fieldset > div > input[type=radio]{
+    vertical-align:-0.3em;
+    margin-right:0.2em;
+    margin-left:0.2em;
+}
 fieldset > div > .header,
 fieldset > div > .header_narrow{
     display:table-cell;

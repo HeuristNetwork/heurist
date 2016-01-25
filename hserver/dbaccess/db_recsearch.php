@@ -171,7 +171,7 @@
             }
             else { //freetext and other if($dt_type==null || $dt_type=="freetext")
 
-                if($step_level>0 || $dt_type!="freetext"){
+                if($step_level>0 || !($dt_type=="freetext" || $dt_type=="integer" || $dt_type=="float")){
 
                 }else{
                     $select_field = "SUBSTRING(trim(".$select_field."), 1, 1)";

@@ -269,8 +269,7 @@ $.widget( "heurist.search_faceted", {
                
                field['id']   = code[code.length-1];
                field['rtid'] = code[code.length-2];
-               if(field['isfacet']){
-               
+               if(field['isfacet']>0){
                
                        //create query to search facet values
                        function __crt( idx ){
@@ -402,7 +401,15 @@ $.widget( "heurist.search_faceted", {
             for (facet_index=0;facet_index<len;facet_index++){
                 facets[facet_index].history = [];
                 facets[facet_index].selectedvalue = null;
-                facets[facet_index].isfacet = facets[facet_index].isfacet || top.HEURIST4.util.isnull(facets[facet_index].isfacet);
+                
+                if(top.HEURIST4.util.isnull(facets[facet_index].isfacet) || 
+                        facets[facet_index].isfacet==true || facets[facet_index].isfacet==1){
+                            facets[facet_index].isfacet=1;
+                }else if (facets[facet_index].isfacet==false){
+                            facets[facet_index].isfacet=0;
+                }
+                
+                //facets[facet_index].isfacet = facets[facet_index].isfacet || top.HEURIST4.util.isnull(facets[facet_index].isfacet);
             }
         }
         
@@ -454,14 +461,16 @@ $.widget( "heurist.search_faceted", {
            
            if(!top.HEURIST4.util.isnull(field['var']) && field['code'] ){
                
-             if(field['isfacet']){
+             if(!field['help']) field['help'] = '';
+               
+             if(field['isfacet']>0){
                     
                     //inpt.find('.input-div').hide();
                     //inpt.find('.header').css({'background-color': 'lightgray', 'padding': '5px', 'width': '100%'});
                     //inpt.find('.editint-inout-repeat-button').hide();
                     
                     $("<div>",{id: "fv_"+field['var'] }).html(
-                        '<div class="header">'+   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
+                        '<div class="header" title="'+field['help']+'">'+   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
                             '<label>'+harchy + "<span style='font-weight:bold'>" + field['title'] + '</span></label>'+
                         '</div>'+
                         '<div class="input-cell"></div>').appendTo($fieldset);
@@ -488,6 +497,7 @@ $.widget( "heurist.search_faceted", {
                            rst_RequirementType: 'optional',
                            rst_MaxValues: 1,
                            rst_DisplayWidth:0
+                           //rst_DisplayHelpText: field['help']
                        };
                    }
 
@@ -498,6 +508,8 @@ $.widget( "heurist.search_faceted", {
 
                     inpt.appendTo($fieldset);
                     that._input_fields['$X'+field['var']] = inpt;
+                    
+                    inpt.find('.header').attr('title', field['help']);
                     
                     inpt.find('.input-div').css('display','inline-block');
                     
@@ -569,7 +581,7 @@ $.widget( "heurist.search_faceted", {
                         for (facet_index=0;facet_index<len;facet_index++){
                             if(facets[facet_index]["var"] == val.substr(2)){
 
-                                if(!facets[facet_index]['isfacet']){
+                                if(facets[facet_index]['isfacet']==0){
                                      var sel = $(_inputs[val]).editing_input('getValues');
                                      if(sel && sel.length>0){
                                          facets[facet_index].selectedvalue = {value:sel[0]};
@@ -689,7 +701,7 @@ $.widget( "heurist.search_faceted", {
         for(;i< this.options.params.facets.length; i++)
         {
             var field = this.options.params.facets[i];
-            if(i>field_index && field['isfacet'] && field['facet']){
+            if(i>field_index && field['isfacet']>0 && field['facet']){
                 
                 var subs_value = null;
                 
@@ -796,6 +808,9 @@ $.widget( "heurist.search_faceted", {
                 
                 
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
+                if(field['isfacet']==2){
+                    step_level = 1; //always full value for this type of facet
+                }
                 
                 var request = {q: query, w: 'a', a:'getfacets',
                                      facet_index: i, 

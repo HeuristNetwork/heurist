@@ -24,7 +24,7 @@
 */
 
 
-/* Explanation of faceted search
+/* Explanation of faceted search - @todo OUTDATED - NEED TO REWRITE
 
 There are two types of queries: 1) to search facet values 2) to search results
 
@@ -78,6 +78,12 @@ NOTE - to make search fo facet value faster we may try to omit current search in
 
 */
 
+/*
+step1 - selection of rectype, sup filter, rules
+step2 - select fields in treeview
+step3 - define label, help prompt and filter type (by first letter, by full name, directly)
+step4 - preview
+*/
 $.widget( "heurist.search_faceted_wiz", {
 
     // default options
@@ -213,8 +219,11 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step3 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
         .appendTo(this.element);
-        $("<div>").append($("<h4>").html(top.HR("Define ranges for numeric and date facets"))).appendTo(this.step3);
-        $("<div>",{id:'facets_list'}).appendTo(this.step3);
+        
+        var header = $("<div>").css('font-size','0.8em').appendTo(this.step3);
+        header.html("<label>"+top.HR("Define titles, help tips and facet type")+"</label>");
+        
+        $("<fieldset>",{id:'facets_list'}).appendTo(this.step3);
         this.step_panels.push(this.step3);
 
         //preview
@@ -405,9 +414,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 //load list of field types
                 this._initStep2_FieldTreeView(rectypeIds);
 
-            }  if(this.step==2 && newstep==3){  //set ranges
+            }  if(this.step==2 && newstep==3){  //set individual facets
 
-                if(!this._initStep3_FacetsRanges()){
+                if(!this._initStep3_FacetsSettings()){
                     return;
                 }
             }
@@ -416,13 +425,13 @@ $.widget( "heurist.search_faceted_wiz", {
             if(this.step==2 && newstep==1 && !this.options.params.isadvanced){
                 newstep = 0;
             }else if(this.step==4 && newstep==3){
-                newstep=2;
+                //newstep=2;
             }
 
             this._showStep(newstep);
 
-            if(newstep==3)               //skip step - define ranges
-                this.navigateWizard(1);
+            //if(newstep==3)               //skip step - define ranges
+            //this.navigateWizard(1);
 
         }
 
@@ -434,10 +443,12 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step_panels[newstep].css('display','block');
 
         if(this.step==3 && newstep==4){ //preview
-
+            this._assignFacetParams();
             this._initStep4_FacetsPreview();
             $("#btnNext").button('option', 'label', top.HR('Save'));
-
+        }
+        if(this.step==3 && newstep==2){
+            this._assignFacetParams();
         }
 
         if(newstep==0){
@@ -865,73 +876,30 @@ $.widget( "heurist.search_faceted_wiz", {
             }
         }
     }
+    
+    , _findFacetByCode: function(code){
+        if( top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
+            
+            var k, len = this.options.params.facets.length;
+            for (k=0;k<len;k++){
+                var facet =  this.options.params.facets[k];
+                if(facet.code == code){
+                    return facet;
+                }
+            }
+        }
+        return null;
+    }
 
-    // 3d step  - fill facets array and create query JSON
-    , _initStep3_FacetsRanges: function() {
+    // 3d step  - define individual setting for facets
+    , _initStep3_FacetsSettings: function() {
 
-        var listdiv = $(this.step3).find("#facets_list");
-        listdiv.empty();
-
-        var that = this;
         var facets = [];
         var facets_new = [];
         var k, len = this.options.params.rectypes.length;
         var isOneRoot = true;
 
         // ------------------------------------------------------
-
-        // NOT USED - @todo remove
-        function __get_queries(node){
-
-            var res = [];
-
-            var parent = node.parent; //it may rectype of pointer field
-            var fieldnode;
-
-            if( parent.data.type=="rectype"){
-
-                fieldnode = parent.parent
-                if(fieldnode.isRoot()){
-                    var q = node.key;
-                    if(node.data.type=="relmarker") q = "relmarker"
-                    else if(q=="recTitle") q = "title"
-                        else if(q=="recModified") q = "modified";
-
-                    if(isOneRoot){
-                        //root rectypes will be added only once - when full_query is creating
-                        // q = "t:"+parent.key+" "+q;
-                    }
-
-                    q_full = "t:"+that.options.params.rectypes.join(",")+" "+q;
-
-                    //final exit when we access root
-                    return [{ title:(node.data.name?node.data.name:node.title), type:node.data.type, query: q_full, fieldid:q }];
-                }
-            }else{
-                fieldnode = parent;
-            }
-
-            var q = node.key;
-            //if(false && fieldnode.data.type=="relmarker") q = "f:relmarker"  //ARTEM 0429
-            if(node.data.type=="relmarker") q = "relmarker"
-            else if(q=="recTitle") q = "title"
-                else if(q=="recModified") q = "modified";
-
-            if(fieldnode.data.rt_ids){ //constrained
-                q_full = "t:"+fieldnode.data.rt_ids+" "+q;
-            }else{
-                q_full = q;
-            }
-            res.push( { title:(node.data.name?node.data.name:node.title), type:node.data.type, query:q_full, fieldid:q });
-
-            var res2 = __get_queries(fieldnode);
-            for(var i=0; i<res2.length; i++){
-                res.push(res2[i]);
-            }
-
-            return res;
-        } //end __get_queries ------------------------------------
-
         var tree = $(this.step2).find('#field_treeview').fancytree("getTree");
         var fieldIds = tree.getSelectedNodes(false);
         len = fieldIds.length;
@@ -948,30 +916,108 @@ $.widget( "heurist.search_faceted_wiz", {
                     var ids = node.data.code.split(":");
                     //rtid: ids[ids.length-2],
                     //id:  ids[ids.length-1],
+                    
+                    //if facets already defined try to restore title,help and type from previous
+                    var old_facet = this._findFacetByCode(node.data.code);
+                    if(old_facet!=null){
+                        
+                        facets.push( {
+                            'var': facets.length,
+                            code:node.data.code,
+                            title: old_facet.title,
+                            help: old_facet.help,
+                            isfacet: old_facet.isfacet,
+                            type:node.data.type
+                        } );
+                        
+                    }else{
 
-                    facets.push( {
-                        'var': facets.length,
-                        code:node.data.code,
-                        title:(node.data.name?node.data.name:node.title),
-                        type:node.data.type
-                    } );
+                        facets.push( {
+                            'var': facets.length,
+                            code:node.data.code,
+                            title:(node.data.name?node.data.name:node.title),
+                            type:node.data.type
+                        } );
+                    }
                 }
             }
 
-            //draw list
-            len = facets.length;
-            for (k=0;k<len;k++){
-                var s = facets[k].type+'  ';
-                var title = facets[k].title;
-                s = s + facets[k].code;
-                listdiv.append($('<div>').html( title + '  ' + s + '<hr />'));
-            }
-
+            
             this.options.params.facets = facets;
             this.options.params.version = 2;
 
             if(len>0){
-                facets[0].isfacet = true;
+                //facets[0].isfacet = true;
+            }
+            
+            //-----------------------------------------------------------
+            
+            var listdiv = $(this.step3).find("#facets_list");
+            listdiv.empty();
+            
+            len = facets.length;
+            for (k=0;k<len;k++){
+                    //title
+                    //help tip (take from rectype structure?)
+                    //type of facet (radio group)
+                    
+                    var sContent = 
+            '<div>'
+                +'<div class="header"><label for="facet_Title'+k+'">Facet title</label></div>'
+                +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" class="text ui-widget-content ui-corner-all" />'
+            +'</div>'
+            +'<div>'
+                +'<div class="header" style="vertical-align:top;"><label for="facet_Help'+k+'">Help tip</label></div>'
+                +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="2" class="text ui-widget-content ui-corner-all"'
+                    +' style="margin-top:0.4em;width:300px"></textarea>'
+            +'</div>';
+            
+                    var sTypeLabel = '<div class="header"><label>Type of facet</label></div>';
+                    //|| facets[k].type=='blocktext'
+                    if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
+                        sContent = sContent +
+            '<div>'
+                + sTypeLabel
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'   //true  1
+                +'<label for="facet_Type'+k+'_1">facet first character</label>'    
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_2" value="2"/>'   //2
+                +'<label for="facet_Type'+k+'_2">facet every value</label>'
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'   //false 0
+                +'<label for="facet_Type'+k+'_0">input field</label>'
+            +'</div>';
+                    }else if(facets[k].type=='date' || facets[k].type=='year'){
+                        sContent = sContent +
+            '<div>'
+                + sTypeLabel
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
+                +'<label for="facet_Type'+k+'_1">ranges</label>'
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
+                +'<label for="facet_Type'+k+'_0">datepicker</label>'
+            +'</div>';
+                    }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
+                        sContent = sContent +
+            '<div>'
+                + sTypeLabel
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
+                +'<label for="facet_Type'+k+'_1">facets</label>'
+                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
+                +'<label for="facet_Type'+k+'_0">dropdown</label>'
+            +'</div>';
+                    }
+                         
+                sContent = sContent + '<hr style="margin-top:0.2em"/>';
+                listdiv.append($(sContent));
+            
+                if(facets[k].isfacet==false){
+                    facets[k].isfacet = 0;
+                }else if(facets[k].isfacet!=2){
+                    facets[k].isfacet = 1;
+                }
+            
+                //assign values
+                listdiv.find('#facet_Title'+k).val(facets[k].title);
+                listdiv.find('#facet_Help'+k).val(facets[k].help);
+                listdiv.find('input:radio[name="facet_Type'+k+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
             }
 
             return true;
@@ -979,6 +1025,23 @@ $.widget( "heurist.search_faceted_wiz", {
             return false;
         }
     }
+    
+    , _assignFacetParams: function(){
+        if( top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
+            
+            var listdiv = $(this.step3).find("#facets_list");
+            
+            var k, len = this.options.params.facets.length;
+            for (k=0;k<len;k++){
+                var title = listdiv.find('#facet_Title'+k).val();
+                if(title!='') this.options.params.facets[k].title = title;
+                this.options.params.facets[k].help = listdiv.find('#facet_Help'+k).val();
+                this.options.params.facets[k].isfacet = listdiv.find('input:radio[name="facet_Type'+k+'"]:checked').val();
+            }
+        }
+        return null;
+    }
+    
 
     //4. show facet search preview
     ,_initStep4_FacetsPreview: function(){
