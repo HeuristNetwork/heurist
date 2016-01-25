@@ -303,6 +303,7 @@ if ($addRecDefaults) {
             #add-link-tags {width : 100%;}
             p {line-height: 14px;}
             .input-cell a {background:none !important; padding:0}
+            .input-row {border:none}
         </style>
 
     </head>
@@ -322,10 +323,12 @@ if ($addRecDefaults) {
                 <div class="input-cell">
                     <?php
                     include(dirname(__FILE__).'/../../common/php/recordTypeSelect.php');
+                    //style="float:right; margin-left:30px;" 
+                    // class="actionButtons"
                     ?>
-            <span class="actionButtons">
-                <input type="button" class="add" style="float:right; margin-left:30px;" value="Add Record" onClick="addRecord(event);">
-            </span>
+                    <span style="float:right; margin:3 0 0 30" >
+                        <button type="button" class="add" style="height:22px !important" value="Add Record" onClick="addRecord(event);">Add Record</button>
+                    </span>
                 </div>
             </div>
 
