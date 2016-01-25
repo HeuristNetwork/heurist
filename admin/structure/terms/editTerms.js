@@ -1208,7 +1208,8 @@ function EditTerms() {
             Hul.popupURL(top, sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
-                height: 160,
+                title: 'Import Terms',
+                height: 200,
                 width: 500,
                 callback: _import_complete
             });

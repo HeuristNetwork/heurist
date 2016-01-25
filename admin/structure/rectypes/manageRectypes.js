@@ -191,19 +191,25 @@ function RectypeManager() {
                         //'&nbsp;Show active only&nbsp;&nbsp;'+
 
                         '</div>'+
-                        '<div style="float:right; text-align:right">'+
+                        '<div>'+
                         // TODO: remove old code - orginally had to manually save changes
                         // '<label id="lblNoticeAboutChanges'+grpID+'" '+
                         // 'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
                         // '&nbsp;&nbsp;&nbsp;'+
                         // '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
                         // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
-                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add"/>'+
+                        '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
+                        
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
                         '<div style="position:absolute;bottom:8px;right:425px;">'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add"/>'+
+
+                        '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add" style="margin-right:1em"/>'+
                         '</div>'+
                         '</div>')
 
@@ -680,6 +686,51 @@ function RectypeManager() {
             };
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick;
+            
+            var body = $(top.document).find('body');
+            var dim = {h:body.innerHeight(), w:body.innerWidth()},
+            
+            btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
+            btnAddRecordType.onclick = function(){
+                var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/selectDBForImport.php?popup=1&db="+ db +
+                "&grpId="+grpID;
+
+                Hul.popupURL(top, sURL, {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    title: 'Acquire from databases',
+                    height: dim.h*0.95,
+                    width: dim.w*0.95,
+                    //callback: _import_complete
+                });
+                
+                
+            };
+            btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
+            btnAddRecordType2.onclick = btnAddRecordType.onclick
+
+            //-------
+            
+            btnAddRecordType = Dom.get('btnImportFromTemplate'+grpID);
+            btnAddRecordType.onclick = function(){
+                var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ db +
+                "&grpId="+grpID;
+
+                Hul.popupURL(top, sURL, {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    title: 'Acquire from templates',
+                    height: dim.h*0.95,
+                    width: dim.w*0.95,
+                    //callback: _import_complete
+                });
+                
+                
+            };
+            btnAddRecordType2 = Dom.get('btnImportFromTemplate'+grpID+'_2');
+            btnAddRecordType2.onclick = btnAddRecordType.onclick
+            
+            
             /*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
             btnAddFieldType.onclick = function (e) {
             var currentTabIndex = tabView.get('activeIndex');

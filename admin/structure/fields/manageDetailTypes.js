@@ -175,7 +175,7 @@ function DetailTypeManager() {
             label: "<label title='"+grpDescription+"'>"+grpName+"</label>",
             content:
             ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>'+ //for="filter"
-                '<div style="float:right; display:inline-block; margin-bottom: 10px;"><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:</label>'+
+                '<div style="float:right; display:none; margin-bottom: 10px;"><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Filter by name:</label>'+
                 '<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
                 '<input type="checkbox"  id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show visible only&nbsp;&nbsp;'+
                 '</div>'+

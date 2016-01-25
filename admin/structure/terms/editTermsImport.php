@@ -33,8 +33,8 @@
     $parent_id = intval($_REQUEST['parent']);
     $domain = $_REQUEST['domain'];
 
-    $has_codes = (@$_REQUEST['has_codes']=="1");
-    $has_descr = (@$_REQUEST['has_descr']=="1");
+    $has_codes = true; //(@$_REQUEST['has_codes']=="1");
+    $has_descr = true; //(@$_REQUEST['has_descr']=="1");
 
     if (!$parent_id) return;
 
@@ -109,12 +109,16 @@
             </div>
 
             <div class="input-row">
+                Terms may be followed on each line by a code and a label, separated by commas 
+                with optional quote marks eg. English,En,"English language (UK)"
+                <!--
                 <div class="input-header-cell">Terms are followed on each line,  in this order, by comma-separated:
                 </div>
                 <div class="input-cell">
                     <input type="checkbox" name="has_codes" value="1" style="display:inline-block;">codes&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="checkbox" name="has_descr" value="1" style="display:inline-block;">extended labels
                 </div>
+                -->
             </div>
 
             <div class="actionButtons" style="padding-right:80px">
