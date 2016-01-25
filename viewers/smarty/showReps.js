@@ -1218,6 +1218,14 @@ function ShowReps() {
     *
     */
     function _insertPattern(pattern) {
+        
+        if(top.HEURIST4){
+            if(insertPopupID){
+                $(insertPopupID).dialog('close');
+                insertPopupID = null;
+            }
+        }
+        
         var _text = '';
         var textedit = Dom.get("edTemplateBody");
 
@@ -1364,8 +1372,9 @@ function ShowReps() {
             if(node){
                 title = ucwords(node.data.labelonly);
             }else{
-                title = 'Insert variable';
+                title = 'variable';
             }
+            document.getElementById("insert-popup-header").innerHTML = 'Inserting: <b>'+title+'</b>';
 
 
             if(top.HEURIST4){
@@ -1376,7 +1385,7 @@ function ShowReps() {
                     height: 260,
                     width: 400,
                     modal: false,
-                    title: title,
+                    title: 'Insert field, test or pattern',
                     position: { my: "right top", at: "left bottom", of: $(elt) }
                 });
 

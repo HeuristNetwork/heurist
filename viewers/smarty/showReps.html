@@ -153,6 +153,11 @@
                 <table style="border: 0px;">
 
                     <tr>
+                        <td colspan='2'>
+                            <span id='insert-popup-header'/>
+                        </td>
+                    </tr>                        
+                    <tr>
                         <td>
                             <select id="selInsertMode" style="width:200px"
                                 title="Choose options for insertion - use fucntion wrapper to format multimedia (images, sound, video) for display">
@@ -266,21 +271,43 @@
 
                     <span id="recordCount"></span>
                 </div>
-                <button id="btnRepPrint2" style="position: absolute; right: 40px; top:4px;">Print</button>
-
+                
+                <div style="position: absolute; right: 4px; top:6px;">
+                    <button id="btnRepEdit" title="Edit the selected template">Edit</button>
+                    <button id="btnRepNew" title="Create a new template">New</button>
+                    <button id="btnRepDelete" title="Delete the selected template">Delete</button>
+                    <button id="btnRepImport" title="Import a template exported from another database">Import</button>
+                    <button id="btnRepExport" title="Export a template in a format which can imported to another database">Export</button>
+                    <button id="btnRepPublish" title="Obtain javascript to insert report in a web page, set publishing schedule">Publish</button>
+                    <button id="btnRepPrint2" title="">Print</button>
+                    <button id="btnRepRefresh" title="Refresh memory - updates lists, dropdowns and report output">Refresh</button>
+                </div>
+<!-- replaced with toolbar 2015-01-15
                 <ul id="rep_list" class="horizontal menu" style="float:right">
                     <li style="width:22px;"><button id="btnRepMenu2">Menu</button>
-                        <!-- <span id="btnRepMenu2" class="button"></span> -->
                         <ul id="toolMenuItems" style="zdisplay:block;">
                         </ul>
                     </li>
                 </ul>
-
+-->
             </div>
             <div id="rep_container"></div>
         </div>
         <div id="editorcontainer" style="display:none">
             <h2>Template <span id="edTemplateName"></span></h2>
+            
+            <div style="position:absolute;top:4px;right:4px;">
+                <button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
+                <button onClick="doEditor(1)">Save As</button>
+                <!--        <button onClick="doEditor(3)">Delete</button>
+                -->
+                <button onClick="doEditor(0)">Close Editor</button>
+                &nbsp;&nbsp;&nbsp;
+                <button onClick="onExportTemplate()" title="Export template with concept codes">Export</button>
+
+                <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
+            </div>
+            
             <div id="templateCode">
                 <!-- PLAIN MODE <textarea id="edTemplateBody" name="edTemplateBody"></textarea>
                 <div id="editor"></div>-->
@@ -292,7 +319,7 @@
                         title="Read full documentation on the Smarty templating language">
                         <b>Help on using this function</b></a><br />
                     <div style="margin-top: 10px;">
-                        <label style="font-weight:bold;width:auto;">Select Record Type</label><span id="rectype_selector"></span>
+                        <label style="font-weight:bold;width:auto;">Select Type</label><span id="rectype_selector"></span>
                     </div>
                     Position cursor in text on left before selecting actions below
 
@@ -310,8 +337,6 @@
             </div>
 
             <div class="actionButtons">
-                <button onClick="doExecuteFromEditor()" title="Test your template" style="font-size:1.1em;">TEST</button>
-                &nbsp;
                 <div style="display:inline-block;">
                     <select id="cbErrorReportLevel">
                         <option value="0" selected="selected">Ignore errors</option>
@@ -325,22 +350,16 @@
                         <option value="main">Query result</option>
                     </select>
                 </div>
-                <button onClick="doEditor(2)" title="Save, Close and Execute the updated template">Save</button>
-                <button onClick="doEditor(1)">Save As</button>
-                <!--		<button onClick="doEditor(3)">Delete</button>
-                -->
-                <button onClick="doEditor(0)">Close Editor</button>
-                &nbsp;&nbsp;&nbsp;
-                <button onClick="onExportTemplate()" title="Export template with concept codes">Export</button>
-
-                <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
-
-                <span class="fileinput-button" style="visibility: hidden;">
+                &nbsp;
+                <button onClick="doExecuteFromEditor()" title="Test your template" 
+                    style="font-size:1.1em;background-color:red;">TEST</button>
+                &nbsp;    
+                <div style="display:inline-block;color:red;height:20px;vertical-align:middle" 
+                    class="ui-icon ui-icon-circle-arrow-s" onClick="doExecuteFromEditor()">&nbsp;</div>
+                
+                <span class="fileinput-button" style="display: none;">
                     <input id="fileupload" type="file" name="import_template" accept=".gpl">
                 </span>
-
-            </div>
-
         </div>
 
 
@@ -414,7 +433,8 @@
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
                 Hul.popupURL(this, top.HEURIST.baseURL_V3 + 'viewers/smarty/repMenu.html?template_file='+template_file,
-                    { callback: function(filename){
+                    {   title: 'Publish report',
+                        callback: function(filename){
                         if(!Hul.isnull(filename)) {
                             window.showReps.onPublish( filename )
                         }
@@ -542,36 +562,52 @@
                 window.showReps.onResize(this.innerWidth);
                 //setupMCE();
 
-                $("#btnRepPrint2").button({text:false, icons: {
-                    primary: "ui-icon-print"
-                }})
-                .click(onPrint);
-
+                $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).click(onPrint);
+                
+                $("#btnRepEdit").button({text:false, icons: { primary: "ui-icon-pencil" }}).click(onShowEditor);
+                $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).click(onGenerate);
+                $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).click(onDeleteTemplate);
+                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-in" }}).click(function(){
+                            $('#fileupload').click();return false;                        
+                });
+                $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(onExportTemplate);
+                $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }}).click(onFile);
+                $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
+                
+                
+/*replaced with toolbar 2015-01-15
                 $("#btnRepMenu2").button({text:false, icons: {
                     primary: "ui-icon-gear"
                 }});
-
+*/
 
 
             }
 
-            function loadUserInfoHandler(){
-                //$('.linkadmin').css('display', 'block  !important');
-                //$('.linkadmin').css('display', 'none  !important');
-                //$('#lnkDel').css('display', 'none  !important');
-                //$('.linkadmin').css('visibility', 'visible');
+            function onLoadUserInfoHandler(){
 
+                $('button[id^="btnRep"]').hide();
+                
+                if(top.HEURIST.is_logged_in()){
+                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                        $('#btnRepEdit').show();    
+                        $('#btnRepNew').show();    
+                        $('#btnRepDelete').show();    
+                    }
+                    $('#btnRepImport').show();    
+                    $('#btnRepExport').show();    
+                    $('#btnRepPublish').show();    
+                }                                                       
+                $('#btnRepPrint2').show();    
+                $('#btnRepRefresh').show();    
+                                    
+                return;
+
+                //replaced with toolbar 2015-01-15
+                
                 var s = '';
 
                 if(top.HEURIST.is_logged_in()){
-                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
-                        s =  '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
-                        '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
-                    } else {
-                        s = s + '<li> <a href="#" >Manage (Admins only)</a></li>';
-                    }
-
-                    s = s + '<li><a href="#" onClick="onFile()" class="separator">Publish report</a></li>';
 
                     s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export Template</a></li>' +
                     '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import Template</a></li>';
@@ -619,7 +655,7 @@
             YAHOO.util.Event.addListener(window, "load", loadHandler );
 
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            $.getScript( top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php?db="+_db, loadUserInfoHandler);
+            $.getScript( top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php?db="+_db, onLoadUserInfoHandler);
             //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );
             //top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadUserInfo.php");
 
