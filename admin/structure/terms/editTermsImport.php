@@ -149,30 +149,23 @@
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $num = count($data);
                 if($num>0){
-                    if($has_codes){
-                        $code = substr(trim($data[0]), 0, 99);
-                        $ind = 1;
-                    }else{
-                        $code = '';
-                        $ind = 0;
-                    }
-
-                    if($num>$ind){
-
-                        $label = substr(trim($data[$ind]), 0, 399);
-                        $len = strlen($label);
-                        if($len>0 && $len<400){
-                            $desc = "";
-                            if($has_descr){
-                                $ind++;
-                                for ($c=$ind; $c < $num; $c++) {
-                                    if($c>1) $desc = $desc.",";
-                                    $desc = $desc.$data[$c];
-                                }
-                            }
-                            array_push($parsed, array($code, $label,substr($desc, 0, 999),$domain,$parent_id,1));
-                            $row++;
+                    
+                    $desc = '';
+                    $code = '';
+                    $label = substr(trim($data[0]), 0, 499);
+                    if(count($data)>1){
+                        $code = substr(trim($data[1]), 0, 99);
+                        if(count($data)>2){
+                            $desc = implode(',', array_slice($data,2) );
+                            $desc = substr($desc, 0, 999);
                         }
+                    }
+                    if($label==''){
+                        $label = $code;
+                    }
+                    if($label!=''){
+                        array_push($parsed, array($code, $label, $desc, $domain, $parent_id, 1));
+                        $row++;
                     }
                 }
             }

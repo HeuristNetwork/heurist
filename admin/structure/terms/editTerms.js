@@ -199,6 +199,10 @@ function EditTerms() {
                             if(!Hul.isnull(arTerm)){
 
                                 term = {};//new Object();
+                                //if(child==5746){ //debug
+                                //    term.id = child;
+                                //}
+                                
                                 term.id = child;
                                 term.parent_id = parent_id;
                                 term.conceptid = arTerm[fi.trm_ConceptID];
