@@ -182,7 +182,7 @@ $rtDefines = array(
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
     'RT_MAP_DOCUMENT' => array(3, 1019), // H3ReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
-    'RT_QUERY_SOURCE' => array(3, 1021)
+    'RT_QUERY_SOURCE' => array(3, 1021)  //RT_MAPABLE_QUERY
 
 );
 

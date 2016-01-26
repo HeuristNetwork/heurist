@@ -289,23 +289,23 @@ function _addLayerOverlay(bounds, layer, index) {
         source.title = layer.title;
 
         /** MAP IMAGE FILE (TILED) */
-        if(source.rectypeID == map_image_file_tiled) {
+        if(source.rectypeID == RT_TILED_IMAGE_SOURCE) {
             console.log("MAP IMAGE FILE (tiled)");
             addTiledMapImageLayer(source, bounds, index);
 
         /** MAP IMAGE FILE (NON-TILED) */
-        }else if(source.rectypeID == map_image_file_untiled) {
+        }else if(source.rectypeID == RT_GEOTIFF_SOURCE) {
             // Map image file (non-tiled)
             console.log("MAP IMAGE FILE (non-tiled)");
             addUntiledMapImageLayer(source, bounds, index);
 
         /** KML FILE OR SNIPPET */
-        }else if(source.rectypeID == kml_file) {
+        }else if(source.rectypeID == RT_KML_SOURCE) {
             console.log("KML FILE or SNIPPET");
             addKMLLayer(source, index);
 
         /** SHAPE FILE */
-        }else if(source.rectypeID == shape_file) {
+        }else if(source.rectypeID == RT_SHP_SOURCE) {
             console.log("SHAPE FILE");
             addShapeLayer(source, index);
 
@@ -927,14 +927,15 @@ function _editLayerProperties( dataset_id, callback ){
     
 }
 
+// 
 // Data types
-//  @TODO - get it from magic number constants defined on server side
 //
-var map_image_file_tiled = 17; //11;
-var map_image_file_untiled = 1018;
-var kml_file = 21; //1014;
-var shape_file = 1017;
-var RT_MAPABLE_QUERY = 24; //1021;
+var localIds = top.HAPI4.sysinfo['dbconst'];
+var RT_TILED_IMAGE_SOURCE = localIds['RT_TILED_IMAGE_SOURCE']; //2-11
+var RT_GEOTIFF_SOURCE = localIds['RT_GEOTIFF_SOURCE']; //3-1018;
+var RT_KML_SOURCE = localIds['RT_KML_SOURCE']; //3-1014;
+var RT_SHP_SOURCE = localIds['RT_SHP_SOURCE']; //3-1017;
+var RT_MAPABLE_QUERY = localIds['RT_QUERY_SOURCE']; //3-1021;
 
 // delirium - to remove
 

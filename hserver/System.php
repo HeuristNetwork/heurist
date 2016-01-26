@@ -163,6 +163,27 @@ class System {
         }
     }
 
+    function getLocalConstants(){
+
+        $res = array();    
+        
+        global $rtDefines;
+        foreach ($rtDefines as $magicRTName => $id) {
+            if(defined($magicRTName)){
+                $res[$magicRTName] = constant ( $magicRTName );
+            }
+        }
+
+        // Data type constants
+        global $dtDefines;
+        foreach ($dtDefines as $magicDTName => $id) {
+            if(defined($magicDTName)){
+                $res[$magicDTName] = constant ( $magicDTName );
+            }
+        }
+        
+        return $res;
+    }
 
 
     /**
@@ -435,7 +456,8 @@ class System {
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli),
-                    "basePathV3"=>HEURIST_BASE_URL)
+                    "basePathV3"=>HEURIST_BASE_URL,
+                    "dbconst"=>$this->getLocalConstants()) //some record and detail types constants with local values specific for current db
             );
             
         }else{

@@ -42,7 +42,7 @@ function getFileURL($system, $fileID) {
 
     if(isset($paths[0][0])) {
         // Heurist URL
-        return HEURIST_FILESTORE_URL . $paths[0][0];
+        return HEURIST_FILES_URL . $paths[0][0];
     }else if(isset($paths[0][1])) {
         // External URL
         return $paths[0][1];

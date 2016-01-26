@@ -321,13 +321,18 @@ function hRecordSet(initdata) {
          return null;
    }
    
-   //take magic numbers from server
-    var RT_RELATION = 1;
-        DT_TARGET_RESOURCE = 5,
-        DT_RELATION_TYPE = 6,
-        DT_PRIMARY_RESOURCE = 7;
+    // some important id for record and detail types in local values
+    var RT_RELATION = top.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
+        DT_TARGET_RESOURCE = top.HAPI4.sysinfo['dbconst']['DT_TARGET_RESOURCE'], //5
+        DT_RELATION_TYPE = top.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'], //6
+        DT_PRIMARY_RESOURCE = top.HAPI4.sysinfo['dbconst']['DT_PRIMARY_RESOURCE'], //7
+        DT_DATE = top.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
+        DT_START_DATE = top.HAPI4.sysinfo['dbconst']['DT_START_DATE'], //10
+        DT_END_DATE = top.HAPI4.sysinfo['dbconst']['DT_END_DATE'], //11
+        DT_SHORT_SUMMARY = top.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'], //3
+        DT_GEO_OBJECT = top.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; //28
+        
    
-
     // find relation records of given type for recID
     // 1. search all relationship records
     // 2. check target or source fields
@@ -401,20 +406,20 @@ function hRecordSet(initdata) {
                         return d[fldname][0];
                     }
                 }else if(fldname=="dtl_StartDate"){
-                    if(d[10] && d[10][0]){
-                        return d[10][0];
-                    }else if(d[9]){
-                        return d[9][0];
+                    if(d[DT_START_DATE] && d[DT_START_DATE][0]){
+                        return d[DT_START_DATE][0];
+                    }else if(d[DT_DATE]){
+                        return d[DT_DATE][0];
                     }
                 }else if(fldname=="dtl_EndDate"){
-                    return _getFieldValue(record, 11);
+                    return _getFieldValue(record, DT_END_DATE);
                     //if(d[11] && d[11][0]){ return d[11][0]; }
                 }else if(fldname=="dtl_Description"){
-                    return _getFieldValue(record, 3);
+                    return _getFieldValue(record, DT_SHORT_SUMMARY);
                     //if(d[3] && d[3][0]){return d[3][0];}
                     
-                }else if(fldname.indexOf("dtl_Geo")==0 && d[28] && d[28][0]){
-                    var g = d[28][0].split(' ');
+                }else if(fldname.indexOf("dtl_Geo")==0 && d[DT_GEO_OBJECT] && d[DT_GEO_OBJECT][0]){
+                    var g = d[DT_GEO_OBJECT][0].split(' ');
 
                     if(fldname=="dtl_Geo"){
                         g.shift()
