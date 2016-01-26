@@ -102,18 +102,6 @@ body {
 }
 .ui-layout-toggler-west .ui-icon,
 .ui-layout-toggler-east .ui-icon  { margin-left:   -5px; }   /*tweak arrow horizontal-center */
-.ui-layout-toggler-west-closed .ui-icon,
-.ui-layout-toggler-east-open .ui-icon {
-    background-position: -48px -192px;    /* ui-icon-circle-triangle-e */
-    background-position: -144px -16px;    /* ui-icon-triangle-2-e-w */
-    background-position: -32px -16px;     /* ui-icon-triangle-1-e */
-}
-.ui-layout-toggler-east-closed .ui-icon,
-.ui-layout-toggler-west-open .ui-icon {
-    background-position: -80px -192px;    /* ui-icon-circle-triangle-w */
-    background-position: -144px -16px;    /* ui-icon-triangle-2-e-w */
-    background-position: -96px -16px;     /* ui-icon-triangle-1-w */
-}
 
 .ui-layout-toggler-south-open  .ui-icon{
     background-position: -64px -20px;
@@ -317,6 +305,7 @@ optgroup {
 /* -------------------------------------------- */
 /*  SEARCH RESULT */
 
+/* todo: to remove */
 .bookmarked {
     background-image: url(hclient/assets/bookmark.png);
     height:16px;

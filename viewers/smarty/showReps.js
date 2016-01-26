@@ -555,7 +555,7 @@ function ShowReps() {
             }else{
 
                 //template.gpl
-                window.open(baseurl+'?'+squery, '_blank');
+                window.open(baseurl+'?'+squery, 'Download');
             }
 
         }else{
@@ -761,7 +761,7 @@ function ShowReps() {
 
 
 
-    var layout, _isviewer, _iseditor;
+    var layout, _isviewer, _iseditor, _kept_width=-1;
 
     /**
     * change visibility
@@ -826,6 +826,19 @@ function ShowReps() {
             _needListRefresh = false;
             _reload_templates();
         }
+        
+        if(iseditor){
+            _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );    
+            top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');    
+            top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width   
+        }else if(isviewer){
+            if(_kept_width>0) 
+                top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width   
+            top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');   
+        }
+
+        
+        
     }
 
 

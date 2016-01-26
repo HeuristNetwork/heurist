@@ -630,8 +630,8 @@ $.widget( "heurist.resultList", {
         + html_thumb
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
-        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);">'
-        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>'
+        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'           //+     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
         +     html_owner
         +     html_pwdrem
         + '</div>'

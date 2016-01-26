@@ -86,7 +86,7 @@
                 
                     break;
                 case 'serve':
-                // TODO: convert template file to global concept IDs and serve up to caller
+                    // TODO: convert template file to global concept IDs and serve up to caller
 
                     smartyLocalIDsToConceptIDs($template_file);
                     break;
@@ -312,10 +312,8 @@
         global $dir, $dbID;
         
         if(!$dbID){
-            return array("error"=>"Database must be registered to allow translation of local template to global template");    
-        }
-
-        if($filename && file_exists($dir.$filename)){
+             $res = array("error"=>"Database must be registered to allow translation of local template to global template");    
+        }else if($filename && file_exists($dir.$filename)){
             $template = file_get_contents($dir.$filename);
             $res = convertTemplate($template, 0);
         }else{

@@ -32,7 +32,8 @@ function hLayout(args) {
 
      var widgetinstances = [], //@todo array of all inited widgets 
          widgets = [],
-         layouts = [];
+         layouts = [],  //json description of layout
+         _containerid;
          
     /**
     * Initialization
@@ -86,6 +87,38 @@ function hLayout(args) {
         
     }
     
+    //
+    // action: close, open
+    // args - [pane, values] 
+    //
+    function _cardinalPanel(action, args){
+     
+        var $container = $(_containerid);
+        if(!$.isFunction($container.layout)) return;
+        
+        var pane, 
+            myLayout = $container.layout();
+        
+        
+        if($.isArray(args)){
+            if(args.length<1) return;
+            pane = args[0];
+        }else{
+            pane = args;
+        }
+        
+        if(action=='open'){
+            myLayout.open(pane);
+        }else if(action=='close'){
+            myLayout.close(pane);
+        }else if(action=='getSize' && args.length==2){
+            return myLayout.state[pane][args[1]];
+        }else if(action=='sizePane' && args.length==2){
+            myLayout.sizePane(pane, args[1]);
+        }
+
+        return false;
+    }
     
     /**
     * Main funtion that inits all stuff
@@ -129,14 +162,41 @@ function hLayout(args) {
         var layout_opts =  {
             applyDefaultStyles: true,
             maskContents:        true,
-            togglerContent_open:    '<div class="ui-icon"></div>',
-            togglerContent_closed:  '<div class="ui-icon"></div>',
+            //togglerContent_open:    '<div class="ui-icon"></div>',
+            //togglerContent_closed:  '<div class="ui-icon"></div>',
+            //togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
+            //togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-e"></div>',
+            togglerContent_open:    '&nbsp;',
+            togglerContent_closed:  '&nbsp;',
             tips: {
                 Close:                "Click to minimise panel",
                 Resize:               "Drag to resize panel"
             },
             onresize_end: function(){
                 $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
+            }
+            ,
+            onopen_end: function(pane_name, pane_element){
+                if(pane_name=='west'){
+                    var tog = pane_element.parent().find('.ui-layout-toggler-west');
+                    //tog.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-w');
+                    //tog.find('.content-open').addClass('ui_icon ui-icon-triangle-1-e');
+                    //tog.find('.content-closed').addClass('ui_icon ui-icon-triangle-1-w');
+                    //tog.removeClass('ui_icon ui-icon-triangle-1-e');
+                    //tog.addClass('ui_icon ui-icon-triangle-1-w');
+                    
+                }
+            },
+            onclose_end: function(pane_name, pane_element){
+                if(pane_name=='west'){
+                    /*var tog = pane_element.parent().find('.ui-layout-toggler-west');
+                    tog = tog.find('.content-closed');
+                    tog.empty();
+                    $('<div>').addClass('ui-icon ui-icon-triangle-1-e').appendTo(tog);*/
+                    //tog.removeClass('ui-icon-triangle-1-w').addClass('ui-icon-triangle-1-e');
+                    //tog.removeClass('ui_icon ui-icon-triangle-1-w');
+                    //tog.addClass('ui_icon ui-icon-triangle-1-e');
+                }
             }
         };
 
@@ -185,6 +245,18 @@ function hLayout(args) {
         // 2) init layout container
         $container.layout( layout_opts );
 
+        function __toogleIcons(pane, closed, opened){
+            var tog = $container.find('.ui-layout-toggler-'+pane);
+            tog.addClass('ui-heurist-btn-header1')
+            var togc = tog.find('.content-closed'); togc.empty();
+            $('<div>').addClass('ui-icon ui-icon-triangle-1-'+closed).appendTo(togc);
+            togc = tog.find('.content-open'); togc.empty();
+            $('<div>').addClass('ui-icon ui-icon-triangle-1-'+opened).appendTo(togc);
+        }
+        
+        __toogleIcons('west', 'e', 'w');
+        __toogleIcons('east', 'w', 'e');
+        
         // 3) add tabs/apps to panes
 
         var bg_color = top.HEURIST4.util.getCSS('background-color', 'ui-widget-content');
@@ -838,6 +910,9 @@ function hLayout(args) {
 
         return res;
     }
+    
+    
+    
 
     //**********************************************************
 
@@ -893,6 +968,7 @@ function hLayout(args) {
         },
         
         appInitAll: function(layoutid, containerid){
+            _containerid = containerid
             _appInitAll(layoutid, containerid);
         },
 
@@ -902,7 +978,11 @@ function hLayout(args) {
         
         init: function(cfg_widgets, cfg_layouts){
             _init(cfg_widgets, cfg_layouts)
-        }
+        },
+        
+        cardinalPanel:function(pane, action){
+            return _cardinalPanel(pane, action);
+        },
 
     }
 

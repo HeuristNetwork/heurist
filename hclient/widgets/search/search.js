@@ -149,6 +149,7 @@ $.widget( "heurist.search", {
         .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
 
+        /*
         var link = $('<a>',{href:'#'})
             .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/info.png" width="20" height="20" title="Show syntax and examples of the Heurist query language" />')
             .css('padding-right','1em')
@@ -156,7 +157,18 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 window.open('context_help/advanced_search.html','_blank');
             } });
-
+        */    
+        var link = $('<button>')
+            .button({icons: {
+                primary: 'ui-icon-circle-b-info'
+            }, text:false, label:'Info', title:'Show syntax and examples of the Heurist query language'})
+            .addClass('ui-heurist-btn-header1')
+            .css({'padding-right':'1em','width':'22px'})
+            .appendTo(this.div_search_header);
+            this._on( link, {  click: function(){
+                window.open('context_help/advanced_search.html','_blank');
+            } });
+            
 
         /*
         $( "<button>", {
@@ -368,12 +380,23 @@ $.widget( "heurist.search", {
                     .insertBefore( this.div_search_stop );
 
                 // Quick search builder wizard button
+                /*
                 var link = $('<a>',{href:'#'})
                 .html('<img src="'+top.HAPI4.basePathV4+'hclient/assets/magicwand.png" width="20" title="'+
                         top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')+'" />')
                 .css({'padding-right':'0.5em'})
                 .appendTo( this.div_buttons );
-                this._on( link, {  click: this.showSearchAssistant });
+               */ 
+        var link = $('<button>')
+            .button({icons: {
+                primary: 'ui-icon-arrowthick-1-s'
+            }, text:false, label:'Assistant', 
+               title:top.HR('Build a Heurist filter using a form-driven approach (simple and advanced options)')})
+            .addClass('ui-heurist-btn-header1')
+            .css({'padding-right':'0.5em','width':'22px'})
+            .appendTo(this.div_buttons);
+                
+        this._on( link, {  click: this.showSearchAssistant });
 
 
         this.search_assistant = null;
