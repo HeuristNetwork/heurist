@@ -37,6 +37,9 @@ $detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
 * @return mixed Image URL
 */
 function getFileURL($system, $fileID) {
+    
+    return HEURIST_BASE_URL."file.php?db=".HEURIST_DBNAME."&id=".$fileID;
+    
     $paths = fileGetPath_URL_Type($system, $fileID);
     //print_r($paths);
 

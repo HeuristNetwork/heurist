@@ -125,10 +125,14 @@ if($db){
                     </body>
                 </html>
                 <?php
-            }else if(file_exists($filepath)){
-                downloadFile($mimeType, $filepath);
-            }else if($fileinfo[1]){
-                header('Location: '.$fileinfo[1]);  //redirect to URL
+            }else{
+
+                $filepath = HEURIST_FILES_DIR . $filepath;
+                if(file_exists($filepath)){
+                    downloadFile($mimeType, $filepath);
+                }else if($fileinfo[1]){
+                    header('Location: '.$fileinfo[1]);  //redirect to URL (external)
+                }
             }
         }
 
