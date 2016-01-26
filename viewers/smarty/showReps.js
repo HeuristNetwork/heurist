@@ -452,7 +452,7 @@ function ShowReps() {
 
 
 
-    function _initEditor(content) {
+        function _initEditor(content) {
         if(codeEditor==null){
             if(_isAceEditor){
                 codeEditor = ace.edit("editor");
@@ -474,7 +474,10 @@ function ShowReps() {
                         "Enter": function(e){
                             insertAtCursor(null, "");
                         }
-                }});
+                    },
+                    onFocus:function(){},
+                    onBlur:function(){} 
+                });
             }
         }else if(!_isAceEditor){
             $('.CodeMirror').hide();
