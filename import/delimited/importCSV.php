@@ -66,9 +66,9 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
-        <link rel="stylesheet" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
         <!--
         <link rel="stylesheet" href="../../../h4styles.css">
         -->
@@ -1218,7 +1218,7 @@ if(is_array($imp_session)){
                     </select>
                 </td>
             </tr>
-            
+
             <tr>
                 <td align="right">Field separator:</td>
                 <td>
@@ -1382,7 +1382,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
         $lb = str_replace("\\r", "\r", $lb);
         $lb = str_replace("\\t", "\t", $lb);
     }
-    
+
     $handle = @fopen($filename, "r");
     if (!$handle) {
         if (! file_exists($filename)) return 'file does not exist';
@@ -1404,18 +1404,18 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
     if(!$line){
         return "Empty header line";
     }
-    
+
     //detect encoding and convert to UTF8
     if( $csv_encoding!='UTF-8' || !mb_check_encoding( $line, 'UTF-8' ) ){
-        
-        $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding); 
+
+        $line = mb_convert_encoding( $line, 'UTF-8', $csv_encoding);
         if(!$line){
             return 'Your file can\'t be converted to UTF-8. '
             .'Please open it in any advanced editor and save with UTF-8 text encoding';
         }
 
         $content = file_get_contents($filename);
-        $content = mb_convert_encoding( $content, 'UTF-8' ); 
+        $content = mb_convert_encoding( $content, 'UTF-8' );
         if(!$content){
             return 'Your file can\'t be converted to UTF-8. '
             .'Please open it in any advanced editor and save with UTF-8 text encoding';
@@ -1425,12 +1425,12 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
             return 'Cant save temporary file '.$filename;
         }
     }
-        
-    
-//  mb_detect_encoding($line, "UTF-8, ISO-8859-1, ISO-8859-15", true);
-    
 
-    
+
+//  mb_detect_encoding($line, "UTF-8, ISO-8859-1, ISO-8859-15", true);
+
+
+
 
     //get fields
     $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
