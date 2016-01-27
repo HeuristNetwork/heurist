@@ -1365,7 +1365,7 @@ function EditRecStructure() {
 
             _myDataTable.unselectAllRows();
 			//ART16 _myDataTable.selectRow(index_toinsert);
-
+            
 			// in case of addition - all fields were affected
 			_updatedFields = null;
 
@@ -1398,7 +1398,14 @@ function EditRecStructure() {
             if(data.rst_DisplayOrder !== i){
                 data.rst_DisplayOrder = i;
 
-                _myDataTable.updateRow(i, data);
+                //_myDataTable.updateRow(i, data);  - important this method replace table row to new one
+                //var rowrec = _myDataTable.getTrEl(rec);
+                var id = rec.getId();
+                if (myDTDrags[id]) {
+                    myDTDrags[id].unreg();
+                    delete myDTDrags[id];
+                }
+                myDTDrags[id] = new YAHOO.example.DDRows(id);
 
                 if(_updatedDetails.indexOf(data.rst_ID)<0){
                     _updatedDetails.push(data.rst_ID);
