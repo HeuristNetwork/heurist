@@ -50,7 +50,6 @@ function ShowReps() {
     mySimpleDialog,
     needReload = true,
     codeEditor = null,
-    _isAceEditor = false,
     infoMessageBox,
     _currentRecordset = null,
     _db;
@@ -281,16 +280,6 @@ function ShowReps() {
         //Hul.getJsonData(baseurl, callback, squery);
     }
 
-    //
-    function _isEditorVisible(){
-        //
-        if(!isEditorVisible && !isInited){
-            //MCE works only once????  setupMCE(); //auto setup mce
-            return false;
-        }else{
-            return isEditorVisible;
-        }
-    }
 
     function _onbeforeunload() {
         if(_iseditor && _keepTemplateValue && _keepTemplateValue!=codeEditor.getValue()){
@@ -318,11 +307,6 @@ function ShowReps() {
             }
 
             if(isLoadGenerated){
-
-                if(_isEditorVisible()){ //NOT USED
-                    var ed = tinyMCE.get('edTemplateBody');
-                    ed.setContent(context['text']);
-                }else if(true) {
 
                     //ApplyLineBreaks
                     var text = [
@@ -377,12 +361,6 @@ function ShowReps() {
 
                     Dom.get("edTemplateName").innerHTML = name;
                     _initEditor(res);
-                    _keepTemplateValue = codeEditor.getValue();
-                }else{ //NOT USED
-                    Dom.get("edTemplateName").innerHTML = name;
-                    ApplyLineBreaks(Dom.get("edTemplateBody"), context['text']);
-                    _keepTemplateValue = Dom.get("edTemplateBody").value;
-                }
             }
 
             _variables = context;
@@ -452,14 +430,8 @@ function ShowReps() {
 
 
 
-        function _initEditor(content) {
+    function _initEditor(content) {
         if(codeEditor==null){
-            if(_isAceEditor){
-                codeEditor = ace.edit("editor");
-                codeEditor.setTheme("ace/theme/chrome");
-                codeEditor.getSession().setMode("ace/mode/php");
-                codeEditor.setValue(content);
-            }else{
 
                 codeEditor = CodeMirror(Dom.get("templateCode"), {
                     mode           : "smartymixed",
@@ -478,19 +450,15 @@ function ShowReps() {
                     onFocus:function(){},
                     onBlur:function(){} 
                 });
-            }
-        }else if(!_isAceEditor){
-            $('.CodeMirror').hide();
         }
 
         codeEditor.setValue(content);
 
-        if(!_isAceEditor){
-            setTimeout(function(){
+        setTimeout(function(){
                 $('.CodeMirror').show();
-                codeEditor.refresh();
+                    codeEditor.refresh();
+                    _keepTemplateValue = codeEditor.getValue();
                 },2000);
-        }
     }
 
 
@@ -499,8 +467,6 @@ function ShowReps() {
 
         Dom.get("edTemplateName").innerHTML = template_file;
         _initEditor(template_body);
-        //Dom.get("edTemplateBody").value = template_body;
-        _keepTemplateValue = template_body; //Dom.get("edTemplateBody").value;
         _setLayout(true, true);
     }
 
@@ -558,7 +524,12 @@ function ShowReps() {
             }else{
 
                 //template.gpl
-                window.open(baseurl+'?'+squery, 'Download');
+                if(top.HEURIST4){
+                    top.HEURIST4.util.downloadURL(baseurl+'?'+squery);    
+                }else{
+                    window.open(baseurl+'?'+squery, 'Download'); //old way
+                }
+                
             }
 
         }else{
@@ -684,7 +655,7 @@ function ShowReps() {
 
                 }else{
                     mySimpleDialog.setHeader("Warning!");
-                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?");
+                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?!");
                     mySimpleDialog.show();
                 }
             }else{
@@ -724,15 +695,7 @@ function ShowReps() {
         replevel = 2;
         }*/
 
-        var template_body;
-        if(_isEditorVisible()){
-            var ed = tinyMCE.get('edTemplateBody');
-            template_body = ed.getContent();
-        }else if (true){
-            template_body = codeEditor.getValue();
-        }else{
-            template_body = Dom.get("edTemplateBody").value;
-        }
+        var template_body = codeEditor.getValue();
 
         if(template_body && template_body.length>10){
 
@@ -1588,9 +1551,7 @@ function ShowReps() {
     * TODO: What do the parameters do?
     */
     function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
-        if(_isAceEditor){
-            codeEditor.insert(myValue);
-        }else{
+        
             //for codemirror
             var crs = codeEditor.getCursor();
             //calculate required indent
@@ -1628,7 +1589,7 @@ function ShowReps() {
 
             codeEditor.setCursor(crs);
             setTimeout(function(){codeEditor.focus();},200);
-        }
+        
     }
 
 

@@ -363,8 +363,10 @@
             }
         }
         
-        header("Content-type: text/javascript");
-        print json_format($res);
+        //header("Content-type: text/javascript");
+        header('Content-type: application/json');
+        print json_encode($res);
+        //print json_format($res);
     }
 
     if (! function_exists('array_str_replace')) {

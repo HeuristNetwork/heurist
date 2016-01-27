@@ -168,6 +168,21 @@ function hLayout(args) {
             //togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-e"></div>',
             togglerContent_open:    '&nbsp;',
             togglerContent_closed:  '&nbsp;',
+            //togglerLength_open: 21, 
+            west:{
+              spacing_open:6,
+              spacing_closed:16,  
+              togglerAlign_open:'center',
+              togglerAlign_closed:'top',
+              togglerLength_closed:16,  //makes it square
+            },
+            east:{
+              spacing_open:6,
+              spacing_closed:16,  
+              togglerAlign_open:'center',
+              togglerAlign_closed:'top',
+              togglerLength_closed:16,  //makes it square
+            },
             tips: {
                 Close:                "Click to minimise panel",
                 Resize:               "Drag to resize panel"
@@ -175,7 +190,7 @@ function hLayout(args) {
             onresize_end: function(){
                 $(document).trigger(top.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
             }
-            ,
+            /*,
             onopen_end: function(pane_name, pane_element){
                 if(pane_name=='west'){
                     var tog = pane_element.parent().find('.ui-layout-toggler-west');
@@ -189,15 +204,8 @@ function hLayout(args) {
             },
             onclose_end: function(pane_name, pane_element){
                 if(pane_name=='west'){
-                    /*var tog = pane_element.parent().find('.ui-layout-toggler-west');
-                    tog = tog.find('.content-closed');
-                    tog.empty();
-                    $('<div>').addClass('ui-icon ui-icon-triangle-1-e').appendTo(tog);*/
-                    //tog.removeClass('ui-icon-triangle-1-w').addClass('ui-icon-triangle-1-e');
-                    //tog.removeClass('ui_icon ui-icon-triangle-1-w');
-                    //tog.addClass('ui_icon ui-icon-triangle-1-e');
                 }
-            }
+            }*/
         };
 
         // 1) create panes (see ext/layout)

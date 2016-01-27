@@ -157,7 +157,7 @@
 
                     <tr>
                         <td colspan='2'>
-                            <span id='insert-popup-header'/>
+                            <span id='insert-popup-header'></span>
                         </td>
                     </tr>                        
                     <tr>
@@ -179,7 +179,7 @@
                             <select id="selInsertModifiers" style="width:200px"
                                 title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)"
                                 onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
-                                style="width:120px">
+                                >
                                 <option>choose function ...</option>
                                 <option>capitalize</option>
                                 <option>cat</option>
@@ -363,52 +363,11 @@
                 <span class="fileinput-button" style="display: none;">
                     <input id="fileupload" type="file" name="import_template" accept=".gpl">
                 </span>
+            </div>
         </div>
 
 
         <script type="text/javascript">
-
-            var isInited = false;
-            function setupMCE() {
-                if(isInited){
-                    tinyMCE.execCommand('mceToggleEditor',false,'edTemplateBody');
-                    isEditorVisible = !isEditorVisible;
-                }else{
-                    tinyMCE.init({
-                        mode : "textareas",
-                        theme : "advanced",
-                        editor_selector : "mceAdvanced",
-                        /*"advanced"
-                        plugins : "pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,
-                        searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
-
-                        theme_advanced_buttons1 : "bold,italic,underline,strikethrough,forecolor,backcolor,|,justifyleft,justifycenter,justifyright,
-                        justifyfull,|,formatselect,fontselect,fontsizeselect,|,sub,sup,|,charmap,emotions",
-                        theme_advanced_buttons2 : "cut,copy,paste,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,
-                        unlink,anchor,|,insertdate,inserttime",
-                        theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid", //",iespell,media,advhr",
-                        */
-                        /*
-                        theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,
-                        justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
-                        theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,
-                        redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
-                        theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,
-                        advhr,|,print,|,ltr,rtl,|,fullscreen",
-                        theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,|,cite,abbr,acronym,del,ins,
-                        attribs,|,visualchars,nonbreaking,template,pagebreak",
-                        */
-                        theme_advanced_toolbar_location : "top",
-                        theme_advanced_toolbar_align : "left",
-                        theme_advanced_statusbar_location : "bottom",
-                        theme_advanced_resizing : true
-                    });
-                    isInited = true;
-                    isEditorVisible = true;
-                }
-
-            }
-
             //
             function onPrint()
             {
@@ -563,7 +522,6 @@
                 window.showReps = new ShowReps();
 
                 window.showReps.onResize(this.innerWidth);
-                //setupMCE();
 
                 $("#btnRepPrint2").button({text:false, icons: { primary: "ui-icon-print" }}).click(onPrint);
                 
@@ -675,6 +633,10 @@
                     done: function (e, data) {
 
                         var obj = data.jqXHR.responseJSON; //Hul.evalJson(data.jqXHR.responseJSON);
+                        if(top.HEURIST4.util.isnull(obj)){
+                            obj = data.jqXHR.responseText;
+                            obj = JSON.parse(obj);
+                        }
                         if (obj  &&  obj.error) {
                             alert(obj.error);
                         }else if(obj.ok) {

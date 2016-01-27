@@ -532,7 +532,16 @@ top.HEURIST4.util = {
             hash = hash & hash; // Convert to 32bit integer
         }
         return hash;    
-    }
+    },
+    
+    downloadURL: function(url) {
+        $idown = $('#idown');
+        if ($idown.length>0) {
+            $idown.attr('src',url);
+        } else {
+            $idown = $('<iframe>', { id:'idown', src:url }).hide().appendTo('body');
+        }
+    }      
 
 }//end util
 
