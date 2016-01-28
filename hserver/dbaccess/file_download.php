@@ -57,6 +57,7 @@ if($db){
             $url = $fileinfo[1];
             $mimeType = $fileinfo[2];
             $params = $fileinfo[3];
+            $originalFileName = $fileinfo[4];
 
             $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
             $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
@@ -129,11 +130,17 @@ if($db){
 
                 $filepath = HEURIST_FILES_DIR . $filepath;
                 if(file_exists($filepath)){
-                    downloadFile($mimeType, $filepath);
+                    downloadFile($mimeType, $filepath, $originalFileName);
                 }else if($fileinfo[1]){
                     header('Location: '.$fileinfo[1]);  //redirect to URL (external)
+                }else{
+//DEBUG                    
+                    error_log('File not found '.$filepath);
                 }
             }
+        }else{
+//DEBUG 
+            error_log('Filedata not found '.$fileid);
         }
 
     }
@@ -145,10 +152,10 @@ if($db){
 * @param mixed $mimeType
 * @param mixed $filename
 */
-function downloadFile($mimeType, $filename){
+function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
-
+//error_log($mimeType.'   '.$filename);
         header('Content-Description: File Transfer');
         if ($mimeType) {
             header('Content-type: ' .$mimeType);
@@ -160,7 +167,10 @@ function downloadFile($mimeType, $filename){
             header('access-control-allow-credentials: true');
         }
         //header('Content-Type: application/octet-stream');
-        //force download header('Content-Disposition: attachment; filename='.basename($filename));
+        //force download 
+        if($originalFileName!=null){
+            header('Content-Disposition: attachment; filename='.$originalFileName); //basename($filename));
+        }
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
         header('Cache-Control: must-revalidate');

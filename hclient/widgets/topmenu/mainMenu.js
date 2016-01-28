@@ -711,7 +711,9 @@ $.widget( "heurist.mainMenu", {
             var allFields = $dlg.find('input,select');
 
             var currentTheme = prefs['layout_theme'];
-            var themeSwitcher = $("#layout_theme").themeswitcher({currentTheme:currentTheme,
+            var themeSwitcher = $("#layout_theme").themeswitcher(
+                {initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
+                currentTheme:currentTheme,
                 onSelect: function(){
                     currentTheme = this.currentTheme;
             }});

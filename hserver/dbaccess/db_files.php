@@ -63,9 +63,10 @@
                 $query = "ulf_ObfuscatedFileID in ('".implode("','", $file_ids)."')";
             }
 
-            $query = "select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference, fxm_MimeType, ulf_Parameters from recUploadedFiles "
-            ." left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt"
-            ." where ".$query;
+            $query = 'select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
+            .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName from recUploadedFiles '
+            .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
+            .$query;
 
             $mysqli = $system->get_mysqli();
             $res = $mysqli->query($query);

@@ -413,13 +413,19 @@ function addKMLLayer(source, index) {
     if(source.files !== undefined) {
         var fileURL = source.files[0];
         console.log("KML file: " + fileURL);
-
+        /*fileURL = 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml'; works
+        fileURL = 'http://127.0.0.1/HEURIST_FILESTORE/artem_delete11/file_uploads/ulf_39_ulf_8_1925.kml';
+        fileURL = 'http://tudl0867.home.xs4all.nl/test-big.kml'; works
+        fileURL = 'http://127.0.0.1/HEURIST_FILESTORE/artem_delete11/file_uploads/test.kml';*/
         // Display on Google Maps
         kmlLayer = new google.maps.KmlLayer({
             url: fileURL,
             suppressInfoWindows: true,
             preserveViewport: false,
-            map: map
+            map: map,
+            status_changed: function(){
+                console.log('status: '+kmlLayer.getStatus());
+            }
         });
     }
 
@@ -497,24 +503,33 @@ function addShapeLayer(source, index) {
 */
 function addGeoJsonToMap(data, index) {
     // Add GeoJson to map
-    console.log(data);
-    var features = map.data.addGeoJson(data.geojson);
-
-    // Set visiblity method
-    data.setVisibility = function(checked) {
-        this.visible = checked;
-        if(checked) {
-            features = map.data.addGeoJson(data.geojson);
-        }else{
-            for (var i = 0; i < features.length; i++) {
-                map.data.remove(features[i]);
+    //console.log(data);
+    
+    var overlay = {
+            visible:false,
+            features: null,
+            data: data,
+            
+            // Set visibility
+            setVisibility: function(checked) {
+                if(this.visible == checked) return;
+                this.visible = checked;
+                if(checked) {
+                    this.features = map.data.addGeoJson(data.geojson);
+                }else if(this.features!=null) {
+                    for (var i = 0; i < this.features.length; i++) {
+                        map.data.remove(this.features[i]);
+                    }
+                    this.features = null;
+                }
+            },
+            removeOverlay: function(){
+                this.setVisibility(false);
             }
-        }
     };
-    data.removeOverlay = function() {
-            this.setVisibility(false);
-    };
-    overlays[index] = data;
+    overlays[index] = overlay;
+    overlay.setVisibility(true);
+
 }
 
 
