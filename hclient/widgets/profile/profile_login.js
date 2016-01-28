@@ -23,6 +23,17 @@ function doLogin(isforsed){
 
     var login_dialog = $('#heurist-login-dialog');
 
+    function _setMessage(text){
+        var message = login_dialog.find('.messages');
+        if(top.HEURIST4.util.isempty(text)){
+            message.empty();
+            message.removeClass('ui-state-error');   
+        }else{
+            message.html(text);
+            message.addClass('ui-state-error');   
+        }
+    }    
+    
 
     if(login_dialog.length<1)  // login_dialog.is(':empty') )
     {
@@ -64,12 +75,13 @@ function doLogin(isforsed){
 
 
             var allFields = $dlg.find('input');
-            var message = $dlg.find('.messages');
+            
             var isreset = false;
 
             function __doLogin(){
 
                 allFields.removeClass( "ui-state-error" );
+                var message = login_dialog.find('.messages');
 
                 if(isreset){
                     var rusername = $dlg.find('#reset_username');
@@ -108,8 +120,8 @@ function doLogin(isforsed){
                                     $dlg.dialog( "close" );
                                     //that._refresh();
                                 }else if(response.status == top.HAPI4.ResponseStatus.REQUEST_DENIED){
-                                    message.addClass( "ui-state-highlight" );
-                                    message.text(response.message);
+                                    _setMessage(response.message);
+                                    setTimeout(function(){ _setMessage(); }, 2000);
                                 }else {
                                     top.HEURIST4.msg.showMsgErr(response);
                                 }
@@ -136,7 +148,7 @@ function doLogin(isforsed){
                 //$dlg.find("#btn_login2").button("option","label",top.HR('Reset password'));
                 $dlg.find("#fld_reset").show();
                 $dlg.find("#fld_login").hide();
-                $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
+                _setMessage();
             });
 
             var arr_buttons = [{text:'<b>'+top.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'}];
@@ -171,8 +183,7 @@ function doLogin(isforsed){
                     //$dlg.find("#btn_login2").button("option","label",top.HR('Login'));
                     $dlg.find("#fld_reset").hide();
                     $dlg.find("#fld_login").show();
-                    $dlg.find(".messages").removeClass( "ui-state-highlight" ).text('');
-
+                    _setMessage();
                 }
             });
 
@@ -214,3 +225,4 @@ function doRegister(){
     }
 
 }
+
