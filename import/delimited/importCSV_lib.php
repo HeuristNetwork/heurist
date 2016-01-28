@@ -339,6 +339,8 @@ function matchingAssign($mysqli, $imp_session, $params){
         return assignMultivalues($mysqli, $imp_session, $params);
     }
 
+    //everything below is NOT IN USE!!!
+    
     $import_table = $imp_session['import_table'];
 
     //get rectype to import
@@ -611,7 +613,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
     $search_stmt->bind_result($rec_ID, $rec_Title);
 
     //already founded IDs
-    $pairs = array();
+    $pairs = array(); //to avoid search 
     $records = array();
     $disambiguation = array();
     $tmp_idx_insert = array(); //to keep indexes
@@ -728,6 +730,7 @@ function matchingMultivalues($mysqli, $imp_session, $params){
 
 
 /**
+* MAIN method for first step - finding exisiting /matching records in destination
 * Assign record ids to field in import table
 * (negative if not found)
 *
@@ -2009,17 +2012,21 @@ function doImport($mysqli, $imp_session, $params){
                 //add - update record for 2 cases: idfield not defined, idfield is multivalue
                 if(!$id_field && count($details)>0){ //id field not defined - insert for each line
 
-                    $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field_def);
+                    $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field_def); 
 
                 }else if ($is_mulivalue_index){ //idfield is multivalue (now is is assummed that index field is always multivalue)
 
                     //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
-                    $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
-                    if($new_id && is_numeric($new_id)) array_push($new_record_ids, $new_id);
-                    $previos_recordId = null;
+                    if(count($details)>1){
+                        $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
+                        if($new_id && is_numeric($new_id)) array_push($new_record_ids, $new_id);
+                        $previos_recordId = null;
 
-                    if($recordId==null || $recordId<0){ //new records OR predefined id
-                        $pairs[$id_field_values[$idx2]] = $new_id;
+                        if($recordId==null || $recordId<0){ //new records OR predefined id
+                            $pairs[$id_field_values[$idx2]] = $new_id;
+                        }
+                    }else if($recordId>0){
+                        array_push($new_record_ids, $recordId);
                     }
                 }
 
@@ -2063,7 +2070,7 @@ function doImport($mysqli, $imp_session, $params){
 
 
 //
-//
+// assign real record ID inot import (source) table
 //
 function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
     global $mysqli;

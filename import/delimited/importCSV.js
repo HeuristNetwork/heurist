@@ -47,11 +47,13 @@ function init() {
     document.title = "Import Records from "+currentSessionName;
 
     //change title in parent dialog
+    if(window.frameElement){
     var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
     if( reference_to_parent_dialog ){
         var ele = parent.document.getElementById(reference_to_parent_dialog);
         $(ele.parentElement).find('.ui-dialog-title').text( 'Import Records from '+currentSessionName );
         //dialog( "option", "title", 'Import Records from '+currentSessionName );
+    }
     }
 
     select_rectype.change(function (event){

@@ -332,6 +332,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <hr width="100%" />
 
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
+            <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
             <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
             <input type="hidden" id="step" name="step" value="1">
             <input type="hidden" name="filename" value="<?=$imp_session['filename']?>">
@@ -472,7 +473,11 @@ if(is_array($imp_session)){
                         $res = doImport($mysqli, $imp_session, $_REQUEST);
                         ?>
                     </div>
-                    <br /><br /><input type="button" value="Close popup" onClick="{showRecords('mapping');}">
+                    <br /><br />
+                    <input type="button"
+                value="&lt;&lt; Back to start" onClick="{window.location.href='importCSV.php?db=<?=HEURIST_DBNAME?>'}"
+                style="margin-right: 10px; margin-left:20px;"
+                title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                 </div><!-- main_import_result -->
                 <?php
             }
@@ -490,6 +495,7 @@ if(is_array($imp_session)){
 
     ?>
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="import_form" onsubmit="return verifySubmit()">
+    <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
     <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
     <input type="hidden" name="step" id="input_step" value="2">
     <input type="hidden" id="ignore_insert" name="ignore_insert" value="<?=@$_REQUEST["ignore_insert"]?>">
@@ -1048,11 +1054,13 @@ if(is_array($imp_session)){
                 $("#div-progress").hide();
 
                 //change title in parent dialog
+                if(window.frameElement){
                 var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
                 if( reference_to_parent_dialog ){
                     var ele = parent.document.getElementById(reference_to_parent_dialog);
                     $(ele.parentElement).find('.ui-dialog-title').text( 'Import delimited text (csv, tsv)' );
                     //dialog( "option", "title", 'Import delimited text (csv, tsv)');
+                }
                 }
 
         });
@@ -1103,6 +1111,7 @@ if(is_array($imp_session)){
     </div>
 
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
+        <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
         <input type="hidden" name="step" value="1">
 
