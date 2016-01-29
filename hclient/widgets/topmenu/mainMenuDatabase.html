@@ -21,7 +21,7 @@
 -->
 
 <!-- Note: h3link class implies location of H3 codebase, which is prepended to the URLs
-     See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
+See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
 
 <li>DATABASE</li>
 
@@ -76,6 +76,13 @@
         onClick="{return false;}"
         title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
         Manage terms / relation types</a>
+</li>
+
+<li style="padding-left:5px;">
+    <a href="admin/verification/listDatabaseErrors.php?popup=1" name="auto-popup" class="verylarge h3link"
+        onClick="{return false;}"
+        title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
+        Verify structure and data</a>
 </li>
 
 <li style="padding-left:5px;" id="menu-database-refresh">
