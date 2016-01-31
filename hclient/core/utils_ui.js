@@ -739,6 +739,43 @@ top.HEURIST4.ui = {
 
     },
 
+    // Init button that show/hide help tips
+    
+    initHintButton: function(help_button){
+
+        var $help_button = $(help_button);
+        
+        var ishelp_on = top.HAPI4.get_prefs('help_on');
+        
+        function __switchState(event){
+            
+            ishelp_on = $help_button.attr('data-state');
+
+            if(event!=null){
+                ishelp_on = (ishelp_on==1 || ishelp_on==true)?0:1;
+                $help_button.attr('data-state', ishelp_on);
+                top.HAPI4.save_pref('help_on',ishelp_on);
+            }
+            
+            if(ishelp_on){
+                $help_button.addClass('ui-state-focus');    
+                $('.heurist-helper1').css('display','block');
+                $('div.div-table-cell.heurist-helper1').css('display','table-cell');
+            }else{
+                $help_button.removeClass('ui-state-focus');
+                $('.heurist-table-helper1').css('display','none');
+                $('.heurist-helper1').css('display','none');
+            }
+        }
+        
+        $help_button.button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
+                    .attr('data-state', ishelp_on)
+                    .on('click', __switchState);
+        
+        __switchState(null);
+        
+    },
+    
     //
     // Inits helper div (slider) and button
     // 
@@ -754,8 +791,8 @@ top.HEURIST4.ui = {
         var $help_button = $(help_button);
         var $helper_div = $(document.body).find('#helper');
 
-        $help_button.button({icons: { primary: "ui-icon-help" }, text:false})
-                    .on('click', 3, function(){
+        $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false})
+                    .on('click', function(){
                         var $helper_div = $(document.body).find('#helper');
                         
                         if($helper_div.dialog( "isOpen" )){

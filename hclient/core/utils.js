@@ -541,7 +541,11 @@ top.HEURIST4.util = {
         } else {
             $idown = $('<iframe>', { id:'idown', src:url }).hide().appendTo('body');
         }
-    }      
+    },
+    
+    isRecordSet: function(recordset){
+        return !top.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
+    }
 
 }//end util
 

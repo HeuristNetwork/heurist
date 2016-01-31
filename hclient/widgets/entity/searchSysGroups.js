@@ -18,13 +18,16 @@
 */
 
 
-$.widget( "heurist.searchRecord", {
+$.widget( "heurist.searchSysGroups", {
 
     // default options
     options: {
+        select_mode: 'manager', //'select_single','select_multi','manager'
         
-        add_new_record: true,
-        rectype_set: null,  //array of record types to limit search
+        //initial filter by title and subset of groups to search
+        filter_title: null,
+        filter_group_selected:null,
+        filter_groups: null,
         
         // callbacks - events
         onstart:null,
@@ -36,14 +39,8 @@ $.widget( "heurist.searchRecord", {
 
     // the widget's constructor
     _create: function() {
-
         // prevent double click to select text
         this.element.disableSelection();
-
-        // Sets up element to apply the ui-state-focus class on focus.
-        //this._focusable($element);   
-        //this._refresh();
-
     }, //end _create
 
     // Any time the widget is called with no arguments or with only an option hash, 
@@ -53,7 +50,7 @@ $.widget( "heurist.searchRecord", {
             var that = this;
             
             if(this._need_load_content){        
-                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchRecord.html', 
+                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchSysGroups.html?t'+Math.random(), 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {
@@ -72,16 +69,6 @@ $.widget( "heurist.searchRecord", {
                     secondary: "ui-icon-search"
                 }});
                         
-            this.btn_add_record = this.element.find('#btn_add_record')
-                .css({'min-width':'11.9em'})
-                .button({label: top.HR("Add Record"), icons: {
-                    primary: "ui-icon-plus"
-                }})
-                .click(function(e) {
-                        //top.HAPI4.SearchMgr.doStop();
-                        alert('Add record');
-                    });
-    
             this.input_search = this.element.find('#input_search')
                 .on('keypress',
                 function(e){
@@ -92,50 +79,24 @@ $.widget( "heurist.searchRecord", {
                             that.startSearch();
                         }
                 });
-            
-                
-            this.selectRectype = this.element.find('#sel_rectypes');
-            
-            this.selectRectype.empty();
-            top.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
-                this.options.rectype_set, 
-                this.options.rectype_set?null:top.HR('Any Record Type'));
-                      
-            var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
-            this.element.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
-    
-            //force search if rectype_set is defined
-            if(this.selectRectype.val()>0){
-                this.selectRectype.change();
-            }
-            
-            this._on( this.selectRectype, {
-                change: function(event){
-                    
-                    if(this.selectRectype.val()>0){
-                        lbl = top.HR('Add')+' '+ this.selectRectype.find( "option:selected" ).text();
-                    }else{
-                        lbl = top.HR("Add Record");
-                    }
-                    
-                    this.btn_add_record.button('option','label',lbl);
-                    this.startSearch();
-                }
-            });
-            
-            this._on( this.element.find('input[type=checkbox]'), {
-                change: function(event){
-                    this.startSearch();
-                }});
+
+            this._on( this.element.find('.ent_search_cb > input'), {  //input[type=radio]
+                change: this.startSearch });
             this._on( this.btn_search_start, {
-                click: function(event){
-                    this.startSearch();
-                }});
+                click: this.startSearch });
+                
+            // help buttons
+            top.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
+            top.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'System Users',
+                top.HAPI4.basePathV4+'context_help/sysUGrps.html #content');
             
+            var right_padding = top.HEURIST4.util.getScrollBarWidth()+4;
+            this.element.find('#div-table-right-padding').css('min-width',right_padding);
         
+        
+            this.startSearch();
     },  
-
-
+    
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
@@ -147,15 +108,6 @@ $.widget( "heurist.searchRecord", {
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
-        
-        if(this.options.add_new_record){
-            this.btn_add_record.show();
-            this.element.find('#lbl_add_record').show();
-        }else{
-            this.btn_add_record.hide();
-            this.element.find('#lbl_add_record').hide();
-        }
-
     },
     // 
     // custom, widget-specific, cleanup.
@@ -169,55 +121,52 @@ $.widget( "heurist.searchRecord", {
     //
     startSearch: function(){
         
-            var qstr = '', domain = 'a';
-            if(this.selectRectype.val()!=''){
-                qstr = qstr + 't:'+this.selectRectype.val();
-            }   
+            var request = {}
+        
             if(this.input_search.val()!=''){
-                qstr = qstr + ' title:'+this.input_search.val();
+                request['ugr_Name'] = this.input_search.val();
             }
+
+            // actually we may take list of groups from currentUser['ugr_Groups']
+            if(!this.element.find('#rb_anygroup').is(':checked')){
             
-            if(this.element.find('#cb_selected').is(':checked')){
-                qstr = qstr + ' ids:' + top.HAPI4.get_prefs('recent_Records');
-            }
-            if(this.element.find('#cb_modified').is(':checked')){
-                qstr = qstr + ' sortby:-m after:"1 week ago"';
-            }
-            if(this.element.find('#cb_bookmarked').is(':checked')){
-                domain = 'b';
-                if(qstr==''){
-                    qstr = 'sortby:t';
+                request['ugl_UserID'] = top.HAPI4.currentUser['ugr_ID'];
+                
+                if(this.element.find('#rb_admin').is(':checked')){
+                    request['ugl_Role'] = 'admin';
+                }
+                if(this.element.find('#rb_member').is(':checked')){
+                    request['ugl_Role'] = 'member';
                 }
             }
             
-            //noothing defined
-            if(qstr==''){
+            //nothing defined
+            if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         
-                var request = { q: qstr,
-                                w: domain,
-                                limit: 100000,
-                                needall: 1,
-                                detail: 'ids',
-                                id: Math.round(new Date().getTime() + (Math.random() * 100))};
-                                //source: this.element.attr('id') };
+                request['a']          = 'search'; //action
+                request['entity']     = 'sysUGrps';
+                request['details']    = 'id';
+                request['request_id'] = Math.round(new Date().getTime() + (Math.random() * 100));
+                request['ugr_Type']    = 'workgroup';
+                
+                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 //that.loadanimation(true);
-
-                top.HAPI4.RecordMgr.search(request, function( response ){
-                    //that.loadanimation(false);
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                        that._trigger( "onresult", null, 
-                            {recordset:new hRecordSet(response.data), request:request} );
-                    }else{
-                        top.HEURIST4.msg.showMsgErr(response);
-                    }
-
-                });
+                top.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            that._trigger( "onresult", null, 
+                                {recordset:new hRecordSet(response.data), request:request} );
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
             }
-    }
+    },
+    
 
 });

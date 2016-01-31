@@ -451,6 +451,12 @@ div .selected_last{
     width: 125px;
 }
 
+.thumbs .recordDiv .recordSelector {
+    bottom: 1px;
+    right: 3px;
+    position: absolute;
+}
+
 .thumbs .recordDiv .recordIcons {
     bottom: 1px;
     left: 3px;
@@ -510,6 +516,12 @@ div .selected_last{
     white-space: normal;
 }
 
+.icons .recordDiv .recordSelector {
+    bottom: 1px;
+    right: 3px;
+    position: absolute;
+}
+
 .icons .recordIcons {
     display: none;
 }
@@ -555,10 +567,23 @@ div .selected_last{
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.list .recordDiv .recordTitle .item {
+    width:150px;
+    display:inline-block;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .list .recordDiv .recordIcons {
     min-width: 20px;
     display: inline-block;
 }
+.list .recordDiv .recordSelector {
+    display: inline-block;
+}
+
 
 /* THUMBS (another mode) VIEW */
 .thumbs2 .recordDiv {
@@ -757,6 +782,7 @@ Allow use of icon-large to be properly aligned
 .heurist-helper1{
     font-style:italic;
     font-size: 0.9em;
+    vertical-align:top;
 }
 .svs-acordeon{
     border-bottom: #8ea9b9 1px solid;
@@ -812,6 +838,15 @@ background: #8ea9b9
     vertical-align:-0.3em;
     margin-right:0.2em;
 }
+.div-table-cell > div.header4{
+    width: 3em;
+    display: inline-block;
+    text-align: right;
+}
+.div-table-cell.header{
+    padding-right:0.5em;
+    text-align:right
+}
 
 .mandatory > label{
     color:red;
@@ -843,4 +878,25 @@ background: #8ea9b9
     height:3em;
     text-align:right;
     padding: 1em 1em .3em .4em;
+}
+
+.ent_wrapper{position:absolute; top:0;bottom:0;left:0;right:1px; overflow:hidden;font-size:0.9em;min-width:550px}
+.ent_header, .ent_footer, .ent_content, .ent_content_full{position:absolute; width:100%;}
+.ent_header{top:0;height:50px;display:table} /*background-color:#faa;*/
+.ent_content{top:7em;bottom:3em; overflow:auto;}
+.ent_content_full{top:7em;bottom:0; overflow:auto;}
+.ent_footer{bottom:0px; background-color:#afa; height:3em}
+
+/*
+.ent_help_buttons{
+    position:absolute; 
+    top:0.2em;right:1em;
+}
+*/
+.ent_select_multi{
+    x-width: 270px;
+    position: absolute;
+    right: 11px;
+    top: 0px;    
+    text-align:right;
 }

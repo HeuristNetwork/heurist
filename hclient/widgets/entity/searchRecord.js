@@ -78,10 +78,9 @@ $.widget( "heurist.searchRecord", {
                     primary: "ui-icon-plus"
                 }})
                 .click(function(e) {
-                        //top.HAPI4.SearchMgr.doStop();
                         alert('Add record');
                     });
-    
+                    
             this.input_search = this.element.find('#input_search')
                 .on('keypress',
                 function(e){

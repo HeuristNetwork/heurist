@@ -887,7 +887,7 @@ function hRecordSet(initdata) {
         },
         
         removeRecord:function(recID){
-            delete records[recID];
+            delete records[recID];           //@todo check how it affect selet_multi
             var idx = order.indexOf(recID);
             if(idx>=0){
                 order.splice(idx,1);
@@ -895,6 +895,17 @@ function hRecordSet(initdata) {
             }
         },
 
+        addRecord:function(recID, record){
+            var idx = order.indexOf(recID);
+            if(idx>=0){
+                setRecord(recID, record);
+            }else{
+                records[recID] = record;
+                order.push(recID);
+                total_count = total_count+1;
+            }
+        },
+        
         setRecord:function(recID, record){
             var idx = order.indexOf(recID);
             if(idx>=0){

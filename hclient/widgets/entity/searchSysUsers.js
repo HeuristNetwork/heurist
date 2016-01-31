@@ -22,9 +22,12 @@ $.widget( "heurist.searchSysUsers", {
 
     // default options
     options: {
+        select_mode: 'manager', //'select_single','select_multi','manager'
         
-        add_new_record: true,
-        groups_set: null,  //array of record types to limit search within
+        //initial filter by title and subset of groups to search
+        filter_title: null,
+        filter_group_selected:null,
+        filter_groups: null,
         
         // callbacks - events
         onstart:null,
@@ -47,7 +50,7 @@ $.widget( "heurist.searchSysUsers", {
             var that = this;
             
             if(this._need_load_content){        
-                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchSysUsers.html', 
+                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchSysUsers.html?t'+Math.random(), 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {
@@ -66,16 +69,6 @@ $.widget( "heurist.searchSysUsers", {
                     secondary: "ui-icon-search"
                 }});
                         
-            this.btn_add_record = this.element.find('#btn_add_record')
-                .css({'min-width':'11.9em'})
-                .button({label: top.HR("Create New User"), icons: {
-                    primary: "ui-icon-plus"
-                }})
-                .click(function(e) {
-                        //top.HAPI4.SearchMgr.doStop();
-                        alert('Add record');
-                    });
-    
             this.input_search = this.element.find('#input_search')
                 .on('keypress',
                 function(e){
@@ -87,26 +80,31 @@ $.widget( "heurist.searchSysUsers", {
                         }
                 });
             
-                
+            
             this.selectRole   = this.element.find('#sel_role');
             this.selectGroup = this.element.find('#sel_group');
             this.selectGroup.empty();
             
-            top.HAPI4.EntityMgr.doRequest({a:'search','details':'name','entity':'sysUGrps','ugr_Type':'workgroup'},
+            top.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
+                        'entity':'sysUGrps','ugr_Type':'workgroup','ugr_ID':that.options.filter_groups},
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             var groups = new hRecordSet(response.data).makeKeyValueArray('ugr_Name');
                             
-                            if(that.options.groups_set==null){
+                            if(top.HEURIST4.util.isempty(that.options.filter_groups)){
                                 groups.unshift({key:'',title:top.HR('Any Groups')});
                             }
                             
                             top.HEURIST4.ui.createUserGroupsSelect(that.selectGroup.get(0), 
-                                null, 
+                                [], 
                                 groups,
                                 function(){ //on load completed
-                                    //force search if group set is defined
-                                    that.selectGroup.change();
+                                    //force search 
+                                    //predefined search values
+                                    if(!top.HEURIST4.util.isempty(that.options.filter_title)) that.input_search.val(that.options.filter_title);
+                                    if(!top.HEURIST4.util.isempty(that.options.filter_group_selected)) that.selectGroup.val(that.options.filter_group_selected);
+            
+                                    that.selectGroup.change(); //force search
                                 });
                             
                         }else{
@@ -115,33 +113,35 @@ $.widget( "heurist.searchSysUsers", {
                     });
                       
                       
-            var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
-            this.element.find('.heurist-helper1').css('display',ishelp_on?'block':'none');
-    
-            
             this._on( this.element.find('select'), {
                 change: function(event){
                     if(this.selectGroup.val()>0){
                         that.selectRole.parent().show();
+                        //that.element.find('span[for="sel_role"]').show();
+                        //that.element.find('#sel_role_lbl').show();
                     }else{
                         that.selectRole.parent().hide();
+                        //that.element.find('#sel_role_lbl').hide();
                     }
                     this.startSearch();
                 }
             });
-            this._on( this.element.find('input[type=radio]'), {
-                change: function(event){
-                    this.startSearch();
-                }});
+            this._on( this.element.find('.ent_search_cb > input'), {  //input[type=checkbox]
+                change: this.startSearch });
             this._on( this.btn_search_start, {
-                click: function(event){
-                    this.startSearch();
-                }});
+                click: this.startSearch });
+                
+            // help buttons
+            top.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
+            top.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'System Users',
+                top.HAPI4.basePathV4+'context_help/sysUGrps.html #content');
             
+            
+            var right_padding = top.HEURIST4.util.getScrollBarWidth()+4;
+            this.element.find('#div-table-right-padding').css('min-width',right_padding);
         
     },  
-
-
+    
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
@@ -153,7 +153,7 @@ $.widget( "heurist.searchSysUsers", {
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
-        
+        /*
         if(this.options.add_new_record){
             this.btn_add_record.show();
             this.element.find('#lbl_add_record').show();
@@ -161,6 +161,7 @@ $.widget( "heurist.searchSysUsers", {
             this.btn_add_record.hide();
             this.element.find('#lbl_add_record').hide();
         }
+        */
 
     },
     // 
@@ -186,13 +187,23 @@ $.widget( "heurist.searchSysUsers", {
             if(this.input_search.val()!=''){
                 request['ugr_Name'] = this.input_search.val();
             }
-            
-            if(this.element.find('#rb_inactive').is(':checked')){
+
+
+            if(this.element.find('#cb_selected').is(':checked')){
+                request['ugr_ID'] = top.HAPI4.get_prefs('recent_Users');
+            }
+            if(this.element.find('#cb_modified').is(':checked')){
+                var d = new Date(); 
+                //d = d.setDate(d.getDate()-7);
+                d.setTime(d.getTime()-7*24*60*60*1000);
+                request['ugr_Modified'] = '>'+d.toISOString();
+            }
+            if(this.element.find('#cb_inactive').is(':checked')){
                 request['ugr_Enabled'] = 'n';
             }
             
             //noothing defined
-            if($.isEmptyObject(request)){
+            if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
                 this._trigger( "onstart" );
@@ -202,6 +213,8 @@ $.widget( "heurist.searchSysUsers", {
                 request['details']    = 'id';
                 request['request_id'] = Math.round(new Date().getTime() + (Math.random() * 100));
                 request['ugr_Type']    = 'user';
+                
+                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
                 //that.loadanimation(true);
@@ -216,6 +229,7 @@ $.widget( "heurist.searchSysUsers", {
                     });
 
             }
-    }
+    },
+    
 
 });

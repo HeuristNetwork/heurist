@@ -329,7 +329,7 @@ $.widget( "heurist.editing_input", {
                             title: top.HR('Select linked record'), 
                             class:'ui-heurist-bg-light',
                             callback: function(recordset){
-                                if(recordset && $.isFunction(recordset.isA) && recordset.isA("hRecordSet") ){
+                                if( top.HEURIST4.util.isRecordSet(recordset) ){
                                     var record = recordset.getFirstRecord();
                                     var name = recordset.fld(record,'rec_Title');
                                     $input.val(name);

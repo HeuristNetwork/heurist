@@ -1,5 +1,5 @@
 /**
-* Record manager - Main
+* manageSysUsers.js - main widget mo manage sys users
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,12 +22,36 @@ $.widget( "heurist.manageSysUsers", {
 
     // default options
     options: {
-        isdialog: false,
-        select_mode:'single', //'none','multi'
-        groups_set: null,        
+        // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
+        //        highlight in list works as usual and selected records are used in actions
+        // select_single - in list only one item can be highlighted, in dialog mode it will be closed
+        // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
+        select_mode: 'manager', //'select_single','select_multi','manager'
+
+        selectbutton_label: 'Select Marked Users',
+        //initial filter by title and subset of groups to search
+        filter_title: null,
+        filter_group_selected:null,
+        filter_groups: null,
+
+        page_size: 50,
+
+        //if true - default set of actions, if array - specified set of actions, false or empty array - hide selector or buttons
+        action_select: false, //may be true,false or array [add,edit,delete,merge,select all|none,import,] 
+        action_buttons: true, //may be true,false or array
+        
+        isdialog: false,  //show in dialog
+        dialogcleanup: true, // remove dialog div on close
+        
         // callbacks
-        onselect:null  //selection complete - close dialog if select_mode!='none'
+        onselect:null  //selection complete callback
     },
+    
+    _default_sel_actions:[{key:'edit', title:'Edit'},
+                      {key:'delete', title:'Delete'},
+                      {key:'merge', title:'Merge'},
+                      {key:'import', title:'Import'}],
+    _default_btn_actions:[{key:'add', title:'Create New User'}],
 
     _selection:null,
     
@@ -45,25 +69,43 @@ $.widget( "heurist.manageSysUsers", {
             this._initDialog();
         }
         
-        this.element
-            .css({'font-size':'0.9em', 'min-width':  620})
-            .addClass('ui-heurist-bg-light');
+        this.wrapper = $('<div>')
+            .addClass('ent_wrapper ui-heurist-bg-light')
+            .css('min-width','700px')
+            .appendTo(this.element);
+            
+        
+        var that = this;
         
         //init record list
-        this.recordList = $('<div>').css({position: 'absolute', top:'6em', bottom:'1px', left:0, right:'1px'})
-            .appendTo(this.element)
+        this.recordList = $('<div>')
+            .addClass('ent_content_full')
+            //.css({position: 'absolute', top:'6em', bottom:'1px', left:0, right:'1px'})
+            .appendTo(this.wrapper)
             .resultList({
                eventbased: false, 
-               isapplication: false, //do not listent global events
-               showmenu: false, 
-               multiselect: (this.options.select_mode=='multi'),
-               //onselect: function(event, selected_recs){this.selection(selected_recs);},
+               isapplication: false, //do not listent global events @todo merge with eventbased
+               showmenu: false,      //@todo - replace to action_select and action_buttons
+               multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
+
+               select_mode: this.options.select_mode,
+               selectbutton_label: this.options.selectbutton_label,
+               
+               action_select: this.options.action_select==true
+                                        ?this._default_sel_actions
+                                        :this.options.action_select, 
+               action_buttons: this.options.action_buttons==true
+                                        ?this._default_btn_actions
+                                        :this.options.action_buttons,
+               
                empty_remark: 
-                    (this.options.select_mode!='none')
+                    (this.options.select_mode!='manager')
                     ?'<div style="padding:1em 0 1em 0">Please use the search field above to locate relevant user (partial string match on name)</div>'
                     :'',
-               searchfull: this._searchFullData,
-               renderer:   this._rendererListItem
+               searchfull: function(arr_ids, pageno, callback){
+                   that._searchFullData(arr_ids, pageno, callback);
+               },//this._searchFullData,    //search function 
+               renderer:   this._rendererListItem   //custom render for particular entity type
                         });     
 
         this._on( this.recordList, {
@@ -71,17 +113,37 @@ $.widget( "heurist.manageSysUsers", {
                             this.selection(selected_recs);
                         }
                 });
+        this._on( this.recordList, {
+                "resultlistonaction": function(event, action){
+                        if(action=='select-and-close'){
+                             this._selectAndClose();
+                        } else {
+                            var recID = 0;
+                            if(action && action.action){
+                               recID =  action.recID;
+                               action = action.action;
+                            }
+                            
+                             var s = 'User clicked action "'+action+'" for ';
+                             if(recID>0){
+                                 s = s + 'rec# '+recID;
+                             }else if(top.HEURIST4.util.isRecordSet(this._selection) && this._selection.length()>0){
+                                 s = s + this._selection.length() + ' selected record';
+                             }else{
+                                 s = 'Nothing selected';
+                             }
+                             top.HEURIST4.msg.showMsgFlash(s);  
+                        }
+                    }
+                });
             
 
         // init search header
-        this.searchRecord = $('<div>').css({height: '6em', padding:'0.2em'})
-            .appendTo(this.element)
-            .searchSysUsers({
-                add_new_record: true,
-                groups_set: this.options.groups_set,
-                
-                //onresult: this.updateRecordList   
-            })
+        this.searchRecord = $('<div>')
+            .addClass('ent_header')
+            .css({padding:'0.2em'})
+            .appendTo(this.wrapper)
+            .searchSysUsers(this.options);
             
         this._on( this.searchRecord, {
                 "searchsysusersonresult": this.updateRecordList
@@ -112,7 +174,10 @@ $.widget( "heurist.manageSysUsers", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         // remove generated elements
-        //this.select_rectype.remove();
+        this.searchRecord.remove();
+        this.recordList.remove();
+        this.wrapper.remove();
+        this._selection = null;
     },
     
     //----------------------
@@ -122,7 +187,14 @@ $.widget( "heurist.manageSysUsers", {
     _rendererListItem:function(recordset, record){
         
         function fld(fldname){
-            return recordset.fld(record, fldname);
+            return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width){
+            swidth = '';
+            if(!top.HEURIST4.util.isempty(col_width)){
+                swidth = ' style="width:'+col_width+'"';
+            }
+            return '<div class="item" '+swidth+'>'+top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
@@ -131,7 +203,10 @@ $.widget( "heurist.manageSysUsers", {
         var rectype = fld('ugr_Type');
         var isEnabled = (fld('ugr_Enabled')=='y');
         
-        var recTitle = top.HEURIST4.util.htmlEscape(fld('ugr_Name'));
+        var recTitle = fld2('ugr_Name','10em')+
+        '<div class="item" style="width:25em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'+fld2('ugr_Organisation')+fld2('ugl_Role');
+        
+        
         var recIcon = top.HAPI4.iconBaseURL + '../entity-icons/sysUGrps/' + rectype + '.png';
 
 
@@ -145,18 +220,21 @@ $.widget( "heurist.manageSysUsers", {
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectype+'">'
         + html_thumb
+        + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
-        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);">'
-        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="'+(isEnabled?'bookmarked':'unbookmarked')+'">'
+        +     '" style="background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
+        +     '<span class="ui-icon ui-icon-flag" style="color:'+(isEnabled?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'           
         + '</div>'
-        + '<div title="'+recTitle+'" class="recordTitle">'
+        + '<div class="recordTitle">'
         +     recTitle
         + '</div>'
-        + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-        //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathV3+'records/edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+        + '<div title="Click to edit user" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
         + '</div>&nbsp;&nbsp;'
+        + '<div title="Click to delete user" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+        + '</div>'
         /*+ '<div title="Click to view record (opens in popup)" '
         + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + '   role="button" aria-disabled="false">'
@@ -179,8 +257,17 @@ $.widget( "heurist.manageSysUsers", {
                 'entity'     : 'sysUGrps',
                 'details'    : 'list',
                 'request_id' : pageno,
-                'ugr_ID'     : arr_ids
+                'ugr_ID'     : arr_ids,
+                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
         };
+        
+        if(this.searchRecord){
+            var selectGroup = this.searchRecord.find('#sel_group');
+            if(selectGroup.val()!=''){
+                    request['ugr_Type'] = 'user';
+                    request['ugl_GroupID'] = selectGroup.val();
+            }
+        }
         
         top.HAPI4.EntityMgr.doRequest(request, callback);
     },
@@ -194,30 +281,25 @@ $.widget( "heurist.manageSysUsers", {
                 btn_array = [],
                     that = this;
         
-            if(options['select_mode']=='multi'){
-                btn_array.push({text:top.HR('Select'),
-                        title: top.HR("Select marked users"),
-                        click: function() {
-                                    that._trigger( "onselect", null, that.selection() );
-                                    that._closeDialog();
-                                    //$( this ).dialog( "close" );
-                                    //that.element.remove();
-                                  }
-                               });
+            //dialog buttons 
+            if(options['select_mode']=='select_multi'){ 
+                btn_array.push({text:top.HR( options['selectbutton_label'] ),
+                        click: function() { that._selectAndClose(); }}); 
             }
             btn_array.push({text:top.HR('Close'), 
-                    click: function() {
-                        that._closeDialog();
-                    }});
+                    click: function() { that._closeDialog(); }}); 
+                    
                 
-            this.element.dialog({
+            var $dlg = this.element.dialog({
                 autoOpen: false ,
                 height: options['height']?options['height']:400,
                 width:  options['width']?options['width']:720,
                 modal:  (options['modal']!==true),
                 title: options['title']
                             ?options['title']
-                            :(options['select_mode']=='multi')?top.HR("Select User"):top.HR("Manage Users"),
+                            :((options['select_mode']=='manager')
+                                    ?top.HR("Manage Users")
+                                    :top.HR("Select User"+(options['select_mode']=='select_multi'?'s':'') )),
                 resizeStop: function( event, ui ) {//fix bug
                 
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
@@ -226,6 +308,13 @@ $.widget( "heurist.manageSysUsers", {
                     //setTimeout(function(){
                     // that.element.css({overflow: 'none !important','width':'100%'});},400);   
                     //that.recordList.css({'width':'100%'});
+                },
+                
+                close: function(event, ui){
+                       if(options['dialogcleanup']){
+                           $dlg.remove();
+                       }
+                            
                 },
                 buttons: btn_array
             });        
@@ -246,11 +335,21 @@ $.widget( "heurist.manageSysUsers", {
     //
     _closeDialog: function(){
         if(this.options.isdialog){
-            this.element.dialog("close");
-            this.element.remove();
+            this.element.dialog('close');
         }
     },
 
+    _selectAndClose: function(){
+        
+        if(top.HEURIST4.util.isRecordSet(this._selection)){
+            top.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
+            this._trigger( "onselect", null, {selection:this._selection.getIds()});
+        }else{        
+            this._trigger( "onselect", null, null );
+        }
+        this._closeDialog();
+    },
+        
     //
     // value - RecordSet
     //    
@@ -263,9 +362,9 @@ $.widget( "heurist.manageSysUsers", {
             //setter
             this._selection = value;
             
-            if(this.options.select_mode=='single'){
-                this._trigger( "onselect", null, value );
-                this._closeDialog();
+            
+            if(this.options.select_mode=='select_single'){
+                this._selectAndClose();
             }
         }
         

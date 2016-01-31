@@ -95,7 +95,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     //
     //  shows standard work in progress message (not used)
     //
-    showMsgWorkInProgress: function( message ){
+    showMsgWorkInProgress: function( isdlg, message ){
 
         if(top.HEURIST4.util.isempty(message)){
             message = "this feature";
@@ -106,7 +106,12 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
               + "<br/><br/>Please email Heurist support (info at HeuristNetwork dot org)"
               + "<br/>if you need this feature and we will provide workarounds and/or fast-track your needs.";
 
-        top.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");
+        if(isdlg){
+            top.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");    
+        }else{
+            top.HEURIST4.msg.showMsgFlash(message, 4000, "Work in Progress");
+        }
+        
     },
 
     //
@@ -536,7 +541,10 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         $dosframe.attr('src', url);
 
     },
-
+    
+    //
+    // take element and assign it to dialog, on dialog close place element back to original parent
+    //
     showElementAsDialog: function(options){
 
             var opener = options['window']?options['window'] :window;

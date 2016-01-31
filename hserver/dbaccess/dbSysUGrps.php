@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Library to update records details in batch
+    * db access to sysUGrpps table
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -21,29 +21,30 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/db_tags.php');
+//require_once (dirname(__FILE__).'/db_tags.php');
 
 class DbSysUGrps
 {
     private $system;  
     
     /*  
-    *       recIDs - list of records IDS to be processed
-    *       rtyID  - filter by record type
-    *       dtyID  - detail field to be added
-    *       for addition: val: | geo: | ulfID: - value to be added
-    *       for edit sVal - search value,  rVal - replace value
-    *       for delete: sVal  
-    *       tag  = 0|1  - add system tag to mark processed records
+     parametrs
+    
+     list of fields to search or update
+     
+    
     */    
     private $data;  
 
     //@todo???? load this mapping dynamically fromn db
     // to validate fieldnames and value
+    
+    
+    //data types: ids, int, float, date, bool, enum
     private static $fields = array( 
-   'ugr_ID'=>'ids',
-   'ugr_Type'=>array('user','workgroup','ugradclass'),
-   'ugr_Name'=>63,
+   'ugr_ID'=>'ids',    //ids
+   'ugr_Type'=>array('user','workgroup','ugradclass'), //t
+   'ugr_Name'=>63,     //title
    'ugr_LongName'=>128,
    'ugr_Description'=>1000,
    'ugr_Password'=>40,
@@ -56,9 +57,12 @@ class DbSysUGrps
    'ugr_State'=>40,
    'ugr_Postcode'=>20,
    'ugr_Interests'=>255,
-   'ugr_Enabled'=>array('y','n'),
-   'ugl_Role'=>array('admin','member'));
-
+   'ugr_Enabled'=>'bool',
+   'ugr_Modified'=>'date',    //date, after, before
+   'ugl_Role'=>array('admin','member'),
+   'ugl_UserID'=>'ids',
+   'ugl_GroupID'=>'ids' );
+   
     
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -66,18 +70,47 @@ class DbSysUGrps
     }
     
     //
+    // @todo inherit
     //
-    //
-    private function _validateIds($values, $title){
+    private function _validateIds($fieldname){
     
-        if(@$values!=null){
+        $values = @$this->data[$fieldname];
+        
+        if($values!=null){
             //array of integer or integer
             if(!is_array($values)){
-                $values = array($values);
+                $values = explode(',', $values);
+                //$values = array($values);
             }
+            //if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) 
             foreach($values as $val){  //intval()
-                if(!(is_numeric($val)&& $val)){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter $title: $val");
+                if(!(is_numeric($val) && $val!=null)){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname: $val");
+                    return false;
+                }
+            }
+            //return $values;        
+        }
+        return true;        
+    }
+
+    //
+    // @todo inherit
+    //
+    private function _validateEnum($fieldname){
+    
+        $value = @$this->data[$fieldname];
+        
+        if($value!=null){
+            
+            $enums = DbSysUGrps::$fields[$fieldname];
+
+            if(!is_array($values)){
+                $values = explode(',', $values);
+            }
+            foreach($values as $val){ 
+                if(array_search($value, $enums, true)===false){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname: $value");
                     return false;
                 }
             }
@@ -85,66 +118,62 @@ class DbSysUGrps
         return true;        
     }
 
-    private function _validateEnum($value, $title, $enums){
-    
-        if(@$value){
-            //array of integer or integer
-            if(array_search($value, $enums, true)===false){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter $title: $value");
+    //
+    // @todo inherit
+    //
+    private function _validateBoolean($fieldname){
+
+        $value = @$this->data[$fieldname];
+        
+        if($value!=null){
+
+            if(is_bool($value)){
+                $value = $value?'y':'n';
+            }else if(is_numeric($value)){
+                $value = $value==1?'y':'n';
+            }
+            if(!($value=='y' || $value=='n')){
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
                 return false;
             }
+            return $value;
+            
         }
-        return true;        
+        return true;
     }
-
-    
+    //
+    // @todo inherit
+    //
     private function _validateParams(){
         
-        $res = $this->_validateIds(@$this->data['ugr_ID'], 'user/group IDs');
-        if(is_bool($res)){
-            if(!$res) return false;
-        }else{
-            $this->data['ugr_ID'] = $res;
-        }
         
-        if(!$this->_validateEnum(@$this->data['ugr_Type'], 'user/group type', array('workgroup','user') )){
-            return false;
-        }
+        foreach(DbSysUGrps::$fields as $fieldname=>$data_type){
+            if(!@$this->data[$fieldname]){
+                
+                if($data_type=='ids'){
+                    $res = $this->_validateIds($fieldname); //, 'user/group IDs');
+                }else if(is_array($data_type)){
+                    $res = $this->_validateEnum($fieldname);
+                }else if($data_type=='bool'){
+                    $res = $this->_validateBoolean($fieldname);
+                }else{
+                    $res = true;
+                }
         
-        if(@$this->data['ugr_Enabled']!=null){
-            if(is_bool($this->data['ugr_Enabled'])){
-                $this->data['ugr_Enabled'] = $this->data['ugr_Enabled']?'y':'n';
-            }else if(is_numeric($this->data['ugr_Enabled'])){
-                $this->data['ugr_Enabled'] = $this->data['ugr_Enabled']==1?'y':'n';
+                if(!is_bool($res)){
+                    $this->data[$fieldname] = $res;
+                }else{
+                    if(!$res) return false;        
+                }        
             }
-            if(!($this->data['ugr_Enabled']=='y' || $this->data['ugr_Enabled']=='n')){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter user/group enabled: ".$this->data['ugr_Enabled']);
-                return false;
-            }
         }
-        
-        $res = $this->_validateIds(@$this->data['ugl_GroupID'], 'user/group IDs');
-        if(is_bool($res)){
-            if(!$res) return false;
-        }else{
-            $this->data['ugl_GroupID'] = $res;
-        }
-
-        $res = $this->_validateIds(@$this->data['ugl_UserID'], 'user/group IDs');
-        if(is_bool($res)){
-            if(!$res) return false;
-        }else{
-            $this->data['ugl_UserID'] = $res;
-        }
-        
-        if(!$this->_validateEnum(@$this->data['ugl_Role'], 'user role', array('admin','member') )){
-            return false;
-        }
-
         
         return true;
     }
     
+    //
+    // @todo inherit
+    //
     function _getOffset(){
         if(@$this->data['offset']){
             $offset = intval($this->data['offset']);
@@ -156,6 +185,9 @@ class DbSysUGrps
             }
         }
     }
+    //
+    // @todo inherit
+    //
     function _getLimit(){
         if(@$this->data['limit']){
             $limit = intval($this->data['limit']);
@@ -167,6 +199,176 @@ class DbSysUGrps
             }
         }
     }
+
+    //
+    // remove quoted values and double spaces
+    //
+    function _cleanQuotedValue($val) {
+        if (strlen($val)>0 && $val[0] == '"') {
+            if ($val[strlen($val)-1] == '"')
+                $val = substr($val, 1, -1);
+            else
+                $val = substr($val, 1);
+            return preg_replace('/ +/', ' ', trim($val));
+        }
+
+        return $val;
+    }
+        
+    //
+    // extract first charcter to determine comparison opeartor =,like, >, <, between
+    //
+    function _getSearchPredicate($fieldname) {
+        
+        $value = @$this->data[$fieldname];
+        if($value==null) return null;
+        
+        $data_type = DbSysUGrps::$fields[$fieldname];
+        if(is_array($data_type)){
+            $data_type = 'enum';
+        }else if(is_numeric($data_type)){
+            $data_type = 'varchar';
+        }
+
+        //special case for ids - several values can use IN operator        
+        if ($data_type == 'ids') {  //preg_match('/^\d+(?:,\d+)+$/', $value)
+        
+            if(is_array($value)){
+                $value = implode(',',$value);
+            }
+            if(strpos($value, '-')===0){
+                $negate = true;
+                $value = substr($value, 1);
+            }else{
+                $negate = false;
+            }
+            if($value=='') return null;
+            $mysqli = $this->system->get_mysqli();
+            
+            if(strpos($value, ',')>0){
+                // comma-separated list of ids
+                $in = ($negate)? 'not in' : 'in';
+                $res = " $in (" . $value . ")";
+            }else{
+                $res = ($negate)? ' !=' : '='.$value;
+            }
+
+            return $fieldname.$res;    
+        }   
+        
+        if(!is_array($value)){      
+            $or_values = array($value);
+        }else{
+            $or_values = $value;
+        }
+        
+        $or_predicates = array();
+        
+        foreach($or_values as $value){
+        
+            $exact = false;
+            $negate = false;
+            $between = (strpos($value,'<>')>0);
+            $lessthan = false;
+            $greaterthan = false;
+            
+            if ($between) {
+                if(strpos($value, '-')===0){
+                    $negate = true;
+                    $value = substr($value, 1);
+                }
+            }else{
+                if(strpos($value, '-')===0){
+                    $negate = true;
+                    $value = substr($value, 1);
+                }else if(strpos($value, '=')===0){
+                    $exact = true;
+                    $value = substr($value, 1);
+                }else if(strpos($value, '<')===0){
+                    $lessthan = true;
+                    $value = substr($value, 1);
+                }else if(strpos($value, '>')===0){
+                    $greaterthan = true;
+                    $value = substr($value, 1);
+                }
+            }
+            
+            $value = $this->_cleanQuotedValue($value);
+
+            if($value=='') continue;
+            
+            $mysqli = $this->system->get_mysqli();
+            
+            if($between){
+                $values = explode('<>', $value);
+                $between = ((negate)?' not':'').' between ';
+                $values[0] = $mysqli->real_escape_string($values[0]);
+                $values[1] = $mysqli->real_escape_string($values[1]);
+            }else{
+                $value = $mysqli->real_escape_string($value);
+            }
+            
+            $eq = ($negate)? '!=' : (($lessthan) ? '<' : (($greaterthan) ? '>' : '='));
+            
+            if ($data_type == 'int' || $data_type == 'float') {
+
+                if($between){
+                    $res = $between.$values[0].' and '.$values[1];
+                }else{
+                    $res = " $eq ".($data_type == 'int'?intval($value):$value);  //no quotes
+                }
+            }
+            else if ($data_type == 'date') {    
+
+                //$datestamp = validateAndConvertToISO($this->value);
+                
+                if($between){
+                    $res = $between." '".$values[0]."' and '".$values[1]."'";
+                }else{
+                    
+                    if($eq=='=' && !$exact){
+                        $eq = 'like';
+                        $value = $value.'%';
+                    }
+                    
+                    $res = " $eq '".$value. "'";
+                }
+                
+
+            } else {
+                
+                if($between){
+                    $res = $between.$values[0].' and '.$values[1];
+                }else{
+                    
+                    if($eq=='=' && !$exact && $data_type == 'varchar'){
+                        $eq = 'like';
+                        $k = strpos($value,"%");
+                        if($k===false || ($k>0 && $k+1<strlen($value))){
+                            $value = '%'.$value.'%';
+                        }
+                    }
+                    
+                    $res = " $eq '".$value. "'";
+                }
+
+            }
+            
+            array_push($or_predicates, $fieldname.$res);
+        
+        }//for or_values
+        
+        if(count($or_predicates)>0){
+            $res = implode(' OR ', $or_predicates);
+            return $res;
+        }else{
+            return null;
+        }
+            
+        
+        
+    }
+    
         
     /**
     *  search user or/and groups
@@ -175,6 +377,7 @@ class DbSysUGrps
     *  sysUGrps.ugr_Type
     *  sysUGrps.ugr_Name
     *  sysUGrps.ugr_Enabled
+    *  sysUGrps.ugr_Modified
     *  sysUsrGrpLinks.ugl_UserID
     *  sysUsrGrpLinks.ugl_GroupID
     *  sysUsrGrpLinks.ugl_Role
@@ -186,6 +389,7 @@ class DbSysUGrps
     *  limit
     *  request_id
     * 
+    *  @todo overwrite
     */
     public function search(){
         
@@ -211,63 +415,55 @@ class DbSysUGrps
 
         $mysqli = $this->system->get_mysqli();
 
+        //compose WHERE 
         $where = array('(ugr_ID>0)');    
         
-        //compose WHERE 
-        if(@$this->data['ugr_ID']){
-            if(count($this->data['ugr_ID'])>1){
-                array_push($where, '(ugr_ID in ('.implode(',', $this->data['ugr_ID']).'))');
-            }else{
-                array_push($where, '(ugr_ID = '. $this->data['ugr_ID'][0].')');
-            }
-        }
+        $pred = $this->_getSearchPredicate('ugr_ID');
+        if($pred!=null) array_push($where, $pred);
+
+        $pred = $this->_getSearchPredicate('ugr_Name');
+        if($pred!=null) array_push($where, $pred);
         
-        if(@$this->data['ugr_Name']){
-            $val = $this->data['ugr_Name'];
-            //@todo - extract first charcter to determine comparison opeartor = or like
-            array_push($where, "(ugr_Name like '%".$mysqli->real_escape_string($val)."%'");
-        }
+        $pred = $this->_getSearchPredicate('ugr_Enabled');
+        if($pred!=null) array_push($where, $pred);
 
-        if(@$this->data['ugr_Enabled']){
-            array_push($where, "(ugr_Enabled = '". $this->data['ugr_Enabled']."')");
-        }
-       
-        if(@$this->data['ugr_Type']){
-            array_push($where, '(ugr_Type = "'. $this->data['ugr_Type'].'")');
+        $pred = $this->_getSearchPredicate('ugr_Modified');
+        if($pred!=null) array_push($where, $pred);
 
+        $pred = $this->_getSearchPredicate('ugr_Type');
+        if($pred!=null) {
+            array_push($where, $pred);
+        
             //find group where this user is member or admin
-            if(@$this->data['ugl_UserID']){
-                if(count($this->data['ugl_UserID'])>1){
-                    array_push($where, '(sysUsrGrpLinks.ugl_UserID in ('.implode(',', $this->data['ugl_UserID']).'))');
-                }else{
-                    array_push($where, '(sysUsrGrpLinks.ugl_UserID = '. $this->data['ugl_UserID'][0].')');
-                }
-                array_push($where, "(sysUsrGrpLinks.ugl_GroupID = ugr_ID)");
+            $pred = $this->_getSearchPredicate('ugl_UserID');
+            if($pred!=null && $this->data['ugr_Type']=='workgroup') {
+                array_push($where, $pred);
                 $isJoin = true;
             }
             //find users for given groups
-            if(@$this->data['ugl_GroupID']){
-                
-                if(count($this->data['ugl_GroupID'])>1){
-                    array_push($where, '(sysUsrGrpLinks.ugl_GroupID in ('.implode(',', $this->data['ugl_GroupID']).'))');
-                }else{
-                    array_push($where, '(sysUsrGrpLinks.ugl_GroupID = '. $this->data['ugl_GroupID'][0].')');
-                }
-                array_push($where, "(sysUsrGrpLinks.ugl_UserID = ugr_ID)");
+            $pred = $this->_getSearchPredicate('ugl_GroupID');
+            if($pred!=null && $this->data['ugr_Type']=='user') {
+                array_push($where, $pred);
                 $isJoin = true;
             }
-            if(@$this->data['ugl_Role']){
-                array_push($where, "(sysUsrGrpLinks.ugl_Role = '". $this->data['ugl_Role']."')");
+            $pred = $this->_getSearchPredicate('ugl_Role');
+            if($pred!=null) {
+                array_push($where, $pred);
                 $isJoin = true;
             }
             
             if($isJoin){
+                if($this->data['ugr_Type']=='user'){
+                    array_push($where, "(sysUsrGrpLinks.ugl_UserID = ugr_ID)");
+                }else{
+                    array_push($where, "(sysUsrGrpLinks.ugl_GroupID = ugr_ID)");
+                }
                 $joinSysUsrGrpLinks = ', sysUsrGrpLinks';
             }
         }
 
        
-        //compose SELECT
+        //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
             $this->data['details'] = 'ugr_ID';
@@ -278,14 +474,15 @@ class DbSysUGrps
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'ugr_ID,ugr_Type,ugr_Name,ugr_Description,ugr_Enabled,ugr_Organisation';
+            $this->data['details'] = 'ugr_ID,ugr_Type,ugr_Name,ugr_FirstName,ugr_LastName,ugr_Description,ugr_Enabled,ugr_Organisation';
             if($isJoin) $this->data['details'] .= ',ugl_Role';
             
         }else if(@$this->data['details']=='full'){
 
+            //remove ugl_XXX fields from the end of fields array
             $this->data['details'] = implode(',',  $isJoin
-                        ?DbSysUGrps::$fields 
-                        : array_slice(DbSysUGrps::$fields,0,count(DbSysUGrps::$fields)-1) );
+                        ? array_slice(DbSysUGrps::$fields,0,count(DbSysUGrps::$fields)-2)
+                        : array_slice(DbSysUGrps::$fields,0,count(DbSysUGrps::$fields)-3) );
         }
         
         if(!is_array($this->data['details'])){
@@ -299,7 +496,7 @@ class DbSysUGrps
                 return false;
             }            
         }
-        //exclude ugr_Password    
+        //exclude ugr_Password   - DO NOT SEND to client side 
         $idx = array_search('ugr_Password', $this->data['details']);
         if($idx>=0){
             unset($this->data['details'][$idx]);
@@ -324,7 +521,7 @@ class DbSysUGrps
          $query = $query.$this->_getOffset()
                         .$this->_getLimit();
         
-error_log($query);        
+//error_log($query);        
         
         $res = $mysqli->query($query);
         if (!$res){

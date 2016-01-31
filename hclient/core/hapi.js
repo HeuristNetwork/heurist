@@ -769,6 +769,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
         },
         
+        //
+        // limit - to save limited list of ids - for example: last selected tags
+        //
         save_pref: function(name, value, limit){
                 //top.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
                 
