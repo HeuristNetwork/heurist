@@ -163,6 +163,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             //
             //
             function showProgressMsg(msg){
+//console.log('pm: '+msg);                
                 $("#div-progress").html(msg);
                 $("#div-progress").show();
             }
@@ -210,9 +211,31 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             //
             function doUpload2(){
                 showProgressMsg('Please wait');
+                hideThisFrame();
                 $(document.forms[0]).hide();
                 document.forms[0].submit();
             }
+            
+            
+            //
+            // it calls before each submit
+            // 
+            function hideThisFrame(){
+             
+                if(window.frameElement){
+                    var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
+                    if( reference_to_parent_dialog ){
+                            var frame = window.frameElement;
+                            //$(reference_to_parent_dialog).css('background','green');
+                            var ele = parent.document.getElementById(reference_to_parent_dialog);
+                            $(ele).addClass('loading');
+                            $(frame).hide();
+            //console.log('hide frame');                
+                    }
+                }
+                
+                return true;
+            }            
         </script>
         <?php
         //USER_ID:=get_user_id()
@@ -222,10 +245,11 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         $step = intval(@$_REQUEST["step"]);
         if(!$step) $step=0;
 
+/* ART 2016-02-01        
         ob_start();
         echo '<div id="div-progress" style="display:none" class="loading">&nbsp;</div>';
         ob_flush();flush();
-
+*/
         //load session
         if(intval(@$_REQUEST["import_id"])>0){
             ob_start();
@@ -331,7 +355,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <h4><?=$imp_session['warning']?></h4>
         <hr width="100%" />
 
-        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
+        <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form" onsubmit="hideThisFrame()">
             <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
             <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
             <input type="hidden" id="step" name="step" value="1">
@@ -767,7 +791,9 @@ if(is_array($imp_session)){
                 <!-- table showing input columns and controls for selection and matching -->
                 <div>
                     <br/>
-
+<?php 
+//DEBUG echo print_r($imp_session['multivals'],true)
+?>
                     <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                         <thead><tr> <!-- Table headings -->
                             <th style="width:40px;">Key<br/>field&nbsp;</th>
@@ -1070,6 +1096,7 @@ if(is_array($imp_session)){
         //
         function doUpload(){
             showProgressMsg('Please wait, file is uploading (time required will depend on your network connection speed)');
+            hideThisFrame();
             $(document.forms[0]).hide();
             document.forms[0].submit();
         }
@@ -1080,6 +1107,7 @@ if(is_array($imp_session)){
         //
         function doSelectSession(){
             showProgressMsg('Loading saved file');
+            hideThisFrame();
             $(document.forms[0]).hide();
             document.forms[0].submit();
         }
@@ -1110,7 +1138,7 @@ if(is_array($imp_session)){
         <br/>
     </div>
 
-    <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form">
+    <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form" onsubmit="hideThisFrame()" >
         <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
         <input type="hidden" name="step" value="1">
@@ -1296,16 +1324,17 @@ if(is_array($imp_session)){
 ?>
 
 <div id="divMatchingPopup" style="display:none;padding:10px;">
-    <p>One or more of the records you are trying to update does not yet exist in the database, so it/they need to be created from scratch. However, you have not assigned data for all the required fields, so these records cannot be created.</p>
-
+    <p>One or more of the records you are trying to update does not yet exist in the database (rows with negative ID), so it/they need to be created from scratch. However, you have not assigned <b>data for all the required fields</b>, so these records cannot be created.</p>
+    <br/>
     <p>Option 1: Hit Cancel, then assign the required data fields so that the missing records can be created. It is essential to check the appropriate radio button to make sure that the values in your input file do not overwrite data for existing (matched) records in the database which may have been edited or imported from another source. </p>
-
+    <br/>
     <p>Option 2: Download the non-matching rows as a tab-delimited text file and delete them from the current data before proceeding:
         <div id="divUnmatchedBtns"><input type="button" id="btnUnMatchDownload" value="Download unmatched rows"/>  <input id="btnUnMatchDelete" type="button" value="Delete unmatched rows"/></div>
         <div id="divUnmatchedRes" class="error"></div>
     </p>
-
-    <p>If you proceed, Heurist will update only the records which have been matched to input rows</p>
+    <br/>
+    <br/>
+    <p>If you proceed, Heurist will update only the records which have been matched to input rows (records witn defined Record ID)</p>
     <p><input type="button" id="btnMatchProceed" value="Proceed"/>  <input id="btnMatchCancel" type="button" value="Cancel"/></p>
 
 </div>
@@ -1671,6 +1700,7 @@ function preprocess_uploaded_file($filename){
 
                     //Identify repeating value fields and flag - will not be used as key fields
                     if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
+//DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
                         array_push($multivals, $k);
                     }
                     if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){

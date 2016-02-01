@@ -376,7 +376,7 @@
 
             }else{
 
-                include(dirname(__FILE__).'utils_db_load_script.php'); // used to load procedures/triggers
+                include(dirname(__FILE__).'/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, HEURIST_BASE_URL.'admin/setup/dbcreate/addProceduresTriggers.sql')){
                     $res = true;
                 }

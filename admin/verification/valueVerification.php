@@ -190,29 +190,30 @@ function getTermsFromFormat($formattedStringOfTermIDs){
 function isValidPointer($constraints, $rec_id, $dtyID ){
     global $dtyIDDefs;
 
-    $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$rec_id);
-    if ($res){
-        $tempRtyID = mysql_fetch_row($res);
-        if ($tempRtyID){
-            $tempRtyID = @$tempRtyID[0];
-        } else {
-            return false;
-        }
+    $isvalid = false;
+    
+    if(isset($rec_id) && is_numeric($rec_id) && $rec_id>0){
+    
+        $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$rec_id);
+        if ($res){
+            $tempRtyID = mysql_fetch_row($res);
+            if ($tempRtyID){
+                $tempRtyID = @$tempRtyID[0];
 
-        $allowed_types = "all";
-        if ($constraints!=null && $constraints != "") {
-            $temp = explode(",",$constraints); //get allowed record types
-            if (count($temp)>0) {
-                $allowed_types = $temp;
+                $allowed_types = "all";
+                if ($constraints!=null && $constraints != "") {
+                    $temp = explode(",",$constraints); //get allowed record types
+                    if (count($temp)>0) {
+                        $allowed_types = $temp;
+                    }
+                }
+
+                $isvalid = ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));
+
             }
         }
-
-        return ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));
-
-    }else{
-        //record not found
-        return false;
     }
+    return $isvalid;
 }
 
 ?>

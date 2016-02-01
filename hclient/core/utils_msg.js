@@ -395,7 +395,11 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 //.appendTo( that.document.find('body') )
 
                 //create new div for dialogue with $(this).uniqueId();
-                var $dlg = $('<div>').addClass('loading').appendTo( $(opener.document).find('body') ).uniqueId();
+                var $dlg = $('<div>')
+                        .addClass('loading')
+                        //.css('background','red')
+                        .appendTo( $(opener.document).find('body') ).uniqueId();
+                        
                 if(options.class){
                     $dlg.addClass(options.class);
                 }
@@ -433,9 +437,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                     */    
                 };
 
-
                 //on load content event listener
                 $dosframe.on('load', function(){
+                    
                         $dosframe.show();
                         var content = $dosframe[0].contentWindow;
                         

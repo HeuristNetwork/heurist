@@ -313,6 +313,7 @@ function init() {
             $("#btnMatchProceed").click(function(){
                 $("#ignore_insert").val(1);
                 $("#input_step").val(2);
+                hideThisFrame();
                 document.forms[0].submit();
                 if(_dialogbox) top.HEURIST.util.closePopup(_dialogbox.id);
                 _dialogbox = null;
@@ -401,12 +402,14 @@ function doMatching(){
 
         var r = true;
         if(cb_keyfields2.length>0){
+            r = true;
+            /* 2016-02-01 hide this warning since all id fields are considered as mutlivalue
             r = confirm('You have a multi-value column ('+cb_keyfields2.attr('column')+
                 ') in your key columns. The record identifier column created by this matching process will have multiple values '+
                 'corresponding with the number of values in this column for each record.\r\n\r\n'+
                 'When used as the key field in the insert/update step, a record will be created for each value. '+
                 'When used as a data field, the data field will have repeated values in the record.');
-
+            */    
             if(r){
                 $("#mvm").val(1);
                 $("#multifield").val(cb_keyfields2.val());
@@ -447,6 +450,7 @@ function doDatabaseUpdate(cnt_insert_nonexist_id, cnt_errors){
     }
     if(r){
         $("#input_step").val(3); //start real import
+        hideThisFrame();
         document.forms[0].submit();
     }
 }
@@ -765,6 +769,7 @@ function getValues(dest){
 //
 function verifySubmit()
 {
+    var res = false;    
     var rectype = $("#sa_rectype").val();
     if(rectype>0){
 
@@ -785,7 +790,7 @@ function verifySubmit()
                     alert("If you wish to redo the matching, select column for ID field");
 
                 }else {
-                    return true;
+                    res = true;
                 }
 
             }else{
@@ -798,7 +803,7 @@ function verifySubmit()
 
             var select_fieldtype = $('select[id^="sa_dt_"][value!=""]');
             if(select_fieldtype.length>0){
-                return true;
+                res = true;
             }else{
                 alert("You need to map import data to record's fields. Please select at least one field type.");
             }
@@ -808,7 +813,11 @@ function verifySubmit()
         alert("Select record type!");
     }
 
-    return false;
+    if(res){
+        hideThisFrame();
+    }
+    
+    return res;
 }
 //
 // create SELECT element (see h4/utils)
@@ -1034,3 +1043,4 @@ function showTermListPreview(dty_ID){
         parentdiv.appendChild(el_sel);
     }
 }
+

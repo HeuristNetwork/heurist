@@ -27,6 +27,7 @@ require_once(dirname(__FILE__)."/../../admin/verification/valueVerification.php"
 $rep_processed = 0;
 $rep_added = 0;
 $rep_updated = 0;
+$rep_skipped = 0;
 
 //a couple of functions from h4/utils_db.php
 /**
@@ -164,10 +165,13 @@ function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 * @param mixed $params
 */
 function matchingSearch($mysqli, $imp_session, $params){
-
+    
     //add result of validation to session
     $imp_session['validation'] =
-    array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>999, "count_insert_rows"=>999, "count_error"=>0, "error"=>array());
+    array( "count_update"=>0, "count_insert"=>0, 
+           "count_update_rows"=>999, "count_insert_rows"=>999, 
+           "count_error"=>0,   //total number of errors (may be several per row)
+           "error"=>array());
 
     $import_table = $imp_session['import_table'];
 
@@ -519,8 +523,13 @@ function matchingAssign($mysqli, $imp_session, $params){
 */
 function matchingMultivalues($mysqli, $imp_session, $params){
 
-    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0, "count_insert_rows"=>0,
-        "count_error"=>0, "error"=>array(), "recs_insert"=>array(), "recs_update"=>array() );
+    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, 
+        "count_update_rows"=>0, 
+        "count_insert_rows"=>0,
+        "count_error"=>0,  //total number of errors (may be several per row)
+        "error"=>array(), 
+        "recs_insert"=>array(), 
+        "recs_update"=>array() );
 
     $import_table = $imp_session['import_table'];
     $multivalue_field_name = $params['multifield']; //name of multivalue field
@@ -810,6 +819,7 @@ function assignMultivalues($mysqli, $imp_session, $params){
     $rep_processed=0;
     $rep_added   = 0;
     $rep_updated = 0;
+    $rep_skipped = 0;
 
     //update values in import table - replace negative to new one
     foreach($records as $imp_id => $ids){
@@ -885,8 +895,11 @@ function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 function validateImport($mysqli, $imp_session, $params){
 
     //add result of validation to session
-    $imp_session['validation'] = array( "count_update"=>0, "count_insert"=>0, "count_update_rows"=>0,
-        "count_insert_rows"=>0, "count_error"=>0, "error"=>array() );
+    $imp_session['validation'] = array( "count_update"=>0, 
+        "count_insert"=>0,       //records to be inserted
+        "count_update_rows"=>0,   
+        "count_insert_rows"=>0,  //row that are source of insertion
+        "count_error"=>0, "error"=>array() );
 
     //get rectype to import
     $recordType = @$params['sa_rectype'];
@@ -922,6 +935,8 @@ function validateImport($mysqli, $imp_session, $params){
     if(count($sel_query)<1){
         return "mapping not defined";
     }
+//error_log(' validation upd:'.$cnt_update_rows.'  to insert '.$cnt_insert_rows);
+    
 
     $imp_session['validation']['mapped_fields'] = $mapped_fields;
 
@@ -1108,12 +1123,19 @@ function validateImport($mysqli, $imp_session, $params){
             }
 
 
-        }else if($ft_vals[$idx_reqtype] == "required"){
+        }else 
+        if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){
                 array_push($missed, $ft_vals[0]);
             }else{
+                if($ft_vals[$idx_fieldtype] == "resource" || $ft_vals[$idx_fieldtype] == "enum"){
+                    $squery = "not (".$field_name.">0)";    
+                }else{
+                    $squery = $field_name." is null or ".$field_name."=''";
+                }
+                
                 array_push($query_reqs, $field_name);
-                array_push($query_reqs_where, $field_name." is null or ".$field_name."=''");
+                array_push($query_reqs_where, $squery);
             }
         }
 
@@ -1190,7 +1212,29 @@ function validateImport($mysqli, $imp_session, $params){
             "This field is required - a value must be supplied for every record",
             "Missing Values", $field);
         if(is_array($wrong_records)) {
+
+            $cnt = count(@$imp_session['validation']['error']);//was
             $imp_session = $wrong_records;
+
+            //remove from array to be inserted - wrong records with missed required field                
+            if(count(@$imp_session['validation']['recs_insert'])>0 ){
+                $cnt2 = count(@$imp_session['validation']['error']);//now
+                if($cnt2>$cnt){
+                    $wrong_recs_ids = $imp_session['validation']['error'][$cnt]['recs_error_ids'];
+                    if(count($wrong_recs_ids)>0){
+                        $badrecs = array();
+                        foreach($imp_session['validation']['recs_insert'] as $idx=>$flds){
+                            if(in_array($flds[0], $wrong_recs_ids)){
+                                array_push($badrecs, $idx);
+                            }
+                        }
+                        $imp_session['validation']['recs_insert'] = array_diff_key($imp_session['validation']['recs_insert'],
+                                    array_flip($badrecs) );
+                        $imp_session['validation']["count_insert"] = count($imp_session['validation']['recs_insert']);                                     }
+                }
+            }
+            
+            
         }else if($wrong_records) {
             return $wrong_records;
         }
@@ -1350,25 +1394,30 @@ function validateImport($mysqli, $imp_session, $params){
 */
 function getWrongRecords($mysqli, $query, $imp_session, $message, $short_messsage, $fields_checked){
 
+//error_log('valquery: '.$query);    
+    
     $res = $mysqli->query($query." LIMIT 5000");
     if($res){
         $wrong_records = array();
+        $wrong_records_ids = array();
         while ($row = $res->fetch_row()){
             array_push($wrong_records, $row);
+            array_push($wrong_records_ids, $row[0]);
         }
         $res->close();
         $cnt_error = count($wrong_records);
         if($cnt_error>0){
             $error = array();
             $error["count_error"] = $cnt_error;
-            $error["recs_error"] = array_slice($wrong_records,0,1000);
+            $error["recs_error"] = $wrong_records; //array_slice($wrong_records,0,1000); //imp_id, fields
+            $error["recs_error_ids"] = $wrong_records_ids;
             $error["field_checked"] = $fields_checked;
             $error["err_message"] = $message;
             $error["short_message"] = $short_messsage;
 
             $imp_session['validation']['count_error'] = $imp_session['validation']['count_error']+$cnt_error;
             array_push($imp_session['validation']['error'], $error);
-
+            
             return $imp_session;
         }
 
@@ -1672,7 +1721,7 @@ function validateDateField($mysqli, $query, $imp_session, $fields_checked, $fiel
 */
 function doImport($mysqli, $imp_session, $params){
 
-    global $rep_processed,$rep_added,$rep_updated;
+    global $rep_processed,$rep_added,$rep_updated,$rep_skipped;
 
 
     //rectype to import
@@ -1680,6 +1729,8 @@ function doImport($mysqli, $imp_session, $params){
     $recordType = @$params['sa_rectype'];
     $id_field = @$params['recid_field']; //record ID field is always defined explicitly
 
+    $id_field_not_defined = ($id_field==null || $id_field=='');
+    
     if($id_field && @$imp_session['indexes_keyfields'][$id_field]){
         $is_mulivalue_index = true;
     }else{
@@ -1748,7 +1799,7 @@ function doImport($mysqli, $imp_session, $params){
         $index = array_search($id_fieldname, $imp_session['columns']); //find it among existing columns
 
         if($index!==false){ //this is existing field
-            $id_field  = "field_".$index;
+            $id_field_def  = "field_".$index;
             $imp_session['indexes'][$id_field] = $recordType;
         }else{
             $field_count = count($imp_session['columns']);
@@ -1774,6 +1825,7 @@ function doImport($mysqli, $imp_session, $params){
         $rep_processed = 0;
         $rep_added = 0;
         $rep_updated = 0;
+        $rep_skipped = 0;
         $tot_count = $imp_session['reccount'];
         $first_time = true;
         $step = ceil($tot_count/10);
@@ -1781,7 +1833,7 @@ function doImport($mysqli, $imp_session, $params){
         else if($step<1) $step=1;
 
 
-            $previos_recordId = null;
+        $previos_recordId = null;
         $recordId = null;
         $details = array();
         $details2 = array(); //to keep original for sa_mode=2 (replace all existing value)
@@ -1794,7 +1846,7 @@ function doImport($mysqli, $imp_session, $params){
         while ($row = $res->fetch_row()){
 
             //split multivalue index field
-            if($id_field){ //id field defined - detect insert or update
+            if($id_field && @$row[$id_field_idx]){ //id field defined - detect insert or update
                 $id_field_values = explode($params['csv_mvsep'],$row[$id_field_idx]);
             }else{
                 $id_field_values = array(null);
@@ -1803,7 +1855,7 @@ function doImport($mysqli, $imp_session, $params){
             //loop all id values - because on index field may have multivalue ID
             foreach($id_field_values as $idx2 => $recordId_in_import){
 
-                if(@$pairs[$recordId_in_import]){
+                if(@$pairs[$recordId_in_import]){ //already impported
                     $recordId_in_import = $pairs[$recordId_in_import];
                 }
 
@@ -1877,7 +1929,7 @@ function doImport($mysqli, $imp_session, $params){
                             $field_type = substr($field_type, 0, strlen($field_type)-5);
                             $fieldtype_type = "long";
                         }else{
-                            $ft_vals = $recStruc[$recordType]['dtFields'][$field_type]; //field type description
+                            $ft_vals = $recordTypeStructure[$field_type]; //field type description
                             $fieldtype_type = $ft_vals[$idx_fieldtype];
                         }
 
@@ -1914,7 +1966,20 @@ function doImport($mysqli, $imp_session, $params){
                                     }
                                 }
 
-                            }else if($fieldtype_type == "geo"){
+                            }
+                            else if($fieldtype_type == "resource"){
+                                
+                                if(!isValidPointer(null, $r_value, $field_type)){
+//error_log('wrong pointer '.$r_value.'  '.$field_type);                                    
+                                    $value  = null;
+                                }else{
+//error_log('VALID pointer '.$r_value.'  '.$field_type);                                    
+                                     $value = $r_value;
+                                }
+                                
+                                
+                            }
+                            else if($fieldtype_type == "geo"){
 
                                 //verify WKT
                                 $geoType = null;
@@ -1962,7 +2027,7 @@ function doImport($mysqli, $imp_session, $params){
                                 $long = null;
                             }
 
-                            if($value  &&
+                            if($value  &&   //value defined
                             ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
                                 //$params['sa_upd']==1 Add new data only if field is empty (new data ignored for non-empty fields)
 
@@ -1996,23 +2061,34 @@ function doImport($mysqli, $imp_session, $params){
                             }
 
                             if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"]
-                            && !$value && $rectypeStruc[$field_type][$idx_reqtype] != "required"){ //delete old even if new is not provided
+                            && !$value && $recordTypeStructure[$field_type][$idx_reqtype] != "required"){ //delete old even if new is not provided
 
                                 $details["t:".$field_type]["bd:delete"] = "ups!";
                             }
 
+                        }//$values
+                        
+                        //if insert and require field is not defined - skip it
+                        if( !($recordId>0) && 
+                            $recordTypeStructure[$field_type][$idx_reqtype] == "required")
+                            //!@$details["t:".$field_type][0])
+                        {
+//error_log($field_type.' = '.print_r(@$details["t:".$field_type],true));                            
+                            //$is_valid_newrecord = false;
+                            //break;
                         }
+                        
                     }
                 }//for import data
-
+                
                 //END FILL DETAILS =============================
 
                 $new_id = null;
-
+               
                 //add - update record for 2 cases: idfield not defined, idfield is multivalue
-                if(!$id_field && count($details)>0){ //id field not defined - insert for each line
+                if($id_field_not_defined && count($details)>0){ //id field not defined - insert for each line
 
-                    $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field_def); 
+                    $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field); 
 
                 }else if ($is_mulivalue_index){ //idfield is multivalue (now is is assummed that index field is always multivalue)
 
@@ -2029,6 +2105,7 @@ function doImport($mysqli, $imp_session, $params){
                         array_push($new_record_ids, $recordId);
                     }
                 }
+                
 
                 $rep_processed++;
 
@@ -2060,7 +2137,11 @@ function doImport($mysqli, $imp_session, $params){
             array_push($imp_session['uniqcnt'], $rep_added);
         }
         print '<script type="text/javascript">update_counts('.$rep_processed.','.$rep_added.','.$rep_updated.','.$tot_count.')</script>'."\n";
-
+        if($rep_skipped>0){
+            print '<p>'.$rep_skipped.' rows skipped</p>';
+        }
+        
+        
     }
 
     //save mapping into import_sesssion
@@ -2182,7 +2263,7 @@ function findOriginalRecord($recordId){
 //
 function doInsertUpdateRecord($recordId, $params, $details, $id_field){
 
-    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated;
+    global $mysqli, $imp_session, $rep_processed, $rep_added, $rep_updated, $rep_skipped;
 
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
@@ -2207,8 +2288,12 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
         null //+comment
     );
 
+//error_log('to Add '.print_r($details,true));        
+//error_log('ADD REC '.print_r($out,true));        
+    
     if (@$out['error']) {
 
+        
         //special formatting
         foreach($out["error"] as $idx=>$value){
             $value = str_replace(". You may need to make fields optional. Missing data","",$value);
@@ -2229,6 +2314,8 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
             }
             print "</div>";
         }
+        
+        $rep_skipped++;
 
     }else{
 
@@ -2856,8 +2943,8 @@ function renderRecordsError($imp_session){
         $idx_dt_type = $detDefs['fieldNamesToIndex']['dty_Type'];
 
         //find distinct terms values
+        $is_enum = false;
         if(!$is_missed){
-            $is_enum = false;
             $err_col = 0;
             $m = 1;
             foreach($mapped_fields as $field_name=>$dt_id) {
