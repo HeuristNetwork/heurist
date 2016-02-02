@@ -29,22 +29,22 @@ $.widget( "heurist.resultList", {
         selectbutton_label:'Select',
         action_select:null,  //array of actions
         action_buttons:null,
-        
-        multiselect: true,     //@todo replace to select_mode 
+
+        multiselect: true,     //@todo replace to select_mode
         isapplication: true,  //do not listent global events @todo merge with eventbased
         showcounter: true,
         showmenu: true,       //@todo - replace to action_select and action_buttons
         innerHeader: false,   // show title of current search in header
         title: null,
-        eventbased:true, 
+        eventbased:true,
         //searchsource: null,
-        
+
         empty_remark:'',
-        
+
         renderer: null,    // renderer function to draw item
         rendererHeader: null,    // renderer function to draw header for list view-mode
-        searchfull: null,  // search full list data 
-        
+        searchfull: null,  // search full list data
+
         //event
         onselect: null  //on select event for non event based
     },
@@ -74,7 +74,7 @@ $.widget( "heurist.resultList", {
         //that.hintDiv = new HintDiv('resultList_thumbnail_rollover', 160, 160, '<div id="thumbnail_rollover_img" style="width:100%;height:100%;"></div>');
 
         //this.div_actions = $('<div>').css({'width':'100%', 'height':'2.8em'}).appendTo(this.element);
-        
+
         var right_padding = top.HEURIST4.util.getScrollBarWidth()+1;
 
         /*if(hasHeader){
@@ -84,42 +84,42 @@ $.widget( "heurist.resultList", {
         header.parent().css({'background':'none','border':'none'});
         header.parent().parent().css({'background':'none','border':'none'});
         } */
-        
+
         this.div_header = null;
         if(this.options.innerHeader || this.options.select_mode=='select_multi'){
             this.div_header =  $( "<div>" ).css('height','2.6em').appendTo( this.element );
-            
-            if(this.options.innerHeader){    
+
+            if(this.options.innerHeader){
                 $('<h3>'+top.HR('Search Result')+'</h3>')
-                        .css('padding','1.4em 0 0 0.7em')
-                        .appendTo(this.div_header);
+                .css('padding','1.4em 0 0 0.7em')
+                .appendTo(this.div_header);
                 //set background to none
                 this.element.parent().css({'background':'none','border':'none'});
                 this.element.parent().parent().css({'background':'none','border':'none'});
             }
-            
+
             if(this.options.select_mode=='select_multi'){
                 this.show_selected_only = $( "<div>" )
-                    .addClass('ui-widget-content ent_select_multi')
-                    .css({'right':right_padding+2})
-                    .html(
+                .addClass('ui-widget-content ent_select_multi')
+                .css({'right':right_padding+2})
+                .html(
                     '<input id="cb_selected_only" type="checkbox" style="vertical-align:-0.3em;"/>'
                     +'<label for="cb_selected_only" style="padding:0 0.4em;">show selected only</label>'
                     +'<div id="btn_select_and_close"></div>')
-                    .appendTo( this.div_header );
-                    
-                //init checkbox and button    
+                .appendTo( this.div_header );
+
+                //init checkbox and button
                 this.btn_select_and_close = this.element.find('#btn_select_and_close')
-                    .css({'min-width':'11.9em'})
-                    .button({label: top.HR( this.options.selectbutton_label )})
-                    .click(function(e) {
-                        that._trigger( "onaction", null, 'select-and-close' );
-                    });
-                    
+                .css({'min-width':'11.9em'})
+                .button({label: top.HR( this.options.selectbutton_label )})
+                .click(function(e) {
+                    that._trigger( "onaction", null, 'select-and-close' );
+                });
+
                 this.cb_selected_only = this.element.find('#cb_selected_only')
                 this._on( this.cb_selected_only, {
-                        change: this.showRetainedSelection} );
-                    
+                    change: this.showRetainedSelection} );
+
             }
         }
 
@@ -140,71 +140,71 @@ $.widget( "heurist.resultList", {
         .appendTo( this.element ).hide();
 
         this.action_buttons_div = $( "<span>" )
-                        .css({'display':'inline-block', 'padding-left':'1em'})
-                        .appendTo( this.div_toolbar );
-        
+        .css({'display':'inline-block', 'padding-left':'1em'})
+        .appendTo( this.div_toolbar );
+
         if(top.HEURIST4.util.isArrayNotEmpty(this.options.action_buttons)){
-                
+
             var idx = 0;
             for(idx in this.options.action_buttons){
-                
+
                 var key = this.options.action_buttons[idx].key;
                 var title = this.options.action_buttons[idx].title;
-                
+
                 var btn_icon = null;
                 if(key=='add') btn_icon = 'ui-icon-plus'
                 else if(key=='edit') btn_icon = 'ui-icon-pencil'
-                else if(key=='delete') btn_icon = 'ui-icon-minus';
-                
+                    else if(key=='delete') btn_icon = 'ui-icon-minus';
+
                 btn_icon = {primary: btn_icon};
                 $('<div>',{'data-key':key}).button({icons: btn_icon, text:true, label:top.HR(title) })
-                        .appendTo(this.action_buttons_div)
-                        .click(function( event ) {
-                            var key = $(event.target).parent().attr('data-key');
-                            that._trigger( "onaction", null, key );
-                        });
+                .appendTo(this.action_buttons_div)
+                .click(function( event ) {
+                    var key = $(event.target).parent().attr('data-key');
+                    that._trigger( "onaction", null, key );
+                });
             }
         }
         if(top.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){
-            
+
             var idx = 0;
             var smenu = "";
             for(idx in this.options.action_select){
                 var key = this.options.action_select[idx].title
                 var title = this.options.action_select[idx].title;
                 smenu = smenu + '<li data-key="'+key+'"><a href="#">'+top.HR(title)+'</a></li>';
-            }               
-                
+            }
+
             this.menu_actions = $('<ul>'+smenu+'</ul>')   //<a href="#">
-                .zIndex(9999)
-                .css('position','absolute')
-                .appendTo( this.document.find('body') )
-                .menu({
-                    select: function( event, ui ) {
-                        var key =  ui.item.attr('data-key'); 
-                        that._trigger( "onaction", null, key );
-                }})
-                .hide();
-                
+            .zIndex(9999)
+            .css('position','absolute')
+            .appendTo( this.document.find('body') )
+            .menu({
+                select: function( event, ui ) {
+                    var key =  ui.item.attr('data-key');
+                    that._trigger( "onaction", null, key );
+            }})
+            .hide();
+
             this.btn_actions = $( "<button>" )
-                    .appendTo( this.action_buttons_div )
-                    .button({icons: { secondary: "ui-icon-triangle-1-s"}, text:true, label: top.HR("Actions")});
-                
+            .appendTo( this.action_buttons_div )
+            .button({icons: { secondary: "ui-icon-triangle-1-s"}, text:true, label: top.HR("Actions")});
+
             this._on( this.btn_actions, {
-                    click: function() {
-                        $('.ui-menu').not('.horizontalmenu').hide(); //hide other
-                        var menu = $( this.menu_actions )
-                        //.css('width', this.div_search_as_user.width())
-                        .show()
-                        .position({my: "right top", at: "right bottom", of: this.btn_actions });
-                        $( document ).one( "click", function() { menu.hide(); });
-                        return false;
-                    }
-                });                
+                click: function() {
+                    $('.ui-menu').not('.horizontalmenu').hide(); //hide other
+                    var menu = $( this.menu_actions )
+                    //.css('width', this.div_search_as_user.width())
+                    .show()
+                    .position({my: "right top", at: "right bottom", of: this.btn_actions });
+                    $( document ).one( "click", function() { menu.hide(); });
+                    return false;
+                }
+            });
         }
-        
+
         var rnd = Math.floor((Math.random() * 10000) + 1);
-        
+
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding-right':right_padding+'px'})
@@ -214,19 +214,19 @@ $.widget( "heurist.resultList", {
             +'<label for="cb2_'+rnd+'">'+top.HR('icons')+'</label>'
             +'<input  id="cb3_'+rnd+'" type="radio" name="list_lo" value="thumbs"/>'
             +'<label for="cb3_'+rnd+'">'+top.HR('thumbs')+'</label>'
-            )
+        )
         .buttonset()
         .appendTo( this.div_toolbar );
-        
+
         this._on( this.view_mode_selector, {
-                    click: function(event) { //it works twice - first for button, then for buttonset
-            var rbid = $(event.target).parent().attr('for');             
-            if(!top.HEURIST4.util.isnull(rbid)){
-                var view_mode = this.element.find('#'+rbid).val();
-            //var view_mode = this.element.find("input[name='list_lo']:checked").val();
-//console.log(this.element.parent().parent().attr('id')+'  '+rbid+' '+view_mode);                        
-                this._applyViewMode(view_mode);
-            }
+            click: function(event) { //it works twice - first for button, then for buttonset
+                var rbid = $(event.target).parent().attr('for');
+                if(!top.HEURIST4.util.isnull(rbid)){
+                    var view_mode = this.element.find('#'+rbid).val();
+                    //var view_mode = this.element.find("input[name='list_lo']:checked").val();
+                    //console.log(this.element.parent().parent().attr('id')+'  '+rbid+' '+view_mode);
+                    this._applyViewMode(view_mode);
+                }
         }});
 
         this.element.find('input[type=radio][value="list"]').button({icons: {primary: "ui-icon-list"}, text:false, title:top.HR('list')});
@@ -236,9 +236,9 @@ $.widget( "heurist.resultList", {
         //----------------------
         //,'min-width':'10em'
         this.span_pagination = $( "<div>")
-            //.css({'position':'absolute','right':'80px','padding':'6px 2em 0 0px'})
-            .css({'float':'right','padding':'6px 2em 0 0px'})
-            .appendTo( this.div_toolbar )
+        //.css({'position':'absolute','right':'80px','padding':'6px 2em 0 0px'})
+        .css({'float':'right','padding':'6px 2em 0 0px'})
+        .appendTo( this.div_toolbar )
         $( "<span>").appendTo( this.span_pagination );
         this.span_info = $("<span>").css({'font-style':'italic','padding':'0 0.5em'}).appendTo( this.span_pagination );
 
@@ -315,8 +315,8 @@ $.widget( "heurist.resultList", {
                         that._query_request = data;  //keep current query request
 
                     }else{ //fake restart
-                            that._clearAllRecordDivs('');
-                            //that.loadanimation(true);
+                        that._clearAllRecordDivs('');
+                        //that.loadanimation(true);
                     }
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
@@ -422,8 +422,8 @@ $.widget( "heurist.resultList", {
         this.menu_view.remove();
 
         this._removeNavButtons();
-        
-        
+
+
         this._currentSelection = null;
 
     },
@@ -472,35 +472,35 @@ $.widget( "heurist.resultList", {
     _applyViewMode: function(newmode){
 
         if(!this.div_content.hasClass(newmode)){
-        
-        //var $allrecs = this.div_content.find('.recordDiv');
-        if(newmode){
-            var oldmode = this.options.view_mode;
-            this.options.view_mode = newmode;
-            //this.option("view_mode", newmode);
-            if(oldmode)this.div_content.removeClass(oldmode);
 
-            //save viewmode is session
-            top.HAPI4.save_pref('rec_list_viewmode', newmode);
+            //var $allrecs = this.div_content.find('.recordDiv');
+            if(newmode){
+                var oldmode = this.options.view_mode;
+                this.options.view_mode = newmode;
+                //this.option("view_mode", newmode);
+                if(oldmode)this.div_content.removeClass(oldmode);
 
-        }else{
-            //load saved value
-            if(!this.options.view_mode){
-                this.options.view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
+                //save viewmode is session
+                top.HAPI4.save_pref('rec_list_viewmode', newmode);
+
+            }else{
+                //load saved value
+                if(!this.options.view_mode){
+                    this.options.view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
+                }
+                if(!this.options.view_mode){
+                    this.options.view_mode = 'list'; //default value
+                }
+
+                newmode = this.options.view_mode;
             }
-            if(!this.options.view_mode){
-                this.options.view_mode = 'list'; //default value
-            }
-
-            newmode = this.options.view_mode;
-        }
-        this.div_content.addClass(newmode);
+            this.div_content.addClass(newmode);
 
         }
         //this.btn_view.button( "option", "label", top.HR(newmode));
         //this.element.find('#list_layout_'+newmode).attr('checked','checked');
         this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked','checked');
-        
+
         //if(this.view_mode_selector.data('uiButtonset'))
         //        this.view_mode_selector.buttonset('refresh');
     },
@@ -517,13 +517,13 @@ $.widget( "heurist.resultList", {
         }
 
         if(new_title!=null){
-            
+
             var $header = $(".header"+this.element.attr('id'));
             if($header.length>0){
                 $header.html('<h3>'+new_title+'</h3>');
                 $('a[href="#'+this.element.attr('id')+'"]').html(new_title);
             }
-           
+
             if(this.div_header!=null) {
                 this.div_header.find('h3').html(new_title);
             }
@@ -531,8 +531,8 @@ $.widget( "heurist.resultList", {
                 this.triggerSelection();
             }
         }
-        
-        
+
+
         this._count_of_divs = 0;
     },
 
@@ -573,18 +573,18 @@ $.widget( "heurist.resultList", {
                 }
 
             }else if(this._count_of_divs<1) {
-                
+
                 this._renderPagesNavigator();
 
                 var empty_message = top.HR('No records match the search')+
-                    '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
-                        ?'Note: some records may only be visible to members of particular workgroups'
-                        :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
-                
+                '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
+                    ?'Note: some records may only be visible to members of particular workgroups'
+                    :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
+
                 if(this.options['empty_remark']!=''){
-                        empty_message = empty_message + this.options['empty_remark'];
-                }    
-                
+                    empty_message = empty_message + this.options['empty_remark'];
+                }
+
                 var $emptyres = this._renderMessage( empty_message );
 
                 if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
@@ -637,8 +637,14 @@ $.widget( "heurist.resultList", {
 
     },
 
+
+    /*
+    Renders a record as a line or thumbnail in the results list
+    This function is more-or-less duplicated in dh_maps.js
+    */
     _renderRecord_html: function(recordset, record){
-        
+
+
         if($.isFunction(this.options.renderer)){
             return this.options.renderer.call(this, recordset, record);
         }
@@ -673,6 +679,7 @@ $.widget( "heurist.resultList", {
         recIcon = top.HAPI4.iconBaseURL + recIcon + '.png';
 
 
+        //get thumbnail if available for this record, or generic thumbnail for record type
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
@@ -689,11 +696,12 @@ $.widget( "heurist.resultList", {
         }else{
             pwd = '';
         }
-        
+
         function __getOwnerName(ugr_id){
             return top.HAPI4.sysinfo.db_usergroups[ugr_id];
         }
 
+        // Show owner group and accessibility to others as colour code
         var html_owner = '';
         var owner_id = fld('rec_OwnerUGrpID');
         if(owner_id && owner_id!='0'){
@@ -703,29 +711,36 @@ $.widget( "heurist.resultList", {
             // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
             var clr  = (visibility=='hidden')? 'red': ((visibility=='viewable')? 'orange' : ((visibility=='pending')? 'green' : 'blue'));
             var hint = __getOwnerName(owner_id)+', '+
-             ((visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)");
+            ((visibility=='hidden')? 'private - hidden from non-owners': (visibility=='viewable')? 'visible to any logged-in user' : (visibility=='pending')? 'pending (viewable by anyone, changes pending)' : "public (viewable by anyone)");
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner" style="color:' + clr + '" title="' + hint + '">&nbsp;&nbsp;<b>' + owner_id + '</b></span>';
         }
 
+        // construct the line or block
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
         + html_thumb
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>'
-        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'           
-        //+     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
+        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'
         +     html_owner
         +     html_pwdrem
         + '</div>'
-        + '<div title="'+recTitle+'" class="recordTitle">'
+
+        // it is useful to display the record title as a rollover in case the title is too long for the current display area
+        + '<div title="'+recTitle+' &nbsp;&nbsp;&nbsp;[ dbl-click to edit ]" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
         + '</div>'
-        + '<div title="Click to edit record (opens in new tab)" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-        //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathV3+'records/edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
+
+        // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
+        // TODO: add an open-in-new-search icon to the display of a record in the results list
+
+        + '<div title="Click to edit record (opens in new tab)" '
+        + 'class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
+        + '</div>'
+
         + '<div title="Click to view record (opens in popup)" '
         + '   class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
         + '   role="button" aria-disabled="false">'
@@ -806,7 +821,7 @@ $.widget( "heurist.resultList", {
                 top.HEURIST4.msg.showMsgDlg(pwd, null, "Password reminder", $target);
                 return;
             }else{
-                
+
                 var isview = ($target.parents('.rec_view_link').length>0); //this is edit click
                 if(isview){
 
@@ -823,7 +838,7 @@ $.widget( "heurist.resultList", {
                 }
             }
         }
-        
+
         if(this.options.select_mode=='select_multi'){
             if($rdiv.hasClass('selected')){
                 $rdiv.removeClass('selected');
@@ -839,67 +854,67 @@ $.widget( "heurist.resultList", {
                 }
             }
             this._updateInfo();
-            
+
         }else{
-       
 
-        this.div_content.find('.selected_last').removeClass('selected_last');
 
-        if(this.options.multiselect && event.ctrlKey){
+            this.div_content.find('.selected_last').removeClass('selected_last');
 
-            if($rdiv.hasClass('selected')){
-                $rdiv.removeClass('selected');
-                this._lastSelectedIndex = 0;
-                //$rdiv.removeClass('ui-state-highlight');
+            if(this.options.multiselect && event.ctrlKey){
+
+                if($rdiv.hasClass('selected')){
+                    $rdiv.removeClass('selected');
+                    this._lastSelectedIndex = 0;
+                    //$rdiv.removeClass('ui-state-highlight');
+                }else{
+                    $rdiv.addClass('selected');
+                    $rdiv.addClass('selected_last');
+                    this._lastSelectedIndex = selected_rec_ID;
+                    //$rdiv.addClass('ui-state-highlight');
+                }
+                //this._lastSelectedIndex = selected_rec_ID;
+
+            }else if(this.options.multiselect && event.shiftKey){
+
+                if(Number(this._lastSelectedIndex)>0){
+                    var nowSelectedIndex = selected_rec_ID;
+
+                    this.div_content.find('.selected').removeClass('selected');
+
+                    var isstarted = false;
+
+                    this.div_content.find('.recordDiv').each(function(ids, rdiv){
+                        var rec_id = $(rdiv).attr('recid');
+
+                        if(rec_id == that._lastSelectedIndex || rec_id==nowSelectedIndex){
+                            if(isstarted){ //stop selection and exit
+                                $(rdiv).addClass('selected');
+                                return false;
+                            }
+                            isstarted = true;
+                        }
+                        if(isstarted) {
+                            $(rdiv).addClass('selected');
+                        }
+                    });
+
+                    $rdiv.addClass('selected_last');
+                    that._lastSelectedIndex = selected_rec_ID;
+
+                }else{
+                    lastSelectedIndex = selected_rec_ID;
+                }
+
+
             }else{
+                //remove selection from all recordDiv
+                this.div_content.find('.selected').removeClass('selected');
                 $rdiv.addClass('selected');
                 $rdiv.addClass('selected_last');
                 this._lastSelectedIndex = selected_rec_ID;
-                //$rdiv.addClass('ui-state-highlight');
-            }
-            //this._lastSelectedIndex = selected_rec_ID;
 
-        }else if(this.options.multiselect && event.shiftKey){
-
-            if(Number(this._lastSelectedIndex)>0){
-                var nowSelectedIndex = selected_rec_ID;
-
-                this.div_content.find('.selected').removeClass('selected');
-
-                var isstarted = false;
-
-                this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                    var rec_id = $(rdiv).attr('recid');
-
-                    if(rec_id == that._lastSelectedIndex || rec_id==nowSelectedIndex){
-                        if(isstarted){ //stop selection and exit
-                            $(rdiv).addClass('selected');
-                            return false;
-                        }
-                        isstarted = true;
-                    }
-                    if(isstarted) {
-                        $(rdiv).addClass('selected');
-                    }
-                });
-
-                $rdiv.addClass('selected_last');
-                that._lastSelectedIndex = selected_rec_ID;
-
-            }else{
-                lastSelectedIndex = selected_rec_ID;
             }
 
-
-        }else{
-            //remove selection from all recordDiv
-            this.div_content.find('.selected').removeClass('selected');
-            $rdiv.addClass('selected');
-            $rdiv.addClass('selected_last');
-            this._lastSelectedIndex = selected_rec_ID;
-
-        }
-        
         }
 
         this.triggerSelection();
@@ -921,10 +936,10 @@ $.widget( "heurist.resultList", {
     * return hRecordSet of selected records
     */
     getSelected: function( idsonly ){
-        
-        
+
+
         if(this.options.select_mode == 'select_multi'){
-            
+
             if(this._currentSelection==null){
                 return null;
             }else if(idsonly){
@@ -933,7 +948,7 @@ $.widget( "heurist.resultList", {
                 return this._currentSelection;
             }
 
-            
+
         }else{
 
             var selected = []
@@ -949,7 +964,7 @@ $.widget( "heurist.resultList", {
                     selected.push(""+this._lastSelectedIndex);
                 }
             }
-            
+
             if(idsonly){
                 return selected;
             }else if(this._currentRecordset){
@@ -957,9 +972,9 @@ $.widget( "heurist.resultList", {
             }else{
                 return null;
             }
-        
+
         }
-        
+
     },
 
     /**
@@ -1027,31 +1042,31 @@ $.widget( "heurist.resultList", {
     , _renderProgress: function(){
 
     },
-    
+
     _updateInfo: function(){
-        
+
         var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
-        
+
         var sinfo = "Records: "+total_inquery;
-        
+
         if(this.options.select_mode=='select_multi' && this._currentSelection!=null && this._currentSelection.length()>0){
             sinfo = sinfo + " | Selected: "+this._currentSelection.length()+' <a href="#">clear</a>';
         }
 
         this.span_info.html(sinfo);
-        
+
         if(this.options.select_mode=='select_multi'){
             var that = this;
-            this.span_info.find('a').click(function(){ 
-                    that._currentSelection=null; 
-                    that._updateInfo(); 
-                    
-                    that.div_content.find('.recordDiv').removeClass('selected');                  
-                    that.div_content.find('.recordDiv .recordSelector>input').prop('checked', '');
-                    
-                    that.triggerSelection();
-                    
-                    return false; });
+            this.span_info.find('a').click(function(){
+                that._currentSelection=null;
+                that._updateInfo();
+
+                that.div_content.find('.recordDiv').removeClass('selected');
+                that.div_content.find('.recordDiv .recordSelector>input').prop('checked', '');
+
+                that.triggerSelection();
+
+                return false; });
         }
     },
 
@@ -1085,7 +1100,7 @@ $.widget( "heurist.resultList", {
 
         var span_pages = $(this.span_pagination.children()[0]);//first();
         span_pages.empty();
-        
+
         this._updateInfo();
 
         if (pageCount < 2) {
@@ -1118,7 +1133,7 @@ $.widget( "heurist.resultList", {
         var ismenu = (that.element.width()<620);
 
         var smenu = '';
-        
+
         if (start != 1) {    //force first page
             if(ismenu){
                 smenu = smenu + '<li id="page0"><a href="#">1</a></li>'
@@ -1229,25 +1244,25 @@ $.widget( "heurist.resultList", {
     , _renderPage: function(pageno, recordset, is_retained_selection){
 
         var idx, len, pagesize;
-        
+
         if(is_retained_selection){ //draw retained selection
-            
+
             recordset = this._currentSelection;
             this._removeNavButtons();
             idx = 0;
             len = recordset.length();
             pagesize = len;
-            
+
         }else{
-            
+
             if(this.cb_selected_only) this.cb_selected_only.prop('checked', '');
-        
-            if(!recordset){ 
+
+            if(!recordset){
                 recordset = this._currentRecordset;
             }
 
             if(!recordset) return;
-               
+
             this._renderPagesNavigator(); //redraw paginator
             if(pageno<0){
                 pageno = 0;
@@ -1255,12 +1270,12 @@ $.widget( "heurist.resultList", {
                 pageno= this.max_page - 1;
             }
             this.current_page = pageno;
-            
+
             idx = pageno*this.pagesize;
             len = Math.min(recordset.length(), idx+this.pagesize)
             pagesize = this.pagesize;
-        }            
-        
+        }
+
         this._clearAllRecordDivs(null);
 
         var recs = recordset.getRecords();
@@ -1269,7 +1284,7 @@ $.widget( "heurist.resultList", {
         var rec_onpage = [];
 
         var html = '', recID;
-        
+
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             recID = rec_order[idx];
             if(recID){
@@ -1290,18 +1305,18 @@ $.widget( "heurist.resultList", {
             }
         }
         this.div_content[0].innerHTML += html;
-        
+
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
         }else if(this._currentSelection!=null) { //hightlight retained selected records
-        
+
             for(idx=0; idx<rec_onpage.length; idx++){
                 recID = rec_onpage[idx];
                 if(this._currentSelection.getById(recID)!=null){
                     var $rdiv = this.div_content.find('.recordDiv[recid="'+recID+'"]');
-                    $rdiv.find('.recordSelector>input').prop('checked','checked');        
+                    $rdiv.find('.recordSelector>input').prop('checked','checked');
                     $rdiv.addClass('selected');
-                }            
+                }
             }
         }
 
@@ -1348,13 +1363,13 @@ $.widget( "heurist.resultList", {
         //load full record info - record header111
         if(rec_toload.length>0){
             var that = this;
-            
+
             that.loadanimation(true);
-            
+
             if($.isFunction(this.options.searchfull)){
-                
-                this.options.searchfull.call(this, rec_toload, this.current_page, 
-                    function(response){                
+
+                this.options.searchfull.call(this, rec_toload, this.current_page,
+                    function(response){
                         that.loadanimation(false);
                         if(response.status == top.HAPI4.ResponseStatus.OK){
                             if(response.data.queryid==that.current_page) {
@@ -1385,16 +1400,16 @@ $.widget( "heurist.resultList", {
 
                             var resp = new hRecordSet( response.data );
                             that._currentRecordset.fillHeader( resp );
-                            
+
                             //remove records that we can't recieve data
                             for(i in rec_toload){
-                               var recID = rec_toload[i];
-                               if(resp.getById(recID)==null){
-                                   that._currentRecordset.removeRecord(recID);
-                                   //that._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Can not get data from server'});
-                               } 
+                                var recID = rec_toload[i];
+                                if(resp.getById(recID)==null){
+                                    that._currentRecordset.removeRecord(recID);
+                                    //that._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Can not get data from server'});
+                                }
                             }
-                            
+
                             that._renderPage( that.current_page );
                         }
 
@@ -1403,26 +1418,26 @@ $.widget( "heurist.resultList", {
                     }
 
                 });
-                
+
             }
 
 
         }
 
     },
-    
+
     showRetainedSelection: function(){
-        
+
         //if(top.HEURIST4.util.isnull(need_show)){
         var need_show = this.cb_selected_only.is(':checked');
-        
-        
+
+
         if(need_show && this._currentSelection!=null && this._currentSelection.length()>0){
             this._renderPage(0, null, true);
         }else{
             this._renderPage(this.current_page);
         }
     }
-    
+
 
 });

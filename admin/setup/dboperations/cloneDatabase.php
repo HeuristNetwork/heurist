@@ -142,7 +142,7 @@ if(mysql_error()) {
                             (all databases created by this installation of the software will have the same prefix).</p>
                         <h3>Enter a name for the cloned database:</h3>
                         <div style="margin-left: 40px;">
-                            <input type='text' name='targetdbname' onkeypress="{onKeyPress(event)}"/>
+                            <input type='text' name='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
                             <input type='button' value='Clone "<?=HEURIST_DBNAME?>"'
                                 onclick='onSubmit(event)'/>
                         </div>

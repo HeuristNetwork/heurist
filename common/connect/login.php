@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -366,11 +366,13 @@ if(!$needRegistration){
                             <tr><td>
                                     <p>You are currently logged-in as <b><?= get_user_name() ?> (<?= get_user_username() ?>)</b></p>
 
-                                    <p><b><a href="<?=HEURIST_BASE_URL?>">Heurist home</a></b></p>
+                                    <p><b><a href="<?=HEURIST_BASE_URL?>">Browse databases on this server</a></b></p>
 
                                     <?php
+                                    /* TODO: This gives a URL of the form http://.../h4/common/connect/'http://..../h4/<path><filename.php>?db=<databasename>
                                     if ($last_uri)
-                                        echo "<p><b><a href=\"{$last_uri}\">Return to application</a></b></p>\n\n";
+                                        echo "<p><b><a href=\"{$last_uri}\">Return to database</a></b></p>\n\n";
+                                    */
                                     ?>
 
                                     <p><b><a href='login.php?db=<?=HEURIST_DBNAME?>&logout=1'>Log out</a></b></p>

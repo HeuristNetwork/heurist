@@ -24,7 +24,7 @@
     *
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Stephen White   
+    * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @copyright   (C) 2005-2016 University of Sydney
     * @link        http://HeuristNetwork.org
@@ -112,7 +112,7 @@
         );
 
         if (! $res) {
-            $uploadFileError = "Error inserting file upload info into database";
+            $uploadFileError = "Error inserting file upload information into database. The most likely cause is that the mime type for this file is not recognised. Please add mime type from Database > Administration > Structure > Define mime types. Otherwise pelase contact your system administrator or the Heurist developers.";
             return $uploadFileError;
         }
 
