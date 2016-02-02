@@ -349,6 +349,9 @@ class System {
         return true;
     }
 
+    //
+    //
+    //
     private function getInstallPath(){
 
         $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
@@ -683,9 +686,7 @@ class System {
         }
         return $islogged;
     }
-
-
-
+    
     /**
     * Find user by name and password and keeps user info in current_User and in session
     *
@@ -790,6 +791,21 @@ class System {
         unset($_SESSION[$this->dbname_full]['user_realname']);
         */
         return true;
+    }
+
+    //
+    //
+    //
+    public function user_GetPreference($property){
+        
+        $res = @$_SESSION[$this->dbname_full]["ugr_Preferences"][$property];
+        
+        if('search_detail_limit'==$property){
+            if(!$res && $res<500 ) {$res = 500;}
+            else if($res>30000 ) {$res = 3000;}  
+        } 
+
+        return $res;
     }
 
 

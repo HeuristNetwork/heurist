@@ -492,7 +492,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 //if limit is not defined - get it from preferences
                 if(top.HEURIST4.util.isnull(request.limit)){
-                    request.limit = top.HAPI4.get_prefs('search_limit');
+                    request.limit = top.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
                 }
 
                 // start search
@@ -758,13 +758,18 @@ function hAPI(_db, _oninit) { //, _currentUser
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
                 //preferences by default
-                that.currentUser['ugr_Preferences'] = {layout_language:'en', layout_theme:'heurist', 'search_limit':1000, 'help_on':'0'};
+                that.currentUser['ugr_Preferences'] = {layout_language:'en', 
+                                         layout_theme: 'heurist', 
+                                'search_detail_limit': 2000, 'help_on':'0'};
             }
             if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
             }else{
                 var res = that.currentUser['ugr_Preferences'][name]
-                if(!res && 'search_limit'==name) res = 1000;
+                if('search_detail_limit'==name){
+                    if(!res && res<500 ) res = 500
+                    else if(res>30000 ) res = 3000;  
+                } 
                 return res;
             }
         },

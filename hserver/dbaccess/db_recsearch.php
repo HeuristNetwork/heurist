@@ -497,7 +497,8 @@ if(@$params['debug']) echo $query."<br>";
 
             $params['parentquery'] = $query_top;  //parentquery parameter is used in  get_sql_query_clauses
 
-        }else if( @$params['rules'] ){ //special case - server side operation
+        }
+        else if( @$params['rules'] ){ //special case - server side operation
 
             // rules - JSON array the same as stored in saved searches table
 
@@ -695,7 +696,7 @@ if(@$params['debug']) echo $query."<br>";
                 $chunk_size = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{
-                $chunk_size =  3001;
+                $chunk_size = $system->user_GetPreference('search_detail_limit');
             }
 
 
@@ -828,15 +829,19 @@ if(@$params['debug']) echo $query."<br>";
                                     }
 
                                     if($row[2]){
-                                        $val = $row[1].' '.$row[2];     //dtl_Geo
+                                        $val = $row[1].' '.$row[2];     //dtl_Geo @todo converto to JSON
                                     }else if($row[3]){
-                                        $val = array($row[4], $row[5]); //obfuscted value for fileid
+                                        $val = array($row[4], $row[5]); //obfuscated value for fileid
                                     }else {
                                         $val = $row[1];
                                     }
                                     array_push($records[$recID]['d'][$dtyID], $val);
                                 }
                                 $res_det->close();
+                                
+                                if($params['detail']=='timemap'){
+                                    
+                                }
 
                             }
                         }//$need_details

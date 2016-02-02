@@ -139,6 +139,10 @@ if(!$system->init(@$_REQUEST['db']) ){
                     return false;
                 }
             }
+            
+            $(document).ready(function() {
+                $("#expand").click();
+            });
         </script>
     </head>
 

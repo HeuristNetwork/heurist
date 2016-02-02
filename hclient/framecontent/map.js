@@ -624,7 +624,8 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
         $.each(all_mapdata, function(dataset_id, mapdata){
 
-            if(mapdata.visible && mapdata.timeline.items.length>0){
+            var cnt = mapdata.timeline.items.length;
+            if(mapdata.visible && cnt>0){
 
                 timeline_data = timeline_data.concat( mapdata.timeline.items );
                 timeline_groups.push({ id:dataset_id, content: mapdata.title});
@@ -640,26 +641,27 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         var is_stack = true;//(timeline_groups.length<2 && timeline_data.length<250);
 
  console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+        top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
+        var timeline_ele = document.getElementById(timelinediv_id)
 
         if(vis_timeline==null){
-            var ele = document.getElementById(timelinediv_id);
+            timeline_ele = document.getElementById(timelinediv_id);
             // Configuration for the Timeline
             var options = {dataAttributes: ['id'],
                            orientation:'both', //scale on top and bottom
                            selectable:true, multiselect:true,
                            zoomMax:31536000000*500000,
-                           stack:is_stack,
+                           stack:is_stack,  //how to display items: staked or in line 
                            margin:1,
-                           minHeight: $(ele).height(),
+                           minHeight: $(timeline_ele).height(),
                            order: function(a, b){
                                return a.start<b.start?-1:1;
                            }
                            };
                         //31536000000 - year
             // Create a Timeline
-            vis_timeline = new vis.Timeline(ele, null, options);
+            vis_timeline = new vis.Timeline(timeline_ele, null, options);
             //on select listener
             vis_timeline.on('select', function(params){
                 selection = params.items;
@@ -693,21 +695,26 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         }
 
         vis_timeline_range = null;
+        
+        var timeline_content = $(timeline_ele).find('.vis-itemset');
+        timeline_content.hide();
+        
         vis_timeline.setGroups(groups);
         vis_timeline.setItems(items);
+//console.log('TIMELINE DATASET. set data: '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+//        top.HEURIST4._time_debug = new Date().getTime() / 1000;
         _timelineZoomToAll();
-        //vis_timeline.fit(); //short way
+// console.log('TIMELINE DATASET. zoom to all: '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+//        top.HEURIST4._time_debug = new Date().getTime() / 1000;
+//        //vis_timeline.fit(); //short way
 
         if(!is_stack){
-            $(".vis-item-content").find("span").hide();
+            $(timeline_ele).find(".vis-item-content").find("span").hide();
             //$.find('#vis_timeline_toolbar li').removeClass('ui-icon-check');
             //$.find('#vis_timeline_toolbar li #tlm4').addClass('ui-icon-check');
         }
+        timeline_content.show();
 
-        //$(".vis-item-content").css('margin-left',0);
-
-        //if(_mapdata.timeenabled>0)
-        //    vis_timeline.setVisibleChartRange(_mapdata.timeline.start, _mapdata.timeline.end);
         }
     }
 

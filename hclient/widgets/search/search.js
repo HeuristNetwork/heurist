@@ -149,7 +149,7 @@ $.widget( "heurist.search", {
         .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
 
-        var link = $('<button>')
+        /*var link = $('<button>')
         .button({icons: {
             primary: 'ui-icon-circle-b-info'
             }, text:false,
@@ -160,8 +160,17 @@ $.widget( "heurist.search", {
         .appendTo(this.div_search_header);
         this._on( link, {  click: function(){
             window.open('context_help/advanced_search.html','_blank');
-        } });
+        } });*/
 
+        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
+            .css({'padding-right':'1.5em','display':'inline-block'})
+            .addClass('ui-icon ui-icon-circle-info')
+            .appendTo(this.div_search_header);
+            this._on( link, {  click: function(){
+                window.open('context_help/advanced_search.html','_blank');
+            } });
+        
+        
 
         // Search field
         this.div_search_input = $('<div>')
@@ -353,6 +362,7 @@ $.widget( "heurist.search", {
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
+        .css({ 'width': '56px', 'text-align': 'center'})
         .insertBefore( this.div_search_stop );
 
         // Quick search builder dropdown form
@@ -363,7 +373,7 @@ $.widget( "heurist.search", {
             label:'Dropdown form for building a simple filter expression',
             title:top.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
         .addClass('ui-heurist-btn-header1')
-        .css({'padding-right':'1.0em','padding-left':'1.0em','width':'40px'})
+        .css({'width':'40px'})  //'padding':'0 1.0em',
         .appendTo(this.div_buttons);
 
         this._on( link, {  click: this.showSearchAssistant });

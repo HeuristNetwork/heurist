@@ -116,9 +116,7 @@ function hRecordSet(initdata) {
         var mapenabled = 0,
             timeenabled = 0;
             
-        var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');    
-        if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
-        MAXITEMS = 2000;
+        var MAXITEMS = top.HAPI4.get_prefs('search_detail_limit');    
             
         dataset_name = dataset_name || "main";
         iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';
@@ -257,6 +255,8 @@ function hRecordSet(initdata) {
                 timeline:{ items:titems } //, start: min_date  ,end: max_date  }
             };
 
+console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length+' of '+timeenabled);            
+            
         return dataset;
     }//end _toTimemap
 

@@ -1,4 +1,3 @@
-
 /**
 * filename: explanation
 *
@@ -561,9 +560,12 @@ function _addQueryLayer(source, index) {
                 return;
             }
         }
+        
+        var MAXITEMS = top.HAPI4.get_prefs('search_detail_limit');
+        
         //request['getrelrecs'] = 1;  //return all related records including relationship records
         request['detail'] = 'timemap';
-        request['limit'] = 2000;
+        request['limit'] = MAXITEMS;  // in any case it is limited on server side for detail: 'timemap'
         
         if(loadingbar==null){
             var image = top.HAPI4.basePathV4+'hclient/assets/loading_bar.gif';
@@ -577,7 +579,6 @@ function _addQueryLayer(source, index) {
             loadingbar.setPosition(map.getCenter());
         } 
         
-
         // Retrieve records for this request
         top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
 
@@ -631,6 +632,8 @@ function _addQueryLayer(source, index) {
 */
 function _addRecordsetLayer(source, index) {
 
+    var MAXITEMS = top.HAPI4.get_prefs('search_detail_limit');
+    
     // Show info on map
     var mapdata = source.mapdata;
     if( top.HEURIST4.util.isnull(mapdata) ) {
@@ -642,9 +645,9 @@ function _addRecordsetLayer(source, index) {
 
                     var request = {w: 'all', 
                                    detail: 'timemap', 
-                                   limit: 3000};
+                                   limit: MAXITEMS};  // in any case it is limited on server side for detail: 'timemap'
                     
-                    if(recset.length()<2001){
+                    if(recset.length()<2001){ //limit query by id
                         source.query = { q:'ids:'+recset.getIds().join(',') };
                     }else{
                         var curr_request = recset.getRequest();
@@ -677,7 +680,7 @@ function _addRecordsetLayer(source, index) {
                                                    
                     return;               
                 }
-                
+               
                 mapdata = recset.toTimemap(source.id, null, source.color);
                 
                 mapdata.id = source.id;
@@ -687,7 +690,7 @@ function _addRecordsetLayer(source, index) {
             
 
             //mapping.load(mapdata);
-            if (mapping.addDataset(mapdata)){
+            if (mapping.addDataset(mapdata)){ //see map.js
 
                var overlay = {
                     id: mapdata.id,
@@ -718,9 +721,6 @@ function _addRecordsetLayer(source, index) {
                     //index = 'A'+Math.floor((Math.random() * 10000) + 1);
                     //overlays_not_in_doc[index] = overlay;
 
-                    var MAXITEMS = top.HAPI4.get_prefs('maxRecordsShowOnMap');
-                    if(isNaN(MAXITEMS) || MAXITEMS<500) MAXITEMS=500;
-                    MAXITEMS = 2000;
                     var sMsg = '';
                     if(mapdata.mapenabled > MAXITEMS){
                            sMsg = mapdata.mapenabled +' records to display on this map';

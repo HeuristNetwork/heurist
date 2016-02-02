@@ -70,7 +70,7 @@ define ('TESTMODE', false);           // Set to true to process the file without
 
 // Database configuration
 function db_script($db_name, $filename, $verbose = true){
-
+    
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
 $db_password = ADMIN_DBUSERPSWD;
@@ -132,7 +132,7 @@ $upload_dir = dirname(__FILE__);
 // If not familiar with PHP please don't change anything below this line
 // *******************************************************************************************
 
-if ($ajax)
+if (!$verbose || $ajax)
   ob_start();
 
 @ini_set('auto_detect_line_endings', true);
@@ -224,6 +224,8 @@ if (!$error && isset($_REQUEST["start"]))
   else
     $curfilename="";
 
+error_log($curfilename);    
+    
 // Recognize GZip filename
   $gzipmode=false;
 
@@ -253,7 +255,6 @@ if (!$error && isset($_REQUEST["start"]))
     $error=true;
   }
 }
-
 
 // *******************************************************************************************
 // START IMPORT SESSION HERE
@@ -562,27 +563,7 @@ skin_open();
 
     if ($linenumber<$_REQUEST["start"]+$linespersession)
     { echo ("<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n");
-      echo ("<p class=\"successcentr\">IMPORTANT: REMOVE YOUR DUMP FILE and BIGDUMP SCRIPT FROM SERVER NOW!</p>\n");
-      echo ("<p class=\"centr\">Thank you for using this tool! Please rate <a href=\"http://www.hotscripts.com/listing/bigdump/?RID=403\" target=\"_blank\">Bigdump at Hotscripts.com</a></p>\n");
-      echo ("<p class=\"centr\">You can send me some bucks or euros as appreciation via PayPal. Thank you!</p>\n");
-?>
 
-<!-- Start Paypal donation code -->
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-<input type="hidden" name="cmd" value="_xclick" />
-<input type="hidden" name="business" value="alexey@ozerov.de" />
-<input type="hidden" name="item_name" value="BigDump Donation" />
-<input type="hidden" name="no_shipping" value="1" />
-<input type="hidden" name="no_note" value="0" />
-<input type="hidden" name="tax" value="0" />
-<input type="hidden" name="bn" value="PP-DonationsBF" />
-<input type="hidden" name="lc" value="US" />
-<input type="image" src="https://www.paypal.com/en_US/i/btn/x-click-but04.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!" />
-<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
-</form>
-<!-- End Paypal donation code -->
-
-<?php
       do_action('script_finished');
       $error=true; // This is a semi-error telling the script is finished
     }
@@ -618,12 +599,13 @@ else if ($file && $gzipmode) gzclose($file);
 
 // If error or finished put out the whole output from above and stop
 
-if ($error)
+if ($error && $verbose)
 {
   $out1 = ob_get_contents();
   ob_end_clean();
   echo $out1;
-  //die; //??????
+}else{
+   ob_clean();
 }
 
 

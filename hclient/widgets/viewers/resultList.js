@@ -242,6 +242,8 @@ $.widget( "heurist.resultList", {
         $( "<span>").appendTo( this.span_pagination );
         this.span_info = $("<span>").css({'font-style':'italic','padding':'0 0.5em'}).appendTo( this.span_pagination );
 
+        this._showHideOnWidth();
+        
         //-----------------------
 
         if(this.options.showmenu){
@@ -267,12 +269,8 @@ $.widget( "heurist.resultList", {
 
                 if(e.type == top.HAPI4.Event.ON_LAYOUT_RESIZE){
 
-                    var w = that.element.width();
-                    if ( w < 390 || (w < 430 && that.max_page>1) ) {
-                        that.span_info.hide();
-                    }else{
-                        that.span_info.show();
-                    }
+                    that._showHideOnWidth();
+                 
 
                 }else if(e.type == top.HAPI4.Event.LOGIN){
 
@@ -442,6 +440,19 @@ $.widget( "heurist.resultList", {
         }
     },
 
+    _showHideOnWidth: function(){                    
+            var w = this.element.width();
+            if ( w < 390 || (w < 440 && this.max_page>1) ) {
+                this.span_info.hide();
+            }else{
+                this.span_info.show();
+            }
+            if ( w < 370 ) {
+                this.span_pagination.hide();
+            }else{
+                this.span_pagination.show();
+            }
+    },
 
     //
     // not used
@@ -1212,6 +1223,7 @@ $.widget( "heurist.resultList", {
 
         }
 
+        this._showHideOnWidth();
     }
 
     , _renderPage: function(pageno, recordset, is_retained_selection){
