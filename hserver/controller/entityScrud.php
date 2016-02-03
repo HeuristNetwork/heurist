@@ -25,6 +25,10 @@
 
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/dbSysUGrps.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypes.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypeGroups.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypes.php');
+    require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypeGroups.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     $response = array();

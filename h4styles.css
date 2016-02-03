@@ -185,7 +185,7 @@ fieldset > div > input[type=radio]{
     vertical-align:-0.3em;
     margin: 0.5em 0.2em 0.2em 0.2em;
 }
-fieldset > div > input[type=checkbox]{
+fieldset > div > input[type=checkbox], .ent_search_cb input[type=checkbox], .ent_search_cb input[type=radio]{
     vertical-align:-0.3em;
 }
 fieldset > div > .header,
@@ -541,6 +541,7 @@ div .selected_last{
     /*border-top: 1px solid #FFFFFF;*/
     display: block; /* !important; */
     /*height: 2.6em;*/
+    
     left: 0;
     margin: 0;
     overflow: hidden;
@@ -560,28 +561,42 @@ div .selected_last{
 }
 .list .recordDiv .recordTitle {
     left: 74px;
-    right: 32px;
+    right: 3px;
     top: 3px;
 
     vertical-align: middle;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.icons .recordDiv .recordTitle .inlist, .thumbs .recordDiv .recordTitle .inlist{
+    display:none;
+}
 .list .recordDiv .recordTitle .item {
     width:150px;
     display:inline-block;
+    vertical-align:middle;
 
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.list .recordDiv .recordTitle .item.inlist {
+    display:inline-block;
+
+    white-space: normal;
+    min-height:2.5em;
+    max-height:2.5em;
+}
+
 
 .list .recordDiv .recordIcons {
+    padding-left:4px;
     min-width: 20px;
     display: inline-block;
 }
 .list .recordDiv .recordSelector {
     display: inline-block;
+    padding-top:5px;
 }
 
 

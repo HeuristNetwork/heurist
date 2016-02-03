@@ -545,6 +545,11 @@ top.HEURIST4.util = {
     
     isRecordSet: function(recordset){
         return !top.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
+    },
+    
+    random: function(){
+        //Math.round(new Date().getTime() + (Math.random() * 100));
+        return Math.floor((Math.random() * 10000) + 1);
     }
 
 }//end util

@@ -1,5 +1,5 @@
 <div style="display: table-row;">
-    <div class="div-table-cell header">
+    <div class="div-table-cell" style="padding-right:0.5em;text-align:right">
         <label>Find by name</label>
     </div>
     <div class="div-table-cell">
@@ -8,6 +8,8 @@
         <div id="btn_search_start"></div>        
     </div>
     <div class="div-table-cell">
+        <div class="header4"><label>in</label></div>
+        <select id="sel_group" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
         <div style="float:right">
             <div id="btn_help_hints"></div>
             <div id="btn_help_content"></div>
@@ -16,22 +18,19 @@
     <div class="div-table-cell" id="div-table-right-padding">
     </div>
 </div>
-<div style="display: table-row;line-height:3em;">
-    <div class="div-table-cell header">
-        <label>Show:</label>
-    </div>
-    <div class="div-table-cell ent_search_cb">
-        <label><input value="anygroup" type="radio" checked="checked"/>All Groups</label>
-        <label><input value="mygroups" type="radio"/>My Groups</label>
-        <label><input value="admin" type="radio"/>Admin only</label>
-        <label><input value="member" type="radio"/>Member only</label>
-    </div>
-</div>
-
-<!-- help tips row -->
-<div style="display: table-row;">  
+<div style="display: table-row;">
     <div class="div-table-cell"></div>
     <div class="div-table-cell heurist-helper1" style="max-width:290px;vertical-align:top;">
         Select below or search on title here. [enter] or <span class="ui-icon ui-icon-search" style="display:inline;font-size:0.9em">&nbsp;&nbsp;&nbsp;</span> to search
+    </div>
+    <div class="div-table-cell">
+        <div class="header4" id="sel_role_lbl"><label>Status</label></div>
+        <select id="sel_role" class="text ui-widget-content ui-corner-all" style="max-width:150px">
+            <option value="">all</option>
+            <option value="reserved">reserved</option>
+            <option value="approved">approved</option>
+            <option value="pending">pending</option>
+            <option value="open">open</option>
+        </select>
     </div>
 </div>

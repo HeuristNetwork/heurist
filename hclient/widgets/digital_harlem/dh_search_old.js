@@ -678,7 +678,7 @@ $.widget( "heurist.dh_search", {
             rules = [{"query":"t:12 relatedfrom:14"}];
         }
 
-        var params = {id:"dhs"+Math.floor((Math.random() * 10000) + 1), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
+        var params = {id:"dhs"+top.HEURIST4.util.random(), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
 
         var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha51');
         if(app && app.widget){

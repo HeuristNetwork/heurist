@@ -718,7 +718,7 @@ function _addRecordsetLayer(source, index) {
                     _addLegendEntryForLayer(index, source.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png');
                     
                }else{ // this layer is explicitely (by user) added
-                    //index = 'A'+Math.floor((Math.random() * 10000) + 1);
+                    //index = 'A'+top.HEURIST4.util.random();
                     //overlays_not_in_doc[index] = overlay;
 
                     var sMsg = '';
@@ -832,7 +832,7 @@ function _editLayerProperties( dataset_id, callback ){
                                 w: 'all'};
 
                         //add new layer with given name
-                        var source = {id:"dhs"+Math.floor((Math.random() * 10000) + 1),
+                        var source = {id:"dhs"+top.HEURIST4.util.random(),
                              title: new_title,
                              query: request,
                              color: new_color,
@@ -844,7 +844,7 @@ function _editLayerProperties( dataset_id, callback ){
                         */
                        
                        //load new recordset 
-                        var source = {id:"dhs"+Math.floor((Math.random() * 10000) + 1),
+                        var source = {id:"dhs"+top.HEURIST4.util.random(),
                              title: new_title,
                              recordset:  top.HAPI4.currentRecordset,
                              color: new_color
@@ -853,7 +853,7 @@ function _editLayerProperties( dataset_id, callback ){
                 
                 }else if(mapdata.id=='main'){ 
                         
-                        mapdata.id = "dhs"+Math.floor((Math.random() * 10000) + 1); //random id 
+                        mapdata.id = "dhs"+top.HEURIST4.util.random();
                         mapdata.title = new_title;
                         //change color scheme if required
                         mapping.changeDatasetColor( 'main', new_color, false );

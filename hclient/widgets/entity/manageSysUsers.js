@@ -18,168 +18,40 @@
 */
 
 
-$.widget( "heurist.manageSysUsers", {
+$.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
-    // default options
-    options: {
-        // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
-        //        highlight in list works as usual and selected records are used in actions
-        // select_single - in list only one item can be highlighted, in dialog mode it will be closed
-        // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
-        select_mode: 'manager', //'select_single','select_multi','manager'
-
-        selectbutton_label: 'Select Marked Users',
-        //initial filter by title and subset of groups to search
-        filter_title: null,
-        filter_group_selected:null,
-        filter_groups: null,
-
-        page_size: 50,
-
-        //if true - default set of actions, if array - specified set of actions, false or empty array - hide selector or buttons
-        action_select: false, //may be true,false or array [add,edit,delete,merge,select all|none,import,] 
-        action_buttons: true, //may be true,false or array
-        
-        isdialog: false,  //show in dialog
-        dialogcleanup: true, // remove dialog div on close
-        
-        // callbacks
-        onselect:null  //selection complete callback
-    },
-    
-    _default_sel_actions:[{key:'edit', title:'Edit'},
-                      {key:'delete', title:'Delete'},
-                      {key:'merge', title:'Merge'},
-                      {key:'import', title:'Import'}],
-    _default_btn_actions:[{key:'add', title:'Create New User'}],
-
-    _selection:null,
-    
     // the widget's constructor
     _create: function() {
-        // prevent double click to select text
-        this.element.disableSelection();
+
+        this._super();
+
+        this._entityName = 'User',
+        this._entityNames = 'Users',
+        this._empty_remark = 'Please use the search field above to locate relevant user (partial string match on name)',
+        
+        this._default_sel_actions = [{key:'edit', title:'Edit'},
+                          {key:'delete', title:'Delete'},
+                          {key:'merge', title:'Merge'},
+                          {key:'import', title:'Import'}];
+                          
+        this._default_btn_actions = [{key:'add', title:'Add New User'}];
+        
     }, //end _create
     
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
         
-        if(this.options.isdialog){
-            this._initDialog();
-        }
-        
-        this.wrapper = $('<div>')
-            .addClass('ent_wrapper ui-heurist-bg-light')
-            .css('min-width','700px')
-            .appendTo(this.element);
-            
-        
-        var that = this;
-        
-        //init record list
-        this.recordList = $('<div>')
-            .addClass('ent_content_full')
-            //.css({position: 'absolute', top:'6em', bottom:'1px', left:0, right:'1px'})
-            .appendTo(this.wrapper)
-            .resultList({
-               eventbased: false, 
-               isapplication: false, //do not listent global events @todo merge with eventbased
-               showmenu: false,      //@todo - replace to action_select and action_buttons
-               multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
-
-               select_mode: this.options.select_mode,
-               selectbutton_label: this.options.selectbutton_label,
-               
-               action_select: this.options.action_select==true
-                                        ?this._default_sel_actions
-                                        :this.options.action_select, 
-               action_buttons: this.options.action_buttons==true
-                                        ?this._default_btn_actions
-                                        :this.options.action_buttons,
-               
-               empty_remark: 
-                    (this.options.select_mode!='manager')
-                    ?'<div style="padding:1em 0 1em 0">Please use the search field above to locate relevant user (partial string match on name)</div>'
-                    :'',
-               searchfull: function(arr_ids, pageno, callback){
-                   that._searchFullData(arr_ids, pageno, callback);
-               },//this._searchFullData,    //search function 
-               renderer:   this._rendererListItem   //custom render for particular entity type
-                        });     
-
-        this._on( this.recordList, {
-                "resultlistonselect": function(event, selected_recs){
-                            this.selection(selected_recs);
-                        }
-                });
-        this._on( this.recordList, {
-                "resultlistonaction": function(event, action){
-                        if(action=='select-and-close'){
-                             this._selectAndClose();
-                        } else {
-                            var recID = 0;
-                            if(action && action.action){
-                               recID =  action.recID;
-                               action = action.action;
-                            }
-                            
-                             var s = 'User clicked action "'+action+'" for ';
-                             if(recID>0){
-                                 s = s + 'rec# '+recID;
-                             }else if(top.HEURIST4.util.isRecordSet(this._selection) && this._selection.length()>0){
-                                 s = s + this._selection.length() + ' selected record';
-                             }else{
-                                 s = 'Nothing selected';
-                             }
-                             top.HEURIST4.msg.showMsgFlash(s);  
-                        }
-                    }
-                });
-            
+        this._super();
 
         // init search header
-        this.searchRecord = $('<div>')
-            .addClass('ent_header')
-            .css({padding:'0.2em'})
-            .appendTo(this.wrapper)
-            .searchSysUsers(this.options);
+        this.searchRecord.searchSysUsers(this.options);
             
         this._on( this.searchRecord, {
                 "searchsysusersonresult": this.updateRecordList
                 });
-            
-        
-        
-        var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
-        $('.heurist-helper1').css('display',ishelp_on?'block':'none');
-        
-        
     },
 
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    _setOptions: function( ) {
-        this._superApply( arguments );
-    },
-
-    /* 
-    * private function 
-    * show/hide buttons depends on current login status
-    */
-    _refresh: function(){
-
-    },
-    // 
-    // custom, widget-specific, cleanup.
-    _destroy: function() {
-        // remove generated elements
-        this.searchRecord.remove();
-        this.recordList.remove();
-        this.wrapper.remove();
-        this._selection = null;
-    },
-    
     //----------------------
     //
     //
@@ -270,113 +142,6 @@ $.widget( "heurist.manageSysUsers", {
         }
         
         top.HAPI4.EntityMgr.doRequest(request, callback);
-    },
-    
-    //
-    //
-    //
-    _initDialog: function(){
-
-            var options = this.options,
-                btn_array = [],
-                    that = this;
-        
-            //dialog buttons 
-            if(options['select_mode']=='select_multi'){ 
-                btn_array.push({text:top.HR( options['selectbutton_label'] ),
-                        click: function() { that._selectAndClose(); }}); 
-            }
-            btn_array.push({text:top.HR('Close'), 
-                    click: function() { that._closeDialog(); }}); 
-                    
-                
-            var $dlg = this.element.dialog({
-                autoOpen: false ,
-                height: options['height']?options['height']:400,
-                width:  options['width']?options['width']:720,
-                modal:  (options['modal']!==true),
-                title: options['title']
-                            ?options['title']
-                            :((options['select_mode']=='manager')
-                                    ?top.HR("Manage Users")
-                                    :top.HR("Select User"+(options['select_mode']=='select_multi'?'s':'') )),
-                resizeStop: function( event, ui ) {//fix bug
-                
-                    that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
-                    
-                
-                    //setTimeout(function(){
-                    // that.element.css({overflow: 'none !important','width':'100%'});},400);   
-                    //that.recordList.css({'width':'100%'});
-                },
-                
-                close: function(event, ui){
-                       if(options['dialogcleanup']){
-                           $dlg.remove();
-                       }
-                            
-                },
-                buttons: btn_array
-            });        
-        
-    },
-    
-    //
-    // public methods
-    //
-    popupDialog: function(){
-        if(this.options.isdialog){
-            this.element.dialog("open");
-        }
-    },
-    
-    //
-    //
-    //
-    _closeDialog: function(){
-        if(this.options.isdialog){
-            this.element.dialog('close');
-        }
-    },
-
-    _selectAndClose: function(){
-        
-        if(top.HEURIST4.util.isRecordSet(this._selection)){
-            top.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
-            this._trigger( "onselect", null, {selection:this._selection.getIds()});
-        }else{        
-            this._trigger( "onselect", null, null );
-        }
-        this._closeDialog();
-    },
-        
-    //
-    // value - RecordSet
-    //    
-    selection: function(value){
-        
-        if(top.HEURIST4.util.isnull(value)){
-            //getter
-            return this._selection;
-        }else{
-            //setter
-            this._selection = value;
-            
-            
-            if(this.options.select_mode=='select_single'){
-                this._selectAndClose();
-            }
-        }
-        
-    },
-    
-    //
-    //
-    //
-    updateRecordList: function( event, data ){
-        if (data){
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
-        }
     }
     
 });

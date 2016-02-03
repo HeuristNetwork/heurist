@@ -1,5 +1,5 @@
 /**
-* Search header for sysUsers manager
+* Search header for DefDetailTypes manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,15 +17,15 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
+$.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
 
     // the widget's constructor
     _create: function() {
         this._super();
 
-        this._htmlContent =  'searchSysUsers.html';
-        this._helpContent = 'sysUGrps.html';
-        this._helpTitle = 'About User and Groups';
+        this._htmlContent =  'searchDefDetailTypes.html';
+        this._helpContent = 'defDetailTypes.html';
+        this._helpTitle = 'Field Types';
     }, //end _create
 
     //
@@ -34,32 +34,37 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         
         var that = this;
             
-        this.selectRole   = this.element.find('#sel_role');
+        this.selectRole   = this.element.find('#sel_datatype'); //status of record type - for manager mode only
+        
+        var key;
+        var data_types = [{key:'',title:top.HR('Any Type')}];
+        for (key in top.HEURIST4.detailtypes.lookups){
+            if(top.HEURIST4.detailtypes.lookups[key]){
+                data_types.push({key:key,title:top.HEURIST4.detailtypes.lookups[key]});
+            }
+        }
+        top.HEURIST4.ui.createSelector(that.selectRole.get(0), data_types);
+        
         this.selectGroup = this.element.find('#sel_group');
         this.selectGroup.empty();
             
         top.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
-                        'entity':'sysUGrps','ugr_Type':'workgroup','ugr_ID':that.options.filter_groups},
+                        'entity':'defDetailTypeGroups','dtg_ID':that.options.filter_groups},
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
-                            var groups = new hRecordSet(response.data).makeKeyValueArray('ugr_Name');
+                            var groups = new hRecordSet(response.data).makeKeyValueArray('dtg_Name');
                             
                             if(top.HEURIST4.util.isempty(that.options.filter_groups)){
                                 groups.unshift({key:'',title:top.HR('Any Group')});
                             }
                             
-                            top.HEURIST4.ui.createUserGroupsSelect(that.selectGroup.get(0), 
-                                [], 
-                                groups,
-                                function(){ //on load completed
-                                    //force search 
-                                    //predefined search values
-                                    if(!top.HEURIST4.util.isempty(that.options.filter_group_selected)){
-                                            that.selectGroup.val(that.options.filter_group_selected);  
-                                    } 
-                                    that.selectGroup.change(); //force search
-                                });
+                            top.HEURIST4.ui.createSelector(that.selectGroup.get(0), groups);
                             
+                            if(!top.HEURIST4.util.isempty(that.options.filter_group_selected)){
+                                that.selectGroup.val(that.options.filter_group_selected);
+                            }
+                            
+                            that.startSearch();
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
                         }
@@ -68,14 +73,6 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                       
             this._on( this.element.find('select'), {
                 change: function(event){
-                    if(this.selectGroup.val()>0){
-                        that.selectRole.parent().show();
-                        //that.element.find('span[for="sel_role"]').show();
-                        //that.element.find('#sel_role_lbl').show();
-                    }else{
-                        that.selectRole.parent().hide();
-                        //that.element.find('#sel_role_lbl').hide();
-                    }
                     this.startSearch();
                 }
             });
@@ -93,27 +90,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             var request = {}
         
             if(this.selectGroup.val()!=''){
-                request['ugl_GroupID'] = this.selectGroup.val();
-                if(this.selectRole.val()!=''){
-                    request['ugl_Role'] = this.selectRole.val();
-                }   
+                request['dty_DetailTypeGroupID'] = this.selectGroup.val();
+            }   
+            if(this.selectRole.val()!=''){
+                request['dty_Type'] = this.selectRole.val();
             }   
             if(this.input_search.val()!=''){
-                request['ugr_Name'] = this.input_search.val();
-            }
-
-
-            if(this.element.find('#cb_selected').is(':checked')){
-                request['ugr_ID'] = top.HAPI4.get_prefs('recent_Users');
-            }
-            if(this.element.find('#cb_modified').is(':checked')){
-                var d = new Date(); 
-                //d = d.setDate(d.getDate()-7);
-                d.setTime(d.getTime()-7*24*60*60*1000);
-                request['ugr_Modified'] = '>'+d.toISOString();
-            }
-            if(this.element.find('#cb_inactive').is(':checked')){
-                request['ugr_Enabled'] = 'n';
+                request['dty_Name'] = this.input_search.val();
             }
             
             //noothing defined
@@ -123,10 +106,9 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 this._trigger( "onstart" );
         
                 request['a']          = 'search'; //action
-                request['entity']     = 'sysUGrps';
-                request['details']    = 'id';
+                request['entity']     = 'defDetailTypes';
+                request['details']    = 'list'; //'id';
                 request['request_id'] = top.HEURIST4.util.random();
-                request['ugr_Type']    = 'user';
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 

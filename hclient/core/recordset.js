@@ -898,7 +898,7 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
         addRecord:function(recID, record){
             var idx = order.indexOf(recID);
             if(idx>=0){
-                setRecord(recID, record);
+                this.setRecord(recID, record);
             }else{
                 records[recID] = record;
                 order.push(recID);

@@ -200,7 +200,7 @@ $.widget( "heurist.searchRecord", {
                                 limit: 100000,
                                 needall: 1,
                                 detail: 'ids',
-                                id: Math.round(new Date().getTime() + (Math.random() * 100))};
+                                id: top.HEURIST4.util.random()}
                                 //source: this.element.attr('id') };
 
                 var that = this;                                                

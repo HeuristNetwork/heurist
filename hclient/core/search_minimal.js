@@ -75,7 +75,7 @@ function hSearchMinimal() {
             if(request==null) return;
 
             if( top.HEURIST4.util.isnull(request.id) ) { //unique id for request
-                request.id = Math.round(new Date().getTime() + (Math.random() * 100));
+                request.id = top.HEURIST4.util.random();
             }
             
             request.source = _owner_element_id;
@@ -139,7 +139,7 @@ function hSearchMinimal() {
     function _searchCompleted( is_terminate ){
 
             if(_query_request!=null && is_terminate){
-                _query_request.id = Math.round(new Date().getTime() + (Math.random() * 100));
+                _query_request.id = top.HEURIST4.util.random();
             }
             
             if(!top.HEURIST4.util.isnull(_owner_doc)){ 

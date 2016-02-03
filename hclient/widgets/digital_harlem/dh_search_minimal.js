@@ -156,7 +156,7 @@ function hSearchMinimalDigitalHarlem() {
         if(request==null) return;
 
         if( top.HEURIST4.util.isnull(request.id) ) { //unique id for request
-            request.id = Math.round(new Date().getTime() + (Math.random() * 100));
+            request.id = top.HEURIST4.util.random();
         }
 
         //keep rules for further search

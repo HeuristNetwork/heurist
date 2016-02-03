@@ -462,7 +462,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(!$.isFunction(callback)){   //@todo - remove all this stuff since it is implemented in SearchMgr
 
                     if(!request.increment || top.HEURIST4.util.isnull(request.id)){
-                        request.id = Math.round(new Date().getTime() + (Math.random() * 100));
+                        request.id = top.HEURIST4.util.random();
                     }
 
                     var document = callback;

@@ -43,7 +43,7 @@ function doLogin(isforsed){
         var $dlg = login_dialog;
 
         //load login dialogue
-        $dlg.load(top.HAPI4.basePathV4 + "hclient/widgets/profile/profile_login.html?t="+Math.random(), function(){  //?t="+(new Date().getTime())
+        $dlg.load(top.HAPI4.basePathV4 + "hclient/widgets/profile/profile_login.html?t="+top.HEURIST4.util.random(), function(){ 
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
@@ -55,7 +55,7 @@ function doLogin(isforsed){
 
                 function __refreshCaptcha(){
                     var $dd = $dlg.find('#imgdiv');
-                    var id = Math.random();
+                    var id = top.HEURIST4.util.random();
                     if(true){
                         $dd.load(top.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
                     }else{

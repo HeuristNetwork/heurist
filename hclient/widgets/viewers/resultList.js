@@ -25,6 +25,7 @@ $.widget( "heurist.resultList", {
     // default options
     options: {
         view_mode: null, // list|icons|thumbnails   @toimplement detail, condenced
+        hide_view_mode: false,
         select_mode:null,//manager, select_single, select_multi
         selectbutton_label:'Select',
         action_select:null,  //array of actions
@@ -103,8 +104,9 @@ $.widget( "heurist.resultList", {
                     .addClass('ui-widget-content ent_select_multi')
                     .css({'right':right_padding+2})
                     .html(
-                    '<input id="cb_selected_only" type="checkbox" style="vertical-align:-0.3em;"/>'
-                    +'<label for="cb_selected_only" style="padding:0 0.4em;">show selected only</label>'
+                    '<label style="padding:0 0.4em;">'
+                    +'<input id="cb_selected_only" type="checkbox" style="vertical-align:-0.3em;"/>'
+                    +'&nbsp;show selected only</label>'
                     +'<div id="btn_select_and_close"></div>')
                     .appendTo( this.div_header );
                     
@@ -203,7 +205,7 @@ $.widget( "heurist.resultList", {
                 });                
         }
         
-        var rnd = Math.floor((Math.random() * 10000) + 1);
+        var rnd = top.HEURIST4.util.random();
         
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
@@ -368,8 +370,14 @@ $.widget( "heurist.resultList", {
 
         // repaint current record set
         //??? this._renderRecords();  //@todo add check that recordset really changed  !!!!!
-        this._applyViewMode();
-
+        if(this.options.hide_view_mode==true){
+            this.view_mode_selector.hide();
+            this._applyViewMode('list');
+        }else{
+            this.view_mode_selector.show();
+            this._applyViewMode();
+        }
+        
         if(top.HAPI4.currentUser.ugr_ID>0){
             $(this.div_toolbar).find('.logged-in-only').css('visibility','visible');
             $(this.div_content).find('.logged-in-only').css('visibility','visible');
@@ -377,6 +385,7 @@ $.widget( "heurist.resultList", {
             $(this.div_toolbar).find('.logged-in-only').css('visibility','hidden');
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
+        
 
         /*
         var abtns = (this.options.actionbuttons?this.options.actionbuttons:"tags,share,more,sort,view").split(',');
@@ -408,13 +417,13 @@ $.widget( "heurist.resultList", {
         });*/
 
         if(this.div_header) this.div_header.remove();
+        if(this.div_content_header) this.div_content_header.remove();
 
         // remove generated elements
         this.action_buttons_div.remove();
         if(this.div_actions) this.div_actions.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
-
 
         this.menu_tags.remove();
         this.menu_share.remove();
@@ -473,29 +482,52 @@ $.widget( "heurist.resultList", {
 
         if(!this.div_content.hasClass(newmode)){
         
-        //var $allrecs = this.div_content.find('.recordDiv');
-        if(newmode){
-            var oldmode = this.options.view_mode;
-            this.options.view_mode = newmode;
-            //this.option("view_mode", newmode);
-            if(oldmode)this.div_content.removeClass(oldmode);
+            //var $allrecs = this.div_content.find('.recordDiv');
+            if(newmode){
+                var oldmode = this.options.view_mode;
+                this.options.view_mode = newmode;
+                //this.option("view_mode", newmode);
+                if(oldmode)this.div_content.removeClass(oldmode);
 
-            //save viewmode is session
-            top.HAPI4.save_pref('rec_list_viewmode', newmode);
+                //save viewmode is session
+                top.HAPI4.save_pref('rec_list_viewmode', newmode);
 
-        }else{
-            //load saved value
-            if(!this.options.view_mode){
-                this.options.view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
+            }else{
+                //load saved value
+                if(!this.options.view_mode){
+                    this.options.view_mode = top.HAPI4.get_prefs('rec_list_viewmode');
+                }
+                if(!this.options.view_mode){
+                    this.options.view_mode = 'list'; //default value
+                }
+
+                newmode = this.options.view_mode;
             }
-            if(!this.options.view_mode){
-                this.options.view_mode = 'list'; //default value
+            this.div_content.addClass(newmode);
+
+            //show hide header
+            if($.isFunction(this.options.rendererHeader)){
+                
+                var header_html = (newmode=='list')
+                                ?this.options.rendererHeader()
+                                :'';
+                
+                if(header_html!=''){
+                    if( top.HEURIST4.util.isnull(this.div_content_header )){
+                        this.div_content_header = $('<div>')
+                            .css({'height':'1.5em','width':'100%','padding-left':'0.8em'})
+                            .addClass('ui-widget-content"') //ui-widget ui-widget-header
+                            .insertBefore(this.div_content);
+                    }
+                    this.div_content.css('top',(this.div_header!=null)?'7em':'4em');
+                    this.div_content_header.show(); 
+                    this.div_content_header.html( header_html );       
+                }else if(!top.HEURIST4.util.isnull(this.div_content_header)){
+                    this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
+                    this.div_content_header.hide();        
+                }   
             }
-
-            newmode = this.options.view_mode;
-        }
-        this.div_content.addClass(newmode);
-
+            
         }
         //this.btn_view.button( "option", "label", top.HR(newmode));
         //this.element.find('#list_layout_'+newmode).attr('checked','checked');
@@ -722,7 +754,7 @@ $.widget( "heurist.resultList", {
         + '<div title="'+recTitle+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"+ recTitle + "</a>") :recTitle)
         + '</div>'
-        + '<div title="Click to edit record (opens in new tab)" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
+        + '<div title="Click to edit record (opens in new tab)" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
         //+ ' onclick={event.preventDefault(); window.open("'+(top.HAPI4.basePathV3+'records/edit/editRecord.html?db='+top.HAPI4.database+'&recID='+recID)+'", "_new");} >'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
         + '</div>&nbsp;&nbsp;'
@@ -783,6 +815,20 @@ $.widget( "heurist.resultList", {
 
         var selected_rec_ID = $rdiv.attr('recid');
 
+        var action = $target.parents().attr('data-key');//parents('div[data-key!=""]');
+        if(!top.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
+            //var action = action_btn.attr('data-key');
+            if(this.options.renderer){
+                this._trigger( "onaction", null, {action:action, recID:selected_rec_ID});
+            }else if (action=='edit'){
+                
+                var url = top.HAPI4.basePathV3 + "records/edit/editRecord.html?db="+top.HAPI4.database+"&recID="+selected_rec_ID;
+                window.open(url, "_new");
+            }
+            return;
+        }
+        
+        /* OLD WAY - to remove
         var isedit = ($target.parents('div[data-key="edit"]').length>0); //this is edit click .rec_edit_link
         var isdelete = ($target.parents('div[data-key="delete"]').length>0); //this is delete click
 
@@ -799,7 +845,8 @@ $.widget( "heurist.resultList", {
                 this._trigger( "onaction", null, {action:'delete', recID:selected_rec_ID});
             }
             return;
-        }else {
+        }*/
+            
             var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
             if (ispwdreminder){
                 var pwd = $rdiv.attr('pwd');
@@ -822,7 +869,7 @@ $.widget( "heurist.resultList", {
                     return;
                 }
             }
-        }
+        
         
         if(this.options.select_mode=='select_multi'){
             if($rdiv.hasClass('selected')){
@@ -1327,6 +1374,23 @@ $.widget( "heurist.resultList", {
 
             }
         });
+        var inline_selectors = this.div_content.find('.recordDiv select');
+        if(inline_selectors.length>0){
+            
+            inline_selectors.find('option[value=""]').remove();
+            $.each(inline_selectors, function(idx, ele){
+               $(ele).val($(ele).attr('data-grpid')); 
+            });
+            
+            this._on( inline_selectors, {
+                 //click: function(){ return false; },
+                 change: function(event){
+                    var $rdiv = $(event.target).parents('.recordDiv');
+                    var recID = $rdiv.attr('recid');
+                    this._trigger( "onaction", null, {action:'group-change', recID:recID, grpID: $(event.target).val()});
+                 }
+            });
+        }
 
         /* show image on hover
         var that = this;
@@ -1372,7 +1436,7 @@ $.widget( "heurist.resultList", {
                 var request = { q: 'ids:'+ ids,
                     w: 'a',
                     detail: 'header',
-                    id: that.current_page, //Math.round(new Date().getTime() + (Math.random() * 100)),
+                    id: that.current_page,
                     source:this.element.attr('id') };
 
                 top.HAPI4.RecordMgr.search(request, function( response ){

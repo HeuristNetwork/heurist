@@ -127,8 +127,9 @@ function hRecordSelect(rectype_set) {
                                         needall: 1,
                                         detail: 'ids',
                                         
-                                        id: Math.round(new Date().getTime() + (Math.random() * 100))};
-                                        //source: this.element.attr('id') };
+                                        id: top.HEURIST4.util.random()
+                                        //source: this.element.attr('id') 
+                                       };
 
                         //that.loadanimation(true);
 

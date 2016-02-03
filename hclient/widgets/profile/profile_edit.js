@@ -238,7 +238,7 @@ $.widget( "heurist.profile_edit", {
     _refreshCaptcha: function(){
         var that = this;
         var $dd = that.edit_form.find('#imgdiv');
-        var id = Math.random();
+        var id = top.HEURIST4.util.random();
         if(true){
             $dd.load(top.HAPI4.basePathV4+'hserver/utilities/captcha.php?id='+id);
         }else{

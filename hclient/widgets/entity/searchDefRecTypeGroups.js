@@ -1,5 +1,5 @@
 /**
-* Search header for sysGroups manager
+* Search header for DefRecTypeGroups manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -18,25 +18,23 @@
 */
 
 
-$.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
+$.widget( "heurist.searchDefRecTypeGroups", $.heurist.searchEntity, {
 
     // the widget's constructor
     _create: function() {
         
         this._super();
 
-        this._htmlContent =  'searchSysGroups.html';
-        this._helpContent = 'sysUGrps.html';
-        this._helpTitle = 'About User and Groups';
+        this._htmlContent =  '';
+        this._helpContent = 'defRecTypes.html';
+        this._helpTitle = 'Record Types';
+        this._need_load_content = false;
         
     }, //end _create
 
     //
     _initControls: function() {
-        this._super();
-        
-        //assign unique name for radio group (to avoid conflicts with other instances of widget)
-        this.element.find('.ent_search_cb input[type="radio"]').prop('name', 'rbg_'+top.HEURIST4.util.random());
+        //this._super();
         
         this.startSearch();
     },  
@@ -50,38 +48,14 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         
             var request = {}
         
-            if(this.input_search.val()!=''){
-                request['ugr_Name'] = this.input_search.val();
-            }
-
-            // actually we may take list of groups from currentUser['ugr_Groups']
-            var gr_role = this.element.find('.ent_search_cb input[type="radio"]:checked').val();
-            
-            if(gr_role!='anygroup'){
-            
-                request['ugl_UserID'] = top.HAPI4.currentUser['ugr_ID'];
-                
-                if(gr_role=='admin'){
-                    request['ugl_Role'] = 'admin';
-                }else
-                if(gr_role=='member'){  
-                    request['ugl_Role'] = 'member';
-                }
-            }
-            
-            //nothing defined
-            if(false && $.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
-            }else{
                 this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = 'sysUGrps';
-                request['details']    = 'id';
-                request['request_id'] = top.HEURIST4.util.random();
-                request['ugr_Type']    = 'workgroup';
-                
-                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+
+                request = {
+                'a'          : 'search',
+                'entity'     : 'defRecTypeGroups',
+                'details'    : 'list',
+                'request_id' : top.HEURIST4.util.random(),
+                };
 
                 var that = this;                                                
                 //that.loadanimation(true);
@@ -94,7 +68,6 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
                             top.HEURIST4.msg.showMsgErr(response);
                         }
                     });
-            }
     },
     
 
