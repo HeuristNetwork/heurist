@@ -23,7 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 //require_once (dirname(__FILE__).'/db_tags.php');
 
-class DbEntitySearch
+class dbEntitySearch
 {
     private $system;  
     

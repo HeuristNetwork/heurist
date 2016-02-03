@@ -21,7 +21,7 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/DbEntitySearch.php');
+require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
 class DbDefRecTypeGroups
@@ -76,7 +76,7 @@ class DbDefRecTypeGroups
     public function search(){
         
 //error_log(print_r($this->data,true));        
-        $this->searchMgr = new DbEntitySearch( $this->system, DbDefRecTypeGroups::$fields);
+        $this->searchMgr = new dbEntitySearch( $this->system, DbDefRecTypeGroups::$fields);
 
         /*
         if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
