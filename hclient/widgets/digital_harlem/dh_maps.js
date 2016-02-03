@@ -50,18 +50,18 @@ $.widget( "heurist.dh_maps", {
         var that = this;
 
         $(this.document).on(top.HAPI4.Event.ON_SYSTEM_INITED, function(e, data) {
-            
-            
-            //531 (not individ), 4802 (35), 4803 (pre35) 
+
+
+            //531 (not individ), 4802 (35), 4803 (pre35)
             var query = {"t":"19"};
             if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
                 query["f:144"] = "4802";
             }else{
                 query["f:144"] = "531,4802,4803"; //'{"t":"19","f:144":"-532,4749"}'
             }
-            
 
-            var request = {q:query, w: 'a', 
+
+            var request = {q:query, w: 'a',
                     detail: 'header', l:3000, source:that.element.attr('id') };
 
             //perform search
@@ -136,6 +136,8 @@ $.widget( "heurist.dh_maps", {
 
 
     _renderRecord_html: function(recordset, record){
+
+        // This function is more-or-less duplicated in resultList.js
 
         function fld(fldname){
             return recordset.fld(record, fldname);
