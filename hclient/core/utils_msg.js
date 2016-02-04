@@ -119,17 +119,19 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     //
     showPrompt: function(message, callbackFunc){
         
-        top.HEURIST4.msg.showMsgDlg(
-        //'<div class="ui-heurist-bg-light" style="width:100%;height:100%"></div>'+
-        message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
-        + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>', 
+        if(message.indexOf('dlg-prompt-value')<0){
+            message = message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
+                + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>';    
+        }
+        
+        top.HEURIST4.msg.showMsgDlg( message,
         function(){
             if($.isFunction(callbackFunc)){
                 var $dlg = top.HEURIST4.msg.getMsgDlg();            
                 callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
             }
         },
-        'Enter value');
+        'Specify value');
         
     },
     

@@ -629,7 +629,7 @@ function ShowMap() {
 
 			if(mapobjects>0){
 
-				var limit = parseInt(HRST.util.getDisplayPreference("report-output-limit"));
+				var limit = parseInt(HRST.util.getDisplayPreference("smarty-output-limit"));
 				if (isNaN(limit)) limit = 1000; //def value for dispPreference
 
 

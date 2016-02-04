@@ -688,6 +688,9 @@ function ShowReps() {
             document.getElementById('cbErrorReportLevel').value = 0;
             replevel = 0;
         }
+        var debug_limit = document.getElementById('cbDebugReportLimit').value;
+        
+        
         /*
         if(document.getElementById('cbDebug').checked){
         replevel = 1;
@@ -709,6 +712,10 @@ function ShowReps() {
                 squery = _getQuery();;
             }
 
+            if(debug_limit>0){
+                squery = squery + '&limit='+debug_limit;
+            }
+            
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
 
@@ -1169,7 +1176,7 @@ function ShowReps() {
                 res = res + ' width="300" height="auto"';
             }else{
             }
-            res = res +'}';
+            res = res +'}{*' +  remark + '*}';
         }
 
         return (res+((insertMode==0)?' ':'\n'));
@@ -1244,8 +1251,8 @@ function ShowReps() {
 
             case 3: // information on first element of a loop
                 _text='\n\n{* Information before first element of a loop (nothing output if loop is empty). \n' +
-                '     Place this before the fields output in the loop. Replace $r with the name of the loop variable. *}\n' +
-                '{if $r@first} {* Before loop *} \n' +
+                '     Place this before the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
+                '{if $smarty.foreach.valueloop.first} {* Before loop *} \n' +
                 ' \n' +
                 ' {* Add the information you want output here *}}\n' +
                 ' \n' +
@@ -1255,8 +1262,8 @@ function ShowReps() {
 
             case 4: // information on first element of a loop
                 _text='\n\n{* Information after last element of a loop (nothing output if loop is empty). \n' +
-                '     Place this after the fields output in the loop. Replace $r with the name of the loop variable. *}\n' +
-                '{if $r@last} {* After loop *} \n' +
+                '     Place this after the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
+                '{if $smarty.foreach.valueloop.last} {* After loop *} \n' +
                 ' \n' +
                 ' {* Add the information you want output here *}}\n' +
                 ' \n' +
@@ -1476,8 +1483,9 @@ function ShowReps() {
             var arr_name = (_nodep.data.this_id==="r") ?"results" : _nodep.data.parent_id+'.'+_nodep.data.this_id+'s';
             var item_name = (_nodep.data.this_id==="r") ?"r" : _nodep.data.this_id;
             var remark = "{* "+_getVariableName(_nodep.data.id)+" *}";
+            var loopname = (_nodep.data=='enum')?'ptrloop':'valueloop';
 
-            _text = "{foreach $"+arr_name+" as $"+item_name+"}"+remark+"\n  \n{/foreach}"+remark+"\n";
+            _text = "{foreach $"+arr_name+" as $"+item_name+" name="+loopname+"}"+remark+"\n  \n{/foreach}"+remark+"\n";
         }
 
         if(_text!=="")    {
@@ -1752,7 +1760,7 @@ function ShowReps() {
 
         var msg = "";
 
-        var limit = parseInt(Hul.getDisplayPreference("report-output-limit"));
+        var limit = parseInt(Hul.getDisplayPreference("smarty-output-limit"));
         if (isNaN(limit)) limit = 1000; //def value for dispPreference
 
         if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||

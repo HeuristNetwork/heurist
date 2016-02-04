@@ -157,6 +157,33 @@
             print json_format(array("error"=>"file not found"));
         }
     }
+    
+    function getUniqueTemplateName($template_file){
+
+        global $dir;
+
+        $path_parts = pathinfo($template_file);
+        $template_file = $path_parts['filename'];
+        $cnt = 0;
+        
+        $template_file_fullpath = $dir.$template_file.'.tpl';
+        
+        do{
+            if(file_exists($template_file_fullpath)){
+                if($cnt>0){
+                    $cnt = $cnt+1;
+                }else{
+                    $k = strpos($template_file_fullpath,'(');
+                    $k2 = strpos($template_file_fullpath,').tpl');
+                    $cnt = intval(substr($template_file_fullpath,$k,$k2-$k));
+                    $cnt = ($cnt>1)?$cnt+1:1;
+                }
+                $template_file_fullpath = $dir.$template_file."($cnt).tpl";
+            }
+        }while (file_exists($template_file_fullpath));
+        
+        return $template_file_fullpath;
+    }
 
     function  saveTemplate($template_body, $template_file){
         global $dir;
@@ -338,13 +365,15 @@
     function importTemplate(){
         global $dir;
         
+        
+error_log("HERE");        
         if ( !$_FILES['import_template']['size'] ) {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             
         }else{
             $filename = $_FILES['import_template']['tmp_name'];
             $origfilename = $_FILES['import_template']['name'];
-        
+
             //read tempfile
             $template = file_get_contents($filename);
         
@@ -355,6 +384,12 @@
             }
             
             if(!@$res['error']){
+                  //check if template with such name already exists 
+                  /*while (file_exists($dir.$origfilename)){
+                      $dir.$origfilename = $dir.$origfilename . "($cnt)";
+                  }*/
+                  $origfilename = getUniqueTemplateName($origfilename);
+                
                   $res2 = saveTemplate($res['template'], $origfilename);
                   if(count(@$res['details_not_found'])>0){
                       $res2['details_not_found'] = $res['details_not_found'];

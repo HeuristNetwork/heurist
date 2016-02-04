@@ -765,7 +765,13 @@ function hAPI(_db, _oninit) { //, _currentUser
             if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
             }else{
-                var res = that.currentUser['ugr_Preferences'][name]
+                var res = that.currentUser['ugr_Preferences'][name];
+                
+                //take from old set
+                if(top.HEURIST4.util.isnull(res) && top.HEURIST && top.HEURIST.displayPreferences){
+                    res = top.HEURIST.displayPreferences[name];
+                }
+                
                 if('search_detail_limit'==name){
                     if(!res && res<500 ) res = 500
                     else if(res>30000 ) res = 3000;  

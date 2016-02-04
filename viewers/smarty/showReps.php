@@ -109,17 +109,25 @@ function executeSmartyTemplate($params){
 
     if( !array_key_exists("limit", $params) ){ //not defined
 
-        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
         if (!$limit || $limit<1){
             $limit = 10000; //default limit in dispPreferences
         }
 
         $params["limit"] = $limit; //force limit
     }
-
+    
     if(@$params['recordset']){ //we already have the list of record ids
 
         $qresult = json_decode($params['recordset'], true);
+
+        //truncate recordset
+        if($qresult && array_key_exists('recIDs',$qresult)){
+            $recIDs = explode(',', $qresult['recIDs']);
+            if($params["limit"]<count($recIDs)){
+                $qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));   
+            }
+        }
 
     }else if(@$params['h4']==1){ //search with h4 search engine
 

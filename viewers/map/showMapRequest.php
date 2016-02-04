@@ -76,7 +76,7 @@ function getMapObjects($request){
 
     if( !array_key_exists("limit", $request) ){ //not defined
 
-        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['report-output-limit']);
+        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
         if (!$limit || $limit<1){
             $limit = 1000; //default limit in dispPreferences
         }

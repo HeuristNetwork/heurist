@@ -186,27 +186,6 @@ $.widget( "heurist.recordListExt", {
                   }
             }
             
-            var recordset;
-            
-            if (this.options.recordset!=null) {
-                /* art2304
-                  var recIDs_list = this.options.recordset.getIds();
-                  if(!top.HEURIST4.util.isempty(recIDs_list.length)){
-                        query_string_all = query_string + '&q=ids:'+recIDs_list.join(',');
-                  }
-                 */ 
-                  
-                  var tot_cnt = this.options.recordset.length();
-                  top.HEURIST.totalQueryResultRecordCount = tot_cnt;
-
-                  var recIDs_list = this.options.recordset.getIds();
-                  
-                  recordset = {"resultCount":tot_cnt, "recordCount":tot_cnt, "recIDs":recIDs_list.join(',')};
-                  
-            }else{                         
-                  top.HEURIST.totalQueryResultRecordCount = 0;
-                  recordset = {"resultCount":0,"recordCount":0,"recIDs":""};
-            }
             
             /* art2304
             if(query_string_main.toLowerCase().indexOf('sortby')>=0){  //keep order for smarty output
@@ -228,12 +207,11 @@ $.widget( "heurist.recordListExt", {
                 //@todo - reimplement - send on server JSON with list of record IDs
                 //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
                 if (this.options.recordset!=null){
-                        showReps.assignRecordset(recordset);
-                        showReps.processTemplate();
+                       this._checkRecordsetLengthAndRunSmartyReport(-1);
                 }
             }else{
                 var showMap = this.dosframe[0].contentWindow.showMap;
-                if(showMap){
+                if(showMap){ //not used anymore
                     showMap.processMap();
                 }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
                     
@@ -269,5 +247,68 @@ $.widget( "heurist.recordListExt", {
             //this.dosframe.show();
         }
     },
+    
+    _checkRecordsetLengthAndRunSmartyReport: function(limit){
+
+            var showReps = this.dosframe[0].contentWindow.showReps;
+            if(!showReps) return;
+        
+            var recordset, recIDs_list = [];
+            
+            if (this.options.recordset!=null) {
+                /* art2304
+                  var recIDs_list = this.options.recordset.getIds();
+                  if(!top.HEURIST4.util.isempty(recIDs_list.length)){
+                        query_string_all = query_string + '&q=ids:'+recIDs_list.join(',');
+                  }
+                 */ 
+                  
+                  var tot_cnt = this.options.recordset.length();
+                  top.HEURIST.totalQueryResultRecordCount = tot_cnt;
+                  /*
+                  if(limit<0){
+                  
+                  var pref_limit = top.HAPI4.get_prefs('smarty-output-limit');
+                  if(!(pref_limit>0)){
+                      pref_limit = 200;
+                  }
+                  
+                  if(tot_cnt > pref_limit){
+                    
+                        var that = this;
+                      
+                      top.HEURIST4.msg.showPrompt(
+'<div><p>You have requested a report for '+tot_cnt+' records, which will take '
++((tot_cnt<500)?'some':'a long')
++' time to generate. For a preview we recommend restricting output to the first 50 records.</p>'
++'<p>You can change the limit above which this warning occurs in Profile > Preferences</p><p>Show '
++'<select id="dlg-prompt-value" class="text ui-corner-all" '
+                + ' style="max-width: 100px; min-width: 5em; width: 100px; margin-left:0.2em">'
+                +'<option>50</option>'
+                +'<option>200</option>'
+                +'<option>500</option>'
+                +'<option>1000</option>'
+                +'<option>10000</option>'
+                +'<select> records</p></div>',
+                      function(limit){
+                        that._checkRecordsetLengthAndRunSmartyReport(limit);
+                      }
+                      );
+                      return;
+                  }
+                  
+                  }
+                  */
+                  recIDs_list = this.options.recordset.getIds(limit);
+                  recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, "recIDs":recIDs_list.join(',')};
+                  
+            }else{                         
+                  top.HEURIST.totalQueryResultRecordCount = 0;
+                  recordset = {"resultCount":0,"recordCount":0,"recIDs":""};
+            }
+                  
+            showReps.assignRecordset(recordset);
+            showReps.processTemplate();
+    }
 
 });

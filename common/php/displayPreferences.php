@@ -108,7 +108,7 @@
     "showNavMenuAlways" => "false", // show the navigation menu even when the navigation panel is open
     "showFavouritesSearch" => "false", // ditto for Favourites search
     "mapbackground" => "", // the background to be used for the Google map in the map tab
-    "report-output-limit" => "1000",   //report output limit for smarty and map
+    "smarty-output-limit" => "1000",   //report output limit for smarty and map
 
     "record-edit-date" => "", // TODO: what is this for, it is not set in profile
     "record-edit-advancedmode" => "false", //by default record editing comes up in stripped down 'simple' mode
