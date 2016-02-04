@@ -2320,7 +2320,7 @@ function closeWithValue() {
     type = "p";
     if(markerShape){
       var point = markerShape.getPosition();
-      value = "POINT("+r(point.lng())+" "+r(point.lat())+")";
+      value = "POINT ("+r(point.lng())+" "+r(point.lat())+")";
     }else{
       value = null;
     }
@@ -2328,7 +2328,7 @@ function closeWithValue() {
 
     case 3: //"rectangle":
       type = "r";
-      value = "POLYGON((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
+      value = "POLYGON ((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
       break;
 
     case 4: //"circle":
@@ -2341,26 +2341,26 @@ function closeWithValue() {
       var bounds = circle.getBounds();
 
       // I need only 2 points
-      value = "LINESTRING("+lng+" "+lat+","+r(bounds.getNorthEast().lng())+" "+lat+","+
+      value = "LINESTRING ("+lng+" "+lat+","+r(bounds.getNorthEast().lng())+" "+lat+","+
       r(bounds.getSouthWest().lng())+" "+r(bounds.getSouthWest().lat())+","+
       r(bounds.getSouthWest().lng())+" "+r(bounds.getNorthEast().lat())+
       ")";
 
-      //value = "LINESTRING("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
+      //value = "LINESTRING ("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
 
       break;
 
     case 2: //"polygon":
     type = "pl";
     if(pointsArrayKml.length>2){
-      value = "POLYGON((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
+      value = "POLYGON ((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
     }
     break;
 
     case 1: //"path":
     type = "l";
     if(pointsArrayKml.length>1){
-      value = "LINESTRING(" + pointsArrayKml.join(",") + ")";
+      value = "LINESTRING (" + pointsArrayKml.join(",") + ")";
     }
   }
 

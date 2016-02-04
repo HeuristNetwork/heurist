@@ -13,12 +13,12 @@
 */
 
 /**
-* Geographic Object Interface (GOI) for Heurist API  v0.1 
+* Geographic Object Interface (GOI) for Heurist API  v0.1
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -57,12 +57,12 @@ var HPointValue = function() {
 		}
 		x = parseFloat(xy[1]);
 		y = parseFloat(xy[2]);
-        
+
         if(isNaN(x)){
             throw new HInvalidGeographicValueException("invalid point data long: "+xy[1]);
         }else if(isNaN(y)){
             throw new HInvalidGeographicValueException("invalid point data lat: "+xy[2]);
-        }        
+        }
 		this.constructor = HPointValue;
 	}
 	else if (arguments.length === 2) {	// x, y
@@ -74,14 +74,14 @@ var HPointValue = function() {
         }else if(isNaN(y)){
             throw new HInvalidGeographicValueException("invalid point data lat: "+arguments[1]);
         }
-            
-		HGeographicValue.call(this, "p", "POINT(" + x + " " + y +")");
+
+		HGeographicValue.call(this, "p", "POINT (" + x + " " + y +")");
 	}
 	else { throw new HInvalidGeographicValueException("invalid point data"); }
 
 
-    
-    
+
+
 	this.getX = function() { return x; };
 	this.getY = function() { return y; };
 	this.toString = function() { return "Point: X (" + _r(x) + ") - Y (" + _r(y) + ")"; };
@@ -113,7 +113,7 @@ var HBoundsValue = function() {
 		xMax = parseFloat(arguments[2]);
 		yMax = parseFloat(arguments[3]);
 
-		HGeographicValue.call(this, "r", "POLYGON(("+xMin+" "+yMin+","+xMax+" "+yMin+","+xMax+" "+yMax+","+xMin+" "+yMax+","+xMin+" "+yMin+"))");
+		HGeographicValue.call(this, "r", "POLYGON (("+xMin+" "+yMin+","+xMax+" "+yMin+","+xMax+" "+yMax+","+xMin+" "+yMax+","+xMin+" "+yMin+"))");
 	}
 	else { throw new HInvalidGeographicValueException("invalid rectangle data"); }
 
@@ -147,7 +147,7 @@ var HCircleValue = function() {
 		y = parseFloat(arguments[1]);
 		radius = parseFloat(arguments[2]);
 
-		HGeographicValue.call(this, "c", "LINESTRING("+x+" "+y+","+(x+radius)+" "+y+","+(x-radius)+" "+(y-radius)+","+(x-radius)+" "+(y+radius)+")");
+		HGeographicValue.call(this, "c", "LINESTRING ("+x+" "+y+","+(x+radius)+" "+y+","+(x-radius)+" "+(y-radius)+","+(x-radius)+" "+(y+radius)+")");
 	}
 
 	this.getX = function() { return x; };
@@ -194,7 +194,7 @@ var HPolygonValue = function() {
 		for (i=0; i < points.length; ++i) {
 			wkt.push(points[i].join(" "));
 		}
-		wkt = "POLYGON((" + wkt.join(",") + "))";
+		wkt = "POLYGON ((" + wkt.join(",") + "))";
 		HGeographicValue.call(this, "pl", wkt);
 	}
 	else { throw new HInvalidGeographicValueException("invalid polygon data"); }
@@ -254,7 +254,7 @@ var HPathValue = function() {
 		for (i=0; i < points.length; ++i) {
 			wkt.push(points[i].join(" "));
 		}
-		wkt = "LINESTRING(" + wkt.join(",") + ")";
+		wkt = "LINESTRING (" + wkt.join(",") + ")";
 		HGeographicValue.call(this, "l", wkt);
 	}
 	else { throw new HInvalidGeographicValueException("invalid path data"); }

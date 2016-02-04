@@ -1,7 +1,7 @@
 <!--
 /**
 * Set user's preferences for session
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
@@ -21,7 +21,7 @@
 <script type="text/javascript">
 
     function initProfilePreferences(){
-        
+
         var sel = $("#layout_language");
         if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
 
@@ -34,7 +34,7 @@
                 }
             }
         }
-        
+
         sel = $("#layout_id");
         if(sel.length==1){ //global variable defined in layout_default.js
 
@@ -47,7 +47,7 @@
                 }
             }
         }
-        
+
         //init bookmarklet
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
@@ -61,29 +61,29 @@
             + "d.getElementsByTagName('head')[0].appendChild(s);}"
             + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+top.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
             //+ "window.setTimeout('w.focus()',200);}"
-            + "}})();"            
+            + "}})();"
             );
             sel.text('>> '+top.HAPI4.database)
         }
     }
-    
+
 </script>
 
 <form style="font-size:0.9em">
     <fieldset>
-    
+
         <h3>Bookmarklet</h3>
         <div>
             <label class="header">Drag this link on your bookmarks bar</label><b><u>
-            <a id="bookmarklet-link" 
-                onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}" 
-                title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."            
+            <a id="bookmarklet-link"
+                onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}"
+                title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."
                 href="#"></a>
             </u></b><label>&nbsp;(it provides bookmarking of web pages)</label><br><br>
         </div>
-        
+
         <hr/>
-        
+
         <h3>Search</h3>
         <div>
             <div class="header"><label for="defaultSearch">Heurist search string to execute when loading the search page</label></div>
@@ -101,21 +101,24 @@
                 <option value="5000">5000</option>
                 <option value="1000">1000</option>
                 <option value="500">500</option>
-            </select>            
-        </div>        
+            </select>
+        </div>
         <div>
             <div class="header"><label for="search_detail_limit">
                 Limit loading of current query on map/timeline with the given number of records with geo/time info
             </label></div>
             <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:300px"
-                title="The map and timeline are limited to display a maximum of specified results to avoid overloading your browser.">
-                <option value="3000">3000</option>
-                <option value="2000">2000</option>
-                <option value="1000">1000</option>
+                title="The map and timeline will be limited to displaying this number of results to avoid overloading your browser.">
                 <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2000">2000</option>
+                <option value="5000">5000</option>
+                <option value="10000">10000</option>
+                <option value="20000">20000 (not recommended)</option>
+                <option value="50000">50000 (not recommended)</option>
             </select>
         </div>
-        
+
 
         <hr />
         <h3>Edit</h3>
@@ -135,8 +138,8 @@
             <div class="header"><label for="record-edit-advancedmode">Advanced edit mode</label></div>
             <input type="checkbox" name="record-edit-advancedmode" id="record-edit-advancedmode" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
-        
-    
+
+
         <hr />
         <h3>Appearance</h3>
         <div>
@@ -161,7 +164,7 @@
             <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
         </div>
 
-<!--        
+<!--
         <br />
         <hr />
         <br />

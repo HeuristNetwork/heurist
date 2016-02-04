@@ -21,7 +21,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -695,10 +695,12 @@
 
 			Values supplied are added to any existing values for the field. Multiple values can be separated by | (pipe) characters.<br>
 			Values for record pointer fields should be the id of the record to which the pointer points.<br>
-			Geographic data are represented as a geographic type identifier plus OpenGIS WKT data, eg. <code>p:POINT(134.657 32.326)</code><br>
+            <!-- Why do we need the p: - it appears to be non-standard WKT, and it appears to be redundant -->
+			Geographic data are represented as a geographic type identifier plus OpenGIS WKT data, eg. <code>p:POINT (134.657 32.326)</code><br>
 
-				<!--
-				Multiple geographic objects per column can be separated by | (pipe) characters, eg. <code>p:POINT(134.657 32.326)|p:POINT(134.756 32.378)|</code>...<br>
+            <!--
+            Why do we need the p: - it appears to be non-standard WKT, and it appears to be redundant
+			Multiple geographic objects per column can be separated by | (pipe) characters, eg. <code>p:POINT (134.657 32.326)|p:POINT (134.756 32.378)|</code>...<br>
 			-->
 
 			Geographic type identifiers are: <code>p:POINT</code> for point, <code>r:POLYGON</code> for rectangle,

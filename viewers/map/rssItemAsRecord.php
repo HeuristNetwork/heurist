@@ -18,7 +18,7 @@
 * Simple import for RSS
 *
 * @author      Kim Jackson
-* @author      Stephen White   
+* @author      Stephen White
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
@@ -58,7 +58,7 @@ class PseudoRssBiblio {
 			if ($geo && is_array($geo) && $geo[0]) {
 				$geo = $geo[0];
 				list($lat,$lng) = split(" ",$geo,2);
-				$geometry = new Geometry('POINT('.$lng.' '.$lat.')', 'p', null);
+				$geometry = new Geometry('POINT ('.$lng.' '.$lat.')', 'p', null);
 				$this->geometry[] = $geometry;
 			}
 		}

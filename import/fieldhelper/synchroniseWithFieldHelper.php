@@ -487,7 +487,7 @@ if (! is_logged_in()) {
                                 }
 
                                 if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
-                                    $details["t:".$geoDT] = array("1"=>"p POINT($lon $lat)");
+                                    $details["t:".$geoDT] = array("1"=>"p POINT ($lon $lat)");
                                 }
 
                                 //set title by default

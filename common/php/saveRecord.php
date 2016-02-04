@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -313,7 +313,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
     * $details is the form
     *    $details = array("t:1" => array("bd:234463" => "7th Ave"),
     *                      ,,,
-    *                     "t:11" => array("0" => "p POINT(-73.951172 40.805661)"));
+    *                     "t:11" => array("0" => "p POINT (-73.951172 40.805661)"));
     * where t:id means detail type id  and bd:id means detail record id
     * new details are array values without a preceeding detail ID as in the last line of this example
     */
