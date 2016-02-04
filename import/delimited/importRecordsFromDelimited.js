@@ -19,7 +19,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -1518,7 +1518,7 @@ FlexImport = (function () {
                 lat = parseFloat(geoLat[v]);
                 lng = (v<geoLng.length)?parseFloat(geoLng[v]):NaN;
                 if(!(isNaN(lat) || isNaN(lng))){
-                    vals.push( new HGeographicValue("p", "POINT("+lng+" "+lat+")") );
+                    vals.push( new HGeographicValue("p", "POINT ("+lng+" "+lat+")") );
                 }
 
             }

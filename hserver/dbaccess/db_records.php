@@ -153,7 +153,7 @@
     *            ]
     *    details = array("t:1" => array("bd:234463" => "7th Ave"),
     *                      ,,,
-    *                     "t:11" => array("0" => "p POINT(-73.951172 40.805661)"));
+    *                     "t:11" => array("0" => "p POINT (-73.951172 40.805661)"));
     *
     */
     function recordSave($system, $record){
@@ -546,7 +546,7 @@
         * $details is the form
         *    $details = array("t:1" => array("bd:234463" => "7th Ave"),
         *                      ,,,
-        *                     "t:11" => array("0" => "p POINT(-73.951172 40.805661)"));
+        *                     "t:11" => array("0" => "p POINT (-73.951172 40.805661)"));
         * where t:id means detail type id  and bd:id means detail record id
         * new details are array values without a preceeding detail ID as in the last line of this example
         */
@@ -792,8 +792,8 @@
         return true;
     }
 
-    // @todo move terms function in the separate 
-    
+    // @todo move terms function in the separate
+
     //
     // get terms from json string
     //

@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -862,7 +862,7 @@ function closeWithValue() {
 	    case "point":
 		type = "p";
 		var point = window.shape.position;
-		value = "POINT("+r(point.lng())+" "+r(point.lat())+")";
+		value = "POINT ("+r(point.lng())+" "+r(point.lat())+")";
 		break;
 
 	    case "rectangle":
@@ -872,7 +872,7 @@ function closeWithValue() {
 		var east = r(Math.max(corner1.lng(), corner2.lng()));
 		var north = r(Math.max(corner1.lat(), corner2.lat()));
 		var south = r(Math.min(corner1.lat(), corner2.lat()));
-		value = "POLYGON(("+west+" "+north+","+east+" "+north+","+east+" "+south+","+west+" "+south+","+west+" "+north+"))";
+		value = "POLYGON (("+west+" "+north+","+east+" "+north+","+east+" "+south+","+west+" "+south+","+west+" "+north+"))";
 		break;
 
 	    case "circle":
@@ -880,7 +880,7 @@ function closeWithValue() {
 		var lat = r(window.shape.centre.lat());
 		var lng = r(window.shape.centre.lng());
 		var rad = r(window.shape.radius);
-		value = "LINESTRING("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
+		value = "LINESTRING ("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
 		break;
 
 	    case "polygon":
@@ -889,7 +889,7 @@ function closeWithValue() {
 		for (var i=0; i < window.shape.vertices.length; ++i)
 			points.push(r(window.shape.vertices[i].lng())+" "+r(window.shape.vertices[i].lat()));
 		points.push(r(window.shape.vertices[0].lng())+" "+r(window.shape.vertices[0].lat()));	// close the polygon
-		value = "POLYGON((" + points.join(",") + "))";
+		value = "POLYGON ((" + points.join(",") + "))";
 		break;
 
 	    case "path":
@@ -897,7 +897,7 @@ function closeWithValue() {
 		var points = [];
 		for (var i=0; i < window.shape.vertices.length; ++i)
 			points.push(r(window.shape.vertices[i].lng())+" "+r(window.shape.vertices[i].lat()));
-		value = "LINESTRING(" + points.join(",") + ")";
+		value = "LINESTRING (" + points.join(",") + ")";
 	}
 
 	window.close(type, value);

@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -479,7 +479,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 			$e = floatval(TrivialXMLParser::getValue($box, "east"));
 			if ($n && $s && $w && $e) {
 				// store a rectangle
-				array_push($geometries, array("r", "POLYGON(($n $w,$n $e,$s $e,$s $w,$n $w))"));
+				array_push($geometries, array("r", "POLYGON (($n $w,$n $e,$s $e,$s $w,$n $w))"));
 			}
 			break;
 
@@ -487,7 +487,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 			list($w,$n) = array_map("floatval", explode(',', $innerTags["coordinates"][0]["-text"][0]));
 			if ($w && $n) {
 				// store a point
-				array_push($geometries, array("p", "POINT($w $n)"));
+				array_push($geometries, array("p", "POINT ($w $n)"));
 			}
 			break;
 
@@ -499,7 +499,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 					if ($bdGeoValue) $bdGeoValue .= ",";
 					$bdGeoValue .= floatval($coord[1])." ".floatval($coord[2]);
 				}
-				$bdGeoValue = "LINESTRING(" . $bdGeoValue . ")";
+				$bdGeoValue = "LINESTRING (" . $bdGeoValue . ")";
 				array_push($geometries, array("l", $bdGeoValue));
 			}
 			break;
@@ -519,13 +519,13 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 					}
 				}
 			}
-			array_push($geometries, array("pl", "POLYGON(" . $bdGeoValue . ")"));
+			array_push($geometries, array("pl", "POLYGON (" . $bdGeoValue . ")"));
 			break;
 
 		    case "linearring":
 			$bdGeoValue = $this->_parseLinearRing($innerTags);
 			if ($bdGeoValue) {
-				$bdGeoValue = "POLYGON((" . $bdGeoValue . "))";
+				$bdGeoValue = "POLYGON ((" . $bdGeoValue . "))";
 				array_push($geometries, array("pl", $bdGeoValue));
 			}
 			break;

@@ -218,7 +218,7 @@ class HQuery {
     }
 
     function makeSQL(){
-        
+
         global $publicOnly, $wg_ids;
 
         $res = $this->top_limb->makeSQL();
@@ -244,7 +244,7 @@ class HQuery {
             }
         }
         $this->where_clause = $this->where_clause.$this->top_limb->where_clause." ";
-        
+
         //add owner access restriction @todo look at parmeter owner
         if($this->level=='0'){ //apply this restriction for top level only
             if($publicOnly){
@@ -268,7 +268,7 @@ class HQuery {
 
             $this->where_clause = $this->where_clause. ' and ' . $where2;
         }
-        
+
     }
 
 }
@@ -943,7 +943,7 @@ class HPredicate {
                 $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
             }
         }
-        
+
         return $res;
 
     }
