@@ -251,7 +251,7 @@ if($sError){
                 $usrName, $usrFirstName, $usrLastName, $dbDescription;
 
                 $serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
-                $serverURL = substr($serverURL,4); //to avoid conversion path to localhost if masterindex on the same server
+                $serverURL = substr($serverURL,7); // to avoid conversion path to localhost if masterindex on the same server
 
                 $usrEmail = rawurlencode($usrEmail);
                 $usrName = rawurlencode($usrName);
@@ -262,10 +262,12 @@ if($sError){
 
                 // TODO: New URL should be active July 2014 when H3 on HeuristScholar.org updated to 3.1.8
                 $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" .
-                "?db=Heurist_Master_Index&serverURL=" . $serverURL . "&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
+                "?db=Heurist_Master_Index&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                 "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
-                "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail;
-
+                "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . 
+                "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
+                ."&serverURL=" . rawurlencode($serverURL);
+                
                 $data = loadRemoteURLContent($reg_url);
 
 

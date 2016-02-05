@@ -357,9 +357,11 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 ddiv.height('40px');
 
                 // request for server side on the Heurist master index
-                var baseurl = "<?=HEURIST_INDEX_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
+                var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
                 var params = "db=<?=HEURIST_INDEX_DBNAME?>";   // &named=1&excluded=dbid
                 top.HEURIST.util.getJsonData(baseurl,
+                //top.HEURIST.database.name
+                
                     // fillRegisteredDatabasesTable
                     function(responce){
 

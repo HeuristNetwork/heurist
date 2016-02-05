@@ -65,8 +65,10 @@ if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirst
     return;
 }
 
-if(strpos($serverURL,'http')===false){
-    $serverURL = 'http'.$serverURL;
+error_log('>>>>>'.$serverURL);
+
+if(strpos($serverURL,'http://')===false){
+    $serverURL = 'http://'.$serverURL;
 }
 
 if(strpos($serverURL, '//localhost')>0 ||  strpos($serverURL, '//127.0.0.1')>0){

@@ -24,6 +24,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+//$isOutSideRequest = (@$_REQUEST['db']!="Heurist_Master_Index");
+$_REQUEST['db'] = "Heurist_Master_Index";
 
 if(!defined('NO_DB_ALLOWED')) define('NO_DB_ALLOWED',1);
 if(!defined('SKIP_VERSIONCHECK2')) define('SKIP_VERSIONCHECK2',1);
@@ -35,12 +37,11 @@ $registeredDBs = array();
 
 $is_named = (@$_REQUEST['named']==1); //return assosiated array
 
+$isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
 
-if(@$_REQUEST['db']!="Heurist_Master_Index"){ //this is request from outside - redirect to master index
+if($isOutSideRequest){ //this is request from outside - redirect to master index
 
     $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index";
-
-    //HEURIST_INDEX_BASE_URL POINTS TO http://heurist.sydney.edu.au/h4/
     if($is_named){
         $reg_url =  $reg_url.'&named=1';
     }

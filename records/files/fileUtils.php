@@ -312,7 +312,7 @@ function delFolderTree($dir, $rmdir) {
 function loadRemoteURLviaSocket($url) {
     
     $hostname = '127.0.0.1'; //HEURIST_DOMAIN;
-    $url = str_replace(HEURIST_DOMAIN, $hostname, $url);
+    $url = str_replace('http://'.HEURIST_DOMAIN, 'http://'.$hostname, $url);
 
     $headers[] = "GET ".$url." HTTP/1.1";
     $headers[] = "Host: ".$hostname;
