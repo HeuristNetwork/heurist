@@ -30,20 +30,40 @@ if (!@$serverName) $serverName = null; // override default taken from request he
 // ------ VALUES YOU SHOULD SET -------------------------------------------------------------------------------------------
 
 if (!@$dbHost) {
-	$dbHost= ""; //optional, blank = localhost
-	$dbAdminUsername = "";  // MySQL user names and passwords - required
-	$dbAdminPassword = ""; // required
-	$dbReadonlyUsername = ""; // required
-	$dbReadonlyPassword = ""; //required
+    $dbHost= "";              //optional, blank = localhost
+    $dbAdminUsername = "";    // REQUIRED MySQL user names and passwords
+    $dbAdminPassword = "";    // REQUIRED
+    $dbReadonlyUsername = ""; // REQUIRED
+    $dbReadonlyPassword = ""; // REQUIRED
 }
 
-if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org"; // required, please set to email of the system administrator or mailing group
+if (!@$defaultRootFileUploadURL) $$defaultRootFileUploadURL = "http://??? MUST BE SET BY ADMINISTRATOR ?????????";
+// REQUIRED: defines URL of Heurist filestore - location of files associated with databases
 
-if (!@$infoEmail) $infoEmail = "info@HeuristNetwork.org"; // recommended, please set to the email of whoever provides user assistance
-if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org"; // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
+if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
+// REQUIRED: defines Heurist filestore - location of files associated with databases
+
+// REQUIRED
+// You may need to change this free thumbnailing URL to another (paid) service
+// as you may exhaust its willingness to fgive you thumbnails for free
+if (!@$websiteThumbnailService) $websiteThumbnailService = "http://immediatenet.com/t/m?Size=1024x768&URL=[URL]";
+
+if (!@$websiteThumbnailUsername) $websiteThumbnailUsername = "";
+if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
+if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
+if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 
 
-// -------- THE REST IS OPTIONAL ----------------------------------------------------------------------------------------------
+if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org";
+// REQUIRED, please set to email of the system administrator or mailing group
+
+if (!@$infoEmail) $infoEmail = "info@HeuristNetwork.org";
+// recommended, please set to the email of whoever provides user assistance
+if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org";
+// recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
+
+
+// -------- THE REST IS OPTIONAL --------------------------------------------------------------------------
 
 if (!@$dbPrefix) $dbPrefix = "hdb_"; // recommend retaining hdb_
 
@@ -55,13 +75,6 @@ if (!@$httpProxy) $httpProxy = ""; // if access to the outside world is through 
 if (!@$httpProxyAuth) $httpProxyAuth = ""; // ditto
 if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
 
-if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/"; // default location for new installations
-                                                                   // defines Heurist filestore - location of files associated with databases
 
-if (!@$websiteThumbnailService) $websiteThumbnailService = "http://immediatenet.com/t/m?Size=1024x768&URL=[URL]";
-if (!@$websiteThumbnailUsername) $websiteThumbnailUsername = "";
-if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
-if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
-if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 
 ?>

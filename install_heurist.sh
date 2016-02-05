@@ -43,7 +43,7 @@ if [ $rc -ne 0 ]
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION"
-        echo "The parameter should be eg. h4.0.0-beta as given - DO NOT include the url path or .tar.bz2"
+        echo "The parameter should be eg. h4.2.1.beta as given - DO NOT include the url path or .tar.bz2"
         exit
      fi
 
@@ -122,7 +122,7 @@ $2 mv /var/www/html/HEURIST/$1/move_to_parent_as_index.html /var/www/html/HEURIS
 
 # one or other of these will fail harmlessly
 # on a two tier system you may need to map apache to nobody
-echo Trying both www-data (Debian) and apache (Redhat) as owner:group for data directories, one will succeed
+echo "Trying both www-data (Debian) and apache (Redhat) as owner and group for data directories, one will succeed"
 $2 chown -R apache:apache /var/www/html/HEURIST/
 $2 chown -R www-data:www-data /var/www/html/HEURIST/
 
