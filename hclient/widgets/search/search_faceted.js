@@ -509,9 +509,25 @@ $.widget( "heurist.search_faceted", {
                     inpt.appendTo($fieldset);
                     that._input_fields['$X'+field['var']] = inpt;
                     
-                    inpt.find('.header').attr('title', field['help']);
+                    inpt.find('.header').attr('title', field['help']); //@todo define option in editing_input
                     
                     inpt.find('.input-div').css('display','inline-block');
+                    
+                    //assign event listener
+                    //var $inputs = inpt.editing_input('getInputs');
+                    that._on( inpt.find('input'), {
+                        keypress:
+                        function(e){
+                        var code = (e.keyCode ? e.keyCode : e.which);
+                            if (code == 13) {
+                                top.HEURIST4.util.stopEvent(e);
+                                e.preventDefault();
+                                that.doSearch();
+                            }
+                    }});
+                    that._on( inpt.find('select'), {
+                        change: "doSearch"});                   
+                    
                     
                     var btn_add = $( "<button>")
                     .addClass("smallbutton")

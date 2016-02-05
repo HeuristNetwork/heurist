@@ -24,12 +24,15 @@ $.widget( "heurist.editing_input", {
     options: {
         varid:null,
         recID: null,
-        
+
+        //field desription is either taken from top.HEURIST4.rectypes - H3 compatible structure
+        rectypes: null,  // reference to top.HEURIST4.rectypes - defRecStructure
         rectypeID: null, //field description is taken either from rectypes[rectypeID] or from dtFields
-        rectypes: null,
-        dtID: null,
-        
-        dtFields: null, //it is from top.HEURIST4.rectype.typedefs.dtFields or object with some mandatory field names
+        dtID: null,      // field type id (for recDetails) or field name (for other Entities)
+
+        //  it is either from top.HEURIST4.rectype.typedefs.dtFields - retrieved with help rectypeID and dtID
+        // object with some mandatory field names
+        dtFields: null, 
         
         values: null,
         readonly: false,
@@ -265,7 +268,7 @@ $.widget( "heurist.editing_input", {
                 $input.val(value);
             }
             
-        }else if(detailType=="user"){
+        }else if(detailType=="user"){ //special case - only groups of current user
 
             $input = $( "<select>",{id:inputid} )
             .addClass('text ui-widget-content ui-corner-all')
@@ -484,6 +487,12 @@ $.widget( "heurist.editing_input", {
         return ress;
     },
 
+    //
+    // returns array of input elements
+    //
+    getInputs: function(){
+        return this.inputs;
+    },
 
     _addLabel: function(value, idx) {
 
@@ -509,9 +518,20 @@ $.widget( "heurist.editing_input", {
 
             disp_value = "@todo resource "+value;   
 
-        } else if(detailType=="relmarker"){
+        } else if(detailType=="relmarker"){  //combination of enum and resource
 
             disp_value = "@todo relation "+value;   
+
+        //@todo NEW datatypes                
+        } else if(detailType=="geo"){
+            
+            /*if(detailType=="query")
+            if(detailType=="color")
+            if(detailType=="bool")
+            if(detailType=="password")*/
+            
+            disp_value = "@todo geo "+value;   
+            
 
         }else{
             disp_value = value;
