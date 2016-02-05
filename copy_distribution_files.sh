@@ -75,7 +75,9 @@ cp -r redirects /var/www/html/HEURIST/h4-build/$1
 cp -r search  /var/www/html/HEURIST/h4-build/$1
 cp -r viewers /var/www/html/HEURIST/h4-build/$1
 
+echo
 echo NEW DIRECTOREIS? HAVE YOU UPDATED LIST?
+echo
 
 # remove any superfluous files - add others as appropriate
 # add here as required ...

@@ -481,7 +481,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             if($isDefineNewDatabase){
                 ?>
 
-                <h2 style="padding:0 0 0 10px;">Creating new database on server</h2>
+                <h3 style="padding:0 0 0 10px;">Creating new database on server</h3>
 
                 <div id="challengeForDB" style="<?='display:'.(($passwordForDatabaseCreation=='')?'none':'block')?>;">
                     <label class="labelBold">Enter the password set by your system administrator for new database creation:</label>
@@ -535,7 +535,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div id="div_register_entered" style="display: none;">
                             <h3 style="margin:5px 0 10px 38px;color:darkgreen;">Registration information entered</h3>
                         </div>
@@ -639,9 +639,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     } // checking for current administrative user
 
                     if(!is_logged_in()) { //this is creation+registration
-                            
-                        $captcha_code = getUsrField('ugr_Captcha');    
-                            
+
+                        $captcha_code = getUsrField('ugr_Captcha');
+
                         //check capture
                         if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
                             errorOut('Are you a bot? Please enter the correct answer to the challenge question');
@@ -651,7 +651,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         if (@$_SESSION["captcha_code"]){
                             unset($_SESSION["captcha_code"]);
                         }
-                        
+
                         $firstName = getUsrField('ugr_FirstName');
                         $lastName = getUsrField('ugr_LastName');
                         $eMail = getUsrField('ugr_eMail');
@@ -663,7 +663,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             return false;
                         }
                     }
-                    
+
                     // Create a new blank database
                     $newDBName = trim($_REQUEST['uname']).'_';
 
@@ -798,8 +798,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             return false;
                         }
 
-                        
-                
+
+
                         // Get and clean information for the user creating the database
                         if(!is_logged_in()) {
                             $longName = "";
@@ -873,10 +873,10 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                         // TODO: error check, although this is unlikely to fail
 
-                        
+
                         user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName);
                     } //DEBUG
-                    
+
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
                         <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>
