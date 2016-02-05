@@ -130,16 +130,12 @@ $2 chmod -R 775  /var/www/html/HEURIST/
 $2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
 # Simlink codebase as both heurist and h4 from the root web directory
-# do both /var/www and /var/www/html for good measure
 # h4 goes to index.php, heurist goes to the index.html switchboard
-cd /var/www
-$2 ln -s /var/www/html/HEURIST/h4/ h4
-$2 ln -s /var/www/html/HEURIST/index.html heurist
 cd /var/www/html
-$2 ln -s /var/www/html/HEURIST/h4/ h4
+$2 rm h4
+$2 rm heurist
+$2 ln -s /var/www/html/HEURIST/$1 h4
 $2 ln -s /var/www/html/HEURIST/index.html heurist
-
-# TODO: NEED TO ADD .htaccess file to the filestore
 
 # ------------------------------------------------------------------------------------------
 
@@ -162,5 +158,5 @@ echo "You can do this by pasting the following at the command line - you may nee
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to Heurist on your web site at http://serveraddress/heurist"
+echo "Then run Heurist by navigating to Heurist on your web site at http://serveraddress/heurist for switchboard or http://serveraddress/heurist for direct access to databases"
 echo

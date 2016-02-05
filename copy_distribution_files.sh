@@ -59,25 +59,23 @@ cp -r *.* /var/www/html/HEURIST/h4-build/$1
 
 # Remember to add any new directories here
 
-# H4 directories
-cp -r hclient /var/www/html/HEURIST/h4-build/$1
-cp -r hserver /var/www/html/HEURIST/h4-build/$1
-
-# H3 directories
 cp -r admin /var/www/html/HEURIST/h4-build/$1
 cp -r applications /var/www/html/HEURIST/h4-build/$1
 cp -r common /var/www/html/HEURIST/h4-build/$1
+cp -r context_help /var/www/html/HEURIST/h4-build/$1
+cp -r documentation_and_templates /var/www/html/HEURIST/h4-build/$1
 cp -r export /var/www/html/HEURIST/h4-build/$1
 cp -r hapi /var/www/html/HEURIST/h4-build/$1
+cp -r hclient /var/www/html/HEURIST/h4-build/$1
+cp -r hserver /var/www/html/HEURIST/h4-build/$1
 cp -r import /var/www/html/HEURIST/h4-build/$1
 cp -r installers  /var/www/html/HEURIST/h4-build/$1
 cp -r records  /var/www/html/HEURIST/h4-build/$1
+cp -r redirects /var/www/html/HEURIST/h4-build/$1
 cp -r search  /var/www/html/HEURIST/h4-build/$1
 cp -r viewers /var/www/html/HEURIST/h4-build/$1
 
-# Shared directories
-cp -r context_help /var/www/html/HEURIST/h4-build/$1
-cp -r documentation_and_templates /var/www/html/HEURIST/h4-build/$1
+echo NEW DIRECTOREIS? HAVE YOU UPDATED LIST?
 
 # remove any superfluous files - add others as appropriate
 # add here as required ...
