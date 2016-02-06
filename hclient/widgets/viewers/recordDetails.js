@@ -1,8 +1,10 @@
 /**
 * View data for one record: loads data progressively in order shared, private, relationships, links
-* 
+*
+* TODO: rec_viewer.js and recordDetails.js are pretty much identical. Combine, or at least use includes
+*
 * NO Requires hclient/widgets/rec_actions.js (must be preloaded)
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
@@ -52,7 +54,7 @@ $.widget( "heurist.recordDetails", {
         .appendTo( this.div_toolbar )
         .button({icons: {
             primarty: "ui-icon-pencil"
-            },text:true});    
+            },text:true});
 
         this._on( this.btn_edit, {
             click: function() {
@@ -78,15 +80,15 @@ $.widget( "heurist.recordDetails", {
             function(e, data) {
 
                 var _recID = null,
-                    _recdata = null;
-                    
+                _recdata = null;
+
                 if(data) data = data.selection;
                 var res = top.HAPI4.getSelection(data, false);
                 if(res!=null && res.length()>0){
-                   _recdata = _recdata.getFirstRecord();
-                   _recID  = _recdata.fld(_rec, 'rec_ID'); //_rec[2];
+                    _recdata = _recdata.getFirstRecord();
+                    _recID  = _recdata.fld(_rec, 'rec_ID'); //_rec[2];
                 }
-                
+
                 that.options.recID = _recID;
                 that.options.recdata = _recdata;
                 that._refresh();
@@ -112,7 +114,7 @@ $.widget( "heurist.recordDetails", {
     this._superApply( arguments );
     this._refresh();
     },
-    */  
+    */
 
     /* private function */
     _refresh: function(){
@@ -135,7 +137,7 @@ $.widget( "heurist.recordDetails", {
                     this.recIDloaded = this.options.recID;
 
                     //alert('show '+this.options.recID);
-                    this._renderHeader(); 
+                    this._renderHeader();
 
                     var that = this;
 
@@ -150,7 +152,7 @@ $.widget( "heurist.recordDetails", {
 
                                     for(uGrpID in response.data) {
                                         if(uGrpID && top.HEURIST4.util.isNumber(uGrpID)){
-                                            that.options.user_Tags[uGrpID] = response.data[uGrpID];  
+                                            that.options.user_Tags[uGrpID] = response.data[uGrpID];
                                         }
                                     }
                                     that._renderTags();
@@ -188,22 +190,22 @@ $.widget( "heurist.recordDetails", {
                     */
 
 
-                    /* dynamic load of required js                  
+                    /* dynamic load of required js
                     var that = this;
                     if($.isFunction($('body').editing_input)){
                     this._renderHeader();
                     }else{
-                    $.getScript(top.HAPI4.basePathV4+'hclient/widgets/editing/editing_input.js', function(){ 
+                    $.getScript(top.HAPI4.basePathV4+'hclient/widgets/editing/editing_input.js', function(){
                     $.getScript(top.HAPI4.basePathV4+'hclient/widgets/rec_search.js',
-                    function(){ 
+                    function(){
                     $.getScript(top.HAPI4.basePathV4+'hclient/widgets/rec_relation.js',
-                    function(){ 
-                    that._renderHeader(); 
+                    function(){
+                    that._renderHeader();
                     });
                     });
                     } );
                     }
-                    */                  
+                    */
                 }
             }
 
@@ -252,35 +254,35 @@ $.widget( "heurist.recordDetails", {
         }
 
     }
-    
+
     ,_renderTagsForGroup: function(groupID, groupName){
-        
-                    var tags = this.options.user_Tags[groupID]; //top.HAPI4.currentUser.usr_Tags[groupID];
-                    var tags_list = "";
 
-                    var tagID;
-                    for(tagID in tags) {
-                        var tag = tags[tagID];
-                        if(tag && tag[3]>0){ //usage
-                            tags_list = tags_list + "<a href='#' "+(top.HEURIST4.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
-                        }
-                    }
-                    
-                    var $fieldset = $("<fieldset>").css('font-size','0.9em').appendTo(this.div_content);
+        var tags = this.options.user_Tags[groupID]; //top.HAPI4.currentUser.usr_Tags[groupID];
+        var tags_list = "";
 
-                    if(tags_list)
-                    {
-                        var $d = $("<div>").appendTo($fieldset);
-                        $( "<div>")
-                        .addClass('header')
-                        .css('width','150px')
-                        .html('<label>'+groupName+'</label>')
-                        .appendTo( $d );
-                        $( "<div>")
-                        .addClass('input-cell')
-                        .html(tags_list)
-                        .appendTo( $d );
-                    }
+        var tagID;
+        for(tagID in tags) {
+            var tag = tags[tagID];
+            if(tag && tag[3]>0){ //usage
+                tags_list = tags_list + "<a href='#' "+(top.HEURIST4.util.isempty(tag[1])?"":"title='"+tag[1]+"'")+">"+tag[0]+"</a> ";
+            }
+        }
+
+        var $fieldset = $("<fieldset>").css('font-size','0.9em').appendTo(this.div_content);
+
+        if(tags_list)
+        {
+            var $d = $("<div>").appendTo($fieldset);
+            $( "<div>")
+            .addClass('header')
+            .css('width','150px')
+            .html('<label>'+groupName+'</label>')
+            .appendTo( $d );
+            $( "<div>")
+            .addClass('input-cell')
+            .html(tags_list)
+            .appendTo( $d );
+        }
     }
 
     ,_renderFiles: function(title){
@@ -294,8 +296,8 @@ $.widget( "heurist.recordDetails", {
             var recID = this.options.recID;
 
             for (var idx in this.options.rec_Files){
-                if(idx>=0){  //skip first 
-                    var file = this.options.rec_Files[idx];  
+                if(idx>=0){  //skip first
+                    var file = this.options.rec_Files[idx];
 
                     var obf_recID = file[0];
                     var file_param = file[1]; //($.isArray(file) ?file[2] :file ) ;
@@ -305,9 +307,9 @@ $.widget( "heurist.recordDetails", {
                     // <a href="images/large/01.jpg"><img src="images/thumbnails/01.jpg" alt="First" title="The first image" /></a>
                     // <a href="http://dynamic.xkcd.com/random/comic/?width=880" target="yoxview"><img src="../images/items/thumbnails/xkcd.jpg" alt="XKCD" title="Random XKCD comic" /></a>
 
-                    var $alink = $("<a>",{href: top.HAPI4.basePathV4+'file.php?db=' + top.HAPI4.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
+                    var $alink = $("<a>",{href: top.HAPI4.basePathV4+'redirects/file_download.php?db=' + top.HAPI4.database + (needplayer?'&player=1':'') + '&id='+obf_recID, target:"yoxview" })
                     .appendTo($("<div>").css({height:'auto','display':'inline-block'}).appendTo(this.mediacontent));
-                    $("<img>", {src: top.HAPI4.basePathV4+'file.php?db=' + top.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
+                    $("<img>", {src: top.HAPI4.basePathV4+'redirects/file_download.php?db=' + top.HAPI4.database + '&thumb='+obf_recID, title:title}).appendTo($alink);
 
 
                 }
@@ -316,12 +318,12 @@ $.widget( "heurist.recordDetails", {
             this.mediacontent.show();
 
             /*if($.isFunction(this.mediacontent.yoxview)){
-            $(this.mediacontent).yoxview("update");    
+            $(this.mediacontent).yoxview("update");
             }else{
 
             }  */
-            $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\/file.php\?db=(?:\w+)&id=(?:\w+)$/i});    
-        }      
+            $(this.mediacontent).yoxview({ skin: "top_menu", allowedUrls: /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
+        }
     }
 
     ,_renderHeader: function(){
@@ -358,8 +360,8 @@ $.widget( "heurist.recordDetails", {
             title: '@todo rectypeTitle'.htmlEscape()
             })
             .css({'background-image':'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)','margin-right':'0.4em'}))
-        .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>') 
-        .appendTo($header);          
+        .append('<span>'+(rectypes ?rectypes.names[rectypeID]: 'rectypes not defined')+'</span>')
+        .appendTo($header);
 
         // media content - populated in renderFiles
         this.mediacontent = $("<div>",{id:"mediarec"+recID}).css({'width':'100%','text-align':'center','height':'auto'}).addClass("thumbnails").appendTo(this.div_content); //.hide();
@@ -368,7 +370,7 @@ $.widget( "heurist.recordDetails", {
 
         // list of fields
         var order = rectypes.dtDisplayOrder[rectypeID];
-        if(order){      
+        if(order){
 
             // main fields
             var i, l = order.length;
@@ -380,7 +382,7 @@ $.widget( "heurist.recordDetails", {
                 if (values=='' ||
                     rfrs[dtID][fi['rst_RequirementType']] == 'forbidden' ||
                     (top.HAPI4.has_access(  recdata.fld(record, 'rec_OwnerUGrpID') )<0 &&
-                        rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner 
+                        rfrs[dtID][fi['rst_NonOwnerVisibility']] == 'hidden' )) //@todo: server not return hidden details for non-owner
                 {
                     continue;
                 }
@@ -391,13 +393,13 @@ $.widget( "heurist.recordDetails", {
                 if( (rfrs[dtID][fi['dty_Type']])=="separator" || !values) continue;
 
                 var isempty = true;
-                $.each(values, function(idx,value){ 
-                    if(!top.HEURIST4.util.isempty(value)){ isempty=false; return false; } 
+                $.each(values, function(idx,value){
+                    if(!top.HEURIST4.util.isempty(value)){ isempty=false; return false; }
                 } );
                 if(isempty) continue;
 
-                if(rfrs[dtID][fi['dty_Type']] == 'file'){   
-                    $.each(values, function(idx,value){ 
+                if(rfrs[dtID][fi['dty_Type']] == 'file'){
+                    $.each(values, function(idx,value){
                         if(!top.HEURIST4.util.isempty(value)){
                             that.options.rec_Files.push(value)
                         }
@@ -416,7 +418,7 @@ $.widget( "heurist.recordDetails", {
                 })
                 .appendTo($fieldset);
 
-            }                
+            }
         }//order
 
         this._renderFiles(rec_title);

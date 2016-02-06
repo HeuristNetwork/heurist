@@ -68,7 +68,7 @@ if($db){
                 if($url){
                     $filepath = $url;
                 }else{
-                    $filepath = HEURIST_BASE_URL."file.php?db=".HEURIST_DBNAME."&id=".$fileid;
+                    $filepath = HEURIST_BASE_URL."redirects/file_download.php?db=".HEURIST_DBNAME."&id=".$fileid;
                 }
 
                 ?>
@@ -134,12 +134,12 @@ if($db){
                 }else if($fileinfo[1]){
                     header('Location: '.$fileinfo[1]);  //redirect to URL (external)
                 }else{
-//DEBUG                    
+//DEBUG
                     error_log('File not found '.$filepath);
                 }
             }
         }else{
-//DEBUG 
+//DEBUG
             error_log('Filedata not found '.$fileid);
         }
 
@@ -167,7 +167,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             header('access-control-allow-credentials: true');
         }
         //header('Content-Type: application/octet-stream');
-        //force download 
+        //force download
         if($originalFileName!=null){
             header('Content-Disposition: attachment; filename='.$originalFileName); //basename($filename));
         }
