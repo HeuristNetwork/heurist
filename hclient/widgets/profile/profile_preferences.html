@@ -52,16 +52,16 @@
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
-            "javascript:(function(){h='" + top.HAPI4.basePathV3 + "';"
-            + "d=document;c=d.contentType;"
-            + "if(c=='text/html'||!c){"
-            + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-            + "s=d.createElement('script');s.type='text/javascript';"
-            + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+top.HAPI4.database+"';"
-            + "d.getElementsByTagName('head')[0].appendChild(s);}"
-            + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+top.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
-            //+ "window.setTimeout('w.focus()',200);}"
-            + "}})();"
+                "javascript:(function(){h='" + top.HAPI4.basePathV3 + "';"
+                + "d=document;c=d.contentType;"
+                + "if(c=='text/html'||!c){"
+                + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+                + "s=d.createElement('script');s.type='text/javascript';"
+                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+top.HAPI4.database+"';"
+                + "d.getElementsByTagName('head')[0].appendChild(s);}"
+                + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+top.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+                //+ "window.setTimeout('w.focus()',200);}"
+                + "}})();"
             );
             sel.text('>> '+top.HAPI4.database)
         }
@@ -75,11 +75,11 @@
         <h3>Bookmarklet</h3>
         <div>
             <label class="header">Drag this link on your bookmarks bar</label><b><u>
-            <a id="bookmarklet-link"
-                onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}"
-                title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."
-                href="#"></a>
-            </u></b><label>&nbsp;(it provides bookmarking of web pages)</label><br><br>
+                    <a id="bookmarklet-link"
+                        onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}"
+                        title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."
+                        href="#"></a>
+                </u></b><label>&nbsp;(it provides bookmarking of web pages)</label><br><br>
         </div>
 
         <hr/>
@@ -94,29 +94,35 @@
             <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all h3pref"/>
         </div>
         <div>
-            <div class="header"><label for="smarty-output-limit">Limit number of lines in report output</label></div>
+            <div class="header">
+                <label for="smarty-output-limit">
+                    Limit number of lines in interactive report output<br/>(only applies to web interface, not external calls)
+                </label>
+            </div>
             <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"
-                title="no warning if limit exceeded">
-                <option value="10000">10000</option>
-                <option value="5000">5000</option>
-                <option value="1000">1000</option>
-                <option value="500">500</option>
-                <option value="200">200</option>
+                title="This limit does not apply to external calls or periodic report generation to file">
                 <option value="50">50</option>
-            </select>            
-        </div>        
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1,000</option>
+                <option value="2000">2,000 (not recommended)</option>
+                <option value="5000">5,000 (not recommended)</option>
+                <option value="10000">10,000 (not recommedned)</option>
+                <option value="20000">20,000 (not recommended)</option>
+            </select>
+        </div>
         <div>
             <div class="header"><label for="search_detail_limit">
-                Limit loading of current query on map/timeline with the given number of records with geo/time info
-            </label></div>
+                    Limit number of objects on map/timeline in search interface<br/>(only applies to web interface, not external calls)
+                </label></div>
             <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:300px"
-                title="The map and timeline will be limited to displaying this number of results to avoid overloading your browser.">
+                title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
                 <option value="500">500</option>
-                <option value="1000">1000</option>
-                <option value="2000">2000</option>
-                <option value="5000">5000</option>
-                <option value="10000">10000</option>
-                <option value="20000">20000 (not recommended)</option>
+                <option value="1000">1,000</option>
+                <option value="2000">2,000</option>
+                <option value="5000">5,000</option>
+                <option value="10000">10,000 (not recommended)</option>
+                <option value="20000">20,000 (not recommended)</option>
                 <option value="50000">50000 (not recommended)</option>
             </select>
         </div>
@@ -166,25 +172,25 @@
             <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
         </div>
 
-<!--
+        <!--
         <br />
         <hr />
         <br />
 
         <div>
-            <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
-            <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
+        <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
+        <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
         </div>
         <div>
-            <div class="header"><label for="edit_force_tags">When exiting record edit, prompt for tags if no tags have been set</label></div>
-            <input type="checkbox" name="edit_force_tags" id="edit_force_tags" class="text ui-widget-content ui-corner-all" value="1"/>
+        <div class="header"><label for="edit_force_tags">When exiting record edit, prompt for tags if no tags have been set</label></div>
+        <input type="checkbox" name="edit_force_tags" id="edit_force_tags" class="text ui-widget-content ui-corner-all" value="1"/>
         </div>
         <div>
-            <div class="header"><label for="edit_pointer_recentsearch">When entering a pointer field, default to recent records search (otherwise All Records)</label></div>
-            <input type="checkbox" name="edit_pointer_recentsearch" id="edit_pointer_recentsearch" class="text ui-widget-content ui-corner-all" value="1"/>
+        <div class="header"><label for="edit_pointer_recentsearch">When entering a pointer field, default to recent records search (otherwise All Records)</label></div>
+        <input type="checkbox" name="edit_pointer_recentsearch" id="edit_pointer_recentsearch" class="text ui-widget-content ui-corner-all" value="1"/>
         </div>
--->
+        -->
     </fieldset>
-  </form>
-  <br />
-  <p class="messages"></p>
+</form>
+<br />
+<p class="messages"></p>

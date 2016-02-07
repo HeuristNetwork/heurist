@@ -1,52 +1,52 @@
 <?php
-    /*
-    * Copyright (C) 2005-2016 University of Sydney
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * http://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
+/*
+* Copyright (C) 2005-2016 University of Sydney
+*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
+* in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.gnu.org/licenses/gpl-3.0.txt
+*
+* Unless required by applicable law or agreed to in writing, software distributed under the License
+* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing permissions and limitations under
+* the License.
+*/
 
-    /**
-    * Load the user's display preferences.
-    * Display preferences are added as CSS classes to the document body:
-    * you should include this file in the BODY, not in the head.
-    * If arguments  xxx=yyy  are supplied, set those for future display,
-    * and suppress normal output.
-    *
-    * Setting  xxx=yyy  will add class  xxx-yyy  to the body,
-    * but then setting  xxx=xyz  would add  xxx-xyz  INSTEAD.
-    *
-    * Preferences are currently stored in the $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], maybe they would eventually be in the DB.
-    *
-    * @author      Tom Murtagh
-    * @author      Kim Jackson
-    * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @author      Stephen White   
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2016 University of Sydney
-    * @link        http://HeuristNetwork.org
-    * @version     3.1.0
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-    */
+/**
+* Load the user's display preferences.
+* Display preferences are added as CSS classes to the document body:
+* you should include this file in the BODY, not in the head.
+* If arguments  xxx=yyy  are supplied, set those for future display,
+* and suppress normal output.
+*
+* Setting  xxx=yyy  will add class  xxx-yyy  to the body,
+* but then setting  xxx=xyz  would add  xxx-xyz  INSTEAD.
+*
+* Preferences are currently stored in the $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist'], maybe they would eventually be in the DB.
+*
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Stephen White
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     3.1.0
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+*/
 
-    define('ISSERVICE',1);
-    define("SAVE_URI", "disabled");
+define('ISSERVICE',1);
+define("SAVE_URI", "disabled");
 
-    require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
+require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 
-    /* An array of the properties that may be set, and default values. 
-       Values may be edited for many of these in admin/profile/editPreferbneces.html
-    */
-    $prefs = array(
+/* An array of the properties that may be set, and default values.
+Values may be edited for many of these in admin/profile/editPreferbneces.html
+*/
+$prefs = array(
     "help" => "show", // show help texts under fields and in other locations
     "advanced" => "hide", // not sure if this is ever used
     "input-visibility" => "all", // allows hiding of optional fields
@@ -54,7 +54,7 @@
     "gigitiser-view" => "", // remembers geo window between calls, blank = world
     "double-click-action" => "edit", // double clicking on record in search opens edit, 'edit' is the only value ever used
 
-    "my-records-searches" => "show", // show the My Records section in the navigation menu 
+    "my-records-searches" => "show", // show the My Records section in the navigation menu
     "all-records-searches" => "show", // show the All records section in the navigation menu
     "workgroup-searches" => "show", // show the workgroup searches section in the navigation menu
     "left-panel-scroll" => 0,
@@ -91,7 +91,7 @@
 
     // Properties which can be set in the My profile > Preferences dialogue
     "savedSearchDest" => "",  //last saved search destination (workgroup id)
-    "defaultSearch" => "sortby:-m after:\"1 week ago\"", // was "tag:Favourites"
+    "defaultSearch" => "", // was "tag:Favourites", then sortby:-m after:\"1 week ago\"
     "searchQueryInBrowser" => "true", // was false, I presume for neatness. But less informative
 
     "favourites" => "Favourites", // standard spelling for default search
@@ -113,28 +113,28 @@
     "record-edit-date" => "", // TODO: what is this for, it is not set in profile
     "record-edit-advancedmode" => "false", //by default record editing comes up in stripped down 'simple' mode
     "record-add-showaccess" => "true",     //show access right selectors in add record popup
-    "record-add-defaults" => ""            //default settings for new record in add record popup    
+    "record-add-defaults" => ""            //default settings for new record in add record popup
 
     // Notes: to add new preferences, add here, add in editPreferences (if required)
-    );
+);
 
-    foreach (get_group_ids() as $gid) {
-        $prefs["workgroup-searches-$gid"] = "hide";
+foreach (get_group_ids() as $gid) {
+    $prefs["workgroup-searches-$gid"] = "hide";
+}
+
+session_start();
+
+//save preference  SAW - this supports multiple preference saving, need to consolidate tpreference saves on client side
+$writeMode = false;
+foreach ($_REQUEST as $property => $value) {
+    if (array_key_exists($property, $prefs)) {
+        $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property] = $value;
+        //			$writeMode = true;
     }
-
-    session_start();
-
-    //save preference  SAW - this supports multiple preference saving, need to consolidate tpreference saves on client side
-    $writeMode = false;
-    foreach ($_REQUEST as $property => $value) {
-        if (array_key_exists($property, $prefs)) {
-            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property] = $value;
-            //			$writeMode = true;
-            }
-    }
+}
 
 //	if ($writeMode) return;	// suppress normal output
-    header("Content-type: text/javascript");
+header("Content-type: text/javascript");
 ?>
 <!-- TODO: did someone mean to comment this stuff out? ... -->
 //document.domain = "<?= HEURIST_SERVER_NAME ?>";
@@ -144,29 +144,29 @@ throw document.location.href + ": include displayPreferences.php in the body, no
 }
 
 <?php
-    if ($prefs) {
-        print "top.HEURIST.displayPreferences = {";
-        $first = true;
-        $classNames = "";
-        $replaceClassNames = "";
-        foreach ($prefs as $property => $value) {
-            if (! $first) print ",";  $first = false;
-            print "\n";
+if ($prefs) {
+    print "top.HEURIST.displayPreferences = {";
+    $first = true;
+    $classNames = "";
+    $replaceClassNames = "";
+    foreach ($prefs as $property => $value) {
+        if (! $first) print ",";  $first = false;
+        print "\n";
 
-            if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property])
+        if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property])
             $value = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property];
 
-            print "\t\"".addslashes($property)."\": \"".addslashes($value)."\"";
-            //SAW TODO: This seems to be unused and deprecated with no comment. Check old code and verify and remove.
-            $classNames .= " " . addslashes($property . "-" . $value);
-            if ($replaceClassNames) $replaceClassNames .= "|";
-            $replaceClassNames .= "\\b" . $property . "-\\S+\\b";
-        }
-        print "\n};\n";
-
-    } else {
-        print "top.HEURIST.displayPreferences = {};\n";
+        print "\t\"".addslashes($property)."\": \"".addslashes($value)."\"";
+        //SAW TODO: This seems to be unused and deprecated with no comment. Check old code and verify and remove.
+        $classNames .= " " . addslashes($property . "-" . $value);
+        if ($replaceClassNames) $replaceClassNames .= "|";
+        $replaceClassNames .= "\\b" . $property . "-\\S+\\b";
     }
+    print "\n};\n";
+
+} else {
+    print "top.HEURIST.displayPreferences = {};\n";
+}
 
 ?>
 top.HEURIST.fireEvent(window, "heurist-display-preferences-loaded");
