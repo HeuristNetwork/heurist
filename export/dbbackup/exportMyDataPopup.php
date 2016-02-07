@@ -1,52 +1,52 @@
 <?php
 
-    /**
-    * exportMyDataPopup.php: Set up the export of some or all data as an HML or zip file
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.5
-    */
+/**
+* exportMyDataPopup.php: Set up the export of some or all data as an HML or zip file
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.1.5
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
-    require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-    
-    require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
+require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
+require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL_V3 . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
+require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
 
-    if (isForAdminOnly("to carry out a database content dump - please ask your database owner to do this")){
-        return;
-    }
+if (! is_logged_in()) {
+    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
+    return;
+}
 
-    $username = get_user_username();
-    $folder = HEURIST_FILESTORE_DIR."backup/".$username;
+if (isForAdminOnly("to carry out a database content dump - please ask your database owner to do this")){
+    return;
+}
 
-    $mode = @$_REQUEST['mode'];
+$username = get_user_username();
+$folder = HEURIST_FILESTORE_DIR."backup/".$username;
 
-    // TODO: what has this to do with the price of fish? Is this being used by the dump my data function?
-    if($mode=='2' && file_exists($folder.".zip") ){
-        downloadFile('application/zip', $folder.".zip");
-        exit();
-    }
+$mode = @$_REQUEST['mode'];
+
+// TODO: what has this to do with the price of fish? Is this being used by the dump my data function?
+if($mode=='2' && file_exists($folder.".zip") ){
+    downloadFile('application/zip', $folder.".zip");
+    exit();
+}
 
 ?>
 
@@ -66,7 +66,10 @@
     <body class="popup" width: 300px; height: 300px;>
 
         <?php
-            if(!$mode) {
+
+        $please_advise = "<br>Please advise your system administrator";
+
+        if(!$mode) {
             ?>
 
             <p><b>This function is available to database adminstrators only (you are a database administrator).</b></p>
@@ -107,181 +110,163 @@
 
             <?php
 
+        }else{
+
+            if(file_exists($folder)){
+                //clean folder
+                delFolderTree($folder, true);
+            }
+            if (!mkdir($folder, 0777, true)) {
+                die('Failed to create folder for backup');
+            }
+
+            //load hml output into string file and save it
+            $url = HEURIST_BASE_URL . "export/xml/flathml.php?w=all&a=1&depth=0&db=".HEURIST_DBNAME;
+
+            if(@$_REQUEST['allrecs']!="1"){
+                $userid = get_user_id();
+                $q = "owner:$userid"; //user:$userid OR
             }else{
+                $q = "sortby:-m";
+            }
+            $url .= ("&q=$q&filename=".$folder."/backup.xml");
 
-                if(file_exists($folder)){
-                    //clean folder
-                    delFolderTree($folder, true);
+
+            $_REQUEST['w'] = 'all';
+            $_REQUEST['a'] = '1';
+            $_REQUEST['depth'] = '5';
+            $_REQUEST['q'] = $q;
+            $_REQUEST['rev'] = 'no'; //do not include reverce pointers
+            $_REQUEST['filename'] = $folder."/backup.xml";
+
+            print "Export as flathml<br>";
+            ob_flush();flush();
+
+            $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
+            $content = "";
+            //$content = get_include_contents($filename);
+
+            if (is_file($to_include)) {
+                ob_start();
+                include $to_include;
+                $content = ob_get_contents();
+                ob_end_clean();
+            }
+
+            $file = fopen ($folder."/backup.xml", "w");
+            if(!$file){
+                die("Can't write backup file. Check permissions");
+            }
+            fwrite($file, $content);
+            fclose ($file);
+
+
+            // Export database definitions as readable text
+
+            print "Export database definitions as readable text<br>";
+            ob_flush();flush();
+
+            $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
+            saveURLasFile($url, $folder."/Database_Structure.txt");
+
+
+
+            if(is_admin()){
+                // Do an SQL dump of the whole database
+                print "Export SQL dump of the whole database<br>";
+                ob_flush();flush();
+
+                try{
+                    $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+                    $dump->start($folder."/MySQL_Database_Dump.sql");
+                } catch (Exception $e) {
+                    die ("<h2>Error</h2>Unable to generate MySQL database dump.".$e->getMessage().$please_advise);
                 }
-                if (!mkdir($folder, 0777, true)) {
-                    die('Failed to create folder for backup');
-                }
 
-                //load hml output into string file and save it HEURIST_BASE_URL_V3
-                $url = HEURIST_BASE_URL_V3."/../../export/xml/flathml.php?w=all&a=1&depth=0&db=".HEURIST_DBNAME;
+            }
 
-                if(@$_REQUEST['allrecs']!="1"){
-                    $userid = get_user_id();
-                    $q = "owner:$userid"; //user:$userid OR
+            if($_REQUEST['includeresources']){
+                print "Export resources (files)<br>";
+                ob_flush();flush();
+
+                $squery = "select rec_ID, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt ";
+                $ourwhere = " and (dtl_RecID=rec_ID) and (ulf_ID = dtl_UploadedFileID) ";
+                $detTable = ", recDetails, recUploadedFiles ";
+                $params = array();
+                $params["q"] = $q;
+
+                $query = prepareQuery($params, $squery, BOTH, $detTable, $ourwhere);
+
+                $mysqli = mysqli_connection_overwrite(DATABASE);
+
+                $res = $mysqli->query($query);
+                if (!$res){
+                    print "<p class='error'>Failed to obtain list of file resources from MySQL database.$please_advise</p>";
                 }else{
-                    $q = "sortby:-m";
-                }
-                $url .= ("&q=$q&filename=".$folder."/backup.xml");
+                    //loop for records/details
+                    while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
+                        $filename_orig = $row[4];
+                        $filename_insys = $row[2].$row[3];
+                        if($row[1] && $filename_orig){
 
+                            if(file_exists($filename_insys)){
 
-                $_REQUEST['w'] = 'all';
-                $_REQUEST['a'] = '1';
-                $_REQUEST['depth'] = '5';
-                $_REQUEST['q'] = $q;
-                $_REQUEST['rev'] = 'no'; //do not include reverce pointers
-                $_REQUEST['filename'] = $folder."/backup.xml";
-
-                print "Export as flathml<br>";
-                @ob_flush();@flush();
-
-                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-                $content = "";
-                //$content = get_include_contents($filename);
-
-                if (is_file($to_include)) {
-                    ob_start();
-                    include $to_include;
-                    $content = ob_get_contents();
-                    ob_end_clean();
-                }
-
-                $file = fopen ($folder."/backup.xml", "w");
-                if(!$file){
-                    die("Can't write backup file. Check permissions");
-                }
-                fwrite($file, $content);
-                fclose ($file);
-
-
-                // Export database definitions as readable text
-
-                print "Export database definitions as readable text<br>";
-                @ob_flush();@flush();
-
-                $url = HEURIST_BASE_URL_V3."admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-                saveURLasFile($url, $folder."/Database_Structure.txt");
-
-
-
-                if(is_admin()){
-                    // Do an SQL dump of the whole database
-                    print "Export SQL dump of the whole database<br>";
-                    @ob_flush();@flush();
-
-                    try{
-                        $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
-                        $dump->start($folder."/MySQL_Database_Dump.sql");
-                    } catch (Exception $e) {
-                        die ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
-                    }
-
-                    /* OLD WAY   
-                    $dump_command = "mysqldump --routines -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-                    " ".DATABASE." > ".$folder."/MySQL_Database_Dump.sql";
-
-                    $msg=explode(ADMIN_DBUSERPSWD,$dump_command); // $msg[1] strips out the password info ...
-                    exec("$dump_command". ' 2>&1', $output, $res1);
-                    if ($res1 != 0 ) {
-                        die ("<h2>Error</h2>Unable to process database dump: <i>mysqldump -u... -p... $msg[1]</i>".
-                            "<p>The most likely reason is that the target directory is not writable by PHP, or the SQL output file already exists".
-                            "Please check the target directory listed above, or ask your sysadmin to make it writable/remove existing SQL file");
-                    }*/
-                }
-
-                if($_REQUEST['includeresources']){
-                    print "Export resources (files)<br>";
-                    @ob_flush();@flush();
-
-                    $squery = "select rec_ID, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt ";
-                    $ourwhere = " and (dtl_RecID=rec_ID) and (ulf_ID = dtl_UploadedFileID) ";
-                    $detTable = ", recDetails, recUploadedFiles ";
-                    $params = array();
-                    $params["q"] = $q;
-
-                    $query = prepareQuery($params, $squery, BOTH, $detTable, $ourwhere);
-
-                    $mysqli = mysqli_connection_overwrite(DATABASE);
-
-                    $res = $mysqli->query($query);
-                    if (!$res){
-                        //die('Failed to obtain data for record type: '.$rt);
-                        print "<p class='error'>Failed to obtain data for resources</p>";
-                    }else{
-                        //loop for records/details
-                        while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
-                            $filename_orig = $row[4];
-                            $filename_insys = $row[2].$row[3];
-                            if($row[1] && $filename_orig){
-
-                                if(file_exists($filename_insys)){
-
-                                    $imgfolder = $folder."/resources";
-                                    if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
-                                        print "<p class='error'>'Failed to create folder for resources: ".$imgfolder."</p>";
-                                        break;
-                                    }else{
-                                        $filename = $imgfolder."/".$filename_orig;
-                                        //copy file
-                                        copy($filename_insys, $filename);
-                                    }
-
+                                $imgfolder = $folder."/resources";
+                                if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
+                                    print "<p class='error'>'Failed to create folder for file resources: ".$imgfolder."$please_advise</p>";
+                                    break;
                                 }else{
-                                    print "<p class='error'>".$filename_insys."<br>File is not found. Please contact sysadmin</p>";
+                                    $filename = $imgfolder."/".$filename_orig;
+                                    //copy file
+                                    copy($filename_insys, $filename);
                                 }
 
+                            }else{
+                                print "<p class='error'>File not found: ".$filename_insys."$please_advise</p>";
                             }
+
                         }
                     }
-
                 }
 
-                //copy(dirname(__FILE__)."/../../admin/setup/dbcreate/coreDefinitions.txt", $folder."coreDefinitions.txt");
-
-                //archive folder
-                //zipDirectory($folder, HEURIST_FILESTORE_DIR."backup/".$user."_backup.zip");
-
-
-                // Create a zipfile of the definitions and data which have been dumped to disk
-
-                unlink($folder.".zip");
-                $cmdline = "zip -r -j ".$folder.".zip ".$folder;
-
-                $res1 = 0;
-                $output1 = exec($cmdline, $output, $res1);
-                if ($res1 != 0 ) {
-                    print  ("<p class='error'>Exec error code $res1: Unable to create zip file $folder.zip>&nbsp;<br>");
-                    print  $output;
-                    print  "</p> Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
-                    print "Your data have been backed up in ".$folder;
-                    print "<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder";
-                } else {
-                    print "<br><br><div class='lbl_form'></div>".
-                    "<a href='exportMyDataPopup.php/$username.zip?db=".HEURIST_DBNAME."&mode=2".
-                    "' target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>";
-                }
-
-                print '<div style="width:100%; text-align:center; padding-top:40px;">'.
-                '<input type="button" value="repeat" onclick="{location.href=\'exportMyDataPopup.php?db='.HEURIST_DBNAME.'\'}"></div>';
-
             }
 
-            /*
-            function get_include_contents($filename) {
-            if (is_file($filename)) {
-            ob_start();
-            include $filename;
-            $contents = ob_get_contents();
-            ob_end_clean();
-            return $contents;
+            // Create a zipfile of the definitions and data which have been dumped to disk
+
+            unlink($folder.".zip");
+            $cmdline = "zip -r -j ".$folder.".zip ".$folder;
+
+            $res1 = 0;
+            $output1 = exec($cmdline, $output, $res1);
+            if ($res1 != 0 ) {
+                print  ("<p class='error'>Exec error code $res1: Unable to create zip file $folder.zip>&nbsp;$please_advise<br>");
+                print  $output;
+                print  "</p> Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator.";
+                print "Your data have been backed up in ".$folder;
+                print "<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder";
+            } else {
+                print "<br><br><div class='lbl_form'></div>".
+                "<a href='exportMyDataPopup.php/$username.zip?db=".HEURIST_DBNAME."&mode=2".
+                "' target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>";
             }
-            return false;
-            }
-            */
+
+            print '<div style="width:100%; text-align:center; padding-top:40px;">'.
+            '<input type="button" value="repeat" onclick="{location.href=\'exportMyDataPopup.php?db='.HEURIST_DBNAME.'\'}"></div>';
+
+        }
+
+        /*
+        function get_include_contents($filename) {
+        if (is_file($filename)) {
+        ob_start();
+        include $filename;
+        $contents = ob_get_contents();
+        ob_end_clean();
+        return $contents;
+        }
+        return false;
+        }
+        */
         ?>
 
     </body>
