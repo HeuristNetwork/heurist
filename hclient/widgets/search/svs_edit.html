@@ -1,6 +1,6 @@
 <!--
 /**
-* Popup form for editing saved searches
+* Popup form for editing saved searches and rule sets
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -25,24 +25,32 @@
         <input type="hidden" name="svs_ID" id="svs_ID" />
 
         <div>
-            <div class="header_narrow" style="vertical-align:top; margin-top:5px;"><label for="svs_Name">Filter name</label></div>
-            <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" size="30" style="width:250px" />
+        <div class="header_narrow" style="vertical-align:top; margin-top:5px;"><label for="svs_Name">Filter name</label></div>
+        <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" size="30" style="width:250px" />
+        <div style="font-size: smaller; margin-top: 2px;">
+            Used in navigation tree (limit to approx. 25 characters).
         </div>
 
         <div>
-            <div class="header_narrow" style="vertical-align:top; margin-top:5px;"><label for="svs_Query">Filter query</label></div>
+            <div class="header_narrow" style="vertical-align:top; margin-top:5px;"><label for="svs_Query">Filter string</label></div>
             <textarea name="svs_Query" id="svs_Query" rows="3" class="text ui-widget-content ui-corner-all"
-                style="margin-top:0.4em;width:300px"></textarea>
+                style="margin-top:0.4em;width:350px"></textarea>
+            <div style="width: 340px; font-size: smaller; margin-top: 2px;">
+                A standard Heurist filter string which extracts a subset of the database..
+            </div>
         </div>
 
         <div>
             <div class="header_narrow" style="vertical-align:top; margin-top: 10px;"><label for="svs_Rules">Expansion rules</label></div>
             <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
-                style="margin-top:0.4em;width:300px" readonly="readonly"></textarea>
-                <div style="font-size: smaller; margin-top: 2px;">
-                Rules determine the expansion of the result set <br/>
-                after the filter query has been applied. Edit rules <br/>
-                with the button on the right of the field.</div>
+                style="margin-top:0.4em;width:350px" readonly="readonly"></textarea>
+            <div style="width: 340px; font-size: smaller; margin-top: 2px;">
+                Rules are applied to the result set after each selection. They expand the results
+                to include connected records (entities). Rules can narrow this expansion
+                down to specific entity types, connection types or filters.
+                Use rules to bring in information such as map location or dates for display on a map or timeline.
+                Edit rules with the pencil icon on the right.
+            </div>
 
             <div id="svs_btnset">
                 <div id="svs_Rules_edit" style="margin-top:0.4em"></div>
@@ -58,11 +66,11 @@
 
         <div>
             <div class="header_narrow" style="vertical-align:top"><label for="svs_Notes">Notes</label></div>
-            <textarea name="svs_Notes" id="svs_Notes" rows="2" class="text ui-widget-content ui-corner-all"  style="margin-top:0.4em;width:300px"></textarea>
+            <textarea name="svs_Notes" id="svs_Notes" rows="2" class="text ui-widget-content ui-corner-all"  style="margin-top:0.4em;width:350px"></textarea>
         </div>
 
     </fieldset>
-  </form>
+</form>
 
-  <br />
-  <p class="messages"></p>
+<br />
+<p class="messages"></p>

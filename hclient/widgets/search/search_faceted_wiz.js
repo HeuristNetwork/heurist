@@ -145,8 +145,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
         this.element.dialog({
             autoOpen: false,
-            height: 400,
-            width: 600,
+            height: 550,
+            width: 700,
             modal: true,
             title: top.HR("Define Faceted Search"),
             resizeStop: function( event, ui ) {
@@ -219,10 +219,10 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step3 = $("<div>")
         .css({overflow: 'none !important', width:'100% !important', 'display':'none'})
         .appendTo(this.element);
-        
+
         var header = $("<div>").css('font-size','0.8em').appendTo(this.step3);
         header.html("<label>"+top.HR("Define titles, help tips and facet type")+"</label>");
-        
+
         $("<fieldset>",{id:'facets_list'}).appendTo(this.step3);
         this.step_panels.push(this.step3);
 
@@ -553,7 +553,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if($(opt_rectypes).is(':empty')){
                 top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
-             }   
+             }
 
             this._on( opt_mode, {
             click: function(e){
@@ -876,10 +876,10 @@ $.widget( "heurist.search_faceted_wiz", {
             }
         }
     }
-    
+
     , _findFacetByCode: function(code){
         if( top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
-            
+
             var k, len = this.options.params.facets.length;
             for (k=0;k<len;k++){
                 var facet =  this.options.params.facets[k];
@@ -916,11 +916,11 @@ $.widget( "heurist.search_faceted_wiz", {
                     var ids = node.data.code.split(":");
                     //rtid: ids[ids.length-2],
                     //id:  ids[ids.length-1],
-                    
+
                     //if facets already defined try to restore title,help and type from previous
                     var old_facet = this._findFacetByCode(node.data.code);
                     if(old_facet!=null){
-                        
+
                         facets.push( {
                             'var': facets.length,
                             code:node.data.code,
@@ -929,7 +929,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             isfacet: old_facet.isfacet,
                             type:node.data.type
                         } );
-                        
+
                     }else{
 
                         facets.push( {
@@ -942,39 +942,39 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
             }
 
-            
+
             this.options.params.facets = facets;
             this.options.params.version = 2;
 
             if(len>0){
                 //facets[0].isfacet = true;
             }
-            
+
             //-----------------------------------------------------------
-            
+
             var listdiv = $(this.step3).find("#facets_list");
             listdiv.empty();
-            
+
             len = facets.length;
             for (k=0;k<len;k++){
                     //title
                     //help tip (take from rectype structure?)
                     //type of facet (radio group)
-                    
-                    var sContent = 
+
+                    var sContent =
             '<div>'
                 +'<div class="header"><label for="facet_Title'+k+'">Facet title</label></div>'
                 +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
                 +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
             +'</div>';
-            
+
                     var sTypeLabel = '<div style="font-size:smaller;font-style:italic;"><div class="header"><label></label></div>';
                     //|| facets[k].type=='blocktext'
                     if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
                         sContent = sContent +
                 sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'   //true  1
-                +'<label for="facet_Type'+k+'_1">facet first character</label>'    
+                +'<label for="facet_Type'+k+'_1">facet first character</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_2" value="2"/>'   //2
                 +'<label for="facet_Type'+k+'_2">facet every value</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'   //false 0
@@ -997,8 +997,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'<label for="facet_Type'+k+'_0">dropdown</label>'
             +'</div>';
                     }
-                         
-                sContent = sContent + 
+
+                sContent = sContent +
                 '<div>'
                 +'<div class="header" style="vertical-align:top;"><label for="facet_Help'+k+'">Help tip</label></div>'
                 +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="2" '
@@ -1007,13 +1007,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'</div>'
                 +'<hr style="margin-top:0.5em;margin-bottom:0.5em;"/>';
                 listdiv.append($(sContent));
-            
+
                 if(facets[k].isfacet==false){
                     facets[k].isfacet = 0;
                 }else if(facets[k].isfacet!=2){
                     facets[k].isfacet = 1;
                 }
-            
+
                 //assign values
                 listdiv.find('#facet_Title'+k).val(facets[k].title);
                 listdiv.find('#facet_Help'+k).val(facets[k].help);
@@ -1025,12 +1025,12 @@ $.widget( "heurist.search_faceted_wiz", {
             return false;
         }
     }
-    
+
     , _assignFacetParams: function(){
         if( top.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
-            
+
             var listdiv = $(this.step3).find("#facets_list");
-            
+
             var k, len = this.options.params.facets.length;
             for (k=0;k<len;k++){
                 var title = listdiv.find('#facet_Title'+k).val();
@@ -1041,7 +1041,7 @@ $.widget( "heurist.search_faceted_wiz", {
         }
         return null;
     }
-    
+
 
     //4. show facet search preview
     ,_initStep4_FacetsPreview: function(){

@@ -24,38 +24,47 @@
     <fieldset>
         <input type="hidden" name="svs_ID" id="svs_ID" />
         <div>
-            <div class="header"><label for="svs_Name">Facet search name</label></div>
+            <div class="header"><label for="svs_Name">Faceted search name</label></div>
             <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all" />
-        </div>
-
-        <div class="simple-mode">
-            <div class="header"><label for="opt_rectypes">Select record type</label></div>
-            <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
-        </div>
-
-        <div>
-            <div class="header"  style="padding-top: 10px;"><label for="svs_UGrpID">Save in work group</label></div>
-            <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
-        </div>
-
-        <div>
-            <div class="header" style="vertical-align:top;"><label for="svs_Query">Supplementary Filter</label></div>
-            <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
-                style="margin-top:0.4em;width:300px"></textarea>
-        </div>
-
-        <div style="display:block;border-top:1px solid;margin-top: 10px;padding:1em 0 1em;font-size:smaller;">
-            <div class="heurist-helper1" style="margin-left: 160px;padding:1em 0 1em;">
-                You may add a set of rules which will be used to expand the search result set and bring in additional records each time a facet selection is made. Use to bring in information from related records, such as map location or dates for display on a map / timeline.
+            <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+                Used in navigation tree (limit to approx. 25 characters).
             </div>
         </div>
 
         <div>
-            <div class="header" style="vertical-align:top"><label for="svs_Rules">Rules</label></div>
+            <div class="header"  style="margin-bottom: 10px; "><label for="svs_UGrpID">Save in work group</label></div>
+            <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+        </div>
+
+        <div class="simple-mode"">
+            <div class="header"><label for="opt_rectypes">Search for</label></div>
+            <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+            <div style="width: 370px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+                This determines the record type which will be retrieved by the search.
+                The facets can, however, be based on attributes of other record types linked from this type.
+            </div>
+        </div>
+
+        <div>
+            <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
+            <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
+                style="margin-top:0.4em;width:350px"></textarea>
+            <div style="width: 370px; font-size: smaller; margin-top: 2px;">
+                A standard Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
+            </div>
+        </div>
+
+        <div>
+            <div class="header" style="vertical-align:top"><label for="svs_Rules">Expansion rules</label></div>
             <textarea name="svs_Rules" id="svs_Rules" rows="3" class="text ui-widget-content ui-corner-all"
                 style="margin-top:0.4em;width:350px" readonly="readonly"></textarea>
-                <div style="font-size: smaller; margin-top: 2px;">
-                Edit rules with the button on the right of the field.</div>
+            <div style="width: 370px; font-size: smaller; margin-top: 2px;">
+                Rules are applied to the result set after each selection. They expand the results
+                to include connected records (entities). Rules can narrow this expansion
+                down to specific entity types, connection types or filters.
+                Use rules to bring in information such as map location or dates for display on a map or timeline.
+                Edit rules with the pencil icon on the right.
+            </div>
 
 
             <div id="svs_btnset">
@@ -66,6 +75,7 @@
         </div>
 
     </fieldset>
-  </form>
-  <!-- <br /> -->
-  <p class="messages"></p>
+</form>
+
+<!-- TODO: If the only function of this class is name length warning, remove it and replace with better methodology -->
+<div class="messages"></div>

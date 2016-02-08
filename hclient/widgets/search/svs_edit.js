@@ -380,11 +380,11 @@ function hSvsEdit(args) {
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 475,
-                    width: 450,
+                    height: 575,
+                    width: 600,
                     modal: true,
                     resizable: false,
-                    title: top.HR(isRules?'Edit Rule Set':'Edit saved filter criteria'),
+                    title: top.HR(isRules?'Edit Rule Set':'Save filter criteria'),
                     buttons: [
                         {text:top.HR('Save'), click: __doSave},
                         {text:top.HR('Cancel'), click: function() {
