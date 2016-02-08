@@ -41,11 +41,7 @@ $.widget( "heurist.editing_input", {
         show_header: true, //show/hide label  
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
     },
-    
-    newvalues:{},
-    detailType:null,
-    configMode:null, //configuration settings, mostly for enum and resource types 
-    
+
     // the constructor
     _create: function() {
 
@@ -61,34 +57,28 @@ $.widget( "heurist.editing_input", {
             return;
         }
 
-        
-        this.configMode = this.f('rst_JsonConfig');
-        if(!top.HEURIST4.util.isempty(this.configMode)){
-            if($.type(this.configMode) === "string"){
-                try{
-                    this.configMode = $.parseJSON(this.configMode);
-                }catch(e){
-                    this.configMode = null;                                        
-                }
-            }
-            if(!$.isPlainObject(this.configMode)){
-                this.configMode = null;
-            }
-        }
-        
         var that = this;
 
-        this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
+        /*
+        if(detailType=="separator"){
+        this.element.css('display','block');
+        $( "<h3>")
+        .addClass('separator')
+        .html(this.f('rst_DisplayName'))
+        .appendTo( this.element );
+        }
+        */
 
         var required = "";
         if(this.options.readonly) {
             required = "readonly";
         }else{
-            required = this.f('rst_RequirementType');
-            /*if (required == 'optional') required = "optional";
+            this.f('rst_RequirementType');
+            if (required == 'optional') required = "optional";
             else if (required == 'required') required = "required";
                 else if (required == 'recommended') required = "recommended";
-                    else required = "";*/
+                    else required = "";
 
             var repeatable = (this.f('rst_MaxValues') != 1)? true : false; //saw TODO this really needs to check many exist
             
@@ -106,8 +96,9 @@ $.widget( "heurist.editing_input", {
                 // bind click events
                 this._on( this.btn_add, {
                     click: function(){
-                        if(this.f('rst_MaxValues')==null  || this.inputs.length < this.f('rst_MaxValues')){ 
-                            this._addInput('');
+                        if(this.f('rst_MaxValues')==null || this.options.values.length < this.f('rst_MaxValues')){
+                            this.options.values.push('');
+                            this._addInput('', this.options.values.length-1);
                         }
                     }
                 });
@@ -126,29 +117,22 @@ $.widget( "heurist.editing_input", {
             this.header = $( "<div>")
             .addClass('header '+required)
             .css('width','150px')
-            .css('vertical-align', (this.detailType=="blocktext")?'top':'')
-            .html('<label>'
+            .css('vertical-align', (detailType=="blocktext")?'top':'')
+            .html('<label for="input'+(this.options.varid?this.options.varid:'0_'+this.options.dtID)+'">'
                 + (top.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
             .appendTo( this.element );
         }
 
 
-        //input cell
+        //input
         this.input_cell = $( "<div>")
         .addClass('input-cell')
         .appendTo( this.element );
-        
-        //add prompt       
-        var help_text = this.f('rst_DisplayHelpText');
-        this.input_prompt = $( "<div>")
-        .text( help_text?help_text:'' )
-        .addClass('heurist-helper1')
-        .appendTo( this.input_cell );
 
 
         //values are not defined - assign default value    
         if( !top.HEURIST4.util.isArray(this.options.values) ){
-
+            //this.options.values.length==0
             var def_value = this.f('rst_DefaultValue');
             if(top.HEURIST4.util.isempty(def_value)){
                 this.options.values = [''];        
@@ -162,9 +146,9 @@ $.widget( "heurist.editing_input", {
         var i;
         for (i=0; i<this.options.values.length; i++){
             if(this.options.readonly){
-                this._addReadOnlyContent(this.options.values[i]);
+                this._addLabel(this.options.values[i], i);
             }else{
-                this._addInput(this.options.values[i]);
+                this._addInput(this.options.values[i], i);
             }
         }
 
@@ -249,25 +233,13 @@ $.widget( "heurist.editing_input", {
     //
     //
     //
-    _removeInput: function(input_id){
-        if(this.inputs.length>1){
-            //find in array
-            var that = this;
-            $.each(this.inputs, function(idx, item){
-                
-                var $input = $(item);
-                if($input.attr('id')==input_id){
-                    if(that.newvalues[input_id]){
-                        delete that.newvalues[input_id];
-                    }
-                    //remove element
-                    $input.parents('.input-div').remove();
-                    //remove from array
-                    that.inputs.splice(idx,1);    
-                    return;
-                }
-                
-            });
+    _removeInput: function(idx){
+        if(this.options.values.length>1){
+            //remove from values array
+            this.options.values.splice(idx,1);
+            //remove element
+            this.inputs[idx].parents('.input-div').remove();
+            this.inputs.splice(idx,1);
         }
     },
         
@@ -277,34 +249,33 @@ $.widget( "heurist.editing_input", {
     * @param value
     * @param idx - index for repetative values
     */
-    _addInput: function(value) {
+    _addInput: function(value, idx) {
 
         if(!this.inputs){
             this.inputs = [];
         }
 
         var that = this;
-
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         var $input = null;
-//@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
-//repalce to uniqueId() if need
+        var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         value = value ?value:'';
 
+        //@todo      var defaultValue = (top.HEURIST4.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");
 
-        var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.input_prompt);  //.appendTo( this.input_cell );
 
-        if(this.detailType=="blocktext"){
+        var $inputdiv = $( "<div>" ).addClass('input-div').appendTo( this.input_cell );
 
-            $input = $( "<textarea>",{rows:3})
-            .uniqueId()
+        if(detailType=="blocktext"){
+
+            $input = $( "<textarea>",{id:inputid , rows:3})
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
             .appendTo( $inputdiv );
 
-        }else if(this.detailType=="enum"){
+        }else if(detailType=="enum"){
 
-            $input = $( "<select>")
-            .uniqueId()
+            $input = $( "<select>",{id:inputid} )
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
@@ -312,10 +283,9 @@ $.widget( "heurist.editing_input", {
 
             this._recreateSelector($input, value);
 
-        }else if(this.detailType=="boolean"){
+        }else if(detailType=="boolean"){
 
-            $input = $( "<input>",{type:'checkbox', value:'1'} )
-            .uniqueId()
+            $input = $( "<input>",{id:inputid, type:'checkbox', value:'1'} )
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
             .appendTo( $inputdiv );
@@ -324,10 +294,9 @@ $.widget( "heurist.editing_input", {
                 $input.prop('checked','checked');    
             }
 
-        }else if(this.detailType=="rectype"){
+        }else if(detailType=="rectype"){
 
-            $input = $( "<select>" )
-            .uniqueId()
+            $input = $( "<select>",{id:inputid} )
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
@@ -338,10 +307,9 @@ $.widget( "heurist.editing_input", {
                 $input.val(value);
             }
             
-        }else if(this.detailType=="user"){ //special case - only groups of current user
+        }else if(detailType=="user"){ //special case - only groups of current user
 
-            $input = $( "<select>")
-            .uniqueId()
+            $input = $( "<select>",{id:inputid} )
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
@@ -355,13 +323,12 @@ $.widget( "heurist.editing_input", {
             }
             
         }else{
-            $input = $( "<input>")
-            .uniqueId()
+            $input = $( "<input>",{id:inputid})
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
             .appendTo( $inputdiv );
 
-            if(this.detailType=="integer" || this.detailType=="year"){
+            if(detailType=="integer" || detailType=="year"){
                 
                 $input.keypress(function (e) { 
                     var code = (e.keyCode ? e.keyCode : e.which);
@@ -386,7 +353,7 @@ $.widget( "heurist.editing_input", {
                     }
                 });*/
             }else
-            if(this.detailType=="float"){
+            if(detailType=="float"){
                 
                 $input.keypress(function (e) { 
                     var code = (e.keyCode ? e.keyCode : e.which);
@@ -409,7 +376,7 @@ $.widget( "heurist.editing_input", {
                 });
                 
             }else
-            if(this.detailType=="date"){
+            if(detailType=="date"){
                 var $datepicker = $input.datepicker({
                     /*showOn: "button",
                     buttonImage: "ui-icon-calendar",
@@ -427,18 +394,23 @@ $.widget( "heurist.editing_input", {
 
                 this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
 
-            }else if(this.detailType=="resource"){
+            }else if(detailType=="resource"){
 
-                //old way - by default lookup for Records filtered by Record Types
+                /*if(!this.rec_search_dialog){
+                    this.rec_search_dialog = this.element.rec_search({
+                        isdialog: true,
+                        search_domain: 'a'
+                    });
+                }*/
                 var ptrset = that.f('rst_PtrFilteredIDs');
-                
+                var ptrcfg = $.parseJSON(ptrset);
                 var __show_select_dialog = null;
                 var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
                     .addClass("smallbutton")
                     .appendTo( $inputdiv )
                     .button({icons:{primary: "ui-icon-link"},text:false});
                 
-                if(top.HEURIST4.util.isempty(this.configMode)){
+                if(ptrcfg==null){  //this is record (link) selector
 
                     __show_select_dialog = function __show_select_dialog(event){
                         event.preventDefault();
@@ -454,11 +426,27 @@ $.widget( "heurist.editing_input", {
                                         var record = recordset.getFirstRecord();
                                         var name = recordset.fld(record,'rec_Title');
                                         $input.val(name);
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                        that.options.values[idx] = recordset.fld(record,'rec_ID');
                                     }
                                 }           
                         } );
+                        /*        
+                        that.rec_search_dialog.rec_search("option",{
+                            //retuns selected recrod
+                            rectype_set: that.f('rst_PtrFilteredIDs'),
+                            onselect: function(event, recordset){
 
+                                if(recordset && recordset.length()>0){
+                                    var record = recordset.getFirstRecord();
+                                    $input.val(recordset.fld(record,'rec_Title'));
+                                    that.options.values[idx] = recordset.fld(record,'rec_ID');
+                                }
+
+                            }
+                        });
+
+                        that.rec_search_dialog.rec_search( "show" );
+                        */
                     };
 
 
@@ -466,20 +454,19 @@ $.widget( "heurist.editing_input", {
                 }else{
                     //this is entity selector
                     //detect entity
-                    var entityName = this.configMode.entity;
-                    if(top.HEURIST4.util.isempty(entityName)) entityName='Records'; //by default
+                    var entityName = ptrcfg.entity;
                     
-                    if($.isFunction($('body')['manage'+entityName])){ //OK! widget js has been loaded
+                    if(!$.isFunction($('body')['showManage'+entityName])){
 
                             var popup_options = {
                                 isdialog: true,
-                                select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
+                                select_mode: (ptrcfg.multi==true?'select_multi':'select_single'),
                                 //selectbutton_label: '',
                                 //page_size: $('#page_size').val(),
                                 action_select: false,
                                 action_buttons: true,
                                 filter_group_selected:null,
-                                filter_groups: this.configMode.filter_group,
+                                filter_groups: ptrcfg.filter,
                                 onselect:function(event, data){
                                     
                                     if(data && data.selection && top.HEURIST4.util.isRecordSet(data.selection))
@@ -488,7 +475,7 @@ $.widget( "heurist.editing_input", {
                                         var record = recordset.getFirstRecord();
                                         var name = recordset.fld(record,'rec_Title');
                                         $input.val(name);
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                        that.options.values[idx] = recordset.fld(record,'rec_ID');
                                     }
 
                                 }
@@ -501,7 +488,7 @@ $.widget( "heurist.editing_input", {
                                 ['manage'+entityName]( popup_options );
                                 
                             __show_select_dialog = function(event){
-                                manage_dlg['manage'+entityName]( 'popupDialog' );    
+                                manage_dlg.manageSysUsers( 'popupDialog' );    
                             }
                             
                     }
@@ -513,7 +500,7 @@ $.widget( "heurist.editing_input", {
                 }
                 
                 
-            }else if(false && this.detailType=="relmarker"){  //@TODO!!!!
+            }else if(false && detailType=="relmarker"){
 
                 $input.css('width','auto');
 
@@ -545,7 +532,7 @@ $.widget( "heurist.editing_input", {
                             if(recordset && recordset.length()>0){
                             var record = recordset.getFirstRecord();
                             $input.val(recordset.fld(record,'rec_Title'));
-                            that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                            that.options.values[idx] = recordset.fld(record,'rec_ID');
                             }*/
 
                         }
@@ -558,13 +545,13 @@ $.widget( "heurist.editing_input", {
                 this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
 
             }
-            /*else if(this.detailType=="freetext" && this.options['input_width']){
+            /*else if(detailType=="freetext" && this.options['input_width']){
                 $input.css('width', this.options['input_width']);
             }*/
 
         }
 
-        if (parseFloat( this.f('rst_DisplayWidth') ) > 0 && this.detailType!='boolean') {    //if the size is greater than zero
+        if (parseFloat( this.f('rst_DisplayWidth') ) > 0 && detailType!='boolean') {    //if the size is greater than zero
             $input.css('width', Math.round(2 + Number(this.f('rst_DisplayWidth'))) + "ex"); //was *4/3
         }
 
@@ -579,23 +566,21 @@ $.widget( "heurist.editing_input", {
         {
         
         var $btn_clear = $('<button>',{
-            title: 'Clear entered value',
-            'data-input-id': $input.attr('id')
+            title: 'Clear entered value'
         })
         .addClass("smallbutton btn_input_clear")
-        .css({'vertical-align': (this.detailType=="blocktext")?'top':'' })
+        .css({'vertical-align': (detailType=="blocktext")?'top':'' })
         .appendTo( $inputdiv )
         .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
 
         // bind click events
         this._on( $btn_clear, {
             click: function(e){
-                var input_id = $(e.target).parent().attr('data-input-id');
-                if(that.inputs.length>1){
-                //if( top.HEURIST4.util.isempty( that._getValue('#'+input_id)) ){
-                    that._removeInput( input_id );                    
+                if(top,HEURIST4.util.isempty(that.options.values[idx])){
+                    that._removeInput(idx);                    
                 }else{
-                    that._setValue(input_id, '');
+                    that.options.values[idx] = '';
+                    $input.val('');
                 }
             }
         });
@@ -611,33 +596,18 @@ $.widget( "heurist.editing_input", {
     _recreateSelector: function($input, value){
 
         $input.empty();
-        
-        var allTerms = this.f('rst_JsonConfig');
-        if(top.HEURIST4.util.isempty(allTerms)){
-            allTerms = this.f('rst_FilteredJsonTermIDTree');
-        }
 
-        if(isNaN(allTerms)){//this is not vocabulary ID, this is something more complex
-        
-            if($.isPlainObject(this.configMode)){ //this lookup for entity
-                
-                //create and fill SELECT
-                //this.configMode.entity
-                //this.configMode.filter_group
-                
-                //add add/browse buttons
-                top.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
-                
-                if(this.configMode.button_browse){
-                    
-                }
-                
-            }else{
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
+
+        var allTerms = this.f('rst_JsonConfig');
+        if(allTerms) {
             
+            if(isNaN(allTerms)){
+                
                 if (!$.isArray(allTerms) && !top.HEURIST4.util.isempty(allTerms)) {
-                    //is it CS string - convert to array
                     allTerms = allTerms.split(',');   
                 }
+
                 
                 if(top.HEURIST4.util.isArrayNotEmpty(allTerms)){
                     if(top.HEURIST4.util.isnull(allTerms[0]['key'])){
@@ -651,79 +621,53 @@ $.widget( "heurist.editing_input", {
                     //array of key:title objects
                     top.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
+            }else{
+                //vocabulary
+                top.HEURIST4.ui.createTermSelectExt2($input.get(0), 
+                    {datatype:detailType, termIDTree:allTerms, headerTermIDsList:null, 
+                    defaultTermID:value, topOptions:true, supressTermCode:true});
             }
+        }else{
+        
+            allTerms = this.f('rst_FilteredJsonTermIDTree');
             
-        }else{ //old way
+            if(isNaN(allTerms)){
+                
+                var options = [];
+                var idx, opts = allTerms.split(',');
+                for (idx=0; idx<opts.length; idx++){
+                    options.push({key:opts[idx], title:opts[idx]});
+                }
+            
+                top.HEURIST4.ui.createSelector($input.get(0), options);
+            
+            }else{
+                var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
-            //headerTerms - not used anymore
-            var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
-            
-            //vocabulary
-            top.HEURIST4.ui.createTermSelectExt2($input.get(0), 
-                {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms, 
-                defaultTermID:value, topOptions:true, supressTermCode:true});
+                top.HEURIST4.ui.createTermSelectExt2($input.get(0), 
+                    {datatype:detailType, termIDTree:allTerms, headerTermIDsList:headerTerms, 
+                    defaultTermID:value, topOptions:true, supressTermCode:true});
+            }
         }
     },
 
-    _setValue: function(input_id, value, display_value){
-        
-            var that = this;
-            $.each(this.inputs, function(idx, item){
-                
-                var $input = $(item);
-                if($input.attr('id')==input_id){
-                    if(that.newvalues[input_id]){
-                        that.newvalues[input_id] = '';
-                    }
-                    $input.val( display_value?display_value :value);
-                    return;
-                }
-                
-            });
-        
-    },
-    
-    //not used
     setValue: function(value, idx, display_value){
         // alert("selected "+value+"  "+display_value);
         if(!idx) idx = 0;
-        if(idx>=this.inputs.length) return;
-        var $input = this.inputs[idx];
-        
-        if(!(this.detailType=="resource" || this.detailType=="relmarker")){
-            this.newvalues[$input.attr('id')] = value;
-        }
-        $input.val( display_value?display_value:value );
+        this.inputs[idx].val( value );
     },
 
-    //
-    // input_id id or element
-    //
-    _getValue: function(input_id){
-        
-            var res = null;
-            var $input = $(input_id);
-    
-            if(!(this.detailType=="resource" || this.detailType=="relmarker")){
-                res = $input.val();
-            }else if (!top.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) ){
-                res = this.newvalues[$input.attr('id')];
-            }
-        
-            return res;
-    },
-    
-    //
-    //
-    //
     getValues: function(){
 
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         var idx;
         var ress = [];
         for (idx in this.inputs) {
-            var res = this._getValue(this.inputs[idx]);
-            if (!top.HEURIST4.util.isempty( res ) ){
-                ress.puss(res)    
+            if(!(detailType=="resource" || detailType=="relmarker")){
+                this.options.values[idx] = this.inputs[idx].val();
+            }
+            if(this.options.values[idx]){
+                ress.push( this.options.values[idx] );
             }
         }
         return ress;
@@ -736,38 +680,36 @@ $.widget( "heurist.editing_input", {
         return this.inputs;
     },
 
-    //
-    //
-    //
-    _addReadOnlyContent: function(value, idx) {
+    _addLabel: function(value, idx) {
 
+        var detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         var disp_value ='';
 
         if($.isArray(value)){
 
             disp_value = value[1]; //record title, relation description, filename, human readable date and geo
 
-        }else if(this.detailType=="enum" || this.detailType=="relationtype"){
+        }else if(detailType=="enum" || detailType=="relationtype"){
 
-            disp_value = top.HEURIST4.ui.getTermValue(this.detailType, value, true);
+            disp_value = top.HEURIST4.ui.getTermValue(detailType, value, true);
 
             if(top.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missed. id '+termID
             }
-        } else if(this.detailType=="file"){
+        } else if(detailType=="file"){
 
             disp_value = "@todo file "+value;   
 
-        } else if(this.detailType=="resource"){
+        } else if(detailType=="resource"){
 
             disp_value = "@todo resource "+value;   
 
-        } else if(this.detailType=="relmarker"){  //combination of enum and resource
+        } else if(detailType=="relmarker"){  //combination of enum and resource
 
             disp_value = "@todo relation "+value;   
 
         //@todo NEW datatypes                
-        } else if(this.detailType=="geo"){
+        } else if(detailType=="geo"){
             
             /*if(detailType=="query")
             if(detailType=="color")
@@ -781,7 +723,7 @@ $.widget( "heurist.editing_input", {
             disp_value = value;
         }
 
-        if(this.detailType=="blocktext"){
+        if(detailType=="blocktext"){
             this.input_cell.css({'padding-top':'0.4em'});
         }
 

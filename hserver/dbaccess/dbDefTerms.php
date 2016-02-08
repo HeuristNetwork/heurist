@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to sysUGrpps table
+    * db access to defTerms table
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -24,7 +24,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefDetailTypes
+class DbDefTerms
 {
     private $system;  
     
@@ -39,32 +39,28 @@ class DbDefDetailTypes
     
     //data types: ids, int, float, date, bool, enum
     private static $fields = array( 
-    'dty_ID'=>'ids',    //ids
-    'dty_Name'=>255,     //title
-    'dty_Documentation'=>5000,
-   
-    'dty_Type'=>array('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker'),
-    'dty_HelpText'=>255,
-    'dty_ExtendedDescription'=>5000,
-    'dty_EntryMask'=>'text',
-    'dty_Status'=>array('reserved','approved','pending','open'),
-    'dty_OriginatingDBID'=>'int',
-    'dty_NameInOriginatingDB'=>255,
-    'dty_IDInOriginatingDB'=>'int',
-    
-    'dty_DetailTypeGroupID'=>'ids',
-    'dty_OrderInGroup'=>'int',
+    'trm_ID'=>'ids',    //ids
+    'trm_Label'=>500,     //title
+    'trm_InverseTermId'=>'int',
+    'trm_Description'=>1000,
 
-    'dty_JsonTermIDTree'=>5000,  //dty_JsonConfig
-    'dty_TermIDTreeNonSelectableIDs'=>1000,
-    'dty_PtrTargetRectypeIDs'=>63,
-    'dty_FieldSetRectypeID'=>'int',
+    'trm_Status'=>array('reserved','approved','pending','open'),
+    'trm_OriginatingDBID'=>'int',
+    'trm_NameInOriginatingDB'=>63,
+    'trm_IDInOriginatingDB'=>'int',
 
-    'dty_ShowInLists'=>'bool2',
-    'dty_NonOwnerVisibility'=>array('hidden','viewable','public','pending'),
-    'dty_Modified'=>'date',
-    'dty_LocallyModified'=>'bool2'
+    'trm_AddedByImport'=>'bool2',
+    'trm_IsLocalExtension'=>'bool2',
+    'trm_Domain'=>array('enum','relation'),
     
+    'trm_OntID'=>'int',
+    'trm_ChildCount'=>'int',
+    'trm_ParentTermID'=>'int',
+    'trm_Depth'=>'int',
+    'trm_Modified'=>'date',
+    'trm_LocallyModified'=>'bool2',
+    
+    'trm_Code'=>100
     );
     
     function __construct( $system, $data ) {
@@ -97,7 +93,7 @@ class DbDefDetailTypes
     public function search(){
         
 //error_log(print_r($this->data,true));        
-        $this->searchMgr = new dbEntitySearch( $this->system, DbDefDetailTypes::$fields);
+        $this->searchMgr = new dbEntitySearch( $this->system, DbDefTerms::$fields);
 
         /*
         if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
@@ -121,42 +117,44 @@ class DbDefDetailTypes
         //compose WHERE 
         $where = array();    
         
-        $pred = $this->searchMgr->getPredicate('dty_ID');
+        $pred = $this->searchMgr->getPredicate('trm_ID');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('dty_Name');
+        $pred = $this->searchMgr->getPredicate('trm_Label');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('dty_Type');
+        $pred = $this->searchMgr->getPredicate('trm_Domain');
         if($pred!=null) array_push($where, $pred);
         
-        $pred = $this->searchMgr->getPredicate('dty_Status');
+        $pred = $this->searchMgr->getPredicate('trm_Status');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('dty_Modified');
+        $pred = $this->searchMgr->getPredicate('trm_Modified');
         if($pred!=null) array_push($where, $pred);
 
-        $pred = $this->searchMgr->getPredicate('dty_DetailTypeGroupID');
+        $pred = $this->searchMgr->getPredicate('trm_Code');
         if($pred!=null) array_push($where, $pred);
         
+        $pred = $this->searchMgr->getPredicate('trm_ParentTermID');
+        if($pred!=null) array_push($where, $pred);
 
        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
-            $this->data['details'] = 'dty_ID';
+            $this->data['details'] = 'trm_ID';
             
         }else if(@$this->data['details']=='name'){
 
-            $this->data['details'] = 'dty_ID,dty_Name';
+            $this->data['details'] = 'trm_ID,trm_Label';
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID';
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID,trm_Code';
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', DbDefDetailTypes::$fields );
+            $this->data['details'] = implode(',', DbDefTerms::$fields );
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -165,25 +163,25 @@ class DbDefDetailTypes
         
         //validate names of fields
         foreach($this->data['details'] as $fieldname){
-            if(!@DbDefDetailTypes::$fields[$fieldname]){
+            if(!@DbDefTerms::$fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            
         }
 
         //ID field is mandatory and MUST be first in the list
-        $idx = array_search('dty_ID', $this->data['details']);
+        $idx = array_search('trm_ID', $this->data['details']);
         if($idx>0){
             unset($this->data['details'][$idx]);
             $idx = false;
         }
         if($idx===false){
-            array_unshift($this->data['details'],'dty_ID');
+            array_unshift($this->data['details'],'trm_ID');
         }
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defDetailTypes';
+        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defTerms';
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);

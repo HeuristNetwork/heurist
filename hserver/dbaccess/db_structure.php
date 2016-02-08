@@ -653,7 +653,8 @@
     * @todo      compare this against table for complete list logging error if mismatch
     */
     function dbs_GetDtLookups() {
-        return array("enum" => "Terms list",
+        return array(
+            "enum" => "Terms list",
             "float" => "Numeric",
             "date" => "Date / temporal",
             "file" => "File",

@@ -39,7 +39,7 @@ $.widget( "heurist.manageEntity", {
         //if true - default set of actions, if array - specified set of actions, false or empty array - hide selector or buttons
         action_select: false, //may be true,false or array [add,edit,delete,merge,select all|none,import,] 
         action_buttons: true, //may be true,false or array
-        list_header: false,
+        list_header: false,   //show header in list mode (@todo implement)
         
         isdialog: false,  //show in dialog
         dialogcleanup: true, // remove dialog div on close

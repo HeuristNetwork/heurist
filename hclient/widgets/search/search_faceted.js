@@ -513,6 +513,7 @@ $.widget( "heurist.search_faceted", {
                     
                     inpt.find('.input-div').css('display','inline-block');
                     
+                    //@todo make as event listeneres
                     //assign event listener
                     //var $inputs = inpt.editing_input('getInputs');
                     that._on( inpt.find('input'), {

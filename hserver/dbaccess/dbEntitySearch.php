@@ -73,8 +73,10 @@ class dbEntitySearch
             
             $enums = $this->fields[$fieldname];
 
-            if(!is_array($values)){
-                $values = explode(',', $values);
+            if(!is_array($value)){
+                $values = explode(',', $value);
+            }else{
+                $values = $value;
             }
             foreach($values as $val){ 
                 if(array_search($value, $enums, true)===false){
@@ -143,9 +145,12 @@ class dbEntitySearch
         $this->data = $data;
         
         foreach($this->fields as $fieldname=>$data_type){
-            if(!@$this->data[$fieldname]){
+            $value = @$this->data[$fieldname];
+            if($value!=null){
                 
-                if($data_type=='ids'){
+                if($value=='NULL' || $value=='-NULL'){
+                    $res = true;
+                }else if($data_type=='ids'){
                     $res = $this->_validateIds($fieldname); //, 'user/group IDs');
                 }else if(is_array($data_type)){
                     $res = $this->_validateEnum($fieldname);
@@ -199,7 +204,7 @@ class dbEntitySearch
             $data_type = 'varchar';
         }
 
-        //special case for ids - several values can use IN operator        
+        //special case for ids - several values can be used in IN operator        
         if ($data_type == 'ids') {  //preg_match('/^\d+(?:,\d+)+$/', $value)
         
             if(is_array($value)){
@@ -234,6 +239,14 @@ class dbEntitySearch
         $or_predicates = array();
         
         foreach($or_values as $value){
+
+            if($value == 'NULL'){
+                array_push($or_predicates, $fieldname.' IS NULL');
+                continue;
+            }else if($value == '-NULL'){
+                array_push($or_predicates, $fieldname.' IS NOT NULL');
+                continue;
+            }
         
             $exact = false;
             $negate = false;
@@ -241,6 +254,7 @@ class dbEntitySearch
             $lessthan = false;
             $greaterthan = false;
             
+                
             if ($between) {
                 if(strpos($value, '-')===0){
                     $negate = true;
@@ -278,7 +292,7 @@ class dbEntitySearch
             }
             
             $eq = ($negate)? '!=' : (($lessthan) ? '<' : (($greaterthan) ? '>' : '='));
-            
+
             if ($data_type == 'int' || $data_type == 'float') {
 
                 if($between){

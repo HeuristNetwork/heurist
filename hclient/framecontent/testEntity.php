@@ -183,6 +183,25 @@ require_once(dirname(__FILE__)."/initPage.php");
                 
             }
             
+            var systemEntiries= 
+                           [{"key":"Records",title:"Records"},
+                            {"key":"SysUsers",title:"Users",icon:'ui-icon-person'},
+                            {"key":"SysGroups",title:"Workgroups",icon:'ui-icon-group'},
+                            {"key":"Tags",title:"Tags",icon:'ui-icon-tag'},
+                            {"key":"RecUploadedFiles",title:"Uploaded Files",icon:'ui-icon-image'},
+                            {"key":"Reminders",title:"Reminders",icon:'ui-icon-mail-closed'},
+                            {"key":"Databases",title:"Databases",icon:'ui-icon-database'},
+                            {"key":"Records",title:"Saved Searches",icon:'ui-icon-search'},
+                            {"key":"DefRecTypes",title:"Record Types",icon:'ui-icon-image'},
+                            {"key":"DefRecTypeGroups",title:"Record Type Groups"},
+                            {"key":"DefDetailTypes",title:"Field Types"},
+                            {"key":"DefDetailTypeGroups",title:"Field Type Groups"},
+                            {"key":"DefTerms",title:"Terms"},
+                            {"key":"RecComments",title:"Record Comments"},
+                            {"key":"Smarty",title:"Smarty Reports"},
+                            {"key":"SmartySchedule",title:"Smarty Reports Schedule"}];
+            
+            
         </script>
     </head>
 
@@ -192,9 +211,9 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
+                            <option value="Records">Records</option>
                             <option value="SysUsers">Users +</option>
                             <option value="SysGroups">Workgroups +</option>
-                            <option value="Records">Records</option>
                             <option value="Tags">Tags</option>
                             <option value="RecUploadedFiles">Uploaded Files</option>
                             <option value="Reminders">Reminders</option>

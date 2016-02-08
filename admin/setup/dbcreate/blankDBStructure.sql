@@ -130,7 +130,7 @@ CREATE TABLE defDetailTypes (
   dty_Type enum('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude') NOT NULL COMMENT 'The value-type of this detail type, what sort of data is stored',
   dty_HelpText varchar(255) NOT NULL default 'Please provide a short explanation for the user ...' COMMENT 'The default help text displayed to the user under the field',
   dty_ExtendedDescription varchar(5000) default 'Please provide an extended description for display on rollover ...' COMMENT 'Extended text describing this detail type, for display in rollover',
-  dty_EntryMask text COMMENT 'Data entry mask, use to control decimals ion numeric values, content of text fields etc.',
+  dty_EntryMask text COMMENT 'Data entry mask, use to control decimals on numeric values, content of text fields etc.',
   dty_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   dty_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
   dty_NameInOriginatingDB varchar(255) default NULL COMMENT 'Name used in database where this detail type originated',

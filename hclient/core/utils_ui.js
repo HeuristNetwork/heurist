@@ -35,6 +35,8 @@ createRectypeDetailSelect - get SELECT for details of given recordtype
     
 createUserGroupsSelect - get SELECT for list of given groups, othewise loads list of groups for current user    
 
+createEntitySelector - get id-name selector for specified entity
+
 Other UI functions    
 initHelper - Inits helper div (slider) and button   
 
@@ -736,7 +738,89 @@ top.HEURIST4.ui = {
         if(typeof callback === "function"){
             callback();
         }
+    },
+    
+    
+    // configMode.entity
+    // configMode.filter_group
+    createEntitySelector: function(selObj, configMode, topOptions, callback){
+       
+        $(selObj).empty();
+        
+        var request = {a:'search','details':'name'};
+        var fieldTitle;
+        
+        if(configMode.entity=='SysUsers'){
+            fieldTitle = 'ugr_Name';
+            request['entity'] = 'sysUGrps';
+            request['ugr_Type'] = 'user';
+            request['ugl_GroupID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='SysGroups'){
+            fieldTitle = 'ugr_Name';
+            request['entity'] = 'sysUGrps';
+            request['ugr_Type'] = 'workgroup';
+            request['ugl_UserID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='DefTerms'){
+            fieldTitle = 'trm_Label';
+            request['entity'] = 'defTerms';
+            request['trm_Domain'] = configMode.filter_group;
+            request['trm_ParentTermID'] = [0,'NULL']; //get vocabs only
+            
+        }else if(configMode.entity=='DefRecTypeGroups'){
+            fieldTitle = 'rtg_Name';
+            request['entity'] = 'defRecTypeGroups';
+            
+        }else if(configMode.entity=='DefDetailTypeGroups'){
+            fieldTitle = 'dtg_Name';
+            request['entity'] = 'defDetailTypeGroups';
+            
+        }else if(configMode.entity=='DefRecTypeGroups'){
+            fieldTitle = 'rtg_Name';
+            request['entity'] = 'defRecTypes';
+            request['rty_RecTypeGroupID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='DefDetailTypeGroups'){
+            fieldTitle = 'dtg_Name';
+            request['entity'] = 'defDetailTypes';
+            request['dty_DetailTypeGroupID'] = configMode.filter_group;
+        }
+        
+        top.HAPI4.EntityMgr.doRequest(request,
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            
+                            var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
+                            
+                            if(!top.HEURIST4.util.isArray(topOptions)){
+                                if(topOptions==true){
+                                    topOptions = [{key:'',title:top.HR('select...')}];
+                                }else if(!top.HEURIST4.util.isempty(topOptions) && topOptions!==false){
+                                    if(topOptions===true) topOptions ='';
+                                    topOptions = [{key:'',title:topOptions}];
+                                }
+                            }
+                            if(top.HEURIST4.util.isArray(topOptions) && top.HEURIST4.util.isArray(groups)){
+                                groups = topOptions.concat(groups);
+                            }else if(top.HEURIST4.util.isArray(topOptions)){
+                                groups = topOptions;
+                            }
 
+                            top.HEURIST4.ui.createSelector(selObj, groups);
+                            
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                        
+                        if($.isFunction(callback)){
+                            callback();
+                        }
+                        
+                    });
+                              
+        
+        
     },
 
     // Init button that show/hide help tips
