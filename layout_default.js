@@ -70,7 +70,7 @@ var cfg_widgets = [
     {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
-    {id:'h4_connections', name:'Connections', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
+    {id:'h4_connections', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
 
     // DIGITAL HARLEM APPS
     {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'hclient/widgets/digital_harlem/dh_search.js'},
@@ -115,7 +115,7 @@ var cfg_layouts = [
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
-                    {appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
+                    {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
             ]}]
         }
     },
@@ -131,7 +131,7 @@ var cfg_layouts = [
     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
     {appid:'ha51'}, // H4 map V2
     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
-    {appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}  //H4 connections
+    {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}  //H4 connections
     ]}]
     }
     },
@@ -226,7 +226,7 @@ var cfg_layouts = [
                     ,css:{position:'absolute', top:0,left:0,bottom:0,right:0}}
         ]},
     },
-    
+
     // Alternative (Gridster) layout (like Windows tiles) - not very useful unless a small set of widgets
     /*   {id:'Gridster', name:'gridster example', theme:'smoothness', type:'gridster',
     options:{widget_base_dimensions:[50, 50]},
@@ -236,7 +236,7 @@ var cfg_layouts = [
 
     pane1:{col:4, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_resultList', name: 'Search result' }]},  //search result
     pane2:{col:12, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', name: 'Record' }]},
-    pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Connections', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'} }]},
+    pane5:{col:20, row:2, size_x:7, size_y:7, dockable:true, apps:[{appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'} }]},
     pane3:{col:4, row:9, size_x:7, size_y:7, dockable:true, apps:[ {appid:'ha51', options:{title:'Map'}} ] },
     pane4:{col:12, row:9, size_x:7, size_y:7, dockable:true, apps:[{appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'} }]},
 
