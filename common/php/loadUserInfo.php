@@ -118,7 +118,9 @@
 			    $query = "grp.ugr_ID in (".join(",", array_keys($_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_access'])).") and grp.ugr_Type !='user' order by grp.ugr_Name";
 
 			    $workgroups = mysql__select_array(USERS_DATABASE.".sysUGrps grp", "grp.ugr_ID", $query);
-			    print join(", ", $workgroups);
+                if(is_array($workgroups)){
+			        print join(", ", $workgroups);
+                }
 		    }
 	    ?> ];
 

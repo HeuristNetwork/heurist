@@ -140,6 +140,9 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                         setTimeout(function(){
                             top.HAPI4.SearchMgr.doSearch(document, request);
                         }, 3000);
+                    }else{
+                        //trigger search finish to init some widgets
+                        $(document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
                     }
                 }
                 //definition of ABOUT dialog, called from Help > About, see content below

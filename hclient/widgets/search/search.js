@@ -181,6 +181,7 @@ $.widget( "heurist.search", {
         .css({'margin-right':'0.2em', 'height':'2.5em', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
+        top.HEURIST4.util.setDisabled(this.input_search, true);
 
         var menu_h = top.HEURIST4.util.em(1);
 
@@ -588,6 +589,7 @@ $.widget( "heurist.search", {
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
+            top.HEURIST4.util.setDisabled(this.input_search, false);
             that._renderProgress( null );
             if(that.options.is_progress_visible){
                 that.div_progress.css('display','none');
