@@ -963,49 +963,44 @@ $.widget( "heurist.search_faceted_wiz", {
 
                     var sContent =
             '<div>'
-                +'<div class="header"><label for="facet_Title'+k+'">Facet title</label></div>'
+                +'<div class="header"><label for="facet_Title'+k+'">Facet</label></div>'
                 +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
                 +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
+                +' <label for="facet_Help'+k+'">&nbsp;&nbsp;Rollover (optional)&nbsp;</label>'
+                +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="1" '
+                +' style="font-size:smaller" class="text ui-widget-content ui-corner-all"'
+                    +' style="margin-top:0.4em;margin-bottom:1.0em;width:300px;"></textarea>';
             +'</div>';
 
-                    var sTypeLabel = '<div style="font-size:smaller;font-style:italic;"><div class="header"><label></label></div>';
-                    //|| facets[k].type=='blocktext'
+            var sTypeLabel = '<div style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header"><label></label></div>';
                     if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
                         sContent = sContent +
                 sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'   //true  1
-                +'<label for="facet_Type'+k+'_1">facet first character</label>'
+                +'<label for="facet_Type'+k+'_1">&nbsp;first char&nbsp;&nbsp;</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_2" value="2"/>'   //2
-                +'<label for="facet_Type'+k+'_2">facet every value</label>'
+                +'<label for="facet_Type'+k+'_2">&nbsp;list&nbsp;&nbsp;</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'   //false 0
-                +'<label for="facet_Type'+k+'_0">search field</label>'
+                +'<label for="facet_Type'+k+'_0">&nbsp;search</label>'
             +'</div>';
                     }else if(facets[k].type=='date' || facets[k].type=='year'){
                         sContent = sContent +
                 sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
-                +'<label for="facet_Type'+k+'_1">ranges</label>'
+                +'<label for="facet_Type'+k+'_1">&nbsp;slider&nbsp;&nbsp;</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
-                +'<label for="facet_Type'+k+'_0">datepicker</label>'
+                +'<label for="facet_Type'+k+'_0">&nbsp;search</label>'
             +'</div>';
                     }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                         sContent = sContent +
                 sTypeLabel
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
-                +'<label for="facet_Type'+k+'_1">facets</label>'
+                +'<label for="facet_Type'+k+'_1">&nbsp;list&nbsp;&nbsp;</label>'
                 +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
-                +'<label for="facet_Type'+k+'_0">dropdown</label>'
+                +'<label for="facet_Type'+k+'_0">&nbsp;dropdown&nbsp;&nbsp;</label>'
             +'</div>';
                     }
 
-                sContent = sContent +
-                '<div>'
-                +'<div class="header" style="vertical-align:top;"><label for="facet_Help'+k+'">Help tip</label></div>'
-                +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="2" '
-                +' styele="font-size:smaller" class="text ui-widget-content ui-corner-all"'
-                    +' style="margin-top:0.4em;width:300px"></textarea>'
-                +'</div>'
-                +'<hr style="margin-top:0.5em;margin-bottom:0.5em;"/>';
                 listdiv.append($(sContent));
 
                 if(facets[k].isfacet==false){
