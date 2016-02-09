@@ -381,7 +381,7 @@ function hSvsEdit(args) {
                 $dlg.dialog({
                     autoOpen: false,
                     height: 575,
-                    width: 600,
+                    width: 650,
                     modal: true,
                     resizable: false,
                     title: top.HR(isRules?'Edit Rule Set':'Save filter criteria'),

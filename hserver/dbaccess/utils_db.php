@@ -281,6 +281,8 @@
         }else{
             $query = $query." where ".$table_prefix."ID=".$rec_ID;
         }
+        
+//error_log($query);        
 
         $stmt = $mysqli->prepare($query);
         if($stmt){

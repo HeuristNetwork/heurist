@@ -261,6 +261,12 @@ if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultR
 }
 
 
+// set up email defines
+define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org'); 
+define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org'); 
+define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO); 
+
+
 //-------------------------------------------------------------------------- DB SELECTION ---------
 
 if (@$_REQUEST["db"]) { //if uri has DB then use it
@@ -453,12 +459,6 @@ if (!defined('SKIP_VERSIONCHECK') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) 
     returnErrorMsgPage(3, "Heurist Code Version " . HEURIST_VERSION . " requires Database Schema version # " .
         HEURIST_MIN_DBVERSION . " or higher. " . HEURIST_DBNAME . " has version # " . HEURIST_DBVERSION . " - ".$talkToSysAdmin);
 }
-
-// set up email defines
-
-define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org'); 
-define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org'); 
-define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO); 
 
 
 // url of 3d party service that generates thumbnails for given website, set for installation in intialise.php

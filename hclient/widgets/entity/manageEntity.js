@@ -16,8 +16,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
 $.widget( "heurist.manageEntity", {
 
     // default options
@@ -36,30 +34,39 @@ $.widget( "heurist.manageEntity", {
 
         page_size: 50,
 
+        isdialog: false,  //show in dialog
+        dialogcleanup: true, // remove dialog div on close
+        height: 400,
+        width:  740,
+        modal:  true,
+        title:  '',
+        
+        // callbacks
+        onselect:null,  //selection complete callback
+
         //if true - default set of actions, if array - specified set of actions, false or empty array - hide selector or buttons
         action_select: false, //may be true,false or array [add,edit,delete,merge,select all|none,import,] 
         action_buttons: true, //may be true,false or array
         list_header: false,   //show header in list mode (@todo implement)
         
-        isdialog: false,  //show in dialog
-        dialogcleanup: true, // remove dialog div on close
+        edit_dialog: true,  //show in right hand form or as popup 
+        edit_height:null,
+        edit_width :null,
+        edit_title :null,
+        edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
         
-        // callbacks
-        onselect:null  //selection complete callback
+        //it either loaded from server side if _entityName defined or defined explicitely on client side
+        entity: {}
     },
     
-    //overwrite it in create method
-    _entityName: 'Entity',
-    _entityNames: 'Entities',
+    //system name of entity  - define it to load entity config from server
+    _entityName: '', 
+    _entityIDfield: '', //to be taken from options.entity
     
-    _empty_remark: '', //move to options??
-    
-    _default_sel_actions:[{key:'edit', title:'Edit'},
-                          {key:'delete', title:'Delete'},
-                          {key:'merge', title:'Merge'}],
-    _default_btn_actions:[{key:'add', title:'Add New'}],
-
+    //selected records
     _selection:null,
+    //reference to edit form
+    _editing:null,
     
     // the widget's constructor
     _create: function() {
@@ -70,7 +77,7 @@ $.widget( "heurist.manageEntity", {
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
-        
+
         if(this.options.isdialog){
             this._initDialog();
         }
@@ -79,15 +86,40 @@ $.widget( "heurist.manageEntity", {
             .addClass('ent_wrapper ui-heurist-bg-light')
             .css('min-width','700px')
             .appendTo(this.element);
-            
+
+        
+        if(!top.HEURIST4.util.isempty(this._entityName)){
+            //entity should be loaded from server
+            var that = this;
+            top.HAPI4.EntityMgr.getEntityConfig(this._entityName, 
+                    function(entity){
+                        that.options.entity = entity;
+                        that._initControls();
+                    });
+            return;
+        }else{
+            //entity defined via options
+            this._entityName = this.options.entity['entityName'];
+            this._initControls();
+        }
+    },
+      
+    //  
+    // invoked from _init after load entity config    
+    //
+    _initControls(){
+        
+        if(!this._entityName || $.isEmptyObject(this.options.entity)){
+            return false;
+        }
         
         var that = this;
         
         if(this.options.action_select==true){
-            this.options.action_select = this._default_sel_actions;
+            this.options.action_select = this.options.entity.sel_actions;
         }
         if(this.options.action_buttons==true){
-            this.options.action_buttons = this._default_btn_actions;
+            this.options.action_buttons = this.options.entity.btn_actions;
         }
         
         //init record list
@@ -109,7 +141,7 @@ $.widget( "heurist.manageEntity", {
                
                empty_remark: 
                     (this.options.select_mode!='manager')
-                    ?'<div style="padding:1em 0 1em 0">'+this._empty_remark+'</div>'
+                    ?'<div style="padding:1em 0 1em 0">'+this.options.entity.empty_remark+'</div>'
                     :'',
                searchfull: function(arr_ids, pageno, callback){
                    that._searchFullData(arr_ids, pageno, callback);
@@ -130,7 +162,21 @@ $.widget( "heurist.manageEntity", {
                 });
         this._on( this.recordList, {
                 "resultlistonaction": this._rendererListOnAction});
+                
+                
+       //---------   
+       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
+       if(top.HEURIST4.util.isArrayNotEmpty(this.options.action_buttons)
+        || top.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){
+           
+            this.ent_editor = $('<div>')
+                .addClass('ent_editor ui-heurist-bg-light')
+                .css('min-width', this.options.edit_width?this.options.edit_width:'700px')
+                .appendTo(this.element);
+       }
             
+            
+        //--------------------------------------------------------------------    
 
         var ishelp_on = top.HAPI4.get_prefs('help_on')==1;
         $('.heurist-helper1').css('display',ishelp_on?'block':'none');
@@ -140,7 +186,9 @@ $.widget( "heurist.manageEntity", {
             .css({padding:'0.2em'})
             .appendTo(this.wrapper);
         
-        //extend ===========    
+        
+        return true;
+        //place this code in extension ===========    
         /* init search header
         this.searchRecord.searchSysGroups(this.options);
             
@@ -178,7 +226,7 @@ $.widget( "heurist.manageEntity", {
     
     //----------------------
     //
-    //
+    // listener of action button/menu clicks
     //
     _rendererListOnAction:function(event, action){
         if(action=='select-and-close'){
@@ -198,7 +246,12 @@ $.widget( "heurist.manageEntity", {
              }else{
                  s = 'Nothing selected';
              }
-             top.HEURIST4.msg.showMsgFlash(s);  
+             
+             if(action=='add' || action=='edit'){
+                    this._addEditRecord(recID);
+             }else{
+                    top.HEURIST4.msg.showMsgFlash(s);  
+             }
         }
     },
     
@@ -249,7 +302,17 @@ $.widget( "heurist.manageEntity", {
     //
     //
     _searchFullData:function(arr_ids, pageno, callback){
-        //TO EXTEND        
+
+        var request = {
+                'a'          : 'search',
+                'entity'     : this.options.entity.entityName,
+                'details'    : 'list',
+                'request_id' : pageno,
+                'dty_ID'     : arr_ids,
+                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
+        };
+        
+        top.HAPI4.EntityMgr.doRequest(request, callback);
     },
     
     //
@@ -272,17 +335,17 @@ $.widget( "heurist.manageEntity", {
                 
             var $dlg = this.element.dialog({
                 autoOpen: false ,
-                height: options['height']?options['height']:400,
-                width:  options['width']?options['width']:740,
+                height: options['height'],
+                width:  options['width'],
                 modal:  (options['modal']!==true),
                 title: options['title']
                             ?options['title']
                             :( (options['select_mode']=='manager'
                                     ?top.HR('Manage')
-                                    :top.HR('Select')) + 
+                                    :top.HR('Select')) + ' ' +
                                 (options['select_mode']=='select_multi'
-                                    ?this._entityNames
-                                    :this._entityName) ),
+                                    ?options.entity.entityTitlePlural
+                                    :options.entity.entityTitle) ),
                 resizeStop: function( event, ui ) {//fix bug
                 
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
@@ -360,6 +423,150 @@ $.widget( "heurist.manageEntity", {
         if (data){
             this.recordList.resultList('updateResultSet', data.recordset, data.request);
         }
+    },
+    
+    //  -----------------------------------------------------
+    //
+    //
+    _getValidatedValues: function(){
+        //EXTEND if need it
+        if(this._editing.validate()){
+            return this._editing.getValues(false);    
+        }else{
+            return null;
+        }
+    },
+    
+    //  -----------------------------------------------------
+    //
+    //
+    _saveEditAndClose: function(){
+
+            var fields = this._getValidatedValues(); 
+            
+            if(fields==null) return; //validation failed
+        
+            var request = {
+                'a'          : 'save',
+                'entity'     : this.options.entity.entityName,
+                'request_id' : top.HEURIST4.util.random(),
+                'fields'    : fields                     
+                };
+                
+                var that = this;                                                
+                //that.loadanimation(true);
+                top.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+
+                            top.HEURIST4.msg.showMsgFlash('ok');
+                            if(that.options.edit_dialog){
+                                that.ent_editor.dialog('close')
+                            }
+                            
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+    },       
+    
+    //  -----------------------------------------------------
+    //
+    //
+    _initEditForm: function(recID){
+
+        if(!this._editing){
+            this._editing = new hEditing(this.ent_editor);
+        }
+
+        //fill with values
+        if(recID>0){
+            if(this.options.edit_need_load_fullrecord){
+                
+                //get primary key field
+                _entityIDfield
+                
+                var request = {'a': 'search',
+                    'entity': this.options.entity.entityName,  //'defDetailTypes'
+                    'details': 'full',
+                    'request_id': top.HEURIST4.util.random()
+                }
+                request[this._entityIDfield] = recID;
+                
+                var that = this;                                                
+                
+                top.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            var recordset = new hRecordSet(response.data);
+                            
+                            that._editing.initEditForm(that.options.entity.fields, recordset);
+                            that._afterInitEditForm();
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+                
+                return;    
+            
+            }else{
+                var recordset = this.recordList.resultList('getRecordsById', recID);
+                this._editing.initEditForm(this.options.entity.fields, recordset);
+            }
+        }else{
+            this._editing.initEditForm(this.options.entity.fields, null);
+        }
+        
+        this._afterInitEditForm();
+    },
+    
+    //-----
+    //  perform some after load modifications (show/hide fields,tabs )
+    //
+    _afterInitEditForm: function(){
+        // to EXTEND 
+    },
+
+    //
+    //  show edit form in popup dialog or rigth-hand panel
+    //
+    _addEditRecord: function(recID){
+        
+        this._initEditForm(recID);
+        
+        if(this.options.edit_dialog){ //show in popup
+
+            var that = this; 
+        
+            var btn_array = [{text:top.HR('Save'),
+                        click: function() { that._saveEditAndClose(); }},
+                              {text:top.HR('Close'), 
+                    click: function() { that.ent_editor.dialog('close'); }}]; 
+             
+            this.ent_editor.dialog({
+                autoOpen: true,
+                height: this.options['edit_height']?this.options['edit_height']:400,
+                width:  this.options['edit_width']?this.options['edit_width']:740,
+                modal:  true,
+                title: this.options['edit_title']
+                            ?this.options['edit_title']
+                            :top.HR('Edit') + ' ' +  this.options.entity.entityName,
+                resizeStop: function( event, ui ) {//fix bug
+                    that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+                },
+                buttons: btn_array
+            });        
+            
+
+            
+        }else{ //show on right-hand panel
+            
+            
+        }
+        
+        
     }
     
+    
 });
+

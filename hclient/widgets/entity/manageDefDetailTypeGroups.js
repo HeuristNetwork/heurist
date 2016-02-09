@@ -20,30 +20,19 @@
 
 $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
-    // the widget's constructor
-    _create: function() {
-        
-        this._super();
-
-        this._entityName = 'Field Type Group',
-        this._entityNames = 'Field Type Groups',
-        this._empty_remark = 'Please use the search field above to locate relevant group (partial string match on title)',
-        
-        this._default_sel_actions = [{key:'edit', title:'Edit'},
-                          {key:'delete', title:'Delete'}];
-                          
-        this._default_btn_actions = [{key:'add', title:'Add New Group'}];
-        
-    }, //end _create
     
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
-    _init: function() {
+    _entityName:'defDetailTypeGroups',
+    //  
+    // invoked from _init after load entity config    
+    //
+    _initControls: function() {
         
-        this._super();
+        if(!this._super()){
+            return false;
+        }
 
         // init search header
-        this.searchRecord.searchDefDetailTypeGroups(this.options);
+        this.searchRecord.searchDefDetailTypeGroups( this.options );
             
         this._on( this.searchRecord, {
                 "searchdefdetailtypegroupsonresult": this.updateRecordList
@@ -53,13 +42,15 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         this.element.find('.ent_content_full').css('top',0);
         
         this.recordList.resultList('option','hide_view_mode',true);
-    },
+        
+        return true;
+    },    
     
     //----------------------
     //
     //
     //
-    _rendererListItem:function(recordset, record){
+    _rendererListItem: function(recordset, record){
         
         function fld(fldname){
             return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
@@ -93,23 +84,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
     },
 
-    //
-    //
-    //
-    _searchFullData:function(arr_ids, pageno, callback){
-        
-        var request = {
-                'a'          : 'search',
-                'entity'     : 'defDetailTypeGroups',
-                'details'    : 'list',
-                'request_id' : pageno,
-                'ugr_ID'     : arr_ids
-                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
-        };
-        
-        top.HAPI4.EntityMgr.doRequest(request, callback);
-    }
-    
 });
 
 //

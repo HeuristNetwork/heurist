@@ -1,0 +1,109 @@
+{
+        "entityName": "defTerms",
+
+        "helpContent": "defTerms.html",
+        
+        "searchFormContent": "searchDefTerms.html",
+        
+        "entityTitle": "Term",
+        "entityTitlePlural": "Vocabularies",
+        "empty_remark": "Please use the search field above to locate relevant term (partial string match on title)",
+
+        "sel_actions": [{"key":"edit", "title":"Edit Term"},
+                        {"key":"delete", "title":"Remove Term"}],
+        "btn_actions": [{"key":"add", "title":"Add New Vocabulary"},
+                        {"key":"add_term", "title":"Add New Term"}],
+
+        "reference_query": {},
+        
+        "fields": [
+                {
+                    "dtID": "trm_ID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "trm_Label",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"title",
+                        "dty_Size":500,
+                        "rst_DisplayName": "Term (label):",
+                        "rst_DisplayHelpText": "The term or label describing the category. The label is the normal way of expressing the term. Dropdowns are ordered alphabetically. Precede terms with 01, 02, 03 ... to control order if require", 
+                        "rst_DisplayExtendedDescription":"",
+                        "rst_DisplayWidth":60,
+                        "rst_DefaultValue":"",
+                        "rst_RequirementType":"required",
+                        "rst_MaxValues":1
+                    }
+                },
+                {
+                    "dtID": "trm_InverseTermId",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName":"Target record types:",
+                        "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
+                        "rst_FieldConfig": {"entity":"DefTerms","filter_group":"relation","button_browse":true}
+                    }
+                },
+                {
+                    "dtID": "trm_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName":"Default help text:",
+                        "dty_Size":1000,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayHelpText": "A concise but comprehensive description of this term or category."
+                    }
+                },
+                {
+                    "dtID": "trm_Code",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":100,
+                        "rst_DisplayWidth":30,
+                        "rst_DisplayName":"Standard code:",
+                        "rst_DisplayHelpText": "A domain or international standard code for this term or category. May also be used for a local code value to be used in importing data."
+                    }
+                },
+                {
+                    "dtID": "trm_Status",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Status:",
+                        "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
+                        "rst_DisplayExtendedDescription":"",
+                        "rst_DisplayWidth":30,
+                        "rst_DefaultValue":"open",
+                        "rst_FieldConfig":["open","reserved","approved","pending"]
+                    }
+                },
+                {
+                    "dtID": "trm_Modified",
+                    "dtFields":{
+                        "dty_Type":"date",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "trm_ParentTermID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
+                    "dtID": "trm_Domain",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_Display":"hidden",
+                        "rst_FieldConfig":["enum","relation"]
+                    }
+                }
+                
+     ]
+}

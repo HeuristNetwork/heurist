@@ -19,15 +19,6 @@
 
 $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
 
-    // the widget's constructor
-    _create: function() {
-        this._super();
-
-        this._htmlContent =  'searchDefDetailTypes.html';
-        this._helpContent = 'defDetailTypes.html';
-        this._helpTitle = 'Field Types';
-    }, //end _create
-
     //
     _initControls: function() {
         this._super();
@@ -48,6 +39,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this.selectGroup = this.element.find('#sel_group');
         this.selectGroup.empty();
             
+        //@todo change to ui.createEntitySelector
         top.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
                         'entity':'defDetailTypeGroups','dtg_ID':that.options.filter_groups},
                     function(response){
@@ -106,14 +98,14 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 this._trigger( "onstart" );
         
                 request['a']          = 'search'; //action
-                request['entity']     = 'defDetailTypes';
+                request['entity']     = this.options.entity.entityName;  //'defDetailTypes'
                 request['details']    = 'list'; //'id';
                 request['request_id'] = top.HEURIST4.util.random();
                 
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
-                //that.loadanimation(true);
+                
                 top.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){

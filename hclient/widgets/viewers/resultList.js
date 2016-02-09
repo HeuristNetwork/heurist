@@ -1021,7 +1021,7 @@ $.widget( "heurist.resultList", {
         }
 
     },
-
+    
     /**
     * selection - hRecordSet or array of record Ids
     *
@@ -1499,7 +1499,17 @@ $.widget( "heurist.resultList", {
         }else{
             this._renderPage(this.current_page);
         }
-    }
+    },
 
+    //
+    //
+    //
+    getRecordsById: function (recID){
+            if(this._currentRecordset){
+                return this._currentRecordset.getSubSetByIds([recID]);
+            }else{
+                return null;
+            }        
+    }
 
 });

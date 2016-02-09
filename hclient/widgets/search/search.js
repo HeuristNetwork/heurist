@@ -140,37 +140,39 @@ $.widget( "heurist.search", {
         // Loading progress bar, initially hidden
         this.div_progress = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_search_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element ).hide();
 
+        
+        // Save search popup button
+        this.div_search_as_user2 = $('<div>')
+        .addClass('div-table-cell logged-in-only')
+        .appendTo( this.div_search );
+        
+        this.btn_search_save = $( "<button>", {
+            text: top.HR("Save Filter"),
+            title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
+        })
+        .css({'vertical-align':'top', 'margin-left':'1em'})
+        .appendTo( this.div_search_as_user2 )
+        .addClass('ui-heurist-btn-header1')
+        .button({icons: {
+            primary: "ui-icon-disk"
+        }});
+
+        this._on( this.btn_search_save, {  click: function(){
+            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            if(app && app.widget){
+                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+            }
+        } });
 
         //header-label
         this.div_search_header = $('<div>')
+        .css({'width':'100px','text-align':'right'})
         .addClass('div-table-cell')
         .appendTo( this.div_search );
-        $( "<label>" ).text(top.HR("Filter criteria"))
+        $( "<label>" ).text(top.HR("Filter"))
         .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
 
-        /*var link = $('<button>')
-        .button({icons: {
-            primary: 'ui-icon-circle-b-info'
-            }, text:false,
-            label:'Show syntax and examples of the Heurist query/filter language',
-            title:'Help for queries'})
-        .addClass('ui-heurist-btn-header1')
-        .css({'padding-right':'1em','width':'22px'})
-        .appendTo(this.div_search_header);
-        this._on( link, {  click: function(){
-            window.open('context_help/advanced_search.html','_blank');
-        } });*/
-
-        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
-            .css({'padding-right':'1.5em','display':'inline-block'})
-            .addClass('ui-icon ui-icon-circle-info')
-            .appendTo(this.div_search_header);
-            this._on( link, {  click: function(){
-                window.open('context_help/advanced_search.html','_blank');
-            } });
-        
-        
 
         // Search field
         this.div_search_input = $('<div>')
@@ -281,6 +283,7 @@ $.widget( "heurist.search", {
         .button({icons: {
             primary: "ui-icon-triangle-1-s"
             }, text:false});
+            
 
         this.div_search_as_user.buttonset();
 
@@ -317,26 +320,6 @@ $.widget( "heurist.search", {
             }
         });
 
-        // Save search popup button
-        this.btn_search_save = $( "<button>", {
-            text: top.HR("Save Filter"),
-            title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
-        })
-        .css({'vertical-align':'top', 'margin-left':'1em'})
-        .appendTo( this.div_search_as_user )
-        .addClass('ui-heurist-btn-header1')
-        .button({icons: {
-            primary: "ui-icon-disk"
-        }});
-
-        this._on( this.btn_search_save, {  click: function(){
-            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-            }
-        } });
-
-
 
         // Add record button
         if(this.options.btn_visible_newrecord){
@@ -363,7 +346,7 @@ $.widget( "heurist.search", {
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
-        .css({ 'width': '56px', 'text-align': 'center'})
+        .css({'text-align': 'center'}) // 'width': '56px', 
         .insertBefore( this.div_search_stop );
 
         // Quick search builder dropdown form
@@ -374,12 +357,37 @@ $.widget( "heurist.search", {
             label:'Dropdown form for building a simple filter expression',
             title:top.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
         .addClass('ui-heurist-btn-header1')
-        .css({'width':'40px'})  //'padding':'0 1.0em',
+        .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
         .appendTo(this.div_buttons);
 
         this._on( link, {  click: this.showSearchAssistant });
 
 
+        /*var link = $('<button>')
+        .button({icons: {
+            primary: 'ui-icon-circle-b-info'
+            }, text:false,
+            label:'Show syntax and examples of the Heurist query/filter language',
+            title:'Help for queries'})
+        .addClass('ui-heurist-btn-header1')
+        .css({'padding-right':'1em','width':'22px'})
+        .appendTo(this.div_search_header);
+        this._on( link, {  click: function(){
+            window.open('context_help/advanced_search.html','_blank');
+        } });*/
+        this.div_buttons = $('<div>')
+        .addClass('div-table-cell')
+        .css({'text-align': 'center','width': '20px'}) // , 
+        .insertBefore( this.div_search_stop );
+
+        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
+            .css({'padding-right':'1.5em','display':'inline-block'})
+            .addClass('ui-icon ui-icon-circle-info')
+            .appendTo(this.div_buttons);
+            this._on( link, {  click: function(){
+                window.open('context_help/advanced_search.html','_blank');
+            } });
+        
         this.search_assistant = null;
 
         if(this.options.isrectype){

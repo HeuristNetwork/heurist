@@ -19,17 +19,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/*
-
-TODO: OLD - TO REMOVE
-
-*/
 function hEditing(container, _recdata, _recstructure) {
      var _className = "Editing",
          _version   = "0.4";
 
      var $container = null,
          recdata = null,     //hRecordSet with data to be edited
+         editing_inputs = [],
          recstructure;
 
     /**
@@ -41,21 +37,20 @@ function hEditing(container, _recdata, _recstructure) {
         if (typeof container==="string") {
             $container = $("#"+container);
         }else{
-            $container = container;
+            $container = $(container);
         }
-        if($container.length==0){
+        if($container==null || $container.length==0){
             $container = null;
             alert('Container element for editing not found');
         }
-        recstructure = _recstructure;
         
-        _load(_recdata);
+        _initEditForm(_recstructure, _recdata);
     }
 
     //
+    // relaod existing form
     //
-    //
-    function _load(_recdata) {
+    function _reload(_recdata) {
         
         if(!$container) return;
 
@@ -66,23 +61,41 @@ function hEditing(container, _recdata, _recstructure) {
         //create form, fieldset and input elements according to record type/entity structure
 
         var record = recdata.getFirstRecord();
-        if(record){
+        /*if(record){
             var recID = recdata.fld(record, 'rec_ID');
             var rectypeID = recdata.fld(record, 'rec_RecTypeID');
-            
             //load recordtype/entity structure
             var rectypes = recdata.getStructures();
+        }*/
+        if(record!=null){
+            //fill form with values
+            var idx, ele;
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                var val = recdata.fld(record, ele.editing_input('option', 'dtID'));
+                if(!top.HEURIST4.util.isArray(val)) val = [val];
+                ele.editing_input('setValue', val );
+            }
+            
         }
     }
     
-    function _initEditForm(_recstructure){
+    function _initEditForm(_recstructure, _recdata){
         
         if(_recstructure) recstructure = _recstructure;
         
+        editing_inputs = [];
         $container.empty(); //clear previous edit elements
         
         
-        if(!top.HEURIST4.util.isArrayNotEmpty(recstructure)) return;        
+        if(!top.HEURIST4.util.isArrayNotEmpty(recstructure)) return;   
+        
+        recdata = _recdata;
+        record = null;
+                
+        if(recdata!=null){
+             record = recdata.getFirstRecord();
+        }
         
         //rec structure is arrya in following format
         /*
@@ -184,8 +197,19 @@ function hEditing(container, _recdata, _recstructure) {
                     
                     if(fields[idx]['dty_Type']=="separator"){
                         $('<h3>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
-                    }else{
-                        $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);       
+                    }else  //do not include hidden 
+                    if(fields[idx]['dtFields']['rst_Display']!="hidden") {
+                        
+                        if(record!=null){
+                            var val = recdata.fld(record, fields[idx]['dtID']);
+                            if(!top.HEURIST4.util.isnull(val)){
+                                if(!top.HEURIST4.util.isArray(val)) val = [val];
+                                fields[idx].values = val;
+                            }  
+                        }
+                        
+                        var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
+                        editing_inputs.push(inpt);  
                     }
                 }
                 
@@ -205,15 +229,75 @@ function hEditing(container, _recdata, _recstructure) {
         $container.addClass('ui-heurist-bg-light');        
         __createGroup(recstructure, $container, null);
     }
-    
-
-    function _verify(){
-        return true;
-    }
 
     function _save(){
         alert('save');
         return true;
+    }
+
+    //
+    // returns values as object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
+    //    
+    function _getValues(needArrays){
+        
+        var idx, ele, details = {};
+        for (idx in editing_inputs) {
+            ele = $(editing_inputs[idx]);
+            var vals = ele.editing_input('getValues');
+            //var vals = ele.list("getValues"); 
+            //var vals = ele.data("editing_input").getValues();
+            if(vals && vals.length>0){
+                details[ ele.editing_input('option', 'dtID') ] = (needArrays || vals.length>1) ?vals :vals[0];
+            }
+        }
+        return details;
+    }
+    
+    function _validate(){
+        
+        var idx, res = true;
+        for (idx in editing_inputs) {
+            res = $(editing_inputs[idx]).editing_input('validate') && res;
+        }
+        
+        return res;
+    }
+    
+    //
+    // returns array of input elements for given field
+    // 
+    function _getFieldByName(fieldName){
+        var idx, ele;
+        for (idx in editing_inputs) {
+            ele = $(editing_inputs[idx]);
+            if(ele.editing_input('option', 'dtID')  == fieldName){
+                return ele;
+            }
+        }
+    }
+
+    //
+    // returns array of input elements for field value
+    // 
+    function _getFieldByName(fieldName, value){
+        var idx, ele, ress = [];
+        for (idx in editing_inputs) {
+            ele = $(editing_inputs[idx]);
+            if(ele.editing_input('f', fieldName)  == value){
+                ress.push(ele);
+            }
+        }
+        return ress;
+    }
+        
+    //
+    // returns array of input elements for given field
+    // 
+    function _getInputs(fieldName){
+        var ele = _getFieldByName(fieldName);
+        if(ele && ele.length>0){
+            return ele.editing_inputs('getInputs');
+        }
     }
 
 
@@ -224,21 +308,42 @@ function hEditing(container, _recdata, _recstructure) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        load: function(_recdata){
-            _load(_recdata);
+        //assign values only based on old structure
+        reload: function(_recdata){
+            _reload(_recdata);
         },
 
-        verify: function(){
-            _verify();
+        validate: function(){
+            return _validate();
         },
 
         save: function(){
             _save();
         },
         
-        initEditForm: function(_recstructure){
-            _initEditForm(_recstructure);
+        initEditForm: function(_recstructure, _recdata){
+            _initEditForm(_recstructure, _recdata);
+        },
+        
+        getValues:function(needArrays){
+            return _getValues(needArrays);
+        },
+        
+        //
+        // returns editing_element by name
+        //
+        getFieldByName:function(fieldName){
+            return _getFieldByName(fieldName);
+        },
+        
+        getFieldByValue:function(fieldName, value){
+            return _getFieldByName(fieldName, value);
+        },
+        
+        getInputs:function(fieldName){
+            return _getInputs(fieldName);
         }
+        
     }
 
     _init(container, _recdata, _recstructure);

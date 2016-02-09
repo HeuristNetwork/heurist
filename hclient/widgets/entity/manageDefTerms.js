@@ -1,5 +1,5 @@
 /**
-* manageDefDetailTypes.js - main widget to manage defDetailTypes
+* manageDefTerms.js - main widget to manage defTerms
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -18,9 +18,9 @@
 */
 
 
-$.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
+$.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
-    _entityName:'defDetailTypes',
+    _entityName:'defTerms',
     
     //  
     // invoked from _init after load entity config    
@@ -31,13 +31,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             return false;
         }
 
-        this._entityIDfield = 'dty_ID';
+        this._entityIDfield = 'trm_ID'; //@todo - take it from config
 
         // init search header
-        this.searchRecord.searchDefDetailTypes(this.options);
+        this.searchRecord.searchDefTerms(this.options);
             
         this._on( this.searchRecord, {
-                "searchdefdetailtypesonresult": this.updateRecordList
+                "searchdeftermsonresult": this.updateRecordList
                 });
         this.recordList.css('top','5.5em');
                 

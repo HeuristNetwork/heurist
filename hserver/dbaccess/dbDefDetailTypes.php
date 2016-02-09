@@ -21,57 +21,24 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
+require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefDetailTypes
+class DbDefDetailTypes extends DbEntityBase
 {
-    private $system;  
-    
-    /*  
-     parametrs
-    
-     list of fields to search or update
-     
-    
-    */    
-    private $data;  
-    
-    //data types: ids, int, float, date, bool, enum
-    private static $fields = array( 
-    'dty_ID'=>'ids',    //ids
-    'dty_Name'=>255,     //title
+/*
     'dty_Documentation'=>5000,
-   
-    'dty_Type'=>array('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker'),
-    'dty_HelpText'=>255,
-    'dty_ExtendedDescription'=>5000,
     'dty_EntryMask'=>'text',
-    'dty_Status'=>array('reserved','approved','pending','open'),
     'dty_OriginatingDBID'=>'int',
     'dty_NameInOriginatingDB'=>255,
     'dty_IDInOriginatingDB'=>'int',
-    
-    'dty_DetailTypeGroupID'=>'ids',
+  
     'dty_OrderInGroup'=>'int',
-
-    'dty_JsonTermIDTree'=>5000,  //dty_JsonConfig
     'dty_TermIDTreeNonSelectableIDs'=>1000,
-    'dty_PtrTargetRectypeIDs'=>63,
     'dty_FieldSetRectypeID'=>'int',
-
-    'dty_ShowInLists'=>'bool2',
-    'dty_NonOwnerVisibility'=>array('hidden','viewable','public','pending'),
-    'dty_Modified'=>'date',
     'dty_LocallyModified'=>'bool2'
-    
-    );
-    
-    function __construct( $system, $data ) {
-       $this->system = $system;
-       $this->data = $data;
-    }
-    
+*/
 
     /**
     *  search user or/and groups
@@ -97,20 +64,8 @@ class DbDefDetailTypes
     public function search(){
         
 //error_log(print_r($this->data,true));        
-        $this->searchMgr = new dbEntitySearch( $this->system, DbDefDetailTypes::$fields);
+        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
 
-        /*
-        if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
-            return false;
-        }
-        
-        if(!$this->_validateParamsAndCounts()){
-            return false;
-        }else if (count(@$this->recIDs)==0){
-            return $this->result_data;
-        }
-        */
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -156,7 +111,7 @@ class DbDefDetailTypes
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', DbDefDetailTypes::$fields );
+            $this->data['details'] = implode(',', $this->fields );
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -165,7 +120,7 @@ class DbDefDetailTypes
         
         //validate names of fields
         foreach($this->data['details'] as $fieldname){
-            if(!@DbDefDetailTypes::$fields[$fieldname]){
+            if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            

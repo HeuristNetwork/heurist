@@ -80,6 +80,17 @@ require_once(dirname(__FILE__)."/initPage.php");
                     
                     top.HEURIST4.ui.initHintButton($('#btn_help_hints'));
                     
+                    var isOnTop = false;
+                    $('#btn_style').button().on({click:function(e){
+                        isOnTop = !isOnTop;
+                        if(isOnTop){
+                            $('fieldset').addClass('ontop');
+                        }else{
+                            $('fieldset').removeClass('ontop');
+                        }
+                    }  });
+                    
+                    
                 }
             }
             
@@ -87,212 +98,6 @@ require_once(dirname(__FILE__)."/initPage.php");
 //----------------------------------
                         //rst_PtrFilteredIDs:$('#input_rectypes').val(),
                         //rst_FilteredJsonTermIDTree:$('#input_term').val(),  //configuration  rst_FilteredJsonTermIDTree
-    var defDetailTypes = [
-                {
-                    dtID: 'dty_Name',
-                    dtFields:{
-                        dty_Type:'freetext',
-                        rst_DisplayName: 'Default field type name:',
-                        rst_DisplayHelpText: "A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name is normally overridden with a name specific to each record type in which it is used.", 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:60,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'required',
-                        rst_MaxValues:1
-                    }
-                },
-                {
-                    dtID: 'dty_HelpText',
-                    dtFields:{
-                        dty_Type:'freetext',
-                        rst_DisplayName:'Default help text:',
-                        rst_DisplayHelpText: 'A default generic help text which may be overridden with more specific help for each record type that uses this field type', 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:60,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'required',
-                        rst_MaxValues:1
-                    }
-                },
-                {
-                    dtID: 'dty_ExtendedDescription',
-                    dtFields:{
-                        dty_Type:'blocktext',
-                        rst_DisplayName:'Extended description:',
-                        rst_DisplayHelpText: 'An extended description of the content of this field type and references to any standards used', 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:60,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'optional',
-                        rst_MaxValues:1
-                    }
-                },
-                {
-                    dtID: 'dty_Type',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Data type:',
-                        rst_DisplayHelpText: 'The type of data to be recorded in this field. Note: in most cases this cannot be changed once set', 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:40,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'required',
-                        rst_MaxValues:1,
-                        rst_JsonConfig:[  //it will be stored in 
-{key:"blocktext", title:"Memo (multi-line)"},
-{key:"boolean", title:"Boolean (T/F)"},
-//{key:"calculated", title:"Calculated (not yet impl.)"},
-{key:"date", title:"Date / temporal"},
-{key:"enum", title:"Terms list"},
-{key:"file", title:"File"},
-{key:"float", title:"Numeric"},
-{key:"freetext", title:"Text (single line)"},
-{key:"geo", title:"Geospatial"},
-{key:"integer", title:"Numeric - integer"},
-{key:"relationtype", title:"Relationship type"},
-{key:"relmarker", title:"Relationship marker"},
-{key:"resource", title:"Record pointer"},
-//{key:"separator", title:"Heading (no data)"},
-{key:"year", title:"Year (no mm-dd)"}]                        
-                    }
-                },
-                //specific elements 
-                {
-                    dtID: 'dty_Mode_freetext',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Input type:',
-                        rst_DisplayHelpText: "Define specific subtype", 
-                        rst_JsonConfig:['text','password','color']
-                    }
-                },
-                {
-                    dtID: 'dty_Mode_blocktext',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Input type:',
-                        rst_DisplayHelpText: "Define specific subtype", 
-                        rst_JsonConfig:['text','query','editor']
-                    }
-                },
-                {
-                    dtID: 'dty_Mode_date',
-                    dtFields:{
-                        dty_Type:'boolean',
-                        rst_DisplayName:'Allow temporal object:',
-                        rst_DisplayHelpText: "Define specific subtype"
-                    }
-                },
-                {   // for example for defDetailType the configuration is  {entity:'defTerms', filter_group:'enum', mode:'single'}
-                    // we do not need to specify all these 3 params here
-                    dtID: 'dty_JsonTermIDTree',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Vocabulary (terms):',
-                        rst_DisplayHelpText: "The set of terms which may be selected for this field", 
-                        rst_JsonConfig: {entity:'DefTerms', filter_group:'enum', button_browse:true}
-                    }
-                },
-                {
-                    dtID: 'dty_PtrTargetRectypeIDs',
-                    dtFields:{
-                        dty_Type:'resource',
-                        rst_DisplayName:'Target record types:',
-                        rst_DisplayHelpText: "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
-                        rst_JsonConfig: {entity:'DefRecTypes',csv:true}  //select several recordtypes
-                    }
-                },
-                {
-                    groupHeader: 'Additional',
-                    groupType: 'accordion',  //accordion, tabs, group 
-                    groupStye: null,
-                    children:[
-                
-                {
-                    dtID: 'dty_Mode_freetext',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Status2222:',
-                        rst_DisplayHelpText: "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:60,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'optional',
-                        rst_MaxValues:9,
-                        rst_JsonConfig:['reserved','approved','pending','open']
-                    }
-                },
-                
-                ]},                
-                {
-                    groupHeader: 'Second22',
-                    groupType: 'accordion',  //accordion, tabs, group 
-                    groupStye: null,
-                    children:[
-                
-                {
-                    dtID: 'dty_Status',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Status:',
-                        rst_DisplayHelpText: "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:60,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'optional',
-                        rst_MaxValues:1,
-                        rst_JsonConfig:['reserved','approved','pending','open']
-                    }
-                },
-                {
-                    dtID: 'dty_NonOwnerVisibility',
-                    dtFields:{
-                        dty_Type:'enum',
-                        rst_DisplayName:'Non-owner visibility:',
-                        rst_DisplayHelpText: "Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers", 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DisplayWidth:60,
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'optional',
-                        rst_MaxValues:1,
-                        rst_JsonConfig:['hidden','viewable','public'] //,'pending'
-                    }
-                },
-                {
-                    dtID: 'dty_ShowInLists',
-                    dtFields:{
-                        dty_Type:'boolean',
-                        rst_DisplayName:'Show in lists:',
-                        rst_DisplayHelpText: "Show this field type in pulldown lists etc. (always visible in field management screen)", 
-                        rst_DisplayExtendedDescription:'',
-                        rst_DefaultValue:'',
-                        rst_RequirementType:'optional',
-                        rst_MaxValues:1
-                    }
-                }
-                
-                ]}                
-     ];
-     var defDetailTypeGroups = [
-                    {dtID: 'dtg_Name',
-                    dtFields:{
-                        dty_Type:'freetext',
-                        rst_DisplayName:'Name of Group:',
-                        rst_DisplayHelpText:'Descriptive heading to be displayed for each group of details (fields)'
-                    }},
-                    {dtID: 'dtg_Description',
-                    dtFields:{
-                        dty_Type:'freetext',
-                        rst_DisplayName:'Description:',
-                        rst_DisplayHelpText:'General description fo this group of detail (field) types'
-                    }},
-                    {dtID: 'dtg_Order',
-                    dtFields:{
-                        dty_Type:'integer',
-                        rst_DisplayName:'Order:',
-                        rst_DisplayHelpText:'Ordering of detail type groups within pulldown lists'
-                    }}
-                    ];
         </script>
     </head>
 
@@ -305,5 +110,6 @@ require_once(dirname(__FILE__)."/initPage.php");
         </div>
 
         <div id="btn_help_hints" style="position:absolute;top:4px;right:4px;"></div>        
+        <div id="btn_style" style="position:absolute;top:4px;right:34px;">style</div>        
     </body>
 </html>

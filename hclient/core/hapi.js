@@ -652,7 +652,29 @@ function hAPI(_db, _oninit) { //, _currentUser
     * @returns {Object}
     */
     function hEntityMgr(){
+        
+        var entities = {};
+        
         var that = {
+            getEntityConfig:function(entityName, callback){
+                   
+                if(entities[entityName]){
+                    callback(entities[entityName]);
+                }else{
+                    _callserver('entityScrud', {a:'config', 'entity':entityName}, 
+                       function(response){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                                entities[response.data.entityName] = response.data;
+                                callback(response.data);
+                            }else{
+                                top.HEURIST4.msg.showMsgErr(response);
+                            }
+                       }
+                    
+                    );
+                }
+                
+            },
             doRequest:function(request, callback){
                 //todo - verify basic params
                 

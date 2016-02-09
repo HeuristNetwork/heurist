@@ -25,8 +25,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         
         this._super();
 
-        this._entityName = 'Group',
-        this._entityNames = 'Groups',
+        this._entityTitle = 'Group',
+        this._entityTitlePlural = 'Groups',
         this._empty_remark = 'Please use the search field above to locate relevant group (partial string match on title)',
         
         this._default_sel_actions = [{key:'edit', title:'Edit'},

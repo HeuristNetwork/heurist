@@ -22,12 +22,7 @@ $.widget( "heurist.searchDefDetailTypeGroups", $.heurist.searchEntity, {
 
     // the widget's constructor
     _create: function() {
-        
         this._super();
-
-        this._htmlContent =  '';
-        this._helpContent = 'defDetailTypes.html';
-        this._helpTitle = 'Detail Types';
         this._need_load_content = false;
         
     }, //end _create
@@ -35,7 +30,6 @@ $.widget( "heurist.searchDefDetailTypeGroups", $.heurist.searchEntity, {
     //
     _initControls: function() {
         //this._super();
-        
         this.startSearch();
     },  
     
@@ -52,7 +46,7 @@ $.widget( "heurist.searchDefDetailTypeGroups", $.heurist.searchEntity, {
 
                 request = {
                 'a'          : 'search',
-                'entity'     : 'defDetailTypeGroups',
+                'entity'     : this.options.entity.entityName,  //'defDetailTypeGroups',
                 'details'    : 'list',
                 'request_id' : top.HEURIST4.util.random(),
                 };

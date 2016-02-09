@@ -25,8 +25,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         this._super();
 
-        this._entityName = 'Record Type Group',
-        this._entityNames = 'Record Type Groups',
+        this._entityTitle = 'Record Type Group',
+        this._entityTitlePlural = 'Record Type Groups',
         this._empty_remark = 'Please use the search field above to locate relevant group (partial string match on title)',
         
         this._default_sel_actions = [{key:'edit', title:'Edit'},
@@ -51,6 +51,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 
         this.element.find('.ent_header').css('height',0);
         this.element.find('.ent_content_full').css('top',0);
+        
+        this.wrapper.css('min-width','300px');
         
         this.recordList.resultList('option','hide_view_mode',true);
     },

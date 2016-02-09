@@ -25,8 +25,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         this._super();
 
-        this._entityName = 'User',
-        this._entityNames = 'Users',
+        this._entityTitle = 'User',
+        this._entityTitlePlural = 'Users',
         this._empty_remark = 'Please use the search field above to locate relevant user (partial string match on name)',
         
         this._default_sel_actions = [{key:'edit', title:'Edit'},

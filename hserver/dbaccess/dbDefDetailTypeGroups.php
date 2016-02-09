@@ -21,36 +21,12 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
+require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefDetailTypeGroups
+class DbDefDetailTypeGroups extends DbEntityBase 
 {
-    private $system;  
-    
-    /*  
-     parametrs
-    
-     list of fields to search or update
-     
-    
-    */    
-    private $data;  
-    
-    //data types: ids, int, float, date, bool, enum
-    private static $fields = array( 
-    'dtg_ID'=>'ids',    //ids
-    'dtg_Name'=>63,     //title
-    'dtg_Order'=>'int',
-    'dtg_Description'=>255,
-    'dtg_Modified'=>'date'
-    );
-    
-    function __construct( $system, $data ) {
-       $this->system = $system;
-       $this->data = $data;
-    }
-
     /**
     *  search user or/and groups
     * 
@@ -74,21 +50,9 @@ class DbDefDetailTypeGroups
     */
     public function search(){
         
-//error_log(print_r($this->data,true));        
-        $this->searchMgr = new dbEntitySearch( $this->system, DbDefDetailTypeGroups::$fields);
+        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
 
-        /*
-        if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
-            return false;
-        }
-        
-        if(!$this->_validateParamsAndCounts()){
-            return false;
-        }else if (count(@$this->recIDs)==0){
-            return $this->result_data;
-        }
-        */
+
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
             $this->data = $res;
@@ -107,6 +71,7 @@ class DbDefDetailTypeGroups
 
        
         //compose SELECT it depends on param 'details' ------------------------
+        //@todo - take it form fiels using some property
         if(@$this->data['details']=='id'){
         
             $this->data['details'] = 'dtg_ID';
@@ -121,7 +86,7 @@ class DbDefDetailTypeGroups
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', DbDefDetailTypeGroups::$fields );
+            $this->data['details'] = implode(',', $this->fields );
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -130,7 +95,7 @@ class DbDefDetailTypeGroups
         
         //validate names of fields
         foreach($this->data['details'] as $fieldname){
-            if(!@DbDefDetailTypeGroups::$fields[$fieldname]){
+            if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            
@@ -162,7 +127,7 @@ class DbDefDetailTypeGroups
         return $res;
 
     }
-     
-    
+
+
 }
 ?>

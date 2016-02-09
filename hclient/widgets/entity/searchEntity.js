@@ -31,13 +31,10 @@ $.widget( "heurist.searchEntity", {
         
         // callbacks - events
         onstart:null,
-        onresult:null
+        onresult:null,
         
+        entity:{}
     },
-    
-    _htmlContent: 'searchEntity.html',
-    _helpContent: 'entities.html',
-    _helpTitle: 'About Entities',
     
     _need_load_content:true,
 
@@ -53,8 +50,8 @@ $.widget( "heurist.searchEntity", {
 
             var that = this;
             
-            if(this._need_load_content){        
-                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/'+this._htmlContent+'?t'+top.HEURIST4.util.random(), 
+            if(this._need_load_content && this.options.entity.searchFormContent){        
+                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/'+this.options.entity.searchFormContent+'?t'+top.HEURIST4.util.random(), 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {
@@ -70,6 +67,9 @@ $.widget( "heurist.searchEntity", {
             
     },
     
+    //
+    //
+    //
     _initControls: function() {
             
             //init buttons
@@ -112,8 +112,8 @@ $.widget( "heurist.searchEntity", {
                 
             // help buttons
             top.HEURIST4.ui.initHintButton(this.element.find('#btn_help_hints'));
-            top.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),this._helpTitle,
-                top.HAPI4.basePathV4+'context_help/'+this._helpContent+' #content');
+            top.HEURIST4.ui.initHelper(this.element.find('#btn_help_content'),'Help',
+                top.HAPI4.basePathV4+'context_help/'+this.options.entity.helpContent+' #content');
             
             var right_padding = top.HEURIST4.util.getScrollBarWidth()+4;
             this.element.find('#div-table-right-padding').css('min-width',right_padding);

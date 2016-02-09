@@ -25,8 +25,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         this._super();
 
-        this._entityName = 'Record Type',
-        this._entityNames = 'Record Types',
+        this._entityTitle = 'Record Type',
+        this._entityTitlePlural = 'Record Types',
         this._empty_remark = 'Please use the search field above to locate relevant record type (partial string match on title)',
         
         this._default_sel_actions = [

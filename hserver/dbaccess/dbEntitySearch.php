@@ -23,7 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 //require_once (dirname(__FILE__).'/db_tags.php');
 
-class dbEntitySearch
+class DbEntitySearch
 {
     private $system;  
     
@@ -71,19 +71,33 @@ class dbEntitySearch
         
         if($value!=null){
             
-            $enums = $this->fields[$fieldname];
+            $enums = $this->fields[$fieldname]['rst_FieldConfig'];
 
             if(!is_array($value)){
                 $values = explode(',', $value);
             }else{
                 $values = $value;
             }
+            $iskeybased = (is_array($enums[0]));
+            
             foreach($values as $val){ 
-                if(array_search($value, $enums, true)===false){
+                //search in enums
+                $isNotFound = true;
+                if($iskeybased){
+                    foreach($enums as $enum){ 
+                        if($enum['key']==$val){
+                            $isNotFound = false;
+                            break;
+                        }
+                    }
+                }else if(array_search($value, $enums, true)!==false){
+                    $isNotFound = false;
+                }
+                if($isNotFound){
                     $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname: $value");
                     return false;
                 }
-            }
+            }//for
         }
         return true;        
     }
@@ -98,33 +112,11 @@ class dbEntitySearch
         if($value!=null){
 
             if(is_bool($value)){
-                $value = $value?'y':'n';
-            }else if(is_numeric($value)){
-                $value = $value==1?'y':'n';
-            }
-            if(!($value=='y' || $value=='n')){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
-                return false;
-            }
-            return $value;
-            
-        }
-        return true;
-    }
-
-    //
-    //
-    //
-    private function _validateBoolean2($fieldname){
-
-        $value = @$this->data[$fieldname];
-        
-        if($value!=null){
-
-            if(is_bool($value)){
                 $value = $value?1:0;
             }else if(is_numeric($value)){
                 $value = $value==1?1:0;
+            }else{
+                $value = $value=='y'?1:0;    
             }
             if(!($value==1 || $value==0)){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter for field $fieldname ".$this->data[$fieldname]);
@@ -144,20 +136,27 @@ class dbEntitySearch
         
         $this->data = $data;
         
-        foreach($this->fields as $fieldname=>$data_type){
+        foreach($this->fields as $fieldname=>$field_config){
             $value = @$this->data[$fieldname];
+            
             if($value!=null){
+                
+                $data_type = $field_config['dty_Type'];
+                $data_role = @$field_config['dty_Role'];
+                
+                $is_ids = ($data_role=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
                 
                 if($value=='NULL' || $value=='-NULL'){
                     $res = true;
-                }else if($data_type=='ids'){
+                }else if($is_ids=='ids'){
                     $res = $this->_validateIds($fieldname); //, 'user/group IDs');
-                }else if(is_array($data_type)){
+                    
+                }else if($data_type == 'enum' && !$is_ids){
                     $res = $this->_validateEnum($fieldname);
-                }else if($data_type=='bool'){
+                    
+                }else if($data_type=='boolean'){
                     $res = $this->_validateBoolean($fieldname);
-                }else if($data_type=='bool2'){
-                    $res = $this->_validateBoolean2($fieldname);
+                    
                 }else{
                     $res = true;
                 }
@@ -197,15 +196,12 @@ class dbEntitySearch
         $value = @$this->data[$fieldname];
         if($value==null) return null;
         
-        $data_type = $this->fields[$fieldname];
-        if(is_array($data_type)){
-            $data_type = 'enum';
-        }else if(is_numeric($data_type)){
-            $data_type = 'varchar';
-        }
-
+        $field_config = $this->fields[$fieldname];
+        $data_type = $field_config['dty_Type'];
+        $is_ids = (@$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
+        
         //special case for ids - several values can be used in IN operator        
-        if ($data_type == 'ids') {  //preg_match('/^\d+(?:,\d+)+$/', $value)
+        if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
         
             if(is_array($value)){
                 $value = implode(',',$value);
@@ -293,7 +289,7 @@ class dbEntitySearch
             
             $eq = ($negate)? '!=' : (($lessthan) ? '<' : (($greaterthan) ? '>' : '='));
 
-            if ($data_type == 'int' || $data_type == 'float') {
+            if ($data_type == 'integer' || $data_type == 'float' || $data_type == 'year') {
 
                 if($between){
                     $res = $between.$values[0].' and '.$values[1];
@@ -324,7 +320,7 @@ class dbEntitySearch
                     $res = $between.$values[0].' and '.$values[1];
                 }else{
                     
-                    if($eq=='=' && !$exact && $data_type == 'varchar'){
+                    if($eq=='=' && !$exact && ($data_type == 'freetext' || $data_type == 'blocktext') ){
                         $eq = 'like';
                         $k = strpos($value,"%");
                         if($k===false || ($k>0 && $k+1<strlen($value))){

@@ -52,9 +52,13 @@
         }
     }
 
-    if($entity){
+    if($entity && $entity->isvalid()){
         if(@$_REQUEST['a'] == 'search'){
             $res = $entity->search();
+        }else if(@$_REQUEST['a'] == 'save'){
+            $res = $entity->save();
+        }else if(@$_REQUEST['a'] == 'config'){
+            $res = $entity->config();
         }else {
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
         }

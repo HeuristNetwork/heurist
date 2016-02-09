@@ -21,53 +21,26 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
+require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 
-class DbDefTerms
+class DbDefTerms extends DbEntityBase
 {
-    private $system;  
-    
-    /*  
-     parametrs
-    
-     list of fields to search or update
-     
-    
-    */    
-    private $data;  
-    
-    //data types: ids, int, float, date, bool, enum
-    private static $fields = array( 
-    'trm_ID'=>'ids',    //ids
-    'trm_Label'=>500,     //title
-    'trm_InverseTermId'=>'int',
-    'trm_Description'=>1000,
-
-    'trm_Status'=>array('reserved','approved','pending','open'),
+    /*
     'trm_OriginatingDBID'=>'int',
     'trm_NameInOriginatingDB'=>63,
     'trm_IDInOriginatingDB'=>'int',
 
     'trm_AddedByImport'=>'bool2',
     'trm_IsLocalExtension'=>'bool2',
-    'trm_Domain'=>array('enum','relation'),
-    
+
     'trm_OntID'=>'int',
     'trm_ChildCount'=>'int',
-    'trm_ParentTermID'=>'int',
+    
     'trm_Depth'=>'int',
-    'trm_Modified'=>'date',
     'trm_LocallyModified'=>'bool2',
-    
-    'trm_Code'=>100
-    );
-    
-    function __construct( $system, $data ) {
-       $this->system = $system;
-       $this->data = $data;
-    }
-    
+    */
 
     /**
     *  search user or/and groups
@@ -93,7 +66,7 @@ class DbDefTerms
     public function search(){
         
 //error_log(print_r($this->data,true));        
-        $this->searchMgr = new dbEntitySearch( $this->system, DbDefTerms::$fields);
+        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
         /*
         if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
@@ -154,7 +127,7 @@ class DbDefTerms
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', DbDefTerms::$fields );
+            $this->data['details'] = implode(',', $this->fields );
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -163,7 +136,7 @@ class DbDefTerms
         
         //validate names of fields
         foreach($this->data['details'] as $fieldname){
-            if(!@DbDefTerms::$fields[$fieldname]){
+            if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            

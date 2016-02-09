@@ -178,6 +178,7 @@ fieldset > div, .input-row{
     display:table-row;
     /*padding-bottom:0.2em;*/
 }
+
 fieldset > div > input.text, fieldset > div > select.text{
     margin-bottom: 0.5em;
 }
@@ -195,18 +196,23 @@ fieldset > div > .header_narrow{
     padding-top:0.4em;
     padding-right:1em;
 }
+fieldset.ontop > div > .header{
+    display:block;
+    text-align:left;
+}
+
+
 fieldset > div > .header{
     width:150px;
     min-width:150px;
-}
-div.prompt{
-    font-size:0.8em;
-    opacity: 0.55;
 }
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
     padding-bottom:0.2em;
+}
+fieldset.ontop > div > .input-cell{
+    display:block;
 }
 .input-cell > input{
     margin-right: 0.4em;
@@ -799,6 +805,14 @@ Allow use of icon-large to be properly aligned
     font-size: 0.9em;
     vertical-align:top;
 }
+/* nearly same as helper but nor affected to help status*/
+.heurist-prompt{
+    font-size:0.9em;
+    opacity: 0.55;
+}
+
+
+
 .svs-acordeon{
     border-bottom: #8ea9b9 1px solid;
     font-size: 0.97em;
@@ -901,6 +915,8 @@ background: #8ea9b9
 .ent_content{top:7em;bottom:3em; overflow:auto;}
 .ent_content_full{top:7em;bottom:0; overflow:auto;}
 .ent_footer{bottom:0px; background-color:#afa; height:3em}
+.ent_editor{position:absolute; top:0;bottom:0;left:1px;right:1px;font-size:0.9em;min-width:550px;display:none;}
+
 
 /*
 .ent_help_buttons{
