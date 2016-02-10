@@ -65,7 +65,7 @@ if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirst
     return;
 }
 
-error_log('>>>>>'.$serverURL);
+//error_log('>>>>>'.$serverURL);
 
 if(strpos($serverURL,'http://')===false){
     $serverURL = 'http://'.$serverURL;
@@ -178,7 +178,7 @@ if(mysql_num_rows($res) == 0) { // new registration
         //send email to administrator about new database registration
         $email_text =
         "There is a new Heurist database registration on the Heurist Master Index\n\n".
-        "Database Title:     ".$dbTitle."\n".
+        "Database Title:     ".htmlentities($dbTitle)."\n".
         "Registration ID:    ".$dbID."\n". // was $indexdb_user_id, which is always 0 b/cnot yet logged in to master index
         "DB Format Version:  ".$dbVersion."\n\n".
         // "User name:    ".$usrFirstName." ".$usrLastName."\n".  // comes out 'every user' b/c user not set
@@ -187,7 +187,7 @@ if(mysql_num_rows($res) == 0) { // new registration
         $serverURL;
 
         $dbowner_Email = get_dbowner_email();
-        $email_title = 'Database registration: '.$dbTitle.' ['.$indexdb_user_id.']';
+        $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
         sendEmail($dbowner_Email, $email_title, $email_text, null);
         //END email -----------------------------------

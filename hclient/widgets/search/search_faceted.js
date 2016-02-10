@@ -77,7 +77,7 @@ NOTE - to make search for facet value faster we may try to omit current search i
 
 $.widget( "heurist.search_faceted", {
 
-    _MIN_DROPDOWN_CONTENT: 50, //min number in dropdown selector, otherwise facet values are displayed in explicit list
+    _MIN_DROPDOWN_CONTENT: 50,//0, //min number in dropdown selector, otherwise facet values are displayed in explicit list
 
     // default options
     options: {
@@ -487,8 +487,9 @@ $.widget( "heurist.search_faceted", {
                                 values: '',
                                 readonly: false,
                                 title:  harchy + "<span style='font-weight:bold'>" + field['title'] + "</span>",
+                                detailtype: field['type'],  //overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
-                                detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
+                                suppress_prompts:true  //supress help, error and required features
                         };
                         
                    if(isNaN(Number(field['id']))){
@@ -533,7 +534,7 @@ $.widget( "heurist.search_faceted", {
                     var btn_add = $( "<button>")
                     .addClass("smallbutton")
                     //.css('position','absolute')
-                    .appendTo( inpt.find('.input-cell') )
+                    .insertBefore( inpt.find('.input-cell .heurist-helper1') )
                     .button({icons:{primary: "ui-icon-search"}, text:false})
                     that._on( btn_add, { click: "doSearch" });
                     
@@ -1015,7 +1016,7 @@ $.widget( "heurist.search_faceted", {
                        
                         //calculate the total number of terms with value
                         var tot_cnt = __calcTerm(term, 0, null);
-                        var as_list = (tot_cnt < that._MIN_DROPDOWN_CONTENT);
+                        var as_list = (field['isfacet']==1 && tot_cnt < that._MIN_DROPDOWN_CONTENT);
 
 
                         if(top.HEURIST4.util.isArrayNotEmpty(field.history)){

@@ -123,7 +123,7 @@ class DbDefTerms extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID,trm_Code';
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID,trm_Code,trm_Status';
             
         }else if(@$this->data['details']=='full'){
 

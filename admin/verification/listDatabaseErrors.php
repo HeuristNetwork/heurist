@@ -40,7 +40,7 @@ require_once('valueVerification.php');
 
         <script type=text/javascript>
 
-            function open_selected(sname) {
+            function open_selected_by_name(sname) {
                 var cbs = document.getElementsByName(sname);
                 if (!cbs  ||  ! cbs instanceof Array)
                     return false;
@@ -136,7 +136,7 @@ require_once('valueVerification.php');
 
 
             <?php
-            if (count($dtysWithInvalidTerms)>0 || count($dtysWithInvalidNonSelectableTerms)>0 || count($dtysWithInvalidRectypeConstraint)>0){
+            if (count(@$dtysWithInvalidTerms)>0 || count(@$dtysWithInvalidNonSelectableTerms)>0 || count(@$dtysWithInvalidRectypeConstraint)>0){
                 ?>
                 <script>
                     function repairFieldTypes(){
@@ -290,7 +290,7 @@ require_once('valueVerification.php');
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected('recCB');">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB');">(show selected as search)</a>
                     </span>
                     <div>To fix the inconsistencies, please click here:
                         <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">
@@ -417,7 +417,7 @@ require_once('valueVerification.php');
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected('recCB5');">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                     </span>
                     <div>To fix faulty date values as suggested, please click here:
                         <button
@@ -504,7 +504,7 @@ require_once('valueVerification.php');
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link onClick="return open_selected('recCB1');">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB1');">(show selected as search)</a>
                     </span>
                     <div>To fix the inconsistencies, please click here:
                         <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
@@ -646,7 +646,7 @@ require_once('valueVerification.php');
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link2 onClick="return open_selected('recCB2');">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link2 onClick="return open_selected_by_name('recCB2');">(show selected as search)</a>
                     </span>
                 </div>
 
@@ -720,7 +720,7 @@ require_once('valueVerification.php');
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link3 onClick="return open_selected('recCB3');">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search)</a>
                     </span>
                 </div>
 
@@ -797,7 +797,7 @@ require_once('valueVerification.php');
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= join(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link4 onClick="return open_selected('recCB4');">(show selected as search)</a>
+                        <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search)</a>
                     </span>
                     <table>
                         <?php

@@ -79,6 +79,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
     $email_title = 'New database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
 
+    //HEURIST_MAIL_TO_ADMIN
     $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
     if($rv != 'ok'){
         return false;

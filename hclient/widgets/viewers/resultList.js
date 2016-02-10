@@ -449,6 +449,9 @@ $.widget( "heurist.resultList", {
         }
     },
 
+    //
+    // show hide pagination and info panel depend on width
+    //
     _showHideOnWidth: function(){                    
             var w = this.element.width();
             if ( w < 390 || (w < 440 && this.max_page>1) ) {
@@ -464,20 +467,8 @@ $.widget( "heurist.resultList", {
     },
 
     //
-    // not used
+    // switcher listener - list;icons;thumbs
     //
-    _initTagMenu: function() {
-
-        this.menu_tags = $('<div>')
-        .addClass('menu-or-popup')
-        .css('position','absolute')
-        .appendTo( this.document.find('body') )
-        .tag_manager()
-        .hide();
-
-        this.btn_tags.click();
-    },
-
     _applyViewMode: function(newmode){
 
         if(!this.div_content.hasClass(newmode)){
@@ -538,6 +529,9 @@ $.widget( "heurist.resultList", {
         //        this.view_mode_selector.buttonset('refresh');
     },
 
+    //
+    //
+    //
     _clearAllRecordDivs: function(new_title){
 
         //this._currentRecordset = null;
@@ -580,12 +574,11 @@ $.widget( "heurist.resultList", {
         this._renderRecordsIncrementally(recordset);
     },
 
-
-    /**
-    * Add new divs
-    *
-    * @param recordset
-    */
+    //
+    // Add new divs for current page
+    //
+    // @param recordset
+    //
     _renderRecordsIncrementally: function( recordset ){
 
         if(recordset)
@@ -599,13 +592,13 @@ $.widget( "heurist.resultList", {
 
             if( total_count_of_curr_request > 0 )
             {
-                if(this._count_of_divs<this.pagesize){//01
+                if(this._count_of_divs<this.pagesize){ // DRAW CURRENT PAGE
 
                     this._renderPage(0, recordset);
 
                 }
 
-            }else if(this._count_of_divs<1) {
+            }else if(this._count_of_divs<1) {   // EMPTY RESULT SET
 
                 this._renderPagesNavigator();
 
@@ -637,6 +630,10 @@ $.widget( "heurist.resultList", {
 
     },
 
+    //
+    // Add message on div_content 
+    // for search start and empty result
+    //
     _renderMessage: function(msg){
 
         var $emptyres = $('<div>')
@@ -670,18 +667,19 @@ $.widget( "heurist.resultList", {
 
     },
 
-
-    /*
-    Renders a record as a line or thumbnail in the results list
-    This function is more-or-less duplicated in dh_maps.js
-    */
+    //
+    // Render div for particular record
+    // it can call external renderer if it is defined in options
+    //
     _renderRecord_html: function(recordset, record){
 
-
+        //call external function to render
         if($.isFunction(this.options.renderer)){
             return this.options.renderer.call(this, recordset, record);
         }
 
+        //@todo - move render for Records into separate method of manageRecords
+        
         function fld(fldname){
             return recordset.fld(record, fldname);
         }
@@ -802,6 +800,9 @@ $.widget( "heurist.resultList", {
 
     },
 
+    //
+    //
+    //
     _recordDivOnHover: function(event){
         var $rdiv = $(event.target);
         if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
@@ -813,6 +814,9 @@ $.widget( "heurist.resultList", {
         }
     },
 
+    //
+    //
+    //
     _recordDivOnClick: function(event){
 
         //var $allrecs = this.div_content.find('.recordDiv');
@@ -1066,11 +1070,9 @@ $.widget( "heurist.resultList", {
         }
     },
 
-    /**
-    * search with the same criteria for all reocrds (assumed before it was for bookmarks)
-    *
-    * @returns {Boolean}
-    */
+    // 
+    // in case nothing found for bookmarks, we offer user to search entire db (w=a)
+    //
     _doSearch4: function(){
 
         if ( this._query_request ) {
@@ -1084,10 +1086,16 @@ $.widget( "heurist.resultList", {
         return false;
     }
 
+    //
+    //
+    //
     , _renderProgress: function(){
 
     },
 
+    //
+    // number of records in result set (query total count) and number of selected records
+    //
     _updateInfo: function(){
 
         var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
@@ -1286,6 +1294,9 @@ $.widget( "heurist.resultList", {
         this._showHideOnWidth();
     }
 
+    //
+    // render the given page (called from navigator and on search finish)
+    //
     , _renderPage: function(pageno, recordset, is_retained_selection){
 
         var idx, len, pagesize;

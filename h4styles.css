@@ -188,6 +188,7 @@ fieldset > div > input[type=radio]{
 }
 fieldset > div > input[type=checkbox], .ent_search_cb input[type=checkbox], .ent_search_cb input[type=radio]{
     vertical-align:-0.3em;
+    margin: 0 0.5em 0 1em;
 }
 fieldset > div > .header,
 fieldset > div > .header_narrow{

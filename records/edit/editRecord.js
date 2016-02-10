@@ -2953,7 +2953,7 @@ console.log('heurist not defined');
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.regex =
-    new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
+    new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\s?\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.getPrimaryValue = function(input) { return input? input.input.value : ""; };
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.typeDescription = "a geographic object";
 
@@ -2985,7 +2985,7 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription = function(wkt) {
         // parse a well-known-text value and return the standard description (type + summary)
-        var matches = wkt.match(/^(p|c|r|pl|l) (?:point|polygon|linestring)\(?\(([-0-9.+, ]+?)\)/i);
+        var matches = wkt.match(/^(p|c|r|pl|l) (?:point|polygon|linestring)\s?\(?\(([-0-9.+, ]+?)\)/i);
         var typeCode = matches[1];
 
         var pointPairs = matches[2].split(/,/);

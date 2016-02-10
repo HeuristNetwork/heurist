@@ -667,7 +667,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 //load definitions for given rectypes
                 window.HAPI4.SystemMgr.get_defs({rectypes: rectype,
-                    mode:4,
+                    mode:4, //special node - returns data for treeview
                     fieldtypes:['enum','freetext',"year","date","integer","float"]},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
@@ -917,7 +917,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     //rtid: ids[ids.length-2],
                     //id:  ids[ids.length-1],
 
-                    //if facets already defined try to restore title,help and type from previous
+                    //if facets are already defined try to restore title,help and type from previous
                     var old_facet = this._findFacetByCode(node.data.code);
                     if(old_facet!=null){
 
@@ -963,41 +963,35 @@ $.widget( "heurist.search_faceted_wiz", {
 
                     var sContent =
             '<div>'
-                +'<div class="header"><label for="facet_Title'+k+'">Facet</label></div>'
+                +'<div class="header_narrow"><label for="facet_Title'+k+'">Facet</label></div>'
                 +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
                 +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
                 +' <label for="facet_Help'+k+'">&nbsp;&nbsp;Rollover (optional)&nbsp;</label>'
-                +'<textarea name="facet_Help'+k+'" id="facet_Help'+k+'" rows="1" '
+                +'<input name="facet_Help'+k+'" id="facet_Help'+k+'" type="text" '
                 +' style="font-size:smaller" class="text ui-widget-content ui-corner-all"'
-                    +' style="margin-top:0.4em;margin-bottom:1.0em;width:300px;"></textarea>';
+                    +' style="margin-top:0.4em;margin-bottom:1.0em;width:300px;"/>';
             +'</div>';
 
-            var sTypeLabel = '<div style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header"><label></label></div>';
+            var sTypeLabel = '<div class="ent_search_cb" style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header_narrow"><label></label></div>';
                     if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
                         sContent = sContent +
                 sTypeLabel
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'   //true  1
-                +'<label for="facet_Type'+k+'_1">&nbsp;first char&nbsp;&nbsp;</label>'
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_2" value="2"/>'   //2
-                +'<label for="facet_Type'+k+'_2">&nbsp;list&nbsp;&nbsp;</label>'
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'   //false 0
-                +'<label for="facet_Type'+k+'_0">&nbsp;search</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>first char</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
             +'</div>';
                     }else if(facets[k].type=='date' || facets[k].type=='year'){
                         sContent = sContent +
                 sTypeLabel
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
-                +'<label for="facet_Type'+k+'_1">&nbsp;slider&nbsp;&nbsp;</label>'
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
-                +'<label for="facet_Type'+k+'_0">&nbsp;search</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
             +'</div>';
                     }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                         sContent = sContent +
                 sTypeLabel
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_1" value="1"/>'
-                +'<label for="facet_Type'+k+'_1">&nbsp;list&nbsp;&nbsp;</label>'
-                +'<input type="radio" name="facet_Type'+k+'" id="facet_Type'+k+'_0" value="0"/>'
-                +'<label for="facet_Type'+k+'_0">&nbsp;dropdown&nbsp;&nbsp;</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>list</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>dropdown</label>'
+                +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
             +'</div>';
                     }
 

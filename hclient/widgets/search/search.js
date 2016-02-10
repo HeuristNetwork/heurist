@@ -31,11 +31,6 @@ $.widget( "heurist.search", {
 
         isloginforced:true,
 
-        btn_visible_dbstructure: false, //show get db strucuture button
-
-        is_progress_visible:false, //show progress bar while searching
-
-
         btn_visible_newrecord: true, //show add record button
 
         // before this widget was generic, however search on main page became very distinctive and got
@@ -76,7 +71,7 @@ $.widget( "heurist.search", {
 
         var div_left_visible = (!this.options.isloginforced || this.options.btn_visible_dbstructure);
 
-        if(div_left_visible)
+        if(false) //div_left_visible)
         {
 
             // database summary, login and register buttons in navigation panel
@@ -113,34 +108,17 @@ $.widget( "heurist.search", {
 
             } // not bypassing login
 
-            // Database summary button
-            if(this.options.btn_visible_dbstructure){
-                this.btn_databasesummary = $( "<button>", {
-                    text: top.HR("Database Summary")
-                })
-                .css('width','160px')
-                .addClass('logged-in-only')
-                .addClass('ui-heurist-btn-header1')
-                .appendTo(div_left)
-                .button()
-                .click( function(){ that._showDbSummary(); });
-            } // database summary
-
         }else{ // lefthand - navigation - panel not visible
             sz_search = '600px';
             sz_input = '450px';
-            sz_search_padding = '50px';
+            sz_search_padding = '20px';
         }
 
 
         // Search functions container
-        //'height':'100%', 'float':'left'
-        this.div_search   = $('<div>').css({ 'padding-left':sz_search_padding, 'min-width':sz_search}).appendTo( this.element );
+        //'height':'100%', 'float':'left'   , 'min-width':sz_search
+        this.div_search   = $('<div>').css({ 'float':'left', 'padding-left':sz_search_padding}).appendTo( this.element );
 
-        // Loading progress bar, initially hidden
-        this.div_progress = $('<div>').css({'padding-top':'1.8em', 'padding-left':sz_search_padding, 'min-width':sz_search, 'float':'left'}).appendTo( this.element ).hide();
-
-        
         // Save search popup button
         this.div_search_as_user2 = $('<div>')
         .addClass('div-table-cell logged-in-only')
@@ -150,7 +128,7 @@ $.widget( "heurist.search", {
             text: top.HR("Save Filter"),
             title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
         })
-        .css({'vertical-align':'top', 'margin-left':'1em'})
+        .css({'vertical-align':'top'})
         .appendTo( this.div_search_as_user2 )
         .addClass('ui-heurist-btn-header1')
         .button({icons: {
@@ -180,7 +158,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         top.HEURIST4.util.setDisabled(this.input_search, true);
@@ -214,35 +192,6 @@ $.widget( "heurist.search", {
             $this.data('x', $this.outerWidth());
             $this.data('y', $this.outerHeight());
         }) // this.input_search.mouseup
-
-
-
-        //
-        // stop button
-        //
-        this.div_search_stop = $('<div>')
-        .addClass('div-table-cell')
-        .appendTo( this.div_search )
-        .hide();
-
-        this.btn_search_stop = $( "<button>", {
-            text: top.HR("Stop"),
-            label: "Click this button to stop the retrieval"
-        })
-        .appendTo( this.div_search_stop )
-        .addClass('ui-heurist-btn-header1')
-        .css({'width':'11.9em'})
-        .button({icons: {
-            secondary: "ui-icon-cancel"
-        }});
-
-        this._on( this.btn_search_stop, {
-            click: function(e) {
-                top.HAPI4.SearchMgr.doStop();
-            }
-        });
-
-
 
         //
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
@@ -325,9 +274,15 @@ $.widget( "heurist.search", {
         if(this.options.btn_visible_newrecord){
 
             this.div_add_record = $('<div>')
+            .addClass('logged-in-only')
+            .css({'float': 'right', 'padding': '23px 23px 0 0'})
+            .appendTo( this.element );
+    
+                        
+            /* in case we need place it along with other elements
             .addClass('div-table-cell  logged-in-only')
             .css('padding-left','4em')
-            .appendTo( this.div_search );
+            .appendTo( this.div_search );*/
 
             this.btn_add_record = $( "<button>", {
                 text: top.HR("Add Record"),
@@ -346,8 +301,8 @@ $.widget( "heurist.search", {
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
-        .css({'text-align': 'center'}) // 'width': '56px', 
-        .insertBefore( this.div_search_stop );
+        .css({'text-align': 'center', 'width':'50px'}) // 'width': '56px', 
+        .insertBefore( this.div_search_as_guest );
 
         // Quick search builder dropdown form
         var link = $('<button>')
@@ -378,7 +333,7 @@ $.widget( "heurist.search", {
         this.div_buttons = $('<div>')
         .addClass('div-table-cell')
         .css({'text-align': 'center','width': '20px'}) // , 
-        .insertBefore( this.div_search_stop );
+        .insertBefore( this.div_search_as_guest );
 
         var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
             .css({'padding-right':'1.5em','display':'inline-block'})
@@ -426,33 +381,6 @@ $.widget( "heurist.search", {
         });
 
         //-----------------------
-
-
-        this.progress_bar = $("<div>")
-        .css({'width':'450px', 'height':'1.6em', 'display':'inline-block', 'margin-right':'0.2em'})  //, 'height':'22px',  'margin':'0px !important'})
-        .progressbar().appendTo(this.div_progress);
-
-        this.progress_lbl = $("<div>").css({'position':'absolute', 'top': '1.6em', 'text-shadow': '1px 1px 0 #fff' })
-        .appendTo(this.progress_bar);
-        //font-weight: bold;
-
-        // Stop search button which is displayed in place of search button while resultset loads
-        this.btn_stop_search = $( "<button>", {text: "Stop"} )
-        .css({'display':'inline-block', 'margin-bottom':'15px'})
-        .addClass('ui-heurist-btn-header1')
-        .appendTo( this.div_progress )
-        .button({icons: {
-            secondary: "ui-icon-cancel"
-            },text:true});
-
-        this._on( this.btn_stop_search, {
-            click: function(e) {
-                top.HAPI4.SearchMgr.doStop();
-            }
-        });
-
-        //-----------------------
-
 
         //global listeners
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
@@ -566,46 +494,25 @@ $.widget( "heurist.search", {
                     that._refresh();
                 }
 
-                if( data.q!='' ){
-                    if(that.options.is_progress_visible){
-                        that.div_search.css('display','none');
-                        that.div_progress.width(this.div_search.width());
-                        that.div_progress.css('display','inline-block');
-                    }else{
-                        that.div_search_stop.css('display','table-cell');
-                        that.div_search_as_user.css('display','none');
-                    }
-                }
-
                 if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
                     window.history.pushState("object or string", "Title", location.pathname+'?'+
                         top.HEURIST4.util.composeHeuristQueryFromRequest(data, false) );
                 }
 
-                that._renderProgress( null );
-
             }else if(data==null){
                 that.input_search.val('');
             }
+            
+            //ART that.div_search.css('display','none');
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-
-            if(data){
-                that._renderProgress( data.getProgressInfo() );
-            }
 
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             top.HEURIST4.util.setDisabled(this.input_search, false);
-            that._renderProgress( null );
-            if(that.options.is_progress_visible){
-                that.div_progress.css('display','none');
-                that.div_search.css('display','inline-block');
-            }else{
-                that.div_search_stop.css('display','none');
-                that.div_search_as_user.css('display','table-cell');
-            }
+            
+            //ART that.div_search.css('display','inline-block');
 
         }
 
@@ -925,25 +832,9 @@ $.widget( "heurist.search", {
         this.div_search_as_user.remove();
         this.div_search_as_guest.remove();
 
-        this.btn_search_stop.remove();
-        this.div_search_stop.remove();
-
         if(this.div_paginator) this.div_paginator.remove();
 
         this.div_search.remove();
-        this.div_progress.remove();
-    }
-
-    //
-    //
-    //
-    , _renderProgress: function( data ){
-
-        if(!data) data = {text:'', value:0};
-
-        this.progress_lbl.html( data.text );
-        this.progress_bar.progressbar( "value", data.value );
-
     }
 
     , _addNewRecord: function(){
@@ -967,17 +858,6 @@ $.widget( "heurist.search", {
                 */
             }
         });
-
-    }
-
-    , _showDbSummary: function(){
-
-        var url = top.HAPI4.basePathV4+ "hclient/framecontent/databaseSummary.php?popup=1&db=" + top.HAPI4.database;
-
-        var body = this.document.find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
-        top.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary'} );
 
     }
 

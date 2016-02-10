@@ -132,8 +132,13 @@ if(!$system->init(@$_REQUEST['db']) ){
                 }else{
                     console.log("SEARCH");
                     console.log(parent.document);
+                    
+                    
+                    var request = {source: 'dbsummary',
+                                        q:  't:'+rt_ID};
+                    top.HAPI4.SearchMgr.doSearch( $(parent.document), request );                    
 
-                    parent.top.HAPI4.RecordMgr.search(query, $(parent.document));
+                    //parent.top.HAPI4.RecordMgr.search(query, $(parent.document));
 
                     window.close();
                     return false;

@@ -39,6 +39,7 @@ $.widget( "heurist.editing_input", {
         title: '',  //label (overwrite Display label from record structure)
         showclear_button: true,
         show_header: true, //show/hide label  
+        suppress_prompts:false, //supress help, error and required features
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
     },
     
@@ -90,7 +91,9 @@ $.widget( "heurist.editing_input", {
                 .appendTo( this.element );
             
         }else{
-            required = this.f('rst_RequirementType');
+            if(!this.options.suppress_prompts){
+                required = this.f('rst_RequirementType');
+            }
             /*if (required == 'optional') required = "optional";
             else if (required == 'required') required = "required";
                 else if (required == 'recommended') required = "recommended";
@@ -157,7 +160,7 @@ $.widget( "heurist.editing_input", {
         //add prompt       
         var help_text = this.f('rst_DisplayHelpText');
         this.input_prompt = $( "<div>")
-        .text( help_text?help_text:'' )
+        .text( help_text && !this.options.suppress_prompts ?help_text:'' )
         .addClass('heurist-helper1')
         .appendTo( this.input_cell );
 
