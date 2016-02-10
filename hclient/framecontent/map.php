@@ -38,7 +38,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 // line:345,15753, 15860, 16108 correct orientation for bottom order
 // line: 13607 getDataRangeHeurist function
 // line: 13594 catch exception of datetime convertation
-// 
+//
 -->
 <script type="text/javascript" src="<?php echo PDIR;?>ext/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/vis/dist/vis.css" />
@@ -373,7 +373,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         var query = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
         if(query=='?'){
-            top.HEURIST4.msg.showMsgDlg("Define query and perform search");
+            top.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
         }else{
             query = query + '&a=1&depth=1&db='+top.HAPI4.database;
             var url_kml = top.HAPI4.basePathV3+"export/xml/kml.php" + query;

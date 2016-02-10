@@ -217,7 +217,7 @@ function ShowReps() {
             if(_sQueryMode=="selected"){
                 _updateReps("<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>");
             }else{
-                _updateReps("<b><font color='#ff0000'>Perform search to see template output</font></b>");
+                _updateReps("<b><font color='#ff0000'>Select saved search or apply a filter to see report output</font></b>");
             }
 
             return null;
@@ -448,7 +448,7 @@ function ShowReps() {
                         }
                     },
                     onFocus:function(){},
-                    onBlur:function(){} 
+                    onBlur:function(){}
                 });
         }
 
@@ -525,11 +525,11 @@ function ShowReps() {
 
                 //template.gpl
                 if(top.HEURIST4){
-                    top.HEURIST4.util.downloadURL(baseurl+'?'+squery);    
+                    top.HEURIST4.util.downloadURL(baseurl+'?'+squery);
                 }else{
                     window.open(baseurl+'?'+squery, 'Download'); //old way
                 }
-                
+
             }
 
         }else{
@@ -689,8 +689,8 @@ function ShowReps() {
             replevel = 0;
         }
         var debug_limit = document.getElementById('cbDebugReportLimit').value;
-        
-        
+
+
         /*
         if(document.getElementById('cbDebug').checked){
         replevel = 1;
@@ -715,7 +715,7 @@ function ShowReps() {
             if(debug_limit>0){
                 squery = squery + '&limit='+debug_limit;
             }
-            
+
             squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
 
 
@@ -799,19 +799,19 @@ function ShowReps() {
             _needListRefresh = false;
             _reload_templates();
         }
-        
+
         if(iseditor){
-            _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );    
-            top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');    
-            top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width   
+            _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+            top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
+            top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
         }else if(isviewer){
-            if(_kept_width>0) 
-                top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width   
-            top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');   
+            if(_kept_width>0)
+                top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
+            top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
         }
 
-        
-        
+
+
     }
 
 
@@ -1204,14 +1204,14 @@ function ShowReps() {
     *
     */
     function _insertPattern(pattern) {
-        
+
         if(top.HEURIST4){
             if(insertPopupID){
                 $(insertPopupID).dialog('close');
                 insertPopupID = null;
             }
         }
-        
+
         var _text = '';
         var textedit = Dom.get("edTemplateBody");
 
@@ -1559,7 +1559,7 @@ function ShowReps() {
     * TODO: What do the parameters do?
     */
     function insertAtCursor(myField, myValue, isApplyBreaks, cursorIndent) {
-        
+
             //for codemirror
             var crs = codeEditor.getCursor();
             //calculate required indent
@@ -1597,7 +1597,7 @@ function ShowReps() {
 
             codeEditor.setCursor(crs);
             setTimeout(function(){codeEditor.focus();},200);
-        
+
     }
 
 

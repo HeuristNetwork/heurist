@@ -68,21 +68,21 @@ $.widget( "heurist.mainMenu", {
 
         this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'padding-top':'2em', 'text-align':'center' }).appendTo(this.element);
 
-        
+
         $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
             'background-position': 'left center',
             'background-repeat': 'no-repeat',
             'background-image': 'url("'+top.HAPI4.basePathV4+'hclient/assets/database.png")' })
             .text(top.HAPI4.database).appendTo( this.div_dbname );
-            
+
         /*$("<span>")
             .addClass('ui-icon ui-icon-database') //    .css({'margin-left':'50px'})
             .appendTo( this.div_dbname );
-            
+
         $("<span>").text(top.HAPI4.database)
             .css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px'})
             .appendTo( this.div_dbname );*/
-            
+
 
         // MAIN MENU-----------------------------------------------------
 
@@ -434,7 +434,7 @@ $.widget( "heurist.mainMenu", {
                 });
             }
         });
-        
+
         menu.find("a[href^='mailto']").click(function(e)
         {
           var el = $(this);
@@ -608,7 +608,7 @@ $.widget( "heurist.mainMenu", {
             q = top.HEURIST4.util.composeHeuristQuery2(top.HEURIST4.current_query_request);
 
             if(q=='?'){
-                top.HEURIST4.msg.showMsgDlg("Define query and perform search");
+                top.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
                 return;
             }
 

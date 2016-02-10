@@ -163,7 +163,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             //
             //
             function showProgressMsg(msg){
-//console.log('pm: '+msg);                
+//console.log('pm: '+msg);
                 $("#div-progress").html(msg);
                 $("#div-progress").show();
             }
@@ -215,13 +215,13 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                 $(document.forms[0]).hide();
                 document.forms[0].submit();
             }
-            
-            
+
+
             //
             // it calls before each submit
-            // 
+            //
             function hideThisFrame(){
-             
+
                 if(window.frameElement){
                     var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
                     if( reference_to_parent_dialog ){
@@ -230,12 +230,12 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                             var ele = parent.document.getElementById(reference_to_parent_dialog);
                             $(ele).addClass('loading');
                             $(frame).hide();
-            //console.log('hide frame');                
+            //console.log('hide frame');
                     }
                 }
-                
+
                 return true;
-            }            
+            }
         </script>
         <?php
         //USER_ID:=get_user_id()
@@ -245,7 +245,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         $step = intval(@$_REQUEST["step"]);
         if(!$step) $step=0;
 
-/* ART 2016-02-01        
+/* ART 2016-02-01
         ob_start();
         echo '<div id="div-progress" style="display:none" class="loading">&nbsp;</div>';
         ob_flush();flush();
@@ -791,7 +791,7 @@ if(is_array($imp_session)){
                 <!-- table showing input columns and controls for selection and matching -->
                 <div>
                     <br/>
-<?php 
+<?php
 //DEBUG echo print_r($imp_session['multivals'],true)
 ?>
                     <table class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
@@ -1539,7 +1539,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
     }
 
     //load file into table
-    $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
+    $query = "LOAD DATA LOCAL INFILE'".$filename."' INTO TABLE ".$import_table
     ." CHARACTER SET UTF8"
     ." FIELDS TERMINATED BY '".$csv_delimiter."' "
     ." OPTIONALLY ENCLOSED BY '".$csv_enclosure."' "
@@ -1549,7 +1549,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
 
 
     if (!$mysqli->query($query)) {
-        return "cannot import data: ".$mysqli->error;
+        return 'Unable to import data. MySQL command: "$query" returns error: '.$mysqli->error;
     }
 
     $warnings = array();
