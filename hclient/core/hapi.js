@@ -653,18 +653,21 @@ function hAPI(_db, _oninit) { //, _currentUser
     */
     function hEntityMgr(){
         
-        var entities = {};
+        var entity_configs = {};
+        var entity_data = {};
         
         var that = {
+            
+            //load entity configuration file
             getEntityConfig:function(entityName, callback){
                    
-                if(entities[entityName]){
-                    callback(entities[entityName]);
+                if(entity_configs[entityName]){
+                    callback(entity_configs[entityName]);
                 }else{
                     _callserver('entityScrud', {a:'config', 'entity':entityName}, 
                        function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
-                                entities[response.data.entityName] = response.data;
+                                entity_configs[response.data.entityName] = response.data;
                                 callback(response.data);
                             }else{
                                 top.HEURIST4.msg.showMsgErr(response);
@@ -673,8 +676,33 @@ function hAPI(_db, _oninit) { //, _currentUser
                     
                     );
                 }
-                
             },
+            
+            //load entire entity data and store it in cache (applicable for entities with count < ~1500)
+            getEntityData:function(entityName, force_reload, callback){
+                   
+                if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
+                    _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'}, 
+                       function(response){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                                entity_data[response.data.entityName] = new hRecordSet(response.data);
+                                if($.isFunction(callback)) callback(entity_data[response.data.entityName]);
+                            }else{
+                                top.HEURIST4.msg.showMsgErr(response);
+                            }
+                       }
+                    
+                    );
+                }else{
+                    if($.isFunction(callback)){
+                        callback(entity_data[entityName]);  
+                    }else{
+                        //if user sure that data is already on client side
+                        return entity_data[entityName];  
+                    }
+                }
+            },
+            
             doRequest:function(request, callback){
                 //todo - verify basic params
                 

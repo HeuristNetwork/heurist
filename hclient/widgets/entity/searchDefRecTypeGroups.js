@@ -52,7 +52,7 @@ $.widget( "heurist.searchDefRecTypeGroups", $.heurist.searchEntity, {
 
                 request = {
                 'a'          : 'search',
-                'entity'     : 'defRecTypeGroups',
+                'entity'     : this.options.entity.entityName, //'defRecTypeGroups',
                 'details'    : 'list',
                 'request_id' : top.HEURIST4.util.random(),
                 };

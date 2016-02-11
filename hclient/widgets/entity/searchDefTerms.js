@@ -1,5 +1,5 @@
 /**
-* Search header for DefDetailTypes manager
+* Search header for DefTerms manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
+$.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
 
     //
     _initControls: function() {
@@ -25,52 +25,33 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
         var that = this;
             
-        this.selectRole   = this.element.find('#sel_datatype'); //status of record type - for manager mode only
-        
-        var key;
-        var data_types = [{key:'',title:top.HR('Any Type')}];
-        for (key in top.HEURIST4.detailtypes.lookups){
-            if(top.HEURIST4.detailtypes.lookups[key]){
-                data_types.push({key:key,title:top.HEURIST4.detailtypes.lookups[key]});
-            }
-        }
-        top.HEURIST4.ui.createSelector(that.selectRole.get(0), data_types);
-        
         this.selectGroup = this.element.find('#sel_group');
-        this.selectGroup.empty();
-            
-        //@todo change to ui.createEntitySelector
-        top.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
-                        'entity':'defDetailTypeGroups','dtg_ID':that.options.filter_groups},
-                    function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                            var groups = new hRecordSet(response.data).makeKeyValueArray('dtg_Name');
-                            
-                            if(top.HEURIST4.util.isempty(that.options.filter_groups)){
-                                groups.unshift({key:'',title:top.HR('Any Group')});
-                            }
-                            
-                            top.HEURIST4.ui.createSelector(that.selectGroup.get(0), groups);
-                            
-                            if(!top.HEURIST4.util.isempty(that.options.filter_group_selected)){
-                                that.selectGroup.val(that.options.filter_group_selected);
-                            }
-                            
-                            that.startSearch();
-                        }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+
+        this.input_search_code = this.element.find('#input_search_code');
+        this._on( this.input_search_code, {
+                keypress:
+                function(e){
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                        if (code == 13) {
+                            top.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                            this.startSearch();
                         }
-                    });
+                }});
+        
                       
-                      
-            this._on( this.element.find('select'), {
+        this._on( this.element.find('select'), {
                 change: function(event){
                     this.startSearch();
                 }
             });
-                
+        
+        if(this.options.use_cache){
+            this.startSearchInitial();            
+        }else{
+            this.startSearch();            
+        }
     },  
-
 
     //
     // public methods
@@ -82,23 +63,27 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             var request = {}
         
             if(this.selectGroup.val()!=''){
-                request['dty_DetailTypeGroupID'] = this.selectGroup.val();
+                request['trm_Domain'] = this.selectGroup.val();
             }   
-            if(this.selectRole.val()!=''){
-                request['dty_Type'] = this.selectRole.val();
+            if(this.input_search_code.val()!=''){
+                request['trm_Code'] = this.input_search_code.val();
             }   
             if(this.input_search.val()!=''){
-                request['dty_Name'] = this.input_search.val();
+                request['trm_Label'] = this.input_search.val();
             }
             
-            //noothing defined
-            if(false && $.isEmptyObject(request)){
+            if(this.options.use_cache){
+                this._trigger( "onfilter", null, request);
+                
+                
+            //NOTE use_cache=false for terms has no practical sense                    
+            }else if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         
                 request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;  //'defDetailTypes'
+                request['entity']     = this.options.entity.entityName;
                 request['details']    = 'list'; //'id';
                 request['request_id'] = top.HEURIST4.util.random();
                 
@@ -115,7 +100,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                             top.HEURIST4.msg.showMsgErr(response);
                         }
                     });
-            }
+            }            
     },
     
 

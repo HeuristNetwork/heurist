@@ -23,6 +23,9 @@
 
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/fancytree/skin-themeroller/ui.fancytree.css" />
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/fancytree/jquery.fancytree-all.min.js"></script>
+
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         
@@ -48,6 +51,27 @@ require_once(dirname(__FILE__)."/initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypeGroups.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypeGroups.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
+        
+        <style>
+            .fancytree-hide{
+                display: none;
+            }
+            ul.fancytree-container li {
+               padding:0; 
+            }
+            .fancytree-ext-filter .fancytree-node.fancytree-match{
+                font-weight: normal;
+            }
+            .fancytree-focused{
+                background-color:lightblue;
+            }
+            .fancytree-title{
+                font-weight: normal !important;
+                white-space:normal;                
+            }
+        </style>
         
         <script type="text/javascript">
             // Callback function on map initialization
@@ -95,7 +119,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                 var options = {
                     select_mode: $('input[name="select_mode"]:checked').val(),
                     selectbutton_label: $('#multi_selectbutton_label').val(),
-                    page_size: $('#page_size').val(),
+                    
+                    pagesize: $('#page_size').val(),
+                    filter_mode: $('input[name="filter_mode"]:checked').val(),
+                    use_cache: $('#use_cache').is(':checked'),
+                    
                     action_select: $('#action_select').is(':checked'), //may be true,false or array
                     action_buttons: $('#action_buttons').is(':checked'), //may be true,false or array
                     list_header: false,  //$('#list_header').is(':checked'), //may be true,false
@@ -139,7 +167,14 @@ require_once(dirname(__FILE__)."/initPage.php");
                        }else if(entity=='DefDetailTypes'){
                             showManageDefDetailTypes( options );      
                        }else if(entity=='DefDetailTypeGroups'){
+                            options.edit_dialog = false;
                             showManageDefDetailTypeGroups( options );      
+                       }else if(entity=='DefTerms'){
+                           
+                            options.edit_dialog = false;
+                            options.height = 600;
+                            options.width = 800;
+                            showManageDefTerms( options );      
                        }
                         
                     }else{
@@ -173,6 +208,9 @@ require_once(dirname(__FILE__)."/initPage.php");
                        }else
                        if(entity=='DefDetailTypeGroups'){
                             $content.manageDefDetailTypeGroups( options );      
+                       }else
+                       if(entity=='DefTerms'){
+                            $content.manageDefTerms( options );      
                        }
                         
                     }else{
@@ -256,10 +294,20 @@ require_once(dirname(__FILE__)."/initPage.php");
                         <label><input type="checkbox" id="action_buttons" checked>Action buttons (show action buttons in header of result viewer - usually Add Button)</label>
                         <!-- <label><input type="checkbox" id="list_header" checked>Header in list view mode</label> -->
                     </span>
-                    <span style="padding-right:20px;visibility: hidden;">
-                        <label>Page size<input type="text" id="page_size" value="50" size="3"></label>
+                </div>
+                <div style="padding:5px; border-bottom:1px solid lightgrey">
+                    <span style="padding-right:20px;">
+                        <label>Page size<input type="text" id="page_size" value="100" size="3"> 0 means 'no pages'</label>
                     </span>
 
+                    <label><input type="checkbox" id="use_cache" checked=checked>Use cache (Not implemented for entities with reccount>1500)</label>
+                    
+                    <span style="padding-left:20px;">
+                        <label>Filter mode for cache mode</label>
+                        <label><input type="radio" name="filter_mode" checked=checked value="hide">Hide</label> 
+                        <label><input type="radio" name="filter_mode" value="dim">Dim</label> 
+                    </span>
+                    
                 </div>
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <button onclick="testEntity(true)">show in popup dialog</button>

@@ -148,7 +148,7 @@ class DbDefDetailTypes extends DbEntityBase
         
 //error_log($query);     
 
-        $res = $this->searchMgr->execute($query, $is_ids_only);
+        $res = $this->searchMgr->execute($query, $is_ids_only, 'defDetailTypes');
         return $res;
 
     }

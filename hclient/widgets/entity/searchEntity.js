@@ -28,15 +28,19 @@ $.widget( "heurist.searchEntity", {
         filter_title: null,
         filter_group_selected:null,
         filter_groups: null,
+
+        use_cache: false,
+        filter_mode: 'hide', //filter mode for cache mode
         
-        // callbacks - events
+        /* callbacks - events
         onstart:null,
         onresult:null,
+        onfilter:null,*/
         
         entity:{}
     },
     
-    _need_load_content:true,
+    _need_load_content:true, // do not load search form html content
 
     // the widget's constructor
     _create: function() {
@@ -122,6 +126,25 @@ $.widget( "heurist.searchEntity", {
             //EXTEND this.startSearch();
     },  
     
+    //
+    // use_cache = true
+    // load entire entity data and work with cached on client side recordset
+    // applicabele for counts < ~1500
+    //
+    startSearchInitial: function(){
+        
+            this._trigger( "onstart" );
+            
+            var that = this;
+            top.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+                function(response){
+                        that._trigger( "onresult", null, {recordset:response} );
+            
+                        that.startSearch(); //applu filter
+                        
+                });
+    },
+
     //
     // public methods
     //

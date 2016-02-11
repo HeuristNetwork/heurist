@@ -41,6 +41,7 @@ $.widget( "heurist.resultList", {
         //searchsource: null,
 
         empty_remark:'',
+        pagesize: 100,
 
         renderer: null,    // renderer function to draw item
         rendererHeader: null,    // renderer function to draw header for list view-mode
@@ -61,7 +62,6 @@ $.widget( "heurist.resultList", {
     current_page: 0,
     max_page: 0,
     count_total: null,  //total records in query - actual number can be less
-    pagesize: 100,
     hintDiv:null, // rollover for thumbnails
 
     _currentRecordset:null,
@@ -129,6 +129,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
         this.div_content = $( "<div>" )
+        .addClass('div-result-list-content')
         .css({'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
             'position':'absolute',
             'border-top': '1px solid #cccccc',
@@ -355,6 +356,9 @@ $.widget( "heurist.resultList", {
     }, //end _create
 
     _setOptions: function() {
+        /*if(!(arguments['pagesize']>0)){
+            arguments['pagesize'] = 9999999999999;
+        }*/
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
         this._refresh();
@@ -592,7 +596,7 @@ $.widget( "heurist.resultList", {
 
             if( total_count_of_curr_request > 0 )
             {
-                if(this._count_of_divs<this.pagesize){ // DRAW CURRENT PAGE
+                if(this._count_of_divs<this.options.pagesize){ // DRAW CURRENT PAGE
 
                     this._renderPage(0, recordset);
 
@@ -1137,7 +1141,7 @@ $.widget( "heurist.resultList", {
 
         if(this.count_total>0){
 
-            this.max_page = Math.ceil(this.count_total / this.pagesize);
+            this.max_page = Math.ceil(this.count_total / this.options.pagesize);
             if(this.current_page>this.max_page-1){
                 this.current_page = 0;
             }
@@ -1327,9 +1331,9 @@ $.widget( "heurist.resultList", {
             }
             this.current_page = pageno;
 
-            idx = pageno*this.pagesize;
-            len = Math.min(recordset.length(), idx+this.pagesize)
-            pagesize = this.pagesize;
+            idx = pageno*this.options.pagesize;
+            len = Math.min(recordset.length(), idx+this.options.pagesize)
+            pagesize = this.options.pagesize;
         }
 
         this._clearAllRecordDivs(null);
@@ -1521,6 +1525,14 @@ $.widget( "heurist.resultList", {
             }else{
                 return null;
             }        
+    },
+    
+    applyFilter:function(request){
+        
+        $.each(this._currentRecordset)
+        this.recordList.find
+        
+        
     }
 
 });

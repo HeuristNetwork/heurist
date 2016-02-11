@@ -19,9 +19,11 @@
 
 
 $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
-
+   
     _entityName:'defTerms',
     
+    _treeview:null,
+
     //  
     // invoked from _init after load entity config    
     //
@@ -39,9 +41,56 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._on( this.searchRecord, {
                 "searchdeftermsonresult": this.updateRecordList
                 });
+        this._on( this.searchRecord, {
+                "searchdeftermsonfilter": this.filterRecordList
+                });
         this.recordList.css('top','5.5em');
                 
         this.recordList.resultList('option','hide_view_mode',true);
+        
+        //move editor panel from element to div_content        
+        if(this.ent_editor && !this.options.edit_dialog){
+            
+            var list_container = this.recordList.find('.div-result-list-content');
+            
+            list_container.removeProp('right').css('width','250px');
+            
+            this.ent_editor
+                .detach()
+                .appendTo(list_container.parent())
+                .css({'min-width':'500px','left':'250px', top:list_container.position().top})
+                .show();
+        }
+        
+        return true;
+    },
+    
+    //
+    //
+    //
+    updateRecordList: function( event, data ){
+        
+        this._super(event, data);
+        
+        if (this._cachedRecordset && this.options.use_cache){
+            //prepare treeview data
+            var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
+            this._initTreeView( treeData );
+        }
+    },
+    
+    //
+    //
+    //
+    filterRecordList: function(event, request){
+        //this._super();
+        
+        if(this._cachedRecordset && this.options.use_cache){
+            var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+            this._filterTreeView( subset );
+            //show/hide items in list according to subset
+            //this.recordList.resultList('updateResultSet', subset, request);   
+        }
     },
     
     //----------------------
@@ -64,56 +113,24 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var showActionInList = (top.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
         //&& (this.options.select_mode=='manager')
         
-        var recID   = fld('dty_ID');
+        var recID   = fld('trm_ID');
         
-        var recTitle = fld2('dty_ID','4em')
-                + fld2('dty_Name','14em')
-                + '<div class="item inlist" style="width:25em;">'+fld('dty_HelpText')+'</div>'
-                + '<div class="item inlist" style="width:10em;">'+top.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>'
-                + (showActionInList?this._rendererListAction('edit'):'');
+        var recTitle = fld2('trm_ID','4em')
+                + fld2('trm_Label','14em');
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="min-height: 2.6em;">'  
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em;">'  
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordTitle" style="left:24px">'
-        +     recTitle;
+        +     recTitle ;
         
         //actions
-        if(showActionInList){
-            
-            //special case for show in list checkbox
-            html = html 
-            +  '<div title="Make type visible in user accessible lists" class="item inlist logged-in-only" '
-            + 'style="width:3em;padding-top:5px" role="button" aria-disabled="false" data-key="show-in-list">'
-            +     '<input type="checkbox" checked="'+(fld('dty_ShowInLists')==0?'':'checked')+'" />'
-            + '</div>';
-            
-            var group_selectoptions = this.searchRecord.find('#sel_group').html();
-                        
-            html = html 
-                //  counter and link to rectype + this._rendererListAction('duplicate')
-                //group selector
-            +  '<div title="Change group" class="item inlist logged-in-only"'
-            +  ' style="width:8em;padding-top:3px" data-key2="group-change">'
-            +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('dty_DetailTypeGroupID')
-            + '">'+group_selectoptions+'</select>'
-            +  '</div>'
+        if(true || showActionInList){
+              html = html
+                + this._rendererListAction('edit')
                 + this._rendererListAction('delete');
         }
-        
-        html = html 
-                + '</div>' //close recordTitle
+        html = html + '</div>'
                 + '</div>'; //close recordDiv
-        
-        /* 
-            html = html 
-        +'<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';*/
-
 
         return html;
         
@@ -127,7 +144,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         //fieldvalues - is object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
         var fieldvalues = this._super();
-        
+/* to implement        
         if(fieldvalues!=null){
             var data_type =  fieldvalues['dty_Type'];
             if(data_type=='freetext' || data_type=='blocktext' || data_type=='date'){
@@ -137,7 +154,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 delete fieldvalues['dty_Type_'+data_type];
             }
         } 
-        
+*/        
         return fieldvalues;
         
     },
@@ -147,29 +164,87 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _afterInitEditForm: function(){
 
-        //fill init values of virtual fields
+    },
+    
+//----------------------------------------------------------------------------------    
+    
+    _initTreeView: function( treeData ){
         
-        //add lister for dty_Type field to show hide these fields
-        var elements = this._editing.getInputs('dty_Type');
-        if(top.HEURIST4.util.isArrayNotEmpty(elements)){
-            this._on( $(elements[0]), {    
-                'change': function(event){
-                       var dt_type = $(event.target).val();
-                       
-                       var virtual_fields = this._editing.getFieldByValue("dty_Role","virtual");
-                       for(var idx in virtual_fields){
-                           $(virtual_fields[idx]).hide();
-                       }
-                       
-                       this._editing.getFieldByName('dty_Mode_'+dt_type).show();
-                    
+        var that = this;
+        
+        var fancytree_options =
+        {
+            checkbox: false,
+            //titlesTabbable: false,     // Add all node titles to TAB chain
+            focusOnSelect:true,
+            source: treeData,
+            quicksearch: true,
+
+            activate: function(event, data) {
+                
+                that.selectedRecords([data.node.key]);
+                
+                if (!that.options.edit_dialog){
+                        that._rendererListOnAction(event, {action:'edit'}); //default action of selection
                 }
                 
-            });
+                //console.log('click on '+data.node.key+' '+data.node.title);
+            }
+        };
+
+        fancytree_options['extensions'] = ["dnd", "filter"]; //"edit", "dnd", "filter"];
+        fancytree_options['dnd'] = {
+                preventVoidMoves: true,
+                preventRecursiveMoves: true,
+                autoExpandMS: 400,
+                dragStart: function(node, data) {
+                    return true;
+                },
+                dragEnter: function(node, data) {
+                    //return true;
+                    // return ["before", "after"];
+                    if(node.tree._id == data.otherNode.tree._id){
+                        return node.folder ?true :["before", "after"];
+                    }else{
+                        return false;
+                    }
+
+
+                },
+                dragDrop: function(node, data) {
+                    /*that._avoidConflictForGroup(groupID, function(){
+                        data.otherNode.moveTo(node, data.hitMode);
+                        that._saveTreeData( groupID );
+                    });*/
+                }
+            };
+            /* fancytree_options['edit'] = {
+                save:function(event, data){
+                    if(''!=data.input.val()){
+                        that._avoidConflictForGroup(groupID, function(){
+                            that._saveTreeData( groupID );
+                        });
+                    }
+                }
+            };     */
+            fancytree_options['filter'] = { highlight:false, mode: "hide" };  
+
+            this._treeview = this.recordList.find('.div-result-list-content').fancytree(fancytree_options);
+        
+    },
+                 
+    _filterTreeView: function( recordset ){
+        
+        if(this._treeview){
+            var wtree = this._treeview.fancytree("getTree");
             
-            $(elements[0]).change(); //trigger
+            wtree.filterNodes(function(node){
+                return !top.HEURIST4.util.isnull(recordset.getById(node.key));
+            }, true);
         }
+
     }
+    
 
     
 
@@ -178,7 +253,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 //
 // Show as dialog - to remove
 //
-function showManageDefDetailTypes( options ){
+function showManageDefTerms( options ){
 
     var manage_dlg = $('#heurist-records-dialog');  //@todo - unique ID
 
@@ -188,8 +263,8 @@ function showManageDefDetailTypes( options ){
 
         manage_dlg = $('<div id="heurist-records-dialog">')
         .appendTo( $('body') )
-        .manageDefDetailTypes( options );
+        .manageDefTerms( options );
     }
 
-    manage_dlg.manageDefDetailTypes( 'popupDialog' );
+    manage_dlg.manageDefTerms( 'popupDialog' );
 }

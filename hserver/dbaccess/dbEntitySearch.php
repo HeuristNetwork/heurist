@@ -377,7 +377,7 @@ class DbEntitySearch
     //
     //
     //
-    public function execute($query, $is_ids_only){        
+    public function execute($query, $is_ids_only, $entityName){        
         
         $mysqli = $this->system->get_mysqli();
         
@@ -442,7 +442,8 @@ class DbEntitySearch
                             'reccount'=>count($records),
                             'fields'=>$fields,
                             'records'=>$records,
-                            'order'=>$order);
+                            'order'=>$order,
+                            'entityName'=>$entityName);
 
                 }//$is_ids_only
             }

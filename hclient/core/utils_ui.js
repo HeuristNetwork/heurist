@@ -38,6 +38,7 @@ createUserGroupsSelect - get SELECT for list of given groups, othewise loads lis
 createEntitySelector - get id-name selector for specified entity
 
 Other UI functions    
+initHintButton - button to show/hide hints
 initHelper - Inits helper div (slider) and button   
 
 Fast access:
@@ -867,56 +868,59 @@ top.HEURIST4.ui = {
     //
     initHelper: function(help_button, content_title, content_url, position){
 
-        //add helper div
-        if($(document.body).find('#helper').length==0){
-            $(document.body).append($('<div>',{id:'helper'}));
-        }
-        
         var $help_button = $(help_button);
-        var $helper_div = $(document.body).find('#helper');
 
         $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false})
                     .on('click', function(){
                         var $helper_div = $(document.body).find('#helper');
                         
+                        if($helper_div.length==0){
+                            $helper_div = $('<div>',{id:'helper'}).hide().appendTo($(document.body));
+                            
+                            $helper_div.dialog({
+                                        autoOpen: false, 
+                                        title: top.HR(content_title),
+                                        show: {
+                                            effect: "slide",
+                                            direction : 'right',
+                                            duration: 1000
+                                        },
+                                        hide: {
+                                            effect: "slide",
+                                            direction : 'right',
+                                            duration: 1000
+                                        }
+                                     });                 
+                        }
+                        
                         if($helper_div.dialog( "isOpen" )){
                             $helper_div.dialog( "close" );
-                        }else{
-                            var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
-                            var div_width  = Math.min(600, $(document.body).width() *0.8);
+                        }else{                        
+                        
+                            //var div_height = Math.min(500, (document.body).height()-$help_button.top());
+                            //var div_width  = Math.min(600, (document.body).width() *0.8);
+                            divpos = null;
+                            if(position=='top'){ //show div aboe button
+                                divpos = { my: "right bottom", at: "right top", of: $help_button }
+                            }else{
+                                divpos = { my: "right top", at: "right bottom", of: $help_button };
+                            }
+
+                            $helper_div.load(content_url, function(){
+
+                                var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
+                                var div_width  = Math.min(600, $(document.body).width() *0.8);
+                                
+                                var title = $helper_div.find('#content>h2').text();
                             
-                            $helper_div.dialog('option',{width:div_width, height: div_height});
-                            $helper_div.dialog( "open" );
+                                if(title!='') $helper_div.dialog('option','title',title);
+                                $helper_div.dialog('option',{width:div_width, height: div_height, position: divpos});
+                                $helper_div.dialog( "open" );
+                            });
                         }
                  });
                  
                  
-        $helper_div.load(content_url);
-        
-        //var div_height = Math.min(500, (document.body).height()-$help_button.top());
-        //var div_width  = Math.min(600, (document.body).width() *0.8);
-        divpos = null;
-        if(position=='top'){ //show div aboe button
-            divpos = { my: "right bottom", at: "right top", of: $help_button }
-        }else{
-            divpos = { my: "right top", at: "right bottom", of: $help_button };
-        }
-        
-        $helper_div.dialog({
-                    autoOpen: false, 
-                    title: top.HR(content_title),
-                    position: divpos,
-                    show: {
-                        effect: "slide",
-                        direction : 'right',
-                        duration: 1000
-                    },
-                    hide: {
-                        effect: "slide",
-                        direction : 'right',
-                        duration: 1000
-                    }
-                 });        
     }
 
 }//end ui

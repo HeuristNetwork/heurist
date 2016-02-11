@@ -32,12 +32,14 @@ $.widget( "heurist.manageEntity", {
         filter_group_selected:null,
         filter_groups: null,
 
-        page_size: 50,
+        pagesize: 100,
+        use_cache: false,
+        filter_mode: 'hide', //filter mode for cache mode
 
         isdialog: false,  //show in dialog
         dialogcleanup: true, // remove dialog div on close
         height: 400,
-        width:  740,
+        width:  760,
         modal:  true,
         title:  '',
         
@@ -56,7 +58,7 @@ $.widget( "heurist.manageEntity", {
         edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
         
         //it either loaded from server side if _entityName defined or defined explicitely on client side
-        entity: {}
+        entity: {}       //configuration
     },
     
     //system name of entity  - define it to load entity config from server
@@ -65,6 +67,8 @@ $.widget( "heurist.manageEntity", {
     
     //selected records
     _selection:null,
+    //selected records
+    _cachedRecordset:null,
     //reference to edit form
     _editing:null,
     
@@ -107,7 +111,7 @@ $.widget( "heurist.manageEntity", {
     //  
     // invoked from _init after load entity config    
     //
-    _initControls(){
+    _initControls:function(){
         
         if(!this._entityName || $.isEmptyObject(this.options.entity)){
             return false;
@@ -139,6 +143,8 @@ $.widget( "heurist.manageEntity", {
                action_select: this.options.action_select, 
                action_buttons: this.options.action_buttons,
                
+               
+               pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                empty_remark: 
                     (this.options.select_mode!='manager')
                     ?'<div style="padding:1em 0 1em 0">'+this.options.entity.empty_remark+'</div>'
@@ -157,7 +163,11 @@ $.widget( "heurist.manageEntity", {
 
         this._on( this.recordList, {
                 "resultlistonselect": function(event, selected_recs){
-                            this.selection(selected_recs);
+                            this.selectedRecords(selected_recs);
+                            
+                            if (!this.options.edit_dialog){
+                                    this._rendererListOnAction(event, {action:'edit'}); //default action of selection
+                            }
                         }
                 });
         this._on( this.recordList, {
@@ -171,8 +181,8 @@ $.widget( "heurist.manageEntity", {
            
             this.ent_editor = $('<div>')
                 .addClass('ent_editor ui-heurist-bg-light')
-                .css('min-width', this.options.edit_width?this.options.edit_width:'700px')
                 .appendTo(this.element);
+//      .css('min-width', this.options.edit_width?this.options.edit_width:'700px')
        }
             
             
@@ -241,13 +251,20 @@ $.widget( "heurist.manageEntity", {
              var s = 'User clicked action "'+action+'" for ';
              if(recID>0){
                  s = s + 'rec# '+recID;
+                 
+              //take records ID from selection   
              }else if(top.HEURIST4.util.isRecordSet(this._selection) && this._selection.length()>0){
                  s = s + this._selection.length() + ' selected record';
+                 var recs = this._selection.getOrder();
+                 recID = recs[recs.length-1];
              }else{
                  s = 'Nothing selected';
+                 recID = null;
              }
              
-             if(action=='add' || action=='edit'){
+             if(action=='add'){
+                    this._addEditRecord(-1);
+             }else if(action=='edit'){
                     this._addEditRecord(recID);
              }else{
                     top.HEURIST4.msg.showMsgFlash(s);  
@@ -265,7 +282,7 @@ $.widget( "heurist.manageEntity", {
             var idx = 0;
             for(idx in this.options.action_select){
                 var act = this.options.action_select[idx];
-                if(action == act.key && !top.HEURIST4.util.isempty(act.icon))
+                if(action == act.key)
                 {
                     if(isheader==true){
 
@@ -274,12 +291,25 @@ $.widget( "heurist.manageEntity", {
                             +act.title+'</div>';
                         
                     }else{
+                        
+                        var icon = act.icon;
+                        if(top.HEURIST4.util.isempty(act.icon)){
+                            //by default only edit,delete buttons allowed - otherwise need specify icon 
+                            //on entity configuration file
+                            if(action=='edit'){
+                                icon = 'ui-icon-pencil';
+                            }else if(action=='delete'){
+                                icon = 'ui-icon-circle-close';
+                            }else{
+                                return ''; 
+                            }
+                        }
                     
                         return '<div title="'
                             + (act.hint?act.hint:act.title)
                             +'" class="item inlist logged-in-only" '
                             +'style="width:3em" role="button" aria-disabled="false" data-key="'+act.key+'">'
-                            +'<span class="ui-icon '+act.icon+'"></span>'
+                            +'<span class="ui-icon '+icon+'"></span>'
                             + '</div>';
                     }
                 }
@@ -397,17 +427,24 @@ $.widget( "heurist.manageEntity", {
     },
         
     //
-    // value - RecordSet
+    // get and set selected records - RecordSet
     //    
-    selection: function(value){
+    selectedRecords: function(value){
         
         if(top.HEURIST4.util.isnull(value)){
             //getter
             return this._selection;
         }else{
+            
+            if($.isArray(value)){
+                if(this._cachedRecordset){
+                    value = this._cachedRecordset.getSubSetByIds(value);
+                }else{
+                    value = null;
+                }
+            }
             //setter
             this._selection = value;
-            
             
             if(this.options.select_mode=='select_single'){
                 this._selectAndClose();
@@ -421,10 +458,24 @@ $.widget( "heurist.manageEntity", {
     //
     updateRecordList: function( event, data ){
         if (data){
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
+            if(this.options.use_cache){
+                this._cachedRecordset = data.recordset;
+            }else{
+                this.recordList.resultList('updateResultSet', data.recordset, data.request);
+            }
         }
     },
-    
+
+    //
+    //
+    //
+    filterRecordList: function(event, request){
+        if(this.options.use_cache){
+            var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+            this.recordList.resultList('updateResultSet', subset, request);   
+        }
+    },
+
     //  -----------------------------------------------------
     //
     //
@@ -561,6 +612,14 @@ $.widget( "heurist.manageEntity", {
             
         }else{ //show on right-hand panel
             
+            var list_container = this.recordList.find('.div-result-list-content');
+
+            list_container.css('width','250px');
+            this.ent_editor
+                .css({'left':'250px', top:list_container.position().top})
+                      //'min-width':'500px',
+                            
+            this.ent_editor.find('.header').css({'min-width':'80px','width':'80px'});
             
         }
         

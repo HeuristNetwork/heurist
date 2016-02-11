@@ -53,6 +53,7 @@ function hRecordSet(initdata) {
 
         if(response){
 
+            that.entityName = response.entityName;           
             queryid = response.queryid;
             total_count = Number(response.count);
             offset = Number(response.offset);
@@ -471,7 +472,7 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
-
+        entityName:'',
 
         /**
         * Returns field value by fieldname for given record
@@ -490,20 +491,7 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
         * @param recID
         */
         getById: function(recID){
-
-            if (true || $.inArray(recID, records)) {
-                return records[recID];
-            }
-            /*
-            var i;
-            for(i=0; i<records.length; i++){
-            if(this.fld(records[i], 'rec_ID') == recID){
-            return records[i];
-            }
-            }
-            */
-            return null;
-
+            return records[recID];
         },
         
         /**
@@ -582,24 +570,31 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
         * 
         * @returns {hRecordSet}
         */
-        getSubSet: function(_records){
+        getSubSet: function(_records, _order){
+            
             if(_records==null){
                 _records = {};
             }
-            var ord = that.getIds2(_records);
+            if(!top.HEURIST4.util.isArrayNotEmpty(_order)){
+                _order = that.getIds2(_records);    
+            }
             
             return new hRecordSet({
                 queryid: queryid,
-                count: ord.length, //$(_records).length,
+                count: _order.length,
+                total_count: _order.length,
                 offset: 0,
                 fields: fields,
                 rectypes: rectypes,
                 structures: structures,
                 records: _records,
-                order: ord
+                order: _order
             });
         },
 
+        //
+        //
+        //
         getSubSetByIds: function(rec_ids){
             var _records = {};
             //find all records
@@ -627,6 +622,71 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             }
             
             return this.getSubSet(_records);
+        },
+        
+        //
+        //  returns subset by rerquest/filter
+        //
+        getSubSetByRequest: function(request, structure){
+            
+            var _records = {}, _order=[];
+            
+            if($.isEmptyObject(fields)) return null;
+            
+            function __getDataType(fieldname){
+                var idx;
+                for (idx in structure){
+                    if(structure[idx]['dtID']==fieldname){
+                          return structure[idx]['dtFields']['dty_Type'];
+                    }
+                }
+                return null;
+            }
+            
+            var recID, fieldName, dataTypes={};
+            //remove empty fields from request
+            for (fieldName in request) {
+                if (request.hasOwnProperty(fieldName) ){
+                    if(top.HEURIST4.util.isempty(request[fieldName])) {
+                        delete request[fieldName];    
+                    }else{
+                        //find data type
+                        dataTypes[fieldName] = __getDataType(fieldName);
+                        if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
+                            request[fieldName] = request[fieldName].toLowerCase();
+                        }
+                    }
+                }
+            }            
+
+            if($.isEmptyObject(request)) return this; //return all
+
+            //search
+            for(recID in records){
+                var record = records[recID];
+                var isOK = true;
+                for(fieldName in request){
+                    if(request.hasOwnProperty(fieldName)){
+                        if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
+                            
+                            if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){
+                                isOK = false;
+                                break;                            
+                            }
+                            
+                        }else if(this.fld(record,fieldName)!=request[fieldName]){
+                            isOK = false;
+                            break;                            
+                        }
+                    }
+                }
+                if(isOK){
+                    _records[recID] = record;    
+                    _order.push(recID);
+                }
+            }
+            
+            return this.getSubSet(_records, _order);
         },
         
         //take records from given recordset
@@ -765,12 +825,13 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             if(order.length>0){
                 return records[order[0]];
             }
-            /*var recid;
-            for (recid in records){
-                if(recid){
-                    return records[recid];
-                }
-            }*/
+            return null;
+        },
+        
+        getLastRecord: function(){
+            if(order.length>0){
+                return records[order.length-1];
+            }
             return null;
         },
 
@@ -913,6 +974,90 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             }
         },
         
+        //
+        //returns data as JSON array for fancytree
+        // fieldTitle, fieldLink - fields for key, title and hierarchy link
+        //
+        getTreeViewData:function(fieldTitle, fieldLink){
+            
+            /*
+            source: [
+    {title: "Node 1", key: "1"},
+    {title: "Folder 2", key: "2", folder: true, children: [
+      {title: "Node 2.1", key: "3", myOwnAttr: "abc"},
+      {title: "Node 2.2", key: "4"}
+    ]}
+  ]
+            */
+            
+            //find vocabs only
+            var recID, vocabs = [];
+            for(recID in records){
+                var record = records[recID];
+                var id = this.fld(record, fieldLink);
+                if(!top.HEURIST4.util.isempty(id) && id>0 && $.inArray(recID, vocabs)<0) { //vocabs.indexOf(id)<0){
+                    vocabs.push(id);
+                }
+            }
+            
+            function __addChilds(that, parentId){
+                var recID, res = [];
+                for(recID in records){
+                    var record = records[recID];
+                    
+                    var id = that.fld(record, fieldLink);
+                    if(top.HEURIST4.util.isempty(id) || id==0) id = null;
+                    
+                    if(parentId==id){
+                        var node = {title: that.fld(record,fieldTitle), key: recID};
+                        if($.inArray(recID, vocabs)>-1){
+                            var children = __addChilds( that, recID );
+                            if(children.length>0){
+                                node['children'] = children;
+                                node['folder'] = true;
+                            }
+                        }
+                        res.push( node );
+                    }
+                }
+                return res;
+            }
+            
+            var res = __addChilds(this, null);
+ /*           
+            for(recID in records){
+                var record = records[recID];
+                
+                var node = {title: this.fld(record,fieldTitle), key: this.fld(record,fieldId)};
+                
+                var parentId = this.fld(record, fieldLink);
+                
+                
+                if(top.HEURIST4.util.isempty(parentId)){
+                   res.push(node); //root
+                   refs[recID] = [res.length-1];
+                }else{
+                    //find parent
+                    var parentNodeRef = refs[recID];
+                    var parentNode;
+                    if(!parentNodeRef){
+                        parentNode = {title:'', key:parentId, children:[]};
+                        res.push(node); //root
+                        refs[recID] = [res.length-1];
+                    }else{
+                        parentNode = res[]
+                    }
+                    if(!parentNode.children){
+                        parentNode.children = [];
+                    }
+                    parentNode.children.push(node);
+                }
+            
+            }//for
+*/            
+            refs = null;
+            return res;
+        }
     }
 
     _init(initdata);

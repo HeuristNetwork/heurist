@@ -134,7 +134,7 @@ $.widget( "heurist.editing_input", {
         if(this.options.show_header){
             this.header = $( "<div>")
             .addClass('header '+required)
-            .css('width','150px')
+            //.css('width','150px')
             .css('vertical-align', (this.detailType=="blocktext")?'top':'')
             .html('<label>'
                 + (top.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')

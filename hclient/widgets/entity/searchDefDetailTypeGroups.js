@@ -30,39 +30,11 @@ $.widget( "heurist.searchDefDetailTypeGroups", $.heurist.searchEntity, {
     //
     _initControls: function() {
         //this._super();
-        this.startSearch();
+        if(this.options.use_cache){
+            this.startSearchInitial();            
+        }else{
+            this.startSearch();            
+        }
     },  
-    
-    //
-    // public methods
-    //
-    startSearch: function(){
-        
-            this._super();
-        
-            var request = {}
-        
-                this._trigger( "onstart" );
-
-                request = {
-                'a'          : 'search',
-                'entity'     : this.options.entity.entityName,  //'defDetailTypeGroups',
-                'details'    : 'list',
-                'request_id' : top.HEURIST4.util.random(),
-                };
-
-                var that = this;                                                
-                //that.loadanimation(true);
-                top.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            top.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-    },
-    
 
 });

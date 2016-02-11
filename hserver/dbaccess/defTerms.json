@@ -45,8 +45,8 @@
                     "dtID": "trm_InverseTermId",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_DisplayName":"Target record types:",
-                        "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
+                        "rst_DisplayName":"Inverse Relation type:",
+                        "rst_DisplayHelpText": "Some relation type can be in pair. Example: IsSon and IsFather", 
                         "rst_FieldConfig": {"entity":"DefTerms","filter_group":"relation","button_browse":true}
                     }
                 },

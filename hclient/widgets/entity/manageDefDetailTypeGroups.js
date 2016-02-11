@@ -43,6 +43,20 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
         this.recordList.resultList('option','hide_view_mode',true);
         
+        //move editor panel from element to div_content        
+        if(this.ent_editor && !this.options.edit_dialog){
+            
+            var list_container = this.recordList.find('.div-result-list-content');
+            
+            list_container.removeProp('right').css('width','250px');
+            
+            this.ent_editor
+                .detach()
+                .appendTo(list_container.parent())
+                .css({'min-width':'500px','left':'250px', top:list_container.position().top})
+                .show();
+        }
+                
         return true;
     },    
     
@@ -66,24 +80,42 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         var recID   = fld('dtg_ID');
         var recTitle = fld2('dtg_ID','4em')+fld2('dtg_Name');
         
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
+        if(this.options.select_mode=='select_multi'){
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
+        }else{
+            html = html + '<div>';
+        }
+        
+        html = html + fld2('dtg_Name') + '</div>';
+        
+        if(this.options.edit_dialog){
+            html = html
+            + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+            + '</div>&nbsp;&nbsp;'
+            + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+            +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+            + '</div>';
+        }
+        
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
-        + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordTitle">'
-        +     recTitle
-        + '</div>'
-        + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';
-
-        return html;
+        return html+'</div>';
         
     },
 
+    updateRecordList: function( event, data ){
+        //this._super(event, data);
+        if (data){
+            if(this.options.use_cache){
+                this._cachedRecordset = data.recordset;
+                //there is n filter feature in this form - thus, show list directly
+            }
+            this.recordList.resultList('updateResultSet', data.recordset, data.request);
+        }
+    },
+    
+    
 });
 
 //
