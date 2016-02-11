@@ -1,57 +1,55 @@
 DIRECTORY STRUCTURE FOR HEURIST WEB SERVER
 
-Ian Johnson rev. 28 april 2014
+Ian Johnson rev. 12 Feb 2016
 
 ------------------------------------------------------------------------------------
 
 Root web directory:    /var/www/html (used in examples below)
 
-Heurist directory:    /var/www/html/HEURIST  (may be installed in any web location)
+Heurist directory:    /var/www/html/HEURIST  (HEURIST may be installed in any web location)
 
             All Heurist files except the file store are in this directory to keep them
-            clear of other files in the root of the web server.
+            clear of other files in the root of the web server. The file store can be in a
+            suitable data location eg. /srv or on a separate data server mounted in / and simlinked
 
             The location of HEURIST is represented as an ellipsis ( ... ) below
 
 ---------------------------------------------------------------------------------------------------------
 
-VERSION 4 (June  2015)
-
-Heurist version 3 (h3) is now a subdirectory of version 4
+VERSION 4 (June  2015 onwards)
 
 SUMMARY:
 
     /var/www/html                           Optional: place simlinks in web root to shorten URL paths
 
-                    h3                      Simlink to .../HEURIST/h3
-                    h3-xxx                  Simlinks to .../HEURIST/h3-ao, h3-ij, h3-alpha, h3-beta etc.
+                    h4                      Simlink to .../HEURIST/h4
+                    h4-xx                   Simlinks to .../HEURIST/h4-ao, h4-ij, h4-alpha, h4-beta etc.
 
-    /var/www/html/HEURIST/                  All Heurist files except filestore in this directory
+    /var/www/html/HEURIST/                  All Heurist files in this directory (file store normally a simlink))
 
                     index.html              Heurist homepage providing access to services
                                             Supplied as move_to_parent_as_index.html in Heurist codebase root
-                                            (file is moved and renamed by installer)
+                                            (file is moved and renamed by installaton script)
 
-                    heuristConfigIni.php    Overrides configIni.php in individual instances
+                    heuristConfigIni.php    General configuration of Heurist on a particular server
+                                            Can be overriden by values supplied through configIni.php for individual instances
                                             Supplied as move_to_parent_as_heuristConfigIni.php in Heurist codebase root
-                                            (file is moved and renamed by installer)
+                                            (file is moved and renamed by installation script)
 
-                    h3                      Production instance
+                    h4                      Production instance
+                        help                Simlink to ../HEURIST_SUPPORT/help
+                        external            Simlink to ../HEURIST_SUPPORT/external (3rd party code for older code (pre vsn 4))
+                        ext                 Simlink to ../HEURIST_SUPPORT/external-h4 (3rd party code for newer code (vsn 4 on))
+
+                    h4-xx                  Alpha, beta, etc. instances
                         help                Simlink to ../HEURIST_SUPPORT/help
                         external            Simlink to ../HEURIST_SUPPORT/external
-                        external-h4         Simlink to ../HEURIST_SUPPORT/external-h4
-                        exemplars           Simlink to ../HEURIST_SUPPORT/exemplars
-
-                    h3-xxx                  Alpha, beta, etc. instances
-                        help                Simlink
-                        external            Simlink
-                        exemplars           Simlink
+                        ext                 Simlink to ../HEURIST_SUPPORT/external-h4
 
                     HEURIST_SUPPORT         Download from link on Google Code site
                         help                directory
                         external            directory
                         external-h4         directory
-                        exemplars           directory
 
                     HEURIST_FILESTORE       Simlink to actual location of file store
                                             eg. /srv/HEURIST_FILESTORE
@@ -59,11 +57,11 @@ SUMMARY:
 
 ---------------------------------------------------------------------------------------------------------
 
-Heurist instances:      .../HEURIST/h3
-                        .../HEURIST/h3-beta
-                        .../HEURIST/h3-alpha
-                        .../HEURIST/h3-ao
-                        .../HEURIST/h3-ij
+Heurist instances:      .../HEURIST/h4
+                        .../HEURIST/h4-beta
+                        .../HEURIST/h4-alpha
+                        .../HEURIST/h4-ao
+                        .../HEURIST/h4-ij
 
             These are normally database-compatible, allowing switch between instances eg. to access
             a new feature or where a bug is encountered in an old feature. Exceptionally there will
@@ -73,18 +71,19 @@ Heurist instances:      .../HEURIST/h3
 
 Master configuration:    .../HEURIST/heuristConfigIni.php
 
-            MySQL password and other setup information in /var/www/HEURIST/heuristConfigIni.php
-            This overrides the individual configIni.php files in the individual Heurist instances
-            so that they do not need configuring when a new update is installed. This file can be
-            copied from heuristConfigIni.php in the root of the Heurist codebase
+            MySQL password and other setup information in /var/www/html/HEURIST/heuristConfigIni.php
+            This can be overridden for individual instancess by values in the configIni.php files in
+            the individual instance - the values are normally left blank - so that all instances are.
+            configured by a single file, obviating the need for configuration when a new update is
+            installed. This file is copied from move_to_parent_as_heuristConfigIni.php in the root
+            of the Heurist codebase
 
+Support files:          .../HEURIST/HEURIST_SUPPORT/  external, external-h4, and help
 
-Support files:          .../HEURIST/HEURIST_SUPPORT/  external, external-h4, help and exemplars
-
-            These directories are simlinked as external, help and exemplars in the root of each Heurist
-            instance, so that they are shared and need not be copied with each update and/or
-            can be updated separately. Updates of Heurist may require additional external functions
-            which will be included with the Heurist distribution.
+            These directories are simlinked as external, ext, and help in the root of each Heurist
+            instance, so that they are shared and need not be copied with each update and/or can be
+            updated separately. Updates of Heurist may require additional external functions which will
+            be included as a new directory with cumulative updates as part of the Heurist distribution.
 
 File store:             /srv/HEURIST_FILESTORE, simlinked as /var/www/html/HEURIST_FILESTORE
 
@@ -94,24 +93,28 @@ File store:             /srv/HEURIST_FILESTORE, simlinked as /var/www/html/HEURI
             loction for data storgage, such as /srv, /data, /mnt, rather than in the web directory.
 
             Note: while uploaded files, images, and templates need not be web accessible, record type
-            icons are currently (Vsn 3) loaded directly by the web browser. Consequently the filestore must
-            be in a web accessible path. Use .htaccess control to block direct access to uploaded files
-            and images; Heurist obfuscates the URL it uses to access uploaded files and images, to
+            icons are currently loaded directly by the web browser. Consequently the filestore must
+            be in a web accessible path. .htaccess control is used to block direct access to uploaded files
+            and images; Heurist also obfuscates the URL it uses to access uploaded files and images, to
             prevent bulk download by sequential incrementation of file URLs, but nothing stops Apache
-            delivering the original files if you have their file names.
+            delivering the original files given the file name, hence the need for .htaccess controls.
 
 Home page:              .../HEURIST/index.html
 
-            A home page for Heurist on any server runnign Heurist. Provides navigation to user registration,
+            A home page for Heurist on any server running Heurist. Provides navigation to user registration,
             create new database, open existing database, documentation and the Heurist Network project
             pages (HeuristNetwork.org). This file is provided as move_to_parent_as_index.html in the root
             of the Heurist codebase.
 
             Note: index.html expects the main installation of Heurist to be in subdirectory .../HEURIST/h4
-                  as it looks in this path to find its CSS files
+                  as it looks in this path to find its CSS files. Edit path if there is no Heurist installation
+                  in this location.
 
-File permissions:       Suggested ownership of all data and program files is www-data:www-data or apache:apache with write access
-                        to the filestore for owner and group. On some systems you may use www-data or nobody
+File permissions:
+
+            Suggested ownership of all data and program files is www-data:www-data or apache:apache with write access
+            to the filestore for owner and group. On some systems (notably with a separate file server)you may
+            need to use nobody
 
 
 -----------------------------------------------------------------------------------------------------------------
@@ -119,8 +122,11 @@ File permissions:       Suggested ownership of all data and program files is www
 Increasing security of data
 
 By default, Heurist hides data directories by including an index.html file which will capture attempts to see the index
-of the directory.  However this does not stop files in the directory being downloaded. To protect files from
-download, edit the /etc/apache2/conf.d/security  file as follows (modify if HEURIST_FILESTORE has been moved):
+of the directory, as well as a .htaccess file in the root filestore directory to stop download of files in this and its
+descendants. There are also .htaccess files in every rectype-icons, hml, html and filethumbs directories to override this
+global block. However .htaccess specifications are not respected by default, so it is necessary to edit the apache
+configuration in /etc/apache2/conf.d/security to enable .htaccess (See HeuristNetwork website under Developers > Installation).
+You may also use the following (modify if the filestore has been moved)
 
     <Directory ~ /HEURIST_FILESTORE>
     Options Includes FollowSymLinks MultiViews
@@ -154,8 +160,7 @@ For USyd-supported installations only:
 
 Sync script:        .../HEURIST/sync_heurist_from_USyd_VS2.sh
 
-            Uses rsync to create and/or update a specified version (h3, h3-ao, h3-ij, h3-alpha, h3-beta)
+            Uses rsync to create and/or update a specified version (h4, h4-ao, h4-ij, h4-alpha, h4-beta)
             of Heurist from the USyd VS2 virtual server. Requires sudo access to VS2
             Also sets ownership and permissions on the copied files. Includes simlinks to support directories.
-
 

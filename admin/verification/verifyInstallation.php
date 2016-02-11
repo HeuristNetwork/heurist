@@ -76,7 +76,7 @@
             which is often a simlink to the real storage location).<br />
             Checks include: external javascript functions; help system; exemplars; root file upload directory; index.html in parent. <br />
 
-            <h3>Please run this using the latest instance on your server eg. h3-alpha</h3><br />
+            <h3>Please run this using the latest instance on your server</h3><br />
             If you use an older instance it may not pick up all requirements for the latest instance.<br/>&nbsp;<br/>
 
             <hr><br />
