@@ -146,6 +146,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     if (!$limit || $limit<1){
         $limit = 1000; //default limit in dispPreferences
     }
+    $limit = PHP_INT_MAX;
 
     $squery_res = prepareQuery(null, $squery, $search_type, $joinTable, "", null, $limit);
 

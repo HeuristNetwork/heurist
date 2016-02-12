@@ -281,6 +281,7 @@
                     <button id="btnRepDelete" title="Delete the selected template">Delete</button>
                     <button id="btnRepImport" title="Import a template exported from another database">Import</button>
                     <button id="btnRepExport" title="Export a template in a format which can imported to another database">Export</button>
+                    <button id="btnRepSave" title="Download current report">Download</button>
                     <button id="btnRepPublish" title="Obtain javascript to insert report in a web page, set publishing schedule">Publish</button>
                     <button id="btnRepPrint2" title="">Print</button>
                     <button id="btnRepRefresh" title="Refresh memory - updates lists, dropdowns and report output">Refresh</button>
@@ -346,7 +347,7 @@
                     <select id="cbDebugReportLimit" title="If some record types are only represented later in the data, use a tighter filter or Collected  > Add, then Collected > Show as search to create a smaller resultset.">
                         <option value="50" selected="selected">50 records</option>
                         <option value="250">250 records</option>
-                        <option value="-1">No limits</option>
+                        <option value="-1">As set in preferences</option>
                     </select>
                     <select id="cbErrorReportLevel">
                         <option value="0" selected="selected">Ignore errors</option>
@@ -444,6 +445,12 @@
                 }
             }
 
+            function onSaveOutput(){
+                if(top.HEURIST4){
+                    top.HEURIST4.util.downloadInnerHtml('heurist_report.html',$('#rep_container') );
+                }
+            }
+            
             function onExportTemplate()
             {
                 var sel = document.getElementById('selTemplates');
@@ -539,6 +546,7 @@
                             $('#fileupload').click();return false;                        
                 });
                 $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(onExportTemplate);
+                $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }}).click(onSaveOutput);
                 $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }}).click(onFile);
                 $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
                 
@@ -649,12 +657,24 @@
                         }else if(obj.ok) {
                             window.showReps.showEditor(obj.ok, true);
                             if(obj.details_not_found){
+                                
+                                var list_of_notfound = obj.details_not_found.join(', ');
+                                
+                                top.HEURIST4.msg.showMsgDlg(
+'Unable to convert IDs for following concept codes: '+list_of_notfound
++'<p style="padding-top:1.5em">Concept IDs which failed to convert are enclosed in [[  ]] in the template file eg. f[[2-27]]. You will need to edit the template in order to remove these IDs or to replace them with the internal code of an equivalent concept.</p>'
++'<p style="padding-top:1.5em">Failure to convert Concept IDs (global codes for particular record types, fields and terms) to local codes indicates that the Concept IDs are not known within your database.</p>'
++'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
+                                ,null,'Conversion of template file to internal codes');
+                                
+                                /* old
                                 alert('Conversion of template file to internal codes. '+
                                     'Unable to convert '+obj.details_not_found.length+
                                     '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
                                     'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+
                                     'which failed to convert are enclosed in [[ ]] in the template file eg. f[[2-27]]'
                                 );
+                                */
                             }
                         }
 

@@ -108,21 +108,26 @@ function executeSmartyTemplate($params){
     $gparams = $params; //keep to use in other functions
 
     if( !array_key_exists("limit", $params) ){ //not defined
+    
+        if($publishmode==0){
 
-        $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
-        if (!$limit || $limit<1){
-            $limit = 10000; //default limit in dispPreferences
+            $limit_for_interface = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
+            if (!$limit_for_interface || $limit_for_interface<1){
+                $limit_for_interface = 100; //default limit in dispPreferences
+            }
+
+            $params["limit"] = $limit_for_interface; //force limit
+        }else{
+            $params["limit"] = PHP_INT_MAX;    
         }
-
-        $params["limit"] = $limit; //force limit
     }
     
     if(@$params['recordset']){ //we already have the list of record ids
 
         $qresult = json_decode($params['recordset'], true);
 
-        //truncate recordset
-        if($qresult && array_key_exists('recIDs',$qresult)){
+        //truncate recordset  - limit does not work for publish mode
+        if($publishmode==0 && $qresult && array_key_exists('recIDs',$qresult)){
             $recIDs = explode(',', $qresult['recIDs']);
             if($params["limit"]<count($recIDs)){
                 $qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));   
@@ -138,7 +143,9 @@ function executeSmartyTemplate($params){
 
 
         $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
+      
         $result = loadRemoteURLContent($url);
+        
         $qresult = json_decode($result, true);
         
     }else{

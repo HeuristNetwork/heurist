@@ -53,6 +53,8 @@ function ShowReps() {
     infoMessageBox,
     _currentRecordset = null,
     _db;
+    
+    var lastQuery = null;
 
     var top_repcontainer = '30px';
 
@@ -270,9 +272,22 @@ function ShowReps() {
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
             infoMessageBox.show();
 
+            lastQuery = squery;
+            
             Hul.sendRequest(baseurl, function(xhr) {
                 var obj = xhr.responseText;
-                _updateReps(obj);
+                    _updateReps(obj);
+                
+                    var limit = parseInt(Hul.getDisplayPreference("smarty-output-limit"));
+                    if(top.HEURIST.totalQueryResultRecordCount>limit){
+                        
+$('<hr/><p>Output truncated at '+limit+' records (out of '
++top.HEURIST.totalQueryResultRecordCount+'). This limit can be reset in Profiles > Preferences.'
++'Note: calls to this function from websites and other external requests are not truncated'
++ '- the limit applies only to interactive viewing.</p>').appendTo($("#rep_container"));
+
+                    }
+                
                 }, squery);
 
         }
@@ -498,7 +513,6 @@ function ShowReps() {
 
         _generateTemplate(template_file, null, false);
     }
-
 
 
     /**

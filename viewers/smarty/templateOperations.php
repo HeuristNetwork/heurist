@@ -208,6 +208,10 @@
     }
 
     
+    function endsWith($haystack, $needle) {
+        // search forward starting from end minus needle length characters
+        return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+    }    
 
     /**
     * Returns the content of template file as text with local IDs replaced by concept IDs or viseverse
@@ -259,10 +263,10 @@
                     $parts2 = array();
                     foreach ($parts as $part) {
         //5. find starting with "f"
-                        if(strpos($part, "f")===0){
-                            $prefix = "f";
-                        }else if(strpos($part, "\$f")===0){
-                            $prefix = "\$f";
+                        if(strpos($part, 'f')===0){
+                            $prefix = 'f';
+                        }else if(strpos($part, '$f')===0){
+                            $prefix = '$f';
                         }else{
                             $prefix = null;
                         }
@@ -270,9 +274,12 @@
                         if($prefix){
         //6. get local DT ID - find Concept Code
                             $code = substr($part, strlen($prefix));
-                            if(substr($part, -1)=="s"){
-                                    $suffix = "s";
+                            if(substr($part, -1)=='s'){
+                                    $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
+                            }else if(endsWith($part,'_originalvalue')){                                            
+                                    $suffix = '_originalvalue';
+                                    $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{
                                     $suffix = "";
                             }
@@ -365,8 +372,6 @@
     function importTemplate(){
         global $dir;
         
-        
-error_log("HERE");        
         if ( !$_FILES['import_template']['size'] ) {
             $res = array("error"=>'Error occurred during upload - file had zero size');
             

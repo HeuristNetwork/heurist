@@ -543,6 +543,22 @@ top.HEURIST4.util = {
         }
     },
     
+    downloadInnerHtml: function (filename, ele, mimeType) {
+        
+        var elHtml = $(ele).html();
+        
+        mimeType = mimeType || 'text/plain';
+        var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml);
+
+        var link = document.createElement('a');
+        mimeType = mimeType || 'text/plain';
+        link.setAttribute('download', filename);
+        link.setAttribute('href', content);
+        link.click(); 
+
+        link = null;
+    },    
+    
     isRecordSet: function(recordset){
         return !top.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
     },

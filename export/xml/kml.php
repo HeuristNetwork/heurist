@@ -154,6 +154,8 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             if (!$limit || $limit<1){
                 $limit = 1000; //default limit in dispPreferences
             }
+            $limit = PHP_INT_MAX;
+
 
             $squery = prepareQuery(null, $squery, $search_type, $detTable, $ourwhere, null, $limit);
             if($isSearchKml){
