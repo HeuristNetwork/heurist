@@ -16,11 +16,8 @@ Heurist is designed primarily for academic research data (including web bookmark
 
 For full information please visit http://HeuristNetwork.org
 
-Documentation standards and overall structure are described in files in the /documentation directory
-
-INSTALLATION: please move the two files "move_to_parent_as_ ....." to the parent of the Heurist instances
-              (this is done automatically by the installation script) and edit the heuristConfigIni.php file in the parent directory.
-              Settings for individual instances, which override the parent configuration, can be set in the configIni.php file.
+Documentation standards and overall structure are described in files in the /documentation directory.
+This includes a detaiiled description of the layout of the Heurist directories and steps for installation.
 
 Updated:     22 Sep 2015
 

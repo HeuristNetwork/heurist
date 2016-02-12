@@ -27,7 +27,7 @@ regional['en'] = {
     'My Bookmarks':'My Bookmarks (private)',
 
     'Error_Empty_Message':'No error message was supplied, please report to Heurist developers',
-    
+
     'Password_Reset':'Your password has been reset. You should receive an email shortly with your new password',
 
     'Error_Password_Reset':'Can not complete operation.',
@@ -35,17 +35,17 @@ regional['en'] = {
     'Error_Mail_Registration':'Your registration info is added to database. However, it is not possible to approve it since registration email can not be sent.',
     'Error_Mail_Approvement':'Can not send registration approvement email.',
     'Error_Connection_Reset':'No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
-    
+
     'mailto_fail': 'Could not perform this operation because the default mail client is not properly installed.<br/>Compose email and send it at info@heuristscholar.org',
-    
-    //titles    
+
+    //titles
     'add_detail':'Add field value',
     'replace_detail':'Replace field value',
     'delete_detail':'Delete field value',
     //helps
-    'record_action_add_detail':'This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. New values cannot be added to records where this will cause the maximum count for that field to be exceeded (eg. adding a value to a single value field where a value is already recorded).',
-    'record_action_replace_detail':'todo define help in localization for record_action_replace_detail',
-    'record_action_delete_detail':'todo define help in localization for record_action_delete_detail',
+    'record_action_add_detail':'This function adds a new value for a specific field to the set of records selected in the dropdown. Existing values are unaffected. Addition will add values even if this exceeds the valid repeat count (eg. more than one value for single-value fields) - check the database for validity with Database > Verify structure and data.',
+    'record_action_replace_detail':'This functions replaces a specified value in a particular field for the set of records selected in the dropdown. Other fields / values are not affected.',
+    'record_action_delete_detail':'This functions deletes a specified value in a particular field for the set of records selected in the dropdown. Other fields / values are not affected. Deletion will remove values even if it is the last in a required field - check the database for validity with Database > Verify structure and data.',
     //reports
     'record_action_passed': 'Records passed to process',
     'record_action_no_access': 'No editable records found',
@@ -56,7 +56,7 @@ regional['en'] = {
     'record_action_limitted_add_detail': 'Skipped due exceeding repeat values limit',
     'record_action_limitted_delete_detail': 'Skipped due impossibility to delete required field',
     'record_action_errors': 'Database sql errors'
-    
+
 };
 
 regional['ru'] = {
