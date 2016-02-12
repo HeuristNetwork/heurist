@@ -180,7 +180,7 @@
                     
                     $i = 0;
                     foreach ($updates as $rec_id => $new_title) {
-                        mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
+                        mysql_query('update Records set rec_Modified=rec_Modified, rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
                         ++$i;
                         if ($rec_id % $step_uiupdate == 0) {
                             print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
