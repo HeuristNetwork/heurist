@@ -350,7 +350,7 @@ iframe.tab {
 	padding:0;
 	margin:0;
 	height:auto;
-	vertical-align: middle;
+	/*vertical-align: middle;*/
 	line-height:25px
 }
 body.mode-public .public-visible {

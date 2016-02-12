@@ -551,21 +551,23 @@
             <div class="banner">
                 <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
 
-                    <input type=checkbox id=ui-pref-simplemode
+                    <label>
+                        <input type=radio id=ui-pref-simplemode name="vide-mode"
                         onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'false' : 'true');setEditMode()" class=minimal>
-                    <label for=ui-pref-simplemode style="vertical-align:top">simplified view</label>
-
-                    <label style="padding-left:3em;vertical-align:top">show:</label>
-
-                    <input type=checkbox id=ui-pref-tabs onClick="" class=minimal style="display:none">
-                    <label for=ui-pref-tabs style="vertical-align:top;padding-right:1em;display:none">tabs</label>
-
+                    Simplified</label>
+                    <label>&nbsp;&nbsp;
+                        <input type=radio id=ui-pref-tabs name="vide-mode"
+                        onClick="top.HEURIST.util.setDisplayPreference('record-edit-advancedmode', this.checked? 'true' : 'false');setEditMode()" class=minimal>
+                    Full</label>
+                    <span style="min-width: 5em;display: inline-block;"></span>
+                    <label>
                     <input type=checkbox id=ui-pref-showhelp onClick="top.HEURIST.util.helpToggler(this)" class=minimal>
-                    <label for=ui-pref-showhelp style="vertical-align:top;padding-right:1em">help</label>
+                    help</label>
 
+                    <label class=public-visible>&nbsp;&nbsp;
                     <input type=checkbox id=ui-pref-optfields  class=public-visible
                             onClick="top.HEURIST.util.setDisplayPreference('input-visibility', this.checked? 'all' : 'recommended')" class=minimal>
-                    <label class=public-visible for=ui-pref-optfields style="vertical-align:top">optional fields</label>
+                    optional fields</label>
                 </div>
 
                 <div id="admin_editrectype" style="float:right;width:230px;text-align:right;"></div> <!-- class="edit-mode-depended" -->
@@ -745,16 +747,20 @@
                     $("#rectype-change").css('display','inline-block');
                     $("#page").css('left','200px');
                     $("#page").css('top','120px');
-                    $("#ui-pref-simplemode").attr('checked',false);
+                    document.getElementById('ui-pref-simplemode').checked = false;
+                    document.getElementById('ui-pref-tabs').checked = true;
+                    //$("#ui-pref-simplemode").prop('checked','');
                 }else{
                     $(".edit-mode-depended").css('display','none');
                     $("#rectype-change").css('display','none');
                     $("#page").css('left','10px');
                     $("#page").css('top','120px');
-                    $("#ui-pref-simplemode").attr('checked',true);
+                    document.getElementById('ui-pref-tabs').checked = false;
+                    document.getElementById('ui-pref-simplemode').checked = true;
+                    //$("#ui-pref-simplemode").prop('checked','checked');
                 }
             }
-            $("#ui-pref-simplemode").css('vertical-align','top');
+            //$("#ui-pref-simplemode").css('vertical-align','top');
             setEditMode();
         </script>
 
