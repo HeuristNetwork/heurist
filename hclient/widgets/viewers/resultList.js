@@ -238,12 +238,14 @@ $.widget( "heurist.resultList", {
 
         //----------------------
         //,'min-width':'10em'
+        
         this.span_pagination = $( "<div>")
-        //.css({'position':'absolute','right':'80px','padding':'6px 2em 0 0px'})
-        .css({'float':'right','padding':'6px 2em 0 0px'})
-        .appendTo( this.div_toolbar )
-        $( "<span>").appendTo( this.span_pagination );
-        this.span_info = $("<span>").css({'font-style':'italic','padding':'0 0.5em'}).appendTo( this.span_pagination );
+                .css({'float':'right','padding':'6px 0.5em 0 0'})
+                .appendTo( this.div_toolbar );
+        
+        this.span_info = $( "<div>")
+                .css({'float':'right','padding':'0.6em 0.5em 0','font-style':'italic'})
+                .appendTo( this.div_toolbar );
 
         this._showHideOnWidth();
         
@@ -324,7 +326,7 @@ $.widget( "heurist.resultList", {
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                    that.span_pagination.show();
+                    that._showHideOnWidth();
                     that._renderPagesNavigator();
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
@@ -458,15 +460,28 @@ $.widget( "heurist.resultList", {
     //
     _showHideOnWidth: function(){                    
             var w = this.element.width();
-            if ( w < 390 || (w < 440 && this.max_page>1) ) {
+            /* pagination has more priority than reccount
+            if ( w < 380 || (w < 440 && this.max_page>1) ) {
                 this.span_info.hide();
             }else{
                 this.span_info.show();
             }
-            if ( w < 370 ) {
+            if ( w < 380 ) {
                 this.span_pagination.hide();
             }else{
                 this.span_pagination.show();
+            }
+            */
+            // pagination has LESS priority than reccount
+            if ( w > 440 && this.max_page>1) {
+                this.span_pagination.show();
+            }else{
+                this.span_pagination.hide();
+            }
+            if ( w > 370 ) {
+                this.span_info.show();
+            }else{
+                this.span_info.hide();
             }
     },
 
@@ -573,9 +588,9 @@ $.widget( "heurist.resultList", {
     updateResultSet: function( recordset, request ){
 
         this._clearAllRecordDivs(null);
-        this.span_pagination.show();
         this._renderPagesNavigator();
         this._renderRecordsIncrementally(recordset);
+        this._showHideOnWidth()
     },
 
     //
@@ -1106,10 +1121,12 @@ $.widget( "heurist.resultList", {
 
         var sinfo = "Records: "+total_inquery;
 
+        this.span_pagination.attr('title', sinfo);
+        
         if(this.options.select_mode=='select_multi' && this._currentSelection!=null && this._currentSelection.length()>0){
             sinfo = sinfo + " | Selected: "+this._currentSelection.length()+' <a href="#">clear</a>';
         }
-
+        
         this.span_info.html(sinfo);
 
         if(this.options.select_mode=='select_multi'){
@@ -1155,7 +1172,7 @@ $.widget( "heurist.resultList", {
         //this._renderRecNumbers();
         this._removeNavButtons();
 
-        var span_pages = $(this.span_pagination.children()[0]);//first();
+        var span_pages = $(this.span_pagination); //.children()[0]);//first();
         span_pages.empty();
 
         this._updateInfo();
@@ -1198,7 +1215,7 @@ $.widget( "heurist.resultList", {
                     smenu = smenu + '<li>...</li>';
                 }
             }else{
-                $( "<button>", { text: "1"}).css({'font-size':'0.7em'}).button()
+                $( "<button>", { title: "1"}).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages ).on("click", function(){ that._renderPage(0); } );
                 if(start!=2){
                     $( "<span>" ).html("..").appendTo( span_pages );
@@ -1210,7 +1227,7 @@ $.widget( "heurist.resultList", {
                 smenu = smenu + '<li id="page'+(i-1)+'"><a href="#">'+i+'</a></li>'
             }else{
 
-                var $btn = $( "<button>", { text: ''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
+                var $btn = $( "<button>", { title: ''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages )
                 .click( function(event){
                     var page = Number(this.id.substring(4));
@@ -1231,7 +1248,7 @@ $.widget( "heurist.resultList", {
                 if(finish!= pageCount-1){
                     $( "<span>" ).html("..").appendTo( span_pages );
                 }
-                $( "<button>", { text: ''+pageCount }).css({'font-size':'0.7em'}).button()
+                $( "<button>", { title: ''+pageCount }).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
             }
         }

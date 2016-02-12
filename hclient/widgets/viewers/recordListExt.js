@@ -265,40 +265,7 @@ $.widget( "heurist.recordListExt", {
                   
                   var tot_cnt = this.options.recordset.length();
                   top.HEURIST.totalQueryResultRecordCount = tot_cnt;
-                  /*
-                  if(limit<0){
                   
-                  var pref_limit = top.HAPI4.get_prefs('smarty-output-limit');
-                  if(!(pref_limit>0)){
-                      pref_limit = 200;
-                  }
-                  
-                  if(tot_cnt > pref_limit){
-                    
-                        var that = this;
-                      
-                      top.HEURIST4.msg.showPrompt(
-'<div><p>You have requested a report for '+tot_cnt+' records, which will take '
-+((tot_cnt<500)?'some':'a long')
-+' time to generate. For a preview we recommend restricting output to the first 50 records.</p>'
-+'<p>You can change the limit above which this warning occurs in Profile > Preferences</p><p>Show '
-+'<select id="dlg-prompt-value" class="text ui-corner-all" '
-                + ' style="max-width: 100px; min-width: 5em; width: 100px; margin-left:0.2em">'
-                +'<option>50</option>'
-                +'<option>200</option>'
-                +'<option>500</option>'
-                +'<option>1000</option>'
-                +'<option>10000</option>'
-                +'<select> records</p></div>',
-                      function(limit){
-                        that._checkRecordsetLengthAndRunSmartyReport(limit);
-                      }
-                      );
-                      return;
-                  }
-                  
-                  }
-                  */
                   recIDs_list = this.options.recordset.getIds(limit);
                   recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, "recIDs":recIDs_list.join(',')};
                   
