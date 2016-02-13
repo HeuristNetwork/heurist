@@ -10,7 +10,7 @@
 
 Directory:	/search/saved
 
-Overview:	Actions on saved searches - legacy from H3
+Overview:	Actions on saved searches - legacy from vsn 3
 
 Notes:		manageCollection.php is the only function from this directory still used by h4
 

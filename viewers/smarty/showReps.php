@@ -23,7 +23,7 @@
 *
 * 'output' - full file path to be saved
 * 'mode' - if publish>0: js or html (default)
-* 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
+* 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
 *
 * other parameters are hquery's
 *
@@ -108,7 +108,7 @@ function executeSmartyTemplate($params){
     $gparams = $params; //keep to use in other functions
 
     if( !array_key_exists("limit", $params) ){ //not defined
-    
+
         if($publishmode==0){
 
             $limit_for_interface = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
@@ -118,10 +118,10 @@ function executeSmartyTemplate($params){
 
             $params["limit"] = $limit_for_interface; //force limit
         }else{
-            $params["limit"] = PHP_INT_MAX;    
+            $params["limit"] = PHP_INT_MAX;
         }
     }
-    
+
     if(@$params['recordset']){ //we already have the list of record ids
 
         $qresult = json_decode($params['recordset'], true);
@@ -130,7 +130,7 @@ function executeSmartyTemplate($params){
         if($publishmode==0 && $qresult && array_key_exists('recIDs',$qresult)){
             $recIDs = explode(',', $qresult['recIDs']);
             if($params["limit"]<count($recIDs)){
-                $qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));   
+                $qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));
             }
         }
 
@@ -143,11 +143,11 @@ function executeSmartyTemplate($params){
 
 
         $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
-      
+
         $result = loadRemoteURLContent($url);
-        
+
         $qresult = json_decode($result, true);
-        
+
     }else{
         $qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
     }

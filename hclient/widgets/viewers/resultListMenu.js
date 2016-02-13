@@ -229,7 +229,7 @@ $.widget( "heurist.resultListMenu", {
 
         }else if(action == "menu-search-advanced"){ //H3
 
-            //call H3 search builder
+            //call vsn 3 search builder
             var q = "",
             that = this;
             if(!Hul.isnull(this._query_request) && !Hul.isempty(this._query_request.q)){
@@ -237,7 +237,7 @@ $.widget( "heurist.resultListMenu", {
             }
             var url = top.HAPI4.basePathV3+ "search/queryBuilderPopup.php?db=" + top.HAPI4.database + q;
 
-                top.HEURIST4.msg.showDialog(url, { 
+                top.HEURIST4.msg.showDialog(url, {
                     title: top.HR('Advanced search builder'),
                     callback: function(res){
                         if(!Hul.isempty(res)) {
@@ -359,7 +359,7 @@ $.widget( "heurist.resultListMenu", {
 
     },
 
-    /**    H3
+    /**    vsn 3
     * action - name of action
     * _data - array of parameters
     * cbAction - callback
@@ -411,7 +411,7 @@ $.widget( "heurist.resultListMenu", {
         }
         //encodeURIComponent(JSON.stringify(_data))
         var str = JSON.stringify(_data);
-        var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //h3 action handler
+        var baseurl = top.HAPI4.basePathV3 + "search/actions/actionHandler.php";   //vsn 3 action handler
 
         /* it cannot parse reponse properly
         var request = {db:top.HAPI4.database, data: str, action: action }
@@ -904,7 +904,7 @@ $.widget( "heurist.resultListMenu", {
             return
         }
 
-        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + 
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" +
                 top.HAPI4.database + '&t='+top.HEURIST4.util.random();
                 //(new Date().time) ;
 
@@ -918,7 +918,7 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST4.msg.showDialog(url, {height:500, width:600, title: top.HR('Add field value')} );
     },
 
-    
+
     detailBatchEditPopup: function(action_type) {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);
@@ -935,7 +935,7 @@ $.widget( "heurist.resultListMenu", {
             return
         }
 
-        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" + 
+        var url = top.HAPI4.basePathV3+ "search/actions/addDetailPopup.html?db=" +
                 top.HAPI4.database + '&t='+top.HEURIST4.util.random();
                 //(new Date().time) ;
 
@@ -945,16 +945,16 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.recids_sel = recIDs_sel;
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
-   */     
+   */
         var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='+top.HAPI4.database+'&action='+action_type;
 
-        top.HEURIST4.msg.showDialog(url, {height:300, width:600, 
+        top.HEURIST4.msg.showDialog(url, {height:300, width:600,
             padding: '0px',
-            title: top.HR(action_type), 
+            title: top.HR(action_type),
             class:'ui-heurist-bg-light'} );
     },
-    
-    
+
+
     replaceDetailPopup: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);

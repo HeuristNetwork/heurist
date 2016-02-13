@@ -15,7 +15,7 @@
 */
 
 /**
-*   Sync h3 database with FAIMS sqlite
+*   Sync Heurist database with FAIMS sqlite
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
@@ -447,7 +447,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     renameExisitingDt($dtyName, 0, 1);
 
                     $fid = 'FAIMS.'.$attrID;
-                    $ftype = faimsToH3_dt_mapping($row1[2]);
+                    $ftype = faimsToHeurist_dt_mapping($row1[2]);
                     //print ">>>>".$fid." ".$row1[1];
                     $dtyName = $row1[1] ?$row1[1] :"FAIMS_ID_".$attrID;
                     $dtyDescr = trim($row1[3]." FAIMS ID ".$attrID);
@@ -995,7 +995,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     //attr id, freetext, measure, certainity, vocabid
                     echo "<div style='padding-left:30px'>".$row[6]."  ".$row[4]."  ".$row[7]."  ".$row[8]."  ".$row[5]."  "."</div>";
 
-                    //get detailtype id in H3 by attrib id
+                    //get detailtype id in Heurist by attrib id
                     $key = -1;
                     if(@$detailMap[$row[6]]){
                         $key = intval($detailMap[$row[6]][0]);
@@ -1162,7 +1162,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     //attr id, freetext, measure, certainity, vocabid
                     echo "<div style='padding-left:30px'>".$row[6]."  ".$row[4]."  ".$row[7]."  ".$row[8]."  ".$row[5]."  "."</div>";
 
-                    //get detailtype id in H3 by attrib id
+                    //get detailtype id in Heurist by attrib id
                     $key = -1;
                     if(@$detailMap[$row[6]]){
                         $key = intval($detailMap[$row[6]][0]);
@@ -1398,7 +1398,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             print "<script>showFinalMessage('Module import completed', false)</script>";
 
             /**
-            * returns H3 record id by faims id
+            * returns Heurist record id by faims id
             *
             * @param mixed $faims_id
             */
@@ -1530,7 +1530,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }//for records
             */
 
-            //insert or update records in H3 databse
+            //insert or update records in Heurist databse
             function insert_update_Record($recID, $rectype, $details, $faims_id)
             {
                 global $cntUpdated, $cntInsterted, $mysqli;
@@ -1590,8 +1590,9 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }
 
 
-            //
-            function faimsToH3_dt_mapping($ftype){
+            // TODO: this also exists in hserver\sync\faims_to_heurist.php
+
+            function faimsToHeurist_dt_mapping($ftype){
 
                 $res = null;
 
@@ -1625,7 +1626,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         $res = 'freetext';
                         break;
                 }
-                //H3 types ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
+                //Heurist types ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
                 return $res;
             }
 

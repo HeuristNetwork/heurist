@@ -418,7 +418,7 @@ $.widget( "heurist.mainMenu", {
 
                 if(ele.hasClass('h3link')){
                     href = window.HAPI4.basePathV3 + href;
-                    //h3link class on menus implies location of h3 code
+                    //h3link class on menus implies location of older (vsn 3) code
                 }
 
                 ele.attr('href', href);
@@ -764,7 +764,7 @@ $.widget( "heurist.mainMenu", {
                 request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
                 //$('#layout_theme').themeswitcher.
 
-                //save H3 preferences
+                //save Vsn 3 preferences
                 if(top.HEURIST && top.HEURIST.util){
                     top.HEURIST.util.setDisplayPreference(h3pref, h3pref_val);
                 }

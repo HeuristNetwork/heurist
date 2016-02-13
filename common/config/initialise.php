@@ -162,9 +162,7 @@ define('HEURIST_DIR', $documentRoot . HEURIST_SITE_PATH ); //  /var/www/html/h4/
 
 // Heurist Installation which contains index of registered Heurist databases (registered DB # 1)
 // DO NOT CHANGE THIS URL
-// Note: had /migrated appended up to 17 Dec 2015, need to update the server with new copy of H4
-// anything using h3 code will still go to the h3 codebase, only h4 code is affected
-define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4/");
+define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/heurist/");
 define('HEURIST_INDEX_DBNAME', "HeuristMasterIndex");
 
 //-------------------------------------------------------------------------- MEMCACHE AND PROXY
@@ -262,9 +260,9 @@ if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultR
 
 
 // set up email defines
-define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org'); 
-define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org'); 
-define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO); 
+define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org');
+define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
+define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
 
 //-------------------------------------------------------------------------- DB SELECTION ---------
@@ -482,7 +480,7 @@ define('DT_ALL_ASSOC_FILE', '2-38');
 
 // NOTE: These duplicate those in consts.php
 $rtDefines = array(
-    // Standard core record types (H3CoreDefinitions: DB = 2)
+    // Standard core record types (HeuristCoreDefinitions: DB = 2)
     'RT_RELATION' => array(2, 1),
     'RT_INTERNET_BOOKMARK' => array(2, 2),
     'RT_NOTE' => array(2, 3),
@@ -493,7 +491,7 @@ $rtDefines = array(
     'RT_INTERPRETATION' => array(2, 8),
     'RT_PERSON' => array(2, 10),
 
-    // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 H3ToolExtensions
+    // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 HeuristToolExtensions
     'RT_FILTER' => array(2, 12),
     'RT_XML_DOCUMENT' => array(2, 13),
     'RT_TRANSFORM' => array(2, 14),
@@ -516,7 +514,7 @@ $rtDefines = array(
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
-    'RT_MAP_DOCUMENT' => array(3,1019), // H3ReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
+    'RT_MAP_DOCUMENT' => array(3,1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3,1020),
     'RT_QUERY_SOURCE' => array(3,1021)
 

@@ -24,7 +24,7 @@
 * parameters
 * 'id' - key field value in usrReportSchedule
 * 'mode' - if publish>0: js or html (default)
-* 'publish' - 0 H3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
+* 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
 *                 3 - redirect the existing report, if it does not exist publish=1
 *
 * If publish=1 then the script displays a web page with a report on the process
@@ -34,7 +34,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org

@@ -133,9 +133,9 @@ $usrTags = array(
 //---------------------------------
 // set up email defines
 //
-define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org'); 
-define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org'); 
-define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO); 
+define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org');
+define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
+define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
 //---------------------------------
 
@@ -144,7 +144,7 @@ define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_IN
 // NOTE: These duplicate those in initialise.php
 
 $rtDefines = array(
-    // Standard core record types (H3CoreDefinitions: DB = 2)
+    // Standard core record types (HeuristCoreDefinitions: DB = 2)
     'RT_RELATION' => array(2, 1),
     'RT_INTERNET_BOOKMARK' => array(2, 2),
     'RT_NOTE' => array(2, 3),
@@ -159,7 +159,7 @@ $rtDefines = array(
     'RT_IMAGE_SOURCE' => array(2, 11), //TODO : change RT_TILED_IMAGE
     'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
 
-    // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 H3ToolExtensions
+    // Record types added by SW and SH for their extensions, no longe in core definitions, now in DB 4 Heurist ToolExtensions
     'RT_FILTER' => array(2, 12),
     'RT_XML_DOCUMENT' => array(2, 13),
     'RT_TRANSFORM' => array(2, 14),
@@ -180,7 +180,7 @@ $rtDefines = array(
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
-    'RT_MAP_DOCUMENT' => array(3, 1019), // H3ReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
+    'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),
     'RT_QUERY_SOURCE' => array(3, 1021)  //RT_MAPABLE_QUERY
 

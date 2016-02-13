@@ -165,8 +165,8 @@ class System {
 
     function getLocalConstants(){
 
-        $res = array();    
-        
+        $res = array();
+
         global $rtDefines;
         foreach ($rtDefines as $magicRTName => $id) {
             if(defined($magicRTName)){
@@ -181,7 +181,7 @@ class System {
                 $res[$magicDTName] = constant ( $magicDTName );
             }
         }
-        
+
         return $res;
     }
 
@@ -373,7 +373,7 @@ class System {
         if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1); //remove last slash
 
         if(is_link($install_path)){
-            $install_path = readlink($install_path);  //real installation path         html/HEURIST/h3-ij/
+            $install_path = readlink($install_path);  //real installation path eg. html/HEURIST/h3-ij/
         }else{
             $install_path = "";
         }
@@ -441,7 +441,7 @@ class System {
         if($user) {
             $user['ugr_Password'] = ''; // do not send password to client side
             $user['ugr_Admin'] = $this->is_admin();
-            if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences(); 
+            if(!@$user['ugr_Preferences']) $user['ugr_Preferences'] = user_getDefaultPreferences();
         }
 
         if($this->mysqli && defined('HEURIST_DBNAME')){
@@ -462,9 +462,9 @@ class System {
                     "basePathV3"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants()) //some record and detail types constants with local values specific for current db
             );
-            
+
         }else{
-            
+
             $res = array(
                 "currentUser"=>null,
                 "sysinfo"=>array(
@@ -473,7 +473,7 @@ class System {
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "basePathV3"=>HEURIST_BASE_URL)
             );
-            
+
         }
 
         return $res;
@@ -651,7 +651,7 @@ class System {
         $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
 
         if(!$userID){
-            // h3 backward capability
+            // vsn 3 backward capability
             $h3session = $this->dbname_full.'.heurist';
             $userID = @$_SESSION[$h3session]['user_id'];
             if($userID){
@@ -686,7 +686,7 @@ class System {
         }
         return $islogged;
     }
-    
+
     /**
     * Find user by name and password and keeps user info in current_User and in session
     *
@@ -750,7 +750,7 @@ class System {
 
                     //header('Location: http://localhost/h4/index.php?db='.$this->dbname);
 
-                    //h3 backward capability
+                    //vsn 3 backward capability
                     $h3session = $this->dbname_full.'.heurist';
                     $_SESSION[$h3session]['cookie_version'] = 1;
                     $_SESSION[$h3session]['user_name']     = $user['ugr_Name'];
@@ -797,13 +797,13 @@ class System {
     //
     //
     public function user_GetPreference($property){
-        
+
         $res = @$_SESSION[$this->dbname_full]["ugr_Preferences"][$property];
-        
+
         if('search_detail_limit'==$property){
             if(!$res && $res<500 ) {$res = 500;}
-            else if($res>30000 ) {$res = 3000;}  
-        } 
+            else if($res>30000 ) {$res = 3000;}
+        }
 
         return $res;
     }
@@ -824,7 +824,7 @@ class System {
                 return null;
             }
 
-            // it is required for main page only - so call this request on index.php 
+            // it is required for main page only - so call this request on index.php
             //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
         }
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;

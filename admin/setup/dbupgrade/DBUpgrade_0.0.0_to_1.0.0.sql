@@ -18,7 +18,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney
 * @link        http://HeuristNetwork.org
@@ -110,7 +110,7 @@
 
 
 -- Add PENDING status to existing non owner visibilites -
--- 12/9/11: these have been applied to H3CoreDefinitions and to sandpit5
+-- 12/9/11: these have been applied to HeuristCoreDefinitions
 
   ALTER TABLE Records
         CHANGE rec_NonOwnerVisibility rec_NonOwnerVisibility

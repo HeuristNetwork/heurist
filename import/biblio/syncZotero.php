@@ -2,7 +2,7 @@
 
     /**
     /**
-    *   Sync h3 database with zotero group or user items
+    *   Sync Heurist database with zotero group or user items
     *   zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC and mapping are specified in zoteroMap.xml
     *
     * @package     Heurist academic knowledge management system
@@ -340,7 +340,7 @@
 
                             $rec_modified = strtotime($row[1]);
 
-                            // 4) compare updated time - if it is less than in H3 database, ignore this entry
+                            // 4) compare updated time - if it is less than in Heurist database, ignore this entry
                             $t_updated = strtotime(strval(findXMLelement($entry, null, "updated")));
 
                             if(false && $t_updated && $rec_modified>$t_updated){

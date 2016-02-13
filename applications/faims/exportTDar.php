@@ -662,7 +662,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 }//foreach
 
                 $dataTable->description = $rectypedef[1];
-                $dataTable->name = 'H3_'.HEURIST_DBNAME.'_rectype_'.$rt;
+                $dataTable->name = 'H4_'.HEURIST_DBNAME.'_rectype_'.$rt;
 
 
                 $metadata_content = utf8_encode($meta->asXML());

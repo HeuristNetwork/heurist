@@ -1,6 +1,6 @@
 /**
 * Widget for input controls on edit form
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
@@ -25,58 +25,58 @@ $.widget( "heurist.editing_input", {
         varid:null,  //id to create imput id, otherwise it is combination of index and detailtype id
         recID: null,  //it is only needed for relation maker @todo remove
 
-        //field desription is either taken from top.HEURIST4.rectypes - H3 compatible structure
+        //field desription is taken from top.HEURIST4.rectypes
         rectypes: null,  // reference to top.HEURIST4.rectypes - defRecStructure
         rectypeID: null, //field description is taken either from rectypes[rectypeID] or from dtFields
         dtID: null,      // field type id (for recDetails) or field name (for other Entities)
 
         //  it is either from top.HEURIST4.rectype.typedefs.dtFields - retrieved with help rectypeID and dtID
         // object with some mandatory field names
-        dtFields: null, 
-        
+        dtFields: null,
+
         values: null,
         readonly: false,
         title: '',  //label (overwrite Display label from record structure)
         showclear_button: true,
-        show_header: true, //show/hide label  
+        show_header: true, //show/hide label
         suppress_prompts:false, //supress help, error and required features
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
     },
-    
+
     newvalues:{},
     detailType:null,
-    configMode:null, //configuration settings, mostly for enum and resource types 
-    
+    configMode:null, //configuration settings, mostly for enum and resource types
+
     // the constructor
     _create: function() {
 
         //field description is taken either from rectypes[rectypeID] or from dtFields
-        if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0 && 
-           this.options.rectypes && this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])
+        if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0 &&
+            this.options.rectypes && this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])
         {
-                    
-              this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+
+            this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
         }
-                
+
         if(this.options.dtFields==null){ //field description is not defined
             return;
         }
 
-        
+
         this.configMode = this.f('rst_FieldConfig');
         if(!top.HEURIST4.util.isempty(this.configMode)){
             if($.type(this.configMode) === "string"){
                 try{
                     this.configMode = $.parseJSON(this.configMode);
                 }catch(e){
-                    this.configMode = null;                                        
+                    this.configMode = null;
                 }
             }
             if(!$.isPlainObject(this.configMode)){
                 this.configMode = null;
             }
         }
-        
+
         var that = this;
 
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
@@ -84,23 +84,23 @@ $.widget( "heurist.editing_input", {
         var required = "";
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
             required = "readonly";
-            
+
             $( "<span>")
-                .addClass('editint-inout-repeat-button')
-                .css({width:'16px', display:'table-cell'})
-                .appendTo( this.element );
-            
+            .addClass('editint-inout-repeat-button')
+            .css({width:'16px', display:'table-cell'})
+            .appendTo( this.element );
+
         }else{
             if(!this.options.suppress_prompts){
                 required = this.f('rst_RequirementType');
             }
             /*if (required == 'optional') required = "optional";
             else if (required == 'required') required = "required";
-                else if (required == 'recommended') required = "recommended";
-                    else required = "";*/
+            else if (required == 'recommended') required = "recommended";
+            else required = "";*/
 
             var repeatable = (this.f('rst_MaxValues') != 1)? true : false; //saw TODO this really needs to check many exist
-            
+
             //multiplier button
             if(repeatable){
 
@@ -115,7 +115,7 @@ $.widget( "heurist.editing_input", {
                 // bind click events
                 this._on( this.btn_add, {
                     click: function(){
-                        if(this.f('rst_MaxValues')==null  || this.inputs.length < this.f('rst_MaxValues')){ 
+                        if(this.f('rst_MaxValues')==null  || this.inputs.length < this.f('rst_MaxValues')){
                             this._addInput('');
                         }
                     }
@@ -146,18 +146,18 @@ $.widget( "heurist.editing_input", {
         this.input_cell = $( "<div>")
         .addClass('input-cell')
         .appendTo( this.element );
-        
+
         //add hidden error message div
-        
+
         this.error_message = $( "<div>")
         .hide()
         .addClass('heurist-prompt ui-state-error')
         .css({'height': 'auto',
-                'padding': '0.2em',
-                'margin-bottom': '0.2em'})
+            'padding': '0.2em',
+            'margin-bottom': '0.2em'})
         .appendTo( this.input_cell );
-        
-        //add prompt       
+
+        //add prompt
         var help_text = this.f('rst_DisplayHelpText');
         this.input_prompt = $( "<div>")
         .text( help_text && !this.options.suppress_prompts ?help_text:'' )
@@ -165,12 +165,12 @@ $.widget( "heurist.editing_input", {
         .appendTo( this.input_cell );
 
 
-        //values are not defined - assign default value    
-        
+        //values are not defined - assign default value
+
         if( !top.HEURIST4.util.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
             if(top.HEURIST4.util.isempty(def_value)){
-                this.options.values = [''];        
+                this.options.values = [''];
             }else if(top.HEURIST4.util.isArray()){
                 this.options.values = def_value;
             }else{
@@ -208,32 +208,32 @@ $.widget( "heurist.editing_input", {
             this.input_cell.remove();
         }
     },
-    
+
     /**
     * get value for given record type structure field
-    * 
+    *
     * dtFields - either from rectypes.typedefs and index is taken from dtFieldNamesToIndex
     *          - or it is object with following list of properties
-        dty_Type,
-        rst_DisplayName,  //label
-        rst_DisplayHelpText  (over dty_HelpText)           //hint
-        rst_DisplayExtendedDescription  (over dty_ExtendedDescription) //rollover
-        
-        rst_RequirementType,  //requirement
-        rst_MaxValues     //repeatability
-        
-        rst_DisplayWidth - width in characters
-        
-        rst_PtrFilteredIDs
-        rst_FilteredJsonTermIDTree      @todo rename to rst_FieldConfig (over dty_JsonConfig)
-        rst_TermIDTreeNonSelectableIDs  
-        dty_TermIDTreeNonSelectableIDs    
-    *  
+    dty_Type,
+    rst_DisplayName,  //label
+    rst_DisplayHelpText  (over dty_HelpText)           //hint
+    rst_DisplayExtendedDescription  (over dty_ExtendedDescription) //rollover
+
+    rst_RequirementType,  //requirement
+    rst_MaxValues     //repeatability
+
+    rst_DisplayWidth - width in characters
+
+    rst_PtrFilteredIDs
+    rst_FilteredJsonTermIDTree      @todo rename to rst_FieldConfig (over dty_JsonConfig)
+    rst_TermIDTreeNonSelectableIDs
+    dty_TermIDTreeNonSelectableIDs
+    *
     *
     * @param fieldname
     */
     f: function(fieldname){
-        
+
         var val = this.options['dtFields'][fieldname]; //try get by name
         if(top.HEURIST4.util.isnull(val) && this.options.rectypes){ //try get by index
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
@@ -242,22 +242,22 @@ $.widget( "heurist.editing_input", {
         if(!val){ //some default values
             if(fieldname=='rst_RequirementType') val = 'optional'
             else if(fieldname=='rst_MaxValues') val = 1
-            else if(fieldname=='dty_Type') val = 'freetext'
-            else if(fieldname=='rst_DisplayWidth' 
-                && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                val = 60;
-            }
+                else if(fieldname=='dty_Type') val = 'freetext'
+                    else if(fieldname=='rst_DisplayWidth'
+                        && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
+                            val = 60;
+                        }
         }
         return val;
-        
+
         /*}else{
-            var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
-            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-            return rfrs[fi[fieldname]];
+        var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+        var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
+        return rfrs[fi[fieldname]];
         }*/
     },
 
-    
+
     //
     //
     //
@@ -266,7 +266,7 @@ $.widget( "heurist.editing_input", {
             //find in array
             var that = this;
             $.each(this.inputs, function(idx, item){
-                
+
                 var $input = $(item);
                 if($input.attr('id')==input_id){
                     if(that.newvalues[input_id]){
@@ -275,17 +275,17 @@ $.widget( "heurist.editing_input", {
                     //remove element
                     $input.parents('.input-div').remove();
                     //remove from array
-                    that.inputs.splice(idx,1);    
+                    that.inputs.splice(idx,1);
                     return;
                 }
-                
+
             });
         }
     },
-        
+
     /**
     * add input according field type
-    * 
+    *
     * @param value
     * @param idx - index for repetative values
     */
@@ -298,8 +298,8 @@ $.widget( "heurist.editing_input", {
         var that = this;
 
         var $input = null;
-//@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
-//repalce to uniqueId() if need
+        //@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
+        //repalce to uniqueId() if need
         value = value ?value:'';
 
 
@@ -333,7 +333,7 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
 
             if(!(value==false || value=='0' || value=='n')){
-                $input.prop('checked','checked');    
+                $input.prop('checked','checked');
             }
 
         }else if(this.detailType=="rectype"){
@@ -345,11 +345,11 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .appendTo( $inputdiv );
 
-            top.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue')); 
+            top.HEURIST4.ui.createRectypeSelect($input.get(0),null, this.f('cst_EmptyValue'));
             if(value){
                 $input.val(value);
             }
-            
+
         }else if(this.detailType=="user"){ //special case - only groups of current user
 
             $input = $( "<select>")
@@ -360,12 +360,12 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
 
             top.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
-                    [{key:'',title:top.HR('select user/group...')},
-                     {key:top.HAPI4.currentUser['ugr_ID'], title:top.HAPI4.currentUser['ugr_FullName'] }] ); 
+                [{key:'',title:top.HR('select user/group...')},
+                    {key:top.HAPI4.currentUser['ugr_ID'], title:top.HAPI4.currentUser['ugr_FullName'] }] );
             if(value){
                 $input.val(value);
             }
-            
+
         }else{
             $input = $( "<input>")
             .uniqueId()
@@ -374,204 +374,204 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
 
             if(this.detailType=="integer" || this.detailType=="year"){
-                
-                $input.keypress(function (e) { 
+
+                $input.keypress(function (e) {
                     var code = (e.keyCode ? e.keyCode : e.which);
                     var charValue = String.fromCharCode(e.keyCode);
                     var valid = false;
-                    
+
                     if(charValue=='-' && this.value.indexOf('-')<0){
                         this.value = '-'+this.value;
                     }else{
-                        valid = /^[0-9]+$/.test(charValue);   
+                        valid = /^[0-9]+$/.test(charValue);
                     }
-                        
+
                     if(!valid){
                         top.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
-                    }    
-                    
-                });
-                /*$input.keyup(function () { 
-                    if (this.value != this.value.replace(/[^0-9-]/g, '')) {
-                        this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
                     }
+
+                });
+                /*$input.keyup(function () {
+                if (this.value != this.value.replace(/[^0-9-]/g, '')) {
+                this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
+                }
                 });*/
             }else
-            if(this.detailType=="float"){
-                
-                $input.keypress(function (e) { 
-                    var code = (e.keyCode ? e.keyCode : e.which);
-                    var charValue = String.fromCharCode(e.keyCode);
-                    var valid = false;
-                    
-                    if(charValue=='-' && this.value.indexOf('-')<0){
-                        this.value = '-'+this.value;
-                    }else if(charValue=='.' && this.value.indexOf('.')<0){    
-                        valid = true;
-                    }else{
-                        valid = /^[0-9]+$/.test(charValue);   
-                    }
-                        
-                    if(!valid){
-                        top.HEURIST4.util.stopEvent(e);
-                        e.preventDefault();
-                    }    
-                    
-                });
-                
-            }else
-            if(this.detailType=="date"){
-                var $datepicker = $input.datepicker({
-                    /*showOn: "button",
-                    buttonImage: "ui-icon-calendar",
-                    buttonImageOnly: true,*/
-                    showButtonPanel: true,
-                    changeMonth: true,
-                    changeYear: true,
-                    dateFormat: "yy-mm-dd"
-                });
+                if(this.detailType=="float"){
 
-                var $btn_datepicker = $( "<button>", {title: "Show calendar"})
-                .addClass("smallbutton")
-                .appendTo( $inputdiv )
-                .button({icons:{primary: "ui-icon-calendar"},text:false});
+                    $input.keypress(function (e) {
+                        var code = (e.keyCode ? e.keyCode : e.which);
+                        var charValue = String.fromCharCode(e.keyCode);
+                        var valid = false;
 
-                this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
+                        if(charValue=='-' && this.value.indexOf('-')<0){
+                            this.value = '-'+this.value;
+                        }else if(charValue=='.' && this.value.indexOf('.')<0){
+                            valid = true;
+                        }else{
+                            valid = /^[0-9]+$/.test(charValue);
+                        }
 
-            }else if(this.detailType=="resource"){
+                        if(!valid){
+                            top.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                        }
 
-                //old way - by default lookup for Records filtered by Record Types
-                var ptrset = that.f('rst_PtrFilteredIDs');
-                
-                var __show_select_dialog = null;
-                var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
-                    .addClass("smallbutton")
-                    .appendTo( $inputdiv )
-                    .button({icons:{primary: "ui-icon-link"},text:false});
-                
-                if(top.HEURIST4.util.isempty(this.configMode)){
+                    });
 
-                    __show_select_dialog = function __show_select_dialog(event){
-                        event.preventDefault();
-                        
-                        var url = top.HAPI4.basePathV4 + 
+                }else
+                    if(this.detailType=="date"){
+                        var $datepicker = $input.datepicker({
+                            /*showOn: "button",
+                            buttonImage: "ui-icon-calendar",
+                            buttonImageOnly: true,*/
+                            showButtonPanel: true,
+                            changeMonth: true,
+                            changeYear: true,
+                            dateFormat: "yy-mm-dd"
+                        });
+
+                        var $btn_datepicker = $( "<button>", {title: "Show calendar"})
+                        .addClass("smallbutton")
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-calendar"},text:false});
+
+                        this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
+
+                    }else if(this.detailType=="resource"){
+
+                        //old way - by default lookup for Records filtered by Record Types
+                        var ptrset = that.f('rst_PtrFilteredIDs');
+
+                        var __show_select_dialog = null;
+                        var $btn_rec_search_dialog = $( "<button>", {title: "Click to search and select"})
+                        .addClass("smallbutton")
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-link"},text:false});
+
+                        if(top.HEURIST4.util.isempty(this.configMode)){
+
+                            __show_select_dialog = function __show_select_dialog(event){
+                                event.preventDefault();
+
+                                var url = top.HAPI4.basePathV4 +
                                 'hclient/framecontent/recordSelect.php?db='+top.HAPI4.database+
                                 '&rectype_set='+that.f('rst_PtrFilteredIDs');
-                        top.HEURIST4.msg.showDialog(url, {height:600, width:600, 
-                                title: top.HR('Select linked record'), 
-                                class:'ui-heurist-bg-light',
-                                callback: function(recordset){
-                                    if( top.HEURIST4.util.isRecordSet(recordset) ){
-                                        var record = recordset.getFirstRecord();
-                                        var name = recordset.fld(record,'rec_Title');
-                                        $input.val(name);
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                top.HEURIST4.msg.showDialog(url, {height:600, width:600,
+                                    title: top.HR('Select linked record'),
+                                    class:'ui-heurist-bg-light',
+                                    callback: function(recordset){
+                                        if( top.HEURIST4.util.isRecordSet(recordset) ){
+                                            var record = recordset.getFirstRecord();
+                                            var name = recordset.fld(record,'rec_Title');
+                                            $input.val(name);
+                                            that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                        }
                                     }
-                                }           
-                        } );
+                                } );
 
-                    };
+                            };
 
 
-                //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
-                }else{
-                    //this is entity selector
-                    //detect entity
-                    var entityName = this.configMode.entity;
-                    if(top.HEURIST4.util.isempty(entityName)) entityName='Records'; //by default
-                    
-                    if($.isFunction($('body')['manage'+entityName])){ //OK! widget js has been loaded
+                            //$input.css('width', this.options['input_width']?this.options['input_width']:'300px');
+                        }else{
+                            //this is entity selector
+                            //detect entity
+                            var entityName = this.configMode.entity;
+                            if(top.HEURIST4.util.isempty(entityName)) entityName='Records'; //by default
 
-                            var popup_options = {
-                                isdialog: true,
-                                select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
-                                //selectbutton_label: '',
-                                //page_size: $('#page_size').val(),
-                                action_select: false,
-                                action_buttons: true,
-                                filter_group_selected:null,
-                                filter_groups: this.configMode.filter_group,
-                                onselect:function(event, data){
-                                    
-                                    if(data && data.selection && top.HEURIST4.util.isRecordSet(data.selection))
-                                    {
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        var name = recordset.fld(record,'rec_Title');
-                                        $input.val(name);
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                            if($.isFunction($('body')['manage'+entityName])){ //OK! widget js has been loaded
+
+                                var popup_options = {
+                                    isdialog: true,
+                                    select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
+                                    //selectbutton_label: '',
+                                    //page_size: $('#page_size').val(),
+                                    action_select: false,
+                                    action_buttons: true,
+                                    filter_group_selected:null,
+                                    filter_groups: this.configMode.filter_group,
+                                    onselect:function(event, data){
+
+                                        if(data && data.selection && top.HEURIST4.util.isRecordSet(data.selection))
+                                        {
+                                            var recordset = data.selection;
+                                            var record = recordset.getFirstRecord();
+                                            var name = recordset.fld(record,'rec_Title');
+                                            $input.val(name);
+                                            that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                        }
+
                                     }
-
                                 }
-                            }
-                            
-                            
-                            var manage_dlg = $('<div>')
+
+
+                                var manage_dlg = $('<div>')
                                 .uniqueId()
                                 .appendTo( $('body') )
                                 ['manage'+entityName]( popup_options );
-                                
-                            __show_select_dialog = function(event){
-                                manage_dlg['manage'+entityName]( 'popupDialog' );    
+
+                                __show_select_dialog = function(event){
+                                    manage_dlg['manage'+entityName]( 'popupDialog' );
+                                }
+
                             }
-                            
-                    }
-                }
-                
-                if(__show_select_dialog!=null){
-                    this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
-                    this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
-                }
-                
-                
-            }else if(false && this.detailType=="relmarker"){  //@TODO!!!!
-
-                $input.css('width','auto');
-
-                if(!this.rec_relation_dialog){
-                    this.rec_relation_dialog = this.element.rec_relation({
-
-                        rectype_set: this.f('rst_PtrFilteredIDs'), //constraints for target record types
-                        reltype_set: this.f('rst_FilteredJsonTermIDTree'), //contraints for relation types
-                        reltype_headers: this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs'), //subset of headers for relation type pulldown
-
-                        source_ids: [this.options.recID],
-                        isdialog: true
-                    });
-                }
-
-                var $btn_rec_relation_dialog = $( "<button>", {title: "Click to define relationship"})
-                .addClass("smallbutton")
-                .appendTo( $inputdiv )
-                .button({icons:{primary: "ui-icon-link"},text:false});
-
-                function __show_relation_dialog(event){
-                    event.preventDefault();
-
-                    that.rec_relation_dialog.rec_relation("option",{
-                        //retuns selected recrod
-                        onselect: function(event, lbl){ //@todo - work with new relation record
-                            $input.val(lbl);
-                            /*
-                            if(recordset && recordset.length()>0){
-                            var record = recordset.getFirstRecord();
-                            $input.val(recordset.fld(record,'rec_Title'));
-                            that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                            }*/
-
                         }
-                    });
 
-                    that.rec_relation_dialog.rec_relation( "show" );
-                };
+                        if(__show_select_dialog!=null){
+                            this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+                            this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+                        }
 
-                this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
-                this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
 
-            }
+                    }else if(false && this.detailType=="relmarker"){  //@TODO!!!!
+
+                        $input.css('width','auto');
+
+                        if(!this.rec_relation_dialog){
+                            this.rec_relation_dialog = this.element.rec_relation({
+
+                                rectype_set: this.f('rst_PtrFilteredIDs'), //constraints for target record types
+                                reltype_set: this.f('rst_FilteredJsonTermIDTree'), //contraints for relation types
+                                reltype_headers: this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs'), //subset of headers for relation type pulldown
+
+                                source_ids: [this.options.recID],
+                                isdialog: true
+                            });
+                        }
+
+                        var $btn_rec_relation_dialog = $( "<button>", {title: "Click to define relationship"})
+                        .addClass("smallbutton")
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-link"},text:false});
+
+                        function __show_relation_dialog(event){
+                            event.preventDefault();
+
+                            that.rec_relation_dialog.rec_relation("option",{
+                                //retuns selected recrod
+                                onselect: function(event, lbl){ //@todo - work with new relation record
+                                    $input.val(lbl);
+                                    /*
+                                    if(recordset && recordset.length()>0){
+                                    var record = recordset.getFirstRecord();
+                                    $input.val(recordset.fld(record,'rec_Title'));
+                                    that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                    }*/
+
+                                }
+                            });
+
+                            that.rec_relation_dialog.rec_relation( "show" );
+                        };
+
+                        this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
+                        this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
+
+                    }
             /*else if(this.detailType=="freetext" && this.options['input_width']){
-                $input.css('width', this.options['input_width']);
+            $input.css('width', this.options['input_width']);
             }*/
 
         }
@@ -589,31 +589,31 @@ $.widget( "heurist.editing_input", {
         //var $btn_clear = $( "<div>")
         if(this.options.showclear_button)
         {
-        
-        var $btn_clear = $('<button>',{
-            title: 'Clear entered value',
-            'data-input-id': $input.attr('id')
-        })
-        .addClass("smallbutton btn_input_clear")
-        .css({'vertical-align': (this.detailType=="blocktext")?'top':'' })
-        .appendTo( $inputdiv )
-        .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
 
-        // bind click events
-        this._on( $btn_clear, {
-            click: function(e){
-                var input_id = $(e.target).parent().attr('data-input-id');
-                if(that.inputs.length>1){
-                //if( top.HEURIST4.util.isempty( that._getValue('#'+input_id)) ){
-                    that._removeInput( input_id );                    
-                }else{
-                    that._setValue(input_id, '');
+            var $btn_clear = $('<button>',{
+                title: 'Clear entered value',
+                'data-input-id': $input.attr('id')
+            })
+            .addClass("smallbutton btn_input_clear")
+            .css({'vertical-align': (this.detailType=="blocktext")?'top':'' })
+            .appendTo( $inputdiv )
+            .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
+
+            // bind click events
+            this._on( $btn_clear, {
+                click: function(e){
+                    var input_id = $(e.target).parent().attr('data-input-id');
+                    if(that.inputs.length>1){
+                        //if( top.HEURIST4.util.isempty( that._getValue('#'+input_id)) ){
+                        that._removeInput( input_id );
+                    }else{
+                        that._setValue(input_id, '');
+                    }
                 }
-            }
-        });
-        
+            });
+
         }
-        
+
         return $input.attr('id');
 
     },
@@ -625,37 +625,37 @@ $.widget( "heurist.editing_input", {
     _recreateSelector: function($input, value){
 
         $input.empty();
-        
+
         var allTerms = this.f('rst_FieldConfig');
         if(top.HEURIST4.util.isempty(allTerms)){
             allTerms = this.f('rst_FilteredJsonTermIDTree');
         }
 
         if(isNaN(allTerms)){//this is not vocabulary ID, this is something more complex
-        
+
             if($.isPlainObject(this.configMode)){ //this lookup for entity
-                
+
                 //create and fill SELECT
                 //this.configMode.entity
                 //this.configMode.filter_group
-                
+
                 //add add/browse buttons
                 top.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
-                
+
                 if(this.configMode.button_browse){
-                    
+
                 }
-                
+
             }else{
-            
+
                 if (!$.isArray(allTerms) && !top.HEURIST4.util.isempty(allTerms)) {
                     //is it CS string - convert to array
-                    allTerms = allTerms.split(',');   
+                    allTerms = allTerms.split(',');
                 }
-                
+
                 if(top.HEURIST4.util.isArrayNotEmpty(allTerms)){
                     if(top.HEURIST4.util.isnull(allTerms[0]['key'])){
-                        //plain array 
+                        //plain array
                         var idx, options = [];
                         for (idx=0; idx<allTerms.length; idx++){
                             options.push({key:allTerms[idx], title:allTerms[idx]});
@@ -666,16 +666,16 @@ $.widget( "heurist.editing_input", {
                     top.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
             }
-            
+
         }else{ //old way
 
             //headerTerms - not used anymore
             var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
-            
+
             //vocabulary
-            top.HEURIST4.ui.createTermSelectExt2($input.get(0), 
-                {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms, 
-                defaultTermID:value, topOptions:true, supressTermCode:true});
+            top.HEURIST4.ui.createTermSelectExt2($input.get(0),
+                {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
+                    defaultTermID:value, topOptions:true, supressTermCode:true});
         }
     },
 
@@ -683,48 +683,48 @@ $.widget( "heurist.editing_input", {
     // internal - assign value for specific input element
     //
     _setValue: function(input_id, value, display_value){
-        
-            var that = this;
-            $.each(this.inputs, function(idx, item){
-                
-                var $input = $(item);
-                if($input.attr('id')==input_id){
-                    if(that.newvalues[input_id]){
-                        that.newvalues[input_id] = '';
-                    }
-                    $input.val( display_value?display_value :value);
-                    return;
+
+        var that = this;
+        $.each(this.inputs, function(idx, item){
+
+            var $input = $(item);
+            if($input.attr('id')==input_id){
+                if(that.newvalues[input_id]){
+                    that.newvalues[input_id] = '';
                 }
-                
-            });
-        
+                $input.val( display_value?display_value :value);
+                return;
+            }
+
+        });
+
     },
-    
+
     //
     // recreate input elements and assign values
     //
     setValue: function(values){
-        
+
         //clear previous inputs
         this.input_cell.find('.input-div').remove();
-        
+
         var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
-        
+
         var i;
         for (i=0; i<values.length; i++){
             if(isReadOnly){
                 this._addReadOnlyContent(values[i]);
             }else{
                 var inpt_id = this._addInput(values[i]);
-                
+
                 if(!(this.detailType=="resource" || this.detailType=="relmarker")){
                     this.newvalues[inpt_id] = values[i];
                 }
-                
+
             }
         }
         if (isReadOnly) {
-            this.options.values = values;  
+            this.options.values = values;
         }
 
     },
@@ -734,19 +734,19 @@ $.widget( "heurist.editing_input", {
     //  input_id - id or element itself
     //
     _getValue: function(input_id){
-        
-            var res = null;
-            var $input = $(input_id);
-    
-            if(!(this.detailType=="resource" || this.detailType=="relmarker")){
-                res = $input.val();
-            }else if (!top.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) ){
-                res = this.newvalues[$input.attr('id')];
-            }
-        
-            return res;
+
+        var res = null;
+        var $input = $(input_id);
+
+        if(!(this.detailType=="resource" || this.detailType=="relmarker")){
+            res = $input.val();
+        }else if (!top.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) ){
+            res = this.newvalues[$input.attr('id')];
+        }
+
+        return res;
     },
-    
+
     //
     //
     //
@@ -759,14 +759,14 @@ $.widget( "heurist.editing_input", {
             var ress = [];
             for (idx in this.inputs) {
                 var res = this._getValue(this.inputs[idx]);
-                if(!top.HEURIST4.util.isempty( res ) || ress.length==0){ //provide the only empty value  || res.trim()!='' 
+                if(!top.HEURIST4.util.isempty( res ) || ress.length==0){ //provide the only empty value  || res.trim()!=''
                     if(top.HEURIST4.util.isnull( res )) res = '';
-                    ress.push(res)    
+                    ress.push(res)
                 }
             }
             return ress;
         }
-        
+
     },
 
     //
@@ -775,55 +775,55 @@ $.widget( "heurist.editing_input", {
     getInputs: function(){
         return this.inputs;
     },
-    
+
     validate: function(){
-        
-            var req_type = this.f('rst_RequirementType');
-            var max_length = this.f('dty_Size');
-            var data_type = this.f('dty_Type');
-            var errorMessage = '';
-            
-            if(req_type=='required'){
-                
-                var ress = this.getValues();
-      
-                if(ress.length==0 || top.HEURIST4.util.isempty(ress[0]) || ress[0].trim()=='' ){
+
+        var req_type = this.f('rst_RequirementType');
+        var max_length = this.f('dty_Size');
+        var data_type = this.f('dty_Type');
+        var errorMessage = '';
+
+        if(req_type=='required'){
+
+            var ress = this.getValues();
+
+            if(ress.length==0 || top.HEURIST4.util.isempty(ress[0]) || ress[0].trim()=='' ){
+                //error highlight
+                $(this.inputs[0]).addClass( "ui-state-error" );
+                //add error message
+                errorMessage = 'Field is requried. Please specify value';
+
+            }else if((data_type=='freetext' || data_type=='blocktext') && ress[0].length<4){
+                //errorMessage = 'Field is requried. Please specify value';
+            }
+        }
+        //verify max alowed size
+        if(max_length>0 &&
+            (data_type=='freetext' || data_type=='blocktext')){
+
+            var idx;
+            for (idx in this.inputs) {
+                var res = this._getValue(this.inputs[idx]);
+                if(!top.HEURIST4.util.isempty( res ) && res.length>max_length){
                     //error highlight
-                    $(this.inputs[0]).addClass( "ui-state-error" );
+                    $(this.inputs[idx]).addClass( "ui-state-error" );
                     //add error message
                     errorMessage = 'Field is requried. Please specify value';
-                    
-                }else if((data_type=='freetext' || data_type=='blocktext') && ress[0].length<4){
-                    //errorMessage = 'Field is requried. Please specify value';
-                }
-            } 
-            //verify max alowed size
-            if(max_length>0 && 
-                (data_type=='freetext' || data_type=='blocktext')){
-                    
-                var idx;
-                for (idx in this.inputs) {
-                    var res = this._getValue(this.inputs[idx]);
-                    if(!top.HEURIST4.util.isempty( res ) && res.length>max_length){
-                        //error highlight
-                        $(this.inputs[idx]).addClass( "ui-state-error" );
-                        //add error message
-                        errorMessage = 'Field is requried. Please specify value';
-                    }
                 }
             }
-            
-            if(errorMessage!=''){
-                this.error_message.text(errorMessage);
-                this.error_message.show();
-            }else{
-                this.error_message.hide();
-                $(this.inputs).removeClass('ui-state-error');
-            }
-            
-            return (errorMessage=='');
+        }
+
+        if(errorMessage!=''){
+            this.error_message.text(errorMessage);
+            this.error_message.show();
+        }else{
+            this.error_message.hide();
+            $(this.inputs).removeClass('ui-state-error');
+        }
+
+        return (errorMessage=='');
     },
-    
+
 
     //
     //
@@ -845,26 +845,26 @@ $.widget( "heurist.editing_input", {
             }
         } else if(this.detailType=="file"){
 
-            disp_value = "@todo file "+value;   
+            disp_value = "@todo file "+value;
 
         } else if(this.detailType=="resource"){
 
-            disp_value = "@todo resource "+value;   
+            disp_value = "@todo resource "+value;
 
         } else if(this.detailType=="relmarker"){  //combination of enum and resource
 
-            disp_value = "@todo relation "+value;   
+            disp_value = "@todo relation "+value;
 
-        //@todo NEW datatypes                
+            //@todo NEW datatypes
         } else if(this.detailType=="geo"){
-            
+
             /*if(detailType=="query")
             if(detailType=="color")
             if(detailType=="bool")
             if(detailType=="password")*/
-            
-            disp_value = "@todo geo "+value;   
-            
+
+            disp_value = "@todo geo "+value;
+
 
         }else{
             disp_value = value;
@@ -875,10 +875,10 @@ $.widget( "heurist.editing_input", {
         }
 
         var $inputdiv = $( "<div>" ).addClass('input-div').css({'font-weight':'bold'}).insertBefore(this.input_prompt);
-        
+
         $inputdiv.html(disp_value);
 
-    }  
+    }
 
 
 });
