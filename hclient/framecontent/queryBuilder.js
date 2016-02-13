@@ -1,5 +1,5 @@
 /**
-* queryBuilder.js:  Dialog elements for the rule set builder
+* queryBuilder.js:  Dialog elements for the RuleSet builder
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -21,11 +21,11 @@
 function hQueryBuilder(query_original, container) {
     var _className = "QueryBuilder",
     _version   = "0.4",
-    
+
     container,
-    
+
     arr_tokens = [{key:'t',title:'Entity(Record) Type'},  //t,type
-             {key:'f',title:'Field'},                //f,field   
+             {key:'f',title:'Field'},                //f,field
              {key:'links',title:'Link/relation'},    //linked_to,linkedfrom,related_to,relatedfrom,links
 
              {key:'',title:'-'},
@@ -33,47 +33,47 @@ function hQueryBuilder(query_original, container) {
              {key:'ids',title:'ID'},
              {key:'url',title:'URL'},
              {key:'notes',title:'Notes'},
-             
+
              {key:'added',title:'Added'},
              {key:'date',title:'Modified'},  //after, since, before
-             {key:'addedby',title:'Added by user'},  
+             {key:'addedby',title:'Added by user'},
              {key:'owner',title:'Owner'},  //owner,workgroup,wg
 
              {key:'',title:'-'},
              {key:'tag',title:'Tag(Keyword)'},         //tag, keyword, kwd
              {key:'user',title:'Bookmarked by user'}  //user, usr
              ];
-    
+
     function _init(query_original, _container){
-    
+
         container = _container;
-        
+
         _loadQuery(query_original);
-        
+
     }
 
     //
     //parses query and recreate query builder items
     //
     function _loadQuery(){
-        
-      //detect type of query - json or plain  
-        
+
+      //detect type of query - json or plain
+
       //parse query on separate tokens
-      
-      //create items  
-      
-      //query not defined - create empty set  
+
+      //create items
+
+      //query not defined - create empty set
       $('<div>').queryBuilderItem().appendTo($(container));
-      
+
     }
 
     //create query in given format from query builder items
     function _getQuery(){
-        
+
     }
 
-    
+
     //public members
     var that = {
 
@@ -92,9 +92,9 @@ function hQueryBuilder(query_original, container) {
 // add first level (init ruleBuilder widget)
 //
 function addLevel(){
-    $("<div>").addClass('level1').uniqueId().queryBuilder({level:1,     //add rule sets builder for level 1
+    $("<div>").addClass('level1').uniqueId().queryBuilder({level:1,     //add RuleSets builder for level 1
         onremove: function(event, data){
-            $('#'+data.id).remove();    //remove this rule sets builder
+            $('#'+data.id).remove();    //remove this RuleSets builder
         }
     }).insertBefore($('#div_add_level'));
 }

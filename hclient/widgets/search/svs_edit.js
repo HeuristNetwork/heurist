@@ -263,7 +263,7 @@ function hSvsEdit(args) {
 
                 $dlg.find("#svs_Rules_edit")
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                .attr('title', top.HR('Edit Rule Set'))
+                .attr('title', top.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
                 .click(function( event ) {
                     //that.
@@ -272,7 +272,7 @@ function hSvsEdit(args) {
 
                 $dlg.find("#svs_Rules_clear")
                 .button({icons: {primary: "ui-icon-close"}, text:false})
-                .attr('title', top.HR('Clear Rule Set'))
+                .attr('title', top.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
                 .click(function( event ) {
                     $dlg.find('#svs_Rules').val('');
@@ -322,7 +322,7 @@ function hSvsEdit(args) {
                             //if(domain!="all"){query_to_save.push('w='+domain);}
                         }
 
-                        /*if(top.HEURIST4.util.isempty(svs_query.val()) && !top.HEURIST4.util.isempty(svs_rules.val())){   //PURE RULE SET
+                        /*if(top.HEURIST4.util.isempty(svs_query.val()) && !top.HEURIST4.util.isempty(svs_rules.val())){   //PURE RuleSet
                             domain = 'rules';
                             svs_ugrid = top.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
                         }*/
@@ -384,7 +384,7 @@ function hSvsEdit(args) {
                     width: 650,
                     modal: true,
                     resizable: false,
-                    title: top.HR(isRules?'Edit Rule Set':'Save filter criteria'),
+                    title: top.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     buttons: [
                         {text:top.HR('Save'), click: __doSave},
                         {text:top.HR('Cancel'), click: function() {
@@ -403,7 +403,7 @@ function hSvsEdit(args) {
         }else{
             //show dialogue
             var isRules = _fromDataToUI(svsID, squery, groupID);
-            edit_dialog.dialog("option",'title', top.HR(isRules?'Edit Rule Set':'Edit saved filter criteria'));
+            edit_dialog.dialog("option",'title', top.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
             edit_dialog.dialog("open");
         }
 

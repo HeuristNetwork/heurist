@@ -205,7 +205,7 @@ regional['ru'] = {
     'Create new saved search': 'Создать поиск',
 
     'Database Summary': 'Сводка базы данных',
-    'Rule Sets': 'Зависимости',
+    'RuleSets': 'Зависимости',
 
 
     'Delete? Please confirm': 'Удалить? Подвтердите',
@@ -379,7 +379,7 @@ regional['fr'] = {
     'Create new saved search': 'Создать поиск',
 
     'Database Summary': 'Сводка базы данных',
-    'Rule Sets': 'Зависимости',
+    'RuleSets': 'Зависимости',
 
 
     'Delete? Please confirm': 'Удалить? Подвтердите',

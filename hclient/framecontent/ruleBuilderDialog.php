@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Rule Set Builder Dialog
+    * RuleSet Builder Dialog
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -59,9 +59,9 @@
 
 
             <!-- Slide-in help text - displays at start by default, can be closed and reopened -->
-            <div id="helper" title="Rules and Rule sets">
+            <div id="helper" title="Rules and RuleSets">
                 <!-- <div id="helper" class="ui-widget-content ui-corner-all">
-                <h3 class="ui-widget-header ui-corner-all">Rules and Rule sets</h3> -->
+                <h3 class="ui-widget-header ui-corner-all">Rules and RuleSets</h3> -->
                 <p style="padding-bottom:1em">
 
                     A <b>rule</b> describes the set of pointers and relationships (including reverse pointers)
@@ -78,23 +78,23 @@
                     Menus >> Recipes >> Creators).
                 </p>
                 <p style="padding-bottom:1em">
-                    <b>Rule Sets</b> may contain several rules. Rule sets can be saved - they appear in the Rule Sets
+                    <b>RuleSets</b> may contain several rules. RuleSets can be saved - they appear in the RuleSets
                     section of the navigation panel - and can be applied to any set of records retrieved by a
-                    search. Rule sets are also saved as part of the saved search when the search is saved
-                    after applying a rule set.
+                    search. RuleSets are also saved as part of the saved search when the search is saved
+                    after applying a RuleSet.
                 </p>
                 <p style="padding-bottom:1em">
-                    When a rule set is applied, it operates on the initial selection set resulting from the query.
-                    Each rule set applied <b>replaces</b> the results of the previous rule set - they are not additive.
+                    When a RuleSet is applied, it operates on the initial selection set resulting from the query.
+                    Each RuleSet applied <b>replaces</b> the results of the previous RuleSet - they are not additive.
                     If you need to apply several rules to build the set of records you require, they should all
-                    be defined in one rule set.
+                    be defined in one RuleSet.
                 </p>
             </div>
 
 
             <div style="position:absolute;width:99%;height:2em;bottom:10px; text-align:right">
 
-                <button id="btn_save">Save Rule Set</button>
+                <button id="btn_save">Save RuleSet</button>
                 <!-- <button id="btn_apply">Apply Rules</button> -->
                 <button id="btn_help">Help</button>
             </div>

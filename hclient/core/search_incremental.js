@@ -1,5 +1,5 @@
 /**
-* Incremental search 
+* Incremental search
 * main request result is returned by chunks
 * then rules use parents results (by 1000) and return results by chunks also
 *
@@ -50,18 +50,18 @@ function hSearchIncremental() {
         _query_request = null,  //current search request - need for "AND" search in current result set
         _owner_doc = null,
         _owner_element_id = null;
-         
-         
-         
+
+
+
     /**
     * Initialization
     */
     function _init( ) {
     }
-    
+
     // search with callback
     function _doSearchWithCallback( request, callback ){
-        
+
         top.HAPI4.RecordMgr.search(request,
             function(response){
                 if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -72,12 +72,12 @@ function hSearchIncremental() {
                 }
             }
         );
-        
+
     }
-    
+
     function _doSearch( originator, request ){
 
-        
+
         if(originator){
             if(originator.document){
                 _owner_doc = originator.document;
@@ -90,10 +90,10 @@ function hSearchIncremental() {
             _owner_doc = null;
             _owner_element_id = null;
         }
-        
+
         _onSearchStart( request );
     }
-    
+
     //incremental search and rules
     //@todo - do not apply rules unless main search is finished
     //@todo - if search in progress and new rules are applied - stop this search and remove all linked data (only main search remains)
@@ -141,7 +141,7 @@ function hSearchIncremental() {
                          if(_rule_index>=_rules.length){
                              _rule_index = -1; //reset
                              _res_index = -1;
-                             
+
                              return false; //this is the end
                          }
 
@@ -149,7 +149,7 @@ function hSearchIncremental() {
                          //results from parent level
                          current_parent_ids = _rules[current_rule.parent].results;
 
-                         
+
                          //if we access the end of result set - got to next rule
                          if(_res_index >= current_parent_ids.length)
                          {
@@ -178,16 +178,16 @@ function hSearchIncremental() {
     }
 
     /**
-    * 
-    * 
+    *
+    *
     */
     function _searchCompleted( is_terminate ){
 
             if(_query_request!=null && is_terminate){
                 _query_request.id = top.HEURIST4.util.random();
             }
-            
-            if(!top.HEURIST4.util.isnull(_owner_doc)){ 
+
+            if(!top.HEURIST4.util.isnull(_owner_doc)){
                 if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0)
                     $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, [ top.HAPI4.currentRecordset ]); //global app event
                 else{
@@ -195,12 +195,12 @@ function hSearchIncremental() {
                 }
             }
     }
-    
+
     function _progressInfo(){
-        
+
             var progress_text = '';
             var progress_value = 0
-            
+
             // show current records range and total count
             if(top.HAPI4.currentRecordset && top.HAPI4.currentRecordset.length()>0){
 
@@ -233,7 +233,7 @@ function hSearchIncremental() {
                             //count of chunks of previous result set = number of queries
                             var res_steps_count = _rules[_rules[_rule_index].parent].results.length;
 
-                            s = "Applying rule set ";
+                            s = "Applying RuleSet ";
                             if(_rules.length>2) //more than 1 rule
                                s  = s + _rule_index+' of '+(_rules.length-1);
                             s = s + '. ';
@@ -258,10 +258,10 @@ function hSearchIncremental() {
 
             return {text:progress_text, value:progress_value};
         }
-        
-        
+
+
     }
-    
+
     /**
     * Rules may be applied at once (part of query request) or at any time later
     *
@@ -281,7 +281,7 @@ function hSearchIncremental() {
             var i;
             for (i=0;i<r_tree.length;i++){
                 var rule = { query: r_tree[i].query, results:[], parent:parent_index };
-                
+
                 flat_rules.push(rule);
                 __createFlatRulesArray(r_tree[i].levels, flat_rules.length-1);
             }
@@ -309,22 +309,22 @@ function hSearchIncremental() {
         _rules = flat_rules;
 
     }
-    
+
     //
     //
     //
     function _onSearchStart( request ){
-    
+
             if(request==null) return;
 
             if(top.HEURIST4.util.isnull(request.id)){ //unique id for request
                 request.id = top.HEURIST4.util.random();
-                
+
             }
             if(!top.HEURIST4.util.isnull(_owner_doc)){
-                $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
+                $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
             }
-        
+
             if(top.HEURIST4.util.isempty(request.topids)){ //topids not defined - this is not rules request
 
                  top.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
@@ -333,7 +333,7 @@ function hSearchIncremental() {
                  top.HAPI4.currentRecordset = null;
 
                  if(request.q!=''){
-                     
+
                         //reset counters and storages
                         _rule_index = -1; // current index
                         _res_index =  -1; // current index in result array (chunked by 1000)
@@ -343,22 +343,22 @@ function hSearchIncremental() {
                             //create flat rule array
                             _prepareRules(_query_request.rules);
                         }
-                        
+
                  }
             }
-        
+
             //reset rules parameter - since we search incrementally from client side
             request.rules = null;
             //perform search
-            top.HAPI4.RecordMgr.search(request, _onSearchResult); //$(_owner_doc)); 
-        
+            top.HAPI4.RecordMgr.search(request, _onSearchResult); //$(_owner_doc));
+
     }
-    
+
     //
     // apply rules to existed result set
     //
     function _doApplyRules( originator, rules ){
-        
+
                 if(rules){
 
                     //create flat rule array
@@ -384,12 +384,12 @@ function hSearchIncremental() {
                          _rule_index = -2;
                          _res_index = 0;
 
-                         /* @todo - move to 
+                         /* @todo - move to
                          this.div_search.css('display','none');
                          this.div_progress.width(this.div_search.width());
                          this.div_progress.css('display','inline-block');
                          */
-                         
+
                          //fake result search event
                          if(!top.HEURIST4.util.isnull(_owner_doc)){
                             $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
@@ -398,16 +398,16 @@ function hSearchIncremental() {
                          if(!_doSearchIncrement()){//start search rules
                             _searchCompleted( false );
                          }
-                         
+
                     } else if(!top.HEURIST4.util.isempty(_rules)){
                         return false;
                     }
                 }
                 return true;
     }
-    
+
     //
-    // callback function for search request 
+    // callback function for search request
     //
     function _onSearchResult(response){
             var resdata = null;
@@ -435,7 +435,7 @@ function hSearchIncremental() {
                             if(ruleindex==1 && !top.HEURIST4.util.isArrayNotEmpty(_rules[ruleindex].results) ){
                                 top.HAPI4.currentRecordset.setMainSet( Hul.cloneJSON(top.HAPI4.currentRecordset.getIds()) );
                             }
-                            
+
                             _rules[ruleindex].results.push(records_ids);
 
                             //unite
@@ -462,13 +462,13 @@ function hSearchIncremental() {
 
                 top.HEURIST4.msg.showMsgErr(response);
 
-                if(!top.HEURIST4.util.isnull(_owner_doc)){ 
-                    $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
+                if(!top.HEURIST4.util.isnull(_owner_doc)){
+                    $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );
                 }
             }
             if(!top.HEURIST4.util.isnull(_owner_doc)){
                 $(_owner_doc).trigger(top.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
-            }    
+            }
     }
 
     //public members
@@ -481,21 +481,21 @@ function hSearchIncremental() {
         doSearchWithCallback: function(request, callback){
             _doSearchWithCallback(request, callback);
         },
-        
+
        // originator - widget that initiated the search
         doSearch:function( originator, request ){
             _doSearch( originator, request );
         },
- 
+
         // apply rules to existing result set
         doApplyRules:function( originator, request ){
             return _doApplyRules( originator, request );
         },
-        
+
         doStop: function(){
             _searchCompleted( true );
         }
-        
+
     }
 
     _init( );

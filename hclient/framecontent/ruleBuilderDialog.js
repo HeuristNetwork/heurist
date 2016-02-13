@@ -1,5 +1,5 @@
 /**
-* ruleBuilderDialog.js:  Dialog elements for the rule set builder
+* ruleBuilderDialog.js:  Dialog elements for the RuleSet builder
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,7 +22,7 @@ function onPageInit(success) //callback function of hAPI initialization
 {
     if(success)  //system is inited
     {
-       
+
         var rules = top.HEURIST4.util.getUrlParameter('rules', window.location.search);
         if(!rules) rules = '[]'
         else rules = decodeURIComponent(rules);
@@ -49,17 +49,17 @@ function onPageInit(success) //callback function of hAPI initialization
             }
         });
 
-        //create rule sets builders in case there is parameter 'rules'
+        //create RuleSets builders in case there is parameter 'rules'
         if(!top.HEURIST4.util.isempty(rules)){
 
             if(!top.HEURIST4.util.isArray(rules)) rules = $.parseJSON(rules);
             var i;
             for(i=0; i<rules.length; i++){
 
-                $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule sets builder for level 1
+                $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add RuleSets builder for level 1
                     rules: rules[i],
                     onremove: function(event, data){
-                        $('#'+data.id).remove();    //remove this rule sets builder
+                        $('#'+data.id).remove();    //remove this RuleSets builder
 
                     }
                 }).insertBefore($('#div_add_level'));
@@ -79,9 +79,9 @@ function onPageInit(success) //callback function of hAPI initialization
 // add first level (init ruleBuilder widget)
 //
 function addLevel(){
-    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add rule sets builder for level 1
+    $("<div>").addClass('level1').uniqueId().ruleBuilder({level:1,     //add RuleSets builder for level 1
         onremove: function(event, data){
-            $('#'+data.id).remove();    //remove this rule sets builder
+            $('#'+data.id).remove();    //remove this RuleSets builder
         }
     }).insertBefore($('#div_add_level'));
 }

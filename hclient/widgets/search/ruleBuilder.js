@@ -204,7 +204,7 @@ $.widget( "heurist.ruleBuilder", {
             rules: rules,
             init_source_rt: this._getTargetRt(),
             onremove: function(event, data){      //not used
-                $('#'+data.id).remove();    //remove this rule sets builder
+                $('#'+data.id).remove();    //remove this RuleSets builder
         } }).appendTo(this.element);
 
         //disable itself
