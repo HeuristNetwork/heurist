@@ -338,18 +338,18 @@ top.HEURIST4.util = {
         switch (type) {
             case "p":
             case "point":
-                matches = wkt.match(/POINT\((\S+)\s+(\S+)\)/i);
+                matches = wkt.match(/POINT\s?\((\S+)\s+(\S+)\)/i);
                 break;
 
             case "c":  //circle
             case "circle":
-                matches = wkt.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+                matches = wkt.match(/LINESTRING\s?\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
                 break;
 
             case "l":  //polyline
             case "polyline":
             case "path":
-                matches = wkt.match(/LINESTRING\((.+)\)/i);
+                matches = wkt.match(/LINESTRING\s?\((.+)\)/i);
                 if (matches){
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
                 }
@@ -361,7 +361,7 @@ top.HEURIST4.util = {
                 //break;
             case "pl": //polygon
             case "polygon":
-                matches = wkt.match(/POLYGON\(\((.+)\)\)/i);
+                matches = wkt.match(/POLYGON\s?\(\((.+)\)\)/i);
                 if (matches) {
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
                 }

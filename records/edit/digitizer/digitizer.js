@@ -1961,25 +1961,25 @@ function loadParameters(val) {
 
   switch (type) {
     case "p":
-      matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
+      matches = value.match(/POINT\s?\((\S+)\s+(\S+)\)/i);
       break;
     case "r":  //rectangle
-      matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
+      matches = value.match(/POLYGON\s?\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
       break;
 
     case "c":  //circle
-      matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+      matches = value.match(/LINESTRING\s?\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
       break;
 
     case "l":  ///polyline
-    matches = value.match(/LINESTRING\((.+)\)/i);
+    matches = value.match(/LINESTRING\s?\((.+)\)/i);
     if (matches){
       matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
     }
     break;
 
     case "pl": //polygon
-    matches = value.match(/POLYGON\(\((.+)\)\)/i);
+    matches = value.match(/POLYGON\s?\(\((.+)\)\)/i);
     if (matches) {
       matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
     }

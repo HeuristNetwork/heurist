@@ -803,14 +803,14 @@ class BibDetailUrlIncludeInput extends BibDetailInput {
 }
 class BibDetailGeographicInput extends BibDetailInput {
     function convertPostToMysql($postVal) {
-        if (preg_match("/^(p(?= point)|r(?= polygon)|[c](?= linestring)|[l](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
+        if (preg_match("/^(p(?= point)|r(?= polygon)|[c](?= linestring)|[l](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\\s?\\(?\\([-0-9.+, ]+?\\)\\)?)$/i", $postVal, $matches)) {
             return array("dtl_Value" => $matches[1], "dtl_Geo" => array("geomfromtext(\"" . $matches[2] . "\")"));
         } else
             return array();
     }
     function inputOK($postVal, $dtyID, $rtyID) {
-        if (! preg_match("/^(p point|r polygon|cl linestring|l linestring)\\(?\\(([-0-9.+, ]+?)\\)\\)?$/i", $postVal, $matches)) {
-            if (! preg_match("/^(pl polygon)\\(\\(([-0-9.+, ]+?)\\)(?:,\\([-0-9.+, ]+?\\))?\\)$/i", $postVal, $matches)) {
+        if (! preg_match("/^(p point|r polygon|cl linestring|l linestring)\\s?\\(?\\(([-0-9.+, ]+?)\\)\\)?$/i", $postVal, $matches)) {
+            if (! preg_match("/^(pl polygon)\\s?\\(\\(([-0-9.+, ]+?)\\)(?:,\\([-0-9.+, ]+?\\))?\\)$/i", $postVal, $matches)) {
                 return false;	// illegal value
             }
         }

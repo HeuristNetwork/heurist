@@ -224,7 +224,7 @@ if (!$error && isset($_REQUEST["start"]))
   else
     $curfilename="";
 
-error_log($curfilename);    
+//DEBUG error_log($curfilename);    
     
 // Recognize GZip filename
   $gzipmode=false;

@@ -327,7 +327,7 @@ function save() {
     alert("No value found, please enter a field value to add");
     return;
   }
-  match = value.match(/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\(?\([-0-9.+, ]+?\)\)?)$/i);
+  match = value.match(/^(p(?= point)|r(?= polygon)|[cl](?= linestring)|pl(?= polygon)) ((?:point|polygon|linestring)\s?\(?\([-0-9.+, ]+?\)\)?)$/i);
   if (match && match[2]) {
     value = match[1];
     wkt = match[2];
