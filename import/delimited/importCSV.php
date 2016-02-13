@@ -1538,8 +1538,8 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
         $filename = str_replace("\\","\\\\",$filename);
     }
 
-    //load file into table
-    $query = "LOAD DATA LOCAL INFILE'".$filename."' INTO TABLE ".$import_table
+    //load file into table  LOCAL
+    $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
     ." CHARACTER SET UTF8"
     ." FIELDS TERMINATED BY '".$csv_delimiter."' "
     ." OPTIONALLY ENCLOSED BY '".$csv_enclosure."' "
@@ -1549,7 +1549,7 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
 
 
     if (!$mysqli->query($query)) {
-        return 'Unable to import data. MySQL command: "$query" returns error: '.$mysqli->error;
+        return 'Unable to import data. MySQL command: "'.$query.'" returns error: '.$mysqli->error;
     }
 
     $warnings = array();

@@ -151,7 +151,20 @@ function mysqli_connection_overwrite($database = '', $server = HEURIST_DBSERVER_
         print "PLEASE SET USERNAME/PASSWORD for OVERWRITE in configIni.php\n";
         exit(2);
     }
-    $mysqli = new mysqli($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);
+    
+    /*
+    $mysqli = mysqli::init();
+    mysqli::options(MYSQLI_OPT_LOCAL_INFILE, true);
+    mysqli::real_connect($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);*/
+        
+    $mysqli = mysqli_init();
+    mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, 1);
+    if(!mysqli_real_connect($mysqli, $server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database)){
+        printf("An error occurred trying to contact the database: %s\n", mysqli_connect_error());
+        die(mysqli_connect_error());
+    }
+    
+    //$mysqli = new mysqli($server, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $database);
     /* check connection */
     if (mysqli_connect_errno()) {
         printf("An error occurred trying to contact the database: %s\n", mysqli_connect_error());
