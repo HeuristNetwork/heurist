@@ -134,7 +134,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             dataType: "json",
             cache: false,
             error: function( jqXHR, textStatus, errorThrown ) {
-                
+
                 err_message = (top.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
                 var response = {status:top.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
                 //_processerror(response);
@@ -278,7 +278,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'save_prefs';
                 _callserver('usr_info', request, callback);
             }
-            
+
             /**
             * Returns detailed description of groupfs for current user
             *
@@ -364,7 +364,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   remove    - delete record
     *
     *   details   - batch edition of record details for many records
-    * 
+    *
     *   search
     *   minmax
     *   get
@@ -424,12 +424,12 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'd';
                 _callserver('record_edit', request, callback);
             }
-            
+
             /**
             * Batch edition of record details
             *
             * @param request a: add,replace,delete
-            *               
+            *
             * recIDs - list of records IDS to be processed
             * rtyID - optional filter by record type
             * dtyID  - detail field to be added
@@ -437,7 +437,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             * for replace: sVal - search value, rVal - replace value
             * for delete:  sVal - search value
             * tag 0|1  - add system tag to mark processed records
-            * 
+            *
             * @param callback
             */
             ,details: function(request, callback){
@@ -652,19 +652,19 @@ function hAPI(_db, _oninit) { //, _currentUser
     * @returns {Object}
     */
     function hEntityMgr(){
-        
+
         var entity_configs = {};
         var entity_data = {};
-        
+
         var that = {
-            
+
             //load entity configuration file
             getEntityConfig:function(entityName, callback){
-                   
+
                 if(entity_configs[entityName]){
                     callback(entity_configs[entityName]);
                 }else{
-                    _callserver('entityScrud', {a:'config', 'entity':entityName}, 
+                    _callserver('entityScrud', {a:'config', 'entity':entityName},
                        function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
                                 entity_configs[response.data.entityName] = response.data;
@@ -673,16 +673,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                                 top.HEURIST4.msg.showMsgErr(response);
                             }
                        }
-                    
+
                     );
                 }
             },
-            
+
             //load entire entity data and store it in cache (applicable for entities with count < ~1500)
             getEntityData:function(entityName, force_reload, callback){
-                   
+
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
-                    _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'}, 
+                    _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
                        function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);
@@ -691,28 +691,28 @@ function hAPI(_db, _oninit) { //, _currentUser
                                 top.HEURIST4.msg.showMsgErr(response);
                             }
                        }
-                    
+
                     );
                 }else{
                     if($.isFunction(callback)){
-                        callback(entity_data[entityName]);  
+                        callback(entity_data[entityName]);
                     }else{
                         //if user sure that data is already on client side
-                        return entity_data[entityName];  
+                        return entity_data[entityName];
                     }
                 }
             },
-            
+
             doRequest:function(request, callback){
                 //todo - verify basic params
-                
+
                 _callserver('entityScrud', request, callback);
             }
         }
         return that;
     }
-    
-    
+
+
     //public members
     var that = {
 
@@ -808,40 +808,40 @@ function hAPI(_db, _oninit) { //, _currentUser
         get_prefs: function(name){
             if( !that.currentUser['ugr_Preferences'] ) {
                 //preferences by default
-                that.currentUser['ugr_Preferences'] = {layout_language:'en', 
-                                         layout_theme: 'heurist', 
+                that.currentUser['ugr_Preferences'] = {layout_language:'en',
+                                         layout_theme: 'heurist',
                                 'search_detail_limit': 2000, 'help_on':'0'};
             }
             if(top.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];
             }else{
                 var res = that.currentUser['ugr_Preferences'][name];
-                
+
                 //take from old set
                 if(top.HEURIST4.util.isnull(res) && top.HEURIST && top.HEURIST.displayPreferences){
                     res = top.HEURIST.displayPreferences[name];
                 }
-                
+
                 if('search_detail_limit'==name){
                     if(!res && res<500 ) res = 500
-                    else if(res>30000 ) res = 3000;  
-                } 
+                    else if(res>30000 ) res = 3000;
+                }
                 return res;
             }
         },
-        
+
         //
         // limit - to save limited list of ids - for example: last selected tags
         //
         save_pref: function(name, value, limit){
                 //top.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
-                
+
                 if($.isArray(value) && limit>0) {
                         value = value.slice(0,limit);
-                        
+
                         var cur_value = top.HAPI4.get_prefs(name);
                         cur_value = (cur_value?cur_value.split(','):null);
-                        
+
                         if($.isArray(cur_value)){
                             var to_remove = Math.min(limit, value.length);
                             cur_value = cur_value.slice(0, to_remove);
@@ -849,10 +849,10 @@ function hAPI(_db, _oninit) { //, _currentUser
                         }
                         value = value.join(',');
                 }
-                
+
                 var request = {};
                 request[name] = value;
-                
+
                 top.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -872,7 +872,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         // main result set that is filled in search_minimal - keeps all
         // purposes:
-        // 1) to keep main set of records (original set) to apply rules set
+        // 1) to keep main set of records (original set) to apply RuleSet
         // 2) to get selected records by ids
         // 3) to pass result set into popup record action dialogs
         currentRecordset: null,
@@ -892,7 +892,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         },*/
 
         RecordMgr: new hRecordMgr(),
-        
+
         EntityMgr: new hEntityMgr(),
 
         //@todo - assign it later since we may have different search managers - incremental, partial...

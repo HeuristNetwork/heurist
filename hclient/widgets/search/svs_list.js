@@ -36,7 +36,7 @@ $.widget( "heurist.svs_list", {
     treeviews:{},
 
     _HINT_RULESET:'It does not perform the search. However it applies rules to current result set and  expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
-    _HINT_WITHRULES:'Searches with addition of a Rule Set automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
+    _HINT_WITHRULES:'Searches with addition of a RuleSet automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
     _HINT_FACETED:'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields',
 
 
@@ -174,7 +174,7 @@ $.widget( "heurist.svs_list", {
 
             +'<div style="font-style:italic;" title="'+this._HINT_RULESET+'">'
             +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;Rules set</div>';
+            +'&nbsp;RuleSet</div>';
 
             this.helper_btm = $( '<div>'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
@@ -439,7 +439,7 @@ $.widget( "heurist.svs_list", {
     _getAddContextMenu: function(groupID){
         var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" },
             {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
-            {title: "New rules set", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
+            {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
             {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }];
 
         var that = this;
@@ -775,7 +775,7 @@ $.widget( "heurist.svs_list", {
 
                         case "addSearch":  //add new saved search
                         case "addSearch2": //add new faceted search
-                        case "addSearch3": //add new rules set
+                        case "addSearch3": //add new RuleSet
 
                             that.editSavedSearch( (data.cmd=="addSearch2")?'faceted':((data.cmd=="addSearch3")?'rules':'saved')
                                 , groupID, null, null, node);
@@ -875,8 +875,8 @@ $.widget( "heurist.svs_list", {
                 delegate: "li", //span.fancytree-node
                 menu: [
                     {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
-                    {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
-                    {title: "New rules set", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
+                    {title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
+                    {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
                     {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
                     {title: "----"},
                     {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
@@ -1173,7 +1173,7 @@ $.widget( "heurist.svs_list", {
 
                 var request = Hul.parseHeuristQuery(qsearch);
 
-                //query is not defenied, but rules are - this is pure rule set - apply it to current result set
+                //query is not defenied, but rules are - this is pure RuleSet - apply it to current result set
                 if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
 
                     if(this.currentSearch){
@@ -1182,7 +1182,7 @@ $.widget( "heurist.svs_list", {
 
                     //target is required
                     if(! top.HAPI4.SearchMgr.doApplyRules( this, request.rules ) ){
-                        top.HEURIST4.msg.showMsgFlash(top.HR('Rule sets require an initial search result as a starting point.'),
+                        top.HEURIST4.msg.showMsgFlash(top.HR('RuleSets require an initial search result as a starting point.'),
                             3000, top.HR('Warning'), ele);
                     }
 

@@ -13,7 +13,7 @@
                 <h4>Predicates</h4>
                 <p style="padding-bottom:1em">
                     Predicate is base element of query. It consists of search token (what to search) and search value.
-                    
+
                     <br/>Examples
                     <exp>
                         JSON:
@@ -21,12 +21,12 @@
                         {"f:103":"Find me!"}
                         {"likedto:90":[{"ids":987,443,543}]}
                         {"related_to:2098":"987,443,543"}
-                        
+
                         Plain text
                         t:25
                     </exp>
                 </p>
-                
+
                 <h4>Search tokens</h4>
                 <p style="padding-bottom:1em">
                     Possible <b>tokens</b> are:
@@ -39,10 +39,10 @@
                         <li>date, modified:  edition date</li>
                         <li>after, since, before: aliases for added:&gtdate and added&lt;date</li>
 
-                        <li></li>                            
+                        <li></li>
                         <li>addedby: added by specified user (`rec_AddedByUGrpID`)</li>
                         <li>owner,workgroup,wg: owner of record (`rec_OwnerUGrpID`)</li>
-                            
+
                         <li></li>
                         <li>tag, keyword, kwd: tag name (`usrtags`.`tag_Text`)</li>
                         <li>user, usr: bookmarked by user (`usrbookmarks`.`bkm_UGrpID`)</li>
@@ -53,7 +53,7 @@
                         <li>linked_to,linkedfrom,related_to,relatedfrom,links: various link predicates</li>
                     </ul>
 
-                    Note: for "field" and "links" token is combination of token name and field or relation type identificator. For example: 
+                    Note: for "field" and "links" token is combination of token name and field or relation type identificator. For example:
                     <ul>
                         <li>linked_to:90 - linked via field #90 </li>
                         <li>relatedfrom:2340 - related via relation type (term) #2340</li>
@@ -62,31 +62,31 @@
                 <h4>Searh values</h4>
 
                 <p style="padding-bottom:1em">
-                    Value for predicates and comparison depend on type of data it may contain. 
+                    Value for predicates and comparison depend on type of data it may contain.
                     <table>
                         <th>
                             <td>Type</td><td>Predicates</td><td>Comparison</td><td>Example</td>
                         </th>
                         <tr>
                             <td>Identificator</td><td>t, ids, usr, addedby, owner </td><td></td><td></td>
-                        </tr>                    
+                        </tr>
                         <tr>
                             <td>Text</td><td>url,notes,title,tag,<br>fields of type freetext,memo</td><td></td><td></td>
-                        </tr>                    
+                        </tr>
                         <tr>
                             <td>Numeric</td><td>url,notes,title,tag,<br>fields of type freetext,memo</td><td></td><td></td>
-                        </tr>                    
-                    
+                        </tr>
+
                     </table>
                 </p>
                 <p style="padding-bottom:1em">
-                    <b>Rule Sets</b> may contain several rules....
+                    <b>RuleSets</b> may contain several rules....
                 </p>
                 <p style="padding-bottom:1em">
-                    When a rule set is applied, it operates on the...
-                </p>            
-            
-            
+                    When a RuleSet is applied, it operates on the...
+                </p>
+
+
         </div>
 
     </body>

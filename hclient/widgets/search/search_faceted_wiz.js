@@ -313,7 +313,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                         $dlg.find("#svs_Rules_edit")
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
-                        .attr('title', top.HR('Edit Rule Set'))
+                        .attr('title', top.HR('Edit RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
                         .click(function( event ) {
                             //that.
@@ -322,7 +322,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                         $dlg.find("#svs_Rules_clear")
                         .button({icons: {primary: "ui-icon-close"}, text:false})
-                        .attr('title', top.HR('Clear Rule Set'))
+                        .attr('title', top.HR('Clear RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
                         .click(function( event ) {
                             $dlg.find('#svs_Rules').val('');

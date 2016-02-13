@@ -39,7 +39,7 @@ $blankServer = (HEURIST_DBNAME==''); //@todo check exxistense of other databases
 // must be logged in anyway to define the master user for the database
 if (!($blankServer || is_logged_in())) {
     $spec_case = "";
-    if(HEURIST_DBNAME=='Heurist_Sandpit'){
+    if(HEURIST_DBNAME=='Heurist_Sandpit'){ // the sandpit is no longer used (from late 2015)
         //special case - do not show database name
         $spec_case = "&register=1";
     }
@@ -69,11 +69,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
     //create email text for admin
     $email_text =
     "There is new Heurist database.\n".
-    "The user who creates new database is:\n".
+    "The user who created the new database is:\n".
     "Database name: ".$newDatabaseName."\n".
     "Full name:    ".$ugr_FullName."\n".
     "Email address: ".$ugr_eMail."\n".
     "Organisation:  ".$ugr_Organisation."\n".
+    "Research interests:  ".$ugr_Interests."\n".
     "Go to the address below to review further details:\n".
     HEURIST_BASE_URL."admin/adminMenu.php?db=".$newDatabaseName;
 
@@ -169,8 +170,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         //restore use registration parameters in case creation fails
                         foreach ($_REQUEST as $param_name => $param_value){
                             if(strpos($param_name,'ugr_')===0 && $param_name!='ugr_Password'){
-//print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
-                                   print "edit_data['$param_name'] = '$param_value';";
+                                //print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
+                                print "edit_data['$param_name'] = '$param_value';";
                             }
                         }
                         ?>
@@ -205,7 +206,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
             <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
             <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-            <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
+            <!-- already referenced above <link rel="stylesheet" type="text/css" href="../../../h4styles.css"> -->
             <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
             <?php
         }
@@ -263,7 +264,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             }
 
 
-            // does a simple word challenge to allow admin to globally restrict new database creation
+            // does a simple word challenge (if set) to allow admin to globally restrict new database creation
             function challengeForDB(){
                 var pwd_value = document.getElementById("pwd").value;
                 if(pwd_value==="<?=$passwordForDatabaseCreation?>"){
@@ -274,7 +275,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 }
             }
 
-            //allow only alphnumeric characters for db name
+            //allow only alphanumeric characters for db name
             function onKeyPress(event){
 
                 event = event || window.event;
@@ -322,7 +323,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         regurl = reginfo[1];
                         // Backwards compatibility for dbs originally registered with h3
                         if(regurl=='http://heurist.sydney.edu.au/h3/'){
-                            regurl = 'http://heurist.sydney.edu.au/h4/';
+                            regurl = 'http://heurist.sydney.edu.au/heurist/';
                         }
 
                         //url + script + db
@@ -341,6 +342,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 showProgress(true);
                 return true;
             }
+
 
             //
             // get list of all registered databases to allow new database to be based on an existing database
@@ -361,8 +363,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
                 var params = "db=<?=HEURIST_INDEX_DBNAME?>";   // &named=1&excluded=dbid
                 top.HEURIST.util.getJsonData(baseurl,
-                //top.HEURIST.database.name
-                
+                    //top.HEURIST.database.name
+
                     // fillRegisteredDatabasesTable
                     function(responce){
 
@@ -458,21 +460,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 $isDefineNewDatabase = false;
                 $isTemplateDB = ($_REQUEST['dbtype']=='1');
 
-                /* TODO: verify that database name is unique - currently rather ugly error trap
-                $list = mysql__getdatabases();
-                $dbname = $_REQUEST['uname']."_".$_REQUEST['dbname'];
-                if(array_key_exists($dbname, $list)){
-                echo "<h3>Database '".$dbname."' already exists. Please choose different name</h3>";
-                }else{
-                */
 
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 // *****************************************
-                //
 
-
-                makeDatabase(); // this does all the work
+                makeDatabase($dataInsertionSQLFile); // this does all the work
 
                 // *****************************************
 
@@ -480,6 +473,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             }
 
             print '<script type="text/javascript">hideProgress();</script>';
+
+            $dataInsertionSQLFile = ""; // normal case is not to insert any data
 
             if($isDefineNewDatabase){
                 ?>
@@ -507,12 +502,20 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 class="labelBold" style="padding-left: 2em;">Standard database template</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
                                 Gives an uncluttered database with essential record types, fields,
-                                terms and relationships, including bibliographic and spatial entities.<br />
+                                terms and relationships, including bibliographic and spatial entities.
                                 Recommended for most new databases unless you wish to copy a particular template (next option).
                             </div>
 
-                            <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
+                            <!-- Added training database 12 Feb 2016 -->
+                            <input type="radio" name="dbtype" value="2" id="rb3"
+                                onclick="{$('#registered_dbs').hide()}"/><label for="rb3"
+                                class="labelBold" style="padding-left: 2em;">Example database (Shakespeare)</label>
+                            <div style="padding-left: 38px;padding-bottom:10px;width:600px">
+                                A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
+                                Use this database as a starting point for becoming familiar with Heurist (See <a href="http://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
+                            </div>
 
+                            <!-- 7 July 2015: Replaced HuNI & FAIMS inbuilt templates with access to registered databases as templates -->
                             <input type="radio" name="dbtype" value="1" id="rb2" onclick="getRegisteredDatabases()"/><label for="rb2"
                                 class="labelBold"  style="padding-left: 2em;">Use a registered database as template</label>
                             <div style="padding-left: 38px;width:600px">
@@ -555,6 +558,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                         value=<?=(is_logged_in()?prepareDbName():'')?>
                                         >
                                 </b>
+                                -
                                 <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
                                 <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
                                 <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
@@ -571,9 +575,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             <button id="btnRegister" style="font-weight: bold;" />
                         </div>
                         <div style="padding-left: 38px; margin-top: 20px; margin-bottom: 20px;">
-                            Please register in order to define the user who will become the database owner and administrator.</br><br/>
+                            Please register in order to define the user who will become the database owner and administrator.<br>/<br/>
                             If you are already a user of another database on this server, we suggest logging into that database (<a href="../../../index.php">select database here</a>)<br/>
-                            and creating your new database with Database > New Database, as this will carry over your login information from the existing database.
+                            and creating your new database with Database &gt; New Database, as this will carry over your login information from the existing database.
                         </div>
                     </div>
 
@@ -624,7 +628,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 return @$_REQUEST[$name]?mysql_real_escape_string($_REQUEST[$name]):'';
             }
 
-            function makeDatabase() { // Creates a new database and populates it with triggers, constraints and core definitions
+
+
+            // Creates a new database and populates it with triggers, constraints and core definitions
+            // if $dataInsertionSQLFile is set, also inserts data (used for Example database(s))
+
+            function makeDatabase($dataInsertionSQLFile) {
 
                 global $newDBName, $isNewDB, $done, $isDefineNewDatabase, $isTemplateDB, $errorCreatingTables;
 
@@ -661,7 +670,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         $name = getUsrField('ugr_Name');
                         $password = getUsrField('ugr_Password');
                         if($firstName=='' || $lastName=='' || $eMail=='' || $name=='' || $password==''){
-                            errorOut('Mandatory data for your registration profile are not completed. Please fill registration form');
+                            errorOut('Mandatory data for your registration profile (first and last name, email, password) are not completed. Please fill out registration form');
                             $isDefineNewDatabase = true;
                             return false;
                         }
@@ -682,19 +691,18 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         return false;
                     }
 
-                    //get path registered db template and download coreDefinitions.txt
+                    //get path to registered db template and download coreDefinitions.txt
                     $reg_url = @$_REQUEST['url_template'];
 
-                    //debug print $reg_url."</br>";
                     $name = '';
 
-                    if(true){ //DEBUG: set to false to avoid real database creation
+                    if(true){ // For debugging: set to false to avoid real database creation
+
                         // this is global variable that is used in buildCrosswalks.php
                         $templateFileName = "NOT DEFINED";
                         $templateFoldersContent = "NOT DEFINED";
 
-
-                        if($reg_url){
+                        if($reg_url){ // getting definitions from an external registered database
 
                             $nouse_proxy = true;
 
@@ -752,15 +760,15 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                                 $res = file_put_contents ( $templateFoldersContent, $data );
                                 if(!$res){
-                                    errorOut ('Warning: cannot save content of settting folders from template database into local file. '
+                                    errorOut ('Warning: cannot save content of settings folders from template database into local file. '
                                         .' Please verify that folder '
                                         .(defined('HEURIST_SETTING_DIR')?HEURIST_SETTING_DIR:HEURIST_UPLOAD_ROOT)
                                         .' is writeable');
                                     return false;
                                 }
                             }else{
-                                errorOut ('Warning: server does not return the content of settting folders from template database. '
-                                    .'Please verify that zip extension on remote server is installed and upload folder is writeable');
+                                errorOut ('Warning: server does not return the content of settings folders from template database. '
+                                    .'Please ask system adminstrator to verify that zip extension on remote server is installed and that upload folder is writeable');
                                 return false;
                             }
 
@@ -775,7 +783,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         }
 
                         if(!file_exists($templateFileName)){
-                            errorOut('Error: definitions file '.$templateFileName.' not found');
+                            errorOut('Error: template database structure file '.$templateFileName.' not found');
                             return false;
                         }
 
@@ -877,8 +885,15 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         // TODO: error check, although this is unlikely to fail
 
 
+                        if ($dataInsertionSQLFile) { // insert data from SQL file for example database
+
+                            // TODO 13 feb 2016: insert data from chosen SQL file in /admin/setup/dbcreate
+
+                        };
+
+
                         user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName);
-                    } //DEBUG
+                    }
 
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
