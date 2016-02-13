@@ -7,7 +7,7 @@
 --        3. import core content (minimal database definitions) from
 --           admin/setup/dbcreate/coreDefinitions.txt
 
--- The next section of this file is a PHPMyAdmin dump of H3 database structure
+-- The next section of this file is a PHPMyAdmin dump of database structure
 -- DO NOT include referential integrity or triggers/procedures. Turn off use of
 -- backquotes, auto increment value and dumping of actual data
 
