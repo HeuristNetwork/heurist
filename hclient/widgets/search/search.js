@@ -123,7 +123,7 @@ $.widget( "heurist.search", {
         this.div_search_as_user2 = $('<div>')
         .addClass('div-table-cell logged-in-only')
         .appendTo( this.div_search );
-        
+
         this.btn_search_save = $( "<button>", {
             text: top.HR("Save Filter"),
             title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
@@ -232,7 +232,7 @@ $.widget( "heurist.search", {
         .button({icons: {
             primary: "ui-icon-triangle-1-s"
             }, text:false});
-            
+
 
         this.div_search_as_user.buttonset();
 
@@ -277,8 +277,8 @@ $.widget( "heurist.search", {
             .addClass('logged-in-only')
             .css({'float': 'right', 'padding': '23px 23px 0 0'})
             .appendTo( this.element );
-    
-                        
+
+
             /* in case we need place it along with other elements
             .addClass('div-table-cell  logged-in-only')
             .css('padding-left','4em')
@@ -301,7 +301,7 @@ $.widget( "heurist.search", {
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
-        .css({'text-align': 'center', 'width':'50px'}) // 'width': '56px', 
+        .css({'text-align': 'center', 'width':'50px'}) // 'width': '56px',
         .insertBefore( this.div_search_as_guest );
 
         // Quick search builder dropdown form
@@ -320,29 +320,29 @@ $.widget( "heurist.search", {
 
         /*var link = $('<button>')
         .button({icons: {
-            primary: 'ui-icon-circle-b-info'
-            }, text:false,
-            label:'Show syntax and examples of the Heurist query/filter language',
-            title:'Help for queries'})
+        primary: 'ui-icon-circle-b-info'
+        }, text:false,
+        label:'Show syntax and examples of the Heurist query/filter language',
+        title:'Help for queries'})
         .addClass('ui-heurist-btn-header1')
         .css({'padding-right':'1em','width':'22px'})
         .appendTo(this.div_search_header);
         this._on( link, {  click: function(){
-            window.open('context_help/advanced_search.html','_blank');
+        window.open('context_help/advanced_search.html','_blank');
         } });*/
         this.div_buttons = $('<div>')
         .addClass('div-table-cell')
-        .css({'text-align': 'center','width': '20px'}) // , 
+        .css({'text-align': 'center','width': '20px'}) // ,
         .insertBefore( this.div_search_as_guest );
 
         var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
-            .css({'padding-right':'1.5em','display':'inline-block'})
-            .addClass('ui-icon ui-icon-circle-info')
-            .appendTo(this.div_buttons);
-            this._on( link, {  click: function(){
-                window.open('context_help/advanced_search.html','_blank');
-            } });
-        
+        .css({'padding-right':'1.5em','display':'inline-block'})
+        .addClass('ui-icon ui-icon-circle-info')
+        .appendTo(this.div_buttons);
+        this._on( link, {  click: function(){
+            window.open('context_help/advanced_search.html','_blank');
+        } });
+
         this.search_assistant = null;
 
         if(this.options.isrectype){
@@ -451,7 +451,7 @@ $.widget( "heurist.search", {
     },
 
     _showAdvancedAssistant: function(){
-        //call H3 search builder
+        //call Heurist vsn 3 search builder
         var q = "",
         that = this;
         if(this.input_search.val()!='') {
@@ -502,7 +502,7 @@ $.widget( "heurist.search", {
             }else if(data==null){
                 that.input_search.val('');
             }
-            
+
             //ART that.div_search.css('display','none');
 
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
@@ -511,7 +511,7 @@ $.widget( "heurist.search", {
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             top.HEURIST4.util.setDisabled(this.input_search, false);
-            
+
             //ART that.div_search.css('display','inline-block');
 
         }

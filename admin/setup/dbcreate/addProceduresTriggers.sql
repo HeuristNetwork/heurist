@@ -3,16 +3,14 @@
 -- 2013-05-13 Arjen Lentz - added replacement functions for levenshtein.c and liposuction.c UDFs
 
 
--- This file contains the stored procedures and triggers for h3 databases
+-- This file contains the stored procedures and triggers for Heurist databases
 
--- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/html/h3-xx WITH:
+-- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/html/h4-xx WITH:
 --   mysql -u root -ppassword hdb_databasename < admin/setup/dbcreate/addProceduresTriggers.sql
 -- Note: this file cannot be run in PHPMySQL because it doesn't recognise the delimiter changes
 
 -- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TO OUTPUT FILE
 -- AND INSPECT
-
--- Updated to new H3 magic numbers for relationshiop records (type 1, with details 4, 5 and 7)
 
 -- Stored Procedures
 -- ------------------------------------------------------------------------------
@@ -296,108 +294,108 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `getTemporalDateString`(strDate varch
 		end if;
 		set @temporalType = SUBSTRING(strDate,@iBegin,1);
 		CASE @temporalType
-			WHEN 's' THEN 
+			WHEN 's' THEN
 -- Simple Date
 				begin
 					set @iBegin := INSTR(strDate,'DAT=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'f' THEN 
+			WHEN 'f' THEN
 -- Fuzzy Date
 				begin
 					set @iBegin := INSTR(strDate,'DAT=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'c' THEN 
+			WHEN 'c' THEN
 -- Carbon14 Date
 				begin
 					set @iBegin := INSTR(strDate,'BPD=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						set @iBegin := INSTR(strDate,'BCE=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
 						end;
 					end if;
 				end;
-			WHEN 'p' THEN 
+			WHEN 'p' THEN
 -- Probable Date
 				begin
 					set @iBegin := INSTR(strDate,'TPQ=');
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no TPQ field try PDB
 						set @iBegin := INSTR(strDate,'PDB=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no PDB field try PDE
 						set @iBegin := INSTR(strDate,'PDE=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no PDE field try TAQ
 						set @iBegin := INSTR(strDate,'TAQ=');
 					end if;
-					if @iBegin = 0 THEN 
+					if @iBegin = 0 THEN
 -- no Date field send empty string
 						RETURN '';
 					else
 						set @iBegin := @iBegin + 4;
 					end if;
 					set @iEnd := LOCATE('|', strDate, @iBegin);
-					if @iEnd = 0 THEN 
+					if @iEnd = 0 THEN
 -- no other properties so goto end of string
 						begin
 							set @dateString =  substring(strDate,@iBegin);
 						end;
-					else	
+					else
 -- use iEnd to calc substring length
 						begin
 							set @dateString =  substring(strDate,@iBegin, @iEnd - @iBegin);
@@ -637,7 +635,7 @@ DELIMITER $$
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
-		end if;     
+		end if;
 -- if change the records type from relation to something else remove cache value
 --		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 	    if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then

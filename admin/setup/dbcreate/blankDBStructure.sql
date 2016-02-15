@@ -34,7 +34,7 @@
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
--- Database: 'hdb_H3CoreDefinitions'
+-- Database: 'hdb_HeuristCoreDefinitions'
 --
 
 -- --------------------------------------------------------
@@ -923,7 +923,6 @@ CREATE TABLE woots (
   VALUES (1,0,1,1,0,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
-  --       This reflects the actual state of the database structure in H3CORECLONE which was pasted in here
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
 
 -- These are critical to the working of the definitions caching system, without these

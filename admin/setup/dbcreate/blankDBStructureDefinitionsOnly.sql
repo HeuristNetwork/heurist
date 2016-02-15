@@ -50,7 +50,7 @@
 -- Server version: 5.0.51
 -- PHP Version: 5.2.3
 --
--- Database: 'hdb_H3CoreDefinitions'
+-- Database: 'hdb_HeuristCoreDefinitions'
 --
 
 -- --------------------------------------------------------

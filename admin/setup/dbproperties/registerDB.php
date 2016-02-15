@@ -260,14 +260,13 @@ if($sError){
                 $usrPassword = rawurlencode($usrPassword);
                 $dbDescriptionEncoded = rawurlencode($dbDescription);
 
-                // TODO: New URL should be active July 2014 when H3 on HeuristScholar.org updated to 3.1.8
                 $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" .
                 "?db=Heurist_Master_Index&dbReg=" . $heuristDBname . "&dbVer=" . HEURIST_DBVERSION .
                 "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
-                "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName . 
+                "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName .
                 "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
                 ."&serverURL=" . rawurlencode($serverURL);
-                
+
                 $data = loadRemoteURLContent($reg_url);
 
 

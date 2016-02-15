@@ -124,13 +124,13 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
         if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
-            $url = HEURIST_BASE_URL."/hserver/controller/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call h4
+            $url = HEURIST_BASE_URL."/hserver/controller/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=heurist"; //call heurist
             $reclist = loadRemoteURLContent($url, false);
             $reclist = json_decode($reclist, true);
             $reccount = @$reclist['resultCount'];
 
 
-            
+
             if (@$reclist['error']!=null || !($reccount>0)) {
                 print '</Document></kml>';
                 return;

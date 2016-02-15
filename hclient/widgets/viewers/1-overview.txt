@@ -3,7 +3,7 @@ Directory:	/hclient/widgets/viewers
 
 Overview:   Resultset menu and viewers (listing, record view, map, connections etc)
 
-Notes:      See also other forms of output, including custom (Smarty) reports, which are in the H3 codebase under /export
+Notes:      See also other forms of output, including custom (Smarty) reports, which are under /export
 
 Updated: 	18 Oct 2015
 

@@ -58,16 +58,6 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
             print "<br /><h4>HELLO! This is FAIMS sync</h4><br />";
 
-            /*
-            $dbname_h3 = "hdb_artem_todelete11";
-            $mysqli = new mysqli("localhost:3306", "root", "");
-            $success = $mysqli->select_db($dbname_h3);
-            if(!$success){
-            return "Could not open database ".$dbname_h3;
-            }
-            $mysqli->query('set character set "utf8"');
-            $mysqli->query('set names "utf8"');
-            */
 
             //$dir_faims.
             $dbname_faims = HEURIST_FILESTORE_DIR. "faims/db.sqlite3";
@@ -196,7 +186,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     $query = "INSERT INTO defDetailTypes (dty_Name, dty_Documentation, dty_Type, dty_NameInOriginatingDB) VALUES (?,?,?,?)";
                     $stmt = $mysqli->prepare($query);
                     $fid = 'FAIMS.'.$attrID;
-                    $ftype = faimsToH3_dt_mapping($row1[2]);
+                    $ftype = faimsToHeurist_dt_mapping($row1[2]);
                     $stmt->bind_param('ssss', $row1[1], $row1[3], $ftype, $fid);
                     $stmt->execute();
 
@@ -445,8 +435,8 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             print "Inserted ".$cntInsterted."<br/>";
             print "Updated ".$cntUpdated."<br/>";
 
-            //
-            function faimsToH3_dt_mapping($ftype){
+            // TODO: this also exists in syncFAIMS.php
+            function faimsToHeurist_dt_mapping($ftype){
 
                 $res = null;
 
@@ -475,7 +465,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                         $res = 'freetext';
                         break;
                 }
-                //H3 types ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
+                //vsn 3 types ENUM('freetext','blocktext','integer','date','year','relmarker','boolean','enum','relationtype','resource','float','file','geo','separator','calculated','fieldsetmarker','urlinclude')
                 return $res;
             }
             ?>

@@ -807,11 +807,11 @@ function outputRecord($recordInfo, $recInfos, $outputStub = false, $parentID = n
         $recAttr['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_record.xsd';
     }
 
-        $recAttr['depth'] = $depth;
-        $recAttr['visibility'] = ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable');
-        $recAttr['visnote'] = ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
-                 : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') );
-        $recAttr['selected'] = (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no');
+    $recAttr['depth'] = $depth;
+    $recAttr['visibility'] = ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable');
+    $recAttr['visnote'] = ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
+        : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') );
+    $recAttr['selected'] = (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no');
 
     openTag('record', $recAttr);
 
@@ -1373,9 +1373,9 @@ if (@$_REQUEST['mode'] != '1') { //not include
 
 $hmlAttrs = array();
 
-    $hmlAttrs['xmlns'] = 'http://heuristnetwork.org';
-    $hmlAttrs['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
-    $hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_hml.xsd';
+$hmlAttrs['xmlns'] = 'http://heuristnetwork.org';
+$hmlAttrs['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
+$hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_hml.xsd';
 
 if ($USEXINCLUDE) {
     $hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';
@@ -1393,7 +1393,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
     $url = HEURIST_BASE_URL."hserver/controller/record_search.php";
 
-    $url = $url.'?'.$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3&needall=1";    //call h4
+    $url = $url.'?'.$_SERVER["QUERY_STRING"]."&detail=ids&vo=heurist&needall=1";    //call h4
     if($PUBONLY){
         $url = $url."&publiconly=1";
     }
@@ -1404,17 +1404,17 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     */
     $result = loadRemoteURLContent($url, false);
     $result = json_decode($result, true);
-    
+
     /* it requires pecl http
     $r = new HttpRequest($url, HttpRequest::METH_GET);
     $r->addCookies($_COOKIE);
     $r->addQueryData($_REQUEST);
     try {
-        $result = $r->getResponseBody(); //send()->getBody();
-        $result = json_decode($result, true);
+    $result = $r->getResponseBody(); //send()->getBody();
+    $result = json_decode($result, true);
     } catch (HttpException $ex) {
-        echo $ex;
-        exit();
+    echo $ex;
+    exit();
     }
     */
 
