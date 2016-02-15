@@ -64,7 +64,7 @@ function errorOut($msg){
 //
 //
 //
-function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation, $ugr_eMail, $newDatabaseName){
+function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation, $ugr_eMail, $newDatabaseName, $ugr_Interests){
 
     //create email text for admin
     $email_text =
@@ -464,6 +464,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 // *****************************************
+                $dataInsertionSQLFile = "";
 
                 makeDatabase($dataInsertionSQLFile); // this does all the work
 
@@ -892,7 +893,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         };
 
 
-                        user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName);
+                        user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName, $interests);
                     }
 
                     ?>
