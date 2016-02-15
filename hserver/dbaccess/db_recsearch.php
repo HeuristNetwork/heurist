@@ -791,7 +791,7 @@ if(@$params['debug']) echo $query."<br>";
                                 $detail_query =  'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
-                                .'astext(dtl_Geo), 0, 0, 0 '
+                                .'ST_AsWKT(dtl_Geo), 0, 0, 0 '
                                 .'from recDetails
                                 where dtl_RecID in (' . join(',', array_keys($records)) . ') '
                                 .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
@@ -800,7 +800,7 @@ if(@$params['debug']) echo $query."<br>";
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
-                                .'astext(dtl_Geo),'      // 2
+                                .'ST_AsWKT(dtl_Geo),'      // 2
                                 .'dtl_UploadedFileID,'   // 3
                                 .'recUploadedFiles.ulf_ObfuscatedFileID,'   // 4
                                 .'recUploadedFiles.ulf_Parameters '         // 5

@@ -673,13 +673,13 @@
 
                         $geoType = trim(substr($dtl_Value, 0, 2));
                         $dtl_Geo = trim(substr($dtl_Value, 2));
-                        $res = mysql__select_value($mysqli, "select astext(geomfromtext('".addslashes($dtl_Geo)."'))");
+                        $res = mysql__select_value($mysqli, "select ST_AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
                         if($res){
                             $dtl_Value = $geoType;
                             $isValid = true;
                         }
                         /*
-                        $res = $mysqli->query("select astext(geomfromtext('".addslashes($dtl_Geo)."'))");
+                        $res = $mysqli->query("select ST_AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
                         if ($res){
                         if($res->fetch_row()){
                         $dtl_Value = $geoType;

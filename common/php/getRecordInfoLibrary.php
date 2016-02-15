@@ -286,8 +286,8 @@ function getBaseProperties($recID, $bkmID) {
 */
 function getAllRecordDetails($recID) {
     $res = mysql_query("select dtl_ID, dtl_DetailTypeID, dtl_Value, rec_Title, dtl_UploadedFileID, trm_Label,
-        if(dtl_Geo is not null, astext(envelope(dtl_Geo)), null) as envelope,
-        if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo
+        if(dtl_Geo is not null, ST_AsWKT(envelope(dtl_Geo)), null) as envelope,
+        if(dtl_Geo is not null, ST_AsWKT(dtl_Geo), null) as dtl_Geo
         from recDetails
         left join defDetailTypes on dty_ID=dtl_DetailTypeID
         left join Records on rec_ID=dtl_Value and dty_Type='resource'

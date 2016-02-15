@@ -913,10 +913,10 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                         //				print "<br>".$rid."&nbsp;&nbsp;&nbsp;";
 
                         if($is_h2){
-                            $query3 = "SELECT `rd_type`, `rdt_type`, `rd_val`, `rd_file_id`, astext(`rd_geo`)
+                            $query3 = "SELECT `rd_type`, `rdt_type`, `rd_val`, `rd_file_id`, ST_AsWKT(`rd_geo`)
                             FROM `$sourcedb`.`rec_details` rd, `$sourcedb`.`rec_detail_types` dt where rd.`rd_type`=dt.`rdt_id` and rd.`rd_rec_id`=$rid order by `rd_type`";
                         }else{
-                            $query3 = "SELECT `dtl_DetailTypeID`, `dty_Type`, `dtl_Value`, `dtl_UploadedFileID`, astext(`dtl_Geo`)
+                            $query3 = "SELECT `dtl_DetailTypeID`, `dty_Type`, `dtl_Value`, `dtl_UploadedFileID`, ST_AsWKT(`dtl_Geo`)
                             FROM $sourcedb.`recDetails` rd, $sourcedb.`defDetailTypes` dt where rd.`dtl_DetailTypeID`=dt.`dty_ID` and rd.`dtl_RecID`=$rid order by `dtl_DetailTypeID`";
                         }
                         $res3 = mysql_query($query3);

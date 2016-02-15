@@ -199,7 +199,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                                 array_push($counts,0);
                             }
                             $details = array();
-                            $res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, astext(dtl_Geo), null) as dtl_Geo, trm_Label
+                            $res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, ST_AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label
                                 from recDetails  left join defTerms on trm_ID = dtl_Value
                                 where dtl_RecID = ' . $records[$index]['rec_ID'] . '
                             order by dtl_DetailTypeID, dtl_ID');

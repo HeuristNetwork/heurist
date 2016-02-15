@@ -102,7 +102,7 @@ print '<name>Export from Heurist2</name>';
 if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     // for wkt
-    $squery = "select rec_ID, rec_URL, rec_Title, d0.dtl_DetailTypeID, d0.dtl_Value, if(d0.dtl_Geo is null, null, asText(d0.dtl_Geo)) as dtl_Geo, ".
+    $squery = "select rec_ID, rec_URL, rec_Title, d0.dtl_DetailTypeID, d0.dtl_Value, if(d0.dtl_Geo is null, null, ST_AsWKT(d0.dtl_Geo)) as dtl_Geo, ".
     "d1.dtl_Value as Date0, d2.dtl_Value as DateStart, d3.dtl_Value as DateEnd ";
     $ourwhere = " and (d0.dtl_RecID=rec_ID) and (d0.dtl_Geo is not null ".(defined('DT_KML')?" or d0.dtl_DetailTypeID=".DT_KML:"").")";
 

@@ -183,7 +183,7 @@ function getMapObjects($request){
     if($bibIDs && count($bibIDs)>0)
     {
         // Find the records that actually have any geographic data to plot
-        $res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
+        $res = mysql_query("select dtl_RecID, dtl_Value, ST_AsWKT(dtl_Geo), ST_AsWKT(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
         if(mysql_error()) {
         }
         if($res){
@@ -504,7 +504,7 @@ function findXMLelement($xml, $ind, $atree){
 }
 
 /**
-* parse value from database (asText)
+* parse value from database (ST_AsWKT)
 *
 * @param mixed $recId
 * @param mixed $type

@@ -104,7 +104,7 @@ foreach ($bibIDs as $bibID) {
 // Find the records that actually have any geographic data to plot
 $geoObjects = array();
 $geoBibIDs = array();
-$res = mysql_query("select dtl_RecID, dtl_Value, astext(dtl_Geo), astext(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
+$res = mysql_query("select dtl_RecID, dtl_Value, ST_AsWKT(dtl_Geo), ST_AsWKT(envelope(dtl_Geo)) from recDetails where dtl_Geo is not null and dtl_RecID in (" . join(",", $bibIDs) . ")");
 while ($val = mysql_fetch_row($res)) {
     // get the bounding box
     if (preg_match("/POLYGON\\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $val[3], $matches)) {
