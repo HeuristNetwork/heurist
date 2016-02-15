@@ -325,9 +325,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         if(regurl=='http://heurist.sydney.edu.au/h3/'){
                             regurl = 'http://heurist.sydney.edu.au/heurist/';
                         }
-
-                        //url + script + db
-                        ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?db='+reginfo[2];
+                        
+                        ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?plain=1&db='+reginfo[2];
                     }
 
                 }else{
@@ -604,9 +603,15 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     return "coreDefinition data is empty";
                 }
 
+                $start_tag_count = substr_count ( $data , ">>StartData>>" );
+                $end_tag_count = substr_count ( $data , ">>StartData>>" );
                 //check the number of start and end quotes
-                if(substr_count ( $data , ">>StartData>>" )!=substr_count ( $data , ">>EndData>>" )){
+                if($start_tag_count!=$end_tag_count){
                     return "Error: core Definition data is invalid: The number of open and close tags must be equal";
+                }
+                if($start_tag_count<15){
+                    return "Error: core Definition data is invalid: It seems it is truncated. Only "
+                        .$start_tag_count." definitions found. At least 15 expected";
                 }
 
                 //verify that start is always before end
@@ -702,7 +707,6 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         // this is global variable that is used in buildCrosswalks.php
                         $templateFileName = "NOT DEFINED";
                         $templateFoldersContent = "NOT DEFINED";
-
                         if($reg_url){ // getting definitions from an external registered database
 
                             $nouse_proxy = true;
@@ -711,7 +715,6 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                             $data = loadRemoteURLContent($reg_url, $nouse_proxy); //without proxy
                             $resval = isDefinitionsInvalid($data);
-
                             if($resval){
                                 if(defined("HEURIST_HTTP_PROXY")){
                                     $nouse_proxy = false;
@@ -728,6 +731,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 errorOut ("Error importing core definitions from template database for database $newname<br>"
                                     .$resval
                                     .'<br>Please check whether this database is valid; consult Heurist support if needed');
+                                    
                                 return false;
                             }
 

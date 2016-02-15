@@ -95,7 +95,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         return false;
     }
 
-    if(strpos($url, HEURIST_SERVER_URL)===0){
+    if(false && strpos($url, HEURIST_SERVER_URL)===0){
         return loadRemoteURLviaSocket($url);
     }
     

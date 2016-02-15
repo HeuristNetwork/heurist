@@ -81,7 +81,7 @@ print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
 print "-- Database = " . HEURIST_DBNAME . "<br>\n";
 print "-- Program Version: ".HEURIST_VERSION."<br>\n";
 print "-- Database Version: ".HEURIST_DBVERSION; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
-print "<br><br>\n";
+if($isHTML) print "<br><br>\n";
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation
 // Each block of data is between a >>StartData>> and >>EndData>> markers
 // This could perhaps be done more elegantly as JSON structures, but SQL inserts help to point up errors in fields
@@ -94,41 +94,40 @@ $endofFileToken = ">>EndOfFile>>";
 // defRecTypeGroups
 
 print "\n\n\n-- RECORD TYPE GROUPS";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defRecTypeGroups";
 $res = mysql_query($query);
 $fmt = 'defRecTypeGroups';   // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // defDetailTypeGroups
 
 print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defDetailTypeGroups";
 $res = mysql_query($query);
 $fmt = 'defDetailTypeGroups'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // Detail Type ONTOLOGIES
-
 print "\n\n\n-- ONTOLOGIES";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defOntologiesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defOntologies";
@@ -136,125 +135,124 @@ $query = "select $flds from defOntologies";
 $res = mysql_query($query);
 $fmt = 'defOntologies'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { 
     @print_row($row, $fmt); 
 }
 print "$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
-
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // Detail Type TERMS
 
 print "\n\n\n-- TERMS";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defTermsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defTerms";
 $res = mysql_query($query);
 $fmt = 'defTerms';  // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) {   @print_row($row, $fmt); }
 print "$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
 
 print "\n-- RECORD TYPES";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecTypesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defRecTypes";
 $res = mysql_query($query);
 $fmt = 'defRecTypes'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
 
 print "\n\n\n-- DETAIL TYPES";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defDetailTypesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defDetailTypes";
 $res = mysql_query($query);
 $fmt = 'defDetailTypes';  // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
 
 print "\n\n\n-- RECORD STRUCTURE";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecStructureFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defRecStructure";
 $res = mysql_query($query);
 $fmt = 'defRecStructure'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // RELATIONSHIP CONSTRAINTS
 
 print "\n\n\n-- RELATIONSHIP CONSTRAINTS";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRelationshipConstraintsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defRelationshipConstraints";
 $res = mysql_query($query);
 $fmt = 'defRelationshipConstraints'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // defFileExtToMimetype
 
 print "\n\n\n-- FILE EXTENSIONS TO MIME TYPES";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defFileExtToMimetypeFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defFileExtToMimetype";
 $res = mysql_query($query);
 $fmt = 'defFileExtToMimetype'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // defTranslations
 
 print "\n\n\n-- Definitions translations";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defTranslationsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defTranslations where trn_Source in
@@ -263,28 +261,28 @@ $query = "select $flds from defTranslations where trn_Source in
 $res = mysql_query($query);
 $fmt = 'defTranslations'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // usrSavedSearches  (added 24/6/2015)
 
 print "\n\n\n-- SAVED SEARCHES";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/usrSavedSearchesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from usrSavedSearches";
 $res = mysql_query($query);
 $fmt = 'usrSavedSearches'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 
 
@@ -296,69 +294,69 @@ print "<p>&nbsp;<p>&nbsp;<p>";
 // defCalcFunctions
 
 print "\n\n\n-- DEF CALC FUNCTIONS";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defCalcFunctionsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defCalcFunctions";
 $res = mysql_query($query);
 $fmt = 'defCalcFunctions'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // defCrosswalk
 
 print "\n\n\n-- DEF CROSSWALK";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defCrosswalkFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defCrosswalk";
 $res = mysql_query($query);
 $fmt = 'defCrosswalk'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // defLanguages
 
 print "\n\n\n-- DEF LANGUAGE";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defLanguages";
 $res = mysql_query($query);
 $fmt = 'defLanguages';  // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // defURLPrefixes
 
 print "\n\n\n-- DEF URL PREFIXES";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/defURLPrefixesFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from defURLPrefixes";
 $res = mysql_query($query);
 $fmt = 'defURLPrefixes';  // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // Output the following only if parameter switch set and user is an admin
@@ -379,69 +377,69 @@ if (! is_admin()) {
 // sysUGrps
 
 print "\n\n\n-- Users and Groups";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/sysUGrpsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from sysUGrps";
 $res = mysql_query($query);
 $fmt = 'sysUGrps'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // sysUsrGrpLinks
 
 print "\n\n\n-- Users to Group membership and roles";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/sysUsrGrpLinksFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from sysUsrGrpLinks";
 $res = mysql_query($query);
 $fmt = 'sysUsrGrpLinks'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // usrHyperlinkFilters
 
 print "\n\n\n-- User's hyperlink filters";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/usrHyperlinkFiltersFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from usrHyperlinkFilters";
 $res = mysql_query($query);
 $fmt = 'usrHyperlinkFilters'; // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
 // usrTags
 
 print "\n\n\n-- User's tags";print "\n";
-print "<p>";
+if($isHTML) print "<p>";
 include HEURIST_DIR.'admin/structure/crosswalk/usrTagsFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from UsrTags";
 $res = mysql_query($query);
 $fmt = 'UsrTags';  // update format if fields added
 
-print "<p>";
+if($isHTML) print "<p>";
 print "\n$startToken\n";
 while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt); }
 print "\n$endToken\n";
-print "<p>&nbsp;<p>&nbsp;<p>";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // --------------------------------------------------------------------------------------
 print "\n$endofFileToken\n";

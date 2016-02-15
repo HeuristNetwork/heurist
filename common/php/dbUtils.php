@@ -560,12 +560,13 @@ function createDatabaseFolders($newDBName){
         echo ("<h3>Warning:</h3> Unable to create/copy record type icons folder rectype-icons to $uploadPath<br>");
         $warnings = 1;
     }
+    /*
     if(recurse_copy( HEURIST_DIR."admin/setup/settings", $uploadPath."/settings" )){
         add_index_html($uploadPath."/settings"); // index file to block directory browsing
     }else{
         echo ("<h3>Warning:</h3> Unable to create/copy settings folder to $uploadPath<br>");
         $warnings = 1;
-    }
+    }*/
     if(recurse_copy( HEURIST_DIR."admin/setup/smarty-templates", $uploadPath."/smarty-templates" )){
         add_index_html($uploadPath."/smarty-templates"); // index file to block directory browsing
     }else{
