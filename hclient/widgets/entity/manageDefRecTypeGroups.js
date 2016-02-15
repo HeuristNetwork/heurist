@@ -61,7 +61,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     //
     //
-    _rendererListItem:function(recordset, record){
+    _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
             return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
@@ -98,7 +98,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     //
     //
-    _searchFullData:function(arr_ids, pageno, callback){
+    _recordListGetFullData:function(arr_ids, pageno, callback){
         
         var request = {
                 'a'          : 'search',

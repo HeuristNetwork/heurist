@@ -35,8 +35,65 @@ Notes:
 
 How entity managers are implemented:
 
-It consists of 3 widgets: searchEntity, resultList, managerEntity 
-1) searchEntity 
+It consists of 3 widgets: manageEntity (and descendants), searchEntity(and descendants), resultList (optional) 
+
+3) manageEntity - an any widget can be applied to element (and optionally this element can be displayed as popup dialog).
+
+        this widget is manager for 3 main parts: search, represent(list) and edit
+        
+        layout is defined in _initControls method 
+                    by default this is fixed cardinal layout 
+                    north - search
+                    west - list
+                    east - edit
+
+        widget options can be devided on the same parts: search, list, edit
+        
+        //DIALOG section       
+        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), _closeDialog
+        dialogcleanup: true, // remove dialog div on close
+        height: 400,
+        width:  760,
+        modal:  true,
+        title:  '',
+        
+        //LIST section 
+        pagesize: 100,      // page size in resultList 
+        
+        //SEARCH/filter section
+        list_header: false, // show header in list mode (@todo implement)
+        use_cache: false,   // search performed once and then we apply local filter  @see updateRecordList, filterRecordList
+        //initial search/filter values by title and subset of groups to search
+        filter_title: null,
+        filter_group_selected:null,
+        filter_groups: null,
+
+        //EDIT section
+        edit_dialog: true,  //show editor in east panel or as popup
+        edit_height:null,
+        edit_width :null,
+        edit_title :null,
+        edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
+        
+        // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
+        //        highlight in list works as usual and selected records are used in actions
+        // select_single - in list only one item can be highlighted, in dialog mode it will be closed
+        // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
+        select_mode: 'manager', //'select_single','select_multi','manager'
+
+        selectbutton_label: 'Select',  //@todo remove?? 
+        
+        
+        //it either loaded from server side if _entityName defined or defined explicitely on client side
+        entity: {}       //configuration
+
+    
+    
+
+
+
+
+2) searchEntity 
     Content is loaded from assosiated html snippet and activated in widget.
     Each search header has search by name input field,  by user/group filter or some other basic filters, 
     as well: recently added/selected filters. 
@@ -49,7 +106,7 @@ It consists of 3 widgets: searchEntity, resultList, managerEntity
         onstart
         onresult
     
-2) resultList - display records in list, allow selection, pagination and action menu
+3) resultList - display records in list, allow selection, pagination and action menu
 
     options
         renderer: custom renderer function
@@ -65,15 +122,7 @@ It consists of 3 widgets: searchEntity, resultList, managerEntity
         updateRecordList  
     
     
-3) managerEntity - widget can be included into page (framecontent/EntityName) to show as standalone page or in msg.showDialog popup
-                   or have global function to show it as jquery-ui dialog
-                   It invokes and links 2 widgets mentioned above (searchEntity, resultList)
-                   
-    options
-        isdialog: SELF-OPENER: creates div, adds it to document body, inits jquery-ui dialog AND init itself withing this dialog
-        select_mode: none|single|multi
-        filter: init filter values          
-        actions
+
                    
                  
 4) editEntity      

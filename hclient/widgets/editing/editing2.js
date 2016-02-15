@@ -48,7 +48,7 @@ function hEditing(container, _recdata, _recstructure) {
     }
 
     //
-    // relaod existing form
+    // reload existing form        NOT USED
     //
     function _reload(_recdata) {
         
@@ -206,6 +206,8 @@ function hEditing(container, _recdata, _recstructure) {
                                 if(!top.HEURIST4.util.isArray(val)) val = [val];
                                 fields[idx].values = val;
                             }  
+                        }else{
+                            fields[idx].values = null;    
                         }
                         
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
@@ -251,6 +253,16 @@ function hEditing(container, _recdata, _recstructure) {
             }
         }
         return details;
+    }
+    
+    function _isModified(){
+        
+        var idx;
+        for (idx in editing_inputs) {
+            ele = $(editing_inputs[idx]);
+            if(ele.editing_input('isChanged')) return true;
+        }
+        return false;
     }
     
     function _validate(){
@@ -342,6 +354,10 @@ function hEditing(container, _recdata, _recstructure) {
         
         getInputs:function(fieldName){
             return _getInputs(fieldName);
+        },
+        
+        isModified: function(){
+            return _isModified();
         }
         
     }

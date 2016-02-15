@@ -63,7 +63,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // NOT USED yet
     //    
-    _rendererListHeader:function(){
+    _recordListHeaderRenderer:function(){
         
         function fld_head(content, sclass, col_width){ //only for list
             var swidth = '';
@@ -80,7 +80,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
               fld_head('<input type="checkbox" style="vertical-align:-3px"/>','','width:3em'))
             + fld_head('&nbsp;','','5em')
             + fld_head('ID','','2em')
-            + (showActionInList?this._rendererListAction('edit', true):'')
+            + (showActionInList?this._rendererActionButton('edit', true):'')
             + fld_head('Name','','14em')
             + fld_head('Description','','25em');
             
@@ -88,10 +88,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             header = header 
                 + fld_head('Actions','','15em')
                 /*+ fld_head('Status','','3em')
-                + this._rendererListAction('duplicate', true)
-                + this._rendererListAction('structure', true)
+                + this._rendererActionButton('duplicate', true)
+                + this._rendererActionButton('structure', true)
                 + fld_head('Group','','4.6em')
-                + this._rendererListAction('delete', true);*/
+                + this._rendererActionButton('delete', true);*/
         }            
             
         header = header 
@@ -103,7 +103,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     //
     //
-    _rendererListItem:function(recordset, record){
+    _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
             return recordset.fld(record, fldname);
@@ -129,7 +129,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var recIcon = top.HAPI4.iconBaseURL + recID + '.png';
         
         var recTitle = fld2('rty_ID','4em')
-                + (showActionInList?this._rendererListAction('edit'):'')
+                + (showActionInList?this._rendererActionButton('edit'):'')
                 + fld2('rty_Name','14em')
                 + '<div class="item inlist" style="width:25em;">'+fld('rty_Description')+'</div>';
                 //fld3('rty_Description','25em');
@@ -162,15 +162,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             var group_selectoptions = this.searchRecord.find('#sel_group').html();
                         
             html = html 
-                + this._rendererListAction('duplicate')
-                + this._rendererListAction('structure')
+                + this._rendererActionButton('duplicate')
+                + this._rendererActionButton('structure')
                 //group selector
             +  '<div title="Change group" class="item inlist logged-in-only"'
             +  ' style="width:8em;padding-top:3px;" data-key2="group-change">'
             +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('rty_RecTypeGroupID')
             + '">'+group_selectoptions+'</select>'
             +  '</div>'
-                + this._rendererListAction('delete');
+                + this._rendererActionButton('delete');
         }
         
         html = html + '</div>'; //close recordTitle
@@ -197,7 +197,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     //
     //
-    _searchFullData:function(arr_ids, pageno, callback){
+    _recordListGetFullData:function(arr_ids, pageno, callback){
         
         var request = {
                 'a'          : 'search',

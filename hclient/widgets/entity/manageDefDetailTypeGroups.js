@@ -31,31 +31,54 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             return false;
         }
 
-        // init search header
+        //hide header
+        this.searchRecord.css('height',0);
+        if(this.recordList){
+            this.recordList.css('top',0);
+            //hide view mode   = hide entire header?
+            this.recordList.resultList('option','hide_view_mode',true);
+        }
+        
+        /* init search header
         this.searchRecord.searchDefDetailTypeGroups( this.options );
-            
         this._on( this.searchRecord, {
                 "searchdefdetailtypegroupsonresult": this.updateRecordList
                 });
+       */
+        var that = this;
+        top.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+            function(response){
+                that._cachedRecordset = response;
+                that.recordList.resultList('updateResultSet', response);
+            });
+            
+        
+       //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
+       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
+       if(this.options.edit_mode!='none'){
+            
+            var add_action = {key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'};
                 
-        this.element.find('.ent_header').css('height',0);
-        this.element.find('.ent_content_full').css('top',0);
+            if(this.options.edit_mode=='inline'){
+               
+               this.ent_editor_wrapper.addClass('ent_wrapper');
+               
+               //define add button on left side
+               this._defineActionButton(add_action, 
+                        (this.recordList)?this.recordList.find('.div-result-list-toolbar'):this.ent_editor_header,
+                        'full',{float:'left'});
+                   
+               //define delete on right side
+               this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
+                        this.ent_editor_header,'full',{float:'right'});
+               
+            }else{
+               //no actions for pop-up 
+               this._defineActionButton(add_action, 
+                        this.recordList.find('.div-result-list-toolbar'),'full',{float:'left'});
+            }
+       }
         
-        this.recordList.resultList('option','hide_view_mode',true);
-        
-        //move editor panel from element to div_content        
-        if(this.ent_editor && !this.options.edit_dialog){
-            
-            var list_container = this.recordList.find('.div-result-list-content');
-            
-            list_container.removeProp('right').css('width','250px');
-            
-            this.ent_editor
-                .detach()
-                .appendTo(list_container.parent())
-                .css({'min-width':'500px','left':'250px', top:list_container.position().top})
-                .show();
-        }
                 
         return true;
     },    
@@ -64,7 +87,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     //
     //
     //
-    _rendererListItem: function(recordset, record){
+    _recordListItemRenderer: function(recordset, record){
         
         function fld(fldname){
             return top.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
@@ -89,7 +112,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
         html = html + fld2('dtg_Name') + '</div>';
         
-        if(this.options.edit_dialog){
+        if(this.options.edit_mode=='popup'){
             html = html
             + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'

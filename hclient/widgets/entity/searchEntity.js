@@ -30,7 +30,6 @@ $.widget( "heurist.searchEntity", {
         filter_groups: null,
 
         use_cache: false,
-        filter_mode: 'hide', //filter mode for cache mode
         
         /* callbacks - events
         onstart:null,
@@ -140,7 +139,7 @@ $.widget( "heurist.searchEntity", {
                 function(response){
                         that._trigger( "onresult", null, {recordset:response} );
             
-                        that.startSearch(); //applu filter
+                        that.startSearch(); //apply filter
                         
                 });
     },

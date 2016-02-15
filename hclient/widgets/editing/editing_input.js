@@ -171,7 +171,7 @@ $.widget( "heurist.editing_input", {
             var def_value = this.f('rst_DefaultValue');
             if(top.HEURIST4.util.isempty(def_value)){
                 this.options.values = [''];        
-            }else if(top.HEURIST4.util.isArray()){
+            }else if(top.HEURIST4.util.isArray(def_value)){
                 this.options.values = def_value;
             }else{
                 this.options.values = [def_value];
@@ -769,6 +769,29 @@ $.widget( "heurist.editing_input", {
         
     },
 
+    //
+    //
+    //
+    isChanged: function(){
+
+        if(this.options.readonly || this.f('rst_Display')=='readonly'){
+            return false;
+        }else{
+            if(this.options.values.length!=this.inputs.length){
+                return true;
+            }
+            var idx;
+            for (idx in this.inputs) {
+                var res = this._getValue(this.inputs[idx]);
+                
+                if(this.options.values[idx]!=res){
+                    return true;
+                }
+            }
+        }
+        return false;        
+    },
+    
     //
     // returns array of input elements
     //

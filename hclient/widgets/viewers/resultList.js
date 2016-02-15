@@ -88,11 +88,11 @@ $.widget( "heurist.resultList", {
 
         this.div_header = null;
         if(this.options.innerHeader || this.options.select_mode=='select_multi'){
-            this.div_header =  $( "<div>" ).css('height','2.6em').appendTo( this.element );
+            this.div_header =  $( "<div>" ).css('height','2.2em').appendTo( this.element );
 
             if(this.options.innerHeader){
                 $('<h3>'+top.HR('Search Result')+'</h3>')
-                .css('padding','1.4em 0 0 0.7em')
+                .css('padding','1em 0 0 0.7em')
                 .appendTo(this.div_header);
                 //set background to none
                 this.element.parent().css({'background':'none','border':'none'});
@@ -127,14 +127,18 @@ $.widget( "heurist.resultList", {
 
 
 
-        this.div_toolbar = $( "<div>" ).css({'width': '100%', 'height':'2.2em'}).appendTo( this.element );
+        this.div_toolbar = $( "<div>" )
+                .addClass('div-result-list-toolbar ent_header')
+                .css({top:(this.div_header!=null)?'2.5em':'0'})
+                .appendTo( this.element );
         this.div_content = $( "<div>" )
-        .addClass('div-result-list-content')
-        .css({'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
+                .addClass('div-result-list-content ent_content_full')
+                .css({'top':(this.div_header!=null)?'5.5em':'2.5em',
+                              'overflow-y':'scroll', 'border-top':'1px solid #cccccc'})   //@todo - proper relative layout        
+        /*'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
             'position':'absolute',
-            'border-top': '1px solid #cccccc',
-            'top':(this.div_header!=null)?'5.5em':'2.5em','bottom':'15px'})   //@todo - proper relative layout
-        //.position({my: "left top", at: "left bottom", of: this.div_toolbar })
+            'border-top': '1px solid #cccccc','bottom':'15px'
+            */
         .appendTo( this.element );
 
         this.div_loading = $( "<div>" )
@@ -1316,6 +1320,13 @@ $.widget( "heurist.resultList", {
     }
 
     //
+    //
+    //    
+    , refreshPage: function(){
+        this._renderPage(this.current_page);
+    }
+    
+    //
     // render the given page (called from navigator and on search finish)
     //
     , _renderPage: function(pageno, recordset, is_retained_selection){
@@ -1385,7 +1396,7 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
-        }else if(this._currentSelection!=null) { //hightlight retained selected records
+        }else if(this._currentSelection!=null) { //highlight retained selected records
 
             for(idx=0; idx<rec_onpage.length; idx++){
                 recID = rec_onpage[idx];

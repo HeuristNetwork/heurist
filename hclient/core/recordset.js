@@ -481,8 +481,8 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             return _getFieldValue(record, fldname);
         },
         
-        setFld: function(record, fldname, vaue){
-            _setFieldValue(record, fldname, vaue);  
+        setFld: function(record, fldname, value){
+            _setFieldValue(record, fldname, value);  
         },
 
         /**
@@ -958,19 +958,33 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
 
         addRecord:function(recID, record){
             var idx = order.indexOf(recID);
-            if(idx>=0){
-                this.setRecord(recID, record);
-            }else{
-                records[recID] = record;
+            if(idx<0){ //add new
+                records[recID] = [];
+                records[recID][fields.length-1] = undefined;
                 order.push(recID);
                 total_count = total_count+1;
             }
+            this.setRecord(recID, record);
         },
         
         setRecord:function(recID, record){
             var idx = order.indexOf(recID);
             if(idx>=0){
-                records[recID] = record;
+                
+                if($.isPlainObject(record)){
+                    var fldname;
+                    for (fldname in record) {
+                        if (record.hasOwnProperty(fldname) ){
+                            _setFieldValue(records[recID], fldname, record[fldname]);    
+                        }
+                    }
+                }else if($.isArray(record)){
+                    records[recID] = record;
+                } 
+                
+                
+                
+                
             }
         },
         

@@ -825,40 +825,59 @@ top.HEURIST4.ui = {
     },
 
     // Init button that show/hide help tips
+    initDialogHintButtons: function($dialog, helpcontent_url){
+        
+        var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
+        
+        var $help_button = $('<div>').button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
+                    .addClass('dialog-title-button')
+                    .css({'right':'48px'})
+                    .appendTo(titlebar)
+                    .on('click', top.HEURIST4.ui.switchHintState);
+
+        var $info_button = $('<div>')
+                    .addClass('dialog-title-button')
+                    .css({'right':'26px'})
+                    .appendTo(titlebar);
+                    
+        top.HEURIST4.ui.initHelper($info_button, null, helpcontent_url);
+                    
+    },
+                        
+    switchHintState: function switchState(event){
+            
+            var ishelp_on = top.HAPI4.get_prefs('help_on');
+
+            if(event!=null){ //need to change
+                ishelp_on = (ishelp_on==1 || ishelp_on==true)?0:1;
+                top.HAPI4.save_pref('help_on',ishelp_on);
+            }
+            
+            if(ishelp_on){
+                //$help_button.addClass('ui-state-focus');    
+                $('.heurist-helper1').css('display','block');
+                $('div.div-table-cell.heurist-helper1').css('display','table-cell');
+            }else{
+                //$help_button.removeClass('ui-state-focus');
+                $('.heurist-table-helper1').css('display','none');
+                $('.heurist-helper1').css('display','none');
+            }
+    },
     
+    // to remove?
+    //
     initHintButton: function(help_button){
 
         var $help_button = $(help_button);
         
         var ishelp_on = top.HAPI4.get_prefs('help_on');
         
-        function __switchState(event){
-            
-            ishelp_on = $help_button.attr('data-state');
-
-            if(event!=null){
-                ishelp_on = (ishelp_on==1 || ishelp_on==true)?0:1;
-                $help_button.attr('data-state', ishelp_on);
-                top.HAPI4.save_pref('help_on',ishelp_on);
-            }
-            
-            if(ishelp_on){
-                $help_button.addClass('ui-state-focus');    
-                $('.heurist-helper1').css('display','block');
-                $('div.div-table-cell.heurist-helper1').css('display','table-cell');
-            }else{
-                $help_button.removeClass('ui-state-focus');
-                $('.heurist-table-helper1').css('display','none');
-                $('.heurist-helper1').css('display','none');
-            }
-        }
         
         $help_button.button({icons: { primary: "ui-icon-help" }, label:'Show help hints', text:false})
                     .attr('data-state', ishelp_on)
-                    .on('click', __switchState);
+                    .on('click', top.HEURIST4.ui.switchHintState);
         
-        __switchState(null);
-        
+        top.HEURIST4.ui.switchHintState(null);
     },
     
     //

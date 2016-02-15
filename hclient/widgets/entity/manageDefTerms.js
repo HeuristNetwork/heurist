@@ -97,7 +97,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     //
     //
-    _rendererListItem:function(recordset, record){
+    _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
             return recordset.fld(record, fldname);
@@ -126,8 +126,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         //actions
         if(true || showActionInList){
               html = html
-                + this._rendererListAction('edit')
-                + this._rendererListAction('delete');
+                + this._rendererActionButton('edit')
+                + this._rendererActionButton('delete');
         }
         html = html + '</div>'
                 + '</div>'; //close recordDiv
@@ -185,7 +185,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 that.selectedRecords([data.node.key]);
                 
                 if (!that.options.edit_dialog){
-                        that._rendererListOnAction(event, {action:'edit'}); //default action of selection
+                        that._onActionListener(event, {action:'edit'}); //default action of selection
                 }
                 
                 //console.log('click on '+data.node.key+' '+data.node.title);

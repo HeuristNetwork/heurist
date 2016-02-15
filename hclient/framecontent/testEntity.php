@@ -49,7 +49,6 @@ require_once(dirname(__FILE__)."/initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypeGroups.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypeGroups.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefTerms.js"></script>
@@ -121,11 +120,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                     selectbutton_label: $('#multi_selectbutton_label').val(),
                     
                     pagesize: $('#page_size').val(),
-                    filter_mode: $('input[name="filter_mode"]:checked').val(),
+                    edit_mode: $('input[name="edit_mode"]:checked').val(),
                     use_cache: $('#use_cache').is(':checked'),
                     
-                    action_select: $('#action_select').is(':checked'), //may be true,false or array
-                    action_buttons: $('#action_buttons').is(':checked'), //may be true,false or array
+                    //action_select: $('#action_select').is(':checked'), //may be true,false or array
+                    //action_buttons: $('#action_buttons').is(':checked'), //may be true,false or array
                     list_header: false,  //$('#list_header').is(':checked'), //may be true,false
                     filter_title: $('#filter_title').val(),
                     filter_group_selected:null,
@@ -168,12 +167,14 @@ require_once(dirname(__FILE__)."/initPage.php");
                             showManageDefDetailTypes( options );      
                        }else if(entity=='DefDetailTypeGroups'){
                             options.edit_dialog = false;
+                            options.height = 400;
+                            options.width = 840;
                             showManageDefDetailTypeGroups( options );      
                        }else if(entity=='DefTerms'){
                            
                             options.edit_dialog = false;
                             options.height = 600;
-                            options.width = 800;
+                            options.width = 840;
                             showManageDefTerms( options );      
                        }
                         
@@ -274,13 +275,13 @@ require_once(dirname(__FILE__)."/initPage.php");
                 <div style="padding:5px; xborder-bottom:1px solid lightgrey">
                     <label>Selection Mode</label>
                     <div style="padding-right:20px">
-                        <label style="font-weight: bold;"><input type="radio" name="select_mode" value="manager">Manager</label> as it currently implemented: records selected with shift, ctrl. Selection is not retained among pages and searches. Selected records are not returned from dialog
+                        <label style="font-weight: bold;"><input type="radio" name="select_mode" value="manager" checked>Manager</label> as it currently implemented: records selected with shift, ctrl. Selection is not retained among pages and searches. Selected records are not returned from dialog
                     </div>
                     <div style="padding-right:20px">
                         <label style="font-weight: bold;"><input type="radio" name="select_mode" value="select_single">Select Single</label> only one selection is allowed. Search result event triggered each time user click on record. In popup mode dialog is closed on select.
                     </div>
                     <div style="padding-right:20px">
-                        <label style="font-weight: bold;"><input type="radio" name="select_mode" value="select_multi" checked>Select Multi</label> Selection persists between pages and selections. Select event is triggered on special button click.
+                        <label style="font-weight: bold;"><input type="radio" name="select_mode" value="select_multi" >Select Multi</label> Selection persists between pages and selections. Select event is triggered on special button click.
                     </div>
                 </div>                        
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
@@ -289,10 +290,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <label>Select button label<input type="text" id="multi_selectbutton_label" value="Select"></label>
                 </div>
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
-                    <span style="padding-right:20px">
-                        <label><input type="checkbox" id="action_select">Action selector (show action menu and action icons in list)</label>
-                        <label><input type="checkbox" id="action_buttons" checked>Action buttons (show action buttons in header of result viewer - usually Add Button)</label>
-                        <!-- <label><input type="checkbox" id="list_header" checked>Header in list view mode</label> -->
+                    <span style="padding-left:20px;">
+                        <label>Edit mode</label>
+                        <label><input type="radio" name="edit_mode" checked=checked value="inline">inline</label> 
+                        <label><input type="radio" name="edit_mode" value="popup">popup</label> 
+                        <label><input type="radio" name="edit_mode" value="none">none</label> 
                     </span>
                 </div>
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
@@ -301,13 +303,6 @@ require_once(dirname(__FILE__)."/initPage.php");
                     </span>
 
                     <label><input type="checkbox" id="use_cache" checked=checked>Use cache (Not implemented for entities with reccount>1500)</label>
-                    
-                    <span style="padding-left:20px;">
-                        <label>Filter mode for cache mode</label>
-                        <label><input type="radio" name="filter_mode" checked=checked value="hide">Hide</label> 
-                        <label><input type="radio" name="filter_mode" value="dim">Dim</label> 
-                    </span>
-                    
                 </div>
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <button onclick="testEntity(true)">show in popup dialog</button>

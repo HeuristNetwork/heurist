@@ -48,7 +48,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     //
     //
-    _rendererListItem:function(recordset, record){
+    _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
             return recordset.fld(record, fldname);
@@ -70,7 +70,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 + fld2('dty_Name','14em')
                 + '<div class="item inlist" style="width:25em;">'+fld('dty_HelpText')+'</div>'
                 + '<div class="item inlist" style="width:10em;">'+top.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>'
-                + (showActionInList?this._rendererListAction('edit'):'');
+                + (showActionInList?this._rendererActionButton('edit'):'');
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="min-height: 2.6em;">'  
         + '<div class="recordSelector"><input type="checkbox" /></div>'
@@ -90,14 +90,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             var group_selectoptions = this.searchRecord.find('#sel_group').html();
                         
             html = html 
-                //  counter and link to rectype + this._rendererListAction('duplicate')
+                //  counter and link to rectype + this._rendererActionButton('duplicate')
                 //group selector
             +  '<div title="Change group" class="item inlist logged-in-only"'
             +  ' style="width:8em;padding-top:3px" data-key2="group-change">'
             +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('dty_DetailTypeGroupID')
             + '">'+group_selectoptions+'</select>'
             +  '</div>'
-                + this._rendererListAction('delete');
+                + this._rendererActionButton('delete');
         }
         
         html = html 
