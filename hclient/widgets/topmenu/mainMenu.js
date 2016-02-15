@@ -361,7 +361,9 @@ $.widget( "heurist.mainMenu", {
     },
 
 
-
+    //
+    //
+    //
     _onPopupLink: function(event){
 
         var body = $(this.document).find('body');
@@ -404,7 +406,6 @@ $.widget( "heurist.mainMenu", {
     },
 
 
-
     //init listeners for auto-popup links
     _initLinks: function(menu){
 
@@ -420,7 +421,7 @@ $.widget( "heurist.mainMenu", {
                     href = window.HAPI4.basePathV3 + href;
                     //h3link class on menus implies location of older (vsn 3) code
                 }
-
+                
                 ele.attr('href', href);
                 that._on(ele, {
                     click:

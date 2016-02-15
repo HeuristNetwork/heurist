@@ -211,6 +211,7 @@ $.widget( "heurist.search", {
 
         this.div_search_as_user = $('<div>')
         .addClass('div-table-cell logged-in-only')
+        .css({'min-width': '150px'})
         .appendTo( this.div_search );
 
         this.btn_search_as_user = $( "<button>", {
@@ -273,10 +274,16 @@ $.widget( "heurist.search", {
         // Add record button
         if(this.options.btn_visible_newrecord){
 
+            /* on right hand side
             this.div_add_record = $('<div>')
             .addClass('logged-in-only')
             .css({'float': 'right', 'padding': '23px 23px 0 0'})
             .appendTo( this.element );
+            */
+            
+            this.div_add_record = $('<div>')
+            .addClass('div-table-cell logged-in-only')
+            .appendTo( this.div_search );
 
 
             /* in case we need place it along with other elements
@@ -288,7 +295,7 @@ $.widget( "heurist.search", {
                 text: top.HR("Add Record"),
                 title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
             })
-            .css('width','160px')
+            .css({'width':'160px','margin-left':'4em'})
             //.addClass('logged-in-only')
             .addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
@@ -297,6 +304,24 @@ $.widget( "heurist.search", {
             }})
             .click( function(){ that._addNewRecord(); });
 
+            this.div_add_record = $('<div>')
+            .addClass('div-table-cell logged-in-only')
+            .appendTo( this.div_search );
+
+            this.btn_mamage_structure = $( "<button>", {
+                text: top.HR("Manage Structure"),
+                title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
+            })
+            .css({'width':'160px','margin-left':'1em'})
+            //.addClass('logged-in-only')
+            .addClass('ui-heurist-btn-header1')
+            .appendTo( this.div_add_record )
+            .button()
+            .click( function(){ 
+                    top.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+top.HAPI4.database,
+                    { width:1200, height:600, title:'Manage Structure'});
+            });
+            
         } // add record button
 
         this.div_buttons = $('<div>')
