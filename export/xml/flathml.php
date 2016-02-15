@@ -1393,7 +1393,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
 
     $url = HEURIST_BASE_URL."hserver/controller/record_search.php";
 
-    $url = $url.'?'.$_SERVER["QUERY_STRING"]."&detail=ids&vo=heurist&needall=1";    //call h4
+    $url = $url.'?'.$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3&needall=1";    //call h4
     if($PUBONLY){
         $url = $url."&publiconly=1";
     }
