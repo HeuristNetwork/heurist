@@ -353,7 +353,7 @@ function matchingAssign($mysqli, $imp_session, $params){
     if(intval($recordType)<1){
         return "record type not defined";
     }
-
+    
     $id_field = @$params['idfield'];
     $field_count = count($imp_session['columns']);
 
@@ -1128,7 +1128,7 @@ function validateImport($mysqli, $imp_session, $params){
             if(!$field_name){
                 array_push($missed, $ft_vals[0]);
             }else{
-                if($ft_vals[$idx_fieldtype] == "resource" || $ft_vals[$idx_fieldtype] == "enum"){
+                if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
                     $squery = "not (".$field_name.">0)";
                 }else{
                     $squery = $field_name." is null or ".$field_name."=''";
@@ -1208,6 +1208,7 @@ function validateImport($mysqli, $imp_session, $params){
         ." from $import_table "
         ." where ".$only_for_specified_id."(".$query_reqs_where[$k].")"; // implode(" or ",$query_reqs_where);
         $k++;
+        
         $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
             "This field is required - a value must be supplied for every record",
             "Missing Values", $field);
@@ -1267,6 +1268,7 @@ function validateImport($mysqli, $imp_session, $params){
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table left join ".$query_enum_join[$k]   //implode(" left join ", $query_enum_join)
             ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
+            
             $wrong_records = getWrongRecords($mysqli, $query, $imp_session,
                 "Term list values read must match existing terms defined for the field",
                 "Invalid Terms", $field);
@@ -1451,7 +1453,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
     $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
 
     $dt_type = $dt_def[$idx_fieldtype];
-
+    
     $res = $mysqli->query($query." LIMIT 5000");
 
     if($res){
@@ -1479,7 +1481,7 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
                     if (!$term_id)
                     {//not found
                         $is_error = true;
-                        array_push($newvalue, "<font color='red'>".$r_value."</font>");
+                        array_push($newvalue, "<font color='red'>".$r_value."AAAA</font>");
                     }else{
                         array_push($newvalue, $r_value);
                     }
@@ -1953,6 +1955,7 @@ function doImport($mysqli, $imp_session, $params){
 
                                 $r_value = trim_lower_accent($r_value);
 
+                                
                                 if($r_value!=""){
 
                                     if(ctype_digit($r_value)
@@ -1965,15 +1968,12 @@ function doImport($mysqli, $imp_session, $params){
                                         $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
                                     }
                                 }
-
                             }
                             else if($fieldtype_type == "resource"){
 
                                 if(!isValidPointer(null, $r_value, $field_type)){
-//error_log('wrong pointer '.$r_value.'  '.$field_type);
                                     $value  = null;
                                 }else{
-//error_log('VALID pointer '.$r_value.'  '.$field_type);
                                      $value = $r_value;
                                 }
 
