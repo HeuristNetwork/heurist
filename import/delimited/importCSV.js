@@ -374,6 +374,16 @@ function update_counts(processed, added, updated, total){
     $("#div-progress2").html("Added: "+added+" Updated:"+updated+". Processed "+processed+" records for "+total+" input rows");
 }
 
+function doMatchingAfterDisambig(){
+
+    if(currDialog!=null){
+        currDialog.dialog('close');
+        currDialog = null;
+    }
+    
+    doMatching();
+}
+
 //
 // Start search/matching
 //
@@ -674,20 +684,34 @@ function showRecords(divname){
     }else{
 
         var $dlg = $('div[id="main_'+divname+'"]');
+        //keep            
+        var element = $dlg[0];
+        var originalParentNode = element.parentNode;
+        //element.parentNode.removeChild(element);
 
-        $dlg.dialog({
-                            autoOpen: false,
-                            height: 550,
-                            width: 800,
-                            modal: true,
-                            resizable: false,
-                            draggable: false,
-                            title: 'Import delimited'
-                    });
+        var options = {
+                    autoOpen: true,
+                    height: 550,
+                    width: 800,
+                    modal: true,
+                    resizable: false,
+                    draggable: false,
+                    title: 'Import delimited',
+                    close: function(event, ui){
 
+                        //var element = popup.element.parentNode.removeChild(popup.element);
+                        element.style.display = "none";
+                        originalParentNode.appendChild(element);
 
-        $dlg.dialog('open');
+                        currDialog = null; //$dlg.remove();
+                    }
+        };
+                    
+
+        $dlg.dialog(options);
+        //$dlg.dialog('open');
         currDialog = $dlg;
+    
     }
 
     //$('div[id^="main_"]').hide();
@@ -769,6 +793,7 @@ function getValues(dest){
 //
 function verifySubmit()
 {
+    
     var res = false;    
     var rectype = $("#sa_rectype").val();
     if(rectype>0){

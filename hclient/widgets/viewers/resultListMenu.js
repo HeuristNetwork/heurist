@@ -948,7 +948,7 @@ $.widget( "heurist.resultListMenu", {
    */
         var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='+top.HAPI4.database+'&action='+action_type;
 
-        top.HEURIST4.msg.showDialog(url, {height:300, width:600,
+        top.HEURIST4.msg.showDialog(url, {height:450, width:600,
             padding: '0px',
             title: top.HR(action_type),
             class:'ui-heurist-bg-light'} );
@@ -1008,7 +1008,7 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST.search4.rectypes =  top.HAPI4.currentRecordset.getRectypes();
         top.HEURIST.search4.executeAction = this.executeAction;
 
-        top.HEURIST4.msg.showDialog(url, {height:500, width:600, title: top.HR('Delete field value')} );
+        top.HEURIST4.msg.showDialog(url, {height:600, width:600, title: top.HR('Delete field value')} );
     },
 
 

@@ -57,7 +57,7 @@ function hRecordAction(_action_type) {
         _fillSelectRecordScope();
 
         //init buttons
-        $('#btn-ok').button({label:top.HR('Action')}).click(_startAction);
+        $('#btn-ok').button({label:top.HR('Go')}).click(_startAction);
         $('#btn-cancel').button({label:top.HR('Cancel')}).click(function(){window.close();});
     }
 
@@ -279,7 +279,7 @@ function hRecordAction(_action_type) {
         if ($('#div_result').is(':visible')){
             $('#div_result').hide();
             $('#div_parameters').show();
-            $('#btn-ok').button('option','label',top.HR('Action'));
+            $('#btn-ok').button('option','label',top.HR('Go'));
             return;
         }
 

@@ -2665,7 +2665,7 @@ function renderDisambiguation($type, $imp_session){
     'an incomplete set of fields for matching.</div>';
     print '<div>Click "Continue" to assign IDs</div><br/>';
     print '<input type="button" value="Close popup" onClick="showRecords(\'mapping\');">'.
-    '&nbsp;&nbsp;<input type="button" value="Continue" onClick="doMatching()">';
+    '&nbsp;&nbsp;<input type="button" value="Continue" onClick="doMatchingAfterDisambig()">';
 
 }
 

@@ -151,7 +151,10 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                 font-size:0.9em;
             }
         </style>
-
+        <!--
+        <script type="text/javascript" src="../../hclient/core/utils.js"></script>
+        <script type="text/javascript" src="../../hclient/core/utils_msg.js"></script>
+         -->
     </head>
 
     <body class="popup">
