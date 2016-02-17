@@ -163,6 +163,10 @@ if (! is_logged_in()) {
                 $mediaFolders = $row1[0];
                 $dirs = explode(';', $mediaFolders); // get an array of folders
 
+                //sanitize folder names
+                $dirs = array_map('sanitizeFolderName', $dirs);
+                $mediaFolders = implode(';', $dirs);
+                
                 // The defined list of file extensions for FieldHelper indexing.
                 if($row1[1]==null){
                     $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,".
@@ -219,6 +223,12 @@ if (! is_logged_in()) {
         }
 
         // ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
+        function sanitizeFolderName($folder) {
+            $folder = str_replace("\0", '', $folder);
+            $folder = str_replace('\\', '/', $folder);
+            if( substr($folder, -1, 1) != '/' )  $folder = $folder.'/';
+            return $folder;
+        }
 
         function doHarvest($dirs) {
 
@@ -411,7 +421,7 @@ if (! is_logged_in()) {
                                         }
                                         $key3 = $fieldhelper_to_heurist_map['file_path'];
                                         if($key3>0){
-                                            if( substr($dir, -1, 1) != '/' )  $dir = $dir.'/';
+                                            
                                             $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
                                             $details["t:".$key3] = array("1"=>$relative_path); //change to relative path
                                         }
@@ -671,9 +681,7 @@ XML;
                         if($key>0){
 
                             $targetPath = $flleinfo['dirname'];
-                            if(substr($targetPath, -1) != '/'){
-                                $targetPath .= "/";
-                            }
+
                             $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath); //getRelativePath2($targetPath);
                             $details["t:".$key] = array("1"=>  $rel_path);
 

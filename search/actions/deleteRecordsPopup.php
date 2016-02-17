@@ -269,7 +269,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 <?php
 	if(count($bib_ids)>3){
 ?>
-	<div>Total count of records: <b><?php echo $bib_ids;?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
+	<div>Total count of records: <b><?php echo count($bib_ids);?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
 <script>
 <?php
   echo "cnt_checked = $cnt_checked ;";                                  
