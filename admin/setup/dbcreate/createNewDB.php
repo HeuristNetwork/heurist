@@ -309,24 +309,32 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             function onBeforeSubmit(){
 
                 var ele = document.getElementById("url_template");
-                if(document.getElementById("rb2").checked){
+                if(!document.getElementById("rb1").checked){ //use tempalte database
 
                     ele.value = '';
+                    
+                    if(document.getElementById("rb2").checked){
 
-                    var bd_reg_idx = document.forms[0].elements['dbreg'].value;
-                    if(!bd_reg_idx){
-                        alert('Select database you wish use as a template');
-                        return false;
-                    }else{
-                        var reginfo = registeredDBs[bd_reg_idx];
+                        var bd_reg_idx = document.forms[0].elements['dbreg'].value;
+                        if(!bd_reg_idx){
+                            alert('Select database you wish use as a template');
+                            return false;
+                        }else{
+                            var reginfo = registeredDBs[bd_reg_idx];
 
-                        regurl = reginfo[1];
-                        // Backwards compatibility for dbs originally registered with h3
-                        if(regurl=='http://heurist.sydney.edu.au/h3/'){
-                            regurl = 'http://heurist.sydney.edu.au/heurist/';
+                            regurl = reginfo[1];
+                            // Backwards compatibility for dbs originally registered with h3
+                            if(regurl=='http://heurist.sydney.edu.au/h3/'){
+                                regurl = 'http://heurist.sydney.edu.au/heurist/';
+                            }
+                            
+                            ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?plain=1&db='+reginfo[2];
                         }
+                    }else{ //database id is radio value
+                    
+                        var db_name = $('input[name="dbtype"]:checked').val();
                         
-                        ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?plain=1&db='+reginfo[2];
+                        ele.value = 'http://heurist.sydney.edu.au/heurist/admin/describe/getDBStructureAsSQL.php?plain=1&db='+db_name;
                     }
 
                 }else{
@@ -457,15 +465,13 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
             if(isset($_REQUEST['dbname'])) {   //name of new database
                 $isDefineNewDatabase = false;
-                $isTemplateDB = ($_REQUEST['dbtype']=='1');
-
+                $dbTemplateName = @$_REQUEST['dbtype'];
 
                 echo_flush( '<script type="text/javascript">showProgress(true);</script>' );
 
                 // *****************************************
-                $dataInsertionSQLFile = "";
 
-                makeDatabase($dataInsertionSQLFile); // this does all the work
+                makeDatabase(); // this does all the work
 
                 // *****************************************
 
@@ -505,9 +511,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 terms and relationships, including bibliographic and spatial entities.
                                 Recommended for most new databases unless you wish to copy a particular template (next option).
                             </div>
-
+                            
                             <!-- Added training database 12 Feb 2016 -->
-                            <input type="radio" name="dbtype" value="2" id="rb3"
+                            <input type="radio" name="dbtype" value="Shakespeares_Plays" id="rb3"
                                 onclick="{$('#registered_dbs').hide()}"/><label for="rb3"
                                 class="labelBold" style="padding-left: 2em;">Example database (Shakespeare)</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
@@ -639,9 +645,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             // Creates a new database and populates it with triggers, constraints and core definitions
             // if $dataInsertionSQLFile is set, also inserts data (used for Example database(s))
 
-            function makeDatabase($dataInsertionSQLFile) {
+            function makeDatabase() {
 
-                global $newDBName, $isNewDB, $done, $isDefineNewDatabase, $isTemplateDB, $errorCreatingTables;
+                global $newDBName, $isNewDB, $done, $isDefineNewDatabase, $dbTemplateName, $errorCreatingTables;
+
+                $isTemplateDB = ($dbTemplateName!=null && $dbTemplateName!='0');
+                $dataInsertionSQLFile = null;
 
                 $error = false;
                 $warning=false;
@@ -728,7 +737,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 }
                             }
                             if($resval){
-                                errorOut ("Error importing core definitions from template database for database $newname<br>"
+                                errorOut ("Error importing core definitions from template database $reg_url for database $newname<br>"
                                     .$resval
                                     .'<br>Please check whether this database is valid; consult Heurist support if needed');
                                     
@@ -751,7 +760,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 return false;
                             }
 
-                            //download content of some folder from template database
+                            //download content of some folder from template database ======================
 
                             $reg_url = str_replace("getDBStructureAsSQL", "getDBFolders", $reg_url); //replace to other script
                             $data = loadRemoteURLContent($reg_url, $nouse_proxy); //with proxy
@@ -777,8 +786,15 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 return false;
                             }
 
-
-
+                            //download data to insert into new database ==========================================
+                            if($dbTemplateName!='1'){
+                                //correct way is the donwloading data from sample database, however at the moment it is included into code
+                                $dataInsertionSQLFile = HEURIST_DIR."admin/setup/dbcreate/example_".$dbTemplateName.".sql";
+                                if(!file_exists($dataInsertionSQLFile)){
+                                        errorOut ('Warning: cannot find sample data dump '.$dataInsertionSQLFile );
+                                        return false;
+                                }
+                            }
 
                         }else if($isTemplateDB){
                             errorOut ('Wrong parameters: Template database is not defined.');
@@ -813,8 +829,6 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             cleanupNewDB($newname);
                             return false;
                         }
-
-
 
                         // Get and clean information for the user creating the database
                         if(!is_logged_in()) {
@@ -889,17 +903,17 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             ugr_interests="'.$interests.'" WHERE ugr_ID=2');
                         // TODO: error check, although this is unlikely to fail
 
-
-                        if ($dataInsertionSQLFile) { // insert data from SQL file for example database
-
-                            // TODO 13 feb 2016: insert data from chosen SQL file in /admin/setup/dbcreate
-
-                        };
-
-
                         user_EmailAboutNewDatabase($name, $firstName.' '.$lastName, $organisation, $eMail, $newDBName, $interests);
                     }
 
+                    if($dataInsertionSQLFile!=null && file_exists($dataInsertionSQLFile)){
+                        if(!db_script($newname, $dataInsertionSQLFile)){
+                            errorOut('Error importing sample data from '.$dataInsertionSQLFile);
+                        }
+                    }
+
+                    
+                    
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
                         <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>

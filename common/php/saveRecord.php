@@ -72,13 +72,18 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
     //	$log = " saving record ($recordID) ";
     $recordID = intval($recordID);
     $wg = intval($wg);
-    if ($wg>0 || !is_logged_in()) {// non-member saves are not allowed
+    if (($wg!=null && intval($wg)>0) || !is_logged_in()) {// non-member saves are not allowed
         $res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg);
         if (mysql_num_rows($res) < 1) {
-            errSaveRec("invalid workgroup, record save aborted");
+            if(is_logged_in()){
+                errSaveRec("Current user ".get_user_id()." is not a member of required workgroup ".$wg.", record save aborted");
+            }else{
+                errSaveRec("It is not possible to save record if not logged in, record save aborted");
+            }
             return $msgInfoSaveRec;
         }
     }
+    $wg = intval($wg);
 
     $rectype = intval($rectype);
     if ($recordID  &&  ! $rectype) {
