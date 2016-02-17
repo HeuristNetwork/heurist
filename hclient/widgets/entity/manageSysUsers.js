@@ -45,9 +45,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this._super();
 
         // init search header
-        this.searchRecord.searchSysUsers(this.options);
+        this.searchForm.searchSysUsers(this.options);
             
-        this._on( this.searchRecord, {
+        this._on( this.searchForm, {
                 "searchsysusersonresult": this.updateRecordList
                 });
     },
@@ -133,8 +133,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
         };
         
-        if(this.searchRecord){
-            var selectGroup = this.searchRecord.find('#sel_group');
+        if(this.searchForm){
+            var selectGroup = this.searchForm.find('#sel_group');
             if(selectGroup.val()!=''){
                     request['ugr_Type'] = 'user';
                     request['ugl_GroupID'] = selectGroup.val();

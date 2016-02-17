@@ -81,16 +81,16 @@ $.widget( "heurist.manageRecord", {
             
 
         // init search header
-        this.searchRecord = $('<div>').css({height: '6em', padding:'0.2em'})
+        this.searchForm = $('<div>').css({height: '6em', padding:'0.2em'})
             .appendTo(this.element)
-            .searchRecord({
+            .searchForm({
                 add_new_record: true,
                 rectype_set: this.options.rectype_set,
                 
                 //onresult: this.updateRecordList   
             })
             
-        this._on( this.searchRecord, {
+        this._on( this.searchForm, {
                 "searchrecordonresult": this.updateRecordList
                 });
             

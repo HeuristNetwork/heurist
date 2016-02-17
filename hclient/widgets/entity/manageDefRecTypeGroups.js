@@ -43,9 +43,9 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         this._super();
 
         // init search header
-        this.searchRecord.searchDefRecTypeGroups(this.options);
+        this.searchForm.searchDefRecTypeGroups(this.options);
             
-        this._on( this.searchRecord, {
+        this._on( this.searchForm, {
                 "searchdefrectypegroupsonresult": this.updateRecordList
                 });
                 

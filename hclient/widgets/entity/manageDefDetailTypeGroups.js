@@ -32,19 +32,12 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         }
 
         //hide header
-        this.searchRecord.css('height',0);
+        this.searchForm.css('height',0);
         if(this.recordList){
-            this.recordList.css('top',0);
-            //hide view mode   = hide entire header?
-            this.recordList.resultList('option','hide_view_mode',true);
+            this.recordList.resultList('hideHeader',true);
         }
         
-        /* init search header
-        this.searchRecord.searchDefDetailTypeGroups( this.options );
-        this._on( this.searchRecord, {
-                "searchdefdetailtypegroupsonresult": this.updateRecordList
-                });
-       */
+
         var that = this;
         top.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){
@@ -57,26 +50,15 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
             
-            var add_action = {key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'};
-                
-            if(this.options.edit_mode=='inline'){
-               
-               this.ent_editor_wrapper.addClass('ent_wrapper');
-               
                //define add button on left side
-               this._defineActionButton(add_action, 
-                        (this.recordList)?this.recordList.find('.div-result-list-toolbar'):this.ent_editor_header,
-                        'full',{float:'left'});
-                   
-               //define delete on right side
-               this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                        this.ent_editor_header,'full',{float:'right'});
-               
-            }else{
-               //no actions for pop-up 
-               this._defineActionButton(add_action, 
-                        this.recordList.find('.div-result-list-toolbar'),'full',{float:'left'});
-            }
+               this._defineActionButton({key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'}, 
+                        this.editFormToolbar, 'full',{float:'left'});
+       
+                if(this.options.edit_mode=='inline'){            
+                    //define delete on right side
+                    this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
+                        this.editFormToolbar,'full',{float:'right'});
+                }
        }
         
                 
@@ -117,9 +99,13 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             + '</div>&nbsp;&nbsp;'
+            
+            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
+             /*
             + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
             + '</div>';
+            */
         }
         
 

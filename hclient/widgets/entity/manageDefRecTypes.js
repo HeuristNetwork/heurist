@@ -50,9 +50,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this._super();
 
         // init search header
-        this.searchRecord.searchDefRecTypes(this.options);
+        this.searchForm.searchDefRecTypes(this.options);
             
-        this._on( this.searchRecord, {
+        this._on( this.searchForm, {
                 "searchdefrectypesonresult": this.updateRecordList
                 });
         this.recordList.css('top','4.5em');
@@ -159,7 +159,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             +     '<input type="checkbox" checked="'+(fld('rty_ShowInLists')==0?'':'checked')+'" />'
             + '</div>';
             
-            var group_selectoptions = this.searchRecord.find('#sel_group').html();
+            var group_selectoptions = this.searchForm.find('#sel_group').html();
                         
             html = html 
                 + this._rendererActionButton('duplicate')

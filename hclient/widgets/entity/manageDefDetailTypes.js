@@ -34,9 +34,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this._entityIDfield = 'dty_ID';
 
         // init search header
-        this.searchRecord.searchDefDetailTypes(this.options);
+        this.searchForm.searchDefDetailTypes(this.options);
             
-        this._on( this.searchRecord, {
+        this._on( this.searchForm, {
                 "searchdefdetailtypesonresult": this.updateRecordList
                 });
         this.recordList.css('top','5.5em');
@@ -87,7 +87,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             +     '<input type="checkbox" checked="'+(fld('dty_ShowInLists')==0?'':'checked')+'" />'
             + '</div>';
             
-            var group_selectoptions = this.searchRecord.find('#sel_group').html();
+            var group_selectoptions = this.searchForm.find('#sel_group').html();
                         
             html = html 
                 //  counter and link to rectype + this._rendererActionButton('duplicate')

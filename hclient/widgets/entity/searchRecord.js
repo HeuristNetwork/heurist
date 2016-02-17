@@ -18,7 +18,7 @@
 */
 
 
-$.widget( "heurist.searchRecord", {
+$.widget( "heurist.searchForm", {
 
     // default options
     options: {
@@ -53,7 +53,7 @@ $.widget( "heurist.searchRecord", {
             var that = this;
             
             if(this._need_load_content){        
-                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchRecord.html', 
+                this.element.load(top.HAPI4.basePathV4+'hclient/widgets/entity/searchForm.html', 
                 function(response, status, xhr){
                     that._need_load_content = false;
                     if ( status == "error" ) {

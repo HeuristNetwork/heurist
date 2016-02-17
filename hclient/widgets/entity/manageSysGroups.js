@@ -45,9 +45,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         this._super();
 
         // init search header
-        this.searchRecord.searchSysGroups(this.options);
+        this.searchForm.searchSysGroups(this.options);
             
-        this._on( this.searchRecord, {
+        this._on( this.searchForm, {
                 "searchsysgroupsonresult": this.updateRecordList
                 });
                 

@@ -125,16 +125,14 @@ $.widget( "heurist.resultList", {
             }
         }
 
-
-
         this.div_toolbar = $( "<div>" )
                 .addClass('div-result-list-toolbar ent_header')
-                .css({top:(this.div_header!=null)?'2.5em':'0'})
+                .css({top:(this.div_header!=null)?'2.5em':'0', 'border-bottom':'1px solid #cccccc'})
                 .appendTo( this.element );
         this.div_content = $( "<div>" )
                 .addClass('div-result-list-content ent_content_full')
                 .css({'top':(this.div_header!=null)?'5.5em':'2.5em',
-                              'overflow-y':'scroll', 'border-top':'1px solid #cccccc'})   //@todo - proper relative layout        
+                              'overflow-y':'scroll'})   //@todo - proper relative layout        
         /*'left':0,'right':'0.3em','overflow-y':'scroll','padding':'0em',
             'position':'absolute',
             'border-top': '1px solid #cccccc','bottom':'15px'
@@ -1547,9 +1545,9 @@ $.widget( "heurist.resultList", {
     //
     //
     //
-    getRecordsById: function (recID){
+    getRecordsById: function (recIDs){
             if(this._currentRecordset){
-                return this._currentRecordset.getSubSetByIds([recID]);
+                return this._currentRecordset.getSubSetByIds(recIDs);
             }else{
                 return null;
             }        
@@ -1561,6 +1559,18 @@ $.widget( "heurist.resultList", {
         this.recordList.find
         
         
+    },
+    
+    hideHeader: function(do_hide){
+        if(do_hide){
+            if(this.div_header!=null) this.div_header.hide();
+            this.div_toolbar.hide();
+            this.div_content.css('top','0px');
+        }else{
+            if(this.div_header!=null) this.div_header.show();
+            this.div_toolbar.show();
+            this.div_content.css('top',(this.div_header!=null)?'5.5em':'2.5em');
+        }
     }
 
 });
