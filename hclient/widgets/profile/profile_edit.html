@@ -21,7 +21,7 @@
 -->
 
 
-<form>
+<form  style="position:absolute;top:0;bottom:3.5em;left:0;right:0;overflow-y: auto;">
     <fieldset>
 
         <div class="mode-edit">
@@ -219,18 +219,19 @@
         </div>
     </div>
 
-    <div class="mode-registration">
+    <div class="mode-registration"">
         <p style="font-size:0.9em">
             Please read the Terms and Conditions of Use above, then click the Register button at the end of the page.
             Note: This system should not be used for the storage of confidential personally-identifiable information
             such as health information without the express permission of the system managers.</p>
         <p id="contactDetails"> (database owner)</p>
-        <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
-        <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
-
-
     </div>
 
+    <br />
+    <p class="messages"></p>
+    
 </form>
-<br />
-<p class="messages"></p>
+<div class="mode-registration" style="position:absolute;height:2em;bottom:0;width:90%">
+    <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
+    <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
+</div>
