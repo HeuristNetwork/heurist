@@ -114,7 +114,7 @@ var cfg_layouts = [
                 apps:[
                     {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
-                    {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
+                    {appid:'h3_recordListExt', name: 'Report', options:{title:'Report', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
                     {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
             ]}]
         }
