@@ -73,13 +73,13 @@ if ($addRecDefaults) {
                     if(defaults[0]){
                         $("#rectype_elt").val(defaults[0]);
                     }
-                    if(defaults[2]){
+                    if(defaults.length > 1 && defaults[2]){
                         $("#rec_NonOwnerVisibility").val(defaults[2]);
                     }
-                    if(defaults[4]){
+                    if(defaults.length > 3 && defaults[4]){
                         $("#add-link-tags").val(defaults[4]);
                     }
-                    if(defaults[5]){
+                    if(defaults.length > 4 && defaults[5]){
                         if(navigator.userAgent.indexOf('Safari')>0){
                             var event = document.createEvent("HTMLEvents");
                             event.initEvent("click", true, true);
@@ -93,8 +93,9 @@ if ($addRecDefaults) {
                     }
                     buildworkgroupTagselect(defaults[1] ? parseInt(defaults[1]) : null, defaults[3] ? decodeURIComponent(defaults[3]) : null );
                 }else{
+                    //from page params
                     var matches = location.search.match(/wg_id=(\d+)/);
-                    buildworkgroupTagselect(matches ? matches[1] : null);
+                    buildworkgroupTagselect(matches && matches.length>0 ? matches[1] : null);
 
                     // now user has to define access right explicitly
                     //$("#rec_NonOwnerVisibility").val(defAccess);

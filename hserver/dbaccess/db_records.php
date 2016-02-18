@@ -38,7 +38,7 @@
             return $system->addError(HEURIST_REQUEST_DENIED);
         }
 
-        $addRecDefaults = @$_SESSION[$system->dbname_full()]["preferences"]['addRecDefaults'];
+        $addRecDefaults = @$_SESSION[$system->dbname_full()]["preferences"]['record-add-defaults'];
         if ($addRecDefaults){
             if (@$addRecDefaults[0]){
                 $userDefaultRectype = intval($addRecDefaults[0]);

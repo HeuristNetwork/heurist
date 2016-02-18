@@ -54,7 +54,7 @@ if (strpos(@$_REQUEST["recID"], ",") !== false) {
 	if (! $recID) return;
 }
 
-$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
 if ($addRecDefaults){
 	if ($addRecDefaults[0]){
 		$userDefaultRectype = intval($addRecDefaults[0]);

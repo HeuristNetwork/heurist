@@ -102,8 +102,12 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
         return $msgInfoSaveRec;
     }
 
-    if ($vis && (!in_array(strtolower($vis),array('hidden','viewable','pending','public')))){
-        $vis = null;
+    if ($vis) {
+        $vis = strtolower(str_replace('"', "", $vis));
+        $isvalid = in_array(strtolower($vis),array('hidden','viewable','pending','public'));
+        if ($isvalid==false){
+            $vis = null;
+        }
     }
     $now = date('Y-m-d H:i:s');
 
@@ -112,6 +116,8 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
     // public records data
     if (!$recordID || $recordID<0) {  //new record
         //		$log .= "- inserting record ";
+        
+
         $recheader = array(
             "rec_RecTypeID" => $rectype,
             "rec_URL" => $url,
