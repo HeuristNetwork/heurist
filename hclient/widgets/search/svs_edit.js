@@ -60,8 +60,9 @@ function hSvsEdit(args) {
             var selObj = svs_ugrid.get(0);
             top.HEURIST4.ui.createUserGroupsSelect(selObj, top.HAPI4.currentUser.usr_GroupsList,
                 [{key:'bookmark', title:top.HR('My Bookmarks (private)')},
-                    {key:'all', title:top.HR('My Filters (private)')},
-                    {key:0, title:top.HR('Searches for guests')}],
+                    {key:'all', title:top.HR('My Filters (private)')}
+                    //{key:0, title:top.HR('Searches for guests')}  removed 2016-02-18
+                ],
                 function(){
                     svs_ugrid.val(top.HEURIST4.util.isempty(groupID)?'all':groupID); //  top.HAPI4.currentUser.ugr_ID);
             });
