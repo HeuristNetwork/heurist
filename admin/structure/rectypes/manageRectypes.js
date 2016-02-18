@@ -201,7 +201,7 @@ function RectypeManager() {
                         '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
                         '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="add" style="margin-right:1em"/>'+
                         '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
-                        
+
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
@@ -686,10 +686,10 @@ function RectypeManager() {
             };
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick;
-            
+
             var body = $(top.document).find('body');
             var dim = {h:body.innerHeight(), w:body.innerWidth()},
-            
+
             btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
             btnAddRecordType.onclick = function(){
                 var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/selectDBForImport.php?popup=1&db="+ db +
@@ -703,14 +703,14 @@ function RectypeManager() {
                     width: dim.w*0.95,
                     //callback: _import_complete
                 });
-                
-                
+
+
             };
             btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick
 
             //-------
-            
+
             btnAddRecordType = Dom.get('btnImportFromTemplate'+grpID);
             btnAddRecordType.onclick = function(){
                 var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ db +
@@ -724,13 +724,13 @@ function RectypeManager() {
                     width: dim.w*0.95,
                     //callback: _import_complete
                 });
-                
-                
+
+
             };
             btnAddRecordType2 = Dom.get('btnImportFromTemplate'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick
-            
-            
+
+
             /*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
             btnAddFieldType.onclick = function (e) {
             var currentTabIndex = tabView.get('activeIndex');
@@ -1127,7 +1127,7 @@ function RectypeManager() {
         Hul.popupURL(top, url,
             {   "close-on-blur": false,
                 "no-resize": false,
-                title:'Edit Record Tytpe',
+                title:'Edit Record Type',
                 height: dim.h*0.9,
                 width: 700,
                 callback: function(context) {
