@@ -122,16 +122,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 										_arr_selection = [];
 									}
 
-									if(datatype==="fieldsetmarker"){
-										var el = Dom.get('divFilterBySelection');
-										el.style.display = "none";
-										el = Dom.get('divFilterBySelectionLbl');
-										el.style.display = "none";
-										el = Dom.get('btnApply1');
-										el.style.display = "none";
-										el = Dom.get('btnApply2');
-										el.style.display = "none";
-									}else if (datatype==="select"){
+									if (datatype==="select"){
                                         Dom.get('btnApply1').value = "Select";
                                         Dom.get('btnApply2').value = "Select";
                                         //Dom.get('btnAllSelection').style.display = "block";
@@ -142,7 +133,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 				_dtyID = dtyID;
 				_reinit_table();
-
+                Dom.get('inputFilterByName').focus();
 	}
 
 	function _reinit_table()
@@ -161,7 +152,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 
 					if(Hul.isnull(_dtyID)){
-						lblSelect1.innerHTML = "ERROR: Detailtype was not found";
+						lblSelect1.innerHTML = "ERROR: Detail type was not found";
 						return;
 					}else{
 						lblSelect1.innerHTML = "";
@@ -498,7 +489,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 	}
 
 	function _showSelectCount(){
-				lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
+				lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> selected";
 				if(!Hul.isnull(lblSelect2)) {
 					lblSelect2.innerHTML = lblSelect1.innerHTML;
 				}
