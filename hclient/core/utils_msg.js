@@ -326,14 +326,17 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     checkLength: function( input, title, message, min, max ) {
         var message_text = top.HEURIST4.msg.checkLength2( input, title, min, max );
         if(message_text!=''){
-
+                                                  
+            top.HEURIST4.msg.showMsgFlash('<div class="ui-state-error" style="padding:10px">'+message_text+'</div>', 3000);
+            
+            /*
             if(message){
                 message.text(message_text);
-                message.addClass( "ui-state-highlight" );
+                message.addClass( "ui-state-error" );
                 setTimeout(function() {
-                    message.removeClass( "ui-state-highlight", 1500 );
-                    }, 500 );
-            }
+                    message.removeClass( "ui-state-error", 1500 );
+                    }, 3500 );
+            } */
 
             return false;
         }else{
@@ -354,14 +357,14 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 message_text = top.HR(title)+" "+top.HR("length must be between ") +
                 min + " "+top.HR("and")+" " + max + ". ";
                 if(len<min){
-                    message_text = message_text + (min-len) + top.HR(" characters left");
+                    //message_text = message_text + (min-len) + top.HR(" characters left");
                 }else{
                     message_text = message_text + (len-max) + top.HR(" characters over");
                 }
 
 
             }else if(min==1){
-                message_text = top.HR(title)+" "+top.HR("required field");
+                message_text = top.HR(title)+" "+top.HR(" is required field");
             }
 
             return message_text;

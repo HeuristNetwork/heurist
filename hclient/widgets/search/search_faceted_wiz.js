@@ -343,7 +343,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
-                var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
+                var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
                 if(!bValid){
                     svs_name.focus();
                     //top.HEURIST4.msg.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
