@@ -411,11 +411,8 @@ function addKMLLayer(source, index) {
     // KML file
     if(source.files !== undefined) {
         var fileURL = source.files[0];
-        /*fileURL = 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml'; works
-        fileURL = 'http://127.0.0.1/HEURIST_FILESTORE/artem_delete11/file_uploads/ulf_39_ulf_8_1925.kml';
-        fileURL = 'http://tudl0867.home.xs4all.nl/test-big.kml'; works
-        fileURL = 'http://127.0.0.1/HEURIST_FILESTORE/artem_delete11/file_uploads/test.kml';*/
-        
+
+        // note google refuses kml from localhost
         console.log("KML file: " + fileURL);
         // Display on Google Maps
         kmlLayer = new google.maps.KmlLayer({
