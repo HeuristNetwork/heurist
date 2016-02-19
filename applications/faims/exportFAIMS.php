@@ -296,7 +296,7 @@ $( document ).ready(function() {
 ?>
 </div>
 <script>
-var map_records = <?=json_format($map_records)?>;
+var map_records = <?php echo json_format($map_records);?>;
 $( document ).ready(function() {
     showSelectedRecTypes();
 });
@@ -1139,6 +1139,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
             $dt_type = $detail[$int_rt_dt_type];
 
+            
             $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
             $dtdisplaynamex = getProperName($dtdisplayname, $rt, $dtid);
 
@@ -1604,7 +1605,7 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
     $idx_rst_defaultvalue = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DefaultValue"];
 
     $event_section = '';
-
+                                        
     // Loop through each of the record types (ArchEntTypes) and output fields
     $rectyps = is_array($rt_toexport) ?$rt_toexport :explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
@@ -1728,7 +1729,7 @@ addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'
                 
                 if($is_hierarchy && !($is_repeatable && $termsCount<13)){
                     $makeVocab = '
-                            populateHierarchicalDropDown("'.$headername.'/'.$dtdisplaynamex.'", "'.$dtdisplaynamex.'");
+                            populateHierarchicalDropDown("'.$headername.'/'.$dtdisplaynamex.'", "'.prepareText($dtdisplayname).'");
 ';
                 }else{
                     
