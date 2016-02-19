@@ -1719,12 +1719,11 @@ addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'
             }else if ($dt_type=='enum') {
 
                 $is_hierarchy = (@$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['is_hierarchy']==true);
+                $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
                 
                 if($is_hierarchy && !($is_repeatable && $termsCount<13)){
                     $makeVocab = 'populateHierarchicalDropDown("'.$headername.'/'.$dtdisplaynamex.'", "'.$dtdisplaynamex.'");';
                 }else{
-                
-                    $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
                     
                     if($is_repeatable){
                         $action = 'populateCheckBoxGroup';
