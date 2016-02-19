@@ -1623,7 +1623,13 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
         
         $TEMPLATE_EVENTS .= 'rectypeToEntity.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
 ';
+        if( in_array($rt, $rt_geoenabled) ){
+        $TEMPLATE_EVENTS .= 'rectypeToEntityGeo.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
+';
+        }
 
+        $headername_uids = $rtnamex.'_uids';
+        
         //init navigation    
         $event_section .= '
 addOnEvent("'.$rtnamex.'", "show", "addNavigationButtons(\"'.$rtnamex.'\")");';
@@ -1634,10 +1640,9 @@ addOnEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
         $event_section .= '
 addOnEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
 
-
         $load_related_part = '';
         $save_related_part = '';
-
+        
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
         $hasattachfile = false;
@@ -1722,7 +1727,9 @@ addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'
                 $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
                 
                 if($is_hierarchy && !($is_repeatable && $termsCount<13)){
-                    $makeVocab = 'populateHierarchicalDropDown("'.$headername.'/'.$dtdisplaynamex.'", "'.$dtdisplaynamex.'");';
+                    $makeVocab = '
+                            populateHierarchicalDropDown("'.$headername.'/'.$dtdisplaynamex.'", "'.$dtdisplaynamex.'");
+';
                 }else{
                     
                     if($is_repeatable){
@@ -1734,14 +1741,15 @@ addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'
                     }
 
                     // makeVocab method
-                    $makeVocab = 'fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\' order by vocabcountorder",
+                    $makeVocab = '
+                            fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\' order by vocabcountorder",
                                   new FetchCallback() {
                                     onFetch(result) {
                                     '.
                                         $action.'("'.$headername.'/'.$dtdisplaynamex.'", result);
                                     }
-                                  });
-                                  ';
+                            });
+                            ';
                               
                 }
                 // Add to load selectors
@@ -2095,17 +2103,24 @@ function getTermsTree($property, $d_type, $terms){
     }
 
     if(is_numeric($terms)){ //vocabulary
+
         $termTree =  $dtTerms['treesByDomain'][$datatype][$terms];
     }else{
-        $termTree = json_decode($terms);
+
+        $termTree = json_decode($terms, true);
     }
+
     if(count($termTree)<1){
         return 0;
     }
 
     $parent = $property->addChild('lookup');
 
-    return createSubTree($parent, $termTree, "");
+    $cnt = createSubTree($parent, $termTree, "");
+
+//error_log($cnt.'  '.$terms);    
+    
+    return $cnt;
 }
 
 //
@@ -2124,14 +2139,16 @@ function isTermsHierarchical($d_type, $terms){
     if(is_numeric($terms)){ //vocabulary
         $termTree =  $dtTerms['treesByDomain'][$datatype][$terms];
     }else{
-        $termTree = json_decode($terms);
+        //individual selection
+        $termTree = json_decode($terms, true);
     }
+
     if(count($termTree)<1){
         return false;
     }
     
     foreach ($termTree as $termid=>$child_terms){
-        if($child_terms && count($child_terms)>0){
+        if($child_terms && is_array($child_terms) && count($child_terms)>0){
             return true;
         }
     }
@@ -2170,6 +2187,11 @@ function sortByCodeAlpha($a,$b){
 function createSubTree($parent, $termTree, $parentname){
 
     global $dtTerms, $ind_label, $datatype;
+    
+    if(!is_array($termTree) || count($termTree)<1){
+        return 0;
+    }
+    
     $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
     $ind_label = $dtTerms['fieldNamesToIndex']['trm_Label'];
     $ind_descr = $dtTerms['fieldNamesToIndex']['trm_Description'];

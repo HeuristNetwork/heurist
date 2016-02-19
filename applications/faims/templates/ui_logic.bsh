@@ -93,6 +93,7 @@ String last_invoker = null;
 List attachedGeometry = null;  //geometry object from map to be attached to current entity
 
 ArrayList rectypeToEntity = new ArrayList();
+ArrayList rectypeToEntityGeo = new ArrayList(); //geo-enabled entities 
 
 /*** START: this section of code depends on the module and entity types selected ***/
 {{TEMPLATE_EVENTS}}
@@ -493,6 +494,13 @@ onLoadEntity(String entid, String entName){
 
 // Returns the query to load information about a certain entity
 getEntityQuery(uid) {
+            
+    return "SELECT uuid, response "+
+                       "  FROM latestNonDeletedArchEntFormattedIdentifiers  "+
+                       " WHERE uuid = '"+uid+"'";
+}
+
+getEntityQuery_OLD(uid) {
     return  "SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext ||'; '|| (certainty * 100.0) || '% certain)',  "+
             "                                     measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)',  "+
             "                                     vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)',  "+
@@ -1200,7 +1208,7 @@ mapInit() {
     DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
     setSelectedLayer("control/map/map", DATA_ENTRY_LAYER);
 
-	populateDropDown("control/map/entityTypeList", rectypeToEntity);
+	populateDropDown("control/map/entityTypeList", rectypeToEntityGeo);
 
 	addOnEvent("control/map", "show", "clearStacks()");
 	addOnEvent("control/map/clear", "click", "onClearMap()");
