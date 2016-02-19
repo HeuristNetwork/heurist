@@ -130,6 +130,18 @@ $.widget( "heurist.manageEntity", {
                 +'</div>';
         }else if(this.options.layout_mode=='short'){ //short search form above list
         
+            layout = 
+                '<div class="ent_wrapper">'
+                        +'<div class="ent_wrapper" style="width:200px">'
+                        +    '<div class="ent_header searchForm"/>'     
+                        +    '<div class="ent_content_full recordList"/>'
+                        +'</div>'
+                        +'<div class="ent_wrapper" style="left:200px">'
+                        +    '<div class="ent_header editForm-toolbar"/>'
+                        +    '<div class="ent_content_full editForm"/>'
+                        +'</div>'
+                +'</div>';
+        
         
         }else if(this.options.layout_mode=='wide'){ //wide search form
 

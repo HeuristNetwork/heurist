@@ -23,7 +23,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _entityName:'defTerms',
     
     _treeview:null,
-
+    
+    _init: function() {
+        this.options.layout_mode='short';
+    
+        this._super();
+    },
     //  
     // invoked from _init after load entity config    
     //
@@ -47,49 +52,28 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 "searchdeftermsonfilter": this.filterRecordList
                 });
                 
-        if(this.options.list_mode=='treeview'){
-        
-            this.recordList = $('<div>')
-                    .addClass('ent_content_full')
-                    //.css({position: 'absolute', top:'6em', bottom:'1px', left:0, right:'1px'})
-                    .appendTo(this.wrapper);
-                    
-            $('<div>').addClass('div-result-list-toolbar ent_header').appendTo(this.recordList);
-            $('<div>').addClass('div-result-list-content ent_content_full').appendTo(this.recordList);
-                    
-        }else if(this.options.list_mode=='default'){
-        
-            this.recordList.resultList('option','hide_view_mode',true);    
+        if(this.options.list_mode=='default'){
+            this.recordList.resultList('hideHeader',true);
         }
         
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
-            
-            var add_action = {key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'};
-            //define add button on left side
-            this._defineActionButton(add_action, 
-                        (this.recordList)?this.recordList.find('.div-result-list-toolbar'):this.editFormToolbar,
-                        'full',{float:'left'});
+
+           //define add button on left side
+           this._defineActionButton({key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'}, 
+                        this.editFormToolbar, 'full',{float:'left'});
                 
-            if(this.options.edit_mode=='inline'){
+           this._defineActionButton({key:'add-child',label:'Add Child', title:'', icon:''},
+                    this.editFormToolbar);
+           this._defineActionButton({key:'add-import',label:'Import Children', title:'', icon:''},
+                    this.editFormToolbar);
+           this._defineActionButton({key:'merge',label:'Merge', title:'', icon:''},
+                    this.editFormToolbar);
                
-               this.ent_editor_wrapper.addClass('ent_wrapper');
-               
-               this._defineActionButton({key:'add-child',label:'Add Child', title:'', icon:''},
-                        this.editFormToolbar);
-               this._defineActionButton({key:'add-import',label:'Import Children', title:'', icon:''},
-                        this.editFormToolbar);
-               this._defineActionButton({key:'merge',label:'Merge', title:'', icon:''},
-                        this.editFormToolbar);
-                   
-               //define delete on right side
-               this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                        this.editFormToolbar,'full',{float:'right'});
-               
-            }else{
-               //no actions for pop-up ???
-            }
+           //define delete on right side
+           this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
+                    this.editFormToolbar,'full',{float:'right'});
        }
         
        return true;
@@ -103,7 +87,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super(event, data);
         
         if (this.options.list_mode=='treeview' && this._cachedRecordset && this.options.use_cache){
-            //prepare treeview data
+            //prepare treeview data (@todo keep in cache on client side)
             var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
             this._initTreeView( treeData );
         }
@@ -154,15 +138,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         if(this.options.edit_mode=='popup'){
             html = html
-            + '<div title="Click to edit term" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-            + '</div>&nbsp;&nbsp;'
-            + '<div title="Click to delete term" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-            + '</div>';
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
+            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
         }
-        
-
         return html+'</div>';
         
         
@@ -261,7 +239,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             };     */
             fancytree_options['filter'] = { highlight:false, mode: "hide" };  
 
-            this._treeview = this.recordList.find('.div-result-list-content').fancytree(fancytree_options);
+            this._treeview = this.recordList.fancytree(fancytree_options);
         
     },
                  
