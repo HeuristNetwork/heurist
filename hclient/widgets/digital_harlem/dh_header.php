@@ -31,26 +31,78 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
     $appcode = @$_REQUEST['app'];
     if($appcode=='DigitalHarlem1935'){
         $appcode = 4800; //4751;
+        
+        $stats = array();
+        
+        // Building query
+        $query = "SELECT count(*) as count FROM Records, recDetails WHERE rec_RecTypeID=14 and 
+          dtl_RecID = rec_ID and   
+          dtl_DetailTypeID=10 and dtl_Value between '1934-12-31' and '1936-01-01'";
+        $res = $system->get_mysqli()->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            $stats['14']= $row["count"];
+        }
+        
+        $query = "SELECT count(distinct d2.dtl_Value) as count 
+FROM Records, recDetails d1, recDetails d2 WHERE rec_RecTypeID=16 and 
+          d1.dtl_RecID = rec_ID and d2.dtl_RecID = rec_ID and     
+          d1.dtl_DetailTypeID=10 and d1.dtl_Value between '1934-12-31' and '1936-01-01' and
+          d2.dtl_DetailTypeID=90 ";
+ 
+/* alternative query          
+"SELECT count(distinct rl_TargetID) as count 
+FROM Records, recLinks, recDetails WHERE rec_RecTypeID=16 and 
+          rl_SourceID = rec_ID and rl_DetailTypeID=90 and
+          dtl_RecID = rec_ID and     
+          dtl_DetailTypeID=10 and dtl_Value between '1934-12-31' and '1936-01-01'"          
+*/        
+        $res = $system->get_mysqli()->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            $stats['16']= $row["count"];
+        }
+
+
+
+        $query = "SELECT rec_RecTypeID as id, count(*) as count FROM Records, recDetails WHERE rec_RecTypeID=15 and 
+          dtl_RecID = rec_ID and   
+          dtl_DetailTypeID=9 and dtl_Value between '1934-12-31' and '1936-01-01'
+          GROUP BY id";
+        $res = $system->get_mysqli()->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            $stats[$row["id"]]= $row["count"];
+        }
+
+        $statistics = '<p>Currently presenting '
+        .'<b title="Number of events">'.@$stats[14]
+        .'</b> events, <b title="Number of addresses">'.@$stats[16]
+        .'</b> addresses and <b title="Number of documents">'.@$stats[15]
+        .'</b> documentary sources related to Harlem, 1935</p>';
+        
     }else if($appcode=='DigitalHarlem'){
         $appcode = 4799; //4750; 
+        
+        // Building query
+        $query = "SELECT rec_RecTypeID as id, count(*) as count FROM Records WHERE rec_RecTypeID in (14,10,12,15) GROUP BY id";
+
+        // Put record types & counts in the table
+        $res = $system->get_mysqli()->query($query);
+        $stats = array();
+        while($row = $res->fetch_assoc()) { // each loop is a complete table row
+            $stats[$row["id"]]= $row["count"];
+        }
+
+        $statistics = '<p>Currently presenting <b title="Number of people">'.@$stats[10]
+        .'</b> people, <b title="Number of events">'.@$stats[14]
+        .'</b> events, <b title="Number of addresses">'.@$stats[12]
+        .'</b> addresses and <b title="Number of documents">'.@$stats[15]
+        .'</b> documentary sources related to Harlem, 1915-1930</p>';
+
     }
 
-    // Building query
-    $query = "SELECT rec_RecTypeID as id, count(*) as count FROM Records WHERE rec_RecTypeID in (14,10,12,15) GROUP BY id";
-
-    // Put record types & counts in the table
-    $res = $system->get_mysqli()->query($query);
-    $stats = array();
-    while($row = $res->fetch_assoc()) { // each loop is a complete table row
-        $stats[$row["id"]]= $row["count"];
-    }
-
-    $statistics = '<p>Currently presenting <b title="Number of people">'.@$stats[10]
-    .'</b> people, <b title="Number of events">'.@$stats[14]
-    .'</b> events, <b title="Number of addresses">'.@$stats[12]
-    .'</b> addresses and <b title="Number of documents">'.@$stats[15]
-    .'</b> documentary sources related to Harlem, 1915-1930</p>';
-
+    
 }
 ?>
 <html>
