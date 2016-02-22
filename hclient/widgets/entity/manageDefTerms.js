@@ -25,9 +25,24 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _treeview:null,
     
     _init: function() {
-        this.options.layout_mode='short';
+        this.options.layout_mode = 'short';
+        this.options.use_cache = true;
+
+        //for selection mode set some options
+        if(this.options.select_mode!='manager'){
+            this.options.width = 390;                    
+            this.options.edit_mode = 'none'
+        }
     
         this._super();
+        
+        //if(this.options.edit_mode=='inline'){
+        if(this.options.select_mode!='manager'){
+            //hide form 
+            this.editForm.parent().hide();
+            this.recordList.parent().css('width','100%');
+        }
+        
     },
     //  
     // invoked from _init after load entity config    
@@ -40,11 +55,25 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return false;
         }
 
-        this._entityIDfield = 'trm_ID'; //@todo - take it from config
-
         // init search header
         this.searchForm.searchDefTerms(this.options);
-            
+        
+        var iheight = 2;
+        //if(this.searchForm.width()<200){  - width does not work here  
+        if(this.options.select_mode=='manager'){            
+            iheight = iheight + 2;
+        }
+        if(top.HEURIST4.util.isempty(this.options.filter_groups)){
+            iheight = iheight + 2;    
+        }
+        this.searchForm.css({'height':iheight+'em'});
+        this.recordList.css({'top':iheight+0.4+'em'});
+
+        if(this.options.select_mode=='manager'){
+            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+        }
+
+        
         this._on( this.searchForm, {
                 "searchdeftermsonresult": this.updateRecordList
                 });
@@ -146,9 +175,36 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
     },
     
+    
+    _onActionListener:function(event, action){
+        
+        var isresolved = this._super(event, action);   //action is already defined in parent's method
+        
+        //@TODO !!!!!! it is not implemented properly!!!!!
+        this._currentDomain = this.searchForm.searchDefTerms('currentDomain');
+        this._currentParentID = null;
+                
+        if(isresolved) return;                        
+        
+        var recID = null;        
+        if(action && action.action){
+             recID =  action.recID;
+             action = action.action;
+        }
+                
+        if(action=='add-child'){
+            this._currentParentID = recID;
+            this._addEditRecord(-1);
+        }
+        
+    },
+    
     //  -----------------------------------------------------
     //
-    // perform special action for virtual fields 
+    // 1. returns values from edit form
+    // 2. performs special action for virtual and hidden fields 
+    // fill them with constructed and/or predefined values
+    // EXTEND this method to set values for hidden fields (for example parent term_id or group/domain)
     //
     _getValidatedValues: function(){
         
@@ -165,6 +221,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
         } 
 */        
+
+        if(!(fieldvalues['trm_ID']>0)){ //this addition - set values for parent id and domain
+            fieldvalues['trm_Domain'] = this._currentDomain;
+            fieldvalues['trm_ParentTermID'] = this._currentParentID;
+        }
+
         return fieldvalues;
         
     },
@@ -173,7 +235,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //  perform some after load modifications (show/hide fields,tabs )
     //
     _afterInitEditForm: function(){
-
+        this._super();
+        
+        var domain = this.searchForm.searchDefTerms('currentDomain');
+        var ele = this._editing.getFieldByName('trm_InverseTermId');
+        if(domain == 'relation'){
+            ele.show();
+        }else{
+            // hide inversion 
+            ele.hide();
+        }
+        
     },
     
 //----------------------------------------------------------------------------------    
@@ -269,8 +341,8 @@ function showManageDefTerms( options ){
         options.isdialog = true;
 
         manage_dlg = $('<div id="heurist-records-dialog">')
-        .appendTo( $('body') )
-        .manageDefTerms( options );
+                .appendTo( $('body') )
+                .manageDefTerms( options );
     }
 
     manage_dlg.manageDefTerms( 'popupDialog' );

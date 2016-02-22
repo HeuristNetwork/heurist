@@ -573,6 +573,9 @@ top.HEURIST4.util = {
 String.prototype.htmlEscape = function() {
     return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
 }
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
 
 if (!Array.prototype.indexOf)
 {

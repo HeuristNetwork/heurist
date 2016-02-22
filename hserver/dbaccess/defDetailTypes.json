@@ -1,6 +1,10 @@
 {
         "entityName": "defDetailTypes",
 
+        "tableName": "defDetailTypes",
+        
+        "tablePrefix": "dty",
+        
         "helpContent": "defDetailTypes.html",
         
         "searchFormContent": "searchDefDetailTypes.html",

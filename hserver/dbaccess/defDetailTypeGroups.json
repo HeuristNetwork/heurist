@@ -1,6 +1,9 @@
 {
         "entityName": "defDetailTypeGroups",
 
+        "tableName": "defDetailTypeGroups",
+        "tablePrefix": "dtg",
+        
         "helpContent": "defDetailTypes.html",
         
         "searchFormContent": "",
@@ -18,6 +21,7 @@
         "fields": [
                 {
                     "dtID": "dtg_ID",
+                    "keyField": true,
                     "dtFields":{
                         "dty_Type":"integer",
                         "dty_Role":"primary",
@@ -27,6 +31,7 @@
                 },
                 {
                     "dtID": "dtg_Name",
+                    "titleField": true,
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"title",

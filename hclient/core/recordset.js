@@ -399,6 +399,7 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
     */
     function _getFieldValue(record, fldname){
 
+        //this is field type ID  or field name (nominal for most common fields)
         if(!isNaN(Number(fldname)) || fldname.indexOf("dtl_")==0){  //@todo - search detail by its code
             var d = record['d'];
             if(d){
@@ -433,6 +434,8 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             return null;
         }
 
+        //either take value by index or by name
+        // record can be either array or object
         var idx = $.inArray(fldname, fields);
         if(isnull(record)){
             return null;

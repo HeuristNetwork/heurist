@@ -1,6 +1,9 @@
 {
         "entityName": "defTerms",
 
+        "tableName": "defTerms",
+        "tablePrefix": "trm",
+        
         "helpContent": "defTerms.html",
         
         "searchFormContent": "searchDefTerms.html",
@@ -19,6 +22,7 @@
         "fields": [
                 {
                     "dtID": "trm_ID",
+                    "keyField": true,
                     "dtFields":{
                         "dty_Type":"integer",
                         "dty_Role":"primary",
@@ -28,6 +32,7 @@
                 },
                 {
                     "dtID": "trm_Label",
+                    "titleField": true,
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"title",
@@ -47,7 +52,7 @@
                         "dty_Type":"resource",
                         "rst_DisplayName":"Inverse Relation type:",
                         "rst_DisplayHelpText": "Some relation type can be in pair. Example: IsSon and IsFather", 
-                        "rst_FieldConfig": {"entity":"DefTerms","filter_group":"relation","button_browse":true}
+                        "rst_FieldConfig": {"entity":"defTerms","filter_group":"relation","button_browse":true}
                     }
                 },
                 {

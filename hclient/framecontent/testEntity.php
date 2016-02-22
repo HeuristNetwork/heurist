@@ -357,10 +357,10 @@ print $targetPath.'<br>';
                     <button onclick="testEntity(false)">show on this page</button>
                 </div>
             </div>
-        <div id="main_div" style="position:fixed;height:700;width:700;border:1px solid">
+        <div id="main_div" style="position:absolute;top:250px;min-height:300px;width:700;border:1px solid">
         </div>
         
-        <div id="selected_div" style="float:right;height:700;width:200;border:1px solid">
+        <div id="selected_div" style="float:right;width:200;border:1px solid">
         </div>
         
     </body>
