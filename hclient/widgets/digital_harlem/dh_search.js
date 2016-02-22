@@ -53,6 +53,7 @@ $.widget( "heurist.dh_search", {
         this.search_pane  = $( "<div>" ).css({'height'
             :'100%' }).appendTo( this.element ).hide();
 
+        // BUTTON - KEEP CURRENT RESULT SET AS LAYER
         this.res_div = $('<div>')
         .css({'margin-botton':'1em', 'font-size':'0.9em','padding':'10px','text-align':'center'})
         .appendTo(this.search_pane).hide();
@@ -270,7 +271,9 @@ $.widget( "heurist.dh_search", {
     },
 
 
-
+     //
+     // START SEARH
+     //
     _doSearch2: function(svsID){
 
         var qsearch = this.usr_SavedSearch[svsID][_QUERY];
@@ -359,8 +362,9 @@ $.widget( "heurist.dh_search", {
     },
 
 
-
-    // add layer to current map document
+    //
+    // add current reuslt set as layer to current map document
+    //
     _onAddLayer: function(){
 
         var app = top.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');

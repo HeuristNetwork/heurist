@@ -53,6 +53,7 @@ $.widget( "heurist.dh_maps", {
 
 
             //531 (not individ), 4802 (35), 4803 (pre35)
+            //LOAD MAP DOCUMENTS
             var query = {"t":"19"};
             if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
                 query["f:144"] = "4802";

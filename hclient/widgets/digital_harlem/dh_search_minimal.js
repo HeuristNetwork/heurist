@@ -226,7 +226,7 @@ function hSearchMinimalDigitalHarlem() {
     TERM_PATH = 4537;
 
 
-    var DH_RECORDTYPE = 13,
+    var DH_RECORDTYPE = 13, //special record type to display links on map
     DH_LINKS = 9999999;  //special record type
 
 
@@ -286,7 +286,7 @@ function hSearchMinimalDigitalHarlem() {
                                 var rel_event = records[ eventID ];
                                 //var rec_ID_event = recordset.fld(rel_event, 'rec_ID')
 
-                                recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
+                                recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //change record type 
                                 recordset.setFld(record, 'rec_Icon',   'term'+recordset.fld(rel_event, DT_EVENT_TYPE) );
                                 recordset.setFld(record, 'rec_Title',  recordset.fld(rel_event, 'rec_Title') );
                                 recordset.setFld(record, DT_STARTDATE, recordset.fld(rel_event, 'dtl_StartDate' ) );
@@ -301,7 +301,7 @@ function hSearchMinimalDigitalHarlem() {
                                         top.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+top.HAPI4.database
                                         +"&recID="+eventID+"&addrID="+recID);
 
-                                    //add links for this person
+                                    //add links for this event
                                     if(!links[ eventID ]){
                                         links[ eventID ] = {primary:[], secondary:[], is_event:true, path:[] };
                                     }
@@ -351,7 +351,7 @@ function hSearchMinimalDigitalHarlem() {
                                 var relation_type = recordset.fld(relrec, DT_RELATION_TYPE);
 
                                 recordset.setFld(record, 'rec_RecTypeID', DH_RECORDTYPE); //?????
-                                recordset.setFld(record, 'rec_Icon',     'term'+relation_type );
+                                recordset.setFld(record, 'rec_Icon',     'term'+relation_type );   //role at this address: resident (primary)
 
                                 var recInfoUrl = top.HAPI4.basePathV4 + "hclient/widgets/digital_harlem/dh_popup.php?db="+top.HAPI4.database+"&recID="+
                                 recordset.fld(rel_person, 'rec_ID')+"&addrID="+recID;
@@ -427,7 +427,7 @@ function hSearchMinimalDigitalHarlem() {
                         recordset.setFld(pathAddr, 'rec_Shape', [{polyline:vertices}] );
                         continue;
                     }
-                }
+                }//event path
 
                 for(i=0; i<links[recID].primary.length; i++){
 
