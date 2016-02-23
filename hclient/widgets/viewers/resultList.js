@@ -1246,7 +1246,7 @@ $.widget( "heurist.resultList", {
                     smenu = smenu + '<li>...</li>';
                 }
             }else{
-                $( "<button>", { title: "1"}).css({'font-size':'0.7em'}).button()
+                $( "<button>", { text: "1"}).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages ).on("click", function(){ that._renderPage(0); } );
                 if(start!=2){
                     $( "<span>" ).html("..").appendTo( span_pages );
@@ -1258,7 +1258,7 @@ $.widget( "heurist.resultList", {
                 smenu = smenu + '<li id="page'+(i-1)+'"><a href="#">'+i+'</a></li>'
             }else{
 
-                var $btn = $( "<button>", { title: ''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
+                var $btn = $( "<button>", { text:''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages )
                 .click( function(event){
                     var page = Number(this.id.substring(4));
@@ -1279,7 +1279,7 @@ $.widget( "heurist.resultList", {
                 if(finish!= pageCount-1){
                     $( "<span>" ).html("..").appendTo( span_pages );
                 }
-                $( "<button>", { title: ''+pageCount }).css({'font-size':'0.7em'}).button()
+                $( "<button>", { text: ''+pageCount }).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
             }
         }
