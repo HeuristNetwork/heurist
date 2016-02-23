@@ -2,6 +2,8 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../../h4styles.css" />
+    <!-- script type="text/javascript" src="../core/utils_browser.js"></script -->
+    <script type="text/javascript" src="../../ext/js/platform.js"></script>
     <style>
     div{
         border:1px solid gray;
@@ -9,8 +11,8 @@
     </style>
 </head>
 <body>
-
-<div class="ent_wrapper">
+<!--
+<divxclass="ent_wrapper">
     <div class="ent_header">
         Search header
     </div>
@@ -34,7 +36,18 @@
     
     </div>
 </div>
-
-  
+-->
+<div>
+<script>
+document.write(' name:'+
+platform.name+' ver:'+
+platform.version+' product:'+ // '5.1'
+platform.product+' manufact:'+ // 'iPad'
+platform.manufacturer+' layout:'+ // 'Apple'
+platform.layout+' os:'+ // 'WebKit'
+platform.os+' notes:'+ // 'iOS 5.0'
+platform.description);
+</script>
+</div>
 </body>
 </html>

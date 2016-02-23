@@ -75,19 +75,6 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
 
-        <!-- DOCUMENTATION TODO: What are these, why are they commented out -->
-        <!-- these widgets are loaded dynamically, but for debug they should be loaded explicitely
-
-        @TODO: FOLLOWING FILE IS NOT IN THIS LOCATION
-        <script type="text/javascript" src="hclient/widgets/profile/profile.js"></script>
-
-        <script type="text/javascript" src="hclient/widgets/viewers/recordDetails.js"></script>
-        <script type="text/javascript" src="hclient/widgets/topmenu/mainMenu.js"></script>
-        script type="text/javascript" src="hclient/widgets/search.js"></script>
-        <script type="text/javascript" src="hclient/widgets/rec_list.js"></script>
-        <script type="text/javascript" src="hclient/widgets/pagination.js"></script>
-        <script type="text/javascript" src="hclient/widgets/rec_list.js"></script>
-        -->
         <!-- DEBUG -->
 
         <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
@@ -104,6 +91,9 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
         <!--  media viewer -->
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
 
+        <!-- os, browser detector -->
+        <script type="text/javascript" src="ext/js/platform.js"></script>
+        
         <script type="text/javascript">
 
            function onPageInit(success){
@@ -175,6 +165,13 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
                 $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
 
+                var os = platform?platform.os.family.toLowerCase():'';
+                if(os.indexOf('android')>=0 || os.indexOf('ios')>=0){
+                    top.HEURIST4.msg.showElementAsDialog(
+                        {element:document.getElementById('heurist-platform-warning'),
+                         width:480, height:220,
+                         title: 'Welcome',
+                        buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  }
 
             }
 
@@ -216,6 +213,12 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                 the License.
             </p>
         </div>
+        
+        <div id="heurist-platform-warning">
+            <p style="padding:10px">Heurist is designed primarily for use with a keyboard and mouse. Tablets are not fully supported at this time, except for data collection on Android (see FAIMS in the Help system).</p>
+
+            <p style="padding:10px">Please contact the Heurist developers (info at HeuristNetwork dot org) for further information or to express an interest in a tablet version</p>
+        </div> 
 
         <div id="heurist-dialog">
         </div>
