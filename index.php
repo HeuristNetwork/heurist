@@ -166,7 +166,7 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                 $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
 
                 var os = platform?platform.os.family.toLowerCase():'';
-                if(os.indexOf('android')>=0 || os.indexOf('ios')>=0){
+                if(os.indexOf('android')>=0 || os.indexOf('ios')>=0){ //test || os.indexOf('win')>=0
                     top.HEURIST4.msg.showElementAsDialog(
                         {element:document.getElementById('heurist-platform-warning'),
                          width:480, height:220,
@@ -214,7 +214,7 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
             </p>
         </div>
         
-        <div id="heurist-platform-warning">
+        <div id="heurist-platform-warning" style="display:none;">
             <p style="padding:10px">Heurist is designed primarily for use with a keyboard and mouse. Tablets are not fully supported at this time, except for data collection on Android (see FAIMS in the Help system).</p>
 
             <p style="padding:10px">Please contact the Heurist developers (info at HeuristNetwork dot org) for further information or to express an interest in a tablet version</p>

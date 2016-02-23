@@ -246,7 +246,7 @@ $.widget( "heurist.resultList", {
                 .appendTo( this.div_toolbar );
         
         this.span_info = $( "<div>")
-                .css({'float':'right','padding':'0.6em 0.5em 0','font-style':'italic'})
+                .css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
                 .appendTo( this.div_toolbar );
 
         this._showHideOnWidth();
@@ -480,11 +480,14 @@ $.widget( "heurist.resultList", {
             }else{
                 this.span_pagination.hide();
             }
-            if ( w > 370 ) {
+            if ( true || w > 340 ) {
                 this.span_info.show();
             }else{
                 this.span_info.hide();
             }
+            
+            this._updateInfo();
+            
     },
 
     //
@@ -1121,15 +1124,41 @@ $.widget( "heurist.resultList", {
 
         var total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
 
-        var sinfo = "Records: "+total_inquery;
+        var sinfo = 'Records: '+total_inquery;
 
         this.span_pagination.attr('title', sinfo);
         
+        var w = this.element.width();
+        
         if(this.options.select_mode=='select_multi' && this._currentSelection!=null && this._currentSelection.length()>0){
-            sinfo = sinfo + " | Selected: "+this._currentSelection.length()+' <a href="#">clear</a>';
+            sinfo = sinfo + " | Selected: "+this._currentSelection.length();
+            if(w>400){
+                sinfo = sinfo+' <a href="#">clear</a>';
+            }
         }
         
-        this.span_info.html(sinfo);
+        if(w<380){
+            this.span_info.prop('title',sinfo);
+            if(w<320){
+                this.span_info.hide();
+            }else {
+                this.span_info.show();
+            
+                if(w<340){
+                    this.span_info.html(total_inquery<1000?total_inquery:'i');
+                }else if(w<360){
+                    this.span_info.html(total_inquery);
+                }else{
+                    this.span_info.html('Rec:'+total_inquery);
+                }
+            }
+            
+        }else{
+            this.span_info.prop('title','');
+            this.span_info.html(sinfo);
+        }
+        
+        
 
         if(this.options.select_mode=='select_multi'){
             var that = this;

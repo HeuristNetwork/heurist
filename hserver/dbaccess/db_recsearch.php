@@ -696,7 +696,7 @@ if(@$params['debug']) echo $query."<br>";
                 $chunk_size = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{
-                $chunk_size = $system->user_GetPreference('search_detail_limit');
+                $chunk_size = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
             }
 
 
@@ -730,7 +730,7 @@ if(@$params['debug']) echo $query."<br>";
 
                     $records = array();
 
-                    while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //3000 max allowed chunk
+                    while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {
                         array_push($records, (int)$row[0]);
                     }
                     $res->close();
