@@ -639,7 +639,7 @@ function _addQueryLayer(source, index) {
     }
 }
 
-var colors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
+var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
 var colors_idx = -1;
 
 /**
@@ -708,9 +708,9 @@ function _addRecordsetLayer(source, index) {
                 var lt = top.HAPI4.sysinfo['layout'];
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
 
-                    if(colors_idx>=colors.length) colors_idx = -1;
+                    if(colors_idx>=myColors.length) colors_idx = -1;
                     colors_idx++;
-                    source.color = colors[colors_idx];
+                    source.color = myColors[colors_idx];
                 
                     //points
                     mapdata = recset.toTimemap(source.id, null, source.color, 1); //main geo only
@@ -903,7 +903,7 @@ function _editLayerProperties( dataset_id, callback ){
                 //      change titles in overlay, legend, timeline
                 //      if required loop mapdata.options.items to change color and reload dataset
                 var new_title = layer_name.val();
-                var new_color = $dlg_edit_layer.find("#layer_color").css('background-color');
+                var new_color = $dlg_edit_layer.find('#layer_color').css('background-color');
                 var mapdata = edit_mapdata;
 
                 if(top.HEURIST4.util.isnull(mapdata) && !top.HEURIST4.util.isnull(top.HAPI4.currentRecordset)){  //add current record set
@@ -999,7 +999,10 @@ function _editLayerProperties( dataset_id, callback ){
             }else{
                 $dlg_edit_layer.find("#layer_name").val('').removeClass( "ui-state-error" );
             }
-            $dlg_edit_layer.find("#layer_color").val(mapdata.color);
+            var colorPicker = $dlg_edit_layer.find("#layer_color");
+            colorPicker.css('background-color', mapdata.color)
+                       .val(mapdata.color);
+                       
             $dlg_edit_layer.find(".messages").removeClass( "ui-state-highlight" ).text('');
        }
                
@@ -1033,6 +1036,7 @@ function _editLayerProperties( dataset_id, callback ){
                    //color:'#f00',
                    opacity: false,
                    //valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
+                   memoryColors:myColors,
                    cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}',
                    renderCallback: function($elm, toggled){
                         if($elm && !toggled){
