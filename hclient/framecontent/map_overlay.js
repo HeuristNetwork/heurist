@@ -164,9 +164,9 @@ function _removeMapDocumentOverlays() {
 }
 
 //
+// dependent_layers -  dependent map layers  [{key :title}]
 //
-//
-function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
+function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_layers, ontop){
 
     var overlay = null,
         legendid,
@@ -182,9 +182,9 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
     }
     if(!overlay) return;
 
-    var legenditem = $('<div style="display:block;padding:2px;" id="'
+    var legenditem = '<div style="display:block;padding:2px;" id="'
             + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
-            + overlay_idx+'" id="chbox-'+legendid+'" data-mapdataid="'+overlay.id+'" '
+            + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
             + (overlay.visible?'checked="checked">':'>')
             + ((ismapdoc)
             ? ('<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
@@ -193,7 +193,10 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
             : ('<div style="display:inline-block;border:6px solid '+icon_or_color+'" />')
             )
             + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
-            + '</label></div>');
+            + '</label></div>';
+       
+       
+    legenditem = $(legenditem);
             
     var legend_content = $("#legend .content");    
             
@@ -216,7 +219,7 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
         legend_content.append(legenditem);
     };
     
-    legenditem.find("input").change(_showHideLayer);
+    legenditem.find(".overlay-legend").change(_showHideOverlay);
 
     if(!ismapdoc){
     
@@ -242,13 +245,27 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
         .appendTo(legenditem);
     
     }
+    //add linked layers
+    
+    if(top.HEURIST4.util.isArrayNotEmpty(dependent_layers)){     
+        var idx;
+        for (idx in dependent_layers){
+            var mapdata_id = dependent_layers[idx].key;
+            var mapdata_title = dependent_layers[idx].title;
+            $('<div style="font-size:smaller;padding-left:16px"><label><input type="checkbox" '
+            + ' data-mapdataid="'+mapdata_id+'" class="overlay-legend-depend" '+(overlay.visible?'checked="checked">':'>')
+            + mapdata_title + '</label></div>').appendTo(legenditem);        
+        }            
+        legenditem.find(".overlay-legend-depend").change(_showHideLayer);
+    }
+    
 
 }      
 
 //
 //
 //
-function _showHideLayer(event){
+function _showHideOverlay(event){
         // Hide or display the layer
         var overlay_idx = $(this).prop("value");
         var checked = $(this).prop("checked");
@@ -260,7 +277,13 @@ function _showHideLayer(event){
             overlay.visible = checked;
         }
 }
+function _showHideLayer(event){
+        var mapdata_id = $(this).attr('data-mapdataid');
+        var checked = $(this).prop("checked");
 
+        mapping.showDataset(mapdata_id, checked);
+}
+    
 //
 // assign listeners for checkboxes
 //
@@ -314,8 +337,8 @@ function _addLayerOverlay(bounds, layer, index) {
             _addQueryLayer(source, index);
         }
         
-        _addLegendEntryForLayer(index, layer.title, top.HAPI4.iconBaseURL + source.rectypeID + '.png');
-        //_addLegendEntryForLayer(index, source.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png', false );
+        if(source.rectypeID != RT_MAPABLE_QUERY)
+            _addLegendEntryForLayer(index, layer.title, top.HAPI4.iconBaseURL + source.rectypeID + '.png');
         
     }
 }
@@ -616,6 +639,9 @@ function _addQueryLayer(source, index) {
     }
 }
 
+var colors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
+var colors_idx = -1;
+
 /**
 *  if recordset has property mapenabled = true, convert recordset to timemap and vis_timeline formats 
 *  if mapenabled = false the request to server side is performed for first 1000 map/time enabled records
@@ -645,7 +671,7 @@ function _addRecordsetLayer(source, index) {
                                    detail: 'timemap', 
                                    limit: MAXITEMS};  // in any case it is limited on server side for detail: 'timemap'
                     
-                    if(recset.length()<2001){ //limit query by id
+                    if(recset.length()<2001){ //limit query by id otherwise use current query
                         source.query = { q:'ids:'+recset.getIds().join(',') };
                     }else{
                         var curr_request = recset.getRequest();
@@ -681,49 +707,67 @@ function _addRecordsetLayer(source, index) {
                
                 var lt = top.HAPI4.sysinfo['layout'];
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
+
+                    if(colors_idx>=colors.length) colors_idx = -1;
+                    colors_idx++;
+                    source.color = colors[colors_idx];
                 
                     //points
                     mapdata = recset.toTimemap(source.id, null, source.color, 1); //main geo only
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
-                    _addRecordsetLayer({id:mapdata.id, mapdata: mapdata}, index);
-
+                    
+                    mapdata.depends = [];
+                    
                     //links
-                    mapdata = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
-                    mapdata.id = source.id+'_links';
-                    mapdata.title = (source['title']?source['title']:source.id) + ' links';
-                    mapdata.timeenabled = 0;
-                    mapdata.timeline = {items:[]};
-                    if(mapdata.mapenabled>0){
-                        _addRecordsetLayer({id:mapdata.id, mapdata: mapdata}, (mapdata.id=='main_links')?mapdata.id:(index+1000));
-                    }else if(mapdata.id=='main_links'){
-                        _removeOverlayById( 'main_links' );
+                    var mapdata2 = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
+                    mapdata2.id = "link_"+top.HEURIST4.util.random();
+                    mapdata2.title = 'Links';
+                    mapdata2.timeenabled = 0;
+                    mapdata2.timeline = {items:[]};
+                    if(mapdata2.mapenabled>0){
+                        mapdata.depends.push(mapdata2);
                     }
-                    return;   
-                }
-                mapdata = recset.toTimemap(source.id, null, source.color);
+                    
+                }else{
                 
-                mapdata.id = source.id;
-                mapdata.title = source['title']?source['title']:mapdata.id;
+                    mapdata = recset.toTimemap(source.id, null, source.color);
+                    mapdata.id = source.id;
+                    mapdata.title = source['title']?source['title']:mapdata.id;
+                }
             }
     }    
             
 
             //mapping.load(mapdata);
             if (mapping.addDataset(mapdata)){ //see map.js
+            
+                //add depends
+                var dependent_layers = [];
+                if(top.HEURIST4.util.isArrayNotEmpty(mapdata.depends)){
+                    var idx;
+                    for (idx in mapdata.depends){
+                        var dep_mapdata = mapdata.depends[idx];
+                        mapping.addDataset(dep_mapdata);
+                        dependent_layers.push({key:dep_mapdata.id, title:dep_mapdata.title});
+                    }
+                }
+            
 
                var overlay = {
                     id: mapdata.id,
                     title: mapdata.title,
+                    dependent_layers: dependent_layers,
                     visible:true,
                     setVisibility: function(checked) {
                         this.visible = checked;
                         mapping.showDataset(this.id, checked); //mapdata.id
-                        
-                        var overlay2 = _getOverlayByMapdataId(this.id+'_links');
-                        if(overlay2!=null){
-                            overlay2.setVisibility(checked);
-                            var cb = $("#legend .content").find('input[data-mapdataid="'+overlay2.id+'"]');
+
+                        var idx;
+                        for (idx in this.dependent_layers){
+                            var mapdata_id = this.dependent_layers[idx].key;
+                            mapping.showDataset(mapdata_id, checked);
+                            var cb = $("#legend .content").find('input[data-mapdataid="'+mapdata_id+'"]');
                             if(cb.length>0){
                                 cb.prop('checked',checked);
                             }
@@ -731,49 +775,39 @@ function _addRecordsetLayer(source, index) {
                     },
                     removeOverlay: function(){
                         mapping.deleteDataset( this.id ); //mapdata.id);
+                        var idx;
+                        for (idx in this.dependent_layers){
+                            mapping.deleteDataset( this.dependent_layers[idx].key );
+                        }
                     },
                     editProperties: function(){
                         _editLayerProperties( this.id );    
-                        
-                        //overlay.title = 
-                        //color
-                        
                     }
                };
                if(index>=0){  //this layer belong to map document
                     overlays[index] = overlay;
                     
-                    _addLegendEntryForLayer(index, mapdata.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png');
+                    _addLegendEntryForLayer(index, mapdata.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png', dependent_layers);
                     
                }else{ // this layer is explicitely (by user) added
-                    //index = 'A'+top.HEURIST4.util.random();
-                    //overlays_not_in_doc[index] = overlay;
 
                     var sMsg = '';
+/*  @todo - move this warning to legend
                     if(mapdata.mapenabled > MAXITEMS){
                            sMsg = mapdata.mapenabled +' records to display on this map';
                     }
                     if(mapdata.timeenabled > MAXITEMS){
                            sMsg = (sMsg?' and ':'') + mapdata.timeenabled +' records to display on timeline';
                     }
-                    if(sMsg!=''){
+                    if(sMsg!=''){ 
 
     sMsg = '<p style="padding-bottom:1em;">There are '+ sMsg +', which exceeds the limit of '+MAXITEMS+' records set in your profile.</p>'
     + '<p style="padding-bottom:1em;">Google Maps and VIS Timeline do not work well with thousands of objects, and may hang your browser or cause it to report the page as non-responsive. Only the first '+MAXITEMS+' records will therefore be displayed.</p>'
     + '<p>We recommend refining your filters to retrieve fewer records before mapping. You may also change the record limits for map and timeline in Profile &gt; My Preferences.</p>';
-
-
                             overlay.title = overlay.title + ' <span style="font-weight:bold;color:red">(Partial)</span>'
                     }
-
-
-
-                    /*if(!overlays_not_in_doc[source.id])
-                    {
-                        overlays_not_in_doc[source.id] = overlay;
-                        $("#legend .content").find('#'+source.id).remove();
-                    }*/
-
+*/
+                    //remove previous entry
                     overlays_not_in_doc[source.id] = overlay;
                     var legenditem = $("#legend .content").find('#'+source.id);
                     if(legenditem.length>0) legenditem.remove();
@@ -782,8 +816,8 @@ function _addRecordsetLayer(source, index) {
                        setTimeout(function(){top.HEURIST4.msg.showMsgErr(sMsg);}, 1000);
                     }
 
-                    //top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png'
-                    _addLegendEntryForLayer(source.id, mapdata.title, mapdata.color, true );
+                    //show custom query on top
+                    _addLegendEntryForLayer(source.id, mapdata.title, mapdata.color, dependent_layers, true );
                }
                
                
@@ -831,16 +865,10 @@ function _removeOverlayById( overlay_id ){
         } catch(err) {
             console.log(err);
         }
-        var mapdataid = null;
         if(ismapdoc){
-            //mapdataid = overlays_not_in_doc[overlay_id].id;
             delete overlays_not_in_doc[overlay_id];
         }else{
-            mapdataid = overlay_id;
             delete overlays[overlay_id];
-        }
-        if(mapdataid!=null){
-            _removeOverlayById(mapdataid+'_links');
         }
         
         _initLegendListeners();
@@ -906,7 +934,7 @@ function _editLayerProperties( dataset_id, callback ){
                         };                 
                         _addRecordsetLayer({id:mapdata.id, title:new_title, mapdata:mapdata}, -1);
                 
-                }else if(mapdata.id=='main'){ 
+                }else if(mapdata.id=='main'){  //rename and keep on map
                         
                         mapdata.id = "dhs"+top.HEURIST4.util.random();
                         mapdata.title = new_title;
@@ -917,11 +945,24 @@ function _editLayerProperties( dataset_id, callback ){
                             mapdata.timeline.items[i].id = mapdata.id + '-' +  mapdata.timeline.items[i].recID;
                             mapdata.timeline.items[i].group = mapdata.id 
                         }
+                        //change color for dependent
+                        var idx;
+                        for (idx in mapdata.depends){
+                            var dep_mapdata = mapdata.depends[idx];
+                            mapping.changeDatasetColor( dep_mapdata.id, new_color, false);
+                        }
                         
                         //remove old 
                         _removeOverlayById( 'main' );
                         //add new    
                         _addRecordsetLayer({id:mapdata.id, title:new_title, mapdata:mapdata}, -1);
+                        
+                        /*var idx;
+                        for (idx in mapdata.depends){
+                            var dep_mapdata = mapdata.depends[idx];
+                            mapping.addDataset(dep_mapdata);
+                        }*/
+                        
                 }else{
                     
                     if(mapdata.title!=new_title){
@@ -933,7 +974,15 @@ function _editLayerProperties( dataset_id, callback ){
                     if(mapdata.color!=new_color){
                         $("#legend .content").find('#'+mapdata.id+'>div').css('border-color',new_color);
                     }
+                    
+                    var idx;
+                    for (idx in mapdata.depends){
+                        var dep_mapdata = mapdata.depends[idx];
+                        mapping.changeDatasetColor( dep_mapdata.id, new_color, true);
+                    }
                     mapping.changeDatasetColor( mapdata.id, new_color, true );
+                    
+                    
                 }
                 
                 $dlg_edit_layer.dialog("close"); 
@@ -947,10 +996,10 @@ function _editLayerProperties( dataset_id, callback ){
            
             if( mapdata && mapdata.id!='main' ){
                 $dlg_edit_layer.find("#layer_name").val(mapdata.title).removeClass( "ui-state-error" );
-                $dlg_edit_layer.find("#layer_color").val(mapdata.color);
             }else{
                 $dlg_edit_layer.find("#layer_name").val('').removeClass( "ui-state-error" );
             }
+            $dlg_edit_layer.find("#layer_color").val(mapdata.color);
             $dlg_edit_layer.find(".messages").removeClass( "ui-state-highlight" ).text('');
        }
                
