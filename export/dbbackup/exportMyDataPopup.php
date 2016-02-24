@@ -73,8 +73,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             ?>
 
             <p><b>This function is available to database adminstrators only (you are a database administrator).</b></p>
-            <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump, and as a
-                directory of attached files (image files, video, XML, maps, documents etc. which have been uploaded or indexed in situ).</p>
+            <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump, as textual and wordprocessor descriptions of the structure of Heurist and of your database, and as a directory of attached files (image files, video, XML, maps, documents etc. which have been uploaded or indexed in situ).</p>
             <p>Attached files may be omitted by unchecking the first checkbox. This may be useful for databases with lots of attached files
                 which are already backed up elsewhere.</p>
             <p>By default the HML file contains all the records to which the current user (administrator) has access, but you can restrict this
@@ -139,7 +138,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $_REQUEST['rev'] = 'no'; //do not include reverce pointers
             $_REQUEST['filename'] = $folder."/backup.xml";
 
-            print "Export as flathml<br>";
+            print "Export as HML (Heurist Markup Language = XML)<br>";
             ob_flush();flush();
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
