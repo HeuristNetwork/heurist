@@ -228,7 +228,8 @@
             if(is_numeric($recTypeId) && $recTypeId!=$rt_ID){
          
                 
-                $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                $details = @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                if(!is_array($details)) continue;
                 
                 foreach ($details as $dtID => $dtValue){
                 
