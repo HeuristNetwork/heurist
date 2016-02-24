@@ -136,16 +136,20 @@ function executeSmartyTemplate($params){
 
     }else if(@$params['h4']==1){ //search with h4 search engine
 
+/*    for future use
+        $params['detail']='ids';
+        $params['vo']='h3';
+        $qresult = recordSearch($system, $params);
+*/    
         $url = "";
         foreach($params as $key=>$value){
             $url = $url.$key."=".urlencode($value)."&";
         }
 
-
         $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
 
-        $result = loadRemoteURLContent($url);
-
+        $result = loadRemoteURLviaSocket($url);// loadRemoteURLContent($url);
+        
         $qresult = json_decode($result, true);
 
     }else{
