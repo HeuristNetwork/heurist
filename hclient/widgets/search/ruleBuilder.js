@@ -308,7 +308,9 @@ $.widget( "heurist.ruleBuilder", {
         // c. all recordtypes contrained in pointer and relmarkers fields
 
         var rectypes = top.HEURIST4.rectypes,
-        details = rectypes.typedefs[rt_ID];
+        details = rectypes.typedefs[rt_ID],
+        source_rt_name = rectypes.names[rt_ID];
+        
 
         if(details){
             details = details.dtFields;
@@ -359,12 +361,13 @@ $.widget( "heurist.ruleBuilder", {
                             temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) )
                             ?  temp.split(",") :[];
                             if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
-                            arr_fields.push({key:dtyID, title:name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
+                            arr_fields.push({key:dtyID, title: source_rt_name + ' >> ' + name, 
+                                    terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
 
                         }else{ // pointer field
 
                             this._has_pointers = '1';
-                            arr_fields.push({key:dtyID, title:name, rectypes:constraints});
+                            arr_fields.push({key:dtyID, title:source_rt_name + ' >> ' + name, rectypes:constraints});
                         }
 
                     }
@@ -436,13 +439,13 @@ $.widget( "heurist.ruleBuilder", {
                                         temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) ) ?  temp.split(",") :[];
                                         if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
 
-                                        arr_fields.push({key:dtyID, title:'<< '+name + ' -- in: ' + rt_name, terms:details[dtyID][fi_term],
+                                        arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name +')', terms:details[dtyID][fi_term],
                                             terms_dis:temp, rectypes:[rtyID], isreverse:true });
 
                                     }else{ // reverse pointer
 
                                         this._has_rev_pointers = '1';
-                                        arr_fields.push({key:dtyID, title:'<< '+name + ' -- in: ' + rt_name, rectypes:[rtyID], isreverse:true });
+                                        arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name+')', rectypes:[rtyID], isreverse:true });
                                     }
                                 } // reverse pointer
 
