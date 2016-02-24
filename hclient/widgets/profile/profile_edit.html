@@ -21,7 +21,7 @@
 -->
 
 
-<form>
+<form  style="position:absolute;top:0;bottom:3.5em;left:0;right:0;overflow-y: auto;">
     <fieldset>
 
         <div class="mode-edit">
@@ -42,15 +42,20 @@
         </div>
         <div>
             <div class="header"><label for="ugr_Name">Login name</label></div>
-            <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" style="width:20em" maxlength="60" />
+            <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" 
+                style="width:20em" maxlength="60" />
             <div class="prompt">
                 The login field is auto-populated with your email address.
                 <br />You may change it to a shorter name, eg. your given name or family name.
+                (Minimum 3 and maximum 60 characters)
             </div>
         </div>
         <div>
             <div class="header"><label for="ugr_Password">Password</label></div>
             <input type="password" name="ugr_Password" id="ugr_Password" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16" />&nbsp;<label class="mode-edit">Leave blank for no change</label>
+            <div style="font-size: smaller; margin-top: 2px;">
+                (Minimum 3 and maximum 16 characters).
+            </div>
         </div>
         <div>
             <div class="header"><label for="password2">Repeat password</label></div>
@@ -219,18 +224,19 @@
         </div>
     </div>
 
-    <div class="mode-registration">
+    <div class="mode-registration"">
         <p style="font-size:0.9em">
             Please read the Terms and Conditions of Use above, then click the Register button at the end of the page.
             Note: This system should not be used for the storage of confidential personally-identifiable information
             such as health information without the express permission of the system managers.</p>
         <p id="contactDetails"> (database owner)</p>
-        <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
-        <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
-
-
     </div>
 
+    <br />
+    <p class="messages"></p>
+    
 </form>
-<br />
-<p class="messages"></p>
+<div class="mode-registration" style="position:absolute;height:2em;bottom:0;width:90%">
+    <input type="checkbox" id="agree" onClick="enable_register(this.checked)">
+    <label for="agree">I have read and agree to the Terms and Conditions of Use above</label>
+</div>

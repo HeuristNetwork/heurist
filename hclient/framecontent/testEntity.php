@@ -249,6 +249,54 @@ require_once(dirname(__FILE__)."/initPage.php");
 
     <!-- HTML -->
     <body>
+    
+<?php
+            /*
+    function getRelativePath($basePath, $targetPath)
+    {
+        $targetPath = str_replace("\0", '', $targetPath);
+        $targetPath = str_replace('\\', '/', $targetPath);
+        
+        
+print $targetPath.'<br>';    
+
+        if ($basePath === $targetPath) {
+            return '';
+        }
+        //else  if(strpos($basePath, $targetPath)===0){
+        //    $relative_path = $dirname;
+
+
+        $sourceDirs = explode('/', isset($basePath[0]) && '/' === $basePath[0] ? substr($basePath, 1) : $basePath);
+        $targetDirs = explode('/', isset($targetPath[0]) && '/' === $targetPath[0] ? substr($targetPath, 1) : $targetPath);
+        array_pop($sourceDirs);
+        $targetFile = array_pop($targetDirs);
+
+        foreach ($sourceDirs as $i => $dir) {
+            if (isset($targetDirs[$i]) && $dir === $targetDirs[$i]) {
+                unset($sourceDirs[$i], $targetDirs[$i]);
+            } else {
+                break;
+            }
+        }
+
+        $targetDirs[] = $targetFile;
+        $path = str_repeat('../', count($sourceDirs)).implode('/', $targetDirs);
+
+        // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
+        // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used
+        // as the first segment of a relative-path reference, as it would be mistaken for a scheme name
+        // (see http://tools.ietf.org/html/rfc3986#section-4.2).
+        return '' === $path || '/' === $path[0]
+            || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
+            ? './'.$path : $path;
+    }
+    print HEURIST_FILESTORE_DIR.'<br>';
+    print getRelativePath(HEURIST_FILESTORE_DIR, 'C:\\xampp\\htdocs\\HEURIST_FILESTORE\\artem_delete11\\klassiki\\');
+     */   
+?>    
+    
+    
             <div>
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
@@ -309,10 +357,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                     <button onclick="testEntity(false)">show on this page</button>
                 </div>
             </div>
-        <div id="main_div" style="position:fixed;height:700;width:700;border:1px solid">
+        <div id="main_div" style="position:absolute;top:250px;min-height:300px;width:700;border:1px solid">
         </div>
         
-        <div id="selected_div" style="float:right;height:700;width:200;border:1px solid">
+        <div id="selected_div" style="float:right;width:200;border:1px solid">
         </div>
         
     </body>

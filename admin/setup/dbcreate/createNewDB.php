@@ -236,6 +236,11 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 padding-left: 38px;
             }
 
+            .truncate {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
         </style>
 
@@ -415,7 +420,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             s = s + baseurl + ' (' + params + ')<p>';
                         }
                         ddiv.innerHTML = s;
-                        $(ddiv).height('300px');
+                        $(ddiv).height('150px');
                     },
                     params);
             }
@@ -536,7 +541,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 as well as community servers maintained by other research groups.
                             </div>
 
-                            <div id="registered_dbs"  style="max-height:300px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
+                            <div id="registered_dbs"  style="max-height:150px;overflow-y:auto;overflow-x:hidden;margin-top:10px;
                                 background:url(../../../hclient/assets/loading-animation-white.gif) no-repeat center center;">
                                 <!-- list of registered DATABASEs  -->
                             </div>
@@ -558,9 +563,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                         <div id="div_create">
                             <h3 style="margin-left: 38px">Enter a name for the new database</h3>
-                            <div style="margin-left:60px; margin-top: 10px;">
+                            <div style="margin-left:60px; margin-top: 0px;">
                                 <!-- user name used as prefix -->
-                                <i>no spaces or punctuation other than underscore</i><br />&nbsp;<br />
                                 <b><?= HEURIST_DB_PREFIX ?>
                                     <input type="text" maxlength="30" size="6" name="uname" id="uname"
                                         onkeypress="{onKeyPress(event)}"
@@ -571,8 +575,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 -
                                 <input type="text" maxlength="64" size="30" name="dbname"  onkeypress="{onKeyPress(event);}">
                                 <input id="btnCreateDb" type="submit" name="submit" value="Create database" style="font-weight: bold;"  >
-                                <p>The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
-                                    databases so that they are easily identified and appear together in the list of databases.</p>
+                                <div style="padding-top:1em; max-width:500px"><i>no spaces or punctuation other than underscore. The user name prefix is editable, and may be blank, but we suggest using a consistent prefix for personal<br>
+                                    databases so that they are easily identified and appear together in the list of databases.</i></div>
                             </div>
 
                         </div>

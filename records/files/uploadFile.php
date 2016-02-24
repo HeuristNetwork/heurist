@@ -931,6 +931,12 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
      */
     function getRelativePath($basePath, $targetPath)
     {
+        
+        $targetPath = str_replace("\0", '', $targetPath);
+        $targetPath = str_replace('\\', '/', $targetPath);
+        
+        if( substr($targetPath, -1, 1) != '/' )  $targetPath = $targetPath.'/';
+        
         if ($basePath === $targetPath) {
             return '';
         }
@@ -960,7 +966,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         // (see http://tools.ietf.org/html/rfc3986#section-4.2).
         return '' === $path || '/' === $path[0]
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
-            ? "./$path" : $path;
+            ? './'.$path : $path;
     }
 
 ?>

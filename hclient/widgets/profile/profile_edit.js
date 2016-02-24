@@ -63,7 +63,9 @@ $.widget( "heurist.profile_edit", {
 
             this.edit_form.load(top.HAPI4.basePathV4+"hclient/widgets/profile/profile_edit.html?t="+(new Date().getTime()),
                 function(){
-
+                    
+                    that.edit_form.css('overflow','hidden');
+                    
                     //find all labels and apply localization
                     that.edit_form.find('label').each(function(){
                         $(this).html(top.HR($(this).html()));

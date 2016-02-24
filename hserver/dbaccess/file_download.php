@@ -129,9 +129,12 @@ if($db){
             }else{
 
                 $filepath = HEURIST_FILES_DIR . $filepath;
+
+//DEBUG error_log($filepath.'  '.file_exists($filepath).'  '.$mimeType);                
                 if(file_exists($filepath)){
                     downloadFile($mimeType, $filepath, $originalFileName);
                 }else if($fileinfo[1]){
+//DEBUG error_log('External '.$fileinfo[1]);                
                     header('Location: '.$fileinfo[1]);  //redirect to URL (external)
                 }else{
 //DEBUG

@@ -80,7 +80,7 @@ $usrID = get_user_id();
 mysql_connection_overwrite(DATABASE);
 mysql_query("set @logged_in_user_id = $usrID");	//saw TODO: check where else this needs to be used
 
-$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
 if ($addRecDefaults){
 	if ($addRecDefaults[0]){
 		$userDefaultRectype = intval($addRecDefaults[0]);

@@ -184,7 +184,7 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, ontop){
 
     var legenditem = $('<div style="display:block;padding:2px;" id="'
             + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
-            + overlay_idx+'" id="chbox-'+legendid+'" '
+            + overlay_idx+'" id="chbox-'+legendid+'" data-mapdataid="'+overlay.id+'" '
             + (overlay.visible?'checked="checked">':'>')
             + ((ismapdoc)
             ? ('<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
@@ -411,11 +411,9 @@ function addKMLLayer(source, index) {
     // KML file
     if(source.files !== undefined) {
         var fileURL = source.files[0];
+
+        // note google refuses kml from localhost
         console.log("KML file: " + fileURL);
-        /*fileURL = 'http://googlemaps.github.io/js-v2-samples/ggeoxml/cta.kml'; works
-        fileURL = 'http://127.0.0.1/HEURIST_FILESTORE/artem_delete11/file_uploads/ulf_39_ulf_8_1925.kml';
-        fileURL = 'http://tudl0867.home.xs4all.nl/test-big.kml'; works
-        fileURL = 'http://127.0.0.1/HEURIST_FILESTORE/artem_delete11/file_uploads/test.kml';*/
         // Display on Google Maps
         kmlLayer = new google.maps.KmlLayer({
             url: fileURL,
@@ -681,6 +679,28 @@ function _addRecordsetLayer(source, index) {
                     return;               
                 }
                
+                var lt = top.HAPI4.sysinfo['layout'];
+                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
+                
+                    //points
+                    mapdata = recset.toTimemap(source.id, null, source.color, 1); //main geo only
+                    mapdata.id = source.id;
+                    mapdata.title = source['title']?source['title']:mapdata.id;
+                    _addRecordsetLayer({id:mapdata.id, mapdata: mapdata}, index);
+
+                    //links
+                    mapdata = recset.toTimemap(source.id, null, source.color, 2); //rec_Shape only
+                    mapdata.id = source.id+'_links';
+                    mapdata.title = (source['title']?source['title']:source.id) + ' links';
+                    mapdata.timeenabled = 0;
+                    mapdata.timeline = {items:[]};
+                    if(mapdata.mapenabled>0){
+                        _addRecordsetLayer({id:mapdata.id, mapdata: mapdata}, (mapdata.id=='main_links')?mapdata.id:(index+1000));
+                    }else if(mapdata.id=='main_links'){
+                        _removeOverlayById( 'main_links' );
+                    }
+                    return;   
+                }
                 mapdata = recset.toTimemap(source.id, null, source.color);
                 
                 mapdata.id = source.id;
@@ -700,6 +720,14 @@ function _addRecordsetLayer(source, index) {
                         this.visible = checked;
                         mapping.showDataset(this.id, checked); //mapdata.id
                         
+                        var overlay2 = _getOverlayByMapdataId(this.id+'_links');
+                        if(overlay2!=null){
+                            overlay2.setVisibility(checked);
+                            var cb = $("#legend .content").find('input[data-mapdataid="'+overlay2.id+'"]');
+                            if(cb.length>0){
+                                cb.prop('checked',checked);
+                            }
+                        }
                     },
                     removeOverlay: function(){
                         mapping.deleteDataset( this.id ); //mapdata.id);
@@ -715,7 +743,7 @@ function _addRecordsetLayer(source, index) {
                if(index>=0){  //this layer belong to map document
                     overlays[index] = overlay;
                     
-                    _addLegendEntryForLayer(index, source.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png');
+                    _addLegendEntryForLayer(index, mapdata.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png');
                     
                }else{ // this layer is explicitely (by user) added
                     //index = 'A'+top.HEURIST4.util.random();
@@ -755,7 +783,7 @@ function _addRecordsetLayer(source, index) {
                     }
 
                     //top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png'
-                    _addLegendEntryForLayer(source.id, source.title, mapdata.color, true );
+                    _addLegendEntryForLayer(source.id, mapdata.title, mapdata.color, true );
                }
                
                
@@ -768,6 +796,26 @@ function _addRecordsetLayer(source, index) {
             }
 }
 
+//
+//
+//
+function _getOverlayByMapdataId( _mapdataid ){
+    for(var idx in overlays) {
+        if(overlays.hasOwnProperty(idx) && overlays[idx].id==_mapdataid){
+            return overlays[idx];
+        }
+    }
+    for(var mapdataid in overlays_not_in_doc) {
+        if(overlays_not_in_doc.hasOwnProperty(mapdataid) && mapdataid==_mapdataid){
+            return overlays_not_in_doc[mapdataid];
+        }
+    }
+    return null;
+}
+
+//
+//
+//
 function _removeOverlayById( overlay_id ){
 
     var ismapdoc = (overlay_id>0);
@@ -783,11 +831,18 @@ function _removeOverlayById( overlay_id ){
         } catch(err) {
             console.log(err);
         }
+        var mapdataid = null;
         if(ismapdoc){
+            //mapdataid = overlays_not_in_doc[overlay_id].id;
             delete overlays_not_in_doc[overlay_id];
         }else{
+            mapdataid = overlay_id;
             delete overlays[overlay_id];
         }
+        if(mapdataid!=null){
+            _removeOverlayById(mapdataid+'_links');
+        }
+        
         _initLegendListeners();
     }
 }

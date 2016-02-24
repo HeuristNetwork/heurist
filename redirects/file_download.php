@@ -19,6 +19,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    header( 'Location: hserver/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
+    header( 'Location: ../hserver/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
     
 ?>

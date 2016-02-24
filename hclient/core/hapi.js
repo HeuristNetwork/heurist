@@ -662,13 +662,30 @@ function hAPI(_db, _oninit) { //, _currentUser
             getEntityConfig:function(entityName, callback){
 
                 if(entity_configs[entityName]){
-                    callback(entity_configs[entityName]);
+                    if($.isFunction(callback)){
+                        callback(entity_configs[entityName]);
+                    }
+                    return entity_configs[entityName];
                 }else{
                     _callserver('entityScrud', {a:'config', 'entity':entityName},
                        function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
-                                entity_configs[response.data.entityName] = response.data;
-                                callback(response.data);
+                                
+                                var entity_cfg = response.data;
+                                
+                                //find key and title fields
+                                var idx;
+                                for(idx in entity_cfg.fields){
+                                    if(entity_cfg.fields[idx]['keyField']==true){
+                                        entity_cfg.keyField = entity_cfg.fields[idx]['dtID'];
+                                    }
+                                    if(entity_cfg.fields[idx]['titleField']==true){
+                                        entity_cfg.titleField = entity_cfg.fields[idx]['dtID'];
+                                    }
+                                }
+                                entity_configs[response.data.entityName] = entity_cfg;
+                                
+                                callback(entity_cfg);
                             }else{
                                 top.HEURIST4.msg.showMsgErr(response);
                             }
@@ -707,7 +724,24 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //todo - verify basic params
 
                 _callserver('entityScrud', request, callback);
+            },
+            
+            getTitlesByIds:function(entityName, recIDs){
+                var idx, display_value = [];
+                if(entity_data[entityName]){
+                   var ecfg = entity_configs[entityName];
+                   var edata = entity_data[entityName];
+                   if(!$.isArray(recIDs)) recIDs = [recIDs];
+                   for(idx in recIDs){
+                        display_value.push(
+                            edata.fld(edata.getById(recIDs[idx]), ecfg.titleField));
+                   }
+                }else{
+                   display_value = recIDs; 
+                }
+                return display_value;
             }
+            
         }
         return that;
     }

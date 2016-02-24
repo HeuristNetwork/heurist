@@ -49,6 +49,7 @@ mysql_connection_overwrite(DATABASE);
   <title>HEURIST: Delete records</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 
   <style type=text/css>
   span { font-weight:bold; }
@@ -59,6 +60,23 @@ mysql_connection_overwrite(DATABASE);
   </style>
   
     <script type="text/javascript">
+            
+            function deleteSubmit(){
+                if(top.HEURIST4.msg){
+                    
+                    top.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;Please confirm that you really wish to delete the selected records, along with all assosiated bookmarks?', function(){
+                        document.forms[0].submit();
+                        $(document.forms[0]).hide();
+                    },'Confirm')
+                    
+                    
+                }else{
+                   if(confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')){
+                        document.forms[0].submit();   
+                   }
+                }
+            }
+    
             function onDocumentReady(){
                 //resize parent dialog
                 setTimeout(function(){
@@ -203,7 +221,7 @@ if(document.getElementById('spSelected')){
 ?>
 <div style="height:45px;">
 This is a fairly slow process, taking several minutes per 1000 records, please be patient…
-<input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+<input class="deleteButton" type="button" style="color:red !important" value="delete" onClick="deleteSubmit()">
 </div>
 <?php
 	}
@@ -263,13 +281,13 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 <input type="hidden" name="delete" value="1">
 <div style="padding-top:5px;">
 <?php echo (count($bib_ids)>20)?"This is a fairly slow process, taking several minutes per 1000 records, please be patient…":""; ?>
-<input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+<input class="deleteButton" type="button" style="color:red !important" value="delete" onClick="deleteSubmit()">
 </div>
 </form>
 <?php
 	if(count($bib_ids)>3){
 ?>
-	<div>Total count of records: <b><?php echo $bib_ids;?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
+	<div>Total count of records: <b><?php echo count($bib_ids);?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
 <script>
 <?php
   echo "cnt_checked = $cnt_checked ;";                                  

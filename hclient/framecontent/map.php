@@ -57,8 +57,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 <script type="text/javascript" src="<?php echo PDIR;?>ext/js/jqColorPicker.min.js"></script>
 
 <!-- Mapping -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=drawing"></script>
-<!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map_overlay.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/map_bubble.js"></script>

@@ -755,6 +755,7 @@ $.widget( "heurist.search", {
                     top.HEURIST4.ui.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions);
 
                     $("#sa_fieldvalue").val("");
+                    $("#sa_negate").prop("checked",'');
                     $dlg.find("#fld_contain").show();
                     $dlg.find("#fld_enum").hide();
                     this.calcShowSimpleSearch();
@@ -798,6 +799,11 @@ $.widget( "heurist.search", {
                     this.calcShowSimpleSearch();
                 }
             });
+            that._on( $("#sa_negate"), {
+                change: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
             that._on( sortasc, {
                 click: function(event){
                     //top.HEURIST4.util.stopEvent(event);
@@ -819,6 +825,10 @@ $.widget( "heurist.search", {
         var fld = this.search_assistant.find("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
         var ctn = this.search_assistant.find("#fld_enum").is(':visible') ?this.search_assistant.find("#sa_termvalue").val()
         :this.search_assistant.find("#sa_fieldvalue").val();
+        
+        if(this.search_assistant.find("#sa_negate").is(':checked')){
+            fld  = '-'+fld;
+        }
 
         var asc = ($("#sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = $("#sa_sortby").val();

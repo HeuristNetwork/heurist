@@ -129,6 +129,8 @@ function dbOwnerRequired(){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
         
+        <!-- loaded by demand script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script -->
+        
     <script type="text/javascript">
     
         // overwrite the standard jquery show method 
@@ -246,12 +248,14 @@ function dbOwnerRequired(){
                 layoutid = "H4Default";
             }
         }
-        top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
+        if(!top.HAPI4.sysinfo['layout']){
+            top.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
-        if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
+            if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
             $.getScript(top.HAPI4.basePathV4+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
                 top.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
             });
+            }
         }
 
 

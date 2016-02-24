@@ -462,9 +462,10 @@ function print_row($row,$fmt,$flds) {
             break;
 
         case 'defTerms': // Data from the rec_details_lookup table
-            $trm_Label = htmlspecialchars(html_escape($row['trm_Label']));
+            $trm_Label = html_escape($row['trm_Label']);
             $trm_Description = html_escape($row['trm_Description']);
-            $trm_NameInOriginatingDB = htmlspecialchars(html_escape($row['trm_NameInOriginatingDB']));
+            $trm_Code = html_escape($row['trm_Code']);
+            $trm_NameInOriginatingDB = html_escape($row['trm_NameInOriginatingDB']);
             print "<trm>";
             print "<trm_ID>$row[trm_ID]</trm_ID>".
             "<trm_Label>$trm_Label</trm_Label>".
@@ -483,7 +484,7 @@ function print_row($row,$fmt,$flds) {
             "<trm_Depth>$row[trm_Depth]</trm_Depth>".
             "<trm_Modified>$row[trm_Modified]</trm_Modified>".
             "<trm_LocallyModified>$row[trm_LocallyModified]</trm_LocallyModified>".
-            "<trm_Code>$row[trm_Code]</trm_Code>";
+            "<trm_Code>$trm_Code</trm_Code>";
             // WARNING! This needs to be updated in sync with new db structure to be added for DB Version 1.2.0 for FAIMS compatibility
             // '$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // for db version 1.2.0 @ 1/10/13
             print "</trm>";
