@@ -244,12 +244,15 @@ function cloneDatabase($targetdbname) {
         where rre_RecID>0
     and rre_RecID not in (select rec_ID from Records)');
 
+    $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues contact the Heurist developers at info heuristnetwork dot org</p>";
+    
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p>Addition of Referential Constraints</p>");
     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         db_drop($newname);
+        print $sHighLoadWarning;
         return false;
     }
 
@@ -258,6 +261,7 @@ function cloneDatabase($targetdbname) {
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         db_drop($newname);
+        print $sHighLoadWarning;
         return false;
     }
 
