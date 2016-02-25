@@ -223,7 +223,7 @@ if ($addRecDefaults) {
 
 
                 rt = parseInt(document.getElementById('rectype_elt').value);
-                //Since 2012-12-13 Ian asked to disable it again! if (! rt) rt = <?=RT_NOTE?> ;
+                //Since 2012-12-13 Ian asked to disable it again! if (! rt) rt = RT_NOTE;
                 //added ian 19/9/08 to re-enable notes as default
                 if(rt<1){
                     alert('Please select record type');
