@@ -181,6 +181,12 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_la
         overlay = overlays_not_in_doc[overlay_idx];
     }
     if(!overlay) return;
+    
+    var warning = '';
+    if($.isPlainObject(title)){
+        warning = title.warning;
+        title = title.title;
+    }
 
     var legenditem = '<div style="display:block;padding:2px;" id="'
             + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
@@ -193,7 +199,9 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_la
             : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+icon_or_color+'" />')
             )
             + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
-            + '</label></div>';
+            + '</label>'
+            + warning
+            + '</div>';
        
        
     legenditem = $(legenditem);
@@ -582,11 +590,8 @@ function _addQueryLayer(source, index) {
             }
         }
         
-        var MAXITEMS = top.HAPI4.get_prefs('search_detail_limit');
-        
         //request['getrelrecs'] = 1;  //return all related records including relationship records
         request['detail'] = 'timemap';
-        request['limit'] = MAXITEMS;  // in any case it is limited on server side for detail: 'timemap'
         
         if(loadingbar==null){
             var image = top.HAPI4.basePathV4+'hclient/assets/loading_bar.gif';
@@ -656,8 +661,6 @@ var colors_idx = -1;
 */
 function _addRecordsetLayer(source, index) {
 
-    var MAXITEMS = top.HAPI4.get_prefs('search_detail_limit');
-    
     // Show info on map
     var mapdata = source.mapdata;
     if( top.HEURIST4.util.isnull(mapdata) ) {
@@ -669,7 +672,7 @@ function _addRecordsetLayer(source, index) {
 
                     var request = {w: 'all', 
                                    detail: 'timemap', 
-                                   limit: MAXITEMS};  // in any case it is limited on server side for detail: 'timemap'
+                                   };
                     
                     if(recset.length()<2001){ //limit query by id otherwise use current query
                         source.query = { q:'ids:'+recset.getIds().join(',') };
@@ -734,6 +737,15 @@ function _addRecordsetLayer(source, index) {
                     mapdata = recset.toTimemap(source.id, null, source.color);
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
+                    
+                    if(recset.count_total()>recset.length()){
+                        var s = '<p>The map and timeline are limited to display a maximum of <b>'+recset.length()+'</b> results to avoid overloading your browser.</p>'
++'<br/><p>There are <b>'+recset.count_total()+'</b> records with spatial and temporal data in the current results set. Please refine your filter to reduce the number of results.</p><br/>'
++'<p>The map/timeline limit can be reset in Profile > Preferences.</p>';                        
+                        
+                        mapdata.title = {title:mapdata.title,
+                        warning:'<div class="ui-icon ui-icon-alert" style="display:inline-block;width:20px" onclick="{top.HEURIST4.msg.showMsgDlg(\''+s+'\')}">&nbsp;</div>'};
+                    }
                 }
             }
     }    
@@ -791,30 +803,10 @@ function _addRecordsetLayer(source, index) {
                     
                }else{ // this layer is explicitely (by user) added
 
-                    var sMsg = '';
-/*  @todo - move this warning to legend
-                    if(mapdata.mapenabled > MAXITEMS){
-                           sMsg = mapdata.mapenabled +' records to display on this map';
-                    }
-                    if(mapdata.timeenabled > MAXITEMS){
-                           sMsg = (sMsg?' and ':'') + mapdata.timeenabled +' records to display on timeline';
-                    }
-                    if(sMsg!=''){ 
-
-    sMsg = '<p style="padding-bottom:1em;">There are '+ sMsg +', which exceeds the limit of '+MAXITEMS+' records set in your profile.</p>'
-    + '<p style="padding-bottom:1em;">Google Maps and VIS Timeline do not work well with thousands of objects, and may hang your browser or cause it to report the page as non-responsive. Only the first '+MAXITEMS+' records will therefore be displayed.</p>'
-    + '<p>We recommend refining your filters to retrieve fewer records before mapping. You may also change the record limits for map and timeline in Profile &gt; My Preferences.</p>';
-                            overlay.title = overlay.title + ' <span style="font-weight:bold;color:red">(Partial)</span>'
-                    }
-*/
                     //remove previous entry
                     overlays_not_in_doc[source.id] = overlay;
                     var legenditem = $("#legend .content").find('#'+source.id);
                     if(legenditem.length>0) legenditem.remove();
-
-                    if(sMsg!=''){
-                       setTimeout(function(){top.HEURIST4.msg.showMsgErr(sMsg);}, 1000);
-                    }
 
                     //show custom query on top
                     _addLegendEntryForLayer(source.id, mapdata.title, mapdata.color, dependent_layers, true );

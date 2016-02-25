@@ -491,9 +491,9 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
                 //if limit is not defined - get it from preferences
-                if(top.HEURIST4.util.isnull(request.limit)){
-                    request.limit = top.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
-                }
+                //if(top.HEURIST4.util.isnull(request.limit)){
+                //    request.limit = top.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
+                //}
 
                 // start search
                 _callserver('record_search', request, callback);    //standard search
@@ -858,7 +858,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 if('search_detail_limit'==name){
                     if(!res && res<500 ) res = 500
-                    else if(res>30000 ) res = 3000;
+                    else if(res>5000 ) res = 5000;
                 }
                 return res;
             }

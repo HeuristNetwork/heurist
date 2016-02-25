@@ -225,7 +225,7 @@ function get_limit($params){
     }
 
     if (!@$limit || $limit < 1){
-        $limit = 1000;
+        $limit = 100000;
     }
     return $limit;
 }
