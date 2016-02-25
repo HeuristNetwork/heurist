@@ -37,11 +37,21 @@
     }
     else */
     if(substr($rectype_id,-4,4) != ".png") $rectype_id = $rectype_id . ".png";
-    
-    if(@$_REQUEST['color'] && strpos($_REQUEST['color'],'rgb')===0){
+
+    if(@$_REQUEST['color']){
         
-        $clr = substr($_REQUEST['color'],4,-1);
-        $color_new = explode(',',$clr);
+        if(strpos($_REQUEST['color'],'rgb')===0){
+            $clr = substr($_REQUEST['color'],4,-1);
+            $color_new = explode(',',$clr);
+        }else{
+            //1st way list($r,$g,$b) = array_map('hexdec',str_split($colorName,2));
+            //2d way
+            $hexcolor = $_REQUEST['color'];
+            $shorthand = (strlen($hexcolor) == 4);
+            list($r, $g, $b) = $shorthand? sscanf($hexcolor, "#%1s%1s%1s") : sscanf($hexcolor, "#%2s%2s%2s");
+            $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b")) 
+                                   :array(hexdec($r), hexdec($g), hexdec($b));
+        }
         
     }else{
         $color_new = null; //array(255, 0, 0);    
@@ -182,6 +192,7 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         /* RGB of your inside color */
         $rgb = $color_new; //array(0,0,255);
         /* Negative values, don't edit */
+        
         $rgb = array($color_old[0]-$rgb[0],$color_old[1]-$rgb[1],$color_old[2]-$rgb[2]);
         imagefilter($img_icon, IMG_FILTER_NEGATE); 
         imagefilter($img_icon, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
@@ -195,6 +206,7 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         }*/
         // merge icon
         imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
+        //imagecopymerge_alpha($img, $img_icon, 0, 0, 0, 0, 24, 24, 70);  //mix background to dark
         
 
         

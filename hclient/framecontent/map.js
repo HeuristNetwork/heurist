@@ -221,7 +221,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
                 for (var i=0; i<mapdata.options.items.length; i++){
                     mapdata.options.items[i].options.icon =
-                        top.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+new_color;
+                        top.HAPI4.iconBaseURL + mapdata.options.items[i].options.iconId + 'm.png&color='+encodeURIComponent(new_color);
 
                     mapdata.options.items[i].options.color = new_color;
                     mapdata.options.items[i].options.lineColor = new_color;

@@ -190,7 +190,7 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_la
             ? ('<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" '     
                 + ( (ismapdoc)?('style="background-image: url('+icon_or_color+');"'):'')+'>')
-            : ('<div style="display:inline-block;border:6px solid '+icon_or_color+'" />')
+            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+icon_or_color+'" />')
             )
             + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
             + '</label></div>';
@@ -903,7 +903,7 @@ function _editLayerProperties( dataset_id, callback ){
                 //      change titles in overlay, legend, timeline
                 //      if required loop mapdata.options.items to change color and reload dataset
                 var new_title = layer_name.val();
-                var new_color = $dlg_edit_layer.find('#layer_color').css('background-color');
+                var new_color = $dlg_edit_layer.find('#layer_color').colorpicker('val');
                 var mapdata = edit_mapdata;
 
                 if(top.HEURIST4.util.isnull(mapdata) && !top.HEURIST4.util.isnull(top.HAPI4.currentRecordset)){  //add current record set
@@ -1000,8 +1000,10 @@ function _editLayerProperties( dataset_id, callback ){
                 $dlg_edit_layer.find("#layer_name").val('').removeClass( "ui-state-error" );
             }
             var colorPicker = $dlg_edit_layer.find("#layer_color");
-            colorPicker.css('background-color', mapdata.color)
-                       .val(mapdata.color);
+            
+            colorPicker.colorpicker('val', mapdata.color);
+            
+            //colorPicker.css('background-color', mapdata.color)
                        
             $dlg_edit_layer.find(".messages").removeClass( "ui-state-highlight" ).text('');
        }
@@ -1032,18 +1034,19 @@ function _editLayerProperties( dataset_id, callback ){
                     }
                 });
                 
-               $dlg_edit_layer.find("#layer_color").colorPicker({
-                   //color:'#f00',
-                   opacity: false,
-                   //valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
-                   memoryColors:myColors,
+               $dlg_edit_layer.find("#layer_color").colorpicker({
+                   hideButton: false, //show button right to input
+                   showOn: "both"  //button, focus
+               });
+               
+               /*$dlg_edit_layer.find("#layer_color").colorPicker({
                    cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}',
                    renderCallback: function($elm, toggled){
                         if($elm && !toggled){
                             $(this.$UI).hide();
                         }
-                   }                   
-               }); 
+                   }
+               });*/
                
        }       
        $dlg_edit_layer.dialog("open");    

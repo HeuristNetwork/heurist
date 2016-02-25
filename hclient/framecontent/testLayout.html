@@ -4,6 +4,10 @@
     <link rel="stylesheet" type="text/css" href="../../h4styles.css" />
     <!-- script type="text/javascript" src="../core/utils_browser.js"></script -->
     <script type="text/javascript" src="../../ext/js/platform.js"></script>
+    <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../ext/js/jqColorPicker.min.js"></script>
+
     <style>
     div{
         border:1px solid gray;
@@ -49,5 +53,32 @@ platform.os+' notes:'+ // 'iOS 5.0'
 platform.description);
 </script>
 </div>
+<div>
+<input id="layer_color"/>
+<input id="init_color"/>
+</div>
+<script>
+$(document).ready(function() {
+
+  var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,127,39)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)'];
+  
+  $('#layer_color').colorPicker(
+                {
+                   //color:'#f00',
+                   opacity: false,
+                   //valueRanges: {rgb: {r: [0, 255], g: [0, 255], b: [0, 255]} },
+                   memoryColors:myColors,
+                   cssAddon:'.cp-color-picker{z-index:999999999999 !important;background-color:#fff;border-radius: 0px;}',
+                   renderCallback: function($elm, toggled){
+                        if($elm && !toggled){
+                            $(this.$UI).hide();
+                        }
+                   }                   
+               }  
+  );
+    
+}
+);
+</script>
 </body>
 </html>

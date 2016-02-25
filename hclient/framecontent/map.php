@@ -54,7 +54,8 @@ require_once(dirname(__FILE__)."/initPage.php");
 <script type="text/javascript" src="<?php echo PDIR;?>ext/shapefile/shapefile.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>ext/shapefile/dbf.js"></script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>ext/js/jqColorPicker.min.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>ext/js/evol.colorpicker.js" charset="utf-8"></script>
+<link href="<?php echo PDIR;?>ext/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
@@ -482,7 +483,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     <div id="helper" title="Mapping Overview">
     </div>
 
-    <div id="layer-edit-dialog"  style="display:none">
+    <div id="layer-edit-dialog"  style="display:none" class="ui-heurist-bg-light">
         <fieldset> <legend>Map layer name</legend>
             <div>
                 <!-- What would you like to call<br>the new map layer -->
@@ -491,7 +492,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             </div>
             <div>
                 <div class="header"><label for="layer_color">Color:</label></div>
-                <input id="layer_color" value="rgb(255, 0, 0)" style="background-color:#f00">
+                <input id="layer_color"/>
             </div>
         </fieldset>
         <div class="messages">1</div>
