@@ -694,6 +694,25 @@ function _onEditMask(){
     });
 }
 
+function _onPreventChars(event){
+
+    event = event || window.event;
+    var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+    if (charCode && charCode > 31)
+    {
+        var keyChar = String.fromCharCode(charCode);
+        if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
+            return false;
+        }
+    }
+    return true;
+}
+
+
         //public members
         var that = {
 
@@ -701,6 +720,10 @@ function _onEditMask(){
                 document.getElementById("rty_Plural").value = (document.getElementById("rty_Name").value + 's');
             },
 
+            onPreventChars: function(event) {
+                _onPreventChars(event);
+            },
+            
             onChangeStatus: function(e) {
                 _onChangeStatus(e);
             },
