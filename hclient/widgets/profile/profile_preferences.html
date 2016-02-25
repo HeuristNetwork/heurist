@@ -52,7 +52,9 @@
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
-                "javascript:(function(){h='" + top.HAPI4.basePathV3 + "';"
+                "javascript:(function(){ "
+                + "if(location.protocol=='https:'){alert('Sorry, only http:// pages can be bookmarked with the bookmarklet, you will need to add https:// pages manually!'); return;}"
+                + "h='" + top.HAPI4.basePathV3 + "';"
                 + "d=document;c=d.contentType;"
                 + "if(c=='text/html'||!c){"
                 + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
