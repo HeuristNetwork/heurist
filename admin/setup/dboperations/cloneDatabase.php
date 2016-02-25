@@ -193,6 +193,13 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 
 // ---- COPY FUNCTION -----------------------------------------------------------------
 
+//
+// 1. create empty database
+// 2. clean default values from some tables
+// 3. clean content of all tables
+// 4. add contrainsts, procedure and triggers
+// 5. remove registration info and assign originID for definitions
+//
 function cloneDatabase($targetdbname) {
     set_time_limit(0);
 
@@ -237,6 +244,7 @@ function cloneDatabase($targetdbname) {
         where rre_RecID>0
     and rre_RecID not in (select rec_ID from Records)');
 
+    // 4. add contrainsts, procedure and triggers
     echo_flush ("<p>Addition of Referential Constraints</p>");
     if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
@@ -253,7 +261,17 @@ function cloneDatabase($targetdbname) {
         return false;
     }
 
+    // 5. remove registration info and assign originID for definitions
     mysql_connection_insert($newname);
+    $sourceRegID = 0;
+    $res = mysql_query('select sys_dbRegisteredID from sysIdentification where 1');
+    if($res){
+        $row = mysql_fetch_row($res);
+        if($row){
+            $sourceRegID = $row[0];
+        }
+    }
+    //print "<p>".$sourceRegID."</p>";
     // RESET register db ID
     $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null where 1";
     $res1 = mysql_query($query1);
@@ -261,6 +279,8 @@ function cloneDatabase($targetdbname) {
         print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
         ")<br> Please reset the registration ID manually</b></p>";
     }
+    //assign origin ID    
+    db_register($newname, $sourceRegID);
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone

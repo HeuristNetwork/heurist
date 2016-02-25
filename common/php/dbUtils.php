@@ -24,6 +24,8 @@
 /**
 * @todo     Funnel all calls to functions in this file.
 *           Not all system code uses these abstractions. Especially services.
+* 
+* @todo for H4 - implement as class fot given database connection
 *
 * Function list:
 * - add_index_html()
@@ -33,6 +35,8 @@
 * - db_dump()
 * - db_clean()
 * - db_script()  - see utils_db_load_script.php
+* 
+* - db_register - set register ID to sysIdentification and rectype, detail and term defintions
 */
 
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/utils_db_load_script.php');
@@ -783,6 +787,64 @@ function checkDatabaseFunctions(){
     return $res;
 }
 
+//
+// set Origin ID for rectype, detail and term defintions
+//
+function db_register($db_name, $dbID){
+    
+    $res = true;
+    
+    if($dbID>0){
+
+    $mysqli = server_connect();
+    if($mysqli){
+
+        if(!$mysqli->select_db($db_name)){
+            $res = false;
+            if($verbose) {
+                echo ("<br/><p>Warning: Could not open database ".$db_name);
+            }
+        }
+
+        if($res){
+                        //@todo why 3 actions for every table????? 
+                        $result = 0;
+                        $res = $mysqli->query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
+                            "where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
+                        if (!$res) {$result = 1; }
+                        $res = $mysqli->query("update defRecTypes set rty_NameInOriginatingDB=rty_Name ".
+                            "where (rty_NameInOriginatingDB = '') OR (rty_NameInOriginatingDB IS NULL)");
+                        if (!$res) {$result = 1; }
+                        $res = $mysqli->query("update defRecTypes set rty_IDInOriginatingDB=rty_ID ".
+                            "where (rty_IDInOriginatingDB = '0') OR (rty_IDInOriginatingDB IS NULL) ");
+                        if (!$res) {$result = 1; }
+                        // Fields
+                        $res = $mysqli->query("update defDetailTypes set dty_OriginatingDBID='$dbID' ".
+                            "where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
+                        if (!$res) {$result = 1; }
+                        $res = $mysqli->query("update defDetailTypes set dty_NameInOriginatingDB=dty_Name ".
+                            "where (dty_NameInOriginatingDB = '') OR (dty_NameInOriginatingDB IS NULL)");
+                        if (!$res) {$result = 1; }
+                        $res = $mysqli->query("update defDetailTypes set dty_IDInOriginatingDB=dty_ID ".
+                            "where (dty_IDInOriginatingDB = '0') OR (dty_IDInOriginatingDB IS NULL) ");
+                        if (!$res) {$result = 1; }
+                        // Terms
+                        $res = $mysqli->query("update defTerms set trm_OriginatingDBID='$dbID' ".
+                            "where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
+                        if (!$res) {$result = 1; }
+                        $res = $mysqli->query("update defTerms set trm_NameInOriginatingDB=trm_Label ".
+                            "where (trm_NameInOriginatingDB = '') OR (trm_NameInOriginatingDB IS NULL)");
+                        if (!$res) {$result = 1; }
+                        $res = $mysqli->query("update defTerms set trm_IDInOriginatingDB=trm_ID ".
+                            "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
+                        if (!$res) {$result = 1; }
+                        
+                        $res = ($result==0);
+        }
+    }
+    }
+    return $res;
+}
 
 
 ?>
