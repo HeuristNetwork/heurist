@@ -307,12 +307,12 @@ if (array_key_exists('mode', $_REQUEST)) {
                             'Fuzzy search to identify records which might contain duplicate data');
                         menuEntry('','',''.HEURIST_DBNAME.'',
                             '');
-                            
-                        menuEntry('','Recreate record links and relation cache','../hserver/utilities/recreateRecLinks.php?db='.HEURIST_DBNAME,
-                            'Recreate record links and relation cache');
+
+                        menuEntry('','Rebuild record links cache','../hserver/utilities/recreateRecLinks.php?db='.HEURIST_DBNAME,
+                            'Rebuild the cache of pointers and relationship records, which is used to speed search/filter actions');
                         menuEntry('','',''.HEURIST_DBNAME.'',
                             '');
-                            
+
                         // DATA QUALITY
                         menuEntry('---','Verify structure and data consistency','verification/listDatabaseErrors.php?db='.HEURIST_DBNAME,
                             'Find errors in database structure (invalid record type, field and term codes) and records with wrong structure and inconsistent values (invalid pointer, missed data etc)');
