@@ -720,6 +720,7 @@ $.widget( "heurist.search", {
 
             var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
+            allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
 
 
@@ -767,16 +768,20 @@ $.widget( "heurist.search", {
                     var dtID = Number(event.target.value);
 
                     var detailtypes = top.HEURIST4.detailtypes.typedefs;
+                    var detailType = '';
 
-                    if(Number(dtID)>0 && detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']]=='enum'){
+                    if(Number(dtID)>0){
+                        detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                    }
+                    if(detailType=='enum'  || detailType=='relationtype'){
                         $dlg.find("#fld_contain").hide();
                         $dlg.find("#fld_enum").show();
                         //fill terms
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
-                        top.HEURIST4.ui.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false);
-                    }else{
+                        top.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, allTerms, disabledTerms, null, false);
+                    } else {
                         $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();
                     }
