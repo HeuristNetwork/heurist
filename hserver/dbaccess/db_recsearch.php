@@ -849,6 +849,10 @@ if(@$params['debug']) echo $query."<br>";
                                 }//while
                                 $res_det->close();
 
+///@todo
+// 1. optimize loop - include into main detail loop
+// 2. exit loop if more than 5000 geo enabled
+// 3. return geojson and timeline items
                                 //additional loop for timemap request 
                                 //1. exclude records without timemap data
                                 //2. limit to $chunk_size

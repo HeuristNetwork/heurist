@@ -285,7 +285,7 @@ exit();
 
                 if ($rows==0 || is_string($rows) ) {
                     $oper = (($isInsert)?"inserting":"updating");
-                    $ret = "error $oper in updateReportSchedule - ".$rows; //$msqli->error;
+                    $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
                 } else {
                     if($isInsert){
                         $recID = $db->insert_id;
