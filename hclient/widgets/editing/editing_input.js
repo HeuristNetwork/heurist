@@ -308,7 +308,7 @@ $.widget( "heurist.editing_input", {
 
         var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.input_prompt);  //.appendTo( this.input_cell );
 
-        if(this.detailType=="blocktext"){
+        if(this.detailType=='blocktext'){
 
             $input = $( "<textarea>",{rows:3})
             .uniqueId()
@@ -316,9 +316,9 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .appendTo( $inputdiv );
 
-        }else if(this.detailType=="enum"){
+        }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
-            $input = $( "<select>")
+            $input = $( '<select>' )
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
@@ -327,9 +327,9 @@ $.widget( "heurist.editing_input", {
 
             this._recreateSelector($input, value);
 
-        }else if(this.detailType=="boolean"){
+        }else if(this.detailType=='boolean'){
 
-            $input = $( "<input>",{type:'checkbox', value:'1'} )
+            $input = $( '<input>',{type:'checkbox', value:'1'} )
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
@@ -628,18 +628,15 @@ $.widget( "heurist.editing_input", {
 
 
     //
-    // recreate SELECT for enum type
+    // recreate SELECT for enum/relation type
     //
     _recreateSelector: function($input, value){
 
         $input.empty();
 
         var allTerms = this.f('rst_FieldConfig');
-        if(top.HEURIST4.util.isempty(allTerms)){
-            allTerms = this.f('rst_FilteredJsonTermIDTree');
-        }
 
-        if(isNaN(allTerms)){//this is not vocabulary ID, this is something more complex
+        if(!top.HEURIST4.util.isempty(allTerms)){//this is not vocabulary ID, this is something more complex
 
             if($.isPlainObject(this.configMode)){ //this lookup for entity
 
@@ -676,8 +673,9 @@ $.widget( "heurist.editing_input", {
             }
             if(!top.HEURIST4.util.isnull(value))  $input.val(value);
 
-        }else{ //from 
+        }else{ //this is usual enumeration from defTerms
 
+            allTerms = this.f('rst_FilteredJsonTermIDTree');        
             //headerTerms - not used anymore
             var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
