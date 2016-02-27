@@ -1382,7 +1382,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 //show jquery dialog
                 insertPopupID = $(ele).dialog({
                     autoOpen: true,
-                    height: 260,
+                    height: 300,
                     width: 400,
                     modal: false,
                     title: 'Insert field, test or pattern',
