@@ -80,13 +80,26 @@ function ImageAnnotation(imageviewer, _recID) {
 		_selAnnotations.onchange = _hightlighSelection;
 		//_hightlighSelection(null);
 
+        /*
 		edittoolbar.appendChild(_selRectypes);
 		edittoolbar.appendChild(document.createTextNode(' Add: '));
 		edittoolbar.appendChild(btnAnnotation);
 		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnRectangle);
-		edittoolbar.appendChild(document.createTextNode(' Select: '));
-		edittoolbar.appendChild(_selAnnotations);
+        edittoolbar.appendChild(document.createTextNode(' Select: '));
+        edittoolbar.appendChild(_selAnnotations);
+        */
+        
+        var $seldiv = $('<div>').css({'display':'inline-block'}).appendTo($(edittoolbar));
+        $(_selRectypes).appendTo($seldiv);
+        $('<label>').css({'padding-left':'4px'}).text('Add: ').appendTo($seldiv);
+        $(btnAnnotation).appendTo($seldiv);
+        $(btnRectangle).appendTo($seldiv);
+        
+        $seldiv = $('<div>').css({'padding-left':'4px','display':'inline-block'}).appendTo($(edittoolbar));
+        $('<label>').text('Select: ').appendTo($seldiv);
+        $(_selAnnotations).appendTo($seldiv);
+        
 		edittoolbar.appendChild(document.createTextNode(' '));
 		edittoolbar.appendChild(btnEdit);
 		edittoolbar.appendChild(document.createTextNode(' '));

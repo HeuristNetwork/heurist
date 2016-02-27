@@ -44,13 +44,14 @@
 	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
 
 </head>
-<body class="editTab" onload="onshow()" >
+<body class="editTab" onload="onshow()">
 
 	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
 	<script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
 
 	<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
 	<script type="text/javascript" src="../../../common/js/calendar.js"></script>
+    
 
 <script>
 
@@ -60,7 +61,7 @@
 				' action="'+top.HEURIST.baseURL_V3+'records/edit/saveRecordDetails.php?db=' + top.HEURIST.database.name +'" target=save-frame>' +
 				' <input type=hidden name=save-mode id=save-mode>' +
 				' <input type=hidden name=notes id=notes>' +
-				' <div id=all-inputs></div>' +
+				' <div id=all-inputs style="overflow:scroll;position:absolute;top:0;bottom:0;left:30;right:0"></div>' +
 				' </form>');
 </script>
 

@@ -801,8 +801,8 @@ class System {
         $res = @$_SESSION[$this->dbname_full]["ugr_Preferences"][$property];
 
         if('search_detail_limit'==$property){
-            if(!$res && $res<500 ) {$res = 500;}
-            else if($res>30000 ) {$res = 3000;}
+            if(!$res || $res<500 ) {$res = 500;}
+            else if($res>5000 ) {$res = 5000;}
         }
 
         return $res;

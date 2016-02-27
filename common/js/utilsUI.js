@@ -1228,10 +1228,23 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             if (req.readyState != 4) return;
             if (req.status != 200 && req.status != 304) {
                 if (req.status == 404) {
-                    top.HEURIST.util.showError('H-Util HTTP error file not found' + req.status + " " +file);
+                    msg = 'H-Util HTTP error file not found' + req.status + ' ' +file;
                 }else if (req.status){
-                    top.HEURIST.util.showError('H-Util HTTP error ' + req.status);
+                    if(req.status==500){
+                        msg = 'HTTP error 500 reported (internal server error). '
+                                +'This may be due to a hiccup in internet connection. Please retry. '
+                    }else{
+                        msg = 'HTTP error '+req.status+' reported. ';
+                    }
+                        msg = msg +'If this error pops up repeatedly, please send a bug report (Help > Bug report) or email the Heurist developers (info at HeuristNetwork dot org) and tell us where it occurs.';
                 }
+                
+                if(top.HEURIST4 && top.HEURIST4.msg){
+                    top.HEURIST4.msg.showMsgErr(msg);                           
+                }else{
+                    top.HEURIST.util.showError(msg);
+                }
+                
                 return;
             }
             callback(req);

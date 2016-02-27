@@ -99,6 +99,9 @@ if (! is_logged_in()) {
             HEURIST_ICON_DIR,
             HEURIST_FILESTORE_DIR."/scratch/",
             HEURIST_FILESTORE_DIR."/settings/",
+            HEURIST_FILESTORE_DIR."/backup/",
+            HEURIST_FILESTORE_DIR.'/documentation_and_templates/',
+            HEURIST_FILESTORE_DIR.'/term-images/',
             HEURIST_SMARTY_TEMPLATES_DIR,
             HEURIST_XSL_TEMPLATES_DIR);
         if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
@@ -161,6 +164,10 @@ if (! is_logged_in()) {
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 $row1 = $row = mysql_fetch_row($res1);
                 $mediaFolders = $row1[0];
+                
+                if($mediaFolders==null || $mediaFolders==''){
+                    $mediaFolders = HEURIST_FILESTORE_DIR;
+                }
                 $dirs = explode(';', $mediaFolders); // get an array of folders
 
                 //sanitize folder names
@@ -640,7 +647,7 @@ XML;
                     $recordNotes = null;
 
                     //checks for allowed extensions
-                    if(in_array(strtolower($flleinfo['extension']),$mediaExts))
+                    if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
                     {
 
                         $details = array();

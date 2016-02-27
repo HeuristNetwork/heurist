@@ -245,7 +245,7 @@ function ShowReps() {
     */
     function _reload(template_file) {
 
-        _showLimitWarning();
+        //not used anymore - limit is shown at the end of report _showLimitWarning();
 
         var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
         var squery = null;
@@ -1815,7 +1815,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
     function _onResize(newwidth){
 
-        var newval = newwidth>490?'30px':'60px';
+        var newval = newwidth>605?'30px':'60px';
 
         if(top_repcontainer!=newval){
             top_repcontainer = newval;

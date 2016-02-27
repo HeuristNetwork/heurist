@@ -170,6 +170,11 @@ iframe {
     border:none;
 }
 
+input[type=checkbox], input[type=radio]{
+    vertical-align:-0.3em;
+    margin-right:0.2em;
+}
+
 /* INPUT FORM ----------------------------------   */
 fieldset {
     padding:1em; border:0;
@@ -187,7 +192,6 @@ fieldset > div > input[type=radio]{
     margin: 0.5em 0.2em 0.2em 0.2em;
 }
 fieldset > div > input[type=checkbox], .ent_search_cb input[type=checkbox], .ent_search_cb input[type=radio]{
-    vertical-align:-0.3em;
     margin: 0 0.5em 0 1em;
 }
 fieldset > div > .header,
@@ -863,10 +867,6 @@ background: #8ea9b9
 .div-table-cell{
     display: table-cell;
     vertical-align: middle;
-}
-.div-table-cell > input[type=checkbox]{
-    vertical-align:-0.3em;
-    margin-right:0.2em;
 }
 .div-table-cell > div.header4{
     width: 3em;

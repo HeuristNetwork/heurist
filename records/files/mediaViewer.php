@@ -269,7 +269,7 @@ if (@$_REQUEST['ulf_ID']){
 
 <?php
 if(@$_REQUEST['db']){
-if(@$_REQUEST['annedit']=='yes'){
+if(false && @$_REQUEST['annedit']=='yes'){
 	 echo '<div id="mediaviewer" style="position:absolute;top:0;bottom:22px;left:0px;right:0px;"></div>';
 ?>
 <div id="image_digitizer_container" style="text-align:center;position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>

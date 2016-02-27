@@ -479,7 +479,7 @@ function updateRecord($recID, $rtyID = null) {
 
 function insertRecord($rtyID = null) {
     // check if there is preference for OwnerGroup and visibility
-    $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['addRecDefaults'];
+    $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
     if ($addRecDefaults){
         if ($addRecDefaults[1]){
             $userDefaultOwnerGroupID = intval($addRecDefaults[1]);

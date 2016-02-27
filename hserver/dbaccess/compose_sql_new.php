@@ -368,6 +368,9 @@ class HLimb {
             //IMPORTANT!!!!!!!!
             if(count($wheres)>0){  //@TODO!  this is temporal solution!!!!!
                 $where = implode($cnj, $wheres);
+                
+//DEBUG error_log("TEST $cnj >>> ".$where);
+                
             }
         }
 

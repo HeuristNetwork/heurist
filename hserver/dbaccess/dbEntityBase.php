@@ -74,11 +74,13 @@ class DbEntityBase
         }
         
         //save data
-        $ret = mysql__insertupdate($this->system->get_mysqli(), 'defDetailTypeGroups' ,'dtg', $this->data['fields']);
+        $ret = mysql__insertupdate($this->system->get_mysqli(), 
+                                $this->config['tableName'], $this->config['tablePrefix'],
+                                $this->data['fields']);
         if(is_numeric($ret)){
                 return $ret;
         }else{
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Can not save data in table defDetailTypeGroups", $ret);
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Can not save data in table ".$this->config['entityName'], $ret);
                 return false;
         }
     }
@@ -87,6 +89,17 @@ class DbEntityBase
     // @todo
     //
     protected function _validateValues(){
+        
+        $fieldvalues = $this->data['fields'];
+        
+        foreach($this->fields as $fieldname=>$field_config){
+            $value = @$fieldvalues[$fieldname];
+         
+            if($field_config['dty_Type']=='resource'){
+                if(intval($value)<1) $this->data['fields'][$fieldname] = null;
+            }
+        }
+        
         return true;
     }
 

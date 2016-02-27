@@ -452,17 +452,38 @@ DELIMITER $$
 --			order by dty_ID desc limit 1;
 --		if NEW.dtl_DetailTypeID=relTrgDT then
 		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
+        begin
 			update recRelationshipsCache
 -- need to also save the RecTypeID for the record to help with constraint checking
 				set rrc_TargetRecID = NEW.dtl_Value
 				where rrc_RecID=NEW.dtl_RecID;
 --		elseif NEW.dtl_DetailTypeID=relSrcDT then
+
+            update recLinks
+                set rl_TargetID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+
+        end;        
 		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
-			update recRelationshipsCache
+        begin
+            update recRelationshipsCache
 -- need to also save the RecTypeID for the record to help with constraint checking
-				set rrc_SourceRecID = NEW.dtl_Value
-				where rrc_RecID=NEW.dtl_RecID;
-		end if;
+                set rrc_SourceRecID = NEW.dtl_Value
+                where rrc_RecID=NEW.dtl_RecID;
+
+            update recLinks
+                set rl_SourceID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;
+        elseif NEW.dtl_DetailTypeID=6 then -- relationship type
+            update recLinks
+                set rl_RelationTypeID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+                
+        elseif dtType='resource' then
+            insert into recLinks (rl_SourceID, rl_TargetID, rl_DetailTypeID, rl_DetailID)
+            values (NEW.dtl_RecID, NEW.dtl_Value, NEW.dtl_DetailTypeID, NEW.dtl_ID);
+        end if;
 -- legacy databases: need to add update for 200 to save the termID to help with constraint checking
 -- new databases: need to add update for detail 200, now 5, to save the termID
 	end$$
@@ -507,20 +528,51 @@ DELIMITER $$
 --			order by dty_ID desc limit 1;
 --		if NEW.dtl_DetailTypeID=relTrgDT then
 		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
-			update recRelationshipsCache
-			-- need to also save teh RecTypeID for the record
-				set rrc_TargetRecID = NEW.dtl_Value
-				where rrc_RecID=NEW.dtl_RecID;
+        begin
+            update recRelationshipsCache
+            -- need to also save teh RecTypeID for the record
+                set rrc_TargetRecID = NEW.dtl_Value
+                where rrc_RecID=NEW.dtl_RecID;
+                
+            update recLinks
+                set rl_TargetID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;
 --		elseif NEW.dtl_DetailTypeID=relSrcDT then
 		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
-		update recRelationshipsCache
-				set rrc_SourceRecID = NEW.dtl_Value
+        begin
+            update recRelationshipsCache
+                set rrc_SourceRecID = NEW.dtl_Value
 -- need to also save teh RecTypeID for the record
-				where rrc_RecID=NEW.dtl_RecID;
-		end if;
+                where rrc_RecID=NEW.dtl_RecID;
+            update recLinks
+                set rl_SourceID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+        end;
+        elseif NEW.dtl_DetailTypeID=6 then -- relationship type
+            update recLinks
+                set rl_RelationTypeID = NEW.dtl_Value
+                where rl_RelationID=NEW.dtl_RecID;
+                
+        elseif dtType='resource' then
+            update recLinks set rl_TargetID=NEW.dtl_Value, rl_DetailTypeID=NEW.dtl_DetailTypeID
+            where rl_DetailID=NEW.dtl_ID;
+        end if;
 -- need to add update for detail 200, now 5, to save the termID
 	end$$
 
+    DROP TRIGGER IF EXISTS delete_detail_trigger$$
+
+    CREATE
+    DEFINER=`root`@`localhost`
+    TRIGGER `delete_detail_trigger`
+    AFTER DELETE ON `recDetails`
+    FOR EACH ROW
+    begin
+        delete ignore from recLinks where rl_DetailID=OLD.dtl_ID;
+    end$$
+    
+    
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------
@@ -547,8 +599,13 @@ DELIMITER $$
 	set @rec_id := last_insert_id(NEW.rec_ID);
 --		if NEW.rec_RecTypeID = relRT then
 		if NEW.rec_RecTypeID = 1 then
+        begin
 --  need to also save relationship records RecTypeID
-			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
+            insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
+            
+            insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
+            values (NEW.rec_ID, NEW.rec_ID, NEW.rec_ID);
+        end;    
 		end if;
 	end$$
 
@@ -635,11 +692,17 @@ DELIMITER $$
 				set trgRecID = NEW.rec_ID;
 			end if;
 			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
+            
+            insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
+            values (srcRecID, trgRecID, NEW.rec_ID);
 		end if;
 -- if change the records type from relation to something else remove cache value
 --		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 	    if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then
-			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
+        begin
+            delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
+            delete ignore from recLinks where rl_RelationID=OLD.rec_ID;
+        end;    
 		end if;
 	end$$
 
@@ -671,6 +734,8 @@ DELIMITER $$
 		if OLD.rec_RecTypeID = 1 then
 			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
 		end if;
+        
+        delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
 	end$$
 
 DELIMITER ;

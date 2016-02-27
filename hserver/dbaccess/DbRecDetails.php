@@ -291,10 +291,10 @@ class DbRecDetails
             $valuesToBeReplaced = mysql__select_assoc($mysqli, "recDetails","dtl_ID", "dtl_Value",
                         "dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause");
             
-            if($valuesToBeReplaced==null){
+            if($mysqli->error!=null || $mysqli->error!=''){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            }else if(count($valuesToBeReplaced)==0){  //not found
+            }else if($valuesToBeReplaced==null || count($valuesToBeReplaced)==0){  //not found
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
             }
@@ -309,7 +309,7 @@ class DbRecDetails
                     $newVal = $this->data['rVal'];
                 }
                 $newVal = $mysqli->real_escape_string($newVal);
-                
+         
                 $dtl['dtl_ID'] = $dtlID;
                 $dtl['dtl_Value'] = $newVal;
                 $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);

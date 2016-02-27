@@ -409,8 +409,12 @@ if(@$params['debug']) echo $query."<br>";
             $params['detail'] = @$params['f']; //backward capability
         }
 
+        $istimemap_request = (@$params['detail']=='timemap');
+        $istimemap_counter = 0; //total records with timemap data
+
+        
         $fieldtypes_ids = null;
-        if(@$params['detail'] == 'timemap'){
+        if($istimemap_request){
                 $fieldtypes_ids = '9,10,11,28';
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){
 
@@ -696,7 +700,7 @@ if(@$params['debug']) echo $query."<br>";
                 $chunk_size = PHP_INT_MAX;
                 $aquery["limit"] = '';
             }else{
-                $chunk_size = $system->user_GetPreference('search_detail_limit');
+                $chunk_size = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
             }
 
 
@@ -726,11 +730,12 @@ if(@$params['debug']) echo $query."<br>";
                 $total_count_rows = $total_count_rows[0];
                 $fres->close();
 
-                if($is_ids_only){ //------------------------  LOAD and RETURN only IDS
+                if($is_ids_only)
+                { //------------------------  LOAD and RETURN only IDS
 
                     $records = array();
 
-                    while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //3000 max allowed chunk
+                    while ($row = $res->fetch_row())  {
                         array_push($records, (int)$row[0]);
                     }
                     $res->close();
@@ -767,21 +772,20 @@ if(@$params['debug']) echo $query."<br>";
                     $rectypes = array();
                     $records = array();
                     $order = array();
-
-                        // load all records
-                        while ( ($row = $res->fetch_row()) && (count($records)<$chunk_size) ) {  //3000 maxim allowed chunk
-                            array_push( $row, ($fieldtypes_ids)?'':fileGetThumbnailURL($system, $row[2]) );
-                            //array_push( $row, $row[4] ); //by default icon if record type ID
-                            $records[$row[2]] = $row;
-                            array_push($order, $row[2]);
-                            if(!@$rectypes[$row[4]]){
-                                $rectypes[$row[4]]=1;
-                            }
+                    
+                    // load all records
+                    while ($row = $res->fetch_row()) {  //3000 maximal allowed chunk
+                        array_push( $row, ($fieldtypes_ids)?'':fileGetThumbnailURL($system, $row[2]) );
+                        //array_push( $row, $row[4] ); //by default icon if record type ID
+                        $records[$row[2]] = $row;
+                        array_push($order, $row[2]);
+                        if(!@$rectypes[$row[4]]){
+                            $rectypes[$row[4]]=1;
                         }
-                        $res->close();
+                    }
+                    $res->close();
 
-
-                        if(($params['detail']=='timemap' ||
+                        if(($istimemap_request ||
                             $params['detail']=='detail' ||
                             $params['detail']=='structure') && count($records)>0){
 
@@ -800,7 +804,7 @@ if(@$params['debug']) echo $query."<br>";
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
-                                .'ST_AsWKT(dtl_Geo),'      // 2
+                                .'ST_AsWKT(dtl_Geo),'    // 2
                                 .'dtl_UploadedFileID,'   // 3
                                 .'recUploadedFiles.ulf_ObfuscatedFileID,'   // 4
                                 .'recUploadedFiles.ulf_Parameters '         // 5
@@ -818,34 +822,60 @@ if(@$params['debug']) echo $query."<br>";
                                 $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.'Search query error (retrieving details)', $mysqli->error);
                                 return $response;
                             }else{
+                                
                                 while ($row = $res_det->fetch_row()) {
                                     $recID = array_shift($row);
                                     if( !array_key_exists('d', $records[$recID]) ){
                                         $records[$recID]['d'] = array();
                                     }
                                     $dtyID = $row[0];
-                                    if( !array_key_exists($dtyID, $records[$recID]['d']) ){
-                                        $records[$recID]['d'][$dtyID] = array();
-                                    }
 
+                                    $val = null;
+                                    
                                     if($row[2]){
-                                        $val = $row[1].' '.$row[2];     //dtl_Geo @todo converto to JSON
+                                        $val = $row[1].' '.$row[2];     //dtl_Geo @todo convert to JSON
                                     }else if($row[3]){
                                         $val = array($row[4], $row[5]); //obfuscated value for fileid
-                                    }else {
+                                    }else if(@$row[1]) {
                                         $val = $row[1];
                                     }
-                                    array_push($records[$recID]['d'][$dtyID], $val);
-                                }
-                                $res_det->close();
-                                
-                                if($params['detail']=='timemap'){
                                     
-                                }
+                                    if($val){
+                                        if( !array_key_exists($dtyID, $records[$recID]['d']) ){
+                                            $records[$recID]['d'][$dtyID] = array();
+                                        }
+                                        array_push($records[$recID]['d'][$dtyID], $val);
+                                    }
+                                }//while
+                                $res_det->close();
 
+///@todo
+// 1. optimize loop - include into main detail loop
+// 2. exit loop if more than 5000 geo enabled
+// 3. return geojson and timeline items
+                                //additional loop for timemap request 
+                                //1. exclude records without timemap data
+                                //2. limit to $chunk_size
+                                if($istimemap_request){
+                                    $tm_records = array();
+                                    $order = array();
+                                    $rectypes = array();
+                                    foreach ($records as $recID => $record) {
+                                        if(is_array($record['d']) && count($record['d'])>0){
+                                            //this record is time enabled 
+                                            if($istimemap_counter<$chunk_size){
+                                                $tm_records[$recID] = $record;        
+                                                array_push($order, $recID);
+                                                $rectypes[$record[4]]=1; 
+                                            }
+                                            $istimemap_counter++;
+                                        }
+                                   }
+                                   $records = $tm_records;
+                                   $total_count_rows = $istimemap_counter;
+                                }//$istimemap_request
                             }
                         }//$need_details
-
 
                         $rectypes = array_keys($rectypes);
                         if( $params['detail']=='structure' && count($rectypes)>0){ //rarely used in editing.js
@@ -870,17 +900,10 @@ if(@$params['debug']) echo $query."<br>";
 
                 }//$is_ids_only
 
-                //serch facets
-                /*temp - todo
-                if(@$params['facets']){
-                    $facets = recordSearchFacets_New($system, $params, null, $currentUser); //see db_searchfacets.php
-                    if($facets){
-                        $response['facets'] = $facets;
-                    }
-                }*/
+
+            
 
             }
-
         }
 
         return $response;

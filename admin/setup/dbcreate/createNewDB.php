@@ -317,7 +317,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 if(!document.getElementById("rb1").checked){ //use tempalte database
 
                     ele.value = '';
-                    
+
                     if(document.getElementById("rb2").checked){
 
                         var bd_reg_idx = document.forms[0].elements['dbreg'].value;
@@ -332,13 +332,13 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             if(regurl=='http://heurist.sydney.edu.au/h3/'){
                                 regurl = 'http://heurist.sydney.edu.au/heurist/';
                             }
-                            
+
                             ele.value = regurl + 'admin/describe/getDBStructureAsSQL.php?plain=1&db='+reginfo[2];
                         }
                     }else{ //database id is radio value
-                    
+
                         var db_name = $('input[name="dbtype"]:checked').val();
-                        
+
                         ele.value = 'http://heurist.sydney.edu.au/heurist/admin/describe/getDBStructureAsSQL.php?plain=1&db='+db_name;
                     }
 
@@ -516,11 +516,15 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 terms and relationships, including bibliographic and spatial entities.
                                 Recommended for most new databases unless you wish to copy a particular template (next option).
                             </div>
-                            
+
                             <!-- Added training database 12 Feb 2016 -->
-                            <input type="radio" name="dbtype" value="Shakespeares_Plays" id="rb3"
+                            <!-- TODO: referencing Shakespeare exemplar database by name will fail on other servers - should use registered ID-->
+                            <!-- TODO: would be better to import the Shakespeare (or other) exemplar data directly from HML although this will expose all public data to easy copying -->
+                            <!-- Note: the value for the radio button indicates the name of the database whose
+                                 structure will be copied. Data is then inserted from the file <dbname>_data.sql -->
+                            <input type="radio" name="dbtype" value="Heurist_Shakespeare_Exemplar" id="rb3"
                                 onclick="{$('#registered_dbs').hide()}"/><label for="rb3"
-                                class="labelBold" style="padding-left: 2em;">Example database (Shakespeare)</label>
+                                class="labelBold" style="padding-left: 2em;">Example database (Shakespeare's plays)</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
                                 A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
                                 Use this database as a starting point for becoming familiar with Heurist (See <a href="http://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
@@ -744,7 +748,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 errorOut ("Error importing core definitions from template database $reg_url for database $newname<br>"
                                     .$resval
                                     .'<br>Please check whether this database is valid; consult Heurist support if needed');
-                                    
+
                                 return false;
                             }
 
@@ -790,12 +794,13 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 return false;
                             }
 
-                            //download data to insert into new database ==========================================
+                            // Example database: download data to insert into new database =================================
                             if($dbTemplateName!='1'){
-                                //correct way is the donwloading data from sample database, however at the moment it is included into code
-                                $dataInsertionSQLFile = HEURIST_DIR."admin/setup/dbcreate/example_".$dbTemplateName.".sql";
+                                // TODO: Artem: correct way is the donwloading data from sample database, however at the moment it is included into code. Ian: NASAT - would exposes databases to easy harvesting, but potentially OK as long as data marked public
+                                // $dbTemplateNsme is the name of the database which is used to populate the example database, the corresponding data file has the same name with _data.sql appended
+                                $dataInsertionSQLFile = HEURIST_DIR."admin/setup/dbcreate/".$dbTemplateName."_data.sql";
                                 if(!file_exists($dataInsertionSQLFile)){
-                                        errorOut ('Warning: cannot find sample data dump '.$dataInsertionSQLFile );
+                                        errorOut ('Warning: cannot find sample data file in code '.$dataInsertionSQLFile );
                                         return false;
                                 }
                             }
@@ -916,8 +921,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         }
                     }
 
-                    
-                    
+
+
                     ?>
                     <div  style='padding:0px 0 10px 0; font-size:larger;'>
                         <h2 style='padding-bottom:10px'>Congratulations, your new database <?php echo $newDBName;?> has been created</h2>

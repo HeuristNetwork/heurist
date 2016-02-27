@@ -23,7 +23,27 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _entityName:'defTerms',
     
     _treeview:null,
+    
+    _init: function() {
+        this.options.layout_mode = 'short';
+        this.options.use_cache = true;
 
+        //for selection mode set some options
+        if(this.options.select_mode!='manager'){
+            this.options.width = 390;                    
+            this.options.edit_mode = 'none'
+        }
+    
+        this._super();
+        
+        //if(this.options.edit_mode=='inline'){
+        if(this.options.select_mode!='manager'){
+            //hide form 
+            this.editForm.parent().hide();
+            this.recordList.parent().css('width','100%');
+        }
+        
+    },
     //  
     // invoked from _init after load entity config    
     //
@@ -35,11 +55,25 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return false;
         }
 
-        this._entityIDfield = 'trm_ID'; //@todo - take it from config
-
         // init search header
         this.searchForm.searchDefTerms(this.options);
-            
+        
+        var iheight = 2;
+        //if(this.searchForm.width()<200){  - width does not work here  
+        if(this.options.select_mode=='manager'){            
+            iheight = iheight + 2;
+        }
+        if(top.HEURIST4.util.isempty(this.options.filter_groups)){
+            iheight = iheight + 2;    
+        }
+        this.searchForm.css({'height':iheight+'em'});
+        this.recordList.css({'top':iheight+0.4+'em'});
+
+        if(this.options.select_mode=='manager'){
+            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+        }
+
+        
         this._on( this.searchForm, {
                 "searchdeftermsonresult": this.updateRecordList
                 });
@@ -47,49 +81,28 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 "searchdeftermsonfilter": this.filterRecordList
                 });
                 
-        if(this.options.list_mode=='treeview'){
-        
-            this.recordList = $('<div>')
-                    .addClass('ent_content_full')
-                    //.css({position: 'absolute', top:'6em', bottom:'1px', left:0, right:'1px'})
-                    .appendTo(this.wrapper);
-                    
-            $('<div>').addClass('div-result-list-toolbar ent_header').appendTo(this.recordList);
-            $('<div>').addClass('div-result-list-content ent_content_full').appendTo(this.recordList);
-                    
-        }else if(this.options.list_mode=='default'){
-        
-            this.recordList.resultList('option','hide_view_mode',true);    
+        if(this.options.list_mode=='default'){
+            this.recordList.resultList('hideHeader',true);
         }
         
        //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
        //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
        if(this.options.edit_mode!='none'){
-            
-            var add_action = {key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'};
-            //define add button on left side
-            this._defineActionButton(add_action, 
-                        (this.recordList)?this.recordList.find('.div-result-list-toolbar'):this.editFormToolbar,
-                        'full',{float:'left'});
+
+           //define add button on left side
+           this._defineActionButton({key:'add', label:'Add New Vocabulary', title:'', icon:'ui-icon-plus'}, 
+                        this.editFormToolbar, 'full',{float:'left'});
                 
-            if(this.options.edit_mode=='inline'){
+           this._defineActionButton({key:'add-child',label:'Add Child', title:'', icon:''},
+                    this.editFormToolbar);
+           this._defineActionButton({key:'add-import',label:'Import Children', title:'', icon:''},
+                    this.editFormToolbar);
+           this._defineActionButton({key:'merge',label:'Merge', title:'', icon:''},
+                    this.editFormToolbar);
                
-               this.ent_editor_wrapper.addClass('ent_wrapper');
-               
-               this._defineActionButton({key:'add-child',label:'Add Child', title:'', icon:''},
-                        this.editFormToolbar);
-               this._defineActionButton({key:'add-import',label:'Import Children', title:'', icon:''},
-                        this.editFormToolbar);
-               this._defineActionButton({key:'merge',label:'Merge', title:'', icon:''},
-                        this.editFormToolbar);
-                   
-               //define delete on right side
-               this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                        this.editFormToolbar,'full',{float:'right'});
-               
-            }else{
-               //no actions for pop-up ???
-            }
+           //define delete on right side
+           this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
+                    this.editFormToolbar,'full',{float:'right'});
        }
         
        return true;
@@ -103,7 +116,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super(event, data);
         
         if (this.options.list_mode=='treeview' && this._cachedRecordset && this.options.use_cache){
-            //prepare treeview data
+            //prepare treeview data (@todo keep in cache on client side)
             var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
             this._initTreeView( treeData );
         }
@@ -154,23 +167,44 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         if(this.options.edit_mode=='popup'){
             html = html
-            + '<div title="Click to edit term" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-            + '</div>&nbsp;&nbsp;'
-            + '<div title="Click to delete term" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-            + '</div>';
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
+            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
         }
-        
-
         return html+'</div>';
         
         
     },
     
+    
+    _onActionListener:function(event, action){
+        
+        var isresolved = this._super(event, action);   //action is already defined in parent's method
+        
+        //@TODO !!!!!! it is not implemented properly!!!!!
+        this._currentDomain = this.searchForm.searchDefTerms('currentDomain');
+        this._currentParentID = null;
+                
+        if(isresolved) return;                        
+        
+        var recID = null;        
+        if(action && action.action){
+             recID =  action.recID;
+             action = action.action;
+        }
+                
+        if(action=='add-child'){
+            this._currentParentID = recID;
+            this._addEditRecord(-1);
+        }
+        
+    },
+    
     //  -----------------------------------------------------
     //
-    // perform special action for virtual fields 
+    // 1. returns values from edit form
+    // 2. performs special action for virtual and hidden fields 
+    // fill them with constructed and/or predefined values
+    // EXTEND this method to set values for hidden fields (for example parent term_id or group/domain)
     //
     _getValidatedValues: function(){
         
@@ -187,6 +221,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
         } 
 */        
+
+        if(!(fieldvalues['trm_ID']>0)){ //this addition - set values for parent id and domain
+            fieldvalues['trm_Domain'] = this._currentDomain;
+            fieldvalues['trm_ParentTermID'] = this._currentParentID;
+        }
+
         return fieldvalues;
         
     },
@@ -195,7 +235,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //  perform some after load modifications (show/hide fields,tabs )
     //
     _afterInitEditForm: function(){
-
+        this._super();
+        
+        var domain = this.searchForm.searchDefTerms('currentDomain');
+        var ele = this._editing.getFieldByName('trm_InverseTermId');
+        if(domain == 'relation'){
+            ele.show();
+        }else{
+            // hide inversion 
+            ele.hide();
+        }
+        
     },
     
 //----------------------------------------------------------------------------------    
@@ -261,7 +311,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             };     */
             fancytree_options['filter'] = { highlight:false, mode: "hide" };  
 
-            this._treeview = this.recordList.find('.div-result-list-content').fancytree(fancytree_options);
+            this._treeview = this.recordList.fancytree(fancytree_options);
         
     },
                  
@@ -291,8 +341,8 @@ function showManageDefTerms( options ){
         options.isdialog = true;
 
         manage_dlg = $('<div id="heurist-records-dialog">')
-        .appendTo( $('body') )
-        .manageDefTerms( options );
+                .appendTo( $('body') )
+                .manageDefTerms( options );
     }
 
     manage_dlg.manageDefTerms( 'popupDialog' );

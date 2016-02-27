@@ -40,7 +40,7 @@ $.widget( "heurist.dh_maps", {
         //this._focusable($element);
 
         this.div_content = $( "<div>" )
-        .css({'width':'100%','height':'100%','overflow-y':'auto','padding':'0.5em'})
+        .css({'overflow-y':'auto','padding':'0.5em','position': 'absolute','bottom': '0','top':'2.5em'})
         .addClass('thumbs2')
         .appendTo( this.element );
 
@@ -53,6 +53,7 @@ $.widget( "heurist.dh_maps", {
 
 
             //531 (not individ), 4802 (35), 4803 (pre35)
+            //LOAD MAP DOCUMENTS
             var query = {"t":"19"};
             if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
                 query["f:144"] = "4802";

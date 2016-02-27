@@ -161,8 +161,11 @@ $.widget( "heurist.editing_input", {
         var help_text = this.f('rst_DisplayHelpText');
         this.input_prompt = $( "<div>")
         .text( help_text && !this.options.suppress_prompts ?help_text:'' )
-        .addClass('heurist-helper1')
-        .appendTo( this.input_cell );
+        .addClass('heurist-helper1');
+        if(top.HAPI4.get_prefs('help_on')!=1){
+            this.input_prompt.hide();
+        }
+        this.input_prompt.appendTo( this.input_cell );
 
 
         //values are not defined - assign default value
@@ -300,12 +303,12 @@ $.widget( "heurist.editing_input", {
         var $input = null;
         //@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         //repalce to uniqueId() if need
-        value = value ?value:'';
+        value = top.HEURIST4.util.isnull(value)?'':value;
 
 
         var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.input_prompt);  //.appendTo( this.input_cell );
 
-        if(this.detailType=="blocktext"){
+        if(this.detailType=='blocktext'){
 
             $input = $( "<textarea>",{rows:3})
             .uniqueId()
@@ -313,9 +316,9 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .appendTo( $inputdiv );
 
-        }else if(this.detailType=="enum"){
+        }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
-            $input = $( "<select>")
+            $input = $( '<select>' )
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
@@ -324,9 +327,9 @@ $.widget( "heurist.editing_input", {
 
             this._recreateSelector($input, value);
 
-        }else if(this.detailType=="boolean"){
+        }else if(this.detailType=='boolean'){
 
-            $input = $( "<input>",{type:'checkbox', value:'1'} )
+            $input = $( '<input>',{type:'checkbox', value:'1'} )
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
@@ -479,43 +482,48 @@ $.widget( "heurist.editing_input", {
                             //this is entity selector
                             //detect entity
                             var entityName = this.configMode.entity;
+                            var widgetName = 'manage'+entityName.capitalize();
+                            
                             if(top.HEURIST4.util.isempty(entityName)) entityName='Records'; //by default
 
-                            if($.isFunction($('body')['manage'+entityName])){ //OK! widget js has been loaded
+                            if($.isFunction($('body')[widgetName])){ //OK! widget js has been loaded
 
                                 var popup_options = {
                                     isdialog: true,
                                     select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                                     //selectbutton_label: '',
                                     //page_size: $('#page_size').val(),
-                                    action_select: false,
-                                    action_buttons: true,
+                                    //action_select: false,
+                                    //action_buttons: true,
                                     filter_group_selected:null,
                                     filter_groups: this.configMode.filter_group,
                                     onselect:function(event, data){
-
-                                        if(data && data.selection && top.HEURIST4.util.isRecordSet(data.selection))
+                                        
+                                        if( data && top.HEURIST4.util.isArrayNotEmpty(data.selection) )
                                         {
-                                            var recordset = data.selection;
-                                            var record = recordset.getFirstRecord();
-                                            var name = recordset.fld(record,'rec_Title');
-                                            $input.val(name);
-                                            that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
+                                            //config and data are loaded already, since dialog was opened
+                                            var display_value = top.HAPI4.EntityMgr.getTitlesByIds(entityName, data.selection);
+                                            $input.val( display_value.join(',') );
+                                            that.newvalues[$input.attr('id')] = data.selection.join(',');
                                         }
 
                                     }
-                                }
-
-
-                                var manage_dlg = $('<div>')
-                                .uniqueId()
-                                .appendTo( $('body') )
-                                ['manage'+entityName]( popup_options );
+                                }//options
 
                                 __show_select_dialog = function(event){
-                                    manage_dlg['manage'+entityName]( 'popupDialog' );
-                                }
+                                        //init dilaog
+                                        var manage_dlg = $('<div>')
+                                            .uniqueId()
+                                            .appendTo( $('body') )
+                                            [widgetName]( popup_options );
 
+                                        manage_dlg[widgetName]( 'popupDialog' );
+                                }
+                                
+                                //assign initial display value
+                                
+                                var display_value = top.HAPI4.EntityMgr.getTitlesByIds(entityName, value.split(','));                                
+                                $input.val( display_value.join(',') );
                             }
                         }
 
@@ -607,7 +615,7 @@ $.widget( "heurist.editing_input", {
                         //if( top.HEURIST4.util.isempty( that._getValue('#'+input_id)) ){
                         that._removeInput( input_id );
                     }else{
-                        that._setValue(input_id, '');
+                        that._clearValue(input_id, '');
                     }
                 }
             });
@@ -620,18 +628,15 @@ $.widget( "heurist.editing_input", {
 
 
     //
-    // recreate SELECT for enum type
+    // recreate SELECT for enum/relation type
     //
     _recreateSelector: function($input, value){
 
         $input.empty();
 
         var allTerms = this.f('rst_FieldConfig');
-        if(top.HEURIST4.util.isempty(allTerms)){
-            allTerms = this.f('rst_FilteredJsonTermIDTree');
-        }
 
-        if(isNaN(allTerms)){//this is not vocabulary ID, this is something more complex
+        if(!top.HEURIST4.util.isempty(allTerms)){//this is not vocabulary ID, this is something more complex
 
             if($.isPlainObject(this.configMode)){ //this lookup for entity
 
@@ -666,9 +671,11 @@ $.widget( "heurist.editing_input", {
                     top.HEURIST4.ui.createSelector($input.get(0), allTerms);
                 }
             }
+            if(!top.HEURIST4.util.isnull(value))  $input.val(value);
 
-        }else{ //old way
+        }else{ //this is usual enumeration from defTerms
 
+            allTerms = this.f('rst_FilteredJsonTermIDTree');        
             //headerTerms - not used anymore
             var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
 
@@ -680,9 +687,9 @@ $.widget( "heurist.editing_input", {
     },
 
     //
-    // internal - assign value for specific input element
+    // internal - assign display value for specific input element
     //
-    _setValue: function(input_id, value, display_value){
+    _clearValue: function(input_id, value, display_value){
 
         var that = this;
         $.each(this.inputs, function(idx, item){
@@ -717,7 +724,7 @@ $.widget( "heurist.editing_input", {
             }else{
                 var inpt_id = this._addInput(values[i]);
 
-                if(!(this.detailType=="resource" || this.detailType=="relmarker")){
+                if(this.detailType=="resource" || this.detailType=="relmarker"){
                     this.newvalues[inpt_id] = values[i];
                 }
 
@@ -784,7 +791,8 @@ $.widget( "heurist.editing_input", {
             for (idx in this.inputs) {
                 var res = this._getValue(this.inputs[idx]);
                 
-                if(this.options.values[idx]!=res){
+                if (!(top.HEURIST4.util.isempty(this.options.values[idx]) && top.HEURIST4.util.isempty(res))
+                   && (this.options.values[idx]!=res)){
                     return true;
                 }
             }

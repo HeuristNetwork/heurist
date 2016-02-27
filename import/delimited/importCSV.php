@@ -158,7 +158,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
     </head>
 
     <body class="popup">
-
+    
         <script type="text/javascript">
 
             var currentDb = "<?=HEURIST_DBNAME?>";

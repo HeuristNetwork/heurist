@@ -91,7 +91,9 @@
 
             <div class="input-row required">
                 <div class="input-header-cell">Default field type name:</div>
-                <div class="input-cell"><input id="dty_Name" style="width:200;" maxlength="255" />
+                <div class="input-cell"><input id="dty_Name" style="width:200;" 
+                onkeypress="detailTypeEditor.onPreventChars(event)"
+                maxlength="255" />
                     <div class="help prompt">A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name is normally overridden with a name specific to each record type in which it is used. </div></div>
             </div>
 

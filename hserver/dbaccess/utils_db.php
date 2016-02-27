@@ -150,6 +150,7 @@
 
         $matches = null;
         if($mysqli){
+            
             $res = $mysqli->query("SELECT $key_column, $val_column FROM $table WHERE $condition");
             if ($res){
                 $matches = array();

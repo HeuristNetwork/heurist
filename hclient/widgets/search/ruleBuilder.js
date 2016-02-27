@@ -51,14 +51,21 @@ $.widget( "heurist.ruleBuilder", {
 
         this.element.addClass('rulebuilder');
 
+       if(this.options.level>1) {
+            $('<div>')
+                .css({'width':'1.5em',
+                'font-size':'0.8em', 'color':'gray',
+                'margin-left':( (this.options.level-1)*20-10)+'px'})
+                .html(this.options.level-1).appendTo(this.element);
+       }
+
         //create list/combobox of source record types
         var cont = $('<div>')
-            .css({'padding-top':(this.options.level==1?'1.2em':0),
+            .css({'padding-top':(this.options.level==1?'10px':0),
                   'text-align':'left','width':'230px'}).appendTo(this.element);
 
         this.select_source_rectype = $( "<select>" )
         .attr('title', 'The starting point entity type for this rule. The result set will be expanded by following pointers/relationships from/to this type' )
-        .css({'margin-left':( (this.options.level-1)*20)+'px'})
         .addClass('text ui-corner-all')
         .appendTo( cont );
 
@@ -83,21 +90,23 @@ $.widget( "heurist.ruleBuilder", {
         .appendTo( $('<div>').appendTo(this.element) );
 
         //
-        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all').css({'width':'155px'})
+        this.additional_filter = $( "<input>" ).addClass('text ui-corner-all').css({'width':'250px'})
         .attr('title', 'Add an additional Heurist query string which will filter the set of records retrieved by this rule' )
-        .appendTo( $('<div>').css({'width':'160px'}).appendTo(this.element) );
+        .appendTo( $('<div>').css({'width':'255px'}).appendTo(this.element) );
 
         /*this.btn_save   = $( "<button>", {text:'Save'} ).appendTo(this.element);
         this.btn_cancel = $( "<button>", {text:'Cancel'} ).appendTo(this.element);*/
 
-        this.div_btn =  $('<div>').css({'width':(this.options.level<3)?'12em':'6em'}).appendTo(this.element); //,'margin-left':'0.5em'
+        //(this.options.level<3)?'12em':
+        this.div_btn2 =  $('<div>').css({'width':'6em'}).appendTo(this.element); //,'margin-left':'0.5em'
 
         this.btn_delete = $( "<button>", {text:'Delete'})
         .attr('title', 'Delete this step in the rule' )
         .css('font-size','0.8em')
-        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
+        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn2);
 
         if(this.options.level<3)
+            this.div_btn =  $('<div>').css({'display':'block','margin': '4px 0 0 '+this.options.level*25+'px'}).appendTo(this.element); //,'margin-left':'0.5em'
             this.btn_add_next_level = $( "<button>", {text:'Add Step '+this.options.level} )
             .attr('title', 'Adds another step to this rule' )
             .css('font-size','0.8em')
@@ -106,7 +115,8 @@ $.widget( "heurist.ruleBuilder", {
 
 
 
-        /*if(this.options.is_search_allowed){
+        /* TODO: remove debu code
+        if(this.options.is_search_allowed){
         this.debug_search = $( "<button>", {text:'Search'} ).appendTo(this.element);
         this.debug_label = $( "<label>" ).css('padding-left','10px').appendTo(this.element);
         this._on( this.debug_search, { click: this._debugSearch });
@@ -125,7 +135,8 @@ $.widget( "heurist.ruleBuilder", {
         if(this.options.level<3)
             this._on( this.btn_add_next_level, {click: function( event ){ this._addChildRule(null); }});
 
-        //-----------------------     listener of global events
+
+        // TODO: remove big block of debug or old code -----------------------     listener of global events
         /*var sevents = top.HAPI4.Event.ON_REC_SEARCHSTART+' '+top.HAPI4.Event.ON_REC_SEARCHRESULT;
 
         $(this.document).on(sevents, function(e, data) {
@@ -222,6 +233,7 @@ $.widget( "heurist.ruleBuilder", {
     _init: function() {
 
     },
+    // TODO: remove big block of debug or old code
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     /*_setOptions: function( ) {
@@ -245,6 +257,7 @@ $.widget( "heurist.ruleBuilder", {
     */
     _refresh: function(){
 
+        // TODO: remove big block of debug or old code
         /*if(top.HAPI4.currentUser.ugr_ID>0){
         $(this.element).find('.logged-in-only').css('visibility','visible');
         }else{
@@ -275,7 +288,8 @@ $.widget( "heurist.ruleBuilder", {
         this.label_5.remove();*/
 
         if(this.debug_label) this.debug_label.remove();
-        this.div_btn.remove();
+        this.div_btn2.remove();
+        if(this.div_btn) his.div_btn.remove();
     },
 
 
@@ -298,7 +312,9 @@ $.widget( "heurist.ruleBuilder", {
         // c. all recordtypes contrained in pointer and relmarkers fields
 
         var rectypes = top.HEURIST4.rectypes,
-        details = rectypes.typedefs[rt_ID];
+        details = rectypes.typedefs[rt_ID],
+        source_rt_name = rectypes.names[rt_ID];
+        
 
         if(details){
             details = details.dtFields;
@@ -349,12 +365,13 @@ $.widget( "heurist.ruleBuilder", {
                             temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) )
                             ?  temp.split(",") :[];
                             if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
-                            arr_fields.push({key:dtyID, title:name, terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
+                            arr_fields.push({key:dtyID, title: source_rt_name + ' >> ' + name, 
+                                    terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
 
                         }else{ // pointer field
 
                             this._has_pointers = '1';
-                            arr_fields.push({key:dtyID, title:name, rectypes:constraints});
+                            arr_fields.push({key:dtyID, title:source_rt_name + ' >> ' + name, rectypes:constraints});
                         }
 
                     }
@@ -426,13 +443,14 @@ $.widget( "heurist.ruleBuilder", {
                                         temp = ( typeof(temp) === "string" && !top.HEURIST4.util.isempty(temp) ) ?  temp.split(",") :[];
                                         if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
 
-                                        arr_fields.push({key:dtyID, title:'<< '+name + ' -- in: ' + rt_name, terms:details[dtyID][fi_term],
+                                        arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name +')', terms:details[dtyID][fi_term],
+
                                             terms_dis:temp, rectypes:[rtyID], isreverse:true });
 
                                     }else{ // reverse pointer
 
                                         this._has_rev_pointers = '1';
-                                        arr_fields.push({key:dtyID, title:'<< '+name + ' -- in: ' + rt_name, rectypes:[rtyID], isreverse:true });
+                                        arr_fields.push({key:dtyID, title:'<< '+name + ' (in: ' + rt_name+')', rectypes:[rtyID], isreverse:true });
                                     }
                                 } // reverse pointer
 
@@ -453,6 +471,7 @@ $.widget( "heurist.ruleBuilder", {
         this._arr_rectypes = arr_rectypes;
         //this._arr_rectypes_subset = arr_rectypes;
 
+        // TODO: remove big block of debug or old code
         //fill selectors
         /*top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
 
@@ -475,6 +494,7 @@ $.widget( "heurist.ruleBuilder", {
         this.select_fields.val('');
         this._onSelectFieldtype();
 
+        // TODO: remove big block of debug or old code
         // selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray
         //top.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_terms, arr_terms_dis, null, arr_fields, false);
 
@@ -558,6 +578,8 @@ $.widget( "heurist.ruleBuilder", {
         //this._generateQuery();
     },
 
+
+    // TODO: remove big block of debug or old code
     //
     // compose search query
     //
@@ -621,14 +643,15 @@ $.widget( "heurist.ruleBuilder", {
         return rt_target;
     },
 
+    // TODO: remove big block of debug or old code
     /*
-       [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype]
-       Source rectype,
-       pointer or relation field id,
-       relation type (term) id,
-       Target rectype,
-       Filter ,
-       linktype  0 links (any), 1 linedfrom, 2 linkedto, 3 relationfrom, 4 relatedto
+    [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype]
+    Source rectype,
+    pointer or relation field id,
+    relation type (term) id,
+    Target rectype,
+    Filter ,
+    linktype  0 links (any), 1 linedfrom, 2 linkedto, 3 relationfrom, 4 relatedto
 
 
     */

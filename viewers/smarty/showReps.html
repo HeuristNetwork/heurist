@@ -261,7 +261,7 @@
 
         <div id="viewercontainer">
             <div id="toolbardiv" style="width:100%;height:30px;">
-                <div style="padding:5px;display:inline-block;">
+                <div style="padding:5px;display:none;">
                     <select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
                         <option value="all" selected="selected">All on page</option>
                         <option value="selected">Selected only</option>
@@ -269,13 +269,13 @@
                     </select>
                 </div>
                 <div style="padding:5px;display:inline-block;">
-                    <label style="width:100px;padding-left:5px;white-space:nowrap;">Select template:</label>
-                    <select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;margin-right:100px"></select>
+                    <label style="width:100px;padding-left:0.5em;white-space:nowrap;">Select template:</label>
+                    <select id="selTemplates" onChange="onSelectTemplate()" style="display:inline-block;width:200px;"></select>
 
                     <span id="recordCount"></span>
                 </div>
                 
-                <div style="position: absolute; right: 16px; top:6px;">
+                <div style="display:inline-block;padding-left:0.5em;">
                     <button id="btnRepEdit" title="Edit the selected template">Edit</button>
                     <button id="btnRepNew" title="Create a new template">New</button>
                     <button id="btnRepDelete" title="Delete the selected template">Delete</button>

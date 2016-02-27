@@ -107,8 +107,13 @@ function hRecordSet(initdata) {
 
     /**
     * Converts recordSet to OS Timemap dataset
+    * 
+        * geoType 
+        * 0, undefined - all
+        * 1 - main geo only
+        * 2 - rec_Shape only
     */
-    function _toTimemap(dataset_name, filter_rt, iconColor){
+    function _toTimemap(dataset_name, filter_rt, iconColor, geoType){
 
         var aitems = [], titems = [];
         var item, titem, shape, idx, 
@@ -185,12 +190,17 @@ function hRecordSet(initdata) {
                     //}
                 }
                 
-                var shapes = (recShape)?recShape:[];
+                var shapes = (recShape && geoType!=1)?recShape:[];
                 
-                var main_shape = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
-                if(main_shape){ //main shape
-                    shapes.push(main_shape);
+                if(geoType!=2){
+                    var main_shape = top.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                    if(main_shape){ //main shape
+                        shapes.push(main_shape);
+                    }
+                }else{
+                    recID = recID + "_link";
                 }
+                
                 
                         item = {
                             title: recName,
@@ -209,7 +219,7 @@ function hRecordSet(initdata) {
                                 title: recName,
                                 
                                 eventIconImage: iconId + 'm.png',
-                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+iconColor,
+                                icon: top.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor),
                                 
                                 //color on dataset level works once only - timemap bug
                                 color: iconColor,
@@ -237,7 +247,9 @@ function hRecordSet(initdata) {
                     }
                     mapenabled++;
                 }
-                aitems.push(item);
+                if(geoType!=2 || shapes.length>0){
+                    aitems.push(item);
+                }
 
                 tot++;
         }}
@@ -399,6 +411,7 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
     */
     function _getFieldValue(record, fldname){
 
+        //this is field type ID  or field name (nominal for most common fields)
         if(!isNaN(Number(fldname)) || fldname.indexOf("dtl_")==0){  //@todo - search detail by its code
             var d = record['d'];
             if(d){
@@ -433,6 +446,8 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             return null;
         }
 
+        //either take value by index or by name
+        // record can be either array or object
         var idx = $.inArray(fldname, fields);
         if(isnull(record)){
             return null;
@@ -922,9 +937,14 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
         */ 
         /**
         * Converts recordSet to OS Timemap dataset
+        * 
+        * geoType 
+        * 0, undefined - all
+        * 1 - main geo only
+        * 2 - rec_Shape only
         */
-        toTimemap: function(dataset_name, filter_rt, iconColor){
-            return _toTimemap(dataset_name, filter_rt, iconColor);
+        toTimemap: function(dataset_name, filter_rt, iconColor, geoType){
+            return _toTimemap(dataset_name, filter_rt, iconColor, geoType);
         },
         
         setProgressInfo: function(data){

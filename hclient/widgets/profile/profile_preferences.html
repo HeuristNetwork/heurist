@@ -52,7 +52,9 @@
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
-                "javascript:(function(){h='" + top.HAPI4.basePathV3 + "';"
+                "javascript:(function(){ "
+                + "if(location.protocol=='https:'){alert('Sorry, only http:// pages can be bookmarked with the bookmarklet, you will need to add https:// pages manually!'); return;}"
+                + "h='" + top.HAPI4.basePathV3 + "';"
                 + "d=document;c=d.contentType;"
                 + "if(c=='text/html'||!c){"
                 + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
@@ -120,10 +122,11 @@
                 <option value="500">500</option>
                 <option value="1000">1,000</option>
                 <option value="2000">2,000</option>
-                <option value="5000">5,000</option>
+                <option value="5000">5,000 (not recommended)</option>
+                <!--
                 <option value="10000">10,000 (not recommended)</option>
                 <option value="20000">20,000 (not recommended)</option>
-                <option value="50000">50000 (not recommended)</option>
+                -->
             </select>
         </div>
 

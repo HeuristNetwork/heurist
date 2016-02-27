@@ -720,6 +720,7 @@ $.widget( "heurist.search", {
 
             var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
+            allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
 
 
@@ -755,6 +756,7 @@ $.widget( "heurist.search", {
                     top.HEURIST4.ui.createRectypeDetailSelect(select_sortby.get(0), rectype, allowed, topOptions);
 
                     $("#sa_fieldvalue").val("");
+                    $("#sa_negate").prop("checked",'');
                     $dlg.find("#fld_contain").show();
                     $dlg.find("#fld_enum").hide();
                     this.calcShowSimpleSearch();
@@ -766,16 +768,20 @@ $.widget( "heurist.search", {
                     var dtID = Number(event.target.value);
 
                     var detailtypes = top.HEURIST4.detailtypes.typedefs;
+                    var detailType = '';
 
-                    if(Number(dtID)>0 && detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']]=='enum'){
+                    if(Number(dtID)>0){
+                        detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                    }
+                    if(detailType=='enum'  || detailType=='relationtype'){
                         $dlg.find("#fld_contain").hide();
                         $dlg.find("#fld_enum").show();
                         //fill terms
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
-                        top.HEURIST4.ui.createTermSelectExt(select_terms.get(0), "enum", allTerms, disabledTerms, null, false);
-                    }else{
+                        top.HEURIST4.ui.createTermSelectExt(select_terms.get(0), detailType, allTerms, disabledTerms, null, false);
+                    } else {
                         $dlg.find("#fld_contain").show();
                         $dlg.find("#fld_enum").hide();
                     }
@@ -795,6 +801,11 @@ $.widget( "heurist.search", {
             });
             that._on( $("#sa_fieldvalue"), {
                 keyup: function(event){
+                    this.calcShowSimpleSearch();
+                }
+            });
+            that._on( $("#sa_negate"), {
+                change: function(event){
                     this.calcShowSimpleSearch();
                 }
             });
@@ -819,6 +830,10 @@ $.widget( "heurist.search", {
         var fld = this.search_assistant.find("#sa_fieldtype").val(); if(fld) fld = "f:"+fld+":";
         var ctn = this.search_assistant.find("#fld_enum").is(':visible') ?this.search_assistant.find("#sa_termvalue").val()
         :this.search_assistant.find("#sa_fieldvalue").val();
+        
+        if(this.search_assistant.find("#sa_negate").is(':checked')){
+            fld  = '-'+fld;
+        }
 
         var asc = ($("#sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = $("#sa_sortby").val();

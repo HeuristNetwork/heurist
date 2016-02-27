@@ -506,7 +506,7 @@ function DetailTypeEditor() {
                 "no-resize": true,
                 title: 'Select Record Type',
                 height: 480,
-                width: 440,
+                width: 540,
                 callback: function(recordTypesSelected) {
                     if(!Hul.isnull(recordTypesSelected)) {
                         _setRecordsPointerValue(recordTypesSelected);
@@ -935,6 +935,25 @@ function DetailTypeEditor() {
 
     }
 
+    function _onPreventChars(event){
+
+        event = event || window.event;
+        var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+        if (charCode && charCode > 31)
+        {
+            var keyChar = String.fromCharCode(charCode);
+            if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+                event.cancelBubble = true;
+                event.returnValue = false;
+                event.preventDefault();
+                if (event.stopPropagation) event.stopPropagation();
+                return false;
+            }
+        }
+        return true;
+    }
+        
+    
     //public members
     var that = {
 
@@ -950,6 +969,9 @@ function DetailTypeEditor() {
             _updateDetailTypeOnServer();
         },
 
+        onPreventChars: function(event) {
+            _onPreventChars(event);
+        },        
         /**
         *	handles change type event
         */

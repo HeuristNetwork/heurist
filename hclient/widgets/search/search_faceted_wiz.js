@@ -155,7 +155,7 @@ $.widget( "heurist.search_faceted_wiz", {
             beforeClose: function( event, ui ) {
                 if(event && event.currentTarget){
                     var that_dlg = this;
-                    top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
+                    top.HEURIST4.msg.showMsgDlg(top.HR("Please confirm discard of any changes"),
                         function(){ $( that_dlg ).dialog( "close" ); });
                     return false;
                 }
@@ -169,11 +169,6 @@ $.widget( "heurist.search_faceted_wiz", {
                     click: function() {
                         that.navigateWizard(1);
                 }},
-                /*{text:top.HR('Close'), click: function() {
-                var that_dlg = this;
-                top.HEURIST4.msg.showMsgDlg(top.HR("Cancel? Please confirm"),
-                function(){ $( that_dlg ).dialog( "close" ); });
-                }}*/
             ]
         });
         this.element.parent().addClass('ui-dialog-heurist');
@@ -343,7 +338,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
-                var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
+                var bValid = top.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
                 if(!bValid){
                     svs_name.focus();
                     //top.HEURIST4.msg.showMsgFlash(top.HR("Define Saved search name"), 2000, "Required", svs_name);
@@ -552,8 +547,8 @@ $.widget( "heurist.search_faceted_wiz", {
             var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
 
             if($(opt_rectypes).is(':empty')){
-                top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
-             }
+            top.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null);
+            }
 
             this._on( opt_mode, {
             click: function(e){
@@ -957,43 +952,43 @@ $.widget( "heurist.search_faceted_wiz", {
 
             len = facets.length;
             for (k=0;k<len;k++){
-                    //title
-                    //help tip (take from rectype structure?)
-                    //type of facet (radio group)
+                //title
+                //help tip (take from rectype structure?)
+                //type of facet (radio group)
 
-                    var sContent =
-            '<div>'
+                var sContent =
+                '<div>'
                 +'<div class="header_narrow"><label for="facet_Title'+k+'">Facet</label></div>'
                 +'<input type="text" name="facet_Title'+k+'" id="facet_Title'+k+'" '
                 +' style="font-weight:bold" class="text ui-widget-content ui-corner-all" />'
                 +' <label for="facet_Help'+k+'">&nbsp;&nbsp;Rollover (optional)&nbsp;</label>'
                 +'<input name="facet_Help'+k+'" id="facet_Help'+k+'" type="text" '
                 +' style="font-size:smaller" class="text ui-widget-content ui-corner-all"'
-                    +' style="margin-top:0.4em;margin-bottom:1.0em;width:300px;"/>';
-            +'</div>';
+                +' style="margin-top:0.4em;margin-bottom:1.0em;width:300px;"/>';
+                +'</div>';
 
-            var sTypeLabel = '<div class="ent_search_cb" style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header_narrow"><label></label></div>';
-                    if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
-                        sContent = sContent +
-                sTypeLabel
-                +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>first char</label>'
-                +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
-                +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-            +'</div>';
-                    }else if(facets[k].type=='date' || facets[k].type=='year'){
-                        sContent = sContent +
-                sTypeLabel
-                +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
-                +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-            +'</div>';
-                    }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
-                        sContent = sContent +
-                sTypeLabel
-                +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>list</label>'
-                +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>dropdown</label>'
-                +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
-            +'</div>';
-                    }
+                var sTypeLabel = '<div class="ent_search_cb" style="font-size:smaller;font-style:italic; margin-bottom:5px;"><div class="header_narrow"><label></label></div>';
+                if(facets[k].type=='freetext' || facets[k].type=='float' || facets[k].type=='integer'){
+                    sContent = sContent +
+                    sTypeLabel
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>first char</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>list</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
+                    +'</div>';
+                }else if(facets[k].type=='date' || facets[k].type=='year'){
+                    sContent = sContent +
+                    sTypeLabel
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>slider</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
+                    +'</div>';
+                }else if(facets[k].type=='enum' || facets[k].type=='relationtype'){
+                    sContent = sContent +
+                    sTypeLabel
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="1"/>list</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="2"/>dropdown</label>'
+                    +'<label><input type="radio" name="facet_Type'+k+'" value="0"/>search</label>'
+                    +'</div>';
+                }
 
                 listdiv.append($(sContent));
 

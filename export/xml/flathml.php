@@ -1402,7 +1402,7 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     $result = loadRemoteURLContent($url);
     $result = json_decode($result, true);
     */
-    $result = loadRemoteURLContent($url, false);
+    $result = loadRemoteURLviaSocket($url); //because of issue with curl/proxy on heurist server loadRemoteURLContent($url, false);
     $result = json_decode($result, true);
 
     /* it requires pecl http

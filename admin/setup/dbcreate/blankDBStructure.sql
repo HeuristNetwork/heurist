@@ -439,6 +439,27 @@ CREATE TABLE recRelationshipsCache (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table 'recLinks'
+--
+
+CREATE TABLE recLinks (
+  rl_ID   int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key',
+  rl_SourceID int(10) unsigned NOT NULL COMMENT 'Source record ID',
+  rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
+  rl_RelationID int(10) unsigned        COMMENT 'Realtionship record ID',
+  rl_RelationTypeID int(10) unsigned    COMMENT 'Realtionship type - defTerms.trm_ID',
+  rl_DetailTypeID int(10) unsigned      COMMENT 'Pointer (Resource) detail type ID',
+  rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
+  PRIMARY KEY  (rl_ID),
+  KEY rl_SourcePtrKey (rl_SourceID),
+  KEY rl_TargetPtrKey (rl_TargetID),
+  KEY rl_RelationKey (rl_RelationID),
+  KEY rl_DetailKey (rl_DetailID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for records links (pointers and relationships) to speed access';
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table 'recSimilarButNotDupes'
 --
 
@@ -900,8 +921,6 @@ CREATE TABLE woots (
   PRIMARY KEY  (woot_ID),
   UNIQUE KEY woot_title_key (woot_Title(200))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
-
-
 
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------

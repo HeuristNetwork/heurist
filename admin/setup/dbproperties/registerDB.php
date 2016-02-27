@@ -27,6 +27,8 @@
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+
 
 if (isForOwnerOnly("to register a database with the Heurist master index")){
     return;
@@ -317,37 +319,8 @@ if($sError){
                         // Update original DB ID and original db code for all existing record types, fields and terms
                         // which don't have them (meaning that they were defined within this database)
                         // Record types
-                        $result = 0;
-                        $res = mysql_query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
-                            "where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        $res = mysql_query("update defRecTypes set rty_NameInOriginatingDB=rty_Name ".
-                            "where (rty_NameInOriginatingDB = '') OR (rty_NameInOriginatingDB IS NULL)");
-                        if (!$res) {$result = 1; }
-                        $res = mysql_query("update defRecTypes set rty_IDInOriginatingDB=rty_ID ".
-                            "where (rty_IDInOriginatingDB = '0') OR (rty_IDInOriginatingDB IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        // Fields
-                        $res = mysql_query("update defDetailTypes set dty_OriginatingDBID='$dbID' ".
-                            "where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        $res = mysql_query("update defDetailTypes set dty_NameInOriginatingDB=dty_Name ".
-                            "where (dty_NameInOriginatingDB = '') OR (dty_NameInOriginatingDB IS NULL)");
-                        if (!$res) {$result = 1; }
-                        $res = mysql_query("update defDetailTypes set dty_IDInOriginatingDB=dty_ID ".
-                            "where (dty_IDInOriginatingDB = '0') OR (dty_IDInOriginatingDB IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        // Terms
-                        $res = mysql_query("update defTerms set trm_OriginatingDBID='$dbID' ".
-                            "where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        $res = mysql_query("update defTerms set trm_NameInOriginatingDB=trm_Label ".
-                            "where (trm_NameInOriginatingDB = '') OR (trm_NameInOriginatingDB IS NULL)");
-                        if (!$res) {$result = 1; }
-                        $res = mysql_query("update defTerms set trm_IDInOriginatingDB=trm_ID ".
-                            "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
-                        if (!$res) {$result = 1; }
-                        if ($result == 1) {
+                        $result = db_register(DATABASE, $dbID);
+                        if (!$result) {
                             echo "<div class=wrap><div id=errorMsg>Unable to set all values for originating DB information for ".DATABASE.
                             " - one of the update queries failed</div></div>";
                         }

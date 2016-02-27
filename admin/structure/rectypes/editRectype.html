@@ -105,7 +105,9 @@
             <div class="input-row  required">
                 <div class="input-header-cell"><label for="rty_Name">Record type name *</label></div>
                 <div class="input-cell">
-                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" onKeyUp="editRectypeEditor.createPlural()" />
+                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" 
+                    onkeypress="editRectypeEditor.onPreventChars(event)"
+                    onKeyUp="editRectypeEditor.createPlural()" />
                     <span style="display:inline-block;text-align:right;width:64px">Plural:</span>
                     <input id="rty_Plural" maxlength="40" style="min-width:190px;width:190px;" />
                     <div class="help prompt">Name for display in selection lists, formats or reporting</div>

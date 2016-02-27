@@ -205,7 +205,7 @@ function ReportScheduleEditor() {
         for (i = 0, l = fnames.length; i < l; i++){
             var fname = fnames[i];
             el = Dom.get(fname);
-            if( !Hul.isnull(el) ){
+            if( !Hul.isnull(el) && fname!='rps_ID' ){
                 if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
                 {
                     // DEBUG alert(el.value+" "+String(_entity[i]));

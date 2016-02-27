@@ -82,10 +82,12 @@ function hEditing(container, _recdata, _recstructure) {
     
     function _initEditForm(_recstructure, _recdata){
         
+        $container.hide();
+        $container.empty(); //clear previous edit elements
+        
         if(_recstructure) recstructure = _recstructure;
         
         editing_inputs = [];
-        $container.empty(); //clear previous edit elements
         
         
         if(!top.HEURIST4.util.isArrayNotEmpty(recstructure)) return;   
@@ -200,13 +202,17 @@ function hEditing(container, _recdata, _recstructure) {
                     }else  //do not include hidden 
                     if(fields[idx]['dtFields']['rst_Display']!="hidden") {
                         
+                        //assign values from record
                         if(record!=null){
                             var val = recdata.fld(record, fields[idx]['dtID']);
                             if(!top.HEURIST4.util.isnull(val)){
                                 if(!top.HEURIST4.util.isArray(val)) val = [val];
                                 fields[idx].values = val;
+                            }else{
+                                fields[idx].values = null; //[''];
                             }  
                         }else{
+                        //new record - reset all values    
                             fields[idx].values = null;    
                         }
                         
@@ -230,6 +236,8 @@ function hEditing(container, _recdata, _recstructure) {
 
         $container.addClass('ui-heurist-bg-light');        
         __createGroup(recstructure, $container, null);
+        
+        $container.fadeIn(250);
     }
 
     function _save(){
@@ -276,7 +284,7 @@ function hEditing(container, _recdata, _recstructure) {
     }
     
     //
-    // returns array of input elements for given field
+    // returns input element for given field
     // 
     function _getFieldByName(fieldName){
         var idx, ele;
@@ -291,7 +299,7 @@ function hEditing(container, _recdata, _recstructure) {
     //
     // returns array of input elements for field value
     // 
-    function _getFieldByName(fieldName, value){
+    function _getFieldByValue(fieldName, value){
         var idx, ele, ress = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
@@ -333,6 +341,9 @@ function hEditing(container, _recdata, _recstructure) {
             _save();
         },
         
+        //
+        // create edit form and fill values from given recordset
+        //
         initEditForm: function(_recstructure, _recdata){
             _initEditForm(_recstructure, _recdata);
         },
@@ -349,7 +360,7 @@ function hEditing(container, _recdata, _recstructure) {
         },
         
         getFieldByValue:function(fieldName, value){
-            return _getFieldByName(fieldName, value);
+            return _getFieldByValue(fieldName, value);
         },
         
         getInputs:function(fieldName){

@@ -54,11 +54,11 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                this._defineActionButton({key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'}, 
                         this.editFormToolbar, 'full',{float:'left'});
        
-                if(this.options.edit_mode=='inline'){            
+               if(this.options.edit_mode=='inline'){            
                     //define delete on right side
                     this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
                         this.editFormToolbar,'full',{float:'right'});
-                }
+               }
        }
         
                 
@@ -96,12 +96,14 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
         if(this.options.edit_mode=='popup'){
             html = html
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
+            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
+             /*
             + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
             + '</div>&nbsp;&nbsp;'
             
-            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
-             /*
+             
             + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
             + '</div>';

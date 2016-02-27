@@ -113,7 +113,7 @@ function executeSmartyTemplate($params){
 
             $limit_for_interface = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
             if (!$limit_for_interface || $limit_for_interface<1){
-                $limit_for_interface = 100; //default limit in dispPreferences
+                $limit_for_interface = 1000; //default limit in dispPreferences
             }
 
             $params["limit"] = $limit_for_interface; //force limit
@@ -136,16 +136,20 @@ function executeSmartyTemplate($params){
 
     }else if(@$params['h4']==1){ //search with h4 search engine
 
+/*    for future use
+        $params['detail']='ids';
+        $params['vo']='h3';
+        $qresult = recordSearch($system, $params);
+*/    
         $url = "";
         foreach($params as $key=>$value){
             $url = $url.$key."=".urlencode($value)."&";
         }
 
-
         $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
 
-        $result = loadRemoteURLContent($url);
-
+        $result = loadRemoteURLviaSocket($url);// loadRemoteURLContent($url);
+        
         $qresult = json_decode($result, true);
 
     }else{

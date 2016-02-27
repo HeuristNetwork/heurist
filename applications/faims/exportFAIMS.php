@@ -296,7 +296,7 @@ $( document ).ready(function() {
 ?>
 </div>
 <script>
-var map_records = <?=json_format($map_records)?>;
+var map_records = <?php echo json_format($map_records);?>;
 $( document ).ready(function() {
     showSelectedRecTypes();
 });
@@ -697,8 +697,10 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
                 $terms = $detail[$int_rt_termtree];
                 //convert to tree
                 $cnt = getTermsTree($property, $dt_type, $terms);
+                $is_hierarchy = isTermsHierarchical($dt_type, $terms);
 
                 $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'] = $cnt;
+                $rtStructs['typedefs'][$rt]['dtFields'][$dtid]['is_hierarchy'] = $is_hierarchy;
             }
         } //for
         
@@ -934,6 +936,50 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
     $body_control->addAttribute('ref', 'control');
     $body_control->addChild('label','{Control}');
 
+        $map = new SimpleXMLElement(
+      '<group ref="data" faims_scrollable="false">
+        <label>{Entities}</label>
+        <select1 ref="entityTypeList">
+          <label>{Select_Entity_Type}</label>
+          <item>
+            <label>placeholder</label> <!-- new -->
+            <value>placeholder</value>
+          </item>
+        </select1>
+        <trigger ref="newEntity">
+          <label>{Create_New_Entity}</label>
+        </trigger>
+        <group ref="Colgroup_0" faims_style="orientation">
+          <label/>
+          <group ref="Col_0" faims_style="even"> 
+            <label/>
+            <input ref="entitySearchTerm">
+                <label/>
+            </input>
+          </group>
+          <group ref="Col_1" faims_style="large">
+            <label/>
+            <trigger ref="entitySearchButton">
+                <label>{Search}</label>
+            </trigger>
+          </group>
+          <group ref="Col_2" faims_style="large">
+            <label/>
+            <trigger ref="entityAllButton">
+                <label>{All}</label>
+            </trigger>
+          </group>
+        </group>
+        <select1 appearance="compact" ref="entityList">
+          <label>Tap entity in list below to load it</label>
+          <item>
+            <label>Entities not loaded</label>
+            <value>0</value>
+          </item>
+        </select1>
+      </group>');
+        xml_adopt($body_control, $map);    
+
     if($hasMapTab){
         
         $map = new SimpleXMLElement(
@@ -979,50 +1025,6 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
       </group>');
         xml_adopt($body_control, $map);
     }
-
-        $map = new SimpleXMLElement(
-      '<group ref="data" faims_scrollable="false">
-        <label>{All_Entities}</label>
-        <select1 ref="entityTypeList">
-          <label>{Select_Entity_Type}</label>
-          <item>
-            <label>placeholder</label> <!-- new -->
-            <value>placeholder</value>
-          </item>
-        </select1>
-        <trigger ref="newEntity">
-          <label>{Create_New_Entity}</label>
-        </trigger>
-        <group ref="Colgroup_0" faims_style="orientation">
-          <label/>
-          <group ref="Col_0" faims_style="even"> 
-            <label/>
-            <input ref="entitySearchTerm">
-                <label/>
-            </input>
-          </group>
-          <group ref="Col_1" faims_style="large">
-            <label/>
-            <trigger ref="entitySearchButton">
-                <label>{Search}</label>
-            </trigger>
-          </group>
-          <group ref="Col_2" faims_style="large">
-            <label/>
-            <trigger ref="entityAllButton">
-                <label>{All}</label>
-            </trigger>
-          </group>
-        </group>
-        <select1 appearance="compact" ref="entityList">
-          <label>Tap entity in list below to load it</label>
-          <item>
-            <label>Entities not loaded</label>
-            <value>0</value>
-          </item>
-        </select1>
-      </group>');
-        xml_adopt($body_control, $map);    
     
         $map = new SimpleXMLElement(
       '<group ref="gps">
@@ -1137,6 +1139,7 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
             $dt_type = $detail[$int_rt_dt_type];
 
+            
             $dtdisplayname = $detail[$int_rt_disp_name]; // the display name for this field
             $dtdisplaynamex = getProperName($dtdisplayname, $rt, $dtid);
 
@@ -1338,9 +1341,18 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_
 
                 if($isvocab){
                     $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
-                    addComment($group, "We would like to see ".($is_repeatable?"Checkbox Group": 
-                                                            (($termsCount<5)?"Radiogroup":"Dropdown"))   );
-                    $inputtype = $is_repeatable?'select':'select1';  //if enum repeatable checkbox list otherwise dropdown
+                    $is_hierarchy = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['is_hierarchy']==true;
+                    if($is_hierarchy && !($is_repeatable && $termsCount<13)){
+                        $tp = "Hierarchical DropDown";
+                        $inputtype = 'select1';
+                    }else{
+                        $tp = $is_repeatable?"Checkbox Group"
+                                       :(($termsCount<5)?"Radiogroup":"Dropdown");
+                        $inputtype = $is_repeatable?'select':'select1';//if enum repeatable checkbox list otherwise dropdown
+                    }
+                    
+                    addComment($group, "We would like to see ".$tp );
+                    
                 }else if($dt_type=='file'){
                      $inputtype = 'select';
                 //<select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
@@ -1593,7 +1605,7 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
     $idx_rst_defaultvalue = $rtStructs['typedefs']['dtFieldNamesToIndex']["rst_DefaultValue"];
 
     $event_section = '';
-
+                                        
     // Loop through each of the record types (ArchEntTypes) and output fields
     $rectyps = is_array($rt_toexport) ?$rt_toexport :explode(",", $rt_toexport);
     foreach ($rectyps as $rt) {
@@ -1612,7 +1624,13 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
         
         $TEMPLATE_EVENTS .= 'rectypeToEntity.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
 ';
+        if( in_array($rt, $rt_geoenabled) ){
+        $TEMPLATE_EVENTS .= 'rectypeToEntityGeo.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
+';
+        }
 
+        $headername_uids = $rtnamex.'_uids';
+        
         //init navigation    
         $event_section .= '
 addOnEvent("'.$rtnamex.'", "show", "addNavigationButtons(\"'.$rtnamex.'\")");';
@@ -1623,10 +1641,9 @@ addOnEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
         $event_section .= '
 addOnEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
 
-
         $load_related_part = '';
         $save_related_part = '';
-
+        
         $descr = $rtStructs['typedefs'][$rt]['commonFields'][$ind_rt_description];
 
         $hasattachfile = false;
@@ -1707,25 +1724,35 @@ addOnEvent("'.$headername.'/attach'.$dtdisplaynamex.'", "click", "pickupDate(\"'
                 
             }else if ($dt_type=='enum') {
 
+                $is_hierarchy = (@$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['is_hierarchy']==true);
                 $termsCount = @$rtStructs['typedefs'][$rt]['dtFields'][$dtid]['termdepth'];
-
-                if($is_repeatable){
-                    $action = 'populateCheckBoxGroup';
-                }else if ($termsCount<5) {
-                    $action = 'populateRadioGroup';
+                
+                if($is_hierarchy && !($is_repeatable && $termsCount<13)){
+                    $makeVocab = '
+                            populateHierarchicalDropDown("'.$headername.'/'.$dtdisplaynamex.'", "'.prepareText($dtdisplayname).'");
+';
                 }else{
-                    $action = 'populateDropDown';
-                }
+                    
+                    if($is_repeatable){
+                        $action = 'populateCheckBoxGroup';
+                    }else if ($termsCount<5) {
+                        $action = 'populateRadioGroup';
+                    }else{
+                        $action = 'populateDropDown';
+                    }
 
-                // makeVocab method
-                $makeVocab = 'fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\' order by vocabcountorder",
-                              new FetchCallback() {
-                                onFetch(result) {
-                                '.
-                                    $action.'("'.$headername.'/'.$dtdisplaynamex.'", result);
-                                }
-                              });
-                              ';
+                    // makeVocab method
+                    $makeVocab = '
+                            fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = \'' .prepareText($dtdisplayname). '\' order by vocabcountorder",
+                                  new FetchCallback() {
+                                    onFetch(result) {
+                                    '.
+                                        $action.'("'.$headername.'/'.$dtdisplaynamex.'", result);
+                                    }
+                            });
+                            ';
+                              
+                }
                 // Add to load selectors
                 $TEMPLATE_SELECTORS .= $makeVocab;
                 //$TEMPLATE_SELECTORS .= ''.($action.'("'.$headername.'/'.$dtdisplaynamex.'", makeVocab("'.prepareText($dtdisplayname).'"));'); // OLD
@@ -2061,7 +2088,7 @@ function getFullTermName($term, $datatype){
 
 
 $datatype = '';
-//  return count
+// return count
 // for UI_Schema
 //
 function getTermsTree($property, $d_type, $terms){
@@ -2077,17 +2104,56 @@ function getTermsTree($property, $d_type, $terms){
     }
 
     if(is_numeric($terms)){ //vocabulary
+
         $termTree =  $dtTerms['treesByDomain'][$datatype][$terms];
     }else{
-        $termTree = json_decode($terms);
+
+        $termTree = json_decode($terms, true);
     }
+
     if(count($termTree)<1){
         return 0;
     }
 
     $parent = $property->addChild('lookup');
 
-    return createSubTree($parent, $termTree, "");
+    $cnt = createSubTree($parent, $termTree, "");
+
+//error_log($cnt.'  '.$terms);    
+    
+    return $cnt;
+}
+
+//
+// if at least one term has children
+//
+function isTermsHierarchical($d_type, $terms){
+    global $dtTerms, $datatype;
+    
+    $datatype = $d_type;
+
+    if($datatype == "relmarker" || $datatype === "relationtype"){
+        $datatype = "relation";
+    }else if(!($datatype=="enum" || $datatype=="relation")){
+        return false;
+    }
+    if(is_numeric($terms)){ //vocabulary
+        $termTree =  $dtTerms['treesByDomain'][$datatype][$terms];
+    }else{
+        //individual selection
+        $termTree = json_decode($terms, true);
+    }
+
+    if(count($termTree)<1){
+        return false;
+    }
+    
+    foreach ($termTree as $termid=>$child_terms){
+        if($child_terms && is_array($child_terms) && count($child_terms)>0){
+            return true;
+        }
+    }
+    return false;
 }
 
 function sortByName($a, $b){
@@ -2122,6 +2188,11 @@ function sortByCodeAlpha($a,$b){
 function createSubTree($parent, $termTree, $parentname){
 
     global $dtTerms, $ind_label, $datatype;
+    
+    if(!is_array($termTree) || count($termTree)<1){
+        return 0;
+    }
+    
     $termLookup = $dtTerms['termsByDomainLookup'][$datatype];
     $ind_label = $dtTerms['fieldNamesToIndex']['trm_Label'];
     $ind_descr = $dtTerms['fieldNamesToIndex']['trm_Description'];

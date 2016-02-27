@@ -157,7 +157,9 @@ function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
             }
         }
     }
-
+    if(!@$dtyIDDefs[$dtyID]){
+        return false; //terms not found
+    }
     return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
 }
 

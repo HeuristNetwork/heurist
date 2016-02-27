@@ -26,26 +26,26 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
         var that = this;
             
         this.selectGroup = this.element.find('#sel_group');
-
+        
+        //only one domain to show
+        if(!top.HEURIST4.util.isempty(this.options.filter_groups) && this.options.filter_groups.indexOf(',')<0){
+            this.options.filter_group_selected = this.options.filter_groups;
+            this.selectGroup.hide();
+        }
+            this.selectGroup.css({position:'absolute','height':'1.8em','bottom':0});
+            this.selectGroup.tabs();
+            if(!top.HEURIST4.util.isempty(this.options.filter_group_selected)){
+                this.selectGroup.tabs('option','active',this.options.filter_group_selected=='relation'?1:0);
+            }
+            this.selectGroup.find('ul').css({'background':'none','border':'none'});
+            this.selectGroup.css({'background':'none','border':'none'});
+        
+        this._on( this.selectGroup, { tabsactivate: this.startSearch  });
+        
         this.input_search_code = this.element.find('#input_search_code');
-        this._on( this.input_search_code, {
-                keypress:
-                function(e){
-                    var code = (e.keyCode ? e.keyCode : e.which);
-                        if (code == 13) {
-                            top.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            this.startSearch();
-                        }
-                }});
-        
+        this._on(this.input_search,  { keyup:this.startSearch });
+        this._on(this.input_search_code,  { keyup:this.startSearch });
                       
-        this._on( this.element.find('select'), {
-                change: function(event){
-                    this.startSearch();
-                }
-            });
-        
         if(this.options.use_cache){
             this.startSearchInitial();            
         }else{
@@ -62,9 +62,8 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
             
             var request = {}
         
-            if(this.selectGroup.val()!=''){
-                request['trm_Domain'] = this.selectGroup.val();
-            }   
+            request['trm_Domain'] = this.currentDomain();
+
             if(this.input_search_code.val()!=''){
                 request['trm_Code'] = this.input_search_code.val();
             }   
@@ -101,6 +100,11 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
                         }
                     });
             }            
+    },
+    
+    currentDomain:function(){
+            var domain = this.selectGroup.tabs('option','active');
+            return domain==1?'relation':'enum';
     },
     
 

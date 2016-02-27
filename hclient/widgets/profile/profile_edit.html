@@ -42,15 +42,20 @@
         </div>
         <div>
             <div class="header"><label for="ugr_Name">Login name</label></div>
-            <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" style="width:20em" maxlength="60" />
+            <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" 
+                style="width:20em" maxlength="60" />
             <div class="prompt">
                 The login field is auto-populated with your email address.
                 <br />You may change it to a shorter name, eg. your given name or family name.
+                (Minimum 3 and maximum 60 characters)
             </div>
         </div>
         <div>
             <div class="header"><label for="ugr_Password">Password</label></div>
             <input type="password" name="ugr_Password" id="ugr_Password" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16" />&nbsp;<label class="mode-edit">Leave blank for no change</label>
+            <div style="font-size: smaller; margin-top: 2px;">
+                (Minimum 3 and maximum 16 characters).
+            </div>
         </div>
         <div>
             <div class="header"><label for="password2">Repeat password</label></div>
