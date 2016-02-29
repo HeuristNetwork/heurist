@@ -674,7 +674,7 @@ $.widget( "heurist.mainMenu", {
                 if(top.HEURIST && top.HEURIST.rectypes){
                     top.HEURIST.util.reloadStrcuture();
                 }else{
-                    top.HEURIST4.msg.showMsgDlg('Database structure definitions in memory have been refreshed.<br>'+
+                    top.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                         'You may need to reload pages to see changes.');
                 }
 
