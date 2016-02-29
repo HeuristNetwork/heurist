@@ -282,10 +282,11 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 
 			{ key: "rps_Title", label: "Title", sortable:true, resizeable:true},
-			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true,
+			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true, 
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 						var hquery = oRecord.getData('rps_HQuery');
-						elLiner.innerHTML = hquery;//"<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
+						elLiner.innerHTML = "<div style='max-width:400px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;'>"+hquery+"</div>";
+                        //"<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
 			}},
 			{ key: "rps_IntervalMinutes", label: "Interval", sortable:true, resizeable:false},
 
