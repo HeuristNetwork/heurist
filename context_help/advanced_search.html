@@ -373,7 +373,7 @@
             <tbody>
                 <tr>
                     <td style="vertical-align: top; text-align: right;">
-                        <span class="search_term">linkto:<i>xxx</i></span></td>
+                        <span class="search_term">linkedfrom:<i>xxx</i></span></td>
                     <td>
                         set of records which have pointers (in their public information) TO this record
                         (this includes all relationship records in which the record is involved)</td>
@@ -381,7 +381,7 @@
 
                 <tr>
                     <td style="vertical-align: top; text-align: right;">
-                        <b>linkedto:xxx</b></td>
+                        <b>linked_to:xxx</b></td>
                     <td>
                         set of records which are pointed to (in the public information) BY this
                         record</td>
@@ -389,7 +389,14 @@
 
                 <tr>
                     <td style="vertical-align: top; text-align: right;">
-                        <b>relatedto:xxx</b></td>
+                        <b>links:xxx</b></td>
+                    <td>
+                        set of records which have any links (either to other objects or from other objects)</td>
+                </tr>
+
+                <tr>
+                    <td style="vertical-align: top; text-align: right;">
+                        <b>related_to:xxx</b></td>
                     <td>
                         set of related records - that is, records which have relationships
                         (relationship records) with this record</td>
@@ -397,7 +404,7 @@
 
                 <tr>
                     <td style="vertical-align: top; text-align: right;">
-                        <b>relationsfor:xxx</b></td>
+                        <b>relatedfrom:xxx</b></td>
                     <td>
                         set of relationship records plus the records involved in those relationships,
                         for this record (that is, all the related records, plus their relationships)</td>
