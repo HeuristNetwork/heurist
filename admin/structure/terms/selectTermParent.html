@@ -66,20 +66,21 @@
             <div id="childTermName"></div>
         </div>
 
-        <div id="termTreeText" style="display:inline-block;">
+        <div id="termTreeText">
 	        <h3 id="header1">Select the term you want to be a new parent</h3>
         </div>
 
-        <div id="termTree" class="termTree ygtv-highlight" style="width:100%"></div>
+        <div id="termTree" class="termTree ygtv-highlight" style="width:290px;display:inline-block;"></div>
 
-        <div style="padding-right:20px;">
-            <div style="padding-top:20px;display: inline-block;" id="divParentIsRoot">
-                <button title="Set root as a parent" onClick="selectTermParent.apply(true);">Parent is Root</button>
+        <div style="display:inline;text-align:center">
+            <div id="divParentIsRoot">
+                 <button title="Set root as a parent" onClick="selectTermParent.apply(true);" style="width:100px">Parent is Root</button>
             </div>
-
-            <div style="padding-top:20px;float:right;text-align:right;padding-right:10px;">
-	            <button title="Cancel changes" onClick="selectTermParent.cancel();">Cancel</button>
-                <button title="Set selected terms as new parent" onClick="selectTermParent.apply(false);" id="btnSet">Set Parent</button>
+            <div style="padding:20px 0;">
+                <button title="Set selected terms as new parent" onClick="selectTermParent.apply(false);" id="btnSet"  style="width:100px">Set Parent</button>
+            </div>
+            <div>
+	            <button title="Cancel changes" onClick="selectTermParent.cancel();" style="width:100px">Cancel</button>
             </div>
         </div>
 
