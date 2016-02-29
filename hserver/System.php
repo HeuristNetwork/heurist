@@ -134,9 +134,6 @@ class System {
                 //consts
                 $this->defineConstants();    //@todo - we do not need to init all constans for every system init - call it as separate method
             }
-
-
-
             return true;
         }
 

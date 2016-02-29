@@ -23,6 +23,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _entityName:'defTerms',
     
     _treeview:null,
+    _currentDomain:null,
+    _currentParentID:null,
     
     _init: function() {
         this.options.layout_mode = 'short';
@@ -122,6 +124,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
     },
     
+    
+    _keepRequest:null,
     //
     //
     //
@@ -129,11 +133,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         //this._super();
         
         if(this._cachedRecordset && this.options.use_cache){
+            this._keepRequest = request;
             var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
             this._filterTreeView( subset );
             //show/hide items in list according to subset
             //this.recordList.resultList('updateResultSet', subset, request);   
         }
+    },
+    
+    refreshRecordList:function(){
+        this.filterRecordList(null, this._keepRequest);
     },
     
     //----------------------
@@ -176,25 +185,32 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
     
     
+    //----------------------
+    //
+    // listener of action button/menu clicks - central listener for action events
+    //
     _onActionListener:function(event, action){
         
         var isresolved = this._super(event, action);   //action is already defined in parent's method
         
-        //@TODO !!!!!! it is not implemented properly!!!!!
+        //keep paret id and domain 
         this._currentDomain = this.searchForm.searchDefTerms('currentDomain');
         this._currentParentID = null;
                 
         if(isresolved) return;                        
         
-        var recID = null;        
         if(action && action.action){
              recID =  action.recID;
              action = action.action;
         }
                 
         if(action=='add-child'){
-            this._currentParentID = recID;
-            this._addEditRecord(-1);
+            if(this._currentEditID>0){
+                this._currentParentID = this._currentEditID;
+                this._addEditRecord(-1);
+            }else{
+                top.HEURIST4.msg.showMsgFlash('Save current term before add a child term');
+            }
         }
         
     },
@@ -222,13 +238,66 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         } 
 */        
 
-        if(!(fieldvalues['trm_ID']>0)){ //this addition - set values for parent id and domain
+        if(fieldvalues && this._currentEditID<0){ //for new term assign domain and parent term id
             fieldvalues['trm_Domain'] = this._currentDomain;
             fieldvalues['trm_ParentTermID'] = this._currentParentID;
         }
 
         return fieldvalues;
         
+    },
+    
+    //
+    //
+    //
+    _afterSaveEvenHandler: function( recID, fieldvalues ){
+        
+        var isNewRecord = (this._currentEditID<0);
+    
+        this._super();
+        
+        var tree = this._treeview.fancytree("getTree");        
+        //refresh treeview
+        if(!isNewRecord){//rename
+                node = tree.getNodeByKey( fieldvalues['trm_ID'] );
+                node.setTitle( fieldvalues['trm_Label'] );
+                node.render(true);            
+        }else{
+            var node, //new node
+                parentNode; 
+                
+            var isVocab = fieldvalues['trm_ParentTermID']==null;
+            
+            //reload edit page
+            
+            if(isVocab){
+                //add new vocabulary - add to root
+                parentNode = tree.rootNode;
+            }else { //add new child term
+                parentNode = tree.getNodeByKey( fieldvalues['trm_ParentTermID'] );
+            }
+            parentNode.folder = true;
+            node = parentNode.addChildren( { title:fieldvalues['trm_Label'], key: recID}); //addNode({}, "child" );
+            
+            this.refreshRecordList();
+            
+            if(isVocab){
+                node.setActive();
+            }else{
+                //select parent node
+                parentNode.setExpanded();
+                parentNode.setActive();
+                //reload parent 
+                this._addEditRecord( fieldvalues['trm_ParentTermID'] );
+            }
+        }
+        
+        
+    },
+    
+    _afterDeleteEvenHandler: function( recID ){
+        this._super();
+        this.refreshRecordList();
     },
     
     //-----

@@ -45,7 +45,7 @@ $.widget( "heurist.editing_input", {
 
     newvalues:{},
     detailType:null,
-    configMode:null, //configuration settings, mostly for enum and resource types
+    configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
 
     // the constructor
     _create: function() {
@@ -135,7 +135,7 @@ $.widget( "heurist.editing_input", {
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
-            .css('vertical-align', (this.detailType=="blocktext")?'top':'')
+            .css('vertical-align', (this.detailType=="blocktext" || this.detailType=="file")?'top':'')
             .html('<label>'
                 + (top.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title) +'</label>')
             .appendTo( this.element );
@@ -401,7 +401,7 @@ $.widget( "heurist.editing_input", {
                 }
                 });*/
             }else
-                if(this.detailType=="float"){
+            if(this.detailType=="float"){
 
                     $input.keypress(function (e) {
                         var code = (e.keyCode ? e.keyCode : e.which);
@@ -423,8 +423,9 @@ $.widget( "heurist.editing_input", {
 
                     });
 
-                }else
-                    if(this.detailType=="date"){
+            }else
+            if(this.detailType=="date"){
+                
                         var $datepicker = $input.datepicker({
                             /*showOn: "button",
                             buttonImage: "ui-icon-calendar",
@@ -442,7 +443,8 @@ $.widget( "heurist.editing_input", {
 
                         this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
 
-                    }else if(this.detailType=="resource"){
+            }else 
+            if(this.detailType=="resource"){
 
                         //old way - by default lookup for Records filtered by Record Types
                         var ptrset = that.f('rst_PtrFilteredIDs');
@@ -533,7 +535,8 @@ $.widget( "heurist.editing_input", {
                         }
 
 
-                    }else if(false && this.detailType=="relmarker"){  //@TODO!!!!
+            }else 
+            if(false && this.detailType=="relmarker"){  //@TODO!!!!
 
                         $input.css('width','auto');
 
@@ -577,7 +580,69 @@ $.widget( "heurist.editing_input", {
                         this._on( $btn_rec_relation_dialog, { click: __show_relation_dialog } );
                         this._on( $input, { keypress: __show_relation_dialog, click: __show_relation_dialog } );
 
+            }else
+            if( this.detailType=='file' ){
+                
+                        //container for image
+                        var $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
+                            //+ '<a href="javascript:void(0)" title="Click to change image">'
+                            + '<img src="" class="image_input"></div>').appendTo( $inputdiv );                
+                            
+                        //browse button    
+                        var $btn_fileselect_dialog = $( "<button>", {title: "Click to select file for upload"})
+                        .addClass("smallbutton")
+                        .css('vertical-align','top')
+                        .appendTo( $inputdiv )
+                        .button({icons:{primary: "ui-icon-folder-open"},text:false});
+                        
+                        //set input as file and hide
+                        $input.prop('type','file').hide();
+                        
+                        //init upload widget
+                        $input.fileupload({
+    url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
+    //url: 'templateOperations.php',
+    formData: [{name:'db', value: top.HAPI4.database}, {name:'entity', value:this.configMode.entity}], //, {name:'recID', value:}],
+    //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
+    //autoUpload: true,
+    sequentialUploads:true,
+    dataType: 'json',
+    dropZone: $input_img,
+    // add: function (e, data) {  data.submit(); },
+    done: function (e, response) {
+            if(response.status==undefined){ //} || response.status == top.HAPI4.ResponseStatus.OK){
+                var data = response;
+                $.each(data.result.files, function (index, file) {
+                    if(file.error){
+                        $input_img.find('img').prop('src', '');
+                        top.HEURIST4.msg.showMsgErr(file.error);
+                    }else{
+                        $input.attr('title', file.name);
+                        $input_img.find('img').prop('src', file.thumbnailUrl);
+                        that.newvalues[$input.attr('id')] = file.name;
                     }
+                });
+            }else{
+                top.HEURIST4.msg.showMsgErr(response.message);
+            }
+            var inpt = this;
+            $input_img.off('click');
+            $input_img.on({click: function(){
+                        $(inpt).click();
+            }});
+            },                            
+    progressall: function (e, data) { // to implement
+        var progress = parseInt(data.loaded / data.total * 100, 10);
+        //$('#progress .bar').css('width',progress + '%');
+    }                            
+                        });
+                
+                        //init click handlers
+                        this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
+                        $input_img.on({click: function(){ //find('a')
+                                $input.click();}
+                        }); 
+            }
             /*else if(this.detailType=="freetext" && this.options['input_width']){
             $input.css('width', this.options['input_width']);
             }*/
@@ -603,7 +668,7 @@ $.widget( "heurist.editing_input", {
                 'data-input-id': $input.attr('id')
             })
             .addClass("smallbutton btn_input_clear")
-            .css({'vertical-align': (this.detailType=="blocktext")?'top':'' })
+            .css({'vertical-align': (this.detailType=='blocktext' || this.detailType=='file')?'top':'' })
             .appendTo( $inputdiv )
             .button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
 
@@ -611,10 +676,9 @@ $.widget( "heurist.editing_input", {
             this._on( $btn_clear, {
                 click: function(e){
                     var input_id = $(e.target).parent().attr('data-input-id');
-                    if(that.inputs.length>1){
-                        //if( top.HEURIST4.util.isempty( that._getValue('#'+input_id)) ){
+                    if(that.inputs.length>1){  //remove supplementary 
                         that._removeInput( input_id );
-                    }else{
+                    }else{  //and clear last one
                         that._clearValue(input_id, '');
                     }
                 }
@@ -699,7 +763,11 @@ $.widget( "heurist.editing_input", {
                 if(that.newvalues[input_id]){
                     that.newvalues[input_id] = '';
                 }
-                $input.val( display_value?display_value :value);
+                if(that.detailType=='file'){
+                    that.input_cell.find('img.image_input').prop('src','');
+                }else{
+                    $input.val( display_value?display_value :value);    
+                }
                 return;
             }
 

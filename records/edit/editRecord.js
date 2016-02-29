@@ -1786,6 +1786,11 @@ console.log('heurist not defined');
         this.required = required;
         var maxValue = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']];
         this.repeatable = ( Number(maxValue) != 1 );//saw TODO this really needs to check many exist
+        
+        if(recFieldRequirements[rstFieldNamesToRdrIndexMap['dty_Type']] === "separator"){
+            this.required = '';
+            this.repeatable = false;    
+        }
 
         this.row = this.document.createElement("div");
         parentElement.appendChild(this.row);

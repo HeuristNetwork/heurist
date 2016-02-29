@@ -62,6 +62,11 @@ class DbEntityBase
     
     
     public function save(){
+
+        //validate permission
+        if(!$this->_validatePermission()){
+            return false;
+        }
         
         //validate mandatory fields
         if(!$this->_validateMandatory()){
@@ -85,6 +90,33 @@ class DbEntityBase
         }
     }
 
+    //
+    //
+    //
+    public function delete(){
+
+        if(!$this->_validatePermission()){
+            return false;
+        }
+        $ret = mysql__delete($this->system->get_mysqli(), 
+                                $this->config['tableName'], $this->config['tablePrefix'],
+                                $this->data['recID'] );
+        if($ret===true){
+            return true;
+        }else{
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Can not delete from table ".$this->config['entityName'], $ret);
+            return false;
+        }
+        
+    }
+    
+    
+    //
+    //@todo
+    //
+    protected function _validatePermission(){
+        return true;
+    }
     //
     // @todo
     //

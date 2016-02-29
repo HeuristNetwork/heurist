@@ -57,6 +57,8 @@
             $res = $entity->search();
         }else if(@$_REQUEST['a'] == 'save'){
             $res = $entity->save();
+        }else if(@$_REQUEST['a'] == 'delete'){
+            $res = $entity->delete();
         }else if(@$_REQUEST['a'] == 'config'){
             $res = $entity->config();
         }else {

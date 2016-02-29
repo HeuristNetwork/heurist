@@ -28,7 +28,7 @@ if(isset($system)){
         $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
     }
 }else{
-    require_once(dirname(__FILE__)."/System.php");
+    require_once(dirname(__FILE__)."/../System.php");
     $system = new System();
     $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 }

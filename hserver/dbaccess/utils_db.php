@@ -10,6 +10,7 @@
     *  mysql__select_value   - return the first column of first row
     *  mysql__select_array   - returns first row
     *  mysql__insertupdate
+    *  mysql__delete
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -221,6 +222,45 @@
         }
         return $result;
     }
+    
+    /**
+    * delete record for given table
+    *
+    * returns record ID in case success or error message
+    *
+    * @param mixed $mysqli
+    * @param mixed $table_name
+    * @param mixed $table_prefix
+    * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
+    *                          fields that don't have specified prefix are ignored
+    */
+    function mysql__delete($mysqli, $table_name, $table_prefix, $rec_ID){
+
+        $ret = null;
+
+        $rec_ID = intval(@$rec_ID);
+        if($rec_ID>0){
+            
+            if (substr($table_prefix, -1) !== '_') {
+                $table_prefix = $table_prefix.'_';
+            }
+
+            $query = "DELETE from $table_name WHERE ".$table_prefix.'ID = '.$rec_ID;
+
+            $res = $mysqli->query($query);
+            
+            if(!$res){
+                $ret = $mysqli->error;
+            }else{
+                $ret = true;
+            }
+
+        }else{
+            $ret = 'Record ID provided is wrong value';
+        }
+        return $ret;
+    }
+    
 
     /**
     * insert or update record for given table
@@ -271,7 +311,11 @@
                 $query = $query.$fieldname.'=?, ';
             }
 
-            $params[0] = $params[0].((substr($fieldname, -2) === 'ID')?'i':'s');
+            $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
+            $params[0] = $params[0].$dtype;
+            if($dtype=='i' && $value==''){
+                $value = null;
+            }
             array_push($params, $value);
         }
 
@@ -284,6 +328,7 @@
         }
         
 //error_log($query);        
+//error_log(print_r($params, true));
 
         $stmt = $mysqli->prepare($query);
         if($stmt){

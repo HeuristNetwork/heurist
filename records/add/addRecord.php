@@ -322,6 +322,26 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
 		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
 		foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
+
+        //insert arbitrary detail types based on URL parameter defval
+        if(@$_REQUEST["defval"]){
+            $default_value = json_decode($_REQUEST["defval"],true);
+            foreach($default_value as $defval){
+                $dtyID = array_keys($defval);
+                if(is_array($dtyID)){
+                    $dtyID = @$dtyID[0];
+                }
+                if(intval($dtyID)>0){
+                    $res = mysql_query("select dty_ID from defDetailTypes where dty_ID=$dtyID");
+                    if ($res && $row = mysql_fetch_row($res)) {
+                        if(intval($row[0])>0 && @$defval[$dtyID]){
+                            array_push($inserts, "($rec_id, $dtyID, '" . mysql_real_escape_string($defval[$dtyID]) . "')");
+                        }
+                    }
+                }
+            }
+        }
+        
 		if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 		if ($description) insert_woot_content($rec_id, $description);
@@ -372,6 +392,30 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
 	foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
 	foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
+    
+    //insert arbitrary detail types based on URL parameter defval
+    if(@$_REQUEST["defval"]){
+        $default_value = json_decode($_REQUEST["defval"],true);
+        foreach($default_value as $defval){
+            $dtyID = array_keys($defval);
+            if(is_array($dtyID)){
+                    $dtyID = @$dtyID[0];
+            }
+            if(intval($dtyID)>0){
+                $res = mysql_query("select dty_ID from defDetailTypes where dty_ID=$dtyID");
+                if ($res && $row = mysql_fetch_row($res)) {
+                    if(intval($row[0])>0 && @$defval[$dtyID]){
+                        $s = "($rec_id, $dtyID, '" . mysql_real_escape_string($defval[$dtyID]) . "')";
+//DEBUG error_log('ins: '.$s);                
+                        array_push($inserts, $s);
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    
 	if ($inserts) mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ' . join(",", $inserts));
 
 	if ($description) insert_woot_content($rec_id, $description);

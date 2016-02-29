@@ -41,10 +41,14 @@
 
 // EDIT 
 // _getValidatedValues - returns values from edit form
+// _afterSaveEvenHandler
 // _saveEditAndClose - send update request and close popup edit dialog
-//_afterInitEditForm perform required after edit form init modifications (show/hide fields, assign even listener )
-//_addEditRecord - call _initEditForm and popup edit dialog
 
+// _afterInitEditForm perform required after edit form init modifications (show/hide fields, assign even listener )
+// _addEditRecord - call _initEditForm and popup edit dialog
+
+// _afterDeleteEvenHandler
+//  _deleteAndClose
 
 $.widget( "heurist.manageEntity", {
 
@@ -102,6 +106,8 @@ $.widget( "heurist.manageEntity", {
     _cachedRecordset:null,
     //reference to edit form
     _editing:null,
+
+    _currentEditID:null,
     
     // the widget's constructor
     _create: function() {
@@ -334,7 +340,7 @@ $.widget( "heurist.manageEntity", {
     
     //----------------------
     //
-    // listener of action button/menu clicks
+    // listener of action button/menu clicks - central listener for action events
     //
     _onActionListener:function(event, action){
         if(action=='select-and-close'){
@@ -349,6 +355,8 @@ $.widget( "heurist.manageEntity", {
              if(action=='add'){
                     this._addEditRecord(-1);
                     return true;
+             }else if(action=='delete'){
+                    this._deleteAndClose(); 
              }
             
              var s = 'User clicked action "'+action+'" for ';
@@ -680,7 +688,30 @@ $.widget( "heurist.manageEntity", {
         }
     },
     
+
     //  -----------------------------------------------------
+    //
+    //  after save event handler
+    //
+    _afterSaveEvenHandler: function( recID, fieldvalues ){
+        
+            this._currentEditID = null;
+            top.HEURIST4.msg.showMsgFlash(top.HR('Record has been saved'));
+            if(this.options.edit_mode=='popup'){
+                this.editForm.dialog('close');
+            }
+            
+            if(this.options.use_cache){
+                //refresh item in list
+                if(this.options.list_mode=='default'){
+                    this.recordList.resultList('refreshPage');  
+                }
+            }
+            
+    },
+    
+    //  -----------------------------------------------------
+    //
     //  send update request and close popup if edit is dialog
     //
     _saveEditAndClose: function(){
@@ -702,19 +733,72 @@ $.widget( "heurist.manageEntity", {
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                            top.HEURIST4.msg.showMsgFlash(top.HR('Record has been saved'));
-                            if(that.options.edit_mode=='popup'){
-                                that.editForm.dialog('close')
-                            }
+                            var recID = ''+response.data;
+                            
                             //update record in cache
                             if(that.options.use_cache){
-                                var recID = ''+response.data;
+                                fields[ that.options.entity.keyField ] = recID;
                                 that._cachedRecordset.addRecord(recID, fields);
-                                //refresh item in list
-                                if(that.options.list_mode=='default'){
-                                    that.recordList.resultList('refreshPage');  
-                                }
                             }
+                            
+                            that._afterSaveEvenHandler( recID, fields );
+                            
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+    },       
+
+    //  -----------------------------------------------------
+    //
+    //  after save event handler
+    //
+    _afterDeleteEvenHandler: function( recID ){
+        
+            this._currentEditID = null;
+            top.HEURIST4.msg.showMsgFlash(top.HR('Record has been deleted'));
+            if(this.options.edit_mode=='popup'){
+                //hide popup edit form 
+                this.editForm.dialog('close');
+            }else{
+                //hide inline edit form 
+                this._addEditRecord(null);
+            }
+            
+            if(this.options.use_cache){
+                //refresh item in list
+                if(this.options.list_mode=='default'){
+                    this.recordList.resultList('refreshPage');  
+                }
+            }
+    },
+    
+    //  -----------------------------------------------------
+    //
+    //  delete emtity and close popup if edit is dialog
+    //
+    _deleteAndClose: function(){
+        
+            if(!(this._currentEditID>0)) return;
+
+            var request = {
+                'a'          : 'delete',
+                'entity'     : this.options.entity.entityName,
+                'request_id' : top.HEURIST4.util.random(),
+                'recID'      : this._currentEditID                     
+                };
+                
+                var that = this;                                                
+                
+                top.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+
+                            var recID = that._currentEditID;
+                            if(that.options.use_cache){
+                                that._cachedRecordset.removeRecord( recID );
+                            }
+                            that._afterDeleteEvenHandler( recID );
                             
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);
@@ -732,7 +816,7 @@ $.widget( "heurist.manageEntity", {
             this._initEditForm_continue(recID);
         }else{
             var that = this;
-            if(this._editing.isModified()){
+            if(this._currentEditID!=null && this._editing.isModified()){
                 top.HEURIST4.msg.showMsgDlg('Data were modified. Ignore and load data for selected record',
                 function(){ that._initEditForm_continue(recID); },
                 'Confirm');
@@ -744,44 +828,52 @@ $.widget( "heurist.manageEntity", {
 
     _initEditForm_continue: function(recID){
         //fill with values
-        if(recID>0){
-            if(this.options.edit_need_load_fullrecord){
-                
-                //get primary key field
-                if(!this.options.entity.keyField) return alert('Developer! Define fieldname for ID in entity configuration file!!!');
-                
-                var request = {'a': 'search',
-                    'entity': this.options.entity.entityName,  //'defDetailTypes'
-                    'details': 'full',
-                    'request_id': top.HEURIST4.util.random()
-                }
-                request[this.options.entity.keyField] = recID;
-                
-                var that = this;                                                
-                
-                top.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == top.HAPI4.ResponseStatus.OK){
-                            var recordset = new hRecordSet(response.data);
-                            
-                            that._editing.initEditForm(that.options.entity.fields, recordset);
-                            that._afterInitEditForm();
-                        }else{
-                            top.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
-                return;    
-            
-            }else{
-                var recordset = this.getRecordSet([recID]);
-                this._editing.initEditForm(this.options.entity.fields, recordset);
-            }
-        }else{
-            this._editing.initEditForm(this.options.entity.fields, null);
-        }
+        this._currentEditID = recID;
         
-        this._afterInitEditForm();
+        if(recID==null){
+            this._editing.initEditForm(null, null); //clear and hide
+        }else{
+
+            if(recID>0){ //edit existing record
+                if(this.options.edit_need_load_fullrecord){
+                    
+                    //get primary key field
+                    if(!this.options.entity.keyField) return alert('Developer! Define fieldname for ID in entity configuration file!!!');
+                    
+                    var request = {'a': 'search',
+                        'entity': this.options.entity.entityName,  //'defDetailTypes'
+                        'details': 'full',
+                        'request_id': top.HEURIST4.util.random()
+                    }
+                    request[this.options.entity.keyField] = recID;
+                    
+                    var that = this;                                                
+                    
+                    top.HAPI4.EntityMgr.doRequest(request, 
+                        function(response){
+                            if(response.status == top.HAPI4.ResponseStatus.OK){
+                                var recordset = new hRecordSet(response.data);
+                                
+                                that._editing.initEditForm(that.options.entity.fields, recordset);
+                                that._afterInitEditForm();
+                            }else{
+                                top.HEURIST4.msg.showMsgErr(response);
+                            }
+                        });
+                        
+                    return;    
+                
+                }else{
+                    var recordset = this.getRecordSet([recID]);
+                    this._editing.initEditForm(this.options.entity.fields, recordset);
+                }
+            }else if(recID<0){
+                this._editing.initEditForm(this.options.entity.fields, null);
+            }
+            
+            this._afterInitEditForm();
+        
+        }
         
         return;
     },
@@ -813,7 +905,7 @@ $.widget( "heurist.manageEntity", {
         
         this._initEditForm(recID);
         
-        if(this.options.edit_mode=='popup'){ //show in popup
+        if(recID!=null && this.options.edit_mode=='popup'){ //show in popup
 
             var that = this; 
         
@@ -836,7 +928,6 @@ $.widget( "heurist.manageEntity", {
                 buttons: btn_array
             });        
             
-        }else{ //show on right-hand panel
         }
         
         

@@ -646,7 +646,8 @@ console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length
             
             var _records = {}, _order=[];
             
-            if($.isEmptyObject(fields)) return null;
+            if(fields==null || $.isEmptyObject(fields)) return null;
+            if(request==null || $.isEmptyObject(request)) return this;
             
             function __getDataType(fieldname){
                 var idx;

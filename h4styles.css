@@ -231,6 +231,22 @@ div.input-div > .btn_input_clear, .btn_input_clear {
 div.input-div{
     padding-bottom:0.2em;
 }
+
+div.image_input{
+    min-width: 80px;
+    min-height: 80px;
+    display: inline-block;
+    position: relative;  
+    cursor: pointer;
+}
+img.image_input{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    left: 0;
+    right: 0;
+}
 /* fieldset for search*/
 .fieldset_search > div, .input-row{
     display:block;

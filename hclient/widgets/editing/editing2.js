@@ -84,18 +84,19 @@ function hEditing(container, _recdata, _recstructure) {
         
         $container.hide();
         $container.empty(); //clear previous edit elements
-        
-        if(_recstructure) recstructure = _recstructure;
-        
         editing_inputs = [];
-        
-        
-        if(!top.HEURIST4.util.isArrayNotEmpty(recstructure)) return;   
-        
         recdata = _recdata;
         record = null;
+        
+        if(!top.HEURIST4.util.isArrayNotEmpty(_recstructure) && _recdata==null){
+            $('<div class="center-message">Select an entity in the list to edit</div>').appendTo($container);
+            $container.show();
+            return;     
+        } 
+        
+        if(_recstructure) recstructure = _recstructure;
                 
-        if(recdata!=null){
+        if(recdata!=null){ //for edit mode
              record = recdata.getFirstRecord();
         }
         
@@ -218,6 +219,11 @@ function hEditing(container, _recdata, _recstructure) {
                         
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
+                        
+                    }else{
+                        //keep hidden value - to return it back
+                        
+                        
                     }
                 }
                 
