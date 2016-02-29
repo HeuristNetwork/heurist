@@ -693,12 +693,13 @@ require_once('valueVerification.php');
 
             <?php
 
-            $res = mysql_query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title
+            $res = mysql_query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type
                 from Records
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID
                 left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
+                left join defDetailTypes on dty_ID = rst_DetailTypeID
                 where rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
-                and dtl_UploadedFileID is null and dtl_Geo is null
+                and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator'
             order by rec_ID");
 
             $bibs = array();
