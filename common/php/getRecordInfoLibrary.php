@@ -1711,8 +1711,6 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
         return array("error" => mysql_error());
     }
     
-error_log('get relrecs for '.$recID);    
-    
     $relations = array('relationshipRecs' => array());
     while ($row = mysql_fetch_assoc($res)) {
         $relnRecID = $row["relnID"];
@@ -1753,7 +1751,7 @@ error_log('get relrecs for '.$recID);
                 "recID" => $row["src"]);
         }
     }
-error_log("found ".count($relations['relationshipRecs']));
+
     foreach ($relations['relationshipRecs'] as $relnRecID => $reln) {
         $relRT = $reln['relatedRec']['rectype'];
         $relRecID = $reln['relatedRec']['recID'];
