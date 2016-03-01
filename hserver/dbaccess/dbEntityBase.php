@@ -78,10 +78,19 @@ class DbEntityBase
             return false;
         }
         
+        //exclude virtual fields
+        $fieldvalues = $this->data['fields'];
+        $fields = array()
+        foreach($this->fields as $fieldname=>$field_config){
+            if(@$field_config['dty_Role']=='virtual') continue;
+            $fields[$fieldname] = $this->data['fields'][$fieldname];
+        }
+        
+        
         //save data
         $ret = mysql__insertupdate($this->system->get_mysqli(), 
                                 $this->config['tableName'], $this->config['tablePrefix'],
-                                $this->data['fields']);
+                                $fields );
         if(is_numeric($ret)){
                 return $ret;
         }else{
@@ -125,8 +134,9 @@ class DbEntityBase
         $fieldvalues = $this->data['fields'];
         
         foreach($this->fields as $fieldname=>$field_config){
+            if(@$field_config['dty_Role']=='virtual') continue;
+                
             $value = @$fieldvalues[$fieldname];
-         
             if($field_config['dty_Type']=='resource'){
                 if(intval($value)<1) $this->data['fields'][$fieldname] = null;
             }
@@ -143,6 +153,8 @@ class DbEntityBase
         $fieldvalues = $this->data['fields'];
         
         foreach($this->fields as $fieldname=>$field_config){
+            if(@$field_config['dty_Role']=='virtual') continue;
+            
             $value = @$fieldvalues[$fieldname];
             
             if(($value==null || trim($value)=='') && 
@@ -201,6 +213,31 @@ class DbEntityBase
         }
         
     }
+    
+    //
+    // $tempfile - file to rename to recID
+    //
+    protected function renameEntityImage($tempfile, $recID){
+        
+        $entity_name = $this->config['entityName'];
+        
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+
+        $directory = new \RecursiveDirectoryIterator($path);
+        $iterator = new \RecursiveIteratorIterator($directory);        
+        
+        foreach ($iterator as $filepath => $info) {
+              $filename = $info->getFilename();
+              if ($filename==$tempfile) {
+                  $pathname = $info->getPathname();
+                  $extension = $info->getExtension()
+                  $new_name = $pathname.$recID.'.'.$extension;
+error_log($filepath.' to '.$new_name);                  
+                  rename ($filepath, $new_name);
+              }
+        }        
+    }
+        
     
 }  
 ?>

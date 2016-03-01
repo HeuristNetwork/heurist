@@ -115,7 +115,7 @@
                         "dty_Type":"file",
                         "rst_DisplayName":"Thumbnail:",
                         "rst_DisplayHelpText": "Image to represent this term. Uploaded image will be scaled to 400x400", 
-                        "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif"},
+                        "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif", "size":200},
                         "dty_Role":"virtual"
                     }
                 }

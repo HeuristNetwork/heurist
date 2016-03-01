@@ -19,6 +19,7 @@
 */
 
 require_once(dirname(__FILE__)."/../System.php");
+require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
 
 $system = new System();
 if($system->init(@$_REQUEST['db'])){
@@ -50,11 +51,21 @@ if($system->init(@$_REQUEST['db'])){
                     'max_height' => 18
 */    
     //error_reporting(E_ALL | E_STRICT);
-    require(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
+//    require(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
     $options = array(
             'upload_dir' => HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/',
             'upload_url' => HEURIST_FILESTORE_URL.'entity/'.$entity_name.'/',
-            'png_scale' => true
+            'unique_filename' => false,
+            'newfilename' => @$_REQUEST['newfilename'],
+            'correct_image_extensions' => true,
+            'image_versions' => array(
+                'thumbnail'=>array(
+                    'max_width' => 120,
+                    'max_height' => 120,
+                    'scale_to_png' => true    
+                )
+            )
+            
             //'max_file_size' => 1024,
             //'print_response ' => false
     );

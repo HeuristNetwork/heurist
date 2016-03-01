@@ -217,6 +217,13 @@ function hEditing(container, _recdata, _recstructure) {
                             fields[idx].values = null;    
                         }
                         
+                        if (record) {
+                            var recID = recdata.fld(record, 'rec_ID');
+                            fields[idx].recID = recID;
+                        }else{
+                            fields[idx].recID = '';
+                        }
+                        
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
                         

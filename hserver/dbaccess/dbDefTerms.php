@@ -168,7 +168,22 @@ class DbDefTerms extends DbEntityBase
         return $res;
 
     }
-     
+    
+    public function save(){
+        
+        $ret = parent::save();
+
+        if(is_numeric($ret)){
+            //treat thumbnail image
+            $thumb_file_name = $this->data['fields']['trm_Thumb'];
+            
+            //rename it to recID.png
+            parent::renameEntityImage($thumb_file_name, $ret);
+            
+        }
+        
+        return $ret;
+    } 
     
 }
 ?>

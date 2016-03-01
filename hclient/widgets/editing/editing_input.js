@@ -23,7 +23,7 @@ $.widget( "heurist.editing_input", {
     // default options
     options: {
         varid:null,  //id to create imput id, otherwise it is combination of index and detailtype id
-        recID: null,  //it is only needed for relation maker @todo remove
+        recID: null,  //record id for current record - required for relation marker, file
 
         //field desription is taken from top.HEURIST4.rectypes
         rectypes: null,  // reference to top.HEURIST4.rectypes - defRecStructure
@@ -275,8 +275,15 @@ $.widget( "heurist.editing_input", {
                     if(that.newvalues[input_id]){
                         delete that.newvalues[input_id];
                     }
-                    //remove element
-                    $input.parents('.input-div').remove();
+                    
+                    if(that.detailType=='file'){
+                        $input.fileupload('destroy');
+                        $input.remove();
+                        that.input_cell.find('.input-div').remove();
+                    }else{
+                        //remove element
+                        $input.parents('.input-div').remove();
+                    }
                     //remove from array
                     that.inputs.splice(idx,1);
                     return;
@@ -583,10 +590,12 @@ $.widget( "heurist.editing_input", {
             }else
             if( this.detailType=='file' ){
                 
+                        //url for thumb
+                        var urlThumb = top.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumbnail');
+                        
                         //container for image
                         var $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
-                            //+ '<a href="javascript:void(0)" title="Click to change image">'
-                            + '<img src="" class="image_input"></div>').appendTo( $inputdiv );                
+                            + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
                             
                         //browse button    
                         var $btn_fileselect_dialog = $( "<button>", {title: "Click to select file for upload"})
@@ -598,11 +607,16 @@ $.widget( "heurist.editing_input", {
                         //set input as file and hide
                         $input.prop('type','file').hide();
                         
+                        //temp file name 
+                        var newfilename = '~'+top.HEURIST4.util.random();
+                        
                         //init upload widget
                         $input.fileupload({
     url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
     //url: 'templateOperations.php',
-    formData: [{name:'db', value: top.HAPI4.database}, {name:'entity', value:this.configMode.entity}], //, {name:'recID', value:}],
+    formData: [ {name:'db', value: top.HAPI4.database}, 
+                {name:'entity', value:this.configMode.entity},
+                {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
     sequentialUploads:true,
@@ -619,7 +633,7 @@ $.widget( "heurist.editing_input", {
                     }else{
                         $input.attr('title', file.name);
                         $input_img.find('img').prop('src', file.thumbnailUrl);
-                        that.newvalues[$input.attr('id')] = file.name;
+                        that.newvalues[$input.attr('id')] = newfilename;
                     }
                 });
             }else{
@@ -763,6 +777,7 @@ $.widget( "heurist.editing_input", {
                 if(that.newvalues[input_id]){
                     that.newvalues[input_id] = '';
                 }
+                
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
                 }else{

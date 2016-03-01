@@ -233,8 +233,8 @@ div.input-div{
 }
 
 div.image_input{
-    min-width: 80px;
-    min-height: 80px;
+    min-width: 120px;
+    min-height: 120px;
     display: inline-block;
     position: relative;  
     cursor: pointer;

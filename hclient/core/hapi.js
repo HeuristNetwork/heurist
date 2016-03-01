@@ -987,6 +987,18 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 }
                 return null;
+        },
+        
+        getImageUrl: function(entityName, recID, version){
+            if(recID>0){
+                     return top.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php'
+                            +'?db='+ top.HAPI4.database
+                            +'&entity='+entityName
+                            +'&recID='+recID
+                            +'&version='+version;
+            }else{
+                return '';
+            }    
         }
     }
 
