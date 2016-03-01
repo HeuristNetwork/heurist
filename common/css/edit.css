@@ -70,7 +70,7 @@
 }
 #rectype-name{
 	width:200px;
-	color:#6A7C99;
+	color:black; /*was #6A7C99;*/
 	font-weight: bold;
 	font-size: 1.4em;
 
@@ -247,17 +247,17 @@
 }
 #footer #rty_description span {
 	padding: 0 5px 0 0;
-	color:#363636;
+	/*color:#363636;*/
 }
 #footer #rty_description #rectype-name{
-	color:#6A7C99;
+	/*color:#6A7C99;*/
 	font-weight: bold;
 }
 #footer span {
 	padding-right:20px;
 }
 #adddate, #moddate {
-	color:#6A7C99
+	/*color:#6A7C99*/
 }
 .sidebar-link {
 	-moz-border-radius-bottomleft:10px;
@@ -266,8 +266,8 @@
 	-webkit-border-top-left-radius:10px;
 	border-bottom-left-radius:10px;
 	border-top-left-radius:10px;
-	background:url("../images/31x31.gif") no-repeat scroll 8px center rgba(255, 255, 255, 0.3);
-	border-color:#E0E0E0 #E0E0E0 #C0C0C0 #C0C0C0;
+	background:url("../images/31x31.gif") no-repeat scroll 8px center #dddddd; /*rgba(255, 255, 255, 0.3);*/
+	/*border-color:#E0E0E0 #E0E0E0 #C0C0C0 #C0C0C0;*/
 	border-left:1px solid;
 	border-style:solid;
 	border-top:1px solid;
@@ -290,7 +290,7 @@
 	background-color: inherit;
 }
 body div div.sidebar-link:hover {
-	background-color: rgba(255, 255, 255, 0.5);
+	background-color: #ffffdd; /*rgba(255, 255, 255, 0.5);*/
 }
 .sidebar-link b {
 	font-size: 108%;
@@ -307,13 +307,16 @@ div.sidebar-link.changed img {
 }
 body div.sidebar-link.disabled, body div.sidebar-link.disabled:hover {
 	cursor: default;
-	color: #565651;
+	color: #ffffdd; /*565651;*/
 	background-position: 8px center;
 	opacity: 0.3;
-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=30);
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=30);
+}
+body div.sidebar-link.disabled{
+    color: #cccccc;
 }
 body div#sidebar div.sidebar-link.selected {
-	background-color: #ECF1FB;
+	background-color: #ffffdd; /*was #ECF1FB; */
 	color: #999999;
 	cursor: default;
 	border:1px solid;
@@ -1138,3 +1141,22 @@ hr {
 	display:block;
 }*/
 
+
+/*H4 color scheme */
+.ui-heurist-header2, .ui-heurist-btn-header1 {
+    background: #2e3e50 !important;
+    color: #ffffff !important;
+}
+.ui-heurist-header1 {
+    background-color: #8ea9b9 !important;
+    background-image: none !important;
+}
+.ui-heurist-bg-light {
+    background-color: #ffffdd !important;
+}
+#quicklinks>ul>li>a{
+    color: #ffffff !important;
+}
+#workgroup-editor{
+    color:gray;
+}

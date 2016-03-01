@@ -56,7 +56,7 @@
         -->
 
     </head>
-    <body>
+    <body class="ui-heurist-header2">
 
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo/yahoo-min.js"></script>
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
@@ -318,8 +318,8 @@
 
                 if(top.HEURIST.is_admin()){
                     var edt = document.getElementById("admin_editrectype");
-                    edt.innerHTML = "<a href='#' onclick='{editRecordType(); return false;}' style='font-size:1.3em;padding:0;'>Modify record structure<img src='../../common/images/edit-pencil.png'></a>"+
-                    "<a href='#' class='externalLink' onclick='{editRecordType_inNewWindow(); return false;}' style='font-size:1.3em;padding:0 3px;'></a>";
+                    edt.innerHTML = "<a href='#' onclick='{editRecordType(); return false;}' style='font-size:1.3em;padding:0;border: none; vertical-align: 7px;'>Modify record structure<img src='../../common/images/edit-pencil.png'></a>"+
+                    "<a href='#' class='externalLink' style='border:none' onclick='{editRecordType_inNewWindow(); return false;}' style='font-size:1.3em;padding:0 3px;'></a>";
 
                     ;
                 }
@@ -437,8 +437,8 @@
                 top.document.getElementById("contact-link").href += "?subject=" + encodeURIComponent(contactLinkSubject);
             });
         </script>
-        <!-- search -->
-        <div id=search  class="roundedBoth outline bannerBG">
+        <!-- search outline bannerBG -->
+        <div id=search  class="roundedBoth ui-heurist-header1">
             <!-- div class="tablecell" id="edit_record_title">EDIT RECORD</div -->
 
             <div id=rectype-edit class=edit >
@@ -458,12 +458,12 @@
                 <div id=workgroup-access title="Access for users not in this workgroup"></div>
             </div>
             <div id="close-button" class="save-record-buttons">
-                <input type=button name=save-button value="Close" onClick="top.HEURIST.edit.closeEditWindow();">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Close" onClick="top.HEURIST.edit.closeEditWindow();">
             </div>
             <div id="save-record-buttons" class="save-record-buttons" style="display: none;">
-                <input type=button name=save-button value="Cancel" onClick="top.HEURIST.edit.cancelSave(false);">
-                <input type=button name=save-button value="Save" onClick="top.HEURIST.edit.save_record(false);">
-                <input type=button name=save-button value="Save / close" title="Save and Close" onClick="top.HEURIST.edit.save_record(true);">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Cancel" onClick="top.HEURIST.edit.cancelSave(false);">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Save" onClick="top.HEURIST.edit.save_record(false);">
+                <input type=button name=save-button class="ui-heurist-btn-header1" value="Save / close" title="Save and Close" onClick="top.HEURIST.edit.save_record(true);">
             </div>
         </div>
 
@@ -500,7 +500,7 @@
                 <span id=desc>Links between related records</span>
             </div>
 
-            <div class="sidebar-nav" style="text-align:right;">
+            <div class="sidebar-nav ui-heurist-header1" style="text-align:right;">
 
             <!-- TODO: Remove. This code is deprecated by new Save, Save-and-close methodology
                 <div style="padding: 3px 0;display:none;">
@@ -518,18 +518,18 @@
                 -->
 
                 <div id="close-button2"  style="text-align:right;">
-                    <input type=button name=save-button value="Close" style="margin-top:46px;" onClick="top.HEURIST.edit.closeEditWindow();">
+                    <input type=button name=save-button class="ui-heurist-btn-header1" value="Close" style="margin-top:46px;" onClick="top.HEURIST.edit.closeEditWindow();">
                 </div>
                 <div id="save-record-buttons2" style="text-align:right;display:none">
-                    <input type=button name="save-button" value="Cancel" onClick="top.HEURIST.edit.cancelSave(false);"><br />
-                    <input type=button name="save-button" style="margin-top:3px;" value="Save" onClick="top.HEURIST.edit.save_record(false);"><br />
-                    <input type=button name=save-button style="margin-top:3px;" value="Save / close" onClick="top.HEURIST.edit.save_record(true);">
+                    <input type=button name="save-button" class="ui-heurist-btn-header1" value="Cancel" onClick="top.HEURIST.edit.cancelSave(false);"><br />
+                    <input type=button name="save-button" class="ui-heurist-btn-header1" style="margin-top:3px;" value="Save" onClick="top.HEURIST.edit.save_record(false);"><br />
+                    <input type=button name=save-button  class="ui-heurist-btn-header1" style="margin-top:3px;" value="Save / close" onClick="top.HEURIST.edit.save_record(true);">
                 </div>
             </div>
 
-            <div id="search-nav" class="sidebar-nav"></div>
+            <div id="search-nav" class="sidebar-nav ui-heurist-header1"></div>
 
-            <div id="dates-added-update-info" class="sidebar-nav" style="text-align:right;">
+            <div id="dates-added-update-info" class="sidebar-nav ui-heurist-header1" style="text-align:right;">
                 <span id=adddate></span><br>
                 <span id=moddate></span>
             </div>
@@ -548,7 +548,7 @@
         <!-- page -->
         <div id=page>
             <!-- banner -->
-            <div class="banner">
+            <div class="banner ui-heurist-header1">
                 <div style="display:inline-block;margin:3px 10px;vertical-align: middle;">
 
                     <label>
