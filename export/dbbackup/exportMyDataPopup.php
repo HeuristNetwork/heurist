@@ -232,7 +232,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             // Create a zipfile of the definitions and data which have been dumped to disk
 
-            unlink($folder.".zip");
+            if(file_exists($folder.".zip")) unlink($folder.".zip");
             $cmdline = "zip -r -j ".$folder.".zip ".$folder;
 
             $res1 = 0;
