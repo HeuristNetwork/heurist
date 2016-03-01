@@ -411,6 +411,14 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             _doExecuteFromEditor(); //execute at once
         }
+        
+        function __onRectypeTree(context){
+            if(Hul.isnull(context)){
+                return;
+            }
+            _variables = context;
+            _fillTreeView();
+        }
 
         if(isLoadGenerated){
             __onGenerateTemplate([]);
@@ -423,7 +431,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     var selel = $(event.target).val();
                     if(selel>0){
                         var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
-                        Hul.getJsonData(baseurl, __onGenerateTemplate, 'db='+_db+'&mode=list&rty_id='+selel);
+                        Hul.getJsonData(baseurl, __onRectypeTree, 'db='+_db+'&mode=list&rty_id='+selel);
                     }
                 });
 
