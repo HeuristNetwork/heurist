@@ -584,6 +584,15 @@
             }
             $dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row, 2);
         }
+        
+        //SPECIAL CASE for relation type #6
+        if($imode>0 && @$dtStructs['typedefs'][DT_RELATION_TYPE]){
+            $idx = $dtStructs['typedefs']['fieldNamesToIndex']['dty_JsonTermIDTree'];
+            $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = 0;
+            $idx = $dtStructs['typedefs']['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+            $dtStructs['typedefs'][DT_RELATION_TYPE]['commonFields'][$idx] = '';
+        }
+        
         //ARTEM setCachedData($cacheKey, $dtStructs);
 
         return $dtStructs;

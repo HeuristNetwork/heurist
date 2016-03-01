@@ -235,8 +235,8 @@ top.HEURIST4.ui = {
     createTermSelectExt2: function(selObj, options) {
 
         var datatype =  options.datatype,
-            termIDTree =  options.termIDTree,
-            headerTermIDsList =  options.headerTermIDsList,
+            termIDTree =  options.termIDTree,  //all terms
+            headerTermIDsList =  options.headerTermIDsList,  //non selectable
             defaultTermID =  options.defaultTermID,
             topOptions =  options.topOptions,
             needArray  =  options.needArray,
@@ -415,7 +415,7 @@ top.HEURIST4.ui = {
             if(top.HEURIST4.util.isNumber(termTree)){
                 //this is vocabulary id - show list of all terms for this vocab
                 var tree = terms.treesByDomain[datatype];
-                termTree = tree[termTree];
+                termTree = (termTree>0)?tree[termTree]:tree;
             }else{
                 termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
                 if(termTree==null){
