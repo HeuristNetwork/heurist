@@ -730,7 +730,7 @@ if (!top.Relationship) {
 
             var rfr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker];
             // get any trgPointer restrictions
-            var trgRectypeList = temp = rfr[rstFieldNamesToRdrIndexMap['rst_PtrFilteredIDs']];
+            var trgRectypeList = temp = rfr[rstFieldNamesToRdrIndexMap['rst_PtrFilteredIDs']]; //constraints for this rectype
             var targetRectypes = {};
             if (temp) {
                 temp = temp.split(",");
@@ -797,7 +797,9 @@ if (!top.Relationship) {
                         continue;
                     }
                     if (typeof flatTermIDLookup === "string" && //filter any records who's relType in not in list
-                        flatTermIDLookup.indexOf("," + [relatedRecords.relationshipRecs[relnID].relTermID] + ",") === -1) {
+                        flatTermIDLookup.indexOf("," + [relatedRecords.relationshipRecs[relnID].relTermID] + ",") === -1 &&
+                        flatTermIDLookup.indexOf("," + [relatedRecords.relationshipRecs[relnID].relInvTermID] + ",") === -1
+                        ) {
                         continue;
                     }
                     if (!found) {

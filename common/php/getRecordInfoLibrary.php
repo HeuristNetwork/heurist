@@ -1700,6 +1700,8 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     " left join recDetails endDate on endDate.dtl_RecID = rels.relnID and endDate.dtl_DetailTypeID = $endDT" .
     " where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
     if ($relnRecID) $query.= " and rels.relnID = $relnRecID";
+    
+//error_log($query);    
     $res = mysql_query($query);
     if (!mysql_num_rows(@$res)) {
         return array();
@@ -1708,6 +1710,9 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     if (mysql_error()) {
         return array("error" => mysql_error());
     }
+    
+error_log('get relrecs for '.$recID);    
+    
     $relations = array('relationshipRecs' => array());
     while ($row = mysql_fetch_assoc($res)) {
         $relnRecID = $row["relnID"];
@@ -1748,6 +1753,7 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
                 "recID" => $row["src"]);
         }
     }
+error_log("found ".count($relations['relationshipRecs']));
     foreach ($relations['relationshipRecs'] as $relnRecID => $reln) {
         $relRT = $reln['relatedRec']['rectype'];
         $relRecID = $reln['relatedRec']['recID'];
