@@ -127,7 +127,6 @@
 
     $key = $lib_keys[$lib_key_idx];
     
-    $key = 'Artem,1339641,,iaQ2v6GZ7Y3qlj5T5l7D6Eyt';
     $vals = explode(",",$key);
 
     $user_ID = @$vals[1];
