@@ -432,39 +432,44 @@ DELIMITER $$
 DELIMITER ;
 DELIMITER $$
 
-	DROP TRIGGER IF EXISTS insert_Details_trigger$$
+    DROP TRIGGER IF EXISTS insert_Details_trigger$$
 
-	CREATE
-	DEFINER=`root`@`localhost`
-	TRIGGER `insert_Details_trigger`
-	AFTER INSERT ON `recDetails`
-	FOR EACH ROW
-	begin
---		declare relSrcDT integer;
---		declare relTrgDT integer;
---		select dty_ID into relSrcDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
---			order by dty_ID desc limit 1;
---		select dty_ID into relTrgDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
---			order by dty_ID desc limit 1;
---		if NEW.dtl_DetailTypeID=relTrgDT then
-		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
+    CREATE
+    DEFINER=`root`@`localhost`
+    TRIGGER `insert_Details_trigger`
+    AFTER INSERT ON `recDetails`
+    FOR EACH ROW
+    begin
+        declare dtType varchar(20);
+        select dty_Type into dtType
+            from defDetailTypes
+            where dty_ID=NEW.dtl_DetailTypeID
+            limit 1;
+    
+--        declare relSrcDT integer;
+--        declare relTrgDT integer;
+--        select dty_ID into relSrcDT
+--            from defDetailTypes
+--            where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
+--            order by dty_ID desc limit 1;
+--        select dty_ID into relTrgDT
+--            from defDetailTypes
+--            where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
+--            order by dty_ID desc limit 1;
+--        if NEW.dtl_DetailTypeID=relTrgDT then
+        if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
         begin
-			update recRelationshipsCache
+            update recRelationshipsCache
 -- need to also save the RecTypeID for the record to help with constraint checking
-				set rrc_TargetRecID = NEW.dtl_Value
-				where rrc_RecID=NEW.dtl_RecID;
---		elseif NEW.dtl_DetailTypeID=relSrcDT then
-
+                set rrc_TargetRecID = NEW.dtl_Value
+                where rrc_RecID=NEW.dtl_RecID;
+                
             update recLinks
                 set rl_TargetID = NEW.dtl_Value
                 where rl_RelationID=NEW.dtl_RecID;
-
         end;        
-		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
+--        elseif NEW.dtl_DetailTypeID=relSrcDT then
+        elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
         begin
             update recRelationshipsCache
 -- need to also save the RecTypeID for the record to help with constraint checking
@@ -486,10 +491,8 @@ DELIMITER $$
         end if;
 -- legacy databases: need to add update for 200 to save the termID to help with constraint checking
 -- new databases: need to add update for detail 200, now 5, to save the termID
-	end$$
-
-DELIMITER ;
-DELIMITER $$
+    end$$
+    
 
 	DROP TRIGGER IF EXISTS pre_update_Details_trigger$$
 
@@ -516,6 +519,13 @@ DELIMITER $$
 	AFTER UPDATE ON `recDetails`
 	FOR EACH ROW
 	begin
+        declare dtType varchar(20);
+        select dty_Type into dtType
+            from defDetailTypes
+            where dty_ID=NEW.dtl_DetailTypeID
+            limit 1;
+    
+    
 --		declare relSrcDT integer;
 --		declare relTrgDT integer;
 --		select dty_ID into relSrcDT
