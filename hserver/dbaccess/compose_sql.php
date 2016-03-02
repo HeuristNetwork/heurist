@@ -31,6 +31,7 @@ define('SORT_URL', 'u');
 define('SORT_MODIFIED', 'm');
 define('SORT_ADDED', 'a');
 define('SORT_TITLE', 't');
+define('SORT_ID', 'id');
 
 
 //defined in const.php define('DT_RELATION_TYPE', 6);
@@ -299,6 +300,8 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
                     $q = 'bkm_Modified desc'; break;
                 case SORT_ADDED:
                     $q = 'bkm_Added desc'; break;
+                case SORT_ID:
+                    $q = 'rec_ID asc'; break;
                 case SORT_TITLE: default:
                     $q = 'rec_Title = "", rec_Title';
             }
@@ -312,6 +315,8 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
                     $q = 'rec_Modified desc'; break;
                 case SORT_ADDED:
                     $q = 'rec_Added desc'; break;
+                case SORT_ID:
+                    $q = 'rec_ID asc'; break;
                 case SORT_TITLE: default:
                     $q = 'rec_Title = "", rec_Title';
             }
@@ -605,6 +610,7 @@ class AndLimb {
         }
 
         $pred_type = substr($text, 0, $colon_pos);
+        
         if ($pred_type[0] == '-') {    // bit of DWIM here: did the user accidentally put the negate here instead?
             $this->negate = true;
             $pred_type = substr($pred_type, 1);
@@ -880,6 +886,8 @@ class SortPhrase {
 
             case 't': case 'title':
                 return array('rec_Title'.$scending, NULL);
+            case 'id': case 'ids':
+                return array('rec_ID'.$scending, NULL);
             case 'rt': case 'type':
                 return array('rec_RecTypeID'.$scending, NULL);
         }
@@ -1582,9 +1590,41 @@ class TagPredicate extends Predicate {
 
 class BibIDPredicate extends Predicate {
     function makeSQL() {
-        $not = ($this->parent->negate)? 'not' : '';
-        return "TOPBIBLIO.rec_ID $not in (" . join(',', array_map('intval', explode(',', $this->value))) . ')';
+        $res = "TOPBIBLIO.rec_ID ".$this->get_field_value();
+        return $res;
     }
+    
+    function get_field_value(){
+
+        if (strpos($this->value,"<>")>0) { 
+
+            $vals = explode("<>", $this->value);
+            $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
+
+        }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+            // comma-separated list of ids
+            $not = ($this->parent->negate)? ' not' : '';
+            $match_pred = $not.' in ('.join(',', array_map('intval', explode(',', $this->value))).')';
+        }else{
+            
+            $value = intval($this->value);
+
+            if ($this->parent->lessthan) {
+                $match_pred = " < $value";
+            } else if ($this->parent->greaterthan) {
+                $match_pred = " > $value";
+            } else {
+                if($this->parent->negate){
+                    $match_pred = ' <> '.$value;
+                }else{
+                    $match_pred = '='.$value;
+                }
+            }
+        }
+
+        return $match_pred;
+    }
+    
 }
 
 

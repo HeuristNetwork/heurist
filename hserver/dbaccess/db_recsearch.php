@@ -784,7 +784,7 @@ if(@$params['debug']) echo $query."<br>";
                         }
                     }
                     $res->close();
-
+                    
                         if(($istimemap_request ||
                             $params['detail']=='detail' ||
                             $params['detail']=='structure') && count($records)>0){

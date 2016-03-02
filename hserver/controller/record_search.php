@@ -103,7 +103,6 @@
         }
         if($isok){
             $response = recordSearch($system, $_REQUEST);
-
         }
     }
 
