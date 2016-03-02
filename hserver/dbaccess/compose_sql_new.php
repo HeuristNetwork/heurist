@@ -556,11 +556,19 @@ class HPredicate {
     }
 
     function predicateField(){
+        global $mysqli;
 
         $p = "rd".$this->qlevel.".";
         $p = "";
 
-        $val = $this->getFieldValue();
+        if(intval($this->field_id)>0){
+            //find field type
+            $fieldtype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
+        }else{
+            $fieldtype = 'freetext';
+        }
+        
+        $val = $this->getFieldValue( $fieldtype );
         if(!$val) return null;
 
         if($this->field_id=="title"){
@@ -572,7 +580,7 @@ class HPredicate {
             $res = "(r".$this->qlevel.".rec_Modified ".$val.")";
 
         }else{
-
+            
             if(false && $this->isDateTime()){
                 $field_name = 'str_to_date(getTemporalDateString('.$p.'.dtl_Value), "%Y-%m-%d %H:%i:%s") ';
             }else{
@@ -873,7 +881,7 @@ class HPredicate {
     * put your comment there...
     *
     */
-    function getFieldValue(){
+    function getFieldValue( $fieldtype ){
 
         global $mysqli;
 
@@ -900,7 +908,23 @@ class HPredicate {
         if($this->value=='') return null;
 
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
-
+        
+        if($fieldtype=='enum' || $fieldtype=='relationtype'){
+            
+            if(intval($this->value)>0){
+                $res = ' in (select trm_ID from defTerms where trm_ID='
+                    .$this->value.' or trm_ParentTermID='.$this->value.')';
+            }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){
+                $res = ' in (select trm_ID from defTerms where trm_ID in ('
+                    .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
+            }else{
+                $value = $mysqli->real_escape_string($this->value);
+                $match_pred = ' in (select trm_ID from defTerms where trm_Label="'
+                    .$value.'" or trm_Code="'.$value.'")';
+            }
+            $res = (($this->negate)?' not':'').$res;
+            
+        }else
         if (is_numeric($this->value)) {
             if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
@@ -916,8 +940,7 @@ class HPredicate {
 
             $this->field_list = true;
 
-        } else if($this->isDateTime()){
-
+        } else if($fieldtype=='date'){ //$this->isDateTime()){
             //
             $res = $this->makeDateClause();
 

@@ -1426,17 +1426,40 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
+        if (preg_match('/^\\d+$/', $this->field_type)) {
+            $dt_query = "select rdt.dty_Type from defDetailTypes rdt where rdt.dty_ID = ".intval($this->field_type);
+            $fieldtype = mysql__select_value($mysqli, $dt_query);
+        }else{
+            $fieldtype ='';
+        }
+        
+        if($fieldtype=='enum' || $fieldtype=='relationtype'){
+            
+            if(preg_match('/^\d+(?:,\d+)+$/', $this->value)){
+                $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('
+                    .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
+            }else if(intval($this->value)>0){
+                $match_pred = ' in (select trm_ID from defTerms where trm_ID='
+                    .$this->value.' or trm_ParentTermID='.$this->value.')';
+            }else{
+                $value = $mysqli->real_escape_string($this->value);
+                $match_pred = ' in (select trm_ID from defTerms where trm_Label="'
+                    .$value.'" or trm_Code="'.$value.'")';
+            }
+            
+        }else
         if (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
 
             $vals = explode("<>", $this->value);
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
-        }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
+        }else 
+        if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
             // comma-separated list of ids
             $match_pred = ' in ('.$this->value.')';
-            $isin = true;
+            
         }else{
-            $isin = false;
+            
             $isnumericvalue = is_numeric($this->value);
 
             $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
