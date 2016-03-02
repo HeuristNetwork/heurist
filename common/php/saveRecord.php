@@ -550,7 +550,7 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
                 array_push($updateIDs, $bdID);
             } else if ($bdID === false) { //bad bdID passed insert detail
                 array_push($badIdInsertQueryValues, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
-                $translated[$oldBdID] = array('val' => $val,'dtType' => $bdtID);
+                $translated[$oldBdID] = array('val' => $val,'dtType' => $bdtID); //   dtl_DetailTypeID
                 array_push($translatedIDs, $oldBdID);
             }else {
                 array_push($insertQueryValues, "($recordID, $bdtID, $bdVal, $bdFileID, $bdGeo,".($modeImport>0?1:0).")");
@@ -611,9 +611,11 @@ function doDetailInsertion($recordID, $details, $recordType, $wg, &$nonces, &$re
     }
 
     if (count($insertQueryValues)) {//insert all new details
-        mysql_query("insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . implode(",", $insertQueryValues));
+        $insert_query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo, dtl_AddedByImport) values " . implode(",", $insertQueryValues);
+        mysql_query($insert_query);
         $first_bd_id = mysql_insert_id();
         if (mysql_error()) {
+
             errSaveRec("db error while inserting '" . implode(",", $insertQueryValues) . "' for record ID ".$recordID." error : ".mysql_error());
             return array("error" => "record ID = $recordID record type = $recordType ");
         }

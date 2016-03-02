@@ -32,7 +32,9 @@
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
+
     require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
+    //require_once dirname(__FILE__).'/../../external/libZotero/build/libZoteroSingle.php';
 
     $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
     if($dt_SourceRecordID==0){
@@ -124,11 +126,17 @@
     }
 
     $key = $lib_keys[$lib_key_idx];
+    
+    $key = 'Artem,1339641,,iaQ2v6GZ7Y3qlj5T5l7D6Eyt';
     $vals = explode(",",$key);
 
     $user_ID = @$vals[1];
     $group_ID = @$vals[2];
     $api_Key  = @$vals[3];
+    
+    if($user_ID!=null)$user_ID = trim($user_ID);
+    if($group_ID!=null)$group_ID = trim($group_ID);
+    if($api_Key!=null)$api_Key = trim($api_Key);
 
     if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
         print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
@@ -206,13 +214,26 @@
     }///foreach
 
     $zotero = null;
-
-
     $zotero = new phpZotero($api_Key);
 
     print "<div>zotero component has been inited with api key $api_Key   step:$step</div>";
 
+    /* test connection
+    $items = $zotero->getItemsTop($group_ID,
+                array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
+    $code = $zotero->getResponseStatus();
+    print $code;
 
+    //test new library
+    $zotero = new \Zotero\Library('user', $user_ID, 'Library', $api_Key);
+    $permissions = $zotero->getKeyPermissions('','');
+    print json_encode($permissions, JSON_PRETTY_PRINT);
+
+    $items = $zotero->fetchItemsTop(array(
+    'format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'10', 'order'=>'dateModified', 'sort'=>'desc' ));
+    //'limit'=>10, 'collectionKey'=>$collectionKey, 'order'=>'dateAdded', 'sort'=>'desc'));
+    */
+    
     if($step=="1"){  //first step - info about current status
 
         // 1) verify connection to zotero (get total count of top-level items in zotero)
@@ -221,7 +242,7 @@
                 array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ), "groups");
         }else{
             $items = $zotero->getItemsTop($user_ID,
-                array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
+                array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'sort'=>'dateModified', 'direction'=>'desc' ));
         }
 
         $code = $zotero->getResponseStatus();
@@ -231,7 +252,7 @@
             ."Please try this operation later.</div>";
         }else if($code>399){
             $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
-            if($code==401 || $code==403){
+            if($code==400 || $code==401 || $code==403){
                 $msg = $msg."Verify API key in Database administration page > Database > Advanced Properties";
             }else if($code==404 ){
                 $msg = $msg."Verify User and Group ID in Database administration page > Database > Advanced Properties";
@@ -246,8 +267,11 @@
             }
         }else{
 
-            $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,
-                strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
+            //DEBUG print '<xmp>'.$items.'</xmp>';    
+            //it does not work anymore
+            //intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
+            //Responses for multi-object read requests will include a custom HTTP header, Total-Results        
+            $totalitems = $zotero->getTotalCount();
 
             //print $items;
 
