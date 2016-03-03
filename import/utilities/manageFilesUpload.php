@@ -115,9 +115,12 @@
                 }
 
                 $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_FILESTORE_DIR."/generated-reports/",
+                        HEURIST_FILESTORE_DIR."generated-reports/",
                         HEURIST_ICON_DIR,
-                        HEURIST_FILESTORE_DIR."/settings/",
+                        HEURIST_FILESTORE_DIR."settings/",
+                        HEURIST_FILESTORE_DIR.'documentation_and_templates/',
+                        HEURIST_FILESTORE_DIR.'backup/',
+                        HEURIST_FILESTORE_DIR.'entity/',
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
                 if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
