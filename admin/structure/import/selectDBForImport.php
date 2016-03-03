@@ -252,6 +252,7 @@
             document.getElementById("dbTitle").value = db[3];
             document.getElementById("dbPrefix").value = db[5]?db[5]:"";
             document.forms["crosswalkInfo"].submit();
+            document.getElementById('page-inner').style.display = 'none';
         }
 
 
