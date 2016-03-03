@@ -38,6 +38,17 @@
 
     if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
 
+    $rt_id = intval(@$_REQUEST['trm_ID']);
+    if($rt_id>0){
+        
+        if( @$_FILES['new_term']['size']>0 ){
+            list($success_msg, $failure_msg) = upload_file($rt_id, 'new_term');
+            header('Content-type: application/json'); //'text/javascript');
+            print json_encode(array('sucess'=>$success_msg,'error'=>$failure_msg));
+        }        
+        exit();
+    }
+    
     $rt_id = intval($_REQUEST['rty_ID']);
     $mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
@@ -210,8 +221,13 @@
     //
     function upload_file($rt_id, $type) {
 
-        $image_dir = HEURIST_ICON_DIR.(($type=='new_icon')?'':'thumb/th_');
-        $dim = ($type=='new_icon')?16:64;
+        if($type=='new_term'){
+            $image_dir = HEURIST_FILESTORE_DIR . 'term-images/';
+            $dim = 400;
+        }else{
+            $image_dir = HEURIST_ICON_DIR.(($type=='new_icon')?'':'thumb/th_');
+            $dim = ($type=='new_icon')?16:64;
+        }        
 
         if ( !$_FILES[$type]['size'] ) return array('', 'Error occurred during upload - file had zero size '.$type.'  '.$_FILES[$type]['size']);
         $mimeExt = $_FILES[$type]['type'];

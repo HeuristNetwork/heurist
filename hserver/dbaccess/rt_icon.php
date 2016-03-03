@@ -57,7 +57,17 @@
         $color_new = null; //array(255, 0, 0);    
     }
     
-    $filename = HEURIST_ICON_DIR . $rectype_id;
+    if(@$_REQUEST['ent']=="term"){
+        $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$rectype_id;
+        if(file_exists($filename)){
+            download_file($filename);
+        }else{
+            download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif');
+        }
+        exit();
+    }else{
+        $filename = HEURIST_ICON_DIR . $rectype_id;
+    }
   
 //print $filename;    
     if(file_exists($filename)){

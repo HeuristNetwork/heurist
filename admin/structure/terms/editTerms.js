@@ -108,6 +108,8 @@ function EditTerms() {
             dv1.style.display = "none";
             dv2.style.display = "block";
         }
+        
+        _initFileUploader();
     }
 
     /**
@@ -374,6 +376,20 @@ function EditTerms() {
                 }
                 Dom.get('edDescription').value = node.data.description;
                 Dom.get('edCode').value = node.data.termcode;
+                
+                //image
+                if(node.data.id>0){
+                    var curtimestamp = (new Date()).getMilliseconds();
+                    Dom.get('termImage').innerHTML =
+            "<a href=\"javascript:void(0)\" onClick=\"{editTerms.showFileUploader()}\" title=\"Click to change image\">"+
+            "<img id=\"imgThumb\" src=\""+
+            top.HEURIST.iconBaseURL + node.data.id + "&ent=term&t=" + curtimestamp +
+            "\" height=\"120\"></a>";
+                    Dom.get('termImage').style.display = 'block';
+                }else{
+                    Dom.get('termImage').style.display = 'none';
+                }
+                
 
                 var node_invers = null;
                 if(node.data.inverseid>0){
@@ -1482,6 +1498,45 @@ function EditTerms() {
 
     }
 
+    function _initFileUploader(){
+        
+            var $input = $('#new_term_image');
+            var $input_img = $('#termImage');
+        
+            $input.fileupload({
+    url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php', 
+    formData: [ {name:'db', value: _db}, 
+                {name:'entity', value:'terms'},
+                {name:'newfilename', value: Dom.get('edId').value }],
+    acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+    autoUpload: true,
+    sequentialUploads:true,
+    dataType: 'json',
+    //dropZone: $input_img,
+    // add: function (e, data) {  data.submit(); },
+    done: function (e, response) {
+                var data = response;
+                $.each(data.result.files, function (index, file) {
+                    if(file.error){
+                        $input_img.find('img').prop('src', '');
+                        //top.HEURIST4.msg.showMsgErr(file.error);
+                    }else{
+                        var curtimestamp = (new Date()).getMilliseconds();
+                        var url = top.HEURIST.iconBaseURL + Dom.get('edId').value+ "&ent=term&t=" + curtimestamp
+                        $input_img.find('img').prop('src', url); //file.url);
+                    }
+                });
+    
+            /*var inpt = this;
+            $input_img.off('click');
+            $input_img.on({click: function(){
+                        $(inpt).click();
+            }});*/
+            }                    
+                        });
+        
+    }
+
     //
     //public members
     //
@@ -1514,6 +1569,18 @@ function EditTerms() {
             _showFieldUpdater();
         },
 
+        showFileUploader: function(){
+            
+            var $input = $('#new_term_image');
+            $input.fileupload('option','formData',
+                [ {name:'db', value: _db}, 
+                {name:'entity', value:'terms'},
+                {name:'newfilename', value: Dom.get('edId').value }]);
+    
+            $input.click();
+            
+        },
+        
         getClass: function () {
             return _className;
         },

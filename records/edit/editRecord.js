@@ -2588,6 +2588,10 @@ console.log('heurist not defined');
             this.inputCell.removeChild(this.linkSpan);
             this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
         }
+        /*if(this.selectSpan){
+            this.inputCell.removeChild(this.selectSpan);
+            this.inputCell.insertBefore(this.selectSpan, this.linkSpan?this.linkSpan:this.promptDiv);
+        }*/
 
         return newInput;
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
@@ -2613,7 +2617,7 @@ console.log('heurist not defined');
         //        urlSpan.style['float'] = "right";
         urlSpan.style.cursor = "pointer";
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
-        var viewRec = urlSpan.appendChild(this.document.createElement("img"));
+        //var viewRec = urlSpan.appendChild(this.document.createElement("img"));
         editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
@@ -2697,6 +2701,55 @@ console.log('heurist not defined');
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms
 
 
+    top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSelectTermsByImage = function(selector){
+
+        var urlSpan = this.document.createElement("span");
+        //urlSpan.style.paddingLeft = "1em";
+        urlSpan.style.color = "blue";
+        //        urlSpan.style['float'] = "right";
+        urlSpan.style.cursor = "pointer";
+        var editImg = urlSpan.appendChild(this.document.createElement("img"));
+        editImg.src = top.HEURIST.baseURL_V3+"common/images/icon_picture.png";
+        urlSpan.appendChild(editImg);
+
+        urlSpan.thisElement = this;
+        //urlSpan.bdValue = bdValue;
+
+        //open selectTerms to update detailtype
+        urlSpan.onclick = function() {
+            var _element = this.thisElement;
+            var _bdValue = this.bdValue;
+            
+            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            
+            var allTerms = $.map($(selector).find('option'), function(e) { return e.value; });
+
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+                    "admin/structure/terms/selectTermsByImage.php?db="+db+"&ids="+allTerms.join(','),
+                    {
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        height: 280,
+                        width: 650,
+                        title:'Select Term',
+                        callback: function(context) {
+                            if(context!==undefined) {
+                                selector.value = context;
+                            }
+                        }
+                    }
+                );
+        }; // urlSpan.onclick
+
+        //$(urlSpan).insertAfter($(selector));
+        this.inputCell.insertBefore(urlSpan, selector);
+        //this.inputCell.appendChild(urlSpan);
+
+        this.selectSpan = urlSpan;
+
+    } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanSelectTerms
+    
+    
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
 
         var newInput = this.recreateSelector(bdValue, false);
@@ -2710,9 +2763,10 @@ console.log('heurist not defined');
             //this.inputCell.insertBefore(br, newInput);
         }
 
+        this.createSelectTermsByImage(newInput);
         if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
-        this.createSpanLinkTerms(bdValue);
+        this.createSpanLinkTerms();
         return newInput;
     }; //top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput
 

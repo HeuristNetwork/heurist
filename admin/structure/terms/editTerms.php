@@ -55,7 +55,10 @@
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
         <!-- END TREEVIEW DEFS-->
 
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
@@ -166,6 +169,15 @@
                             </div>
 
                         </div>
+                        
+            <div  class="dtyField" id="divImage">
+                            <div style="float:left;">
+                                <label class="dtyLabel" style="margin-top:10px;">
+                                    Image (~400x400):</label>
+                <div style="vertical-align: middle;display:inline-block;">
+                    <div id="termImage" style="border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" ></div>
+                </div>
+            </div>                        
 
                         <div class="dtyField">
                             <label class="dtyLabel">Description of term</label>
@@ -399,12 +411,10 @@
                         </div>
                 </div>
 
-
-
-
+                <input type="file" id="new_term_image" style="display:none">
 
         <script  type="text/javascript">
-
+        
             YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );
             //YAHOO.util.Event.onDOMReady(EditTerms.init);
         </script>

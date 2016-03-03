@@ -80,7 +80,7 @@ class DbEntityBase
         
         //exclude virtual fields
         $fieldvalues = $this->data['fields'];
-        $fields = array()
+        $fields = array();
         foreach($this->fields as $fieldname=>$field_config){
             if(@$field_config['dty_Role']=='virtual') continue;
             $fields[$fieldname] = $this->data['fields'][$fieldname];
@@ -230,7 +230,7 @@ class DbEntityBase
               $filename = $info->getFilename();
               if ($filename==$tempfile) {
                   $pathname = $info->getPathname();
-                  $extension = $info->getExtension()
+                  $extension = $info->getExtension();
                   $new_name = $pathname.$recID.'.'.$extension;
 error_log($filepath.' to '.$new_name);                  
                   rename ($filepath, $new_name);
