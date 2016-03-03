@@ -81,6 +81,7 @@
             $mapping_rt = array();
             $mapping_dt_errors = array();
             $mapping_rt_errors = array();
+            $mapping_rt_errors2 = array();
             $rep_errors_only = true;
 
 
@@ -169,8 +170,7 @@
                         // find record type with such code (or concept code)
                         $rt_id = getRecTypeLocalID($arr['h3id']);
                         if($rt_id == null){
-                            array_push($mapping_rt_errors, "Record type ".$arr['h3id']."  ".$zType.
-                                " was not found in the database (use Database &gt; Structure &gt; Acquire from Databases to obtain)");
+                            array_push($mapping_rt_errors, $arr['h3id']."  ".$zType);
                         }else{
 
                             $mapping_dt = array();
@@ -199,7 +199,7 @@
                             }
 
                             if(count($mapping_dt)<1){
-                                array_push($mapping_rt_errors, "No proper field mapping found for ".$zType);
+                                array_push($mapping_rt_errors2, $zType);
                             }else{
                                 $mapping_dt["h3rectype"] = $rt_id;
                                 $mapping_rt[$zType] = $mapping_dt;
@@ -252,7 +252,7 @@
         }else if($code>399){
             $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
             if($code==400 || $code==401 || $code==403){
-                $msg = $msg."Verify API key in Database administration page > Database > Advanced Properties";
+                $msg = $msg."Verify API key in Database administration page > Database > Advanced Properties. It can be incorrect or truncated";
             }else if($code==404 ){
                 $msg = $msg."Verify User and Group ID in Database administration page > Database > Advanced Properties";
             }else if($code==407 ){
@@ -284,14 +284,24 @@
 
 
             // 2) show mapping issues report
-            if(count($mapping_rt_errors)>0 || count($mapping_dt_errors)>0){
-                print "<div style='color:red'><br />Warning: there are problem in the mapping file in the code at import/biblio/zoteroMap.xml<br />";
+            if(count($mapping_rt_errors)>0 || count($mapping_rt_errors2)>0 || count($mapping_dt_errors)>0){
+
+                print "<div style='color:red'><br />
+                Synchronisation requires bibliographic record types to be defined in the database (Zotero to Heurist type mappings are defined in the code at /import/biblio/zoteroMap.xml)."; 
+
                 if(count($mapping_rt_errors)>0){
-                    print "<br />".implode("<br />",$mapping_rt_errors);
+                    print "<p style='color:red'>The following record types were not found:";                    
+                    print "<br />".implode("<br />",$mapping_rt_errors).'</p>';
+                }
+                if(count($mapping_rt_errors2)>0){
+                    print "<p style='color:red'><br />No proper field mapping found for record types:";                    
+                    print "<br />".implode("<br />",$mapping_rt_errors2).'</p>';
                 }
                 if(count($mapping_dt_errors)>0){
-                    print "<br /><br />Issues with base field (detail) types:<br />".implode("<br />",$mapping_dt_errors);
+                    print "<p style='color:red'><br />Issues with base field (detail) types:<br />".implode("<br />",$mapping_dt_errors).'</p>';
                 }
+                
+                print "<p style='color:red'>Use Database > Structure > Acquire from databases to acquire these record types from the Heurist Core Definitions database (# 2)</p>";
                 print "</div>";
             }
 
