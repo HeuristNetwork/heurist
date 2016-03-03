@@ -195,7 +195,6 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                         },
                         success: function( response, textStatus, jqXHR ){
                             if(response=="ok"){
-                                alert("Clear uploaded file operation completed");
                                 if(session_id=='all'){
                                     $("#import_id").empty();
                                 }else{
