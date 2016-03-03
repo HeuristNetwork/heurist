@@ -278,6 +278,43 @@ function hSvsEdit(args) {
                 .click(function( event ) {
                     $dlg.find('#svs_Rules').val('');
                 });
+                
+                $dlg.find("#svs_GetQuery").button({
+                        label:'Get filter + rules as string',
+                        title:'Gety query string for Mappable Query'})
+                .click(function( event ) {
+                    
+                    var filter = $dlg.find('#svs_Query').val();
+                    if(filter.trim()!=''){
+                        var rules = $dlg.find('#svs_Rules').val();
+                    
+                        var res = '';
+                    
+                        try {
+                            var r = $.parseJSON(filter);
+                            if($.isArray(r) || $.isPlainObject(r)){
+                                res = '{"q":'+filter;
+                            }
+                        }
+                        catch (err) {
+                        }
+                        if(res==''){
+                            res = '{"q":"'+filter+'"';
+                        }
+                        
+                        if(rules!=''){
+                            res = res + ',"rules":'+rules+'}';
+                        }
+                    
+                        top.HEURIST4.msg.showPrompt(
+                        '<label>Edit and copy it to paste in Mappable Query filter field</label>'
+                        + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
+                        + ' style="min-width: 400px; margin-left:0.2em" rows="4" cols="80">'
+                        +res
+                        +'</textarea>'                    
+                        );
+                    }
+                });
 
                 var allFields = $dlg.find('input, textarea');
 
