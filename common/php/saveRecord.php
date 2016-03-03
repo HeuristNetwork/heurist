@@ -72,14 +72,16 @@ function saveRecord($recordID, $rectype, $url, $notes, $wg, $vis, $personalised,
     //	$log = " saving record ($recordID) ";
     $recordID = intval($recordID);
     $wg = intval($wg);
-    if (($wg!=null && intval($wg)>0) || !is_logged_in()) {// non-member saves are not allowed
-        $res = mysql_query("select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg);
+    if(!is_logged_in()){
+        errSaveRec("It is not possible to save record if not logged in, record save aborted");
+        return $msgInfoSaveRec;
+    }else    
+    if ($wg!=null && intval($wg)>0 && intval($wg)!=get_user_id()) {// non-member saves are not allowed
+
+        $uquery = "select * from ".USERS_DATABASE.".sysUsrGrpLinks where ugl_UserID=" . get_user_id() . " and ugl_GroupID=" . $wg;
+        $res = mysql_query($uquery);
         if (mysql_num_rows($res) < 1) {
-            if(is_logged_in()){
-                errSaveRec("Current user ".get_user_id()." is not a member of required workgroup ".$wg.", record save aborted");
-            }else{
-                errSaveRec("It is not possible to save record if not logged in, record save aborted");
-            }
+            errSaveRec("Current user ".get_user_id()." is not a member of required workgroup ".$wg.", record save aborted ");
             return $msgInfoSaveRec;
         }
     }

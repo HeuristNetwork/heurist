@@ -190,7 +190,7 @@ function executeSmartyTemplate($params){
         if(file_exists(HEURIST_SMARTY_TEMPLATES_DIR.$template_file)){
             $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
         }else{
-            $error = "<b><font color='#ff0000'>Template file $template_file does noot exist</font></b>";
+            $error = "<b><font color='#ff0000'>Template file $template_file does not exist</font></b>";
             echo $error;
             if($publishmode>0 && $outputfile!=null){ //save empty output into file
                 save_report_output2($error);
@@ -253,7 +253,7 @@ function executeSmartyTemplate($params){
     $smarty->error_reporting = 0;
 
     if($template_body)
-    {	//execute template from string - modified temoplate in editor
+    {	//execute template from string - modified template in editor
 
         //error report level: 1 notices, 2 all, 3 debug mode
         $replevel = (array_key_exists('replevel',$params) ?$params['replevel']:0);

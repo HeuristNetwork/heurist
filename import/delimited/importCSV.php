@@ -212,10 +212,8 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             // submit form for second attempt of file upload
             //
             function doUpload2(){
-                showProgressMsg('Please wait');
-                hideThisFrame();
-                $(document.forms[0]).hide();
                 document.forms[0].submit();
+                hideThisFrame();
             }
 
 
@@ -232,7 +230,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                             var ele = parent.document.getElementById(reference_to_parent_dialog);
                             $(ele).addClass('loading');
                             $(frame).hide();
-            //console.log('hide frame');
+//console.log('hide frame');
                     }
                 }
 
@@ -275,7 +273,9 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             ?>
 
             <script type="text/javascript">
-                $( function(){ $("#div-progress").hide(); });
+                $(document).ready( function(){ 
+                    $("#div-progress").hide(); 
+                });
 
                 //
                 // reload
@@ -1084,7 +1084,7 @@ if(is_array($imp_session)){
                 //change title in parent dialog
                 if(window.frameElement){
                 var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
-                if( reference_to_parent_dialog ){
+                if( reference_to_parent_dialog ){ 
                     var ele = parent.document.getElementById(reference_to_parent_dialog);
                     $(ele.parentElement).find('.ui-dialog-title').text( 'Import delimited text (csv, tsv)' );
                     //dialog( "option", "title", 'Import delimited text (csv, tsv)');
@@ -1097,10 +1097,8 @@ if(is_array($imp_session)){
         // submit form on new file upload
         //
         function doUpload(){
-            showProgressMsg('Please wait, file is uploading (time required will depend on your network connection speed)');
-            hideThisFrame();
-            $(document.forms[0]).hide();
             document.forms[0].submit();
+            hideThisFrame();
         }
 
 
@@ -1108,10 +1106,10 @@ if(is_array($imp_session)){
         // submit form on session select
         //
         function doSelectSession(){
-            showProgressMsg('Loading saved file');
-            hideThisFrame();
-            $(document.forms[0]).hide();
+            //showProgressMsg('Loading saved file');
+            //$(document.forms[0]).hide();
             document.forms[0].submit();
+            hideThisFrame();
         }
 
     </script>
@@ -1347,6 +1345,37 @@ if(is_array($imp_session)){
 
 <?php
 
+function fix_integer_overflow($size) {
+        if ($size < 0) {
+            $size += 2.0 * (PHP_INT_MAX + 1);
+        }
+        return $size;
+}
+function get_config_bytes($val) {
+    $val = trim($val);
+    $last = strtolower($val[strlen($val)-1]);
+    switch($last) {
+        case 'g':
+            $val *= 1024;
+        case 'm':
+            $val *= 1024;
+        case 'k':
+            $val *= 1024;
+    }
+    return fix_integer_overflow($val);
+}
+
+function get_file_size($file_path, $clear_stat_cache = false) {
+    if ($clear_stat_cache) {
+        if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
+            clearstatcache(true, $file_path);
+        } else {
+            clearstatcache();
+        }
+    }
+    return fix_integer_overflow(filesize($file_path));
+}
+
 //
 // get file from _REQUEST and call import to db if everything is OK
 //
@@ -1360,6 +1389,7 @@ function postmode_file_selection() {
         if ($_FILES['import_file']['size'] == 0) {
             $error = 'no file was uploaded';
         } else {
+ print $_FILES['import_file']['error'];            
             switch ($_FILES['import_file']['error']) {
                 case UPLOAD_ERR_OK:
                     break;
@@ -1382,6 +1412,26 @@ function postmode_file_selection() {
                 default:
                     $error = "Unknown file error";
             }
+            
+        $content_length = fix_integer_overflow((int)@$_SERVER['CONTENT_LENGTH']);
+        
+        $post_max_size = get_config_bytes(ini_get('post_max_size'));
+        if ($post_max_size && ($content_length > $post_max_size)) {
+            $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
+        }else{
+            if ($_FILES['import_file']['tmp_name'] && is_uploaded_file($_FILES['import_file']['tmp_name'])) {
+                $file_size = get_file_size($_FILES['import_file']['tmp_name']);
+            } else {
+                $file_size = $content_length;
+            }
+            $file_max_size = get_config_bytes(ini_get('upload_max_filesize'));
+            if ($file_max_size && ($content_length > $file_max_size)) {
+                $error = 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+            }
+            
+        }
+            
+print $error;            
         }
 
         if (!$error) {    // move on to the next stage!

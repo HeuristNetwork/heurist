@@ -27,7 +27,7 @@
 * 4) Init values for mapping form (checkboxes and selected field in dropdowns)
 */
 
-$( init );
+$(document).ready( init );
 
 function init() {
 

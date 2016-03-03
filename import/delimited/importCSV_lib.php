@@ -2120,10 +2120,10 @@ function doImport($mysqli, $imp_session, $params){
                     //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                     if(count($details)>1){
                         $new_id = doInsertUpdateRecord($recordId, $params, $details, null);
-                        if($new_id && is_numeric($new_id)) array_push($new_record_ids, $new_id);
+                        if($new_id!=null && intval($new_id)>0) array_push($new_record_ids, $new_id);
                         $previos_recordId = null;
 
-                        if($recordId==null || $recordId<0){ //new records OR predefined id
+                        if(($recordId==null || $recordId<0) && intval($new_id)>0){ //new records OR predefined id
                             $pairs[$id_field_values[$idx2]] = $new_id;
                         }
                     }else if($recordId>0){
@@ -2146,7 +2146,7 @@ function doImport($mysqli, $imp_session, $params){
                 }
             }//foreach multivalue index
 
-            if($is_mulivalue_index){
+            if($is_mulivalue_index && is_array($new_record_ids) && count($new_record_ids)>0){
                 updateRecIds($import_table, end($row), $id_field, $new_record_ids, $params['csv_mvsep']);
                 $new_record_ids = array(); //to save in import table
             }
@@ -2181,6 +2181,8 @@ function doImport($mysqli, $imp_session, $params){
 function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
     global $mysqli;
 
+    if(is_array($new_record_ids) && count($new_record_ids)>0){
+    
     $newids = "'".implode($csv_mvsep, $newids)."'";
 
     $updquery = "UPDATE ".$import_table
@@ -2189,6 +2191,8 @@ function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
 
     if(!$mysqli->query($updquery)){
         print "<div style='color:red'>Cannot update import table (set record id ".$newids.") for line:".$imp_id.".</div>";
+    }
+    
     }
 }
 
@@ -2342,7 +2346,7 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field){
         }
 
         $rep_skipped++;
-
+        $out["bibID"] = null;
     }else{
 
         if($recordId!=$out["bibID"]){ //}==null){
@@ -2498,6 +2502,9 @@ function download_import_session($session_id, $idfield=null, $mode=1){
         $tmpFile = str_replace("\\","/",$tmpFile);
     }
 
+    ///ARTEM: issue MySQL server is on different machine. It saves temp file on this machine. This file is not accessible from 
+    // web server
+    
     $query = "SELECT ".implode(',',$headers)
     ." UNION ALL "
     ." SELECT ".implode(",",$list)." FROM ".$import_table
