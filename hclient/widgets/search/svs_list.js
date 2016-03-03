@@ -135,6 +135,7 @@ $.widget( "heurist.svs_list", {
         $(this.document).on(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT, function(e, data) {
             that.accordeon.empty();
             that.helper_top = null;
+            that.helper_btm = null;
             that._refresh();
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
