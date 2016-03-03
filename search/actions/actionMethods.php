@@ -923,7 +923,7 @@ function set_wg_and_vis($data) {
         $wg = intval(@$data['wg_id']);
         $vis = $data['vis'];
 
-        if (($wg == -1 ||  $wg == 0 || in_array($wg, get_group_ids()))  &&
+        if (($wg == -1 ||  $wg == 0 || $wg==get_user_id() || in_array($wg, get_group_ids()))  &&
         (in_array(strtolower($vis),array('viewable','hidden','pending','public'))))
         {
             mysql_connection_overwrite(DATABASE);
