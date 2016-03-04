@@ -248,12 +248,22 @@ function DetailTypeEditor() {
         el_sel.id = "selVocab";
 
         Hul.addoption(el_sel, -1, 'select...');
-
+        
+        //add to temp array
+        var vocabs = [];
         for(termID in termTree) { // For every term in first levet of tree
             if(!Hul.isnull(termID)){
                 termName = terms[termID][fi_label];
-                Hul.addoption(el_sel, termID, termName);
-                if(Number(termID)==vocabId){
+                vocabs.push({key:termID, title:termName });
+            }
+        }
+        //sort array 
+        vocabs.sort(function(a,b){ return a.title<b.title?-1:1; });
+
+        for(var idx in vocabs) { // For every term in first levet of tree
+            if(vocabs[idx]){
+                Hul.addoption(el_sel, vocabs[idx].key, vocabs[idx].title);
+                if(Number(vocabs[idx].key)==vocabId){
                     sel_index = el_sel.length-1;
                 }
             }
