@@ -117,8 +117,21 @@ if (@$_REQUEST['change_names']) {
 }
 
 if (@$_REQUEST['replace_kwd']) {
+    
 	mysql_connection_overwrite(DATABASE);
-	mysql_query('update usrRecTagLinks set rtl_TagID = '.intval(@$_REQUEST['replace_with_kwd_id']).' where rtl_TagID = '.intval($_REQUEST['replace_kwd_id']));
+    
+    $rquery = 'delete r1 FROM usrRecTagLinks AS r1 inner join usrRecTagLinks AS r2 on r1.rtl_RecID=r2.rtl_RecID and r2.rtl_TagID='
+    .intval(@$_REQUEST['replace_with_kwd_id'])
+    .' where r1.rtl_TagID='
+    .intval($_REQUEST['replace_kwd_id']); 
+
+    mysql_query($rquery);
+    
+	$rquery = 'update usrRecTagLinks set rtl_TagID = '
+                    .intval(@$_REQUEST['replace_with_kwd_id'])
+                    .' where rtl_TagID = '
+                    .intval($_REQUEST['replace_kwd_id']);
+    mysql_query($rquery);
 	$tag_message .= '<div class="success">Tag replaced</div>';
 }
 
@@ -256,19 +269,20 @@ $tagsCount = 0;
 $foreach_kwd = $foreach_kwd_js = '';
 while ($row = mysql_fetch_row($res)) {
 	$foreach_kwd .=
-        '<tr>
+        '<tr style="vertical-align:top;">
          <td nowrap>
           <input type="checkbox" style="vertical-align: middle;" name="delete_kwds['.$row[0].']">
           <img src="'.HEURIST_BASE_URL.'common/images/cross.png" onclick="delete_kwd('.$row[0]
                 .',\''.escChars($row[1]).'\','.$row[2].')">
           <input type="text" class="textinput" name="kwdl['.$row[0].']" value="'.escChars($row[1]).'" onchange="rename_kwd('.$row[0].', this);">
          </td>
-         <td nowrap>' . $row[2] . '</td>
+         <td nowrap style="padding-top: 4px;">' . $row[2] . '</td>
          <td class="u-cell">
-          <div class="u" title="' . $row[2] . ' records"><div style="width: ' . (intval($row[2]) / $max_cnt * 100) . '%;"></div></div>
+          <div class="u" style="padding-top: 4px;" title="' . $row[2] . ' records"><div style="width: ' 
+                . ($max_cnt>0?(intval($row[2]) / $max_cnt * 100):0) . '%;"></div></div>
          </td>
          <td class=search>'.($row[2] ? '<a target=_blank href="'.HEURIST_BASE_URL.'?w=bookmark&db='.HEURIST_DBNAME.'&q=tag:%22'.$row[1].'%22" title="View records with this tag" class="externalLink"></a>': '').'</td>
-         <td class=replace>'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
+         <td class=replace style="padding-top: 4px;">'.($row[2] ? '<a href=# onclick="show_replace_list(this, '.$row[0].'); return false;">replace...</a>': '').'</td>
         </tr>';
 
 	$foreach_kwd_js .= "kwd['".escChars(strtolower($row[1]))."'] = ".$row[0].";\n";
