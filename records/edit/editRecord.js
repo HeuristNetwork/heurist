@@ -3305,7 +3305,7 @@ console.log('heurist not defined');
                 var val = eval(json.responseText);
                 if (val && val.byRectype) {
                     top.HEURIST.edit.record.relatedRecords = val;
-                }else if(val.error) {
+                }else if(val && val.error) {
                     alert(" Problem with relationship marker: " + val.error);
                 }
             });

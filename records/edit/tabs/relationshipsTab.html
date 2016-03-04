@@ -55,6 +55,12 @@
 		<script>
 
 			function onshow() {
+                
+                var relatedRecords = top.HEURIST.edit.record.relatedRecords;
+                var relationsBody = document.getElementById("relations-tbody");
+                $(relationsBody).empty();
+                var relManager = new top.RelationManager(relationsBody,top.HEURIST.edit.record, relatedRecords,0,changeNotification,false,true);
+                
 				top.HEURIST.edit.calendarViewer = calendarViewer;
 				var elt = document.getElementById("relationship-type");
 				setTimeout(function() {
@@ -62,6 +68,7 @@
 						if (elt) elt.focus()
 					} catch (e) {}
 				}, 0);
+                
 			}
 		</script>
 
