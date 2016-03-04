@@ -495,8 +495,11 @@ function createrectangle(point) {
   drawRectangle();
 }
 function drawRectangle() {
-  southWest = startMarker.getPosition(); // used in logCode6()
-  northEast = nemarker.getPosition(); // used in logCode6()
+  var pnt1 = startMarker.getPosition(); // used in logCode6()
+  var pnt2 = nemarker.getPosition(); // used in logCode6()
+  
+  southWest = new google.maps.LatLng( pnt1.lat()<pnt2.lat()?pnt1.lat():pnt2.lat(), pnt1.lng()<pnt2.lng()?pnt1.lng():pnt2.lng() );
+  northEast = new google.maps.LatLng( pnt1.lat()>pnt2.lat()?pnt1.lat():pnt2.lat(), pnt1.lng()>pnt2.lng()?pnt1.lng():pnt2.lng() );
   var latLngBounds = new google.maps.LatLngBounds(
     southWest,
     northEast
