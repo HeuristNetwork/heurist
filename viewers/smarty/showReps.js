@@ -993,7 +993,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     }
 
 
-                    if(!is_record){ //simple
+                    if(!is_record){ //simple - leaf - field or term id,label,code
 
                         label = child;
 
@@ -1358,7 +1358,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         top.HEURIST.insertVar = _insertSelectedVars;
         top.HEURIST.insertPattern = _insertPattern;
         top.HEURIST.insertModifier = _insertModifier;
-
 
         if(isloop){
             $(".ins_isloop").show();

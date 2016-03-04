@@ -1034,10 +1034,16 @@ function smarty_function_wrap($params, &$smarty)
         }else if($dt=="file"){
             //insert image or link
             $values = $params['var'];
+            
+            $limit = intval(@$params['limit']);
 
             $sres = "";
+            
+            if(!is_array($values) || !array_key_exists(0,$values)) $values = array($values);
 
-            foreach ($values as $value){
+            foreach ($values as $idx => $value){
+                
+                if($limit>0 && $idx>=$limit) break;
 
                 $type_media = $value['mediaType'];
 
