@@ -411,6 +411,7 @@ function hSvsEdit(args) {
                 allFields.on("keypress",function(event){
                     var code = (event.keyCode ? event.keyCode : event.which);
                     if (code == 13) {
+                        top.HEURIST4.util.stopEvent(event);
                         __doSave();
                     }
                 });
