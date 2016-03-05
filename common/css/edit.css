@@ -290,7 +290,7 @@
 	background-color: inherit;
 }
 body div div.sidebar-link:hover {
-	background-color: #ffffdd; /*rgba(255, 255, 255, 0.5);*/
+	background-color: rgba(255, 255, 255, 0.5);
 }
 .sidebar-link b {
 	font-size: 108%;
@@ -307,7 +307,7 @@ div.sidebar-link.changed img {
 }
 body div.sidebar-link.disabled, body div.sidebar-link.disabled:hover {
 	cursor: default;
-	color: #ffffdd; /*565651;*/
+	color: #565651;
 	background-position: 8px center;
 	opacity: 0.3;
     filter: progid:DXImageTransform.Microsoft.Alpha(opacity=30);
@@ -316,7 +316,7 @@ body div.sidebar-link.disabled{
     color: #cccccc;
 }
 body div#sidebar div.sidebar-link.selected {
-	background-color: #ffffdd; /*was #ECF1FB; */
+	background-color: #ECF1FB; /* same as edit form background */
 	color: #999999;
 	cursor: default;
 	border:1px solid;
@@ -1152,7 +1152,7 @@ hr {
     background-image: none !important;
 }
 .ui-heurist-bg-light {
-    background-color: #ffffdd !important;
+    background-color: #ECF1fB !important;
 }
 #quicklinks>ul>li>a{
     color: #ffffff !important;
