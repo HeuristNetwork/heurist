@@ -677,6 +677,7 @@ if(@$params['debug']) echo $query."<br>";
 
                     if(is_array(@$params['q'])){
                         $query_json = $params['q'];
+//DEBUG error_log('Q='.print_r($params['q'],true));                
                     }else{
                         $query_json = json_decode(@$params['q'], true);
                     }

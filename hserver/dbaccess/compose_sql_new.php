@@ -911,12 +911,12 @@ class HPredicate {
         
         if($fieldtype=='enum' || $fieldtype=='relationtype'){
             
-            if(intval($this->value)>0){
-                $res = ' in (select trm_ID from defTerms where trm_ID='
-                    .$this->value.' or trm_ParentTermID='.$this->value.')';
-            }else if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){
+            if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
+            }else if(intval($this->value)>0){
+                $res = ' in (select trm_ID from defTerms where trm_ID='
+                    .$this->value.' or trm_ParentTermID='.$this->value.')';
             }else{
                 $value = $mysqli->real_escape_string($this->value);
                 $match_pred = ' in (select trm_ID from defTerms where trm_Label="'
