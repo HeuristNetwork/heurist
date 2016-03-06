@@ -149,7 +149,7 @@ class DbDefTerms extends DbEntityBase
             $idx = false;
         }
         if($idx===false){
-            array_unshift($this->data['details'],'trm_ID');
+            array_unshift($this->data['details'], 'trm_ID');
         }
         $is_ids_only = (count($this->data['details'])==1);
             
@@ -169,17 +169,25 @@ class DbDefTerms extends DbEntityBase
 
     }
     
+    //
+    //
+    //
     public function save(){
         
         $ret = parent::save();
 
-        if(is_numeric($ret)){
+        if($ret!==false){
             //treat thumbnail image
-            $thumb_file_name = $this->data['fields']['trm_Thumb'];
+            foreach($this->records as $record){
+                if(in_array(@$record['trm_ID'], $ret)){
+                    $thumb_file_name = @$record['trm_Thumb'];
             
-            //rename it to recID.png
-            parent::renameEntityImage($thumb_file_name, $ret);
-            
+                    //rename it to recID.png
+                    if($thumb_file_name){
+                        parent::renameEntityImage($thumb_file_name, $ret);
+                    }
+                }
+            }
         }
         
         return $ret;

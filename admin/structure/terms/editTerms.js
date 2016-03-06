@@ -1221,19 +1221,28 @@ function EditTerms() {
 
             var term_id = (isRoot)?0:_currentNode.data.id;
 
+            var term_label = (isRoot)?'root vocabulary':_currentNode.label;
+            
+            /* old way
             var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
             "&parent="+term_id+
             "&domain="+_currentDomain;
+            */
 
+            var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/importDefTerms.php?db="+ _db +
+            "&trm_ID="+term_id;
+            
             Hul.popupURL(top, sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
-                title: 'Import Terms',
-                height: 200,
-                width: 500,
+                title: 'Import Terms for '+term_label,
+                //height: 200,
+                //width: 500,
+                height: 460,
+                width: 800,
                 callback: _import_complete
             });
-
+            
         }
     }
 
@@ -1515,23 +1524,20 @@ function EditTerms() {
     //dropZone: $input_img,
     // add: function (e, data) {  data.submit(); },
     done: function (e, response) {
-                var data = response;
-                $.each(data.result.files, function (index, file) {
-                    if(file.error){
-                        $input_img.find('img').prop('src', '');
-                        //top.HEURIST4.msg.showMsgErr(file.error);
-                    }else{
-                        var curtimestamp = (new Date()).getMilliseconds();
-                        var url = top.HEURIST.iconBaseURL + Dom.get('edId').value+ "&ent=term&t=" + curtimestamp
-                        $input_img.find('img').prop('src', url); //file.url);
-                    }
-                });
-    
-            /*var inpt = this;
-            $input_img.off('click');
-            $input_img.on({click: function(){
-                        $(inpt).click();
-            }});*/
+                response = response.result;
+                if(response.status=='ok'){
+                    var data = response.data;
+                    $.each(data.files, function (index, file) {
+                        if(file.error){
+                            $input_img.find('img').prop('src', '');
+                            //top.HEURIST4.msg.showMsgErr(file.error);
+                        }else{
+                            var curtimestamp = (new Date()).getMilliseconds();
+                            var url = top.HEURIST.iconBaseURL + Dom.get('edId').value+ "&ent=term&t=" + curtimestamp
+                            $input_img.find('img').prop('src', url); //file.url);
+                        }
+                    });
+                }
             }                    
                         });
         

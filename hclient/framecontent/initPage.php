@@ -119,8 +119,8 @@ function dbOwnerRequired(){
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" />
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
@@ -188,6 +188,7 @@ function dbOwnerRequired(){
         {
             applyTheme();
 
+            
             if(!top.HEURIST4.rectypes){
                 top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){

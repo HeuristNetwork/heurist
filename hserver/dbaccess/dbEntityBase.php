@@ -31,14 +31,23 @@ class DbEntityBase
         configuration form json file
     */
     protected $config;  
-
+    
+    //name of primary key field from $config
+    protected $primaryField; 
     
     /*
         fields structure description (used in validataion and access)
     */
     protected $fields;  
 
-
+    /**
+    * keeps several records for delete,update actions
+    * it is extracted from $data in begining of method
+    * 
+    * @var mixed
+    */
+    protected $records;
+    
         
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -60,47 +69,84 @@ class DbEntityBase
         return $this->config;
     }
     
-    
+    //
+    // save one or several records 
+    //
     public function save(){
 
+        //extract records
+        if(!$this->prepareRecords()){
+                return false;    
+        }
+        
         //validate permission
         if(!$this->_validatePermission()){
             return false;
         }
         
-        //validate mandatory fields
-        if(!$this->_validateMandatory()){
-            return false;
-        }
+//error_log(print_r($this->records, true));        
+        //validate values and check mandatory fields
+        foreach($this->records as $record){
         
-        //validate values
-        if(!$this->_validateValues()){
-            return false;
-        }
-        
-        //exclude virtual fields
-        $fieldvalues = $this->data['fields'];
-        $fields = array();
-        foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') continue;
-            $fields[$fieldname] = $this->data['fields'][$fieldname];
-        }
-        
-        
-        //save data
-        $ret = mysql__insertupdate($this->system->get_mysqli(), 
-                                $this->config['tableName'], $this->config['tablePrefix'],
-                                $fields );
-        if(is_numeric($ret)){
-                return $ret;
-        }else{
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Can not save data in table ".$this->config['entityName'], $ret);
+            $this->data['fields'] = $record;
+            
+            //validate mandatory fields
+            if(!$this->_validateMandatory()){
                 return false;
+            }
+            
+            //validate values
+            if(!$this->_validateValues()){
+                return false;
+            }
+        
         }
+        
+        //array of inserted or updated record IDs
+        $results = array(); 
+        
+        //start transaction
+        $mysqli = $this->system->get_mysqli();
+        $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
+        if($keep_autocommit===true) $mysqli->autocommit(FALSE);
+        $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+        
+        foreach($this->records as $rec_idx => $record){
+            
+            //exclude virtual fields
+            $fieldvalues = $record;
+            $fields = array();
+            foreach($this->fields as $fieldname=>$field_config){
+                if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) continue;
+                $fields[$fieldname] = $record[$fieldname];
+            }
+            
+//error_log(print_r($fields,true));            
+            
+            //save data
+            $ret = mysql__insertupdate($mysqli, 
+                                    $this->config['tableName'], $this->config['tablePrefix'],
+                                    $fields );
+            if(is_numeric($ret)){
+                   $this->records[$rec_idx][$this->primaryField] = $ret;
+                   $results[] = $ret;
+            }else{
+                    //rollback
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Can not save data in table ".$this->config['entityName'], $ret);
+                    return false;
+            }
+            
+        }//for records
+        //commit
+        $mysqli->commit();
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        return $results;
     }
 
     //
-    //
+    // @todo multirecords and transaction
     //
     public function delete(){
 
@@ -209,6 +255,11 @@ class DbEntityBase
             }else{
                 if(@$field['dtFields']['dty_Role']=='virtual') continue; //skip
                 $this->fields[ $field['dtID'] ] = $field['dtFields'];
+                
+                if(@$field['dtFields']['dty_Role']=='primary'){
+                    $this->primaryField = $field['dtID'];
+                }
+                
             }
         }
         
@@ -228,16 +279,36 @@ class DbEntityBase
         
         foreach ($iterator as $filepath => $info) {
               $filename = $info->getFilename();
-              if ($filename==$tempfile) {
+              if ($filename==$tempfile && file_exists($filename)) {
                   $pathname = $info->getPathname();
                   $extension = $info->getExtension();
                   $new_name = $pathname.$recID.'.'.$extension;
-error_log($filepath.' to '.$new_name);                  
+
                   rename ($filepath, $new_name);
               }
         }        
     }
-        
+
+    //
+    // extract records from data parameter - it is used in delete, save
+    //            
+    protected function prepareRecords(){
+
+        if(!is_array(@$this->data['fields']) || count($this->data['fields'])<1){
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Missed 'fields' parameter. Fields are not defined");
+                return false;    
+        }
+        //detect wehter this is milti record save
+        if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
+            $this->records = array();
+            $this->records[0] = $this->data['fields']; 
+        }else{
+             //this is sequental array 
+            $this->records = $this->data['fields'];
+        }
+       
+        return true; 
+    }    
     
 }  
 ?>

@@ -204,13 +204,30 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
              action = action.action;
         }
                 
-        if(action=='add-child'){
-            if(this._currentEditID>0){
-                this._currentParentID = this._currentEditID;
+        if(this._currentEditID>0){
+            
+            this._currentParentID = this._currentEditID;
+            
+            if(action=='add-child'){
                 this._addEditRecord(-1);
-            }else{
-                top.HEURIST4.msg.showMsgFlash('Save current term before add a child term');
+            }else if(action=='add-import'){
+                
+                //open import dialog
+                top.HEURIST4.msg.showDialog(
+                    top.HAPI4.basePathV4 + 'hclient/framecontent/importDefTerms.php?db='
+                            +top.HAPI4.database
+                            +'&trm_ID='+this._currentParentID,
+                  {
+                     title: 'Import children from structured data (CSV)',
+                     callback: null,
+                     width: '800px',
+                     height: '460px'
+                  }          
+                );
+                
             }
+        }else{
+            top.HEURIST4.msg.showMsgFlash('Save current term before add a child term');
         }
         
     },
@@ -250,7 +267,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     //
     //
-    _afterSaveEvenHandler: function( recID, fieldvalues ){
+    _afterSaveEventHandler: function( recID, fieldvalues ){
         
         var isNewRecord = (this._currentEditID<0);
     

@@ -41,7 +41,7 @@
 
 // EDIT 
 // _getValidatedValues - returns values from edit form
-// _afterSaveEvenHandler
+// _afterSaveEventHandler
 // _saveEditAndClose - send update request and close popup edit dialog
 
 // _afterInitEditForm perform required after edit form init modifications (show/hide fields, assign even listener )
@@ -693,7 +693,7 @@ $.widget( "heurist.manageEntity", {
     //
     //  after save event handler
     //
-    _afterSaveEvenHandler: function( recID, fieldvalues ){
+    _afterSaveEventHandler: function( recID, fieldvalues ){
         
             this._currentEditID = null;
             top.HEURIST4.msg.showMsgFlash(top.HR('Record has been saved'));
@@ -724,7 +724,7 @@ $.widget( "heurist.manageEntity", {
                 'a'          : 'save',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : top.HEURIST4.util.random(),
-                'fields'    : fields                     
+                'fields'     : fields                     
                 };
                 
                 var that = this;                                                
@@ -733,7 +733,7 @@ $.widget( "heurist.manageEntity", {
                     function(response){
                         if(response.status == top.HAPI4.ResponseStatus.OK){
 
-                            var recID = ''+response.data;
+                            var recID = ''+response.data[0];
                             
                             //update record in cache
                             if(that.options.use_cache){
@@ -741,7 +741,7 @@ $.widget( "heurist.manageEntity", {
                                 that._cachedRecordset.addRecord(recID, fields);
                             }
                             
-                            that._afterSaveEvenHandler( recID, fields );
+                            that._afterSaveEventHandler( recID, fields );
                             
                         }else{
                             top.HEURIST4.msg.showMsgErr(response);

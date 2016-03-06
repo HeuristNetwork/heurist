@@ -999,7 +999,17 @@ function hAPI(_db, _oninit) { //, _currentUser
             }else{
                 return '';
             }    
+        },
+
+        //
+        //
+        //        
+        parseCSV: function(request, callback){
+            //if(request) request.a = 'svs_delete';
+            _callserver('fileParse', request, callback);
         }
+        
+        
     }
 
     _init(_db, _oninit); //, _currentUser);

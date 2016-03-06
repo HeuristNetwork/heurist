@@ -68,7 +68,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                             {"key":"Smarty",title:"Smarty Reports"},
                             {"key":"SmartySchedule",title:"Smarty Reports Schedule"}];        
         
-            // Callback function on map initialization
+            // Callback function after initialization
             function onPageInit(success){
                 if(success){
                     

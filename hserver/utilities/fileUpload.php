@@ -21,6 +21,7 @@
 require_once(dirname(__FILE__)."/../System.php");
 require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
 
+$response = null;
 $system = new System();
 if($system->init(@$_REQUEST['db'])){
 
@@ -29,11 +30,11 @@ if($system->init(@$_REQUEST['db'])){
     $recID = @$_REQUEST['recID'];
     
     if(!$entity_name){
-            $system->addError(HEURIST_INVALID_REQUEST, "Entity parameter is not defined");
+            $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
     }else if ( $system->get_user_id()<1 ) {
             $response = $system->addError(HEURIST_REQUEST_DENIED);
     }else if ($entity_name=='sysUGrps') {
-            if(!$system->is_admin2($recID)){
+            if(!$system->is_admin2($recID)){ //only user or group admin
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }
     } if($entity_name!='recUploadedFiles'){ //for all other entities other than recUploadedFile must be admin of dbowners group
@@ -41,6 +42,16 @@ if($system->init(@$_REQUEST['db'])){
               $response = $system->addError(HEURIST_REQUEST_DENIED);
             }
     }
+}else{
+    $response = $system->getError();
+}
+
+if($response!=null){
+    header('Content-type: application/json');
+    print json_encode($response);
+    exit();
+}
+    
     
 /*
         'thumbnail' => array(
@@ -52,7 +63,7 @@ if($system->init(@$_REQUEST['db'])){
 */    
     //error_reporting(E_ALL | E_STRICT);
 
-    if($entity_name=="terms"){//old one
+    if($entity_name=="terms"){//for terms from old term management
 
     $options = array(
             'upload_dir' => HEURIST_FILESTORE_DIR.'term-images/',
@@ -68,7 +79,16 @@ if($system->init(@$_REQUEST['db'])){
                 )
             )
     );
-        
+    
+    }else if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
+    
+    $options = array(
+            'upload_dir' => HEURIST_FILESTORE_DIR.'scratch/',
+            'upload_url' => HEURIST_FILESTORE_URL.'scratch/',
+            'max_file_size' => 1024*1024,
+            //'print_response' => false,
+            //'download_via_php' => 1
+            );
     }else{
 
     $options = array(
@@ -92,15 +112,24 @@ if($system->init(@$_REQUEST['db'])){
     
     }
     
+    $options['print_response'] = false;
+    
     $upload_handler = new UploadHandler($options);
-/*    $res = $upload_handler->get_response();
-error_log(print_r($res, true));
-    $response = array("status"=>HEURIST_OK, "data"=> $res);*/
+    
+    //@todo set print_response=false
+    //and send to client standard HEURIST response
+    $response = null;
+    $res = $upload_handler->get_response();
 
-}else{
-    $response = $system->getError();    
-    header('Content-type: application/json'); //'text/javascript');
+    foreach($res['files'] as $file){
+        if(@$file->error){
+            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File can not be processed", $file->error);
+            break;            
+        }
+    }
+    if($response==null){
+        $response = array("status"=>HEURIST_OK, "data"=> $res);
+    }
+    header('Content-type: application/json');
     print json_encode($response);
-    exit();
-}
 ?>

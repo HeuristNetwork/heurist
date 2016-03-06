@@ -624,10 +624,11 @@ $.widget( "heurist.editing_input", {
     dropZone: $input_img,
     // add: function (e, data) {  data.submit(); },
     done: function (e, response) {
-            if(response.status==undefined){ //} || response.status == top.HAPI4.ResponseStatus.OK){
-                var data = response;
-                $.each(data.result.files, function (index, file) {
-                    if(file.error){
+            response = response.result;
+            if(response.status==top.HAPI4.ResponseStatus.OK){
+                var data = response.data;
+                $.each(data.files, function (index, file) {
+                    if(file.error){ //it is not possible we should cought it on server side - just in case
                         $input_img.find('img').prop('src', '');
                         top.HEURIST4.msg.showMsgErr(file.error);
                     }else{

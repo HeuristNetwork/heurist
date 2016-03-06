@@ -225,7 +225,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 
             }
             
-            var systemEntiries= 
+            var systemEntities= 
                            [{"key":"Records",title:"Records"},
                             {"key":"SysUsers",title:"Users",icon:'ui-icon-person'},
                             {"key":"SysGroups",title:"Workgroups",icon:'ui-icon-group'},
