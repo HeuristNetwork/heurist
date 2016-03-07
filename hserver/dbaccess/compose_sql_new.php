@@ -563,12 +563,12 @@ class HPredicate {
 
         if(intval($this->field_id)>0){
             //find field type
-            $fieldtype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
+            $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
         }else{
-            $fieldtype = 'freetext';
+            $this->field_type = 'freetext';
         }
         
-        $val = $this->getFieldValue( $fieldtype );
+        $val = $this->getFieldValue();
         if(!$val) return null;
 
         if($this->field_id=="title"){
@@ -881,7 +881,7 @@ class HPredicate {
     * put your comment there...
     *
     */
-    function getFieldValue( $fieldtype ){
+    function getFieldValue(  ){
 
         global $mysqli;
 
@@ -909,7 +909,7 @@ class HPredicate {
 
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
-        if($fieldtype=='enum' || $fieldtype=='relationtype'){
+        if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
             if (preg_match('/^\d+(?:,\d+)+$/', $this->value)){
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
@@ -940,7 +940,7 @@ class HPredicate {
 
             $this->field_list = true;
 
-        } else if($fieldtype=='date'){ //$this->isDateTime()){
+        } else if($this->field_type =='date'){ //$this->isDateTime()){
             //
             $res = $this->makeDateClause();
 

@@ -622,7 +622,6 @@ class AndLimb {
             $this->exact = true;
         }
 
-
         switch (strtolower($pred_type)) {
             case 'type':
             case 't':
@@ -1719,8 +1718,8 @@ class LinkedFromParentPredicate extends Predicate {
             $ids = array_map('intval', explode(',', $rty_ID));
             if(count($ids)>1){
                 $add_where = 'rl.rl_SourceID in ('.implode(',',$ids).') and ';
-            }else if(count($ids)==0){
-                $add_where = 'rl.rl_SourceID = '.$ids.' and ';
+            }else if(count($ids)>0){
+                $add_where = 'rl.rl_SourceID = '.$ids[0].' and ';
             }else{
                 $add_where = '';
             }
@@ -1806,10 +1805,11 @@ class LinkedToParentPredicate extends Predicate {
         }else{
             
             $ids = array_map('intval', explode(',', $rty_ID));
+
             if(count($ids)>1){
                 $add_where = 'rl.rl_TargetID in ('.implode(',',$ids).') and ';
-            }else if(count($ids)==0){
-                $add_where = 'rl.rl_TargetID = '.$ids.' and ';
+            }else if(count($ids)>0){
+                $add_where = 'rl.rl_TargetID = '.$ids[0].' and ';
             }else{
                 $add_where = '';
             }
@@ -1821,7 +1821,7 @@ class LinkedToParentPredicate extends Predicate {
             $select = $select.' FROM Records rd,'.$add_from.' WHERE '.$add_where.')';
 
         }
-
+        
         return $select;
     }
 }
@@ -1898,11 +1898,11 @@ class RelatedFromParentPredicate extends Predicate {
 
         }else{
 
-            $ids = array_map('intval', explode(',', $rty_ID));
+            $ids = array_map('intval', explode(',', $source_rty_ID));
             if(count($ids)>1){
                 $add_where = 'rl.rl_SourceID in ('.implode(',',$ids).') and ';
-            }else if(count($ids)==0){
-                $add_where = 'rl.rl_SourceID = '.$ids.' and ';
+            }else if(count($ids)>0){
+                $add_where = 'rl.rl_SourceID = '.$ids[0].' and ';
             }else{
                 $add_where = '';
             }
@@ -1990,11 +1990,11 @@ class RelatedToParentPredicate extends Predicate {
 
         }else{
 
-            $ids = array_map('intval', explode(',', $rty_ID));
+            $ids = array_map('intval', explode(',', $source_rty_ID));
             if(count($ids)>1){
                 $add_where = 'rl.rl_TargetID in ('.implode(',',$ids).') and ';
-            }else if(count($ids)==0){
-                $add_where = 'rl.rl_TargetID = '.$ids.' and ';
+            }else if(count($ids)>0){
+                $add_where = 'rl.rl_TargetID = '.$ids[0].' and ';
             }else{
                 $add_where = '';
             }
@@ -2029,9 +2029,9 @@ class AllLinksPredicate  extends Predicate {
         if(count($ids)>1){
             $add_where1 = $add_where1.'rl1.rl_TargetID in ('.implode(',',$ids).')';
             $add_where2 = $add_where2.'rl2.rl_SourceID in ('.implode(',',$ids).')';
-        }else if(count($ids)==0){
-            $add_where1 = $add_where1.'rl1.rl_TargetID = '.$ids;
-            $add_where2 = $add_where2.'rl2.rl_SourceID = '.$ids;
+        }else if(count($ids)>0){
+            $add_where1 = $add_where1.'rl1.rl_TargetID = '.$ids[0];
+            $add_where2 = $add_where2.'rl2.rl_SourceID = '.$ids[0];
         }else{
             return '(1=0)';
         }
