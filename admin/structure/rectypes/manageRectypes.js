@@ -990,7 +990,7 @@ function RectypeManager() {
             URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
         }
 
-        var dim = Hul.innerDimensions(window);
+        var dim = Hul.innerDimensions(top);
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
@@ -1058,7 +1058,7 @@ function RectypeManager() {
         var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
         //this.location.replace(URL);
 
-        var dim = Hul.innerDimensions(this.window);
+        var dim = Hul.innerDimensions(top);
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
@@ -1123,13 +1123,13 @@ function RectypeManager() {
         }else{
             url = url + "&groupID="+rtg_ID; //new one
         }
-        var dim = Hul.innerDimensions(this.window);
+        var dim = Hul.innerDimensions(top);
         Hul.popupURL(top, url,
             {   "close-on-blur": false,
                 "no-resize": false,
                 title:'Edit Record Type',
                 height: dim.h*0.9,
-                width: 700,
+                width: 800,
                 callback: function(context) {
                     if(!Hul.isnull(context)){
 
