@@ -54,7 +54,7 @@ if(!$system->init(@$_REQUEST['db']) ){
             }
 
             .show {
-                display: none;
+                /*display: none;*/
             }
 
             .empty-row {
@@ -98,6 +98,7 @@ if(!$system->init(@$_REQUEST['db']) ){
             #expand {
                 float: right;
                 margin-right: 5px;
+                display:none;
             }
         </style>
 
@@ -146,7 +147,7 @@ if(!$system->init(@$_REQUEST['db']) ){
             }
             
             $(document).ready(function() {
-                $("#expand").click();
+                setTimeout(function(){$("#expand").click();},1000);
             });
         </script>
     </head>
@@ -262,7 +263,7 @@ if(!$system->init(@$_REQUEST['db']) ){
                 </td>
 
                 <!-- D3 visualisation -->
-                <td id="visualisation-column" style="display:none">
+                <td id="visualisation-column">
                     <?php include "visualize/visualize.html"; ?>
                 </td>
             </tr>
@@ -272,21 +273,21 @@ if(!$system->init(@$_REQUEST['db']) ){
             $("#expand").click(function(e) {
                 // Show visualisation elements
                 $(this).remove();
-                $(".show").slideToggle(500);
-                $("#visualisation-column").slideToggle(500);
+                //$(".show").slideToggle(500);
+                //$("#visualisation-column").slideToggle(500);
 
                 // VISUALISATION CALL  @todo - use abs path from HAPI4.basePathV4
                 var url = "../../hserver/controller/rectype_relations.php" + window.location.search;
                 console.log("Loading data from: " + url);
-                d3.json(url, function(error, json) {
+                d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {
                         return alert("Error loading JSON data: " + error.message);
                     }
 
                     // Data loaded successfully!
-                    console.log("JSON Loaded");
-                    console.log(json);
+                    //console.log("JSON Loaded");
+                    //console.log(json_data);
 
                     /** RECORD FILTERING */
                     // Set filtering settings in UI
@@ -389,9 +390,11 @@ if(!$system->init(@$_REQUEST['db']) ){
                     function visualizeData() {
                         // Call plugin
                         console.log("Calling plugin!");
+                        var data_to_vis = getData(json_data);
+                        
                         $("#visualisation").visualize({
-                            data: json,
-                            getData: function(data) { return getData(data); },
+                            data: json_data,
+                            getData: function(data) { return data_to_vis; },
                             linelength: 200
                         });
                     }
