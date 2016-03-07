@@ -787,9 +787,14 @@ function _addRecordsetLayer(source, index) {
                     },
                     removeOverlay: function(){
                         mapping.deleteDataset( this.id ); //mapdata.id);
-                        var idx;
-                        for (idx in this.dependent_layers){
-                            mapping.deleteDataset( this.dependent_layers[idx].key );
+                        this.removeDependentLayers();
+                    },
+                    removeDependentLayers: function(){
+                        if(this.dependent_layers){
+                            var idx;
+                            for (idx in this.dependent_layers){
+                                mapping.deleteDataset( this.dependent_layers[idx].key );
+                            }
                         }
                     },
                     editProperties: function(){
@@ -804,6 +809,10 @@ function _addRecordsetLayer(source, index) {
                }else{ // this layer is explicitely (by user) added
 
                     //remove previous entry
+                    if(overlays_not_in_doc[source.id]){
+                        overlays_not_in_doc[source.id].removeDependentLayers();
+                    }
+                    
                     overlays_not_in_doc[source.id] = overlay;
                     var legenditem = $("#legend .content").find('#'+source.id);
                     if(legenditem.length>0) legenditem.remove();

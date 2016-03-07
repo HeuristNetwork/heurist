@@ -455,13 +455,20 @@ function zip($source, $folders, $destination, $verbose=true) {
     return true;
 }
 
-function unzip($zipfile, $destination){
+function unzip($zipfile, $destination, $entries=null){
 
     if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
 
         $zip = new ZipArchive;
         if ($zip->open($zipfile) === TRUE) {
-            $zip->extractTo($destination);
+            
+          /*debug to find proper name in archive 
+          for($i = 0; $i < $zip->numFiles; $i++) { 
+             $entry = $zip->getNameIndex($i);
+error_log( $entry );
+          }*/
+            $zip->extractTo($destination, $entries);
+//debug error_log('zip: '.$zip->getStatusString());
             $zip->close();
             return true;
         } else {
