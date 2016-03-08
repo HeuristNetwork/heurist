@@ -467,8 +467,11 @@ function unzip($zipfile, $destination, $entries=null){
              $entry = $zip->getNameIndex($i);
 error_log( $entry );
           }*/
-            $zip->extractTo($destination, $entries);
-//debug error_log('zip: '.$zip->getStatusString());
+            if($entries==null){
+                $zip->extractTo($destination, array());
+            }else{
+                $zip->extractTo($destination, $entries);
+            }
             $zip->close();
             return true;
         } else {

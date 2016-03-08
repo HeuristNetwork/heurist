@@ -314,7 +314,14 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             function onBeforeSubmit(){
 
                 var ele = document.getElementById("url_template");
-                if(!document.getElementById("rb1").checked){ //use tempalte database
+                
+                if(document.getElementById("rb3").checked){ //use exemplar database
+                    
+                    ele.value = '';
+                    ele = document.getElementById("exemplar");
+                    ele.value = document.getElementById("rb3").value;
+                
+                }else if(!document.getElementById("rb1").checked){ //use tempalte database
 
                     ele.value = '';
 
@@ -345,6 +352,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                 }else{
                     ele.value = '';
                 }
+                
 
                 ele = document.getElementById("createDBForm");
                 if(ele) ele.style.display = "none";
@@ -504,6 +512,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         method="POST" id="dbForm" onsubmit="return onBeforeSubmit()">
 
                         <input type="hidden" id="url_template" name="url_template">
+                        <input type="hidden" id="exemplar" name="exemplar">
                         <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>">
                         <input type="hidden" name="popup" value="<?php echo @$_REQUEST['popup']?'1':''; ?>">
 
@@ -716,11 +725,58 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                     //get path to registered db template and download coreDefinitions.txt
                     $reg_url = @$_REQUEST['url_template'];
+                    $exemplar_db = @$_REQUEST['exemplar'];
 
                     $name = '';
 
                     if(true){ // For debugging: set to false to avoid real database creation
 
+                        if( $exemplar_db != null) { //from example db
+                            
+                                //1a. verify that sample dump exists 
+                                $templateFoldersContent = HEURIST_DIR."admin/setup/exemplars/".$exemplar_db.'.zip';
+                                if(!file_exists($templateFoldersContent) || filesize($templateFoldersContent)<1){
+                                        errorOut ('Warning: cannot find exemplar archive with folders content and database script '.$templateFoldersContent );
+                                        return false;
+                                }
+                            
+                                //1b. verify that sample dump exists 
+                                $exemplar_dir = HEURIST_DIR."admin/setup/exemplars/";
+                                $exemplar_dir = str_replace('//','/',$exemplar_dir);
+                                $dataInsertionSQLFile = $exemplar_dir.$exemplar_db.".sql";
+                                if(!file_exists($dataInsertionSQLFile) || filesize($templateFoldersContent)<0){
+                                    
+                                        //extract dump from archive 
+                                        unzip($templateFoldersContent, $exemplar_dir, $exemplar_db.'.sql' );
+                                        
+                                    if(!file_exists($dataInsertionSQLFile) || filesize($dataInsertionSQLFile)<0){
+                                        
+                                        errorOut ('Warning: cannot extract database script '.$exemplar_db.'.sql from exemplar archive '.$templateFoldersContent );
+                                        return false;
+                                    }
+                                }
+                                
+                                
+                                //2. create empty database
+                                if(!db_create($newname)){
+                                        errorOut ('Error: cannot create new database '.$newname );
+                                        return false;
+                                }
+                                                        
+                                //3. restore from dump
+                                if(!db_script($newname, $dataInsertionSQLFile)){
+                                        errorOut('Error importing sample data from '.$dataInsertionSQLFile);
+                                        cleanupNewDB($newname);
+                                        return false;
+                                }
+                                $dataInsertionSQLFile = null;
+                                
+                        }else{ //$exemplar_db
+
+                                        errorOut('ups wrong way');
+                                        return false;
+
+                    
                         // this is global variable that is used in buildCrosswalks.php
                         $templateFileName = "NOT DEFINED";
                         $templateFoldersContent = "NOT DEFINED";
@@ -838,7 +894,9 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                             cleanupNewDB($newname);
                             return false;
                         }
-
+                        
+                        }//not $exemplar_db
+                        
                         // Get and clean information for the user creating the database
                         if(!is_logged_in()) {
                             $longName = "";
@@ -895,7 +953,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         createDatabaseFolders($newDBName);
 
                         if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
-                            unzip($templateFoldersContent, HEURIST_UPLOAD_ROOT.$newDBName."/");
+                            unzip($templateFoldersContent, HEURIST_UPLOAD_ROOT.$newDBName."/");    
                         }
 
                         // Prepare to write to the newly created database
