@@ -36,7 +36,7 @@ regional['en'] = {
     'Error_Mail_Approvement':'Can not send registration approvement email.',
     'Error_Connection_Reset':'No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
 
-    'mailto_fail': 'Could not perform this operation because the default mail client is not properly installed.<br/>Compose email and send it at info@heuristscholar.org',
+    'mailto_fail': 'You have not set an email handler for mailto: links. <br/>Please set this in your  browser (it is normally in the content settings under Privacy)',
 
     //titles
     'add_detail':'Add field value',

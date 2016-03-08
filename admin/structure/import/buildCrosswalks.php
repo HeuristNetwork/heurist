@@ -190,7 +190,7 @@ else
 
         // TODO: Remove this temporary fudge once Heurist_Master_Index updated to remove all references to H3
         if($regurl=='http://heurist.sydney.edu.au/h3/'){  //change the registered url on our server to new one
-            $regurl = 'http://heurist.sydney.edu.au/h4/';
+            $regurl = 'http://heurist.sydney.edu.au/heurist/';
         }
 
         // This is the correct URL for vsn 3.1.8 and above, March 2014, with a hiccup in latter half of 2015
