@@ -258,9 +258,9 @@ To register click Database > Register in the menu on the left<br />&nbsp;<br />"
 
         //file_put_contents($folder."/project.settings", $projname." and basic information 3");
         file_put_contents($folder."/data_schema.xml", generateSchema($projname, $rt_toexport, $rt_geoenabled));
-        file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled));
+        file_put_contents($folder."/ui_schema.xml", generate_UI_Schema($projname, $rt_toexport, $rt_geoenabled));
         file_put_contents($folder."/arch16N.properties", arrToProps());
-        file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport, $rt_geoenabled));
+        file_put_contents($folder."/ui_logic.bsh", generate_Logic($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled));
         file_put_contents($folder."/style.css", getStyling());
 
         //copy("ui_logic.bsh", $folder."/ui_logic.bsh"); //this is a Java beanshell file which provides the operational  logic for the tablet interface
@@ -764,7 +764,7 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
 * @param mixed $projname
 * @param mixed $rt_toexport
 */
-function generate_UI_Schema($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled){
+function generate_UI_Schema($projname, $rt_toexport, $rt_geoenabled){
 
     global $rtStructs, $dtTerms, $supported;
 
@@ -1567,7 +1567,7 @@ function getStyling() {
     return file_get_contents('templates/style.css');
 }
 
-function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
+function generate_Logic($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoenabled){
 
     global $rtStructs, $dtTerms, $supported;
     
@@ -1628,6 +1628,10 @@ function generate_Logic($projname, $rt_toexport, $rt_geoenabled){
         $TEMPLATE_EVENTS .= 'rectypeToEntityGeo.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
 ';
         }
+        if( in_array($rt, $rt_toexport_toplevel) ){
+        $TEMPLATE_EVENTS .= 'rectypeToEntityMain.add(new NameValuePair("'.$rtnamex.'", "'.$rtname.'"));
+';
+        }
 
         $headername_uids = $rtnamex.'_uids';
         
@@ -1637,9 +1641,9 @@ addOnEvent("'.$rtnamex.'", "show", "addNavigationButtons(\"'.$rtnamex.'\")");';
         // Show edit form
         $event_section .= '
 addOnEvent("'.$rtnamex.'", "show", "onShowEditForm(\"'.$rtnamex.'\")");';
-        // Enable auto saving
-        $event_section .= '
-addOnEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
+        // Enable auto saving  - disable 2016-03-08
+//        $event_section .= '
+//addOnEvent("'.$rtnamex.'", "show", "saveEntity(\"'.$rtnamex.'\", false, false)");';
 
         $load_related_part = '';
         $save_related_part = '';

@@ -94,6 +94,7 @@ List attachedGeometry = null;  //geometry object from map to be attached to curr
 
 ArrayList rectypeToEntity = new ArrayList();
 ArrayList rectypeToEntityGeo = new ArrayList(); //geo-enabled entities 
+ArrayList rectypeToEntityMain = new ArrayList(); //main entry entities 
 
 /*** START: this section of code depends on the module and entity types selected ***/
 {{TEMPLATE_EVENTS}}
@@ -542,6 +543,7 @@ print ("Child was deleted - remove relation");
 saveEntity(String rectypeTab, Boolean needValidation, Boolean andclose) {
 
     if(needValidation && !validateEntity( rectypeTab, true )){
+            showToast("Entered data are not valid");
 			return;
     }
 
@@ -965,13 +967,15 @@ validateEntity( rectypeTab, isVoid ){
 
   String validationMessage = validateFields(f, "PLAINTEXT");
   Boolean isValid = "".equals(validationMessage);
-  if(!isVoid){
+  
 	if(isValid){
-		showWarning("Validation Results", "All fields contain valid data!");
+        if(!isVoid){
+		    showWarning("Validation Results", "All fields contain valid data!");
+        }
 	}else{
 		showWarning("Validation Results", validationMessage);
 	}
-  }
+  
   return isValid;
 }
 
@@ -1039,7 +1043,7 @@ loadEntityTypeList() {
    // Populate entity type dropdown - only once
    if(isNullOrEmpty(entName)){
 
-		populateDropDown("control/data/entityTypeList", rectypeToEntity);
+		populateDropDown("control/data/entityTypeList", rectypeToEntityMain);
 		searchEntity( null );
 /*
 		fetchAll("select aenttypename, aenttypename from aenttype;", new FetchCallback() {
