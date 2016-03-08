@@ -153,12 +153,19 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     }
 
 
-    // 3. SPECIAL CASE for _BROKEN_
+    // 3a. SPECIAL CASE for _BROKEN_
 
     $needbroken = false;
     if (@$params['q'] && preg_match('/\\b_BROKEN_\\b/', $params['q'])) {
         $params['q'] = preg_replace('/\\b_BROKEN_\\b/', '', $params['q']);
         $needbroken = true;
+    }
+    // 3b. SPECIAL CASE for _NOTLINKED_
+
+    $neednotlinked = false;
+    if (@$params['q'] && preg_match('/\\b_NOTLINKED_\\b/', $params['q'])) {
+        $params['q'] = preg_replace('/\\b_NOTLINKED_\\b/', '', $params['q']);
+        $neednotlinked = true;
     }
 
     // 4. QUERY MAY BE SIMPLE or full expressiveness ----------------------------------------------------------------------
@@ -169,6 +176,10 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
 
     // 4a. SPECIAL CASE for _BROKEN_
     if($needbroken){
+        $where_clause = '(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '. ($where_clause? ' and '.$where_clause :'');
+    }
+    // 4b. SPECIAL CASE for _NOTLINKED_
+    if($neednotlinked){  //TODO: NEED AN APPROPRIATE WHERECLAUSE BELOW  8MAR2016
         $where_clause = '(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '. ($where_clause? ' and '.$where_clause :'');
     }
 
