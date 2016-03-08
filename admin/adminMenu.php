@@ -340,6 +340,13 @@ if (array_key_exists('mode', $_REQUEST)) {
                                 width="12" height="12" border="0" alt="Search showing records with broken URLs">
                                 </a>
                         </li>
+                        <li><a href="<?=HEURIST_BASE_URL?>?q=_UNLINKED_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                            title="Show records with no outgoing or incoming pointers (includes records without any relationships)>">
+                            Records without links
+                            <img src="../common/images/external_link_16x16.gif"
+                                width="12" height="12" border="0" alt="Search showing records with no links to other records">
+                                </a>
+                        </li>
                         <?php
                         // INSTALLATION AND STATS
                         menuEntry('---','Verify installation','verification/verifyInstallation.php?db='.HEURIST_DBNAME.'',
