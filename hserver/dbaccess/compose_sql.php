@@ -1367,8 +1367,8 @@ class FieldPredicate extends Predicate {
         }else{
             $match_pred_for_term = " = trm.trm_ID";
         }
-
-        $timestamp = $isin ?false:$this->isDateTime();
+        
+        $timestamp = $isin ?false:true; //$this->isDateTime();
 
         if ($timestamp) {
             $date_match_pred = $this->makeDateClause();
@@ -1391,7 +1391,8 @@ class FieldPredicate extends Predicate {
         .'if(rdt.dty_Type in ("enum","relationtype"), '
         .'rd.dtl_Value '.$match_pred_for_term.', '
         . ($timestamp ? 'if(rdt.dty_Type = "date", '
-            .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
+            .'getTemporalDateString(rd.dtl_Value) ' . $date_match_pred . ', '
+            //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
             .'rd.dtl_Value ' . $match_pred . ')'
             : 'rd.dtl_Value ' . $match_pred ) . '))'
         .' and ' . $rd_type_clause . ')';

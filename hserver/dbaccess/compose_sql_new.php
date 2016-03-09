@@ -581,8 +581,9 @@ class HPredicate {
 
         }else{
             
-            if(false && $this->isDateTime()){
-                $field_name = 'str_to_date(getTemporalDateString('.$p.'.dtl_Value), "%Y-%m-%d %H:%i:%s") ';
+            if($this->field_type == 'date'){ //false && $this->isDateTime()){
+                $field_name = 'getTemporalDateString('.$p.'dtl_Value) ';
+                //$field_name = 'str_to_date(getTemporalDateString('.$p.'dtl_Value), "%Y-%m-%d %H:%i:%s") ';
             }else{
                 $field_name = $p."dtl_Value ";
             }
