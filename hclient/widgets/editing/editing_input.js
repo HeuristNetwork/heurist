@@ -433,6 +433,29 @@ $.widget( "heurist.editing_input", {
             }else
             if(this.detailType=="date"){
                 
+                $input.css('width','20ex');
+                
+                if($.isFunction($('body').calendarsPicker)){
+                        
+                    var defDate = top.HAPI4.get_prefs("record-edit-date");
+                    $input.calendarsPicker({
+                        calendar: $.calendars.instance('gregorian'),
+                        showOnFocus: false,
+                        defaultDate: defDate?defDate:'',
+                        selectDefaultDate: true,
+                        dateFormat: 'yyyy-mm-dd',
+                        pickerClass: 'calendars-jumps',
+                        //popupContainer: $input.parents('body'),
+                        onSelect: function(dates){
+                        },
+                        renderer: $.extend({}, $.calendars.picker.defaultRenderer,
+                                {picker: $.calendars.picker.defaultRenderer.picker.
+                                    replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
+                                    replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
+                        showTrigger: '<span class="ui-icon ui-icon-calendar trigger" style="display:inline-block" alt="Popup"></span>'}
+                    );     
+                           
+                }else{
                         var $datepicker = $input.datepicker({
                             /*showOn: "button",
                             buttonImage: "ui-icon-calendar",
@@ -449,6 +472,8 @@ $.widget( "heurist.editing_input", {
                         .button({icons:{primary: "ui-icon-calendar"},text:false});
 
                         this._on( $btn_datepicker, { click: function(){$datepicker.datepicker( "show" ); }} );
+                }  
+                        
 
             }else 
             if(this.detailType=="resource"){
@@ -664,7 +689,8 @@ $.widget( "heurist.editing_input", {
 
         }
 
-        if (parseFloat( this.f('rst_DisplayWidth') ) > 0 && this.detailType!='boolean') {    //if the size is greater than zero
+        if (parseFloat( this.f('rst_DisplayWidth') ) > 0 
+            && this.detailType!='boolean' && this.detailType!='date') {    //if the size is greater than zero
             $input.css('width', Math.round(2 + Number(this.f('rst_DisplayWidth'))) + "ex"); //was *4/3
         }
 

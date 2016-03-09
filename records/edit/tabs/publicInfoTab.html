@@ -39,20 +39,39 @@
 	<link rel=stylesheet href="../../../common/css/global.css">
 	<link rel=stylesheet href="../../../common/css/edit.css">
 
+<!-- replaced to jquery.calendar
 	<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
-	<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+-->
+    <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+    
 	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="../../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+    <style>
+            .calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
+            .calendars-month-header, .calendars-nav, .calendars-month th, 
+            .calendars-month-header select, .calendars-ctrl, .calendars a{
+                background-color:lightgray;
+                color:black;
+            }
+            .calendars-month, .calendars{
+                border-color:lightgray;
+            }
+            .temporal-div > img{
+                vertical-align:super !important;
+            }
+     </style>
 </head>
 <body class="editTab ui-heurist-bg-light" onload="onshow()">
 
 	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
 	<script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
 
+<!-- replaced to jquery.calendar
 	<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
 	<script type="text/javascript" src="../../../common/js/calendar.js"></script>
+-->
     
-
 <script>
 
 		document.write('<form method=post enctype="multipart/form-data"'+
@@ -68,7 +87,7 @@
 <script>
 function onshow() {
 	// Invoked when this frame is made visible.
-	top.HEURIST.edit.calendarViewer = calendarViewer;
+	//repalce to jquery top.HEURIST.edit.calendarViewer = calendarViewer;
 
 	// Find the first required input and focus it.
 	var inputs = window.HEURIST.inputs || [];
@@ -76,7 +95,7 @@ function onshow() {
 	var firstInput = null, firstRequiredInput = null, firstEmptyRequiredInput = null;
 	for (var i=0; i < inputs.length; ++i) {
 		if (inputs[i].inputs && inputs[i].inputs[0].style.display == "none") continue;
-
+        
 		if (firstInput == null)
 			firstInput = inputs[i];
 		if (firstRequiredInput == null && inputs[i].required == "required")

@@ -543,9 +543,9 @@ Temporal.checkValidity = function ( temporal ) {
         switch ( type ) {
             case 'p':
             if (temporal.getTDate("PDB") && temporal.getTDate("TPQ").compare(temporal.getTDate("PDB")) > 0) {
-                ret[3] = "Probability type temporals require that TPQ is before or the same as PDB.";
+                ret[3] = "Probability type temporals require that TPQ is before or the same as PB.";
             }else if (temporal.getTDate("PDE") && temporal.getTDate("TAQ").compare(temporal.getTDate("PDE")) < 0) {
-                ret[3] = "Probability type temporals require that TAQ is after or the same as PDE.";
+                ret[3] = "Probability type temporals require that TAQ is after or the same as PE.";
             }else{
                 ret[0] = true;
             }
@@ -832,7 +832,7 @@ var TDate = function (strDate) {
                             return (format[0] === " " ? " " : "") + (_tz ? _tz : "Z");
                         case " zz":
                         case "zz":  //output offset
-                            return (format[0] === " " ? " " : "") + (_tzOffset ? "GMT" + _tzOffset : "Z");
+                            return (format[0] === " " ? " " : "") + (_tzOffset ? "GMT" + _tzOffset : '');
                         case " z":
                         case "z":
                             return (format[0] === " " ? " " : "") + (_tzOffset ? _tzOffset : "");
@@ -1761,7 +1761,17 @@ function formatGregJulian(val, isneed){
             var tDate = TDate.parse(val);
             var isbce = (tDate.getYear()<0);
             var day = Number(tDate.getDay());
+            
+            var hrs = Number(tDate.getHours());
+            var min = Number(tDate.getMinutes());
+            var sec = Number(tDate.getSeconds());
+            
             var res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            
+            if(hrs>0||min>0||sec>0){
+               res = res + ' ' +tDate.toString('HH:mm:ss zz');
+            }
+            
             return  res.trim();
             //toString('d MMM yyyy') - misses space!
             //tDate.getDay()+' '+tDate.getMonth()+' '+tDate.getYear() + (isbce?' BCE':'');;
@@ -1795,7 +1805,7 @@ function temporalToHumanReadableString(inputStr) {
 
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
-        }else if (str.search(/TYP=s/) != -1 ) {
+        }else if (str.search(/TYP=s/) != -1 ) {  //simple
             if (str.match(/DAT=([^\|]+)/)) {
                 if (str.search(/COM=[^\|]+/) == -1) {
                 }

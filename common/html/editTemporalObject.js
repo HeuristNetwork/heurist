@@ -44,6 +44,9 @@ function switchDev (toAsym) {
 	}
 }
 
+//
+// show alternative calendar
+//
 function calendarPopup(buttonElt) {
 
 	var callback =	function(date)
@@ -459,7 +462,7 @@ var TemporalPopup = (function () {
                     {picker: $.calendars.picker.defaultRenderer.picker.
                         replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                         replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-            showTrigger: '<img src="../images/cal.gif" alt="Popup" class="trigger">'}
+            showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" alt="Popup" class="trigger">'}
         );
 
         //change current calendar
@@ -475,8 +478,9 @@ var TemporalPopup = (function () {
             //assign new calendar for all pickers
             $('.withCalendarsPicker').each(function() {
 
+                var dd = convert($(this), false);
                 $(this).calendarsPicker('option', {calendar: calendar,
-                        defaultDate: convert($(this), false)
+                        defaultDate: dd
                 });
 
 
@@ -627,12 +631,15 @@ var TemporalPopup = (function () {
 					}
 					msg = msg ? "The current temporal is missing the " + msg + " value(s)." : "";
 					msg +=  validity[3] ? " " + validity[3] : "";
-					if (!confirm( msg +
+                    
+                    alert(msg);
+					/*
+                    if (!confirm( msg +
 							"Would you like to continue working? Press cancel to reset to the original string.")) {
 						window.close(that.originalInputString);
 					}else{
 						window.close("");
-					}
+					}*/
 				}
 
 			},

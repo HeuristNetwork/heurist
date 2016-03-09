@@ -119,8 +119,6 @@ function dbOwnerRequired(){
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
@@ -132,6 +130,9 @@ function dbOwnerRequired(){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
         
         <!-- loaded by demand script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script -->
+
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
         
     <script type="text/javascript">
     

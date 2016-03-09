@@ -1594,14 +1594,8 @@ console.log('heurist not defined');
 
         calendarViewer: null,
 
-        /**
-        * create a button to pop up standard calendar component
-        * see also makeTemporalButton for fuzzy date component
-        *
-        * @param dateBox
-        * @param doc
-        */
         makeDateButton: function(dateBox, doc) {
+/* OLD WAY            
             var buttonElt = doc.createElement("input");
             buttonElt.type = "button";
             buttonElt.title = "Pop up calendar widget to enter year-month-day dates";
@@ -1639,9 +1633,45 @@ console.log('heurist not defined');
                 }
                 top.HEURIST.edit.calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback); //offsetLeft-120
             }
-
             return buttonElt;
+*/                
+            var callback2 = function() {
+                
+                    var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
+                    if (windowRef.changed) windowRef.changed();
+                    dateBox.strTemporal = "";
+                    dateBox.style.width = '100px';
+                    dateBox.disabled = false;
+                    dateBox.disabledStrictly = false;
 
+                    if(top.HEURIST.util.setDisplayPreference){
+                        top.HEURIST.util.setDisplayPreference("record-edit-date", dateBox.value);
+                    }
+                    
+                    //$(dateBox).calendarsPicker('option', {defaultDate: dateBox.value });
+            }
+            
+            var defDate = top.HEURIST.util.getDisplayPreference("record-edit-date");
+            
+            $(dateBox).calendarsPicker({
+                calendar: $.calendars.instance('gregorian'),
+                showOnFocus: false,
+                defaultDate: defDate?defDate:'',
+                selectDefaultDate: true,
+                dateFormat: 'yyyy-mm-dd',
+                pickerClass: 'calendars-jumps',
+                popupContainer: $(dateBox).parents('body'),
+                onSelect: function(dates){
+                    callback2();
+                },
+                renderer: $.extend({}, $.calendars.picker.defaultRenderer,
+                        {picker: $.calendars.picker.defaultRenderer.picker.
+                            replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
+                            replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
+                showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" alt="Popup" class="trigger">'}
+            );            
+                
+            return null;
         }, // makeDateButton
 
 
@@ -1665,14 +1695,17 @@ console.log('heurist not defined');
             function disableCtrls (value) {
                 dateBox.disabled = value;
                 dateBox.disabledStrictly = value;
-                dateBox.dateButton.disabled = value;
-                dateBox.dateButton.disabledStrictly = value;
-                dateBox.dateButton.style.visibility = value ?"hidden":"visible";
+                if(dateBox.dateButton){
+                    dateBox.dateButton.disabled = value;
+                    dateBox.dateButton.disabledStrictly = value;
+                    dateBox.dateButton.style.visibility = value ?"hidden":"visible";
+                }
             }
 
             /* Artem Osmakov 2013? : moved function decodeValue to temporalObjectLibrary.js */
 
             dateBox.initVal = dateBox.value;
+            dateBox.style['min-width'] = '100px';
             if (dateBox.value) {
                 disableCtrls(isTemporal(dateBox.value));
 
@@ -1680,10 +1713,11 @@ console.log('heurist not defined');
                     dateBox.strTemporal = dateBox.value;
                 }else{
                     dateBox.strTemporal = "";
+                    dateBox.style.width = '200px';
                 }
                 dateBox.value = temporalToHumanReadableString(dateBox.value);
             }
-            dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
+            //dateBox.style.width = 'auto';//(dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
 
             var popupOptions = {
                 title: 'Temporal Object',
@@ -1697,7 +1731,7 @@ console.log('heurist not defined');
                         }
                         dateBox.strTemporal = str;
                         dateBox.value = temporalToHumanReadableString(str);
-                        dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
+                        dateBox.style.width = '200px';//(dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
                         if( dateBox.strTemporal != dateBox.value) {
                             buttonElt.title = "Edit compound date " + dateBox.strTemporal;
                         }
@@ -2120,7 +2154,7 @@ console.log('heurist not defined');
         newDiv.style.width = "";
         //top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
         this.addInputHelper.call(this, textElt.value, textElt);
-
+        
         top.HEURIST.edit.makeDateButton(textElt, this.document);
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput

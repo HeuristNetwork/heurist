@@ -46,7 +46,8 @@ function CalendarViewer() {
 	{
 			hintDiv.showAtXY(xy);
 
-			init_calendar(datevalue, callback); //from calendar.js
+			//alternative calendar 
+            init_calendar(datevalue, callback); //from calendar.js
 	}
 
 	//public members

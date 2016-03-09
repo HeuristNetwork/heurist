@@ -119,6 +119,12 @@ break;
 */
 
 ?>
+<!-- date picker -->        
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+
 <script type="text/javascript" src="recordAction.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
 
@@ -136,6 +142,19 @@ break;
         display:table-cell;
         font-size:1.1em;
     }
+    
+.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
+.calendars-month-header, .calendars-nav, .calendars-month th, 
+.calendars-month-header select, .calendars-ctrl, .calendars a{
+    background-color:lightgray;
+    color:black;
+}
+.calendars-month, .calendars{
+    border-color:lightgray;
+}
+.calendars-month table, .calendars-month-header select{
+    font-size: 1.2em;
+}
 </style>
 </head>
 

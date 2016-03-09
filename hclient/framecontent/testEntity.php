@@ -81,6 +81,26 @@ require_once(dirname(__FILE__)."/initPage.php");
                     //testUsers();
                     
                 }
+                
+                        var $datepicker = $('#datepicker').datepicker({
+                            showOn: "button",
+                            /*buttonImage: "ui-icon-calendar",
+                            buttonImageOnly: true,*/
+                            showButtonPanel: true,
+                            changeMonth: true,
+                            changeYear: true,
+                            dateFormat: "yy-mm-dd"
+                        });
+
+                        var $btn_datepicker = $( "<button>", {title: "Show calendar"})
+                        .addClass("smallbutton")
+                        .appendTo( $('#inputdiv') )
+                        .button({icons:{primary: "ui-icon-calendar"},text:false});
+
+                        $btn_datepicker.on( { click: function(){$datepicker.datepicker( "show" ); }} );
+                        $('#inputdiv').find('.ui-datepicker-trigger').hide();
+                
+                
             }
             
             function testRecords(){
@@ -331,6 +351,11 @@ print $targetPath.'<br>';
                     <div style="padding-right:20px">
                         <label style="font-weight: bold;"><input type="radio" name="select_mode" value="select_multi" >Select Multi</label> Selection persists between pages and selections. Select event is triggered on special button click.
                     </div>
+                    
+                    <div id='inputdiv'>
+                        <input id='datepicker'/>
+                    </div>
+                    
                 </div>                        
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Initial filter by name<input type="text" id="filter_title" value=""></label>

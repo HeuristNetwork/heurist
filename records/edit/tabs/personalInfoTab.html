@@ -40,9 +40,24 @@
         <link rel=stylesheet href="../../../common/css/edit.css">
         <link rel=stylesheet href="../../../common/css/autocomplete.css">
         <!--link rel=stylesheet href="../../../common/css/woot.css"-->
-        <link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
         <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        
+<!-- replaced to jquery.calendar
+        <link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
         <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+-->        
+        <link rel="stylesheet" type="text/css" href="../../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+        <style>
+            .calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
+            .calendars-month-header, .calendars-nav, .calendars-month th, 
+            .calendars-month-header select, .calendars-ctrl, .calendars a{
+                background-color:lightgray;
+                color:black;
+            }
+            .calendars-month, .calendars{
+                border-color:lightgray;
+            }
+        </style>
     </head>
     <body class="editTab ui-heurist-bg-light">
 
@@ -56,10 +71,10 @@
         <script src="../../../common/js/utilsLoad.js"></script>
         <script src="../../../common/php/displayPreferences.php"></script>
         <script src="../../tags/autocompleteTags.js"></script>
-
+<!-- replaced to jquery.calendar
         <script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
         <script type="text/javascript" src="../../../common/js/calendar.js"></script>
-
+-->
         <script>
             var db = (top.HAPI.database || top.HEURIST.database.name || top.HEURIST.parameters.db);
             document.write('<form method=post jsonAction="'+top.HEURIST.baseURL_V3+'records/bookmarks/saveBookmarkData.php?db='+db+'" action="'+top.HEURIST.baseURL_V3+'records/bookmarks/saveBookmarkData.php?db='+db+'" onsubmit="return verifyForm();">');
@@ -67,7 +82,7 @@
 
         <script>
             function onshow() {
-                top.HEURIST.edit.calendarViewer = calendarViewer;
+                //repalce to jquery top.HEURIST.edit.calendarViewer = calendarViewer;
                 setTimeout(function() { try { document.getElementById("tags").focus(); } catch (e) {} }, 0);
             }
         </script>
