@@ -1994,7 +1994,7 @@ function getProperName($name, $rt=null, $dt=null){
                   }
             }
         }
-        return $bettername;
+        return trim($bettername);
 
 }
 // remove last (s), replace <>
@@ -2012,7 +2012,7 @@ function prepareText($str){
     $str = str_replace('&', 'and', $str);
     //no entities $str = str_replace("&", "&amp;", $str);
     //no escaping $str = mysql_real_escape_string($str);
-    return $str;
+    return trim($str);
 }
 
 function prepareText2($str){
