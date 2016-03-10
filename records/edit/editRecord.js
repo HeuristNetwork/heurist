@@ -1635,8 +1635,13 @@ console.log('heurist not defined');
             }
             return buttonElt;
 */                
+            var isInit = false;    
+
             var callback2 = function() {
                 
+                if(isInit){
+                    isInit = false;
+                }else{
                     var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
                     if (windowRef.changed) windowRef.changed();
                     dateBox.strTemporal = "";
@@ -1648,7 +1653,11 @@ console.log('heurist not defined');
                         top.HEURIST.util.setDisplayPreference("record-edit-date", dateBox.value);
                     }
                     
-                    //$(dateBox).calendarsPicker('option', {defaultDate: dateBox.value });
+                    $(dateBox).parents('body').find('input.hasCalendarsPicker')     
+                            .calendarsPicker('option', {defaultDateOnShow: dateBox.value});
+                    
+                }
+
             }
             
             var defDate = top.HEURIST.util.getDisplayPreference("record-edit-date");
@@ -1656,7 +1665,8 @@ console.log('heurist not defined');
             $(dateBox).calendarsPicker({
                 calendar: $.calendars.instance('gregorian'),
                 showOnFocus: false,
-                defaultDate: defDate?defDate:'',
+                defaultDate: '', //defDate?defDate:'',
+                defaultDateOnShow: defDate?defDate:'',
                 selectDefaultDate: true,
                 dateFormat: 'yyyy-mm-dd',
                 pickerClass: 'calendars-jumps',
@@ -1707,13 +1717,15 @@ console.log('heurist not defined');
             dateBox.initVal = dateBox.value;
             dateBox.style['min-width'] = '100px';
             if (dateBox.value) {
-                disableCtrls(isTemporal(dateBox.value));
+                var isTemporalValue = dateBox.value && dateBox.value.search(/\|VER/) != -1; // isTemporal(dateBox.value);
+                disableCtrls(isTemporalValue);
 
-                if (dateBox.value.search(/\|VER/) != -1){
+                if (isTemporalValue){ //keep temporal value
                     dateBox.strTemporal = dateBox.value;
-                }else{
-                    dateBox.strTemporal = "";
                     dateBox.style.width = '200px';
+                }else{
+                    dateBox.strTemporal = '';
+                    dateBox.style.width = '100px';
                 }
                 dateBox.value = temporalToHumanReadableString(dateBox.value);
             }
@@ -2160,7 +2172,9 @@ console.log('heurist not defined');
     }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput
 
 
-    top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
+    top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(input) { 
+        return input? input.textElt.value : ""; 
+    };
 
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.typeDescription = "a date value";
 
@@ -2193,6 +2207,11 @@ console.log('heurist not defined');
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
 
+        if(!isTemporal(textElt.value)){
+            textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);    
+        }
+        top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
+        
         top.HEURIST.registerEvent(textElt, "change", function() {
             textElt.strTemporal = null;
             if (windowRef.changed) windowRef.changed();
@@ -2201,24 +2220,20 @@ console.log('heurist not defined');
             textElt.strTemporal = null;
             if (windowRef.changed) windowRef.changed();
         }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
-
-        // TODO: are these relevant any more?
-        //    var isTemporal = /^\|\S\S\S=/.test(textElt.value);        //sw check the beginning of the string for temporal format
-        //    var isDate = ( !isTemporal && /\S/.test(textElt.value));    //sw not temporal and has non - white space must be a date
-        //    if (!isTemporal) top.HEURIST.edit.makeDateButton(textElt, this.document); //sw
-
-        textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);
-        top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
+        
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
 
 
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getValue = function(input) {
-        return input && input.textElt ? (input.textElt.strTemporal ? input.textElt.strTemporal :
-            (input.textElt.value ? input.textElt.value : "" )) : "";
+        return input && input.textElt 
+                    ?(input.textElt.strTemporal ? input.textElt.strTemporal 
+                            :(input.textElt.value ? input.textElt.value : "" )) : "";
     };
 
-    top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
+    top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { 
+            return input? input.textElt.value : ""; 
+    };
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.typeDescription = "a compound date value";
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.regex = new RegExp("\\S");
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.verifyTemporal = function(){

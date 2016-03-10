@@ -953,8 +953,8 @@ var TDate = function (strDate) {
         compare: function (tDate2) {
             var ret;
             function comp (a,b) {
-                a = a?a:0;
-                b = b?b:0;
+                a = parseInt(isNaN(a)?0:a);
+                b = parseInt(isNaN(b)?0:b);
                 if (a>b) return 1;
                 if (a<b) return -1;
                 return 0;

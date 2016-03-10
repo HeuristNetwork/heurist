@@ -457,7 +457,9 @@ var TemporalPopup = (function () {
             //defaultDate: convert($(this)), //null, defaultDate),
             dateFormat: 'yyyy-mm-dd',
             pickerClass: 'calendars-jumps',
-            onSelect: function(dates){ _updateGeorgianDate(); },
+            onSelect: function(dates){ 
+                    _updateGeorgianDate(); 
+            },
             renderer: $.extend({}, $.calendars.picker.defaultRenderer,
                     {picker: $.calendars.picker.defaultRenderer.picker.
                         replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
