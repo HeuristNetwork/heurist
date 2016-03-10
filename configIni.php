@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.2.2"; // sets current program version number, determined by Heurist development lead
+$version = "4.2.3"; // sets current program version number, determined by Heurist development lead
 
+// Vsn 4.2.3 8 Mar 2016  Further testing and fixes, fix up exemplar DB function
 // Vsn 4.2.2 17 Feb 2016 Further testing and fixes, fix up new database functions
 // Vsn 4.2.1 05 Feb 2016 Further testing and fixes
 // Vsn 4.2.0 17 Jan 2016 Testing for beta release
