@@ -119,26 +119,7 @@ $.widget( "heurist.search", {
         //'height':'100%', 'float':'left'   , 'min-width':sz_search
         this.div_search   = $('<div>').css({ 'float':'left', 'padding-left':sz_search_padding}).appendTo( this.element );
 
-        
-        // Manage structure button
-            this.div_add_record = $('<div>')
-            .addClass('div-table-cell logged-in-only')
-            .appendTo( this.div_search );
-
-            this.btn_mamage_structure = $( "<button>", {
-                text: top.HR("Manage Structure"),
-                title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
-            })
-            .css({'width':'140px','min-width': '120px','margin-left':'1em'})
-            //.addClass('logged-in-only')
-            .addClass('ui-heurist-btn-header1')
-            .appendTo( this.div_add_record )
-            .button()
-            .click( function(){ 
-                    top.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+top.HAPI4.database,
-                    { width:1200, height:600, title:'Manage Structure'});
-            });
-        
+               
         
         //header-label
         this.div_search_header = $('<div>')
@@ -278,7 +259,7 @@ $.widget( "heurist.search", {
             text: top.HR("Save Filter"),
             title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
         })
-        .css({'min-width': '110px','vertical-align':'top','margin-left': '20px'})
+        .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
         .appendTo( this.div_search_as_user2 )
         .addClass('ui-heurist-btn-header1')
         .button({icons: {
@@ -329,6 +310,27 @@ $.widget( "heurist.search", {
 
             
         } // add record button
+        
+        
+        // Manage structure button
+            this.div_add_record = $('<div>')
+            .addClass('div-table-cell logged-in-only')
+            .appendTo( this.div_search );
+
+            this.btn_mamage_structure = $( "<button>", {
+                text: top.HR("Manage Structure"),
+                title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
+            })
+            .css({'width':'140px','min-width': '120px','margin-left':'3em'})
+            //.addClass('logged-in-only')
+            .addClass('ui-heurist-btn-header1')
+            .appendTo( this.div_add_record )
+            .button()
+            .click( function(){ 
+                    top.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+top.HAPI4.database,
+                    { width:1200, height:600, title:'Manage Structure'});
+            });
+        
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
@@ -349,7 +351,7 @@ $.widget( "heurist.search", {
         this._on( link, {  click: this.showSearchAssistant });
 
 
-
+        // Info button
         this.div_buttons = $('<div>')
         .addClass('div-table-cell')
         .css({'text-align': 'center','width': '20px'}) // ,
@@ -357,7 +359,7 @@ $.widget( "heurist.search", {
 
         var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
         .css({'padding-right':'1.5em','display':'inline-block'})
-        .addClass('ui-icon ui-icon-circle-info')
+        .addClass('ui-icon ui-icon-gear')
         .appendTo(this.div_buttons);
         this._on( link, {  click: function(){
             window.open('context_help/advanced_search.html','_blank');
