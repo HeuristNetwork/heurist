@@ -37,7 +37,7 @@ if (!@$dbHost) {
     $dbReadonlyPassword = ""; // REQUIRED
 }
 
-if (!@$defaultRootFileUploadURL) $$defaultRootFileUploadURL = "http://??? MUST BE SET BY ADMINISTRATOR ?????????";
+if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";
 // REQUIRED: defines URL of Heurist filestore - location of files associated with databases
 
 if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
