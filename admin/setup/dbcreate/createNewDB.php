@@ -736,11 +736,11 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 //1a. verify that sample dump exists 
                                 $templateFoldersContent = HEURIST_DIR."admin/setup/exemplars/".$exemplar_db.'.zip';
                                 if(!file_exists($templateFoldersContent) || filesize($templateFoldersContent)<1){
-                                        errorOut ('Warning: cannot find exemplar archive with folders content and database script '.$templateFoldersContent );
+                                        errorOut ('Sorry, unable to find the exemplar zip file ('.$templateFoldersContent.')containing the database folders and SQL script.');
                                         return false;
                                 }
                             
-                                //1b. verify that sample dump exists 
+                                //1b. verify that sample dump can be extracted 
                                 $exemplar_dir = HEURIST_DIR."admin/setup/exemplars/";
                                 $exemplar_dir = str_replace('//','/',$exemplar_dir);
                                 $dataInsertionSQLFile = HEURIST_FILESTORE_DIR.'scratch/'.$exemplar_db.".sql";
@@ -751,7 +751,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                         
                                     if(!file_exists($dataInsertionSQLFile) || filesize($dataInsertionSQLFile)<0){
                                         
-                                        errorOut ('Warning: cannot extract database script '.$exemplar_db.'.sql from exemplar archive '.$templateFoldersContent );
+                                        errorOut ('Sorry, unable to extract the database script "'.$exemplar_db.'.sql" from the zipped file "'.$templateFoldersContent.
+                                            '". This may be due to incorrect permissions on the program code - please consult your system administrator.' );
                                         return false;
                                     }
                                 }
@@ -759,7 +760,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 
                                 //2. create empty database
                                 if(!db_create($newname)){
-                                        errorOut ('Error: cannot create new database '.$newname );
+                                        errorOut ('Sorry, unable to create new database '.$newname );
                                         return false;
                                 }
                                                         

@@ -119,36 +119,15 @@ $.widget( "heurist.search", {
         //'height':'100%', 'float':'left'   , 'min-width':sz_search
         this.div_search   = $('<div>').css({ 'float':'left', 'padding-left':sz_search_padding}).appendTo( this.element );
 
-        // Save search popup button
-        this.div_search_as_user2 = $('<div>')
-        .addClass('div-table-cell logged-in-only')
-        .appendTo( this.div_search );
-
-        this.btn_search_save = $( "<button>", {
-            text: top.HR("Save Filter"),
-            title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
-        })
-        .css({'vertical-align':'top'})
-        .appendTo( this.div_search_as_user2 )
-        .addClass('ui-heurist-btn-header1')
-        .button({icons: {
-            primary: "ui-icon-disk"
-        }});
-
-        this._on( this.btn_search_save, {  click: function(){
-            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-            }
-        } });
-
+               
+        
         //header-label
         this.div_search_header = $('<div>')
         .css({'width':'100px','text-align':'right'})
         .addClass('div-table-cell')
         .appendTo( this.div_search );
         $( "<label>" ).text(top.HR("Filter"))
-        .css({'font-weight':'bold','font-size':'1.2em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
+        .css({'font-weight':'bold','font-size':'1.2em','padding-left':'1em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
         .appendTo( this.div_search_header );
 
 
@@ -158,7 +137,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) //,  , 'width':'30%', 'max-width':'500px'})
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'67px', 'max-width':sz_input, 'min-width':'10em', 'width':sz_input }) 
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         top.HEURIST4.util.setDisabled(this.input_search, true);
@@ -270,6 +249,31 @@ $.widget( "heurist.search", {
             }
         });
 
+        
+        // Save search popup button
+        this.div_search_as_user2 = $('<div>')
+        .addClass('div-table-cell logged-in-only')
+        .appendTo( this.div_search );
+
+        this.btn_search_save = $( "<button>", {
+            text: top.HR("Save Filter"),
+            title: top.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
+        })
+        .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
+        .appendTo( this.div_search_as_user2 )
+        .addClass('ui-heurist-btn-header1')
+        .button({icons: {
+            primary: "ui-icon-disk"
+        }});
+
+        this._on( this.btn_search_save, {  click: function(){
+            var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            if(app && app.widget){
+                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+            }
+        } });
+
+        
 
         // Add record button
         if(this.options.btn_visible_newrecord){
@@ -295,7 +299,7 @@ $.widget( "heurist.search", {
                 text: top.HR("Add Record"),
                 title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
             })
-            .css({'width':'160px','margin-left':'4em'})
+            .css({'width':'140px','minwidth':'110px','margin-left':'4em'})
             //.addClass('logged-in-only')
             .addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
@@ -304,6 +308,11 @@ $.widget( "heurist.search", {
             }})
             .click( function(){ that._addNewRecord(); });
 
+            
+        } // add record button
+        
+        
+        // Manage structure button
             this.div_add_record = $('<div>')
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
@@ -312,7 +321,7 @@ $.widget( "heurist.search", {
                 text: top.HR("Manage Structure"),
                 title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
             })
-            .css({'width':'160px','margin-left':'1em'})
+            .css({'width':'140px','min-width': '120px','margin-left':'3em'})
             //.addClass('logged-in-only')
             .addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
@@ -321,8 +330,7 @@ $.widget( "heurist.search", {
                     top.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+top.HAPI4.database,
                     { width:1200, height:600, title:'Manage Structure'});
             });
-            
-        } // add record button
+        
 
         this.div_buttons = $('<div>')
         .addClass('div-table-cell logged-in-only')
@@ -343,18 +351,7 @@ $.widget( "heurist.search", {
         this._on( link, {  click: this.showSearchAssistant });
 
 
-        /*var link = $('<button>')
-        .button({icons: {
-        primary: 'ui-icon-circle-b-info'
-        }, text:false,
-        label:'Show syntax and examples of the Heurist query/filter language',
-        title:'Help for queries'})
-        .addClass('ui-heurist-btn-header1')
-        .css({'padding-right':'1em','width':'22px'})
-        .appendTo(this.div_search_header);
-        this._on( link, {  click: function(){
-        window.open('context_help/advanced_search.html','_blank');
-        } });*/
+        // Info button
         this.div_buttons = $('<div>')
         .addClass('div-table-cell')
         .css({'text-align': 'center','width': '20px'}) // ,
@@ -362,7 +359,7 @@ $.widget( "heurist.search", {
 
         var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language'})
         .css({'padding-right':'1.5em','display':'inline-block'})
-        .addClass('ui-icon ui-icon-circle-info')
+        .addClass('ui-icon ui-icon-gear')
         .appendTo(this.div_buttons);
         this._on( link, {  click: function(){
             window.open('context_help/advanced_search.html','_blank');

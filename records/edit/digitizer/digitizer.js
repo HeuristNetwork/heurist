@@ -1896,7 +1896,7 @@ function setinfo(text) {
   }
 }
 function directionsintroduction() {
-  setinfo('Ready for Directions. Create a route along roads with markers at chosen locations.\n'
+  setinfo('Ready for Directions. \n\nCreate a route along roads with markers at chosen locations.\n'
     +'Click on the map, or enter an address and click "Search", to place a marker.\n'
     +'Lines will be drawn along roads from marker to marker.\n'
     +'Use "Delete Last Point" if you want to undo.\n'
@@ -1906,19 +1906,19 @@ function directionsintroduction() {
 }
 
 function markerintroduction() {
-  setinfo('Ready for Marker. Click on the map, or enter an address and click "Search", to place a marker.\n');
+  setinfo('Ready for Marker. \n\nClick on the map, or enter an address and click "Search", to place a marker.\n');
   //+'You may enter your content for the infowindow with "KML input" even if your code choice is Javascript.\n'
   //+'Click "Next shape" before each additional marker.';
 }
 function polylineintroduction() {
-  setinfo('Ready for Polyline. Click on the map. The code for the shape you create will be presented here.\n\n'
+  setinfo('Ready for Polyline. \n\nClick on the map. The code for the shape you create will be presented here.\n\n'
     //+'When finished with a shape, click Next shape and draw another shape, if you wish.\n'
     +'\nIf you want to edit a saved polyline or polygon, click on it. Then click Edit lines. '
     +'When editing, you may remove a point with a click on it.\n');
   //+'\nThe complete KML code for what you have created, is always available with Show KML.';
 }
 function polygonintroduction() {
-  setinfo('Ready for Polygon. Click on the map. The code for the shape you create will be presented here. '
+  setinfo('Ready for Polygon. \n\nClick on the map. The code for the shape you create will be presented here. '
     +'The Maps API will automatically "close" any polygons by drawing a stroke connecting the last coordinate back to the '
     +'first coordinate for any given paths.\n'
     //+'\nTo create a polygon with hole(-s), click "Hole" before you start the drawing.\n'
@@ -1928,14 +1928,14 @@ function polygonintroduction() {
   //+'\nThe complete KML code for what you have created, is always available with Show KML.';
 }
 function rectangleintroduction() {
-  setinfo('Ready for Rectangle. Click two times on the map - first for the southwest and '+
+  setinfo('Ready for Rectangle. \n\nClick two times on the map - first for the southwest and '+
     'then for the northeast corner. You may resize and move '+
     'the rectangle with the two draggable markers you then have.\n\n');
   //'The v3 Rectangle is a polygon. But in Javascript code mode an extra code for '+
   //'polyline is presented here in the text area.';
 }
 function circleintroduction() {
-  setinfo('Ready for Circle. Click for center. Then click for radius distance. '+
+  setinfo('Ready for Circle. \n\nClick for center. Then click for radius distance. '+
     'You may resize and move the circle with the two draggable markers you then have.\n\n');
   //'KML code is not available for Circle.';
 }
