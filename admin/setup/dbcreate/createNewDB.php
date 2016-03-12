@@ -433,12 +433,12 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     params);
             }
 
-            function closeDialog(newDBName){
+            function closeDialog(){
 
-                var url = "<?php echo HEURIST_BASE_URL?>"+"?db="+newDBName;
-                window.open(url, "_blank" );
+                //var url = "<?php echo HEURIST_BASE_URL?>"+"?db="+newDBName;
+                //window.open(url, "_blank" );
 
-                <?php echo (@$_REQUEST['popup']=="1"?"window.close();":"") ?>
+                <?php echo (@$_REQUEST['popup']=="1"?"setTimeout(function(){window.close();},1500)":"") ?>
             }
 
         </script>
@@ -717,7 +717,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                     $list = mysql__getdatabases();
                     $list = array_map("arraytolower", $list);
-                    if(in_array(strtolower($newDBName), $list)){
+                    if(false && in_array(strtolower($newDBName), $list)){
                         errorOut ('Warning: database "'.$newname.'" already exists. Please choose a different name');
                         $isDefineNewDatabase = true;
                         return false;
@@ -727,7 +727,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     $reg_url = @$_REQUEST['url_template'];
                     $exemplar_db = @$_REQUEST['exemplar'];
 
-                    $name = '';
+                    $name = ''; //user name
 
                     if(true){ // For debugging: set to false to avoid real database creation
 
@@ -743,11 +743,11 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 //1b. verify that sample dump exists 
                                 $exemplar_dir = HEURIST_DIR."admin/setup/exemplars/";
                                 $exemplar_dir = str_replace('//','/',$exemplar_dir);
-                                $dataInsertionSQLFile = $exemplar_dir.$exemplar_db.".sql";
+                                $dataInsertionSQLFile = HEURIST_FILESTORE_DIR.'scratch/'.$exemplar_db.".sql";
                                 if(!file_exists($dataInsertionSQLFile) || filesize($templateFoldersContent)<0){
                                     
-                                        //extract dump from archive 
-                                        unzip($templateFoldersContent, $exemplar_dir, $exemplar_db.'.sql' );
+                                    //extract dump from archive 
+                                    unzip($templateFoldersContent, HEURIST_FILESTORE_DIR.'scratch/', $exemplar_db.'.sql' );
                                         
                                     if(!file_exists($dataInsertionSQLFile) || filesize($dataInsertionSQLFile)<0){
                                         
@@ -993,8 +993,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         }
                         ?>
                         <p style="padding-left:10px">Click here to log in to your new database:</p>
-                        <p style="padding-left:6em"><b><a href="#"
-                                    title="" onclick="{closeDialog('<?php echo $newDBName;?>'); return false;}">
+                        <p style="padding-left:6em"><b><a href="<?php echo HEURIST_BASE_URL."?db=".$newDBName; ?>"
+                                    title="" onclick="{closeDialog()}" target="blank">
                                     <?php echo HEURIST_BASE_URL."?db=".$newDBName; ?>
                                 </a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
 
@@ -1006,7 +1006,6 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     <?php
                     // TODO: automatically redirect to the new database in a new window
                     // this is a point at which people tend to get lost
-
                     return false;
                 } // isset
 
