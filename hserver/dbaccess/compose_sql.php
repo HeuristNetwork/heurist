@@ -294,7 +294,7 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
     $q = null;
 
     if ($query->sort_phrases) {
-        // handled in Query logic
+        // already handled in Query logic
     } else if (preg_match('/^f:(\d+)/', $sort_order, $matches)) {
         //mindfuck!!!! - sort by detail?????
         $q = 'ifnull((select if(link.rec_ID is null, dtl_Value, link.rec_Title) from recDetails left join Records link on dtl_Value=link.rec_ID where dtl_RecID=TOPBIBLIO.rec_ID and dtl_DetailTypeID='.$matches[1].' ORDER BY link.rec_Title limit 1), "~~"), rec_Title';
@@ -1145,7 +1145,8 @@ class AnyPredicate extends Predicate {
 
 
 class FieldPredicate extends Predicate {
-    var $field_type;
+    var $field_type;        //name of dt_id
+    var $field_type_value;  //field type
     var $nests = null;
 
     function FieldPredicate(&$parent, $type, $value) {
@@ -1188,8 +1189,9 @@ class FieldPredicate extends Predicate {
     }
 
     function makeSQL() {
+        global $mysqli;
+        
         $not = ($this->parent->negate)? 'not ' : '';
-
 
         if($this->nests){  //special case nested query for resources
 
@@ -1349,7 +1351,13 @@ class FieldPredicate extends Predicate {
             return $resq;
         } //end special case nested query for resources
 
-
+        if (preg_match('/^\\d+$/', $this->field_type)) {
+            $dt_query = "select rdt.dty_Type from defDetailTypes rdt where rdt.dty_ID = ".intval($this->field_type);
+            $this->field_type_value = mysql__select_value($mysqli, $dt_query);
+        }else{
+            $this->field_type_value ='';
+        }
+        
         $match_pred = $this->get_field_value();
 
         if (preg_match('/^\d+(?:,\d+)+$/', $this->value)) {
@@ -1360,59 +1368,79 @@ class FieldPredicate extends Predicate {
             $isnumericvalue = is_numeric($this->value);
         }
 
+        /*
         if($isin){
             $match_pred_for_term = $match_pred;
         }else if($isnumericvalue){
             $match_pred_for_term = $match_pred; //" = $match_value";
         }else{
             $match_pred_for_term = " = trm.trm_ID";
-        }
+        }*/
         
-        $timestamp = $isin ?false:true; //$this->isDateTime();
+        $timestamp = $isin?false:true; //$this->isDateTime();
 
         if ($timestamp) {
             $date_match_pred = $this->makeDateClause();
         }
 
-        $rd_type_clause = $this->get_field_type_clause();
-        if(strpos($rd_type_clause,"like")===false){
-            $rd_type_clause = "rd.dtl_DetailTypeID ".$rd_type_clause;
+        if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
+            
+            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            . ' left join Records link on rd.dtl_Value=link.rec_ID '
+            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rd.dtl_DetailTypeID=' . intval($this->field_type).' and ' 
+            . ($isnumericvalue ? 'rd.dtl_Value ':' link.rec_Title ').$match_pred . ')';
+            
+        }else if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){ 
+            
+            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred )
+            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
+            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+            . ' and rd.dtl_Value '.$match_pred. ')';
+
+        }else if($this->field_type_value=='date'){ 
+
+            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
+            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+            . ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. ')';
+            
+        }else if($this->field_type_value){ 
+
+            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
+            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
+            . ' and rd.dtl_Value ' . $match_pred. ')';
+            
         }else{
-            $rd_type_clause = "rdt.dty_Name ".$rd_type_clause;
+        
+            $rd_type_clause = $this->get_field_type_clause();
+            if(strpos($rd_type_clause,"like")===false){ //several field type
+                $rd_type_clause = " and rd.dtl_DetailTypeID ".$rd_type_clause;
+            }else{
+                if($rd_type_clause=='like "%"'){ //any field type
+                    $rd_type_clause = '';
+                }else{                
+                    $rd_type_clause = " and rdt.dty_Name ".$rd_type_clause;
+                }
+            }
+
+            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
+            . 'left join Records link on rd.dtl_Value=link.rec_ID '
+            //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
+            . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
+            . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
+            .'link.rec_Title ' . $match_pred . ', '
+            .'if(rdt.dty_Type in ("enum","relationtype"), rd.dtl_Value '.$match_pred_for_term.', '
+            . ($timestamp ? 'if(rdt.dty_Type = "date", '
+                .'getTemporalDateString(rd.dtl_Value) ' . $date_match_pred . ', '
+                //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
+                .'rd.dtl_Value ' . $match_pred . ')'
+                : 'rd.dtl_Value ' . $match_pred ) . '))'
+            . $rd_type_clause . ')';
         }
 
-        return $not . 'exists (select rd.dtl_ID from recDetails rd '
-        . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
-        . 'left join Records link on rd.dtl_Value=link.rec_ID '
-        . (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
-        . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-        . ' and if(rdt.dty_Type = "resource" AND '.($isnumericvalue?'0':'1').', '
-        .'link.rec_Title ' . $match_pred . ', '
-        .'if(rdt.dty_Type in ("enum","relationtype"), '
-        .'rd.dtl_Value '.$match_pred_for_term.', '
-        . ($timestamp ? 'if(rdt.dty_Type = "date", '
-            .'getTemporalDateString(rd.dtl_Value) ' . $date_match_pred . ', '
-            //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
-            .'rd.dtl_Value ' . $match_pred . ')'
-            : 'rd.dtl_Value ' . $match_pred ) . '))'
-        .' and ' . $rd_type_clause . ')';
-
-        //@todo avoid clauses for resource and date detail types if not necessary
-        /* not working properly
-        return $not . 'exists (select * from recDetails rd '
-        .($timestamp || !is_numeric($this->value)? 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID ': '')
-        .(!is_numeric($this->value)?'':'left join Records link on rd.dtl_Value=link.rec_ID ')
-        . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-        . (!is_numeric($this->value)?'  and if(rdt.dty_Type = "resource", '      // AND '.(is_numeric($this->value)?'0':'1').'
-        .'link.rec_Title ' . $match_pred . ', '
-        :' and ')
-        . ($timestamp ? 'if(rdt.dty_Type = "date", '
-        .'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
-        .'rd.dtl_Value ' . $match_pred . ')'
-        : 'rd.dtl_Value ' . $match_pred )
-        . (!is_numeric($this->value)?')':'')
-        . ' and ' . $rd_type_clause . ')';
-        */
     }
 
     function get_field_type_clause(){
@@ -1427,8 +1455,9 @@ class FieldPredicate extends Predicate {
             $rd_type_clause = 'in (' . $this->field_type . ')';
         }
         else {
+            $val = $mysqli->real_escape_string($this->field_type);
             /* user has specified the field name */
-            $rd_type_clause = 'like "' . $mysqli->real_escape_string($this->field_type) . '%"';
+            $rd_type_clause = 'like "' . $val . '%"';
         }
         return  $rd_type_clause;
     }
@@ -1437,14 +1466,7 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
-        if (preg_match('/^\\d+$/', $this->field_type)) {
-            $dt_query = "select rdt.dty_Type from defDetailTypes rdt where rdt.dty_ID = ".intval($this->field_type);
-            $fieldtype = mysql__select_value($mysqli, $dt_query);
-        }else{
-            $fieldtype ='';
-        }
-        
-        if($fieldtype=='enum' || $fieldtype=='relationtype'){
+        if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
             
             if(preg_match('/^\d+(?:,\d+)+$/', $this->value)){
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('
@@ -1476,7 +1498,7 @@ class FieldPredicate extends Predicate {
             $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
 
             if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                $match_pred = ' = "$match_value"'; //for unknown reason comparison with numeric takes ages
+                $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
             } else if ($this->parent->lessthan) {
                 $match_pred = " < $match_value";
             } else if ($this->parent->greaterthan) {
