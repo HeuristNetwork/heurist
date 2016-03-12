@@ -67,6 +67,13 @@ links: recordtype
 
 recordtype is added to link query  as first predicate
 
+
+sortby,sort,s - sort phrases must be on top level array - all others will be ignored
+
+sort values:
+
+
+
 -----
 VALUE
 
@@ -75,7 +82,6 @@ VALUE
 3)  WKT       "f:5":"POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
 4)  Query     "linked_to:15": [{ t:4 }, {"f:1":"Alex" } ]
 "f:10": {"any":[ {t:4}, {} ] }
-
 
 
 
@@ -194,7 +200,7 @@ class HQuery {
 
     var $top_limb = array();
     var $sort_phrases;
-    var $sort_tables;
+    var $sort_tables; // sorting may require the introduction of more tables
 
     var $currUserID;
     var $search_domain;
@@ -212,9 +218,10 @@ class HQuery {
         $this->top_limb = new HLimb($this, "all", $query_json);
         // $top_limbs =
 
-        //find all field types
-
-
+        //find search phrases
+        if($level==0){
+            $this->extractSortPharses( $query_json );
+        }
     }
 
     function makeSQL(){
@@ -267,8 +274,131 @@ class HQuery {
             $where2 = '(not r0.rec_FlagTemporary) and '.$where2;
 
             $this->where_clause = $this->where_clause. ' and ' . $where2;
+            
+            //apply sort clause for top level only
+            $this->createSortClause();
         }
 
+    }
+    
+    //
+    // sort phrases must be on top level array - all others will be ignored
+    //
+    function extractSortPharses( $query_json ){
+        
+        $this->sort_phrases = array();
+        
+        foreach ($query_json as $key => $value){
+            if(is_numeric($key)){  //this is sequental array
+                $key = array_keys($value);
+                $key = $key[0];
+                if(is_string($value[$key])){
+                    $value = strtolower($value[$key]);
+                }else{
+                    continue;
+                }
+            }
+            if( ($key == 'sortby' || $key == 'sort' || $key == 's')
+                &&!in_array($value, $this->sort_phrases)){ //this is sort phrase
+                
+                        $this->sort_phrases[] = $value;
+            }
+        }
+        
+    }
+    
+    //
+    //
+    //    
+    function createSortClause() {
+        
+        $sort_fields = array();
+        $sort_expr = array();
+        
+//error_log(print_r($this->sort_phrases,true)        );
+        
+        foreach($this->sort_phrases as $subtext){
+        
+            // if sortby: is followed by a -, we sort DESCENDING; if it's a + or nothing, it's ASCENDING
+            $scending = '';
+            if ($subtext[0] == '-') {
+                $scending = ' DESC ';
+                $subtext = substr($subtext, 1);
+            } else if ($subtext[0] == '+') {
+                $subtext = substr($subtext, 1);
+            }
+            
+            switch (strtolower($subtext)) {
+                case 'r': case 'rating':
+                    if ($this->search_domain == BOOKMARK) {
+                        if(!in_array('bkm_Rating', $sort_fields)) {
+                            $sort_fields[] = 'bkm_Rating';   
+                            $sort_expr[] = 'bkm_Rating'.$scending;   
+                        }
+                        break;
+                    }
+                case 'p': case 'popularity':
+                    if(!in_array('rec_Popularity', $sort_fields)) {
+                        $sort_fields[] = 'rec_Popularity';   
+                        $sort_expr[] = 'rec_Popularity'.$scending;   
+                    }
+                    if(!in_array('rec_ID', $sort_fields)) {
+                        $sort_fields[] = 'rec_ID';   
+                        $sort_expr[] = 'rec_ID'.$scending;   
+                    }
+                    break;
+                case 'u': case 'url':
+                    if(!in_array('rec_URL', $sort_fields)) {
+                        $sort_fields[] = 'rec_URL';   
+                        $sort_expr[] = 'rec_URL'.$scending;   
+                    }
+                    break;
+                case 'm': case 'modified':
+                    $fld = ($this->search_domain == BOOKMARK)?'bkm_Modified':'rec_Modified';
+                    if(!in_array($fld, $sort_fields)) {
+                        $sort_fields[] = $fld;   
+                        $sort_expr[] = $fld.$scending;   
+                    }
+                    break;
+                case 'a': case 'added':
+                    $fld = ($this->search_domain == BOOKMARK)?'bkm_Added':'rec_Added';
+                    if(!in_array($fld, $sort_fields)) {
+                        $sort_fields[] = $fld;   
+                        $sort_expr[] = $fld.$scending;   
+                    }
+                    break;
+                case 't': case 'title':
+                    if(!in_array('rec_Title', $sort_fields)) {
+                        $sort_fields[] = 'rec_Title';   
+                        $sort_expr[] = 'rec_Title'.$scending;   
+                    }
+                    break;
+                case 'id': case 'ids':
+                    if(!in_array('rec_ID', $sort_fields)) {
+                        $sort_fields[] = 'rec_ID';   
+                        $sort_expr[] = 'rec_ID'.$scending;   
+                    }
+                    break;
+                case 'rt': case 'type':
+                    if(!in_array('rec_RecTypeID', $sort_fields)) {
+                        $sort_fields[] = 'rec_RecTypeID';   
+                        $sort_expr[] = 'rec_RecTypeID'.$scending;   
+                    }
+                    break;
+                    
+                case 'f': case 'field':
+                    //@todo 
+            }//switch
+        
+        }//foreach
+        
+//error_log(print_r($sort_expr,true)        );
+        
+        //
+        if(count($sort_expr)>0){
+            $this->sort_clause = ' ORDER BY '.implode(',',$sort_expr);
+        }
+        
     }
 
 }
@@ -279,8 +409,8 @@ class HQuery {
 */
 class HLimb {
 
-    var $parent;           //query
-    var $limbs = array();  //limbs and predicates
+    var $parent;           // query
+    var $limbs = array();  // limbs and predicates
     var $conjunction = "all"; //and
 
     //result
@@ -298,11 +428,12 @@ class HLimb {
         $this->conjunction = $conjunction;
 
         //echo "<br>".(print_r($query_json, true));
+        
 
         foreach ($query_json as $key => $value){
 
             //echo "<br>key=".$key."  ".(print_r($value,true));
-            if(is_numeric($key)){
+            if(is_numeric($key)){  //this is sequental array
                 $key = array_keys($value);
                 $key = $key[0];
                 $value = $value[$key];
