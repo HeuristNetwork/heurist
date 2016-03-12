@@ -269,7 +269,7 @@
                                 if(dup<0){
                                     elLiner.innerHTML = 'Same origin (x '+Math.abs(dup)+')';
                                 }else if (isNaN(Number(dup))){
-                                    elLiner.innerHTML = dup+' has same origin';
+                                    elLiner.innerHTML = '<b>'+dup+'</b> (this database) came from same source (same original database + code)';
                                 }else if (dup>0){
                                     elLiner.innerHTML = 'Duplicate name (x '+dup+')';
                                 }else{
