@@ -130,7 +130,7 @@ function checkVersionOnMainServer($version_in_session)
     // TODO: Maybe this should be changed to Heurist_Sandpit?
     $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
 
-    $rawdata = loadRemoteURLContentWithRange($url, null, true, 5);
+    $rawdata = loadRemoteURLContentSpecial($url);
 
     if($rawdata){
         //parse result

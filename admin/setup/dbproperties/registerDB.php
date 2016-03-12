@@ -269,7 +269,8 @@ if($sError){
                 "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
                 ."&serverURL=" . rawurlencode($serverURL);
 
-                $data = loadRemoteURLContent($reg_url);
+                //$data = loadRemoteURLContent($reg_url);
+                $data = loadRemoteURLContentSpecial($reg_url); //without proxy
 
 
                 if (!$data) {

@@ -134,12 +134,14 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
 
     if ($error) {
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+//error_log('code = '.$code.'  '.$error);
         curl_close($ch);
         return false;
     } else {
         curl_close($ch);
         if(!$data){
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+//error_log('code2 = '.$code);
         }
         return $data;
     }

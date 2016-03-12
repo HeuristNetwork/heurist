@@ -77,10 +77,10 @@ if(!(is_numeric($database_id) && is_numeric($rectype_id))){
 
 // ------------------------------------------------------------------------------------------------
 
-// 1. get database url by looking it up from teh Heusit Master index using database registered ID
+// 1. get database url by looking it up from the Heusit Master index using database registered ID
 
 $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getDatabaseURL.php" . "?db=Heurist_Master_Index&id=".$database_id;
-$data = loadRemoteURLContent($reg_url);
+$data = loadRemoteURLContentSpecial($reg_url);
 if (!$data) {
     error_exit("Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
         "URL requested: ".$reg_url);
@@ -88,7 +88,7 @@ if (!$data) {
 
 $data = json_decode($data, true);
 
-// Artem TODO: What circumstance woukld give rise to this? Explain how the data is 'wrong'/'incorrect'
+// Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
 if(!@$data['rec_URL']){
     error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
         " The page may contain an invalid database reference (0 indicates no reference has been set)");
