@@ -401,8 +401,8 @@ function print_private_details($bib) {
                 dtl_Value as val,
                 dtl_UploadedFileID,
                 dty_Type,
-                if(dtl_Geo is not null, ST_AsWKT(dtl_Geo), null) as dtl_Geo,
-                if(dtl_Geo is not null, ST_AsWKT(envelope(dtl_Geo)), null) as bd_geo_envelope
+                if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo,
+                if(dtl_Geo is not null, AsWKT(envelope(dtl_Geo)), null) as bd_geo_envelope
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID

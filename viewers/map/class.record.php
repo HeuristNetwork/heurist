@@ -111,7 +111,7 @@ class Biblio {
 				$this->description .= $details[$text];
 			}
 
-			$res = mysql_query('SELECT ST_AsWKT(dtl_Geo) geo, dtl_Value, ST_AsWKT(envelope(dtl_Geo)) as rect
+			$res = mysql_query('SELECT AsWKT(dtl_Geo) geo, dtl_Value, AsWKT(envelope(dtl_Geo)) as rect
 			                      FROM recDetails
 			                     WHERE NOT IsNULL(dtl_Geo)
 			                       AND dtl_RecID = ' . $rec_id);
@@ -122,7 +122,7 @@ class Biblio {
 				// and it points to record(s) with spatial data, use that.
 				// Although this is written in a general fashion it was
 				// created for Event records, which may point to Site records
-				$res = mysql_query('select ST_AsWKT(g.dtl_Geo) geo, g.dtl_Value, ST_AsWKT(envelope(g.dtl_Geo)) as rect
+				$res = mysql_query('select AsWKT(g.dtl_Geo) geo, g.dtl_Value, AsWKT(envelope(g.dtl_Geo)) as rect
 				                      from recDetails p
 				                 left join defDetailTypes on dty_ID = p.dtl_DetailTypeID
 				                 left join Records on rec_ID = p.dtl_Value

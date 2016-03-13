@@ -237,7 +237,7 @@ if ($reccount>0)
         }
 
         //geo rss
-        $geos = mysql__select_array("recDetails", "if(a.dtl_Geo is null, null, ST_AsWKT(a.dtl_Geo)) as dtl_Geo",
+        $geos = mysql__select_array("recDetails", "if(a.dtl_Geo is null, null, AsWKT(a.dtl_Geo)) as dtl_Geo",
             "a.dtl_RecID=".$row[0]." and a.dtl_Geo is not null");
 
         if(count($geos)>0){

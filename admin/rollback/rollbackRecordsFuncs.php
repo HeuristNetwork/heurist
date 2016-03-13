@@ -128,7 +128,7 @@ function getDetailHistory ($ard_id, $up_to_version) {
 	// return deltas from archiveDetails, latest first
 	$deltas = array();
 	$res = mysql_query("
-		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, ST_AsWKT(ard_Geo) as ard_Geo
+		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, AsWKT(ard_Geo) as ard_Geo
 		from archiveDetails
 		where ard_ID = $ard_id
 		and ard_Ver <= $up_to_version
@@ -193,7 +193,7 @@ function getDetailRollbacks ($rec_id, $version) {
 				where dtl_ID = $ard_id
 				and dtl_Value " . ($ard_val ? "= '" . mysql_real_escape_string($ard_val) . "'" : "is null") . "
 				and dtl_UploadedFileID " . ($ard_file_id ? "= $ard_file_id" : "is null") . "
-				and ST_AsWKT(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
+				and AsWKT(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
 			);
 			if (mysql_num_rows($res) == 0) {
 				array_push($updates, $potential_update);

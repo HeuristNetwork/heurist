@@ -248,7 +248,7 @@
 		"select dtl_ID,
 		dtl_DetailTypeID,
 		dtl_Value,
-		ST_AsWKT(dtl_Geo) as dtl_Geo,
+		AsWKT(dtl_Geo) as dtl_Geo,
 		dtl_UploadedFileID,
 		dty_Type,
 		rec_ID,
