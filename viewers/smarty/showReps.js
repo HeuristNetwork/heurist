@@ -249,6 +249,8 @@ function ShowReps() {
 
         var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
         var squery = null;
+        var request_query = {};
+        var session_id = Math.round((new Date()).getTime()/1000);
 
         if(_currentRecordset!=null){
 
@@ -260,7 +262,9 @@ function ShowReps() {
                 return;
             }
 
-            squery =  'db='+_db+'&template='+template_file+'&recordset='+JSON.stringify(_currentRecordset);
+            squery =  'db='+_db+'&template='+template_file;//+&recordset='+JSON.stringify(_currentRecordset);
+            
+            request_query = {db:_db, template:template_file, recordset:_currentRecordset, session:session_id};
 
         }else{
             return; //use global recordset only
@@ -275,8 +279,24 @@ function ShowReps() {
 
             lastQuery = squery;
             
-            _showProgress();
-
+            _showProgress( session_id );
+            
+            $.ajax({
+                url: baseurl,
+                type: "POST",
+                data: request_query,
+                dataType: "text",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                    _hideProgress();
+                },
+                success: function( response, textStatus, jqXHR ){
+                    _hideProgress();
+                    _updateReps( response );
+                }
+            });
+            
+            /* 
             Hul.sendRequest(baseurl, function(xhr) {
                 
                 _hideProgress();
@@ -295,9 +315,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     }
                 
                 }, squery);
-                
-
-                
+            */    
         }
 
         //Hul.getJsonData(baseurl, callback, squery);
@@ -306,7 +324,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     //
     //
     //
-    function _showProgress(){
+    function _showProgress( session_id ){
 
         var progressCounter = 0;        
         var progress_url = top.HEURIST.baseURL_V3 + "viewers/smarty/reportProgress.php";
@@ -317,7 +335,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         $('#progress_stop').button().on({click: function() {
             $.ajax({
                 url: progress_url,
-                data: {db: _db, terminate:1, t:(new Date()).getMilliseconds()},
+                type: "GET",
+                data: {db: _db, terminate:1, t:(new Date()).getMilliseconds(), session:session_id},
                 dataType: "text",
                 error: function(jqXHR, textStatus, errorThrown ) {
                     console.log(textStatus+' '+jqXHR.responseText);
@@ -349,7 +368,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         $.ajax({
             url: progress_url,
             type: "GET",
-            data: {db: _db, t:(new Date()).getMilliseconds()},
+            data: {db: _db, t:(new Date()).getMilliseconds(), session:session_id},
             dataType: "text",
             cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
@@ -357,9 +376,10 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 _hideProgress();
             },
             success: function( response, textStatus, jqXHR ){
+
+//console.log('resp '+progressCounter+'  resp='+response+'  '+session_id);
                 
                 var resp = response?response.split(','):[0,0];
-//console.log('resp '+progressCounter+'  resp='+resp);
                 
                 if(resp && resp[0]){
                     if(progressCounter>0){
@@ -369,6 +389,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                             progressLabel.text(resp[0]+' of '+resp[1]);
                         }else{
                             progressLabel.text('wait...');
+                            //progressLabel.text('');
                         }
                     }else{
                         pbar.progressbar( "value", 0 );
@@ -386,7 +407,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             }
         });            
         
-            }, 500);                
+            }, 1000);                
         
     }
     

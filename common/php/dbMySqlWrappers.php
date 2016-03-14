@@ -519,4 +519,56 @@ function refValues($arr) {
     return $arr;
 }
 
+
+function updateProgress($mysqli, $session_id, $is_init, $value){
+    
+    //mysql_connection_overwrite(DATABASE);
+    $need_close = false;
+    if($mysqli===null){
+        $need_close = true;
+        $mysqli = mysqli_connection_overwrite(DATABASE);
+    }
+    
+    if($is_init){
+        //check that session table exists
+        $from_res = $mysqli->query("show tables like 'tmpUsrSession'");
+        if ($from_res && $from_res->num_rows > 0) {
+            //remove old data
+            //mysql_query('DELETE FtmpUsrSession where field_id<'.);
+        }else{
+            //recreate
+            $mysqli->query('CREATE TABLE tmpUsrSession(field_id varchar(32) NOT NULL, field_data varchar(32), PRIMARY KEY (field_id))');
+        }
+    }
+    
+    if($value==null){
+
+      
+        $query = "select field_data from tmpUsrSession where field_id=".$session_id;
+        $from_res = $mysqli->query($query);
+        if ($from_res) { // && $from_res->num_rows > 0
+            $res = $from_res->fetch_row();
+            if($need_close)  $mysqli->close();                     
+            return $res[0];
+        }else{
+//error_log('>>>>NOT FOUND '.$query);   
+        }
+
+    }else if($value=='REMOVE'){
+        $mysqli->query("DELETE FROM tmpUsrSession where field_id=".$session_id);
+//error_log('DELTE '.$mysqli->error.'   '.$mysqli->affected_rows);
+    }else{
+        //write 
+        if($is_init){
+            $query = "insert into tmpUsrSession values (".$session_id.",'".$value."')";
+            $res = $mysqli->query($query);
+        }else{
+            $query = "update tmpUsrSession set field_data='".$value."' where field_id=".$session_id;
+            $res = $mysqli->query($query);
+        }
+        //$mysqli->commit();
+    }
+    if($need_close)  $mysqli->close();
+    return null;
+}
 ?>

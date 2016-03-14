@@ -1226,7 +1226,9 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
         req.onreadystatechange = function () {// callback for ajax object
             if (req.readyState != 4) return;
+            var msg = '';
             if (req.status != 200 && req.status != 304) {
+                
                 if (req.status == 404) {
                     msg = 'H-Util HTTP error file not found' + req.status + ' ' +file;
                 }else if (req.status){
@@ -1239,10 +1241,12 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                         msg = msg +'If this error pops up repeatedly, please send a bug report (Help > Bug report) or email the Heurist developers (info at HeuristNetwork dot org) and tell us where it occurs.';
                 }
                 
-                if(top.HEURIST4 && top.HEURIST4.msg){
-                    top.HEURIST4.msg.showMsgErr(msg);                           
-                }else{
-                    top.HEURIST.util.showError(msg);
+                if(msg){
+                    if(top.HEURIST4 && top.HEURIST4.msg){
+                        top.HEURIST4.msg.showMsgErr(msg);                           
+                    }else{
+                        top.HEURIST.util.showError(msg);
+                    }
                 }
                 
                 return;

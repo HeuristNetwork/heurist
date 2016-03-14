@@ -68,6 +68,8 @@ $max_allowed_depth = 2;
 $publishmode = 0;
 $execution_counter = 0;
 $execution_total_counter = 0;
+$session_id = @$_REQUEST['session'];
+$mysqli = null;
 
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
@@ -75,7 +77,6 @@ if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 
     executeSmartyTemplate($_REQUEST);
 }
-
 
 
 /**
@@ -86,8 +87,10 @@ if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 function executeSmartyTemplate($params){
 
     global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth, $publishmode,
-           $execution_counter, $execution_total_counter;
+           $execution_counter, $execution_total_counter, $session_id, $mysqli;
 
+//error_log('executeSmartyTemplate '.$session_id);           
+           
     set_time_limit(0); //no limit
 
     mysql_connection_overwrite(DATABASE);
@@ -126,7 +129,11 @@ function executeSmartyTemplate($params){
 
     if(@$params['recordset']){ //we already have the list of record ids
 
-        $qresult = json_decode($params['recordset'], true);
+        if(is_array($params['recordset'])){
+            $qresult = $params['recordset'];  
+        }else{
+            $qresult = json_decode($params['recordset'], true);    
+        }
 
         //truncate recordset  - limit does not work for publish mode
         if($publishmode==0 && $qresult && array_key_exists('recIDs',$qresult)){
@@ -216,6 +223,12 @@ function executeSmartyTemplate($params){
         }
     }
     //end pre-parsing of template
+    
+    
+    $mysqli = mysqli_connection_overwrite(DATABASE);
+    if($publishmode==0 && $session_id!=null){
+        updateProgress($mysqli, $session_id, true, '0,0');
+    }
 
     //convert to array that will assigned to smarty variable
     if(array_key_exists('recIDs',$qresult)){
@@ -223,11 +236,11 @@ function executeSmartyTemplate($params){
         $records =  explode(",", $qresult["recIDs"]);
         $results = array();
         $k = 0;
-        $tot_count = count($records);
+        $execution_total_counter = count($records); //'tot_count'=>$tot_count,
         
         foreach ($records as $recordID){
 
-            if(smarty_function_progress(array('tot_count'=>$tot_count,'done'=>$k), $smarty)){
+            if(smarty_function_progress(array('done'=>$k), $smarty)){
                 echo 'Execution was terminated';
                 return;
             }
@@ -240,16 +253,15 @@ function executeSmartyTemplate($params){
             array_push($results, $res1);
         }
 
-
     }else{
 
         $records =  $qresult["records"];
-        $tot_count = count($records);
+        $execution_total_counter = count($records); //'tot_count'=>$tot_count,
         $results = array();
         $k = 0;
         foreach ($records as $rec){
 
-            if(smarty_function_progress(array('tot_count'=>$tot_count,'done'=>$k), $smarty)){
+            if(smarty_function_progress(array('done'=>$k), $smarty)){
                 echo 'Execution was terminated';
                 return;
             }
@@ -259,12 +271,13 @@ function executeSmartyTemplate($params){
             $k++;
             array_push($results, $res1);
         }
+        
     }
     //activate default template - generic list of records
 
     $smarty->assign('results', $results);
     
-    //$smarty->getvat()
+    //$smarty->getvar()
 
     ini_set( 'display_errors' , 'false'); // 'stdout' );
     $smarty->error_reporting = 0;
@@ -317,11 +330,11 @@ function executeSmartyTemplate($params){
     //DEBUG   
     $smarty->registerFilter('post','smarty_post_filter');
     
-    
-    if($publishmode==0){
-        session_start();
+    if($publishmode==0 && $session_id!=null){
+        updateProgress($mysqli, $session_id, true, '0,'.count($results));
+        /*session_start();
         $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = '0,'.count($results);
-        session_write_close();
+        session_write_close();*/
     }
     $execution_counter = -1;
     $execution_total_counter = count($results);
@@ -331,6 +344,11 @@ function executeSmartyTemplate($params){
         echo 'Exception on execution: ', $e->getMessage(), "\n";
     }
 
+    if($publishmode==0 && $session_id!=null){
+        updateProgress($mysqli, $session_id, false, 'REMOVE');
+    }
+    $mysqli->close();               
+    
 }
 
 //
@@ -349,12 +367,6 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
                 ."\n".'{ if(smarty_function_progress(array(), $_smarty_tpl)){ return; }'."\n"
                 .substr($tpl_source,$pos+1);
         
-/*    
-    //str_replace('echo smarty_function_progress','if (smarty_function_progress')
-    $sr = 'smarty_function_progress(array(\'done\'=>$_smarty_tpl->tpl_vars[\'r\']->index),$_smarty_tpl)';
-    //exit from template execution of smarty_function_progress returns true
-    $res = str_replace('echo '.$sr.';', 'if('.$sr.'){ echo "terminated"; return; }',$tpl_source);
-*/
 //DEBUG error_log($res);
         return $res;
     }else{
@@ -1008,11 +1020,11 @@ function getWootText($recID){
 // quick solution for progress tracking
 //
 function smarty_function_progress($params, &$smarty){
-    global $publishmode, $execution_counter, $execution_total_counter;
-
+    global $publishmode, $execution_counter, $execution_total_counter,$session_id,$mysqli;
+    
     $res = false;
     
-    if($publishmode==0){ //check that this call from ui
+    if($publishmode==0 && $session_id!=null){ //check that this call from ui
         
         if(@$params['done']==null){//not set, this is execution from smarty
             $execution_counter++;
@@ -1022,34 +1034,51 @@ function smarty_function_progress($params, &$smarty){
         
         if(isset($execution_total_counter) && $execution_total_counter>0){
             $tot_count = $execution_total_counter;
-        }else if(@$params['tot_count']>=0){
+        }else 
+        if(@$params['tot_count']>=0){
             $tot_count = $params['tot_count'];
         }else{
             $tot_count = count(@$smarty->getVariable('results')->value);
         }
         
-        if($execution_counter<2 || $execution_counter % 5==0 || $execution_counter>$execution_total_counter-3){
-            session_start();
-            $current_val = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'];
+        if($execution_counter<2 || $execution_counter % 10==0 || $execution_counter>$tot_count-3){
             
-//error_log( @$_COOKIE['heurist-sessionid'].' set porgress to '.$params['done'].'  prev '.$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] );
-
+            
+            //$mysqli = mysqli_connection_overwrite(DATABASE);
+            
+            //get 
+            $current_val = updateProgress($mysqli, $session_id, false, null);
+            
             if($current_val && $current_val=='terminate'){
-//error_log('terminated!');        
-                $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = '0,0';
+
+                $session_val = ''; //remove from db
                 $res = true;
             }else{
-//error_log('next '.$execution_counter);        
-                $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = $execution_counter.','.$tot_count;
-                
+/*
+if($execution_counter<2 || $execution_counter>$tot_count-3){  
+    error_log('next '.$execution_counter.'   '.@$params['done'].'  '.$tot_count.'  current_val='.$current_val);        
+}
+*/
+                $session_val = $execution_counter.','.$tot_count;
             }
+            //set
+            updateProgress($mysqli, $session_id, false, $session_val);
             
+            //$mysqli->close();
+
+            /* it does not worl properly            
+            session_start();
+            $current_val = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'];
+            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = $execution_counter.','.$tot_count;
             session_write_close();
+            */
         }
     
     }
     return $res;
 }
+
+
 
 //
 // smarty plugin function
