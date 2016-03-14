@@ -125,6 +125,20 @@
             .insert-intree{
                 display:none;
             }
+            .ui-progressbar {
+                position: absolute;
+                right: 60px;
+                left: 5px;
+                top:7px;
+                height: 18px;                
+            }
+            .progress-label {
+                position: absolute;
+                left: 50%;
+                top: 4px;
+                font-weight: bold;
+                text-shadow: 1px 1px 0 #fff;
+            }            
         </style>
         <script type="text/javascript">
             var showReps, isEditorVisible=false;
@@ -260,6 +274,12 @@
 
 
         <div id="viewercontainer">
+            <div id="progressbar_div" style="width:99%;height:30px;display:none;padding:5px">
+                <div id="progressbar">
+                    <div class="progress-label">Loading data...</div>
+                </div>
+                <div id="progress_stop" style="float:right;">Stop</div>
+            </div>
             <div id="toolbardiv" style="width:100%;height:30px;">
                 <div style="padding:5px;display:none;">
                     <select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">

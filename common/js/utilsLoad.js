@@ -307,6 +307,7 @@ if (! top.HEURIST) {
             }
 
             paramString = paramString.replace(/[+]/g, ' ');	// frustratingly, decodeURIComponent does not decode '+' to ' '
+            paramString = paramString.replace('%%', '%25%');
 
             var parmBits = paramString.split('&');
             var parms = {};

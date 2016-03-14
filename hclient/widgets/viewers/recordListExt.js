@@ -74,8 +74,8 @@ $.widget( "heurist.recordListExt", {
 
                 if(data){
                     that._query_request = jQuery.extend(true, {}, data);  //keep current query request (clone)
-                    that.option("selection", null);
                     that.option("recordset", null);
+                    that.option("selection", null);
                     if(data.q!='')
                         that.loadanimation(true);
                 }
@@ -118,6 +118,7 @@ $.widget( "heurist.recordListExt", {
         this._superApply( arguments );
         this._refresh();
     },
+    
     /*
     _setOption: function( key, value ) {
     if(key=='url'){
@@ -135,6 +136,8 @@ $.widget( "heurist.recordListExt", {
     /* private function */
     _refresh: function(){
 
+//DEBUG console.log('REFRESH');        
+        
         if(this.options.title!=''){
             var id = this.element.attr('id');
             $(".header"+id).html(this.options.title);

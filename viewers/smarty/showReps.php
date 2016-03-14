@@ -44,7 +44,6 @@
 define('ISSERVICE',1);
 define('SEARCH_VERSION', 1);
 
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
 require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
@@ -66,7 +65,9 @@ $dtTerms3 = null;
 $gparams = null;
 $loaded_recs = array();
 $max_allowed_depth = 2;
-
+$publishmode = 0;
+$execution_counter = 0;
+$execution_total_counter = 0;
 
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
@@ -84,7 +85,8 @@ if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 */
 function executeSmartyTemplate($params){
 
-    global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth;
+    global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth, $publishmode,
+           $execution_counter, $execution_total_counter;
 
     set_time_limit(0); //no limit
 
@@ -221,8 +223,15 @@ function executeSmartyTemplate($params){
         $records =  explode(",", $qresult["recIDs"]);
         $results = array();
         $k = 0;
+        $tot_count = count($records);
+        
         foreach ($records as $recordID){
 
+            if(smarty_function_progress(array('tot_count'=>$tot_count,'done'=>$k), $smarty)){
+                echo 'Execution was terminated';
+                return;
+            }
+            
             $rec = loadRecord($recordID, false, true); //from search/getSearchResults.php
 
             $res1 = getRecordForSmarty($rec, 0, $k);
@@ -235,10 +244,16 @@ function executeSmartyTemplate($params){
     }else{
 
         $records =  $qresult["records"];
+        $tot_count = count($records);
         $results = array();
         $k = 0;
         foreach ($records as $rec){
 
+            if(smarty_function_progress(array('tot_count'=>$tot_count,'done'=>$k), $smarty)){
+                echo 'Execution was terminated';
+                return;
+            }
+            
             $res1 = getRecordForSmarty($rec, 0, $k);
             $res1["recOrder"]  = $k;
             $k++;
@@ -248,6 +263,8 @@ function executeSmartyTemplate($params){
     //activate default template - generic list of records
 
     $smarty->assign('results', $results);
+    
+    //$smarty->getvat()
 
     ini_set( 'display_errors' , 'false'); // 'stdout' );
     $smarty->error_reporting = 0;
@@ -290,39 +307,77 @@ function executeSmartyTemplate($params){
         $smarty->debugging = false;
         $smarty->error_reporting = 0;
         if($outputfile!=null){
-            $smarty->registerFilter('output','save_report_output');
+            $smarty->registerFilter('output','smarty_output_filter');
         }else if($isJSout){
             $smarty->registerFilter('output','add_javascript_wrap5');
         }
 
         // TODO: Remove, enable or explain: $smarty->unregisterFilter('post','add_javascript_wrap');
     }
-
+    //DEBUG   
+    $smarty->registerFilter('post','smarty_post_filter');
+    
+    
+    if($publishmode==0){
+        session_start();
+        $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = '0,'.count($results);
+        session_write_close();
+    }
+    $execution_counter = -1;
+    $execution_total_counter = count($results);
     try{
         $smarty->display($template_file);
     } catch (Exception $e) {
-        echo 'Exception on execution: ',  $e->getMessage(), "\n";
+        echo 'Exception on execution: ', $e->getMessage(), "\n";
     }
+
 }
 
-
+//
+//
+//
+function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
+{
+    //error_log($template);
+    //error_log($tpl_source);
+    //find fist foreach and insert as first operation
+    $offset = strpos($tpl_source,'foreach ($_from as $_smarty_tpl');
+    if($offset>0){
+        $pos = strpos($tpl_source,'{',$offset);
+    
+        $res = substr($tpl_source,0,$pos)
+                ."\n".'{ if(smarty_function_progress(array(), $_smarty_tpl)){ return; }'."\n"
+                .substr($tpl_source,$pos+1);
+        
+/*    
+    //str_replace('echo smarty_function_progress','if (smarty_function_progress')
+    $sr = 'smarty_function_progress(array(\'done\'=>$_smarty_tpl->tpl_vars[\'r\']->index),$_smarty_tpl)';
+    //exit from template execution of smarty_function_progress returns true
+    $res = str_replace('echo '.$sr.';', 'if('.$sr.'){ echo "terminated"; return; }',$tpl_source);
+*/
+//DEBUG error_log($res);
+        return $res;
+    }else{
+        return $tpl_source;
+    }
+}
 
 //
 // save report output as file (if there is parameter output)
 //
-function save_report_output($tpl_source, Smarty_Internal_Template $template)
+function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 {
     save_report_output2($tpl_source);
 }
 
 function save_report_output2($tpl_source){
 
-    global $outputfile, $isJSout, $gparams;
+    global $outputfile, $isJSout, $gparams, $publishmode;
 
     $errors = null;
     $res_file = null;
 
-    $publishmode = (array_key_exists("publish", $gparams))? intval($gparams['publish']):0;
+    //$publishmode = (array_key_exists("publish", $gparams))? intval($gparams['publish']):0;
 
     try{
 
@@ -522,7 +577,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
                     $record["recTypeName"] = $rtStructs['typedefs'][$value]['commonFields'][ $rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
                 }else if ($key=="rec_ID"){ //load woottext once per record
 
-                    $record["recWootText"] = getWootText($value);
+                    $record["recWootText"] = getWootText($value); //@todo load dynamically 
                 }
 
             }
@@ -542,7 +597,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
         }
 
         /* find related records */
-        if($recursion_depth==0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
+        if(false && $recursion_depth==0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
 
             $dtValue = array();
 
@@ -773,9 +828,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                         break;
 
                     case 'separator':
-                        break;
                     case 'calculated':
-                        break;
                     case 'fieldsetmarker':
                         break;
 
@@ -819,7 +872,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                     $record = loadRecord($recordID, false, true); //from search/getSearchResults.php
 
                                     $res0 = null;
-                                    if(true){  //64719  45171   48855    57247
+                                    if(true){  //load linked records dynamically
                                         $res0 = getRecordForSmarty($record, $recursion_depth+1, $order_sub); //@todo - need to
                                         $order_sub++;
                                     }
@@ -833,10 +886,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                         //add relationship specific variables
                                         if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                                             $res0["recRelationType"] = $value['RelTerm'];
-                                            /*if(array_key_exists('interpRecID', $value)){
-                                            $record = loadRecord($value['interpRecID']);
-                                            $res0["recRelationInterpretation"] = getRecordForSmarty($record, $recursion_depth+2, $order);
-                                            }*/
+                                            
                                             if(array_key_exists('Notes', $value)){
                                                 $res0["recRelationNotes"] = $value['Notes'];
                                             }
@@ -953,6 +1003,53 @@ function getWootText($recID){
 // Smarty plugin functions allow new functionality to be added to Smarty reports
 // Can be of particular use for complex functions or functions that are used repeatedly by particular installations
 
+
+//
+// quick solution for progress tracking
+//
+function smarty_function_progress($params, &$smarty){
+    global $publishmode, $execution_counter, $execution_total_counter;
+
+    $res = false;
+    
+    if($publishmode==0){ //check that this call from ui
+        
+        if(@$params['done']==null){//not set, this is execution from smarty
+            $execution_counter++;
+        }else{
+            $execution_counter = @$params['done'];
+        }
+        
+        if(isset($execution_total_counter) && $execution_total_counter>0){
+            $tot_count = $execution_total_counter;
+        }else if(@$params['tot_count']>=0){
+            $tot_count = $params['tot_count'];
+        }else{
+            $tot_count = count(@$smarty->getVariable('results')->value);
+        }
+        
+        if($execution_counter<2 || $execution_counter % 5==0 || $execution_counter>$execution_total_counter-3){
+            session_start();
+            $current_val = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'];
+            
+//error_log( @$_COOKIE['heurist-sessionid'].' set porgress to '.$params['done'].'  prev '.$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] );
+
+            if($current_val && $current_val=='terminate'){
+//error_log('terminated!');        
+                $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = '0,0';
+                $res = true;
+            }else{
+//error_log('next '.$execution_counter);        
+                $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = $execution_counter.','.$tot_count;
+                
+            }
+            
+            session_write_close();
+        }
+    
+    }
+    return $res;
+}
 
 //
 // smarty plugin function

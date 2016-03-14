@@ -57,6 +57,8 @@ function ShowReps() {
     var lastQuery = null;
 
     var top_repcontainer = '30px';
+    
+    var progressInterval = null;
 
 
     var handleYes = function() {
@@ -245,8 +247,6 @@ function ShowReps() {
     */
     function _reload(template_file) {
 
-        //not used anymore - limit is shown at the end of report _showLimitWarning();
-
         var baseurl = top.HEURIST.baseURL_V3 + "viewers/smarty/showReps.php";
         var squery = null;
 
@@ -263,6 +263,7 @@ function ShowReps() {
             squery =  'db='+_db+'&template='+template_file+'&recordset='+JSON.stringify(_currentRecordset);
 
         }else{
+            return; //use global recordset only
             squery = _getQueryAndTemplate(template_file, false);
         }
 
@@ -274,7 +275,12 @@ function ShowReps() {
 
             lastQuery = squery;
             
+            _showProgress();
+
             Hul.sendRequest(baseurl, function(xhr) {
+                
+                _hideProgress();
+                
                 var obj = xhr.responseText;
                     _updateReps(obj);
                 
@@ -289,12 +295,112 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     }
                 
                 }, squery);
+                
 
+                
         }
 
         //Hul.getJsonData(baseurl, callback, squery);
     }
 
+    //
+    //
+    //
+    function _showProgress(){
+
+        var progressCounter = 0;        
+        var progress_url = top.HEURIST.baseURL_V3 + "viewers/smarty/reportProgress.php";
+
+        $('#toolbardiv').hide();
+        $('#progressbar_div').show();
+        
+        $('#progress_stop').button().on({click: function() {
+            $.ajax({
+                url: progress_url,
+                data: {db: _db, terminate:1, t:(new Date()).getMilliseconds()},
+                dataType: "text",
+                error: function(jqXHR, textStatus, errorThrown ) {
+                    console.log(textStatus+' '+jqXHR.responseText);
+                    _hideProgress();
+                },
+                success: function( response, textStatus, jqXHR ){
+                    _hideProgress();
+                }
+            });
+        
+        } });
+        
+        var pbar = $('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+        //pbar.progressbar('value', 0);
+        /*{
+              value: false,
+              change: function() {
+                progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+              },
+              complete: function() {
+                progressLabel.text( "Complete!" );
+              }
+        });*/
+        
+        progressInterval = setInterval(function(){ 
+            
+        $.ajax({
+            url: progress_url,
+            type: "GET",
+            data: {db: _db, t:(new Date()).getMilliseconds()},
+            dataType: "text",
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+                console.log(textStatus+' '+jqXHR.responseText);
+                _hideProgress();
+            },
+            success: function( response, textStatus, jqXHR ){
+                
+                var resp = response?response.split(','):[0,0];
+//console.log('resp '+progressCounter+'  resp='+resp);
+                
+                if(resp && resp[0]){
+                    if(progressCounter>0){
+                        if(resp[1]>0){
+                            var val = resp[0]*100/resp[1];
+                            pbar.progressbar( "value", val );
+                            progressLabel.text(resp[0]+' of '+resp[1]);
+                        }else{
+                            progressLabel.text('wait...');
+                        }
+                    }else{
+                        pbar.progressbar( "value", 0 );
+                        progressLabel.text('preparing...');
+                    }
+                }else{
+                    _hideProgress();
+                }
+                
+                
+                progressCounter++;
+                //if(progressCounter>10000){
+                //     _hideProgress();
+                //}
+            }
+        });            
+        
+            }, 500);                
+        
+    }
+    
+    function _hideProgress(){
+        
+        if(progressInterval!=null){
+            
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        $('#progressbar_div').hide();
+        $('#toolbardiv').show();
+        
+    }
 
     function _onbeforeunload() {
         if(_iseditor && _keepTemplateValue && _keepTemplateValue!=codeEditor.getValue()){
@@ -743,8 +849,11 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-white.gif'>");
             infoMessageBox.show();
+            
+            _showProgress();
 
             Hul.sendRequest(baseurl, function(xhr) {
+                _hideProgress();
                 var obj = xhr.responseText;
                 _updateReps(obj);
                 }, squery);
@@ -1773,29 +1882,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             return top.HEURIST.currentQuery_main;
         }
     }
-
-
-
-    //
-    function _showLimitWarning(){
-
-        var msg = "";
-
-        var limit = parseInt(Hul.getDisplayPreference("smarty-output-limit"));
-        if (isNaN(limit)) limit = 1000; //def value for dispPreference
-
-        if( (_sQueryMode=="all" && top.HEURIST.currentQuery_all_waslimited) ||
-            (_sQueryMode=="selected" && top.HEURIST.currentQuery_sel_waslimited) ||
-            (_sQueryMode=="main" && limit<top.HEURIST.totalQueryResultRecordCount))
-        {
-            msg = "&nbsp;&nbsp;<font color='red'>(result set limited to "+limit+")</font>";
-        }else if(_sQueryMode=="main"){
-            msg = "&nbsp;&nbsp;total records: "+top.HEURIST.totalQueryResultRecordCount;
-        }
-
-        document.getElementById('recordCount').innerHTML = msg;
-    }
-
 
 
     //

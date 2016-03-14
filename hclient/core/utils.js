@@ -152,7 +152,11 @@ top.HEURIST4.util = {
                         sq = query_request.q;
                     }
                     
-                    query_string = query_string + '&q=' + (encode?encodeURIComponent(sq):sq);
+                    if(encode){
+                        sq = encodeURIComponent(sq);
+                    }
+                    
+                    query_string = query_string + '&q=' + sq;
                 }
                 if(!top.HEURIST4.util.isempty(query_request.rules)){
                     //@todo simplify rules array - rempove redundant info
