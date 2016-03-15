@@ -236,12 +236,23 @@
                 <tr>
                     <td style="vertical-align: top; text-align: right;">
                         <span class="search_term">field:<i>abc</i>:<i>xxx</i></span>
+                        <br>
+                        <span class="search_term">field:<i>abc</i>:</span>
+                        <br>
+                        <span class="search_term">field:<i>xxx</i></span>
+                        <br>
                         <span class="search_term">f:<i>abc</i>:<i>xxx</i></span>
                     </td>
                     <td>
                         Search for records in public data field <i>abc</i> containing the string <i>xxx</i>.
-                        If <i>xxx</i> is omitted, search for records that have any value in field <i>abc</i>.<br>
-                        The field identifier <i>abc</i> may be the name of the field, for example
+                        <br>
+                        Search for records that have <u>any</u> value in field <i>abc</i>. 
+                        <span class="search_term">-field:<i>abc</i>:</span> searches for records with <u>no</u> values in the field.<span></span>
+                        <br>
+                        Search for records that have value <i>xxx</i> in <u>any</u> field. 
+                        <span class="search_term">-field:<i>xxx</i>:</span> searches for records with value <i>xxx</i> in <u>no</u> fields.<span></span>
+                        <br>                        
+                        <b>field</b> can be shortened to <b>f</b>. The field identifier <i>abc</i> may be the name of the field, for example
                         <span class="search_term">field:"AuthorEditor":Hill</span>,
                         or the field's numerical identifier, <span class="search_term">field:196:Hill</span>.
                         The numerical identifier is preferred, since the name must be the base field name which is often difficult to determine.

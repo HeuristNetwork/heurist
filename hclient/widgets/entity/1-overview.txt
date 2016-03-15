@@ -94,7 +94,7 @@ It consists of 3 widgets: manageEntity (and descendants), searchEntity(and desce
 
 
 2) searchEntity 
-    Content is loaded from assosiated html snippet and activated in widget.
+    Content is loaded from associated html snippet and activated in widget.
     Each search header has search by name input field,  by user/group filter or some other basic filters, 
     as well: recently added/selected filters. 
     

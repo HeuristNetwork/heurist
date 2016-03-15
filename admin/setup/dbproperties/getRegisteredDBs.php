@@ -35,7 +35,7 @@ require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 
 $registeredDBs = array();
 
-$is_named = (@$_REQUEST['named']==1); //return assosiated array
+$is_named = (@$_REQUEST['named']==1); //return associated array
 
 $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
 
