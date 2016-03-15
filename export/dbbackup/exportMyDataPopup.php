@@ -42,7 +42,7 @@ $folder = HEURIST_FILESTORE_DIR."backup/".$username;
 
 $mode = @$_REQUEST['mode'];
 
-// TODO: what has this to do with the price of fish? Is this being used by the dump my data function?
+// Download the dumped data as a zip file
 if($mode=='2' && file_exists($folder.".zip") ){
     downloadFile('application/zip', $folder.".zip");
     exit();
@@ -67,20 +67,23 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
         <?php
 
-        $please_advise = "<br>Please advise your system administrator";
+        $please_advise = "<br>Please consult with your system administrator for a resolution.";
 
         if(!$mode) {
             ?>
 
-            <p><b>This function is available to database adminstrators only (you are a database administrator).</b></p>
-            <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump, as textual and wordprocessor descriptions of the structure of Heurist and of your database, and as a directory of attached files (image files, video, XML, maps, documents etc. which have been uploaded or indexed in situ).</p>
+            <p><b>This function is available to database adminstrators only (therefore you are a database administrator!).</b></p>
+            <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump, 
+            as textual and wordprocessor descriptions of the structure of Heurist and of your database, and as a directory of 
+            attached files (image files, video, XML, maps, documents etc.) which have been uploaded or indexed in situ.</p>
             <p>Attached files may be omitted by unchecking the first checkbox. This may be useful for databases with lots of attached files
                 which are already backed up elsewhere.</p>
             <p>By default the HML file contains all the records to which the current user (administrator) has access, but you can restrict this
-                to only those which you have entered or bookmarked, by unchecking the second checkbox below. The MySQL dump will contain the complete
-                database which can be reloaded on any up-to-date MySQL database server.</p>
+                to only those which you have entered or bookmarked, by unchecking the second checkbox below. 
+                The MySQL dump will contain the complete database which can be reloaded on any up-to-date MySQL database server.</p>
             <p>The output of the process will be made available as a link to a downloadable zip file.
-                Note that zipping very large databases may bog down the server.</p>
+                Note that zipping databases with lots of images or video may bog down the server and the file may not download
+                satisfactorily - in that case it would b e better to ask your sysadmin to give you the archive on a USB drive.</p>
 
             <!-- TODO: Need to also include record type icons, report formats etc. This was originally developed to allow individual users to save their
             data out of the sandpit. With shift to individual and small project databases, it is now best to regard this as a database-administrators-only
@@ -116,7 +119,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 delFolderTree($folder, true);
             }
             if (!mkdir($folder, 0777, true)) {
-                die('Failed to create folder for backup');
+                die('Failed to create folder for backup. Please consult your sysadmin.');
             }
 
             //load hml output into string file and save it
@@ -135,15 +138,14 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $_REQUEST['a'] = '1';
             $_REQUEST['depth'] = '5';
             $_REQUEST['q'] = $q;
-            $_REQUEST['rev'] = 'no'; //do not include reverce pointers
+            $_REQUEST['rev'] = 'no'; //do not include reverse pointers
             $_REQUEST['filename'] = $folder."/backup.xml";
 
-            print "Export as HML (Heurist Markup Language = XML)<br>";
+            print "Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>";
             ob_flush();flush();
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
             $content = "";
-            //$content = get_include_contents($filename);
 
             if (is_file($to_include)) {
                 ob_start();
@@ -154,7 +156,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             $file = fopen ($folder."/backup.xml", "w");
             if(!$file){
-                die("Can't write backup file. Check permissions");
+                die("Can't write backup.xml file. Please ask sysadmin to check permissions");
             }
             fwrite($file, $content);
             fclose ($file);
@@ -162,7 +164,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             // Export database definitions as readable text
 
-            print "Export database definitions as readable text<br>";
+            print "Exporting database definitions as readable text<br>";
             ob_flush();flush();
 
             $url = HEURIST_BASE_URL . "admin/describe/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
@@ -172,7 +174,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             if(is_admin()){
                 // Do an SQL dump of the whole database
-                print "Export SQL dump of the whole database<br>";
+                print "Exporting SQL dump of the whole database<br>";
                 ob_flush();flush();
 
                 try{
@@ -185,7 +187,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             }
 
             if($_REQUEST['includeresources']){
-                print "Export resources (files)<br>";
+                print "Exporting resources (indexed/uploaded files)<br>";
                 ob_flush();flush();
 
                 $squery = "select rec_ID, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt ";
@@ -221,7 +223,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
                                 }
 
                             }else{
-                                print "<p class='error'>File not found: ".$filename_insys."$please_advise</p>";
+                                print "<p class='error'>File not found: ".$filename_insys.
+                                    "<br>Name indicated includes relative path from database file store directory".
+                                    "$please_advise</p>";
                             }
 
                         }
