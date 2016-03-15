@@ -774,10 +774,6 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 
                         }else{ //$exemplar_db
 
-                                        errorOut('ups wrong way');
-                                        return false;
-
-                    
                         // this is global variable that is used in buildCrosswalks.php
                         $templateFileName = "NOT DEFINED";
                         $templateFoldersContent = "NOT DEFINED";
