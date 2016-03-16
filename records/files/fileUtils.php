@@ -302,13 +302,23 @@ function zipDirectory($dir, $zipfile){
 //
 function delFolderTree($dir, $rmdir) {
 
-    array_map('unlink', glob($dir."/*"));
+    $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+    );
+
+    foreach ($files as $fileinfo) {
+        $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+        $todo($fileinfo->getRealPath());
+    }
 
     if($rmdir){
         return rmdir($dir);
     }else{
         return true;
     }
+    
+//works for empty and flat folders only    array_map('unlink', glob($dir."/*"));
 }
 
 function loadRemoteURLviaSocket($url) {

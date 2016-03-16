@@ -750,7 +750,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             }
 
             if(@$res['ulf_FilePath'] || @$res['ulf_FileName']){
-                $res['fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
+                $res['fullpath'] = @$res['ulf_FilePath'].@$res['ulf_FileName'];
             }
             //add database media storage folder for relative paths
             $res['fullpath'] = resolveFilePath(@$res['fullpath']);

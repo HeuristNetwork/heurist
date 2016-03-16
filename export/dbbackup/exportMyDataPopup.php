@@ -207,17 +207,23 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     //loop for records/details
                     while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
                         $filename_orig = $row[4];
-                        $filename_insys = $row[2].$row[3];
-                        if($row[1] && $filename_orig){
+                        $filename_insys = null;
+                        
+                        if(@$row[2] || @$row[3]){
+                            $filename_insys = @$row[2].@$row[3];
+                            $filename_insys = resolveFilePath($filename_insys);
+                        }
+                        
+                        if($filename_insys && $row[1] && $filename_orig){
 
                             if(file_exists($filename_insys)){
 
-                                $imgfolder = $folder."/resources";
+                                $imgfolder = $folder.'/resources/';
                                 if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
                                     print "<p class='error'>'Failed to create folder for file resources: ".$imgfolder."$please_advise</p>";
                                     break;
                                 }else{
-                                    $filename = $imgfolder."/".$filename_orig;
+                                    $filename = $imgfolder.$filename_orig;
                                     //copy file
                                     copy($filename_insys, $filename);
                                 }
@@ -237,13 +243,14 @@ if($mode=='2' && file_exists($folder.".zip") ){
             // Create a zipfile of the definitions and data which have been dumped to disk
 
             if(file_exists($folder.".zip")) unlink($folder.".zip");
-            $cmdline = "zip -r -j ".$folder.".zip ".$folder;
+            chdir($folder);
+            $cmdline = "zip -r ".$folder.".zip *"; //.$folder;  //-j - don't store folders
 
             $res1 = 0;
             $output1 = exec($cmdline, $output, $res1);
             if ($res1 != 0 ) {
                 print  ("<p class='error'>Exec error code $res1: Unable to create zip file $folder.zip>&nbsp;$please_advise<br>");
-                print  $output;
+                print  print_r($output,true);
                 print  "</p> Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator.";
                 print "Your data have been backed up in ".$folder;
                 print "<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder";
