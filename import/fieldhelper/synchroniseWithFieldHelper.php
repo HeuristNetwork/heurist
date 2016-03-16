@@ -95,18 +95,21 @@ if (! is_logged_in()) {
         $mediaExts = null;
         $progress_divid = 0;
         $system_folders = array(HEURIST_THUMB_DIR,
-            HEURIST_FILESTORE_DIR."/generated-reports/",
             HEURIST_ICON_DIR,
-            HEURIST_FILESTORE_DIR."/scratch/",
-            HEURIST_FILESTORE_DIR."/settings/",
-            HEURIST_FILESTORE_DIR."/backup/",
-            HEURIST_FILESTORE_DIR.'/documentation_and_templates/',
-            HEURIST_FILESTORE_DIR.'/term-images/',
+            HEURIST_FILES_DIR,
+            HEURIST_FILESTORE_DIR."backup/",
+            HEURIST_FILESTORE_DIR.'documentation_and_templates/',
+            HEURIST_FILESTORE_DIR."faims/",
+            HEURIST_FILESTORE_DIR."generated-reports/",
+            HEURIST_FILESTORE_DIR."scratch/",
+            HEURIST_FILESTORE_DIR."settings/",
+            HEURIST_FILESTORE_DIR.'term-images/',
             HEURIST_SMARTY_TEMPLATES_DIR,
             HEURIST_XSL_TEMPLATES_DIR);
         if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
         if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
+        
         mysql_connection_overwrite(DATABASE);
         if(mysql_error()) {
             die("Sorry, could not connect to the database (mysql_connection_overwrite error)");

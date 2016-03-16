@@ -107,10 +107,10 @@
             'ulf_MimeExt ' => $mimetypeExt,
             'ulf_FileSizeKB' => $file_size,
             'ulf_Description' => $description? $description : NULL,
-            'ulf_FilePath' => '', //was HEURIST_FILES_DIR
+            'ulf_FilePath' => 'file_uploads/', //relative path to HEURIST_FILESTORE_DIR - db root
             'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt))
         );
-
+                                             
         if (! $res) {
             $uploadFileError = "Error inserting file upload information into database. The most likely cause is that the mime type for this file is not recognised. Please add mime type from Database > Administration > Structure > Define mime types. Otherwise pelase contact your system administrator or the Heurist developers.";
             return $uploadFileError;
@@ -208,13 +208,13 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
             $file_size = round($size / 1024);
         }
 
-        // get relative path
-        $relative_path = getRelativePath(HEURIST_FILES_DIR, $dirname);
+        // get relative path to db root folder
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
 
         //check if such file is already registered
         $res = mysql_query('select ulf_ID from recUploadedFiles '
-            .'where ulf_FileName = "'.addslashes($filename).'" and '
-            .' (ulf_FilePath = "'.addslashes(HEURIST_FILES_DIR).'" or ulf_FilePath = "'.addslashes($relative_path).'")');
+            .'where ulf_FileName = "'.mysql_real_escape_string($filename).'" and '
+            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.mysql_real_escape_string($relative_path).'")');
 
         if (mysql_num_rows($res) == 1) {
             $row = mysql_fetch_assoc($res);
@@ -662,19 +662,18 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
     */
     function resolveFilePath($path){
 
-
-
             if( $path && !file_exists($path) ){
-                chdir(HEURIST_FILES_DIR);          // HEURIST_FILESTORE_DIR.'file_uploads'
+                chdir(HEURIST_FILESTORE_DIR);  // relatively db root
                 $fpath = realpath($path);
                 if(file_exists($fpath)){
                     return $fpath;
                 }else{
-                    chdir(HEURIST_FILESTORE_DIR);
+                    chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
                     $fpath = realpath($path);
                     if(file_exists($fpath)){
                         return $fpath;
                     }else{
+                        //special case to support absolute path on file server
                         if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
                             $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
                             if(file_exists($fpath)){
@@ -793,8 +792,10 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
         if($params){
             $pairs = explode('|', $params);
             foreach ($pairs as $pair) {
-                list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
-                $op[$k] = $v;
+                if(strpos($pair,'=')>0){
+                    list($k, $v) = explode("=", $pair); //array_map("urldecode", explode("=", $pair));
+                    $op[$k] = $v;
+                }
             }
         }
         return $op;

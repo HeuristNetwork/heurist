@@ -122,7 +122,7 @@
     } else {
       $filename = HEURIST_FILESTORE_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
     }
-
+    
     $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
     $filename = str_replace('//', '/', $filename);
   }

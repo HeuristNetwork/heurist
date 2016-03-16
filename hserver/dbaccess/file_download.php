@@ -128,7 +128,7 @@ if($db){
                 <?php
             }else{
 
-                $filepath = HEURIST_FILES_DIR . $filepath;
+                $filepath = resolveFilePath($filepath);
 
 //DEBUG error_log($filepath.'  '.file_exists($filepath).'  '.$mimeType);                
                 if(file_exists($filepath)){
@@ -148,6 +148,39 @@ if($db){
 
     }
 }
+
+/**
+* resolve path relatively db root or file_uploads
+* 
+* @param mixed $path
+*/
+function resolveFilePath($path){
+
+        if( $path && !file_exists($path) ){
+            chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+            $fpath = realpath($path);
+            if(file_exists($fpath)){
+                return $fpath;
+            }else{
+                chdir(HEURIST_FILES_DIR);          // relatively file_uploads 
+                $fpath = realpath($path);
+                if(file_exists($fpath)){
+                    return $fpath;
+                }else{
+                    //special case to support absolute path on file server
+                    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                        if(file_exists($fpath)){
+                            return $fpath;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $path;
+}
+
 
 /**
 * direct file download
