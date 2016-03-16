@@ -21,157 +21,110 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 # See the License for the specific language governing permissions and limitations under the License.
 
-echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
-
 echo
 echo "----------------------- Checking server for installed packages Ubuntu/Debian ---------------------------"
 echo
 echo
 
-
-echo -e "\n\n\n\n\n\n"
-                               
-
-/* REMOVED
-echo "checking for: wget"
-if ! dpkg -s wget > /dev/null; then
-        echo "wget not found."
-        exit 1
-fi
-
-echo "checking for: memcached"
-if ! dpkg -s memcached > /dev/null; then
-        echo "memcached not found."
-        exit 1
-fi
-
-echo "checking for: libapache2-mod-php5"
-if ! dpkg -s libapache2-mod-php5 > /dev/null; then
-        echo "libapache2-mod-php5 not found."
-        exit 1
-fi
-
-*/
-
-/* ******** REQUIRED ************ */
+# ******** REQUIRED ************ 
                                
 echo "checking for: curl"
 if ! dpkg -s curl > /dev/null; then
         echo "curl not found."
-        exit 1
 fi
 
-echo "checking for: xsl"
-if ! dpkg -s xsl > /dev/null; then
-        echo "xsl not found."
-        exit 1
+echo "checking for: php5"
+if ! dpkg -s php5 > /dev/null; then
+        echo "php5 not found."
 fi
 
-echo "checking for: mysql"
-if ! dpkg -s mysql > /dev/null; then
-        echo "mysql not found."
-        exit 1
+echo "checking for: php5-curl"
+if ! dpkg -s php5-curl > /dev/null; then
+        echo "php5-curl not found."
 fi
 
-echo "checking for: mysqli"
-if ! dpkg -s mysqli > /dev/null; then
-        echo "mysqli not found."
-        exit 1
+
+echo "checking for: mysql-server"
+if ! dpkg -s mysql-server > /dev/null; then
+        echo "mysql-server not found."
+fi
+
+echo "checking for: php5-xsl"
+if ! dpkg -s php5-xsl > /dev/null; then
+        echo "php5-xsl not found."
+fi
+
+echo "checking for:  php5-mysql"
+if ! dpkg -s  php5-mysql > /dev/null; then
+        echo " php5-mysql not found."
 fi
 
 echo "checking for: memcache"
 if ! dpkg -s php5-memcache > /dev/null; then
         echo "php5-memcache not found."
-        exit 1
 fi
 
-echo "checking for: SPL"
-if ! dpkg -s SPL > /dev/null; then
-        echo "SPL not found."
-        exit 1
+echo "checking for: php5-memcached"
+if ! dpkg -s php5-memcached > /dev/null; then
+        echo "php5-memcached not found."
 fi
 
-echo "checking for: filter"
-if ! dpkg -s filter > /dev/null; then
-        echo "filter not found."
-        exit 1
-fi
+#echo "checking for: SPL"
+#if ! dpkg -s SPL > /dev/null; then
+#        echo "SPL not found."
+#fi
 
-echo "checking for: pcre"
-if ! dpkg -s pcre > /dev/null; then
-        echo "pcre not found."
-        exit 1
-fi
+#echo "checking for: filter"
+#if ! dpkg -s filter > /dev/null; then
+#        echo "filter not found."
+#fi
 
-echo "checking for: xml"
-if ! dpkg -s xml > /dev/null; then
-        echo "xml not found."
-        exit 1
-fi
+#echo "checking for: pcre"
+#if ! dpkg -s pcre > /dev/null; then
+#        echo "pcre not found."
+#fi
 
-echo "checking for: simpleXML"
-if ! dpkg -s simpleXML > /dev/null; then
-        echo "simpleXML not found."
-        exit 1
-fi
 
-echo "checking for: gd"
-if ! dpkg -s gd > /dev/null; then
-        echo "gd not found."
-        exit 1
+#echo "checking for: simpleXML"
+#if ! dpkg -s simpleXML > /dev/null; then
+#        echo "simpleXML not found."
+#fi
+
+echo "checking for: php5-gd"
+if ! dpkg -s php5-gd > /dev/null; then
+        echo "php5-gd not found."
 fi
 
 echo "checking for: zip"
 if ! dpkg -s zip > /dev/null; then
         echo "zip not found."
-        exit 1
 fi
 
-echo "checking for: mbstring"
-if ! dpkg -s mbstring > /dev/null; then
-        echo "mbstring not found."
-        exit 1
+# ******** OPTIONAL ************ 
+
+echo "checking for: php5-gd"
+if ! dpkg -s php5-gd > /dev/null; then
+        echo "php5-gd not found."
 fi
 
-echo "checking for: json"
-if ! dpkg -s json > /dev/null; then
-        echo "json not found."
-        exit 1
+echo "checking for: zip"
+if ! dpkg -s zip > /dev/null; then
+        echo "zip not found."
 fi
 
-echo "checking for: session"
-if ! dpkg -s session > /dev/null; then
-        echo "session not found."
-        exit 1
-fi
+#echo "checking for: exif"
+#if ! dpkg -s exif > /dev/null; then
+#        echo "exif not found  (only req. for file indexing)."
+#fi
+#
 
-echo "checking for: dom"
-if ! dpkg -s dom > /dev/null; then
-        echo "dom not found."
-        exit 1
-fi
-
-/* ******** OPTIONAL ************ */
-
-echo "checking for: pdo"
-if ! dpkg -s pdo > /dev/null; then
-        echo "pdo not found (only req. for FAIMS)."
-        exit 1
-fi
-
-echo "checking for: pdo_sqlite"
-if ! dpkg -s pdo_sqlite > /dev/null; then
-        echo "pdo_sqlite not found (only req. for FAIMS)."
-        exit 1
-fi
-
-echo "checking for: exif"
-if ! dpkg -s exif > /dev/null; then
-        echo "exif not found  (only req. for file indexing)."
-        exit 1
+echo "checking for: postfix"
+if ! dpkg -s php5-sqlite > /dev/null; then
+        echo "php5-sqlite not found."
 fi
 
 
+echo 
 echo "Checks completed. Errors, if any, are reported above."
 
 echo
