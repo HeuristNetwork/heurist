@@ -1984,7 +1984,13 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             alert(msg);    
         }
     },
-
+    showMessage: function(msg){
+        if(top.HEURIST4 && top.HEURIST4.msg){
+            top.HEURIST4.msg.showMsgDlg(msg);
+        }else{
+            alert(msg);    
+        }
+    },
 
 /**
 * Returns array that contain the mouse position relative to the document

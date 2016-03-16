@@ -325,6 +325,10 @@ if (array_key_exists('mode', $_REQUEST)) {
 
                         menuEntry('','Fix invalid characters','verification/cleanInvalidChars.php?db='.HEURIST_DBNAME,
                             'Attempt to clean up invalid characters in the wysiwyg text fields');
+                            
+                        menuEntry('','Verify uploaded files','verification/listUploadedFilesErrors.php?db='.HEURIST_DBNAME,
+                            'Find errors in database uploaded files');
+                            
                         ?>
                         <li><a href="<?=HEURIST_BASE_URL?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                             title="Search showing bookmarked records which you have not tagged">
