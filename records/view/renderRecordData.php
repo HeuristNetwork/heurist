@@ -302,14 +302,14 @@ function print_private_details($bib) {
                     print '<span style="font-weight: bold; color: black;">'.htmlspecialchars($workgroup_name).'</span>';
                     switch ($bib['rec_NonOwnerVisibility']) {
                         case 'hidden':
-                            print '<span> - hidden to all except owner</span></div></div>';
+                            print '<span> - hidden to all except owner(s))</span></div></div>';
                             break;
                         case 'viewable':
-                            print '<span> - read-only to other logged-in users</span></div></div>';
+                            print '<span> - readable by other logged-in users</span></div></div>';
                             break;
                         case 'public':
                         default:
-                            print '<span> - readable by anyone</span></div></div>';
+                            print '<span> - readable by anyone (public)</span></div></div>';
                     }
                 }
 
