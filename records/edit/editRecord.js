@@ -2428,12 +2428,13 @@ console.log('heurist not defined');
         if (this.choosing) return;    // we are already choosing a record pointer (aka resource)!
         this.choosing = true;
         var thisRef = this;
+        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (! searchValue) searchValue = element.textElt.value;
         var url = top.HEURIST.baseURL_V3+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
-        if (top.HEURIST.edit.record)
-            url += "&target_recordtype="+top.HEURIST.edit.record.rectypeID;
+        if (windowRef.parent.HEURIST.edit.record)   //0317 top
+            url += "&target_recordtype="+windowRef.parent.HEURIST.edit.record.rectypeID; //0317 top
         if (element.input.constrainrectype)
             url += "&t="+element.input.constrainrectype;
         top.HEURIST.util.popupURL(window, url, {
@@ -2962,18 +2963,18 @@ console.log('heurist not defined');
                 inputDiv.fileElt = fileElt;
 
                 var thisRef = this;
-                fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
+                fileElt.onchange = function() { windowRef.parent.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };   //top 0317
                 inputDiv.className = "file-div empty";
 
                 //additional button for Thumbnail Image - to create web snap shot
-                if(top.HEURIST.edit.record && top.HEURIST.edit.record.rectypeID &&
-                    Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
+                if(windowRef.parent.HEURIST.edit.record && windowRef.parent.HEURIST.edit.record.rectypeID &&             //top 0317
+                    Number(windowRef.parent.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
                     var thumbElt = this.document.createElement("input");
                     thumbElt.name = inputDiv.name;
                     thumbElt.value = "Web page snapshot";
                     thumbElt.type = "button";
                     thumbElt.title = "Click here to snapshot the web page indicated by the URL and store as the thumbnail field";
-                    thumbElt.onclick = function(){top.HEURIST.edit.uploadURL.call(thisRef, fileElt);}
+                    thumbElt.onclick = function(){windowRef.parent.HEURIST.edit.uploadURL.call(thisRef, fileElt);}       //top 0317
                     inputDiv.appendChild(thumbElt);
                     inputDiv.thumbElt = thumbElt;
                 }
@@ -3219,7 +3220,7 @@ console.log('heurist not defined');
 
             geoImg.onmouseover= function(e) {
                 //mapViewer.showAt(e, bdValue.geo.value); //dynamic google map (use digitizer.js)
-                mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID, input.value); //static google map (use showMapUrl.php) see mapViewer.js
+                mapViewer.showAtStatic(e, windowRef.parent.HEURIST.edit.record.bibID, input.value); //static google map (use showMapUrl.php) see mapViewer.js
             };
 
             var description = this.geoValueToDescription(bdValue.geo);
@@ -3242,6 +3243,8 @@ console.log('heurist not defined');
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(element, value) {
         if (! value) return; // "cancel"
 
+        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+        
         var description = this.wktValueToDescription(value); //get human readable string
 
         element.input.name = element.input.name.replace(/^_/, "");
@@ -3251,13 +3254,12 @@ console.log('heurist not defined');
         element.descriptionSpan.appendChild(this.document.createTextNode(" " + description.summary + " "));
         element.geoImg.onmouseover= function(e) {
             //mapViewer.showAt(e, value);  //dynamic
-            mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID, element.input.value ); //static google map (use showMapUrl.php) see mapViewer.js
+            mapViewer.showAtStatic(e, windowRef.parent.HEURIST.edit.record.bibID, element.input.value ); //static google map (use showMapUrl.php) see mapViewer.js
         };
 
         element.editLink.innerHTML = "edit";
         element.className = "geo-div";    // not empty
 
-        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         if (windowRef.changed) windowRef.changed();
 
     }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo
@@ -3345,6 +3347,14 @@ console.log('heurist not defined');
     * @param {Object} parentElement
     */
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = function(cmd, relID) {
+        
+        var windowRef = parent;
+        if(this.document){
+            windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+        }else{
+            windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+        }
+        
         if (cmd == "delete") {
             var fakeForm = { action: top.HEURIST.baseURL_V3+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
                 elements: [ { name: "delete[]", value: relID },
@@ -3353,7 +3363,7 @@ console.log('heurist not defined');
             top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
                 var val = eval(json.responseText);
                 if (val && val.byRectype) {
-                    top.HEURIST.edit.record.relatedRecords = val;
+                    windowRef.parent.HEURIST.edit.record.relatedRecords = val; //top 0317
                 }else if(val && val.error) {
                     alert(" Problem with relationship marker: " + val.error);
                 }
@@ -3398,13 +3408,13 @@ console.log('heurist not defined');
         var newInput = this.document.createElement("div");
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.id = "relations-tbody";
-        var relatedRecords = (    this.recID &&
-            parent.HEURIST &&
-            parent.HEURIST.edit &&
-            parent.HEURIST.edit.record &&
-            parent.HEURIST.edit.record.bibID == this.recID &&
-            parent.HEURIST.edit.record.relatedRecords ? parent.HEURIST.edit.record.relatedRecords : null);
-        this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,
+        var relatedRecords = (    this.recID &&                            //0317 was just parent
+            this.windowRef.parent.HEURIST &&
+            this.windowRef.parent.HEURIST.edit &&
+            this.windowRef.parent.HEURIST.edit.record &&
+            this.windowRef.parent.HEURIST.edit.record.bibID == this.recID &&
+            this.windowRef.parent.HEURIST.edit.record.relatedRecords ? this.windowRef.parent.HEURIST.edit.record.relatedRecords : null);
+        this.relManager = new top.RelationManager(newInput, this.windowRef.parent.HEURIST.edit.record, relatedRecords,
             this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification, true, false);
         return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput

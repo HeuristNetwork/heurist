@@ -730,7 +730,8 @@ if (!top.Relationship) {
 
             var rfr = top.HEURIST.rectypes.typedefs[this.rectypeID].dtFields[dtIDRelmarker];
             // get any trgPointer restrictions
-            var trgRectypeList = temp = rfr[rstFieldNamesToRdrIndexMap['rst_PtrFilteredIDs']]; //constraints for this rectype
+            var p_idx = rstFieldNamesToRdrIndexMap['rst_PtrFilteredIDs']
+            var trgRectypeList = temp = rfr[p_idx]; //constraints for this rectype
             var targetRectypes = {};
             if (temp) {
                 temp = temp.split(",");

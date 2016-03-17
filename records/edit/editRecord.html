@@ -42,7 +42,7 @@
         <link rel=stylesheet href="../../common/css/global.css">
         <link rel=stylesheet href="../../common/css/edit.css">
 
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
 
         <script type="text/javascript" src="../../external/js/jquery.calendars-1.2.1/jquery.calendars.js"></script>
@@ -58,14 +58,49 @@
 
         <script src="../../common/js/utilsLoad.js"></script>
         <script src="../../common/js/temporalObjectLibrary.js"></script>
+<!--        
         <script src="../../common/php/getMagicNumbers.php"></script>
         <script src="relationshipsObjectLibrary.js" type="text/javascript" ></script>
         <script src="../../common/php/loadUserInfo.php"></script>
-
         <script src="../../records/edit/digitizer/mapViewer.js"></script>
+-->
 
         <script>
-            top.HEURIST.whenLoaded("obj-user", function() {
+            
+            $.getMultiScripts = function(arr, path) {
+                var _arr = $.map(arr, function(scr) {
+                    return $.getScript( (path||"") + scr );
+                });
+
+                _arr.push($.Deferred(function( deferred ){
+                    $( deferred.resolve );
+                }));
+
+                return $.when.apply($, _arr);
+            }            
+            
+            var dbname = top.HEURIST.getQueryVar("db");
+console.log('>>>>'+dbname);            
+
+            $.getMultiScripts([
+                  '../../common/php/getMagicNumbers.php?db='+dbname,
+                  'relationshipsObjectLibrary.js',
+                  '../../common/php/loadUserInfo.php?db='+dbname,
+                  '../../records/edit/digitizer/mapViewer.js',
+                  '../../common/php/loadCommonInfo.php?db='+dbname,
+                  '../../common/php/displayPreferences.php?db='+dbname
+            ])
+                .done(scriptsLoaded)
+                .fail(function(error) {
+                    //          
+                    alert('Error on script laoding');
+                }).always(function() {
+                    // always called, both on success and error
+                }); 
+
+
+            function scriptsLoaded() {
+console.log('>>>> loaded userinfo');            
                 if (!top.HEURIST.baseURL_V3) {
                     top.HEURIST.baseURL_V3 = location.protocol + "//" + location.hostname + top.HEURIST.baseURL_V3;
                 }
@@ -83,10 +118,13 @@
                     "common/connect/login.php?"+dbname+
                     "last_uri=" + escape(top.HEURIST.baseURL_V3 + "records/edit/editRecord.html" + lsearch ));
                 }
-            });
+            }
         </script>
+        <!--
         <script src="../../common/php/loadCommonInfo.php"></script>
         <script src="../../common/php/displayPreferences.php"></script>
+        -->
+        
 
         <script src="editRecord.js" type="text/javascript" ></script>
         <!-- script src="inputUrlInclude.js"></script -->
@@ -175,11 +213,14 @@
 
             });
         </script>
-        <script src="../../common/php/loadHAPI.php"></script> <!-- TODO: FIXME:  need to just change hapi to load without instances and keys  -->
+        <script src="../../common/php/loadHAPI.php"></script> 
 
         <script>
             top.HEURIST.registerEvent(window, "contentloaded", function() {
-                document.getElementById("home-link").href = top.HEURIST.baseURL_V3 + "?db=" +top.HEURIST.database.name;
+                
+                var dbname = top.HEURIST.getQueryVar("db");
+                
+                document.getElementById("home-link").href = top.HEURIST.baseURL_V3 + "?db=" +dbname;
                 
                 //verify terms and record contraints
                 setTimeout(function(){
@@ -191,7 +232,7 @@
                         }
 
                     });
-                },1000);
+                },1500);
 
 
             });

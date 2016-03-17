@@ -57,14 +57,16 @@
 <body class="editTab ui-heurist-bg-light" onload="onshow()">
 
 	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-	<script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
 
 <!-- replaced to jquery.calendar
+    <script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
+
 	<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
 	<script type="text/javascript" src="../../../common/js/calendar.js"></script>
 -->
     
 <script>
+        $.getScript('../../../common/php/displayPreferences.php?db='+top.HEURIST.database.name);
 
 		document.write('<form method=post enctype="multipart/form-data"'+
 				' onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"' +

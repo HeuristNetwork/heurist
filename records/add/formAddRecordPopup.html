@@ -39,7 +39,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <link rel=stylesheet href="../../common/css/global.css">
   
-  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
+  <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
   <script type="text/javascript" src="../../common/js/hintDiv.js"></script>
   
 </head>
@@ -48,23 +48,53 @@
 
         <script src="../../common/js/utilsLoad.js"></script>
         <script src="../../common/js/temporalObjectLibrary.js"></script>
-        <script src="../../common/php/getMagicNumbers.php"></script> <!-- xxx -->
+<!--        
+        <script src="../../common/php/getMagicNumbers.php"></script>  xxx 
         <script src="../../records/edit/relationshipsObjectLibrary.js"></script>
-        <script src="../../common/php/loadUserInfo.php"></script> <!-- xxx -->
-
+        <script src="../../common/php/loadUserInfo.php"></script> xxx
         <script src="../../records/edit/digitizer/mapViewer.js"></script>
-
-        <script src="../../common/php/loadCommonInfo.php"></script> <!-- xxx -->
+        <script src="../../common/php/loadCommonInfo.php"></script> xxx
         <script src="../../common/php/displayPreferences.php"></script>
-
+-->        
         <script src="../../records/edit/editRecord.js"></script>  
-  
-  
 <div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
 <div id="add_records_footer"><input type=button onClick="window.HEURIST.edit.save();" value="Save new record">
 <input type=button onClick="window.close();" value="Cancel"></div>
   <script>
+  
+            $.getMultiScripts = function(arr, path) {
+                var _arr = $.map(arr, function(scr) {
+                    return $.getScript( (path||"") + scr );
+                });
+
+                _arr.push($.Deferred(function( deferred ){
+                    $( deferred.resolve );
+                }));
+
+                return $.when.apply($, _arr);
+            }            
+            
+            var dbname = top.HEURIST.getQueryVar("db");
+
+            $.getMultiScripts([
+                  '../../common/php/getMagicNumbers.php?db='+dbname,
+                  '../../records/edit/relationshipsObjectLibrary.js',
+                  '../../common/php/loadUserInfo.php?db='+dbname,
+                  '../../records/edit/digitizer/mapViewer.js',
+                  '../../common/php/loadCommonInfo.php?db='+dbname,
+                  '../../common/php/displayPreferences.php?db='+dbname
+            ])
+                //.done()
+                .fail(function(error) {
+                    //          
+                    alert('Error on script laoding');
+                }).always(function() {
+                    // always called, both on success and error
+                }); 
+  
+  
+  
 
 window.HEURIST.edit = {
 	publicHasChanged: false,

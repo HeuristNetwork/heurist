@@ -294,7 +294,7 @@ function cloneDatabase($targetdbname) {
     //TODO: Needs error report, trap error and warn or abort clone
     recurse_copy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
 
-    // Update file path in target database
+    // Update file path in target database  with absolute paths
     $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
     "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
     $res1 = mysql_query($query1);

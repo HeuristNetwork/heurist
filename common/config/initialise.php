@@ -270,6 +270,7 @@ define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_IN
 if (@$_REQUEST["db"]) { //if uri has DB then use it
     $dbName = $_REQUEST["db"];
 } else if (@$_SERVER["HTTP_REFERER"] && preg_match("/.*db=([^&]*).*/", $_SERVER["HTTP_REFERER"], $refer_db)) { //else check refer
+    //this is very unreliable!!!!
     $dbName = $refer_db[1];
 }
 
