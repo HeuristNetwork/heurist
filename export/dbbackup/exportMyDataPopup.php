@@ -147,20 +147,27 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
             $content = "";
 
+            if(@$_REQUEST['includeresources'] == '1'){
+                $imgfolder = $folder.'/resources/';
+                if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
+                    print "<p class='error'>'Failed to create folder for file resources: ".$imgfolder."$please_advise</p>";
+                    break;
+                }
+            }
+            
             if (is_file($to_include)) {
                 ob_start();
                 include $to_include;
                 $content = ob_get_contents();
                 ob_end_clean();
             }
-
+            
             $file = fopen ($folder."/backup.xml", "w");
             if(!$file){
                 die("Can't write backup.xml file. Please ask sysadmin to check permissions");
             }
             fwrite($file, $content);
             fclose ($file);
-
 
             // Export database definitions as readable text
 
@@ -217,6 +224,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
                         if($filename_insys && $row[1] && $filename_orig){
 
                             if(file_exists($filename_insys)){
+                                
+                                //get relative path
+                                
 
                                 $imgfolder = $folder.'/resources/';
                                 if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){

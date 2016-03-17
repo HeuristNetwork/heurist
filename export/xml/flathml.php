@@ -1099,12 +1099,20 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
                 $file = get_uploaded_file_info_internal($file['id'], false);
                 if ($file['fullpath'] && file_exists($file['fullpath'])) {
                     //backup file inot backup/user folder
-                    $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/";
+                    $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/resources/";
+                    
+                    if(!file_exists($folder) && !mkdir($folder, 0777, true)){
+                        print "<p class='error'>'Failed to create folder for file resources: ".$folder.'</p>';
+                        break;
+                    }
+                    
                     $path_parts = pathinfo($file['fullpath']);
                     $file['URL'] = $path_parts['basename'];
                     $filename_bk = $folder . $file['URL'];
                     copy($file['fullpath'], $filename_bk);
                     unset($file['thumbURL']);
+                    
+                    $file['URL'] = 'resources/'.$file['URL'];
                 }
             }
             openTag('detail', $attrs);
@@ -1389,7 +1397,12 @@ if (@$_REQUEST['pathfilename']) {
     $hmlAttrs['pathfilename'] = $_REQUEST['pathfilename'];
 }
 
-if(true || @$_REQUEST['rules']){ //search with h4 search engine
+if(@$_REQUEST['filename']){
+
+    $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
+
+}else{
+// true || @$_REQUEST['rules']){ //search with h4 search engine
 
     $url = HEURIST_BASE_URL."hserver/controller/record_search.php";
 
@@ -1419,8 +1432,6 @@ if(true || @$_REQUEST['rules']){ //search with h4 search engine
     */
 
 
-}else{
-    $result = loadSearch($_REQUEST, false, true, $PUBONLY); //load IDS only
 }
 
 $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));

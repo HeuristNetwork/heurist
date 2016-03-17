@@ -1290,7 +1290,10 @@ function REQUEST_to_query($query, $search_type, $parms=NULL, $wg_ids=NULL, $publ
 
 	/* use the supplied _REQUEST variables (or $parms if supplied) to construct a query starting with $query */
 	if (! $parms) $parms = $_REQUEST;
-	define('stype', @$parms['stype']);
+    if (!defined('stype') && @$parms['stype']){
+            define('stype', @$parms['stype']);
+    }
+	        
 
 	if (! $wg_ids  &&  function_exists('get_user_id')) {
 		$wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
