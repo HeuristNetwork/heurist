@@ -609,10 +609,17 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
         }
 
         /* find related records */
-        if(false && $recursion_depth==0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
+        if($recursion_depth==0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
 
             $dtValue = array();
 
+            // get rel records where current record is source
+            $from_res = mysql_query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID='.$record["recID"]);
+            
+            // get rel records where current record is target
+            $to_res = mysql_query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$record["recID"]);
+
+            /* old slow way                                   
             $from_res = mysql_query('select recDetails.*
                 from recDetails
                 left join Records on rec_ID = dtl_RecID
@@ -625,9 +632,11 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
                 where dtl_DetailTypeID = '.$relTrgDT.
                 ' and rec_RecTypeID = '.$relRT.
                 ' and dtl_Value = ' . $record["recID"]);          //linked resource
+            */
 
             if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
 
+                //load relationship record details
                 while ($reln = mysql_fetch_assoc($from_res)) {
                     $bd = fetch_relation_details($reln['dtl_RecID'], true);
                     array_push($dtValue, $bd);
@@ -637,8 +646,7 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
                     array_push($dtValue, $bd);
                 }
 
-
-                $dt = getDetailForSmarty(-1, $dtValue, 2, $recTypeID, $record["recID"]);
+                $dt = getDetailForSmarty(-1, $dtValue, 1, $recTypeID, $record["recID"]);
                 if($dt){
                     $record = array_merge($record, $dt);
                 }
