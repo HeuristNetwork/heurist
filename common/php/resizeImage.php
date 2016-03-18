@@ -123,6 +123,20 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
             $mimeExt = $matches[1];
         }
+        
+        if (function_exists('exif_imagetype')) {
+            switch(@exif_imagetype($filename)){
+                case IMAGETYPE_JPEG:
+                    $mimeExt = 'jpg';
+                    break;
+                case IMAGETYPE_PNG:
+                    $mimeExt = 'png';
+                    break;
+                case IMAGETYPE_GIF:
+                    $mimeExt = 'gif';
+                    break;
+            }
+        }
 
 
         switch($mimeExt) {
