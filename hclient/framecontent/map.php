@@ -162,8 +162,8 @@ require_once(dirname(__FILE__)."/initPage.php");
             top.HAPI4.RecordMgr.search({q: q, w: "all", detail:"timemap", l:3000},
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
-                        console.log("onMapInit response");
-                        console.log(response);
+                        //console.log("onMapInit response");
+                        //console.log(response);
 
                         // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
                         var recset = new hRecordSet(response.data);

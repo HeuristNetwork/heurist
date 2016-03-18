@@ -268,7 +268,7 @@ function hRecordSet(initdata) {
                 timeline:{ items:titems } //, start: min_date  ,end: max_date  }
             };
 
-console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length+' of '+timeenabled);            
+//console.log('mapitems: '+aitems.length+' of '+mapenabled+'  time:'+titems.length+' of '+timeenabled);            
             
         return dataset;
     }//end _toTimemap
