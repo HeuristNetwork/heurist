@@ -1383,7 +1383,7 @@ $hmlAttrs = array();
 
 $hmlAttrs['xmlns'] = 'http://heuristnetwork.org';
 $hmlAttrs['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance';
-$hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_hml.xsd';
+$hmlAttrs['xsi:schemaLocation'] = 'http://heuristnetwork.org/reference/scheme_hml.xsd';
 
 if ($USEXINCLUDE) {
     $hmlAttrs['xmlns:xi'] = 'http://www.w3.org/2001/XInclude';
