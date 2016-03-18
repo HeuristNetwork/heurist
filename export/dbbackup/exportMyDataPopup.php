@@ -38,7 +38,7 @@ if (isForAdminOnly("to carry out a database content dump - please ask your datab
 }
 
 $username = get_user_username();
-$folder = HEURIST_FILESTORE_DIR."backup/".$username;
+$folder = HEURIST_FILESTORE_DIR."backup/";
 
 $mode = @$_REQUEST['mode'];
 
@@ -63,7 +63,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
     </head>
 
-    <body class="popup" width: 300px; height: 300px;>
+    <body class="popup" width: 250px; height: 200px;>
 
         <?php
 
@@ -72,18 +72,24 @@ if($mode=='2' && file_exists($folder.".zip") ){
         if(!$mode) {
             ?>
 
-            <p><b>This function is available to database adminstrators only (therefore you are a database administrator!).</b></p>
+            <p><b>This function is available to database adminstrators only (therefore you are a database administrator!).</b>
+            </p>
             <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump, 
             as textual and wordprocessor descriptions of the structure of Heurist and of your database, and as a directory of 
-            attached files (image files, video, XML, maps, documents etc.) which have been uploaded or indexed in situ.</p>
-            <p>Attached files may be omitted by unchecking the first checkbox. This may be useful for databases with lots of attached files
-                which are already backed up elsewhere.</p>
-            <p>By default the HML file contains all the records to which the current user (administrator) has access, but you can restrict this
-                to only those which you have entered or bookmarked, by unchecking the second checkbox below. 
-                The MySQL dump will contain the complete database which can be reloaded on any up-to-date MySQL database server.</p>
+            attached files (image files, video, XML, maps, documents etc.) which have been uploaded or indexed in situ.
+            </p>
+            <p>The MySQL dump will contain the complete database which can be reloaded on any up-to-date MySQL database server.
+            </p>
             <p>The output of the process will be made available as a link to a downloadable zip file.
-                Note that zipping databases with lots of images or video may bog down the server and the file may not download
-                satisfactorily - in that case it would b e better to ask your sysadmin to give you the archive on a USB drive.</p>
+            </p>
+            <h3>Warning</h3>
+            <p>Zipping databases and including lots of images or video may bog down the server and the file may not download
+            satisfactorily - in that case it may be better to ask your sysadmin to give you the files separately on a USB drive.</p>
+            
+            <p>Attached files may be omitted by unchecking the first checkbox. This may also be useful for databases with 
+            lots of attached files which are already backed up elsewhere.
+            </p>
+
 
             <!-- TODO: Need to also include record type icons, report formats etc. This was originally developed to allow individual users to save their
             data out of the sandpit. With shift to individual and small project databases, it is now best to regard this as a database-administrators-only
@@ -99,14 +105,14 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     <div class="input-cell"><input type="checkbox" name="includeresources" value="1" checked></div>
                 </div>
 
-                <div class="input-row">
+                <div class="input-row" style="display: none;">
                     <div class="input-header-cell">Include resources from other users (everything to which I have access)</div>
                     <div class="input-cell"><input type="checkbox" name="allrecs" value="1" checked></div>
                 </div>
 
                 <div id="buttons" class="actionButtons">
-                    <input type="submit" value="Export">
-                    <input type="button" value="cancel" onClick="window.close();">
+                    <input type="submit" value="Export" style="margin-right: 20px; padding-left:5px; padding-right:5px;">
+                    <input type="button" value="cancel"  style="margin-right: 200px; padding-left:5px; padding-right:5px;" onClick="window.close();">
                 </div>
             </form>
 
@@ -119,7 +125,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 delFolderTree($folder, true);
             }
             if (!mkdir($folder, 0777, true)) {
-                die('Failed to create folder for backup. Please consult your sysadmin.');
+                die('Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.');
             }
 
             //load hml output into string file and save it
@@ -131,7 +137,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             }else{
                 $q = "sortby:-m";
             }
-            $url .= ("&q=$q&filename=".$folder."/backup.xml");
+            $url .= ("&q=$q&filename=".$folder."/".HEURIST_DBNAME.".xml");
 
 
             $_REQUEST['w'] = 'all';
@@ -139,7 +145,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             $_REQUEST['depth'] = '5';
             $_REQUEST['q'] = $q;
             $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-            $_REQUEST['filename'] = $folder."/backup.xml";
+            $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
 
             print "Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>";
             ob_flush();flush();
@@ -162,9 +168,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 ob_end_clean();
             }
             
-            $file = fopen ($folder."/backup.xml", "w");
+            $file = fopen ($folder."/".HEURIST_DBNAME.".xml", "w");
             if(!$file){
-                die("Can't write backup.xml file. Please ask sysadmin to check permissions");
+                die("Can't write ".HEURIST_DBNAME."xml file. Please ask sysadmin to check permissions");
             }
             fwrite($file, $content);
             fclose ($file);
@@ -186,7 +192,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
                 try{
                     $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
-                    $dump->start($folder."/MySQL_Database_Dump.sql");
+                    $dump->start($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
                 } catch (Exception $e) {
                     die ("<h2>Error</h2>Unable to generate MySQL database dump.".$e->getMessage().$please_advise);
                 }
@@ -266,12 +272,9 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 print "<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder";
             } else {
                 print "<br><br><div class='lbl_form'></div>".
-                "<a href='exportMyDataPopup.php/$username.zip?db=".HEURIST_DBNAME."&mode=2".
+                "<a href='exportMyDataPopup.php/".HEURIST_DBNAME.".zip?db=".HEURIST_DBNAME."&mode=2".
                 "' target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>";
             }
-
-            print '<div style="width:100%; text-align:center; padding-top:40px;">'.
-            '<input type="button" value="repeat" onclick="{location.href=\'exportMyDataPopup.php?db='.HEURIST_DBNAME.'\'}"></div>';
 
         }
 
