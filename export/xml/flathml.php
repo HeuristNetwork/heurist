@@ -95,6 +95,7 @@ require_once (dirname(__FILE__) . '/../../search/getSearchResults.php');
 require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 require_once (dirname(__FILE__) . '/../../records/woot/woot.php');
 require_once (dirname(__FILE__) . '/../../records/files/fileUtils.php');
+require_once (dirname(__FILE__) . '/../../common/php/dbUtils.php');
 
 if(@$_REQUEST['file']){ // output manifest + files ??
     $intofile = true;
@@ -1022,7 +1023,7 @@ function outputRecordStub($recordStub) {
 function makeFileContentNode($file) {
     $filename = $file['URL'];
     if ($file['mimeType'] === "application/xml") { // && file_exists($filename)) {
-        if ($file['origName'] !== "_remote") {
+        if ($file['origName'] !== "_remote" && file_exists($filename)) {
             $xml = simplexml_load_file($filename);
             if (!$xml) {
                 makeTag('error', null, " Error while attemping to read $filename .");
@@ -1095,10 +1096,37 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
             }
         } else if (array_key_exists('file', $value)) {
             $file = $value['file'];
+            
             if (@$_REQUEST['includeresources'] == '1' && @$_REQUEST['mode'] == '1') {
+
                 $file = get_uploaded_file_info_internal($file['id'], false);
+
+                unset($file['thumbURL']);
+
                 if ($file['fullpath'] && file_exists($file['fullpath'])) {
-                    //backup file inot backup/user folder
+                    
+                    //if path is relative then we copy file
+                    if(@$file['ulf_FilePath']==null || $file['ulf_FilePath']=='' || substr($file['ulf_FilePath'],1)!='/'){
+
+                        //$path_parts = pathinfo($file['fullpath']);
+                        //$dirname = $path_parts['dirname'].'/';
+                        //copy file and create required folders
+                        chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+                        $fpath = realpath($file['fullpath']);
+                        $fpath = str_replace('\\','/',$fpath);
+                        
+                        recurse_copy(HEURIST_FILESTORE_DIR, HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'/', null, 
+                                        $fpath);
+                        
+                        $file['URL'] = @$file['ulf_FilePath'].@$file['ulf_FileName']; //relative path to db root    
+                        
+                    }else{
+                        //otherwise skip copy and use downloadURL
+                        //$file['URL'] - it is already has  downloadFile or remote URL
+                    }
+                    
+                    /* this code is not use anymore - we copy the entire file_uploads folder
+                    // backup file into backup/user folder
                     $folder = HEURIST_FILESTORE_DIR . "backup/" . get_user_username() . "/resources/";
                     
                     if(!file_exists($folder) && !mkdir($folder, 0777, true)){
@@ -1110,9 +1138,8 @@ function outputDetail($dt, $value, $rt, $recInfos, $depth = 0, $outputStub, $par
                     $file['URL'] = $path_parts['basename'];
                     $filename_bk = $folder . $file['URL'];
                     copy($file['fullpath'], $filename_bk);
-                    unset($file['thumbURL']);
-                    
                     $file['URL'] = 'resources/'.$file['URL'];
+                    */
                 }
             }
             openTag('detail', $attrs);

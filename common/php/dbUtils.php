@@ -683,24 +683,37 @@ function deleteFolder($dir) {
 *
 * @param mixed $src
 * @param mixed $dst
+* @param array $folders - zero level folders to copy
 */
-function recurse_copy($src, $dst) {
+function recurse_copy($src, $dst, $folders=null, $file_to_copy=null) {
     $res = false;
+
+    $src =  $src . ((substr($src,-1)=='/')?'':'/');
+    
     $dir = opendir($src);
     if($dir!==false){
 
-        if (@mkdir($dst, 0777, true)) {
+        if (file_exists($dst) || @mkdir($dst, 0777, true)) {
 
             $res = true;
 
             while(false !== ( $file = readdir($dir)) ) {
                 if (( $file != '.' ) && ( $file != '..' )) {
-                    if ( is_dir($src . '/' . $file) ) {
-                        $res = recurse_copy($src . '/' . $file,$dst . '/' . $file);
-                        if(!$res) break;
+                    if ( is_dir($src . $file) ) {
+                        
+                        if($folders==null || count($folders)==0 || in_array($src.$file.'/',$folders))
+                        {
+                            if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
+                            {
+                                $res = recurse_copy($src.$file, $dst . '/' . $file, null, $file_to_copy);
+                                if(!$res) break;
+                            }
+                        }
+                        
                     }
-                    else {
-                        copy($src . '/' . $file,$dst . '/' . $file);
+                    else if($file_to_copy==null || $src.$file==$file_to_copy){
+                        copy($src.$file,  $dst . '/' . $file);
+                        if($file_to_copy!=null) return false;
                     }
                 }
             }

@@ -23,6 +23,7 @@
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
 require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
@@ -97,6 +98,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             minimise maintenance requirements -->
 
             <form name='f1' action='exportMyDataPopup.php' method='get'>
+            
                 <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
                 <input name='mode' value='1' type='hidden'>
 
@@ -105,6 +107,13 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     <div class="input-cell"><input type="checkbox" name="includeresources" value="1" checked></div>
                 </div>
 
+                <div class="input-row">
+                    <div class="input-header-cell" 
+                        title="Adds documents describing Heurist structure and data formats - check this box if the output is for long-term archiving">
+                        Include background documentation for archiving</div>
+                    <div class="input-cell"><input type="checkbox" name="include_docs" value="1"></div>
+                </div>
+                
                 <div class="input-row" style="display: none;">
                     <div class="input-header-cell">Include resources from other users (everything to which I have access)</div>
                     <div class="input-cell"><input type="checkbox" name="allrecs" value="1" checked></div>
@@ -128,16 +137,35 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 die('Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.');
             }
 
+            //copy resource folders
+            if(@$_REQUEST['include_docs']=='1'){
+                
+                $system_folders = array(
+                    HEURIST_ICON_DIR,
+                    HEURIST_FILESTORE_DIR.'documentation_and_templates/',
+                    HEURIST_FILESTORE_DIR."generated-reports/",
+                    HEURIST_FILESTORE_DIR."settings/",
+                    HEURIST_FILESTORE_DIR.'term-images/',
+                    HEURIST_SMARTY_TEMPLATES_DIR,
+                    HEURIST_XSL_TEMPLATES_DIR);
+                if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
+                if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
+                
+                print "Exporting system folder<br>";
+                //print HEURIST_FILESTORE_DIR.' to '.$folder.'<br>';             
+                ob_flush();flush();
+                
+                recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
+            }
+            
+            
             //load hml output into string file and save it
-            $url = HEURIST_BASE_URL . "export/xml/flathml.php?w=all&a=1&depth=0&db=".HEURIST_DBNAME;
-
             if(@$_REQUEST['allrecs']!="1"){
                 $userid = get_user_id();
                 $q = "owner:$userid"; //user:$userid OR
             }else{
                 $q = "sortby:-m";
             }
-            $url .= ("&q=$q&filename=".$folder."/".HEURIST_DBNAME.".xml");
 
 
             $_REQUEST['w'] = 'all';
@@ -152,14 +180,6 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
             $content = "";
-
-            if(@$_REQUEST['includeresources'] == '1'){
-                $imgfolder = $folder.'/resources/';
-                if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
-                    print "<p class='error'>'Failed to create folder for file resources: ".$imgfolder."$please_advise</p>";
-                    break;
-                }
-            }
             
             if (is_file($to_include)) {
                 ob_start();
@@ -199,7 +219,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             }
 
-            if($_REQUEST['includeresources']){
+            //this coode not used anymore - we copy entire content of file_uploads
+            if(false && $_REQUEST['includeresources']){
                 print "Exporting resources (indexed/uploaded files)<br>";
                 ob_flush();flush();
 
@@ -230,10 +251,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
                         if($filename_insys && $row[1] && $filename_orig){
 
                             if(file_exists($filename_insys)){
-                                
                                 //get relative path
-                                
-
                                 $imgfolder = $folder.'/resources/';
                                 if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
                                     print "<p class='error'>'Failed to create folder for file resources: ".$imgfolder."$please_advise</p>";

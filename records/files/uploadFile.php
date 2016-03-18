@@ -190,7 +190,7 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
 
         //get folder, extension and filename
         $path_parts = pathinfo($fullname);
-        $dirname = $path_parts['dirname']."/";
+        $dirname = $path_parts['dirname'].'/';
         $mimetypeExt = strtolower($path_parts['extension']);
         //$filename = $path_parts['filename'];
         $filename = $path_parts['basename'];
