@@ -38,7 +38,7 @@ if (isForAdminOnly("to carry out a database content dump - please ask your datab
 }
 
 $username = get_user_username();
-$folder = HEURIST_FILESTORE_DIR."backup/";
+$folder = HEURIST_FILESTORE_DIR."backup/".HEURIST_DBNAME;
 
 $mode = @$_REQUEST['mode'];
 
@@ -259,8 +259,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
             // Create a zipfile of the definitions and data which have been dumped to disk
 
             if(file_exists($folder.".zip")) unlink($folder.".zip");
-            chdir($folder);
-            $cmdline = "zip -r ".$folder.".zip *"; //.$folder;  //-j - don't store folders
+            chdir($folder); 
+            $cmdline = "zip -r ".$folder.".zip *"; //archive everything within folder, keep folder strcuture
 
             $res1 = 0;
             $output1 = exec($cmdline, $output, $res1);
