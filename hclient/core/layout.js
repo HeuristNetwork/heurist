@@ -175,6 +175,16 @@ function hLayout(args) {
               togglerAlign_open:'center',
               togglerAlign_closed:'top',
               togglerLength_closed:16,  //makes it square
+              onopen_start : function(){ 
+                  var  w = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
+                  var mw = 250; //top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
+                  if(w<310){
+                      var tw = (top?top.innerWidth:window.innerWidth);
+                      top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', tw-w-mw]);
+                      setTimeout( function(){top.HAPI4.LayoutMgr.cardinalPanel('open', ['west'] );}, 500 );
+                      return 'abort';
+                  }
+              },
             },
             east:{
               spacing_open:6,
@@ -182,6 +192,19 @@ function hLayout(args) {
               togglerAlign_open:'center',
               togglerAlign_closed:'top',
               togglerLength_closed:16,  //makes it square
+              onopen_start: function(){ 
+                  
+                  var  w = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
+                  var mw = 350;
+                  if(w<310){
+                      var tw = (top?top.innerWidth:window.innerWidth);
+                      top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['west', tw-w-mw]);
+                      setTimeout( function(){top.HAPI4.LayoutMgr.cardinalPanel('open', ['east'] );}, 500 );
+                      return 'abort';
+                  }
+                  
+                  
+              },
             },
             tips: {
                 Close:                "Click to minimise panel",

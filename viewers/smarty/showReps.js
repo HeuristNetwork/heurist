@@ -952,6 +952,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             _reload_templates();
         }
 
+        //resize global cardinal layout
         if(iseditor){
             _kept_width = top.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
             top.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
@@ -961,9 +962,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 top.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
             top.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
         }
-
-
-
     }
 
 
