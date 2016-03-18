@@ -44,7 +44,7 @@ mysql_connection_overwrite(DATABASE);
 
 
 $rec_id = intval($_POST["recID"]);
-$rem_id = intval($_POST["rem_ID"]);
+$rem_id = intval(@$_POST["rem_ID"]);
 if ($rec_id  &&  $_POST["save-mode"] == "add") {
 	if ($_POST["reminder-user"]) {
 		$res = mysql_query("select usr.ugr_ID from ".USERS_DATABASE.".sysUGrps usr where concat(usr.ugr_FirstName, ' ', usr.ugr_LastName) = '" . mysql_real_escape_string($_POST["reminder-user"]) . "'");
@@ -70,7 +70,7 @@ if ($rec_id  &&  $_POST["save-mode"] == "add") {
 		"rem_Nonce" => dechex(rand())
 	);
 
-	if ($_POST["mail-now"]) {
+	if (@$_POST["mail-now"]) {
 		/* user clicked "notify immediately" */
 		require_once(dirname(__FILE__)."/sendReminder.php");
 		print sendReminderEmail($rem);

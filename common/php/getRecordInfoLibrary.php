@@ -357,7 +357,7 @@ function getAllReminders($recID) {
         while ($rem = mysql_fetch_assoc($res)) {
             array_push($reminders, array("id" => $rem["rem_ID"],
                 "user" => $rem["rem_ToUserID"],
-                "group" => $rem["rem_ToWorkGroupID"],
+                "group" => $rem["rem_ToWorkgroupID"],
                 "email" => $rem["rem_ToEmail"],
                 "message" => $rem["rem_Message"],
                 "when" => $rem["rem_StartDate"],
