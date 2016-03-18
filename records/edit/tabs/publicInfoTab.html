@@ -40,10 +40,7 @@
 	<link rel=stylesheet href="../../../common/css/global.css">
 	<link rel=stylesheet href="../../../common/css/edit.css">
 
-<!-- replaced to jquery.calendar
-	<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
--->
-    <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
     
 	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
 
@@ -54,7 +51,7 @@
             }
      </style>
 </head>
-<body class="editTab ui-heurist-bg-light" onload="onshow()">
+<body class="editTab ui-heurist-bg-light">
 
 	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
 
@@ -66,7 +63,7 @@
 -->
     
 <script>
-        $.getScript('../../../common/php/displayPreferences.php?db='+top.HEURIST.database.name);
+        //$.getScript('../../../common/php/displayPreferences.php?db='+top.HEURIST.database.name);
 
 		document.write('<form method=post enctype="multipart/form-data"'+
 				' onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"' +
@@ -76,6 +73,8 @@
 				' <input type=hidden name=notes id=notes>' +
 				' <div id=all-inputs style="overflow:scroll;position:absolute;top:0;bottom:0;left:30;right:0"></div>' +
 				' </form>');
+                
+        $(document).ready(onshow);
 </script>
 
 <script>
@@ -149,9 +148,10 @@ function unchanged() {
 		parent.HEURIST.edit.unchanged("public");
 }
 function handleSaved(json) {
-    console.log(json);
+    //console.log(json);
 	var vals = eval(json.responseText);
 	if (! vals) {
+        //parent.HEURIST = null;
 		window.location.reload();	// no changes to save ... make with the flishy-flashy
 		return;
 	}
@@ -163,8 +163,10 @@ function handleSaved(json) {
 
 	if (! vals.matches) {
 		// regular case -- we get back an object containing updates to the record details
-		for (var i in vals)
+		for (var i in vals){
 			parent.HEURIST.edit.record[i] = vals[i];
+        }
+        //parent.HEURIST = null;
 		window.location.reload();
 	}else {
 		// we have been supplied with a list of biblio records that look like this one

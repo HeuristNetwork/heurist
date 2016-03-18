@@ -149,13 +149,18 @@
 
 
 	    top.HEURIST.user.isInWorkgroup = function(wgID) {
-		    var usrID = top.HEURIST.get_user_id();
-		    if (wgID == 0 || usrID == wgID) return true;
-		    if (! top.HEURIST.user.workgroups) return false;
-		    for (var i in top.HEURIST.user.workgroups) {
-			    if (wgID == top.HEURIST.user.workgroups[i]) return true;
-		    }
-		    return false;
+            if(top){
+            
+		        var usrID = top.HEURIST.get_user_id();
+		        if (wgID == 0 || usrID == wgID) return true;
+		        if (! top.HEURIST.user.workgroups) return false;
+		        for (var i in top.HEURIST.user.workgroups) {
+			        if (wgID == top.HEURIST.user.workgroups[i]) return true;
+		        }
+		        return false;
+            }else{
+                return true;
+            }
 	    };
 
 	    <?php
@@ -184,6 +189,8 @@
     top.HEURIST.is_admin = function() { return <?= intval(is_admin()) ?>; };
 
     top.HEURIST.is_wgAdmin = function(wgID) {
+        if(!top)  return false;
+        
         var usrID = top.HEURIST.get_user_id(), j, i;
         if (wgID == 0 || usrID == wgID) return true;
         if (!top.HEURIST.workgroups || (wgID && !top.HEURIST.workgroups[wgID])) return false;

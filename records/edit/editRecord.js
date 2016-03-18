@@ -288,7 +288,8 @@ if (! top.HEURIST.edit) {
         * @returns {Boolean}
         */
         userCanEdit: function() {
-            if (top.HEURIST.user.isInWorkgroup(parseInt(window.HEURIST.edit.record.workgroupID))){ // user is owner
+            var wgID = parseInt(window.HEURIST.edit.record.workgroupID);
+            if (window.HEURIST.user.isInWorkgroup(wgID)){ // user is owner
                 return true;
             }
             return false;
@@ -544,6 +545,7 @@ if (! top.HEURIST.edit) {
                     form.heuristForceSubmit();
                 }
 
+                top.HEURIST.deregisterEvent(module.frame, "load", moduleUnchangeFunction);
                 if (module.changed) { // don't bother saving unchanged tabs
                     if (form.onsubmit  &&  ! form.onsubmit()) {
                         top.HEURIST.edit.showModule(moduleName);
