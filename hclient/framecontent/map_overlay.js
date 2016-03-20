@@ -359,17 +359,50 @@ function addTiledMapImageLayer(source, bounds, index) {
 
     // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
      if(source.sourceURL !== undefined) {
-        // Tile type
-        var tileType = new google.maps.ImageMapType({
-            getTileUrl: function(coord, zoom) {
+         
+        var tileUrlFunc = null; 
+         
+        if(source.tilingSchema.label=='virtual earth'){
+            
+            tileUrlFunc = function (a,b) {
+                
+                        function __tileToQuadKey(x, y, zoom) {
+                            var i, mask, cell, quad = "";
+                            for (i = zoom; i > 0; i--) {
+                                mask = 1 << (i - 1);
+                                cell = 0;
+                                if ((x & mask) != 0) cell++;
+                                if ((y & mask) != 0) cell += 2;
+                                quad += cell;
+                            }
+                            return quad;
+                        }
+
+                
+                    var res = source.sourceURL + __tileToQuadKey(a.x,a.y,b) 
+                    + (source.mimeType.label == "image/png" ? ".png" : ".gif");
+                    return res;
+                };
+    
+        }else{
+            
+            tileUrlFunc = function(coord, zoom) {
                 //console.log(coord);
                 //console.log(zoom);
 
                 var bound = Math.pow(2, zoom);
-                var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) + ".png";
-                console.log("URL: " + url);
+                var url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
+                            + (source.mimeType.label == "image/png" ? ".png" : ".gif");
+                //console.log("URL: " + url);
                 return url;
-            },
+            };
+            
+        }
+         
+         
+        // Tile type
+        var tileType = new google.maps.ImageMapType({
+            getTileUrl: tileUrlFunc,
             tileSize: new google.maps.Size(256, 256),
             minZoom: 1,
             maxZoom: 20,
