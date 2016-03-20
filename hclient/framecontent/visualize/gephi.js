@@ -45,7 +45,7 @@ function getGephiFormat() {
     var data = settings.getData.call(this, settings.data);
     console.log("GEPHI DATA");
     console.log(data);
-    
+                                                             
     // META
     var gexf = '<?xml version="1.0" encoding="UTF-8"?>';
     gexf +=      '<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">';
@@ -77,7 +77,7 @@ function getGephiFormat() {
         gexf += '<node id="'+node.id+'" label="'+node.name+'">';
         gexf +=     '<attvalues>';
         gexf +=         '<attvalue for="0" value="'+node.name+'"/>';
-        gexf +=         '<attvalue for="1" value="'+node.image+'"/>';
+        gexf +=         '<attvalue for="1" value="'+node.image.replace('&','&amp;')+'"/>';
         gexf +=         '<attvalue for="2" value="'+node.count+'"/>';
         gexf +=     '</attvalues>'; 
         gexf += '</node>';
@@ -88,11 +88,12 @@ function getGephiFormat() {
     gexf += '<edges>';
     for(var i = 0; i < data.links.length; i++) {
         var edge = data.links[i]; 
-        gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'+edge.targetcount+'">';
+        gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'
+                    +(edge.targetcount>0?edge.targetcount:1)+'">';
         gexf +=     '<attvalues>';  
         gexf +=         '<attvalue for="0" value="'+edge.relation.id+'"/>';      
         gexf +=         '<attvalue for="1" value="'+edge.relation.name+'"/>';
-        gexf +=         '<attvalue for="2" value="'+edge.relation.image+'"/>';
+        gexf +=         '<attvalue for="2" value="'+edge.relation.image.replace('&','&amp;')+'"/>';
         gexf +=         '<attvalue for="3" value="'+edge.targetcount+'"/>';
         gexf +=     '</attvalues>'; 
         gexf += '</edge>';
