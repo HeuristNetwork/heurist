@@ -1064,8 +1064,7 @@ console.log('heurist not defined');
      +'Please shorten text or divide into repeat values for this field)');
                 return false;
             }else{
-                var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-                if(windowRef.changed) windowRef.changed();
+                return true;
             }
         },
 
@@ -1397,7 +1396,7 @@ console.log('heurist not defined');
                                     details[det_id] = {vals:[val]};
                                 }
                                 
-                                if(val.length>25 && oversizeInputs.indexOf(inputs[i].shortName)<0){
+                                if(val.length>65535 && oversizeInputs.indexOf(inputs[i].shortName)<0){
                                     oversizeInputs.push(inputs[i].shortName);
                                 }
                             }
@@ -1976,7 +1975,11 @@ console.log('heurist not defined');
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (element.value !== undefined) {    /* if this is an input element, register the onchange event */
-            top.HEURIST.registerEvent(element, "change", top.HEURIST.edit.inputOnChangeEventHandler);
+            top.HEURIST.registerEvent(element, "change", function(event){
+                if(top.HEURIST.edit.inputOnChangeEventHandler(event) && windowRef.changed){
+                        windowRef.changed();
+                }
+            });
 
             /* also, His Nibs doesn't like the fact that onchange doesn't fire until after the user has moved to another field,
             * so ... jeez, I dunno.  onkeypress?
