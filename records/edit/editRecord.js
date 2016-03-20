@@ -1050,7 +1050,24 @@ console.log('heurist not defined');
             }
             return rdtConstrainedLookups;
         },
-
+        
+        
+        //
+        //
+        //
+        inputOnChangeEventHandler: function(event){
+            var element = event.target;
+            if(element.value && element.value.length>65535){
+                top.HEURIST.util.stopEvent(event);
+                top.HEURIST.util.showMessage('Text fields are limited to 65536 characters (64Kb typically ~50 pages).<p>"'
+     +element.getAttribute('data-dispname')+ '" contains '+element.value.length+' characters</p>'
+     +'Please shorten text or divide into repeat values for this field)');
+                return false;
+            }else{
+                var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+                if(windowRef.changed) windowRef.changed();
+            }
+        },
 
 
         /**
@@ -1342,9 +1359,11 @@ console.log('heurist not defined');
             var missingFields = [];
             var firstInput = null;
 
-            //check duplication
+            //check duplication and oversize
             var details = {};
             var duplicatedInputs = [];
+            var oversizeInputs = [];
+            
             var fi_id = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ID;
             for (var i=0; i < inputs.length; ++i) {
 
@@ -1376,6 +1395,10 @@ console.log('heurist not defined');
                                     }
                                 }else{
                                     details[det_id] = {vals:[val]};
+                                }
+                                
+                                if(val.length>25 && oversizeInputs.indexOf(inputs[i].shortName)<0){
+                                    oversizeInputs.push(inputs[i].shortName);
                                 }
                             }
                         }
@@ -1413,9 +1436,20 @@ console.log('heurist not defined');
             }//for inputs
 
             if(duplicatedInputs.length>0){
-                alert("There are duplicated values in your fields:<br />" + duplicatedInputs.join("<br />"));
+                top.HEURIST.util.showMessage("There are duplicated values in your fields:<br />" 
+                    + duplicatedInputs.join("<br />"));
                 return false;
             }
+            
+            if(oversizeInputs.length>0){
+                
+                top.HEURIST.util.showMessage('Text fields are limited to 65536 characters (64Kb typically ~50 pages).<p>'
+     + oversizeInputs.join(",<br />")+'<br/> contain'
+     + (oversizeInputs.length>1?'':'s') +' more characters</p>'
+     +'Please shorten text or divide into repeat values for '+(oversizeInputs.length>1?'these fields':'this field'));
+                return false;
+            }
+            
 
             if (missingFields.length == 0) {
 
@@ -1936,12 +1970,13 @@ console.log('heurist not defined');
 
         var helpPrompt = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
 
-        element.title = helpPrompt?helpPrompt:this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
+        element.title = helpPrompt ?helpPrompt :this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
         element.setAttribute("bib-detail-type", this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']]);
+        element.setAttribute('data-dispname', this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']]);
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (element.value !== undefined) {    /* if this is an input element, register the onchange event */
-            top.HEURIST.registerEvent(element, "change", function() { if (windowRef.changed) windowRef.changed(); });
+            top.HEURIST.registerEvent(element, "change", top.HEURIST.edit.inputOnChangeEventHandler);
 
             /* also, His Nibs doesn't like the fact that onchange doesn't fire until after the user has moved to another field,
             * so ... jeez, I dunno.  onkeypress?
