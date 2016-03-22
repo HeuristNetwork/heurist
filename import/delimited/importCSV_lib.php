@@ -1728,28 +1728,10 @@ function doImport($mysqli, $imp_session, $params){
 
     global $rep_processed,$rep_added,$rep_updated,$rep_skipped,$wg_id,$rec_visibility;
 
-    $addRecDefaults   = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["record-add-defaults"];
-    $defaults = explode(',', $addRecDefaults);
+    $addRecDefaults = getDefaultOwnerAndibility(null);
     
-    $wg_id = null;
-    $rec_visibility = null;
-    if(count($defaults)>1){
-        $wg_id = intval($defaults[1]);   
-        if(count($defaults)>2){
-            $rec_visibility = $defaults[2];    
-        }
-    }
-     
-    $wg_id = is_numeric(@$wg_id) ? $wg_id 
-            :(defined('HEURIST_NEWREC_OWNER_ID') ?HEURIST_NEWREC_OWNER_ID :get_user_id() );
-
-    if($rec_visibility==null){
-        $rec_visibility = defined('HEURIST_NEWREC_ACCESS') ?HEURIST_NEWREC_ACCESS :'viewable';
-    }        
-    
-    if(!($wg_id>0)){
-        $wg_id = get_user_id();  //by default current user
-    }
+    $wg_id = $addRecDefaults[1];
+    $rec_visibility = $addRecDefaults[2];
     
     //rectype to import
     $import_table = $imp_session['import_table'];

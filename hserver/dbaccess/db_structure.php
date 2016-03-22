@@ -297,10 +297,14 @@
             'enum' => array()),
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
             'fieldNamesToIndex' => __getColumnNameToIndex(array_slice(__getTermColNames(), 1)));
-        while ($row = $res->fetch_row()) {
-            $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
+        if($res){
+            while ($row = $res->fetch_row()) {
+                $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
+            }
+            $res->close();
+        }else{
+            error_log('error retrieving terms '.$mysqli->error);
         }
-        $res->close();
         $terms['treesByDomain'] = array('relation' => __getTermTree($mysqli, "relation", "prefix"), 'enum' => __getTermTree($mysqli, "enum", "prefix"));
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;

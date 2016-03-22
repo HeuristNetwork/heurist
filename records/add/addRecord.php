@@ -80,18 +80,7 @@ $usrID = get_user_id();
 mysql_connection_overwrite(DATABASE);
 mysql_query("set @logged_in_user_id = $usrID");	//saw TODO: check where else this needs to be used
 
-$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
-if ($addRecDefaults){
-	if ($addRecDefaults[0]){
-		$userDefaultRectype = intval($addRecDefaults[0]);
-	}
-	if ($addRecDefaults[1]){
-		$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
-	}
-	if ($addRecDefaults[2]){
-		$userDefaultVisibility = $addRecDefaults[2];
-	}
-}
+list($userDefaultRectype, $userDefaultOwnerGroupID, $userDefaultVisibility) = getDefaultOwnerAndibility($_REQUEST);
 
 /* preprocess any description */
 if (@$_REQUEST['bkmrk_bkmk_description']) {

@@ -37,6 +37,8 @@
         if ( $system->get_user_id()<1 ) {
             return $system->addError(HEURIST_REQUEST_DENIED);
         }
+//IMPORTANT !!!!        to implement
+//$addRecDefaults = getDefaultOwnerAndibility($_REQUEST);
 
         $addRecDefaults = @$_SESSION[$system->dbname_full()]["preferences"]['record-add-defaults'];
         if ($addRecDefaults){

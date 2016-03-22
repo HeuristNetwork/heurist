@@ -56,12 +56,12 @@ mysql_query('set @logged_in_user_id = ' . get_user_id());
 
 
 //$checkSimilar = array_key_exists("check-similar", );
-if (@$_POST["check-similar"]=="1") {
-    $rec_id = intval(@$_POST["recID"]);
-    $rec_types = array(intval(@$_POST["rectype"]));
+if (@$_REQUEST["check-similar"]=="1") {
+    $rec_id = intval(@$_REQUEST["recID"]);
+    $rec_types = array(intval(@$_REQUEST["rectype"]));
 
     $fields = array();
-    foreach ($_POST as $key => $val) {
+    foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^type:(\d+)/', $key, $matches)) {
             $fields["t:".$matches[1]] = $val;
         }
@@ -75,9 +75,9 @@ if (@$_POST["check-similar"]=="1") {
     }
 }
 
-$rtyID = @$_POST['rectype'] ? $_POST['rectype'] : (defined('RT_NOTE') ? RT_NOTE : null);
-if (!$rtyID && @$_POST['recID']) {
-    $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$_POST['recID']);
+$rtyID = @$_REQUEST['rectype'] ? $_REQUEST['rectype'] : (defined('RT_NOTE') ? RT_NOTE : null);
+if (!$rtyID && @$_REQUEST['recID']) {
+    $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$_REQUEST['recID']);
     if ($res){
         $rtyID = mysql_fetch_row($res);
         $rtyID = $rtyID[0];
@@ -90,9 +90,9 @@ while ($row = mysql_fetch_assoc($res)) {
     $TL[$row['trm_ID']] = $row;
 }
 
-if ($_POST["save-mode"] == "edit"  &&  intval($_POST["recID"])) {
-    $updated = updateRecord(intval($_POST["recID"]),$rtyID);
-} else if ($_POST["save-mode"] == "new") {
+if ($_REQUEST["save-mode"] == "edit"  &&  intval($_REQUEST["recID"])) {
+    $updated = updateRecord(intval($_REQUEST["recID"]),$rtyID);
+} else if ($_REQUEST["save-mode"] == "new") {
     $updated = insertRecord($rtyID);
 } else {
     $updated = false;
@@ -295,25 +295,25 @@ function updateRecord($recID, $rtyID = null) {
     foreach ($recDetails as $dtyID => $dtlIDs) {
         $eltName ="type:".$dtyID;
         $skipEltName = "_type:".$dtyID;
-        if (@$_POST[$skipEltName]  &&  is_array($_POST[$skipEltName])) { // handle any _type post meant for ignore, need to remove from recDetails
-            foreach (@$_POST[$skipEltName] as $codedDtlID => $ingnoreVal) {
+        if (@$_REQUEST[$skipEltName]  &&  is_array($_REQUEST[$skipEltName])) { // handle any _type post meant for ignore, need to remove from recDetails
+            foreach (@$_REQUEST[$skipEltName] as $codedDtlID => $ingnoreVal) {
                 if (! preg_match("/^bd:\\d+$/", $codedDtlID)) continue;
 
                 $dtlID = substr($codedDtlID, 3);  // everything after "bd:"
 
-                unset($_POST[$skipEltName][$codedDtlID]);  // remove data from post submission
-                if (count($_POST[$skipEltName]) == 0){  // if nothing left in post dtyID then remove it also
-                    unset($_POST[$skipEltName]);
+                unset($_REQUEST[$skipEltName][$codedDtlID]);  // remove data from post submission
+                if (count($_REQUEST[$skipEltName]) == 0){  // if nothing left in post dtyID then remove it also
+                    unset($_REQUEST[$skipEltName]);
                 }
                 unset($recDetails[$dtyID][$dtlID]);  // remove data from local reflection of the database
             }
         }
-        if (! (@$_POST[$eltName]  &&  is_array($_POST[$eltName]))) {
+        if (! (@$_REQUEST[$eltName]  &&  is_array($_REQUEST[$eltName]))) {
             // element wasn't in POST: ignore it -this could be a non-rectype detail
             unset($recDetails[$dtyID]); // remove from details so it's not deleted
             continue;
         }
-        if (count($_POST[$eltName]) == 0) {
+        if (count($_REQUEST[$eltName]) == 0) {
             // element was in POST but without content: values have been deleted client-side (need to be deleted in DB so leave POST)
             continue;
         }
@@ -322,7 +322,7 @@ function updateRecord($recID, $rtyID = null) {
         foreach ($dtlIDs as $dtlID => $val) {
             $eltID ="bd:".$dtlID;
 
-            $val = @$_POST[$eltName][$eltID];
+            $val = @$_REQUEST[$eltName][$eltID];
 
             if (! $bdInputHandler->inputOK($val,$dtyID,$rtyID)) {
                 continue;	// faulty input ... ignore
@@ -340,9 +340,9 @@ function updateRecord($recID, $rtyID = null) {
             at the first for terms (enumeration field type)
             */
 
-            unset($_POST[$eltName][$eltID]);	// remove data from post submission
-            if (count($_POST[$eltName]) == 0){  // if nothing left in post dtyID then remove it also
-                unset($_POST[$eltName]);
+            unset($_REQUEST[$eltName][$eltID]);	// remove data from post submission
+            if (count($_REQUEST[$eltName]) == 0){  // if nothing left in post dtyID then remove it also
+                unset($_REQUEST[$eltName]);
             }
             unset($recDetails[$dtyID][$dtlID]);	// remove data from local reflection of the database
         }
@@ -363,10 +363,10 @@ function updateRecord($recID, $rtyID = null) {
     // Try to insert anything left in POST as new recDetails rows
     $bibDetailInserts = array();
 
-    foreach ($_POST as $eltName => $bds) {
+    foreach ($_REQUEST as $eltName => $bds) {
 
         // if not properly formatted or empty or an empty array then skip it
-        if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_POST[$eltName]  ||  count($_POST[$eltName]) == 0) continue;
+        if (! preg_match("/^type:\\d+$/", $eltName)  ||  ! $_REQUEST[$eltName]  ||  count($_REQUEST[$eltName]) == 0) continue;
 
         $dtyID = substr($eltName, 5);
         $bdInputHandler = getInputHandlerForType($dtyID);
@@ -380,7 +380,7 @@ function updateRecord($recID, $rtyID = null) {
             $newBibDetail["dtl_RecID"] = $recID;
             array_push($bibDetailInserts, $newBibDetail);
 
-            unset($_POST[$eltName][$eltID]);	// remove data from post submission
+            unset($_REQUEST[$eltName][$eltID]);	// remove data from post submission
         }
     }
 
@@ -395,20 +395,20 @@ function updateRecord($recID, $rtyID = null) {
     mysql_query("start transaction");
 
     $recUpdates = array("rec_Modified" => array("now()"), "rec_FlagTemporary" => 0);
-    $recUpdates["rec_ScratchPad"] = $_POST["notes"];
-    if (intval(@$_POST["rectype"])) {
-        $recUpdates["rec_RecTypeID"] = intval($_POST["rectype"]);
+    $recUpdates["rec_ScratchPad"] = $_REQUEST["notes"];
+    if (intval(@$_REQUEST["rectype"])) {
+        $recUpdates["rec_RecTypeID"] = intval($_REQUEST["rectype"]);
     }
-    if (array_key_exists("rec_url", $_POST)) {
-        $recUpdates["rec_URL"] = $_POST["rec_url"];
+    if (array_key_exists("rec_url", $_REQUEST)) {
+        $recUpdates["rec_URL"] = $_REQUEST["rec_url"];
     }
     $owner = $record['rec_OwnerUGrpID'];
     if (is_admin() || is_admin('group',$owner) || $owner == get_user_id()) {// must be grpAdmin or record owner to changes ownership or visibility
-        if (array_key_exists("rec_owner", $_POST)) {
-            $recUpdates["rec_OwnerUGrpID"] = $_POST["rec_owner"];
+        if (array_key_exists("rec_owner", $_REQUEST)) {
+            $recUpdates["rec_OwnerUGrpID"] = $_REQUEST["rec_owner"];
         }
-        if (array_key_exists("rec_visibility", $_POST)) {
-            $recUpdates["rec_NonOwnerVisibility"] = $_POST["rec_visibility"];
+        if (array_key_exists("rec_visibility", $_REQUEST)) {
+            $recUpdates["rec_NonOwnerVisibility"] = $_REQUEST["rec_visibility"];
         }else if ($record['rec_NonOwnerVisibility'] == 'public' && HEURIST_PUBLIC_TO_PENDING){
             $recUpdates["rec_NonOwnerVisibility"] = 'pending';
         }
@@ -443,7 +443,7 @@ function updateRecord($recID, $rtyID = null) {
     }
 
     // eliminate any duplicated lines
-    $notesIn = explode("\n", str_replace("\r", "", $_POST["notes"]));
+    $notesIn = explode("\n", str_replace("\r", "", $_REQUEST["notes"]));
     $notesOut = "";
     $notesMap = array();
     for ($i=0; $i < count($notesIn); ++$i) {
@@ -452,7 +452,7 @@ function updateRecord($recID, $rtyID = null) {
             $notesMap[$notesIn[$i]] = true;
         }
     }
-    $_POST["notes"] = preg_replace("/\n\n+/", "\n", $notesOut);
+    $_REQUEST["notes"] = preg_replace("/\n\n+/", "\n", $notesOut);
 
     if ($updatedRowCount > 0  ||  $insertedRowCount > 0  ||  $deletedRowCount > 0  ||  $biblioUpdated) {
         /* something changed: update the records title and commit all changes */
@@ -479,44 +479,24 @@ function updateRecord($recID, $rtyID = null) {
 
 function insertRecord($rtyID = null) {
     // check if there is preference for OwnerGroup and visibility
-    $addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
-    if ($addRecDefaults){
-        if ($addRecDefaults[1]){
-            $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
-        }
-        if ($addRecDefaults[2]){
-            $userDefaultVisibility = $addRecDefaults[2];
-        }
-    }
+    $addRecDefaults = getDefaultOwnerAndibility($_REQUEST);
     $usrID = get_user_id();
-    //set owner to passed value else to NEWREC default if defined else to user
-    //ART $owner = @$_POST["owner"]?$_POST["owner"]:( defined("HEURIST_NEWREC_OWNER_ID") ? HEURIST_NEWREC_OWNER_ID : get_user_id());
-    //ART $owner = ((@$_POST["owner"] || @$_POST["owner"] === '0') ? intval($_POST["owner"]) :(defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID : get_user_id()));
-
-    $owner = (is_numeric(@$_POST['rec_owner'])?intval($_POST['rec_owner']):
-        ( is_numeric(@$userDefaultOwnerGroupID) ? $userDefaultOwnerGroupID :
-            (defined('HEURIST_NEWREC_OWNER_ID') ? HEURIST_NEWREC_OWNER_ID: intval($usrID))));
-
-    $nonownervisibility = (@$_POST['rec_visibility']?(strtolower($_POST['rec_visibility'])):
-        (@$userDefaultVisibility ? $userDefaultVisibility :
-            (defined('HEURIST_NEWREC_ACCESS') ? HEURIST_NEWREC_ACCESS: 'viewable')));
-
-    // if non zero (everybody group, test if user is member, if not then set owner to user
-    if (intval($owner) != 0 && !in_array($owner,get_group_ids())) {
-        $owner = get_user_id();
-    }
+    
+    
     // Try to insert anything in POST as details of a new Record.
     // We do this by creating a stub record, and then updating it.
     mysql__insert("Records", array(
         "rec_Added" => date('Y-m-d H:i:s'),
         "rec_AddedByUGrpID" => get_user_id(),
         "rec_RecTypeID" => intval($rtyID),
-        "rec_ScratchPad" => @$_POST["notes"] ? $_POST["notes"]:null,
-        "rec_OwnerUGrpID" => $owner,
-        "rec_NonOwnerVisibility" => $nonownervisibility,
-        "rec_URL" => @$_POST["rec_url"]? $_POST["rec_url"] : ""));
+        "rec_ScratchPad" => @$_REQUEST["notes"] ? $_REQUEST["notes"]:null,
+        "rec_OwnerUGrpID" => $addRecDefaults[1],
+        "rec_NonOwnerVisibility" => $addRecDefaults[2],
+        "rec_URL" => @$_REQUEST["rec_url"]? $_REQUEST["rec_url"] : ""));
 
     $_REQUEST["recID"] = $recID = mysql_insert_id();
+    
+
     if($recID){
 
         if ($usrID) {
@@ -594,16 +574,16 @@ function uploadFiles() {
 
             if (is_numeric($fileID)) {
                 /* We got ourselves an uploaded file.
-                * Put an appropriate entry in the $_POST array:
-                *  - if a bdID was specified, preserve that bdID slot in the $_POST (for UPDATE)
-                *  - otherwise, add it as just another "new" input in $_POST (for INSERT)
+                * Put an appropriate entry in the $_REQUEST array:
+                *  - if a bdID was specified, preserve that bdID slot in the $_REQUEST (for UPDATE)
+                *  - otherwise, add it as just another "new" input in $_REQUEST (for INSERT)
                 */
-                if (! $_POST[$eltName]) $_POST[$eltName] = array();
+                if (! $_REQUEST[$eltName]) $_REQUEST[$eltName] = array();
 
                 if (preg_match("/^bd:\\d+$/", $eltID)) {
-                    $_POST[$eltName][$eltID] = $fileID;
+                    $_REQUEST[$eltName][$eltID] = $fileID;
                 } else {
-                    array_push($_POST[$eltName], $fileID);
+                    array_push($_REQUEST[$eltName], $fileID);
                 }
             }
         }

@@ -56,7 +56,7 @@ if (_is_logged_in()) {
 }
 session_write_close();
 
-if (!defined('SKIP_VERSIONCHECK2') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
+if (!defined('SKIP_VERSIONCHECK2') && defined('HEURIST_DBVERSION') && HEURIST_MIN_DBVERSION > HEURIST_DBVERSION) {
 
     returnErrorMsgPage(3, "Need DB upgrade");
 }
@@ -339,4 +339,76 @@ function flush_buffers($start=true){
     if($start) ob_start();
 }
 
+//
+//
+//
+function getDefaultOwnerAndibility($request){
+
+//in session we store CSV  string:  record_type, owner usergroup, nonowner visibility, personal tags, wg tags, setting visibility in ui
+    
+$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
+if ($addRecDefaults){
+    if(!is_array($addRecDefaults)) $addRecDefaults = explode(',',$addRecDefaults);
+}else{
+    $addRecDefaults = array();
+}
+
+//record type
+    if (@$addRecDefaults[0]){
+        $userDefaultRectype = intval($addRecDefaults[0]);
+    }else{
+        $userDefaultRectype = '';
+    }
+    if (@$addRecDefaults[1]){
+        $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+    }
+    if (@$addRecDefaults[2]){
+        $userDefaultVisibility = trim(strtolower($addRecDefaults[2]),'"');
+    }
+    if (@$addRecDefaults[3]){
+        $wgTags = trim($addRecDefaults[3],'"');
+    }else{
+        $wgTags = '';
+    }
+    if (@$addRecDefaults[4]){
+        $personalTags = trim($addRecDefaults[4],'"');
+        $personalTags = str_replace('|',',',$personalTags);
+    }else{
+        $personalTags = '';
+    }
+    if (@$addRecDefaults[5]){
+        $settings_visible = intval($addRecDefaults[5]);
+    }else{
+        $settings_visible = 1;
+    }
+    
+    
+    //values in current request have higher rank
+    if($request!=null && is_array($request)){
+        if(is_numeric(@$request['rec_owner']) && intval($request['rec_owner'])>=0){
+            $userDefaultOwnerGroupID = intval($request['rec_owner']);
+        }
+        if(@$request['rec_visibility']){
+            $userDefaultVisibility = strtolower($request['rec_visibility']);
+        }
+    }
+    // if they are still unset take default value from sysIdentification
+    if(!isset($userDefaultOwnerGroupID) && defined('HEURIST_NEWREC_OWNER_ID')){
+        $userDefaultOwnerGroupID = intval(HEURIST_NEWREC_OWNER_ID);
+    }
+    if(!isset($userDefaultVisibility) && defined('HEURIST_NEWREC_ACCESS')){
+        $userDefaultVisibility = strtolower(HEURIST_NEWREC_ACCESS);
+    }
+
+    //final verification
+    if($userDefaultOwnerGroupID!=0 && !in_array($userDefaultOwnerGroupID, get_group_ids())){
+        $userDefaultOwnerGroupID = get_user_id();
+    }
+    if(!in_array($userDefaultVisibility, array('viewable','hidden','public','pending'))){
+        $userDefaultVisibility = 'viewable';
+    }
+    
+    $addRecDefaults = array($userDefaultRectype, $userDefaultOwnerGroupID, $userDefaultVisibility, $wgTags, $personalTags, $settings_visible);
+    return $addRecDefaults;
+}
 ?>

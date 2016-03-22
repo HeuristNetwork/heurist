@@ -31,12 +31,9 @@ if (! is_logged_in()) return;
 
 mysql_connection_select(DATABASE);
 
+$addRecDefaults = getDefaultOwnerAndibility(null);
 
-$addRecDefaults   = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["record-add-defaults"];
-//    if(!$addRecDefaults)  //backward cap
-//    $addRecDefaults   = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["addRecordDefaults"]; //backward cap
-if ($addRecDefaults) {
-    $defaults = explode(",",$addRecDefaults);
+if (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["record-add-defaults"]) {
     $showAccessRights = (@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]["record-add-showaccess"]!="false");
 }else{
     $showAccessRights = true;
@@ -55,10 +52,8 @@ if ($addRecDefaults) {
 
         <script>
             //		rt, wg_id,vis, kwd, tags, restrict Access;
-            var defaults = [ <?= ($addRecDefaults ? $addRecDefaults :'') ?>];
-            var usrID = <?= get_user_id() ?> ;
-            var defAccess = '<?= HEURIST_NEWREC_ACCESS?HEURIST_NEWREC_ACCESS:"viewable"?>';
-            var defOwnerID = <?=in_array(HEURIST_NEWREC_OWNER_ID,get_group_ids())?HEURIST_NEWREC_OWNER_ID:0?>;
+            var defaults = <?php echo json_format($addRecDefaults);?>;
+            var usrID = <?php echo get_user_id();?>;
             $(document).ready(function() {
                 $("#show-adv-link").click(function() {
                     $(this).hide();
@@ -69,16 +64,14 @@ if ($addRecDefaults) {
                 // assign onchange handle to update_link for values used in link
                 $("#rectype_elt, #restrict_elt, #rec_OwnerUGrpID, #tag, #rec_NonOwnerVisibility, #add-link-title, #add-link-tags").
                 change(update_link);
+                
                 if(defaults && defaults.length > 0){
-                    if(defaults[0]){
-                        $("#rectype_elt").val(defaults[0]);
-                    }
-                    if(defaults.length > 1 && defaults[2]){
-                        $("#rec_NonOwnerVisibility").val(defaults[2]);
-                    }
-                    if(defaults.length > 3 && defaults[4]){
-                        $("#add-link-tags").val(defaults[4]);
-                    }
+                    $("#rectype_elt").val(defaults[0]);
+                    $("#rec_OwnerUGrpID").val(parseInt(defaults[1]));
+                    $("#rec_NonOwnerVisibility").val(defaults[2]);
+                    buildworkgroupTagselect(defaults[1] ? parseInt(defaults[1]) : null, defaults[3] ? defaults[3] : null );
+                    $("#add-link-tags").val(defaults[4]);
+                    //show advanced params
                     if(defaults.length > 4 && defaults[5]){
                         if(navigator.userAgent.indexOf('Safari')>0){
                             var event = document.createEvent("HTMLEvents");
@@ -88,18 +81,10 @@ if ($addRecDefaults) {
                             $("#restrict_elt").click();
                         }
                     }
-                    if(defaults[1]){
-                        $("#rec_OwnerUGrpID").val(parseInt(defaults[1]));
-                    }
-                    buildworkgroupTagselect(defaults[1] ? parseInt(defaults[1]) : null, defaults[3] ? decodeURIComponent(defaults[3]) : null );
                 }else{
                     //from page params
                     var matches = location.search.match(/wg_id=(\d+)/);
                     buildworkgroupTagselect(matches && matches.length>0 ? matches[1] : null);
-
-                    // now user has to define access right explicitly
-                    //$("#rec_NonOwnerVisibility").val(defAccess);
-                    //$("#rec_OwnerUGrpID").val(parseInt(defOwnerID));
                 }
                 update_link();
 
@@ -129,7 +114,7 @@ if ($addRecDefaults) {
                 var title = $("#add-link-title").val();
 
                 if (tags) {
-                    link += (link.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags;
+                    link += (link.match(/&tag=/))  ?  "," + tags  :  "&tag=" + encodeURIComponent(tags);
                 }
 
                 // removed Ian 19/9/08 - title in form is confusing
@@ -149,8 +134,8 @@ if ($addRecDefaults) {
                 //setup link to search for records add to a workgroup with tag by a non-member
                 if ($("#tag").val()) {
                     $("#broken-kwd-link").show()[0].href =
-                    "<?=HEURIST_BASE_URL?>?w=all&q=tag:\"" + $("#tag").val().replace(/\\/, "") + "\"" +
-                    " -tag:\"" + $("#tag").val() + "\"";
+                    "<?=HEURIST_BASE_URL?>?w=all&q=tag:\"" + encodeURIComponent($("#tag").val().replace(/\\/, "")) + "\"" +
+                    " -tag:\"" + encodeURIComponent($("#tag").val()) + "\"";
                 }
             }
 
@@ -188,6 +173,7 @@ if ($addRecDefaults) {
                 rt;
                 var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
                 var vis = document.getElementById('rec_NonOwnerVisibility').value;
+                if(vis=='') vis = 'viewable';
                 var kwdList = document.getElementById('tag');
                 var cbShowAccessRights = document.getElementById('restrict_elt');
                 var tags = $("#add-link-tags").val();
@@ -232,7 +218,7 @@ if ($addRecDefaults) {
 
 
                 if (tags) {
-                    extra_parms += (extra_parms.match(/&tag=/))  ?  "," + tags  :  "&tag=" + tags;
+                    extra_parms += (extra_parms.match(/&tag=/))  ?  "," + tags  :  "&tag=" + encodeURIComponent(tags) ;
                     // warning! code assumes that &tag= is at the end of string
                 }
                 if ( <?= @$_REQUEST['related'] ? '1' : '0' ?> ) {
@@ -246,10 +232,10 @@ if ($addRecDefaults) {
 
 
                 if (true || document.getElementById('defaults_elt').checked) {  //always save
-                    defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
-                        "\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
+                    defaults = [ rt, wg_id, vis , kwdList.options[kwdList.selectedIndex].value,
+                        $("#add-link-tags").val().replace(/,/g,'|'), document.getElementById('restrict_elt').checked?1:0];
 
-                    top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults.join(","));
+                    top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults);
                     top.HEURIST.util.setDisplayPreference('record-add-showaccess', cbShowAccessRights.checked?"true":"false" );
                 }else{
                     top.HEURIST.util.setDisplayPreference('record-add-defaults', "");
@@ -261,23 +247,7 @@ if ($addRecDefaults) {
             }
 
             function cancelAdd(e) {
-                /*
-                if (! e) e = window.event;
-                if (document.getElementById('defaults_elt').checked) {//save settings
-                var rt = parseInt(document.getElementById('rectype_elt').value);
-                var wg_id = parseInt(document.getElementById('rec_OwnerUGrpID').value);
-                var vis = document.getElementById('rec_NonOwnerVisibility').value;
-                var kwdList = document.getElementById('tag');
-                var tags = $("#add-link-tags").val();
-                defaults = [ rt, wg_id,"\"" + vis +"\"", "\"" + encodeURIComponent(kwdList.options[kwdList.selectedIndex].value) +"\"",
-                "\"" + tags + "\"", document.getElementById('restrict_elt').checked?1:0];
-                top.HEURIST.util.setDisplayPreference('record-add-defaults', defaults.join(","));
-                }else{ //reset saved setting
-                top.HEURIST.util.setDisplayPreference('record-add-defaults', "");
-                }
-                */
                 window.close();
-
             }
 
             function showCurrentAccessSettings(){
@@ -367,9 +337,6 @@ if ($addRecDefaults) {
                                 $wgs = array();
                                 while ($row = mysql_fetch_row($res)) {
                                     $flg = (@$_REQUEST['wg_id']==$row[0] ? " selected" : ""); // select if group previously selected
-                                    if(!$addRecDefaults && ($row[0]==1)){
-                                        $flg = 'selected'; // default selection of database owners (group 1) if not set
-                                    };
                                     print "      <option value=".$row[0].' '.$flg.">".
                                     htmlspecialchars($row[1])." </option>\n";
                                     array_push($wgs, $row[0]);
@@ -386,15 +353,7 @@ if ($addRecDefaults) {
                         <div class="input-cell">
                             <select name="rec_NonOwnerVisibility" id="rec_NonOwnerVisibility" style="width: 200px;">
                                 <option value="hidden">Hidden (restricted to owners)</option>
-                                <?php
-                                if(!$addRecDefaults){
-                                    print '<option value="viewable" selected>Viewable (logged-in users only)</option>';
-                                }
-                                else
-                                {
-                                    print '<option value="viewable" selected="selected">Viewable (logged-in users only)</option>';
-                                }
-                                ?>
+                                <option value="viewable" selected>Viewable (logged-in users only)</option>
                                 <option value="pending">Pending (marked for potential publication)</option>
                                 <option value="public">Public (automatically published to hml etc.)</option>
                             </select>

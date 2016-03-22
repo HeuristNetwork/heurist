@@ -128,7 +128,6 @@ session_start();
 $writeMode = false;
 foreach ($_REQUEST as $property => $value) {
     if (array_key_exists($property, $prefs)) {
-//DEBUG error_log('WRITE '.$property.'='.$value);        
         $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"][$property] = $value;
         //			$writeMode = true;
     }

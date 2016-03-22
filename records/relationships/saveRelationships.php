@@ -54,18 +54,7 @@ if (strpos(@$_REQUEST["recID"], ",") !== false) {
 	if (! $recID) return;
 }
 
-$addRecDefaults = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['record-add-defaults'];
-if ($addRecDefaults){
-	if ($addRecDefaults[0]){
-		$userDefaultRectype = intval($addRecDefaults[0]);
-	}
-	if ($addRecDefaults[1]){
-		$userDefaultOwnerGroupID = intval($addRecDefaults[1]);
-	}
-	if ($addRecDefaults[2]){
-		$userDefaultVisibility = $addRecDefaults[2];
-	}
-}
+$addRecDefaults = getDefaultOwnerAndibility($_REQUEST);
 
 if (@$_REQUEST["delete"]  && $recID) {
 	$deletions = array_map("intval", $_REQUEST["delete"]);
