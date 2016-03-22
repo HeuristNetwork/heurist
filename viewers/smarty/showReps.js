@@ -1069,7 +1069,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         //internal function
         // parent_single - true if recrod pointer or enum is not repeatable field type
         //
-        function __createChildren(parentNode, rectypeTree, parent_id, parent_full, parent_single) { // Recursively get all children
+        function __createChildren(parentNode, rectypeTree, parent_id, parent_full,
+                         parent_single, grandparent_single) { // Recursively get all children
             //  __createChildren(topLayerNode, _variables[i], "r", prefix_id+".r");
 
             var term,
@@ -1126,18 +1127,28 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         label = child;
 
                         if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
-                            term.label = term.label + label +
-                            '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                            term.id+'\', false, this)">insert</a>)</span>'+
-                            '<span class="insert-intree">'+
-                            '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+
-                            term.id+'\', false, false)">insert</a>'+
-                            '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+
-                            term.id+'\', true, true)">if</a>)</span></div>';
+                        
+                            if(grandparent_single){
+                        
+                                term.label = term.label + label +
+                                '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
+                                term.id+'\', 0, this)">insert</a>)</span>'+
+                                '<span class="insert-intree">'+
+                                '&nbsp;(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.insertSelectedVars(\''+
+                                term.id+'\', false, false)">insert</a>'+
+                                '&nbsp;<a href="javascript:void(0)" title="Insert IF operator for this variable" onClick="showReps.insertSelectedVars(\''+
+                                term.id+'\', true, true)">if</a>)</span></div>';
+                            } else {
+                                
+                                term.label = term.label + label +
+                                '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
+                                term.id+'\', 2, this)">insert</a>)</span></div>';
+                                
+                            }
                         }else{
                             term.label = term.label + label +
                             '&nbsp;<span class="insert-popup">(<a href="javascript:void(0)" title="Insert variable" onClick="showReps.showInsertPopup(\''+
-                            term.id+'\', true, this)">insert</a>)</span>'+
+                            term.id+'\', 1, this)">insert</a>)</span>'+
                             '<span class="insert-intree">'+
                             '&nbsp;(<a href="javascript:void(0)" title="Insert variable in repeat (without parent prefix)" onClick="showReps.insertSelectedVars(\''+
                             term.id+'\', true, false)">in</a>'+
@@ -1208,11 +1219,11 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, childNode, false);
 
-                            __createChildren(rectypeNode, child[k], term.this_id, term.id, is_single);
+                            __createChildren(rectypeNode, child[k], term.this_id, term.id, is_single, parent_single);
                         }
 
                     }else if( is_record ){ //next recursion
-                        __createChildren(childNode, child, term.this_id, term.id, is_single);
+                        __createChildren(childNode, child, term.this_id, term.id, is_single, parent_single);
                     }
                 }
             }//for
@@ -1261,7 +1272,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             var topLayerNode = new YAHOO.widget.TextNode(term, tv_parent, false); // Create the node
 
-            __createChildren(topLayerNode, _variables[i], 'r', 'r', true);
+            __createChildren(topLayerNode, _variables[i], 'r', 'r', true, false);
 
         }//for  _variables
 
@@ -1480,14 +1491,18 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
 
     var insertPopupID, insert_ID;
+    
+    // 
+    // isloop_level - insert var in loop (trim parents)
+    //  0 - no loop, 1 one level (parent is repeatable), 2 levels (grandparent is repreatable)
+    //
+    function _showInsertPopup( varid, isloop_level, elt ){
 
-    function _showInsertPopup( varid, isloop, elt ){
-
-        top.HEURIST.insertVar = _insertSelectedVars;
+        top.HEURIST.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
         top.HEURIST.insertPattern = _insertPattern;
         top.HEURIST.insertModifier = _insertModifier;
 
-        if(isloop){
+        if(isloop_level>0){
             $(".ins_isloop").show();
         }else{
             $(".ins_isloop").hide();
@@ -1529,7 +1544,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 var xpos = topWindowDims.w - 400;
 
                 top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
-                    "no-close": false, y: pos.y-scroll, width: 400, height: isloop?260:200 });
+                    "no-close": false, y: pos.y-scroll, width: 400, height: isloop_level>0?260:200 });
 
             }
         }//__shownewpopup
@@ -1555,12 +1570,25 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }
     }
 
-
-
     //
     // inserts selected variables
+    // for special case: parent is not repeatable, grandparent is
+    //
+    function _insertSelectedVars_GP_repeatable(  varid, inloop, isif  ){
+        
+        _insertSelectedVars( varid, inloop?2:0, isif )
+    }
+    //
+    // inloop_level = 0 no loop
+    //              = 1 parent is repeatable
+    //              = 2 grandparent is repeatable
     //
     function _insertSelectedVars( varid, inloop, isif ){
+        
+        var inloop_level=2;
+        if(inloop!=2){
+            inloop_level = (inloop===true)?1:0;
+        }
 
         if(top.HEURIST4){
             if(insertPopupID){
@@ -1589,8 +1617,23 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         if(_nodep){
 
             _nodep = _nodep.data;
-
-            if(_inloop){
+/*            
+id            : "r.f15.f26.term"
+labelonly     : "Term"
+parent_full_id: "r.f15.f26"
+parent_id     : "f26"
+this_id       : "term"            
+*/
+            if(inloop_level==2){
+                
+                var gp_node = _findNodeById(_nodep.parent_full_id);
+                if(gp_node && gp_node.data){
+                    _varname = gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id;
+                }else{
+                    _varname = _nodep.parent_id+"."+_nodep.this_id;
+                }
+                
+            }else if(inloop_level==1){
                 _varname = _nodep.parent_id+"."+_nodep.this_id;
             }else{
                 _varname = _nodep.id;
@@ -2030,8 +2073,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             _insertSelectedVarsAsLoop(varid);
         },
 
-        showInsertPopup:function(varid, isloop, elt){
-            _showInsertPopup(varid, isloop, elt);
+        showInsertPopup:function(varid, isloop_level, elt){
+            _showInsertPopup(varid, isloop_level, elt);
             return false;
         },
 
