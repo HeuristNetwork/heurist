@@ -675,13 +675,20 @@ error_log("MOVE ".$tmp_name.">>>".HEURIST_FILES_DIR . $filename.">>>>error=".$is
                     if(file_exists($fpath)){
                         return $fpath;
                     }else{
-                        //special case to support absolute path on file server
+                        //realpath gives real path on remote file server
                         if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
                             $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
                             if(file_exists($fpath)){
                                 return $fpath;
                             }
+                        }else
+                        if(strpos($path, '/misc/heur-filestore/')===0){
+                            $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $path);
+                            if(file_exists($fpath)){
+                                return $fpath;
+                            }
                         }
+                        
                     }
                 }
             }
