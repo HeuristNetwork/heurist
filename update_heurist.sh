@@ -17,26 +17,18 @@
 
 # -------------PRELIMINARIES ---------------------------------------------------------------------------------------------
 
-echo -e "\n\n\n\n\n\n\n\n\n\n\n\n"
-echo Checking parameters and availability ...
-echo
-echo
 
+# Checking parameters and availability ...
 if [ -z $1 ]
    then
-      echo -e "\n\n"
+      echo "Usage: ./update_heurist.sh h4.X.X.alpha [sudo]"
       echo "Please supply version eg. h4.x.x.alpha (this MUST exist as a tar.bz2 file "
-      echo "on heurist.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
+      echo "on http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
       exit
    fi
 
 # Test download package is valid before we get half way and can't find it ...
-curl --range 0-100 http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null 2>&1
-
-rc=$?
-if [ $rc -ne 0 ]
-     then
-        echo -e "\n\n"
+if ! curl -fs --range 0-100 http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION"
         echo "The parameter should be eg. h4.0.0.beta as given - DO NOT include the url path or .tar.bz2"
@@ -44,7 +36,7 @@ if [ $rc -ne 0 ]
         echo
         echo "       ./update_heurist.sh h4.0.0.beta sudo"
         exit
-     fi
+fi
 
 echo
 echo
@@ -53,13 +45,13 @@ echo
 echo
 
 cd /var/www/html/HEURIST
-$2 mkdir temp
+$2 mkdir -p temp
 cd temp
 
-echo -e "Fetching Heurist code from heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2"
+echo "Fetching Heurist code from heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2"
 echo
 $2 rm -f $1.tar.bz2
-$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
+$2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
 $2 mkdir /var/www/html/HEURIST/$1
@@ -71,17 +63,17 @@ echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
 $2 rm -f external.tar.bz2
-$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
+$2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
 $2 tar -xjf external.tar.bz2
 $2 rm -f external.tar.bz2
 
 $2 rm -f external_h4.tar.bz2
-$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
+$2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
 $2 tar -xjf external_h4.tar.bz2
 $2 rm -f external_h4.tar.bz2
 
 $2 rm -f help.tar.bz2
-$2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+$2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
@@ -102,7 +94,7 @@ echo "Heurist unpacked"
 # We are therefore removing it pending investigation. Sept 2014
 # $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
-# $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
+# $2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2.tar.gz
 # $2 tar -zxvf elasticsearch-1.3.2.tar.gz
 # cd  /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch/elasticsearch-1.3.2
 # ./bin/elasticsearch -d
@@ -110,17 +102,20 @@ echo "Heurist unpacked"
 
 # ------------------------------------------------------------------------------------------
 
-echo -e "\n\n\n\n\n\n"
+echo "\n\n\n\n\n\n"
+
 
 echo "---- Heurist update installed in /var/www/html/HEURIST/$1 -------------------------------------------"
 echo
-echo You may need to edit the configIni.php file in the /var/www/html/HEURIST/$1 directory
-echo if you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST (which you should have ...)
-echo See /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php for instructions
+echo "You may need to edit the configIni.php file in the /var/www/html/HEURIST/$1 directory"
+echo "if you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST (which you should have ...)"
+echo "See /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php for instructions"
 echo
-echo Please visit Database-Administrative functions-Utilities-Verify Installation to check that required components are installed
-echo and then verify that Heurist runs correctly from the new location, then overwrite
-echo your /var/www/html/HEURIST/h4 directory with /var/www/html/HEURIST/$1
+echo "Please test your new Heurist install from  http://yourserver/$1 or http://yourserver/HEURIST/$1 and login to a database;"
+echo "Use the menu  Database->\"Full set of database administration functions, utilities and special project extensions\" then select " 
+echo "the \"Verify installation\" to check all is installed correctly"
+echo 
+echo "When you have confirmed that the this Heurist upgrade is running correctly, make it default by repointing"
+echo "your symlink /var/www/html/HEURIST/h4 directory to /var/www/html/HEURIST/$1"
 echo
-echo You can run Heurist from  http://yourserver/$1 or http://yourserver/HEURIST/$1
 echo
