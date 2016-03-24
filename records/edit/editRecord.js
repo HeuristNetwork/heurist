@@ -1145,11 +1145,29 @@ console.log('heurist not defined');
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
             if (fileInput.value == "") return;
+            
+            var filesize = fileInput.files[0].size;
+            var max_size = Math.min(HAPI_commonData.max_file_size,HAPI_commonData.max_post_size);
+            if (filesize>max_size) {
+                    top.HEURIST.util.showError(
+'Sorry, this file exceeds the upload '
++ ((HAPI_commonData.max_file_size<HAPI_commonData.max_post_size)?'file':'(post data)')
++ ' size limit set for this server ('
++ Math.round(max_size/1024/1024) 
++ ' MBytes). Please reduce the file size eg. by reducing resolution of images, or ask your system administrator to increase the upload limit. '
++ '<br><br>'
++ 'For sound and video files we STRONGLY recommend uploading to a streaming service such as Soundcloud, Youtube or Vimeo and entering the URL in the URL field. They will play in situ in Heurist and the streaming service will deliver the appropriate resolution for the device. Choose private but playable by anyone with the URL if they are to be embedded in a public website.'
+                    );
+                    fileInput.value = '';
+                    return;
+            }            
+
+            
             if (! windowRef.HEURIST.uploadsDiv  ||  ! this.document.getElementById("uploads")) {
                 var uploadsDiv = windowRef.HEURIST.uploadsDiv = this.document.body.appendChild(this.document.createElement("div"));
                 uploadsDiv.id = "uploads";
             }
-
+            
             var statusDiv = this.document.createElement("div");
             statusDiv.className = "upload-status";
             statusDiv.appendChild(this.document.createTextNode("Uploading file ..."));
