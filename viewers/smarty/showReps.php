@@ -676,12 +676,13 @@ function _add_term_val($res, $val){
 function getFullTermLabel($term, $domain){
 
     global $dtTerms;
+    
     $fi = $dtTerms['fieldNamesToIndex'];
     $parent_id = $term[ $fi['trm_ParentTermID'] ];
 
     $parent_label = '';
     
-    if($parent_id!=null){
+    if($parent_id!=null && $parent_id>0){
         $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
         if($term_parent){
             $parent_label = getFullTermLabel($term_parent, $domain);    
@@ -689,7 +690,6 @@ function getFullTermLabel($term, $domain){
         }    
     }
     return $parent_label.$term[ $fi['trm_Label']];
-    
 }
                         
                         
