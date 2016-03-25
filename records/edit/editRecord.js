@@ -1057,10 +1057,11 @@ console.log('heurist not defined');
         //
         inputOnChangeEventHandler: function(event){
             var element = event.target;
-            if(element.value && element.value.length>65535){
-                top.HEURIST.util.stopEvent(event);
-                top.HEURIST.util.showMessage('Text fields are limited to 65536 characters (64Kb typically ~50 pages).<p>"'
-     +element.getAttribute('data-dispname')+ '" contains '+element.value.length+' characters</p>'
+            var val_size = element.value?top.HEURIST.util.byteLengthOf(element.value):0;
+            if(val_size>20480){
+                top.HEURIST.util.stopEvent(event);                             //was 65535 
+                top.HEURIST.util.showMessage('Text fields are limited to 20480 bytes (20Kb typically ~15 pages).<p>"'
+     +element.getAttribute('data-dispname')+ '" has '+val_size+' bytes ('+element.value.length+' characters)</p>'
      +'Please shorten text or divide into repeat values for this field)');
                 return false;
             }else{
@@ -1414,7 +1415,7 @@ console.log('heurist not defined');
                                     details[det_id] = {vals:[val]};
                                 }
                                 
-                                if(val.length>65535 && oversizeInputs.indexOf(inputs[i].shortName)<0){
+                                if(top.HEURIST.util.byteLengthOf(val)>20480 && oversizeInputs.indexOf(inputs[i].shortName)<0){
                                     oversizeInputs.push(inputs[i].shortName);
                                 }
                             }
@@ -1460,9 +1461,9 @@ console.log('heurist not defined');
             
             if(oversizeInputs.length>0){
                 
-                top.HEURIST.util.showMessage('Text fields are limited to 65536 characters (64Kb typically ~50 pages).<p>'
-     + oversizeInputs.join(",<br />")+'<br/> contain'
-     + (oversizeInputs.length>1?'':'s') +' more characters</p>'
+                top.HEURIST.util.showMessage('Text fields are limited to 20480 bytes (20Kb typically ~15 pages).<p>'
+     + oversizeInputs.join(",<br />")+'<br/> ha'
+     + (oversizeInputs.length>1?'s':'ve') +' bigger size</p>'
      +'Please shorten text or divide into repeat values for '+(oversizeInputs.length>1?'these fields':'this field'));
                 return false;
             }
