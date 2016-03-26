@@ -487,7 +487,11 @@ top.HEURIST4.ui = {
             if(!top.HEURIST4.util.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');
             }
-
+        }else{
+            rectypeList = [];
+        }
+        
+        if(rectypeList.length>0 && rectypeList.length<4){
             for (var idx in rectypeList)
             {
                 if(idx){
@@ -505,6 +509,20 @@ top.HEURIST4.ui = {
                     rectypes.groups[index].showTypes.length < 1) {
                     continue;
                 }
+                //show group if at leas one rectype is visible
+                if(rectypeList.length>0){
+                    var notfound = true;
+                    for (var recTypeIDIndex in rectypes.groups[index].showTypes){
+                        var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
+                        if(rectypeList.indexOf(rectypeID)>=0){
+                            notfound = false;
+                            break;
+                        }
+                    }
+                    if(notfound) continue;
+                }
+                
+                
                 var grp = document.createElement("optgroup");
                 grp.label = rectypes.groups[index].name;
                 selObj.appendChild(grp);
