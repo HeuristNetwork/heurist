@@ -723,9 +723,10 @@ class HeuristNativeEntry {
                 $bdt_to_rectype[$dtyID] = explode(",",$ptrTargetString);
             }
         }
-        $infos = $hash_info[$this->_rectype];
+        $infos = @$hash_info[$this->_rectype];
 
         $hhash = $this->_rectype . ":";
+        if(is_array($infos))
         foreach ($infos as $rdt_id => $isResource) {
             if (! $isResource) {
                 $values = @$this->_fields_by_bdt_id[$rdt_id];

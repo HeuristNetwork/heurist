@@ -172,7 +172,7 @@ function jump_sessions() {
     // variables to copy from the regular session to the alt
     $copy_vars = array('user_name', 'user_access', 'user_realname', 'user_id');
 
-    $alt_sessionid = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid'];
+    $alt_sessionid = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid'];
     if (! $alt_sessionid) {
         session_start();
         $alt_sessionid = $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['alt-sessionid'] = sha1('import:' . rand());
