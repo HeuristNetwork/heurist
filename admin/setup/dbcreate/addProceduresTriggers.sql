@@ -38,7 +38,7 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(40
 
 		select group_concat(NEW_LIPOSUCTION(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
 			into non_resource_fields
-			from Details, Records, defDetailTypes, defRecStructure
+			from recDetails, Records, defDetailTypes, defRecStructure
 			where dtl_RecID=rec_ID and
 					dtl_DetailTypeID=dty_ID and
 					rec_RecTypeID=rst_RecTypeID and
@@ -47,9 +47,9 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(40
 					dty_Type != "resource" and
 					rec_ID = recID;
 
-		select group_concat(DST.rec_Hhash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
+		select group_concat(DST.rec_Hash order by dty_ID, dty_ID, DST.rec_Hhash separator '$^')
 			into resource_fields
-			from Details, Records SRC, defDetailTypes, defRecStructure, Records DST
+			from recDetails, Records SRC, defDetailTypes, defRecStructure, Records DST
 			where dtl_RecID=SRC.rec_ID and
 					dtl_DetailTypeID=dty_ID and
 					SRC.rec_RecTypeID=rst_RecTypeID and
@@ -85,7 +85,7 @@ DROP function IF EXISTS `simple_hash`$$
 		select rec_RecTypeID into rectype from Records where rec_ID = recID;
 		select group_concat(NEW_LIPOSUCTION(upper(dtl_Value)) order by dty_ID, upper(dtl_Value) separator ';')
 			into non_resource_fields
-			from Details, Records, defDetailTypes, defRecStructure
+			from recDetails, Records, defDetailTypes, defRecStructure
 			where dtl_RecID=rec_ID and
 					dtl_DetailTypeID=dty_ID and
 					rec_RecTypeID=rst_RecTypeID and
@@ -115,20 +115,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `set_all_hhash`()
 			truncate t;
 			insert into t select rec_ID
 							from Records A
-							where A.rec_Hhash is null
+							where A.rec_Hash is null
 								and not exists (select *
-												from Details, defDetailTypes, defRecStructure, Records B
+												from recDetails, defDetailTypes, defRecStructure, Records B
 												where dtl_RecID=A.rec_ID and
 														dtl_DetailTypeID=dty_ID and
 														dty_Type="resource" and
 														B.rec_ID=dtl_Value and
-														B.rec_Hhash is null and
+														B.rec_Hash is null and
 														rst_RecTypeID=A.rec_RecTypeID and
 														rst_DetailTypeID=dty_ID and
 														rst_RequirementType="Required");
 			set @tcount := row_count();
 			update Records
-				set rec_Hhash = hhash(rec_ID)
+				set rec_Hash = hhash(rec_ID)
 				where rec_ID in (select * from t);
 			end;
 			until @tcount = 0
