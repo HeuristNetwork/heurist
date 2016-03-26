@@ -862,7 +862,7 @@ function importVocabulary($term_id, $domain, $children=null){
     $terms = $defs['terms'];
 
     if($term_id==null){
-
+        //import entire list of terms
         foreach($imp_terms[$domain] as $term_id){
             importVocabulary($term_id, $domain, @$terms['treesByDomain'][$domain][$term_id]);
         }
