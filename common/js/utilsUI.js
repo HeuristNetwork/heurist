@@ -1769,24 +1769,29 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 disabledTermIDsList.split(","):
                 []));
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
-
+        
         //this is vocabulary id - show list of all terms for this vocab
         if(!isNaN(Number(termIDTree))){
             
             var vocabId = Number(termIDTree);
-            var tree = top.HEURIST.terms.treesByDomain[datatype];
-            termIDTree = (vocabId==0)?tree:tree[vocabId];
-            if (top.HEURIST.util.isEmptyVar(termIDTree)) {
-              var label = document.createElement("span");
-              label.innerHTML = " no terms available ";
-              return label;
-            }
+            if(vocabId<0){
+                top.HEURIST.util.addoption(selObj, '', 'No terms defined - please use Manage Structure to fix');
+            }else{
             
-            if(vocabId==0){ //specific 
-                temp = [];
-                for(termID in termIDTree){
-                    if(termID){
-                        temp.push(termID);
+                var tree = top.HEURIST.terms.treesByDomain[datatype];
+                termIDTree = (vocabId==0)?tree:tree[vocabId];
+                if (top.HEURIST.util.isEmptyVar(termIDTree)) {
+                  var label = document.createElement("span");
+                  label.innerHTML = " no terms available ";
+                  return label;
+                }
+                
+                if(vocabId==0){ //specific 
+                    temp = [];
+                    for(termID in termIDTree){
+                        if(termID){
+                            temp.push(termID);
+                        }
                     }
                 }
             }

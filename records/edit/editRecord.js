@@ -2672,9 +2672,13 @@ console.log('heurist not defined');
 
         var    allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
         if(allTerms==null){
-            allTerms = (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum")
-            ?top.HEURIST.terms.treesByDomain['enum']
-            :top.HEURIST.terms.treesByDomain.relation;
+            
+            if(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum"){
+                //2016-03-25 vocabulary must be defined! top.HEURIST.terms.treesByDomain['enum']
+                allTerms = -1;
+            }else{
+                allTerms = top.HEURIST.terms.treesByDomain.relation;
+            }
         }
         var    disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 

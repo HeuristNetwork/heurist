@@ -2278,6 +2278,10 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
 				if (typeof disabledTerms.join === "function") {
 						disabledTerms = disabledTerms.join(",");
 				}
+                if(Hul.isempty(allTerms)){
+                    allTerms = -1; //show warning
+                }
+                
 
 				if(!Hul.isnull(allTerms)) {
 					//remove old combobox
