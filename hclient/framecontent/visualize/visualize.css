@@ -1,7 +1,7 @@
 /** Visualisation CSS */
 .fullscreen {
-    width: 100%;
-    height: 100%;
+    width: 99%;
+    height: 99%;
 }
 
 /*
@@ -20,12 +20,12 @@
 
 /** Visualisation settings */
 #visualisation-settings {
-    max-width: 90%;
     float: left; 
 }
       
 .settings {
-    display: inline-block;
+    display: block;
+    border-bottom: 1px solid lightgray;
 }  
 
 .settings div {
@@ -34,9 +34,7 @@
 
 .space {
     font-size: 0.7em;
-    padding-left: 5px;
-    padding-right: 5px;   
-    padding-top: 3px;  
+    padding:3px 5px;
 }
 
 .middle {
@@ -87,6 +85,7 @@
 #visualisation-menu {
     max-width: 150px;
     position: absolute;
+    top:5px;
     right: 5px;
 }
 
@@ -133,7 +132,7 @@
 
 /** SVG */
 #d3svg {
-    border-top: 1px dashed black;
+    border: 1px dashed white;
 }
 
 /** Record hover */

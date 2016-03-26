@@ -294,11 +294,23 @@ function addContainer() {
     var scale = getSetting(setting_scale);
     var translateX = getSetting(setting_translatex);
     var translateY = getSetting(setting_translatey);
-
+    
+    var s ='';
+    if(isNaN(translateX) || isNaN(translateY) || 
+        Math.abs(translateX)==Infinity || Math.abs(translateY)==Infinity){
+        
+        translateX = 1;
+        translateY = 1;
+    }
+    s = "translate("+translateX+", "+translateY+")";    
+    if(!isNaN(scale)){
+        s = s + "scale("+scale+")";
+    }
+    
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "container")
-                       .attr("transform", "translate("+translateX+", "+translateY+")scale("+scale+")");
+                       .attr("transform", s);
                        
     // Zoom behaviour                   
     this.zoomBehaviour = d3.behavior.zoom()

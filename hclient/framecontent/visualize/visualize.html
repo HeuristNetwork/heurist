@@ -23,12 +23,10 @@
 -->
 
 <!-- Network diagram HTML -->
-<table id="visualisation" class="fullscreen" cellpadding="4" cellspacing="1">
-    <tr>
-        <!-- SETTINGS -->
-        <td height="25px" style="vertical-align: middle;">
-            <!-- Settings -->
-            <div id="visualisation-settings">
+
+<div class="ent_header" style="height:12em;border:none">
+    
+            <div id="visualisation-settingsX">
                 <!-- LINE SETTINGS -->
                 <div class="settings space" id="lineSettings">
                     <b>Network&nbsp;</b>
@@ -79,6 +77,25 @@
                         &nbsp;&nbsp;Colour
                         <div id="entitycolor" class="colorblock"></div>
                     </div>
+                    
+                    <div id="formulaContainer">
+                        &nbsp;&nbsp;Scaling
+                        <!-- Formula -->
+                        <select class="middle" id="formula">
+                            <option value="linear">linear</option>
+                            <option value="logarithmic">logarithmic</option>
+                            <option value="unweighted">unweighted</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Fish eye setting -->
+                    <!--TODO: Fisheye on connections diagram does not currently work - commented out-->
+                    <div id="fisheyeContainer" style="display: none;">
+                        &nbsp;&nbsp;Fisheye
+                        <input id="fisheye" type="checkbox" name="fisheye">
+                    </div>
+                    
+                    
                 </div>
 
 
@@ -125,37 +142,11 @@
                         <input id="attraction" class="number-input medium" type="number" step="100" />
                     </div>
 
-                    <div class="settings space">
+                    <div>
                         <i class="explanation">&nbsp;&nbsp;Start with Aggressive, then change to Gentle or Off.</i>
                     </div>
 
 
-                </div>
-
-                <!-- Transform settings -->
-                <!-- TODO: Scaling and Entity colour not currently showing up (7/2/16) -->
-                <div class="settings space" id="transformSettings">
-                    <div id="formulaContainer">
-                        <b>&nbsp;&nbsp;Scaling&nbsp;</b>
-
-                        <!-- Formula -->
-                        <select class="middle" id="formula">
-                            <option value="linear">linear</option>
-                            <option value="logarithmic">logarithmic</option>
-                            <option value="unweighted">unweighted</option>
-                        </select>
-                    </div>
-
-                    <!-- Fish eye setting
-                    TODO: Fisheye on connections diagram does not currently work - commented out
-                    <div id="fisheyeContainer">
-                    &nbsp;&nbsp;Fisheye
-                    <input id="fisheye" type="checkbox" name="fisheye">
-                    </div>
-                    -->
-                </div>
-
-                <div>
                 </div>
 
                 <!-- MOUSE SETTINGS -->
@@ -180,12 +171,12 @@
                         <img id="overlay" class="mouse-icon" title="Retrieve information on click" src="visualize/overlay.png">
                     </div>
 
+                    <div>
+                        <i class="explanation">&nbsp;&nbsp;Click to select, drag to reposition, mouse wheel zooms. Note: Shows constrained relationships only. </i>
+                    </div>
                 </div>
 
                 <!-- HELP INFO -->
-                <div class="settings space">
-                    <i class="explanation">&nbsp;&nbsp;AA Click to select, drag to reposition, mouse wheel zooms. Note: Shows constrained relationships only. </i>
-                </div>
 
             </div>
 
@@ -207,15 +198,10 @@
                 </ul>
                 -->
             </div>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
+</div>
+<div class="ent_content_full" style="top:12em;">
             <!-- SVG -->
             <svg id="d3svg" class="fullscreen">
                 <text x="25" y="25" fill="black">Processing...</text>
-            </svg>
-        </td>
-    </tr>
-</table>
+            </svg>  
+</div>

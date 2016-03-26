@@ -164,7 +164,7 @@ function onMouseDown() {
 * 
 */
 function onMouseMove() {
-    console.log("Mouse moved");
+    //console.log("Mouse moved");
     if(rightClicked) {
         // X-positions
         positions.x2 = d3.event.offsetX;
