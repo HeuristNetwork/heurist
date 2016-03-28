@@ -535,7 +535,8 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                                 onclick="{$('#registered_dbs').hide()}"/><label for="rb3"
                                 class="labelBold" style="padding-left: 2em;">Example database (Shakespeare's plays)</label>
                             <div style="padding-left: 38px;padding-bottom:10px;width:600px">
-                                A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
+                                THIS DATABASE IS CURRENTLY UNDER DEVELOPMENT - PLEASE DON'T USE THIS OPTION
+                                <br/>A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
                                 Use this database as a starting point for becoming familiar with Heurist (See <a href="http://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
                             </div>
 

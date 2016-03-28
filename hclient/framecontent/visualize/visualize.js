@@ -149,7 +149,7 @@ var svg;        // The SVG where the visualisation will be executed on
         // Check visualisation limit
         var amount = Object.keys(settings.data.nodes).length;
         if(amount > settings.limit) {
-             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set at ' +settings.limit+ ' records, you are trying to visualize ' +amount+ ' records</text>');  
+             $("#d3svg").html('<text x="25" y="25" fill="black">Sorry, the visualisation limit is set at ' +settings.limit+ ' records, you are trying to visualize ' +amount+ ' records. Please refine your filter.</text>');  
              return; 
         }else{
             visualizeData();    

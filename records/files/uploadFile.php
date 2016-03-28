@@ -112,7 +112,10 @@
         );
                                              
         if (! $res) {
-            $uploadFileError = "Error inserting file upload information into database. The most likely cause is that the mime type for this file is not recognised. Please add mime type from Database > Administration > Structure > Define mime types. Otherwise pelase contact your system administrator or the Heurist developers.";
+            $uploadFileError = "Error inserting file metadata or unable to recognise uploaded file format. '.
+                'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '.
+                'Please add mime type from Database > Administration > Structure > Define mime types. '.
+                'Otherwise please contact your system administrator or the Heurist developers.";
             return $uploadFileError;
         }
 
