@@ -410,7 +410,7 @@ function EditRecStructure() {
 
                         // Help text
                         '<div class="input-row">'+
-                        '<div class="input-header-cell" style="vertical-align:top">Help text (under field):</div>'+
+                        '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
                         '<textarea style="width:450px" cols="450" rows="3" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
@@ -1064,8 +1064,9 @@ function EditRecStructure() {
                     //show disable target pnr rectype
 
                 }else if(rst_type === "separator"  &&
-                    !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth")){
-                        //hide all but name
+                    !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" 
+                            || fieldnames[k] === "rst_DisplayHelpText")){
+                        //hide all but name  and help
                         edt.parentNode.parentNode.style.display = "none";
                     }else if(rst_type === "fieldsetmarker" && 
                         !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_DisplayWidth" || fieldnames[k] === "rst_Status")){

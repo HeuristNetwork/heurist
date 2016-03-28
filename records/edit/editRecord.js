@@ -3385,8 +3385,8 @@ console.log('heurist not defined');
         //newInput.style.width = '105ex';    // this will effectively override the sizing control in the record definition, may have to remove
         this.addInputHelper.call(this, bdValue, newInput);
         if (this.promptDiv){
-            this.promptDiv.className = "";
-            this.promptDiv.style.display = "none";
+            //this.promptDiv.className = "";
+            //2016-03-28 this.promptDiv.style.display = "none";
             newInput.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
         }
         return newInput;
