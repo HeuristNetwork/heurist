@@ -38,6 +38,14 @@
         <title>Upload file or define URL</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <link rel="stylesheet" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
+        
+        <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+        
         <link rel=stylesheet href="../../common/css/global.css">
         <link rel=stylesheet href="../../common/css/edit.css">
 
@@ -46,14 +54,24 @@
         <script type="text/javascript" src="../../external/js/simple_js_viewer/script/extension/toolbar-ext.js"></script>
         <link rel="stylesheet" type="text/css" href="../../external/js/simple_js_viewer/script/extension/toolbar-ext.css" />
 
-        <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
-
         <style>
             .input-header-cell {
                 vertical-align: middle;
                 width:50px;
                 height:30px;
             }
+            .ui-progressbar {
+                position: relative;
+                width:100%;   
+                height: 18px;                
+            }
+            .progress-label {
+                position: absolute;
+                left: 50%;
+                top: 4px;
+                font-weight: bold;
+                text-shadow: 1px 1px 0 #fff;
+            }            
         </style>
     </head>
     <body class="popup" style="overflow:hidden;" onresize="onResize()">
@@ -89,9 +107,18 @@
 
         <div style="overflow:hidden;">
             <div id="search" class="banner" style="top:0;height:65px;">
-                <div style="width: 100%;" id="div_fileupload"></div>
+                <div style="width: 100%;" id="div_fileupload">
+                </div>
                 <div style="width: 100%;" id="div_url"></div>
+                <div id="progressbar_div" style="width:99%;height:40px;padding:5px;text-align:center;display:none">
+                    <div id="progressbar">
+                        <div class="progress-label">Loading data...</div>
+                    </div>
+                    <div id="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+                </div>
 
+                
+                
                 <div style="position: absolute; top:3px; right: 0px; text-align: right;" id="div_type">
                     <input id="cbSource" type="hidden" />
                     <!--Source:
@@ -134,9 +161,8 @@
         <div id="image_digitizer_container" style="position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>
 
 
-
         <script language="JavaScript">
-            top.HEURIST.registerEvent(window, "load", initPage);
+            $( initPage );
         </script>
     </body>
 </html>

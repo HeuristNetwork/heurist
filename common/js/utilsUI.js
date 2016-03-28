@@ -1769,24 +1769,29 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 disabledTermIDsList.split(","):
                 []));
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
-
+        
         //this is vocabulary id - show list of all terms for this vocab
         if(!isNaN(Number(termIDTree))){
             
             var vocabId = Number(termIDTree);
-            var tree = top.HEURIST.terms.treesByDomain[datatype];
-            termIDTree = (vocabId==0)?tree:tree[vocabId];
-            if (top.HEURIST.util.isEmptyVar(termIDTree)) {
-              var label = document.createElement("span");
-              label.innerHTML = " no terms available ";
-              return label;
-            }
+            if(vocabId<0){
+                top.HEURIST.util.addoption(selObj, '', 'No terms defined - please use Manage Structure to fix');
+            }else{
             
-            if(vocabId==0){ //specific 
-                temp = [];
-                for(termID in termIDTree){
-                    if(termID){
-                        temp.push(termID);
+                var tree = top.HEURIST.terms.treesByDomain[datatype];
+                termIDTree = (vocabId==0)?tree:tree[vocabId];
+                if (top.HEURIST.util.isEmptyVar(termIDTree)) {
+                  var label = document.createElement("span");
+                  label.innerHTML = " no terms available ";
+                  return label;
+                }
+                
+                if(vocabId==0){ //specific 
+                    temp = [];
+                    for(termID in termIDTree){
+                        if(termID){
+                            temp.push(termID);
+                        }
                     }
                 }
             }
@@ -2298,6 +2303,42 @@ if (! top.HEURIST.util) top.HEURIST.util = {
             iCaretPos = ele.selectionStart;
           }
           return (iCaretPos);
+    },
+    
+    //count UTF-8 bytes of a string
+    byteLengthOf: function (s){
+        //assuming the String is UCS-2(aka UTF-16) encoded
+        var n=0;
+        for(var i=0,l=s.length; i<l; i++){
+            var hi=s.charCodeAt(i);
+            if(hi<0x0080){ //[0x0000, 0x007F]
+                n+=1;
+            }else if(hi<0x0800){ //[0x0080, 0x07FF]
+                n+=2;
+            }else if(hi<0xD800){ //[0x0800, 0xD7FF]
+                n+=3;
+            }else if(hi<0xDC00){ //[0xD800, 0xDBFF]
+                var lo=s.charCodeAt(++i);
+                if(i<l&&lo>=0xDC00&&lo<=0xDFFF){ //followed by [0xDC00, 0xDFFF]
+                    n+=4;
+                }else{
+                    return byteLengthOf2(s);
+                    //throw new Error("UCS-2 String malformed");
+                }
+            }else if(hi<0xE000){ //[0xDC00, 0xDFFF]
+                return byteLengthOf2(s);
+                //throw new Error("UCS-2 String malformed");
+            }else{ //[0xE000, 0xFFFF]
+                n+=3;
+            }
+        }
+        return n;
+    },
+    
+    byteLengthOf2: function(text){
+        return encodeURIComponent(text).replace(/%[A-F\d]{2}/g, 'U').length;
+        //return (unescape(encodeURIComponent(s).length);
+        
     }
 };
 //-----------------------------------------------------------------------------------------------------

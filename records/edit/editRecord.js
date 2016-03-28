@@ -1057,10 +1057,11 @@ console.log('heurist not defined');
         //
         inputOnChangeEventHandler: function(event){
             var element = event.target;
-            if(element.value && element.value.length>65535){
-                top.HEURIST.util.stopEvent(event);
-                top.HEURIST.util.showMessage('Text fields are limited to 65536 characters (64Kb typically ~50 pages).<p>"'
-     +element.getAttribute('data-dispname')+ '" contains '+element.value.length+' characters</p>'
+            var val_size = element.value?top.HEURIST.util.byteLengthOf(element.value):0;
+            if(val_size>20480){
+                top.HEURIST.util.stopEvent(event);                             //was 65535 
+                top.HEURIST.util.showMessage('Text fields are limited to 20480 bytes (20Kb typically ~15 pages).<p>"'
+     +element.getAttribute('data-dispname')+ '" has '+val_size+' bytes ('+element.value.length+' characters)</p>'
      +'Please shorten text or divide into repeat values for this field)');
                 return false;
             }else{
@@ -1145,11 +1146,29 @@ console.log('heurist not defined');
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
             if (fileInput.value == "") return;
+            
+            var filesize = fileInput.files[0].size;
+            var max_size = Math.min(HAPI_commonData.max_file_size,HAPI_commonData.max_post_size);
+            if (filesize>max_size) {
+                    top.HEURIST.util.showError(
+'Sorry, this file exceeds the upload '
++ ((HAPI_commonData.max_file_size<HAPI_commonData.max_post_size)?'file':'(post data)')
++ ' size limit set for this server ('
++ Math.round(max_size/1024/1024) 
++ ' MBytes). Please reduce the file size eg. by reducing resolution of images, or ask your system administrator to increase the upload limit. '
++ '<br><br>'
++ 'For sound and video files we STRONGLY recommend uploading to a streaming service such as Soundcloud, Youtube or Vimeo and entering the URL in the URL field. They will play in situ in Heurist and the streaming service will deliver the appropriate resolution for the device. Choose private but playable by anyone with the URL if they are to be embedded in a public website.'
+                    );
+                    fileInput.value = '';
+                    return;
+            }            
+
+            
             if (! windowRef.HEURIST.uploadsDiv  ||  ! this.document.getElementById("uploads")) {
                 var uploadsDiv = windowRef.HEURIST.uploadsDiv = this.document.body.appendChild(this.document.createElement("div"));
                 uploadsDiv.id = "uploads";
             }
-
+            
             var statusDiv = this.document.createElement("div");
             statusDiv.className = "upload-status";
             statusDiv.appendChild(this.document.createTextNode("Uploading file ..."));
@@ -1396,7 +1415,7 @@ console.log('heurist not defined');
                                     details[det_id] = {vals:[val]};
                                 }
                                 
-                                if(val.length>65535 && oversizeInputs.indexOf(inputs[i].shortName)<0){
+                                if(top.HEURIST.util.byteLengthOf(val)>20480 && oversizeInputs.indexOf(inputs[i].shortName)<0){
                                     oversizeInputs.push(inputs[i].shortName);
                                 }
                             }
@@ -1442,9 +1461,9 @@ console.log('heurist not defined');
             
             if(oversizeInputs.length>0){
                 
-                top.HEURIST.util.showMessage('Text fields are limited to 65536 characters (64Kb typically ~50 pages).<p>'
-     + oversizeInputs.join(",<br />")+'<br/> contain'
-     + (oversizeInputs.length>1?'':'s') +' more characters</p>'
+                top.HEURIST.util.showMessage('Text fields are limited to 20480 bytes (20Kb typically ~15 pages).<p>'
+     + oversizeInputs.join(",<br />")+'<br/> ha'
+     + (oversizeInputs.length>1?'s':'ve') +' bigger size</p>'
      +'Please shorten text or divide into repeat values for '+(oversizeInputs.length>1?'these fields':'this field'));
                 return false;
             }
@@ -2653,9 +2672,13 @@ console.log('heurist not defined');
 
         var    allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
         if(allTerms==null){
-            allTerms = (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum")
-            ?top.HEURIST.terms.treesByDomain['enum']
-            :top.HEURIST.terms.treesByDomain.relation;
+            
+            if(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum"){
+                //2016-03-25 vocabulary must be defined! top.HEURIST.terms.treesByDomain['enum']
+                allTerms = -1;
+            }else{
+                allTerms = top.HEURIST.terms.treesByDomain.relation;
+            }
         }
         var    disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 

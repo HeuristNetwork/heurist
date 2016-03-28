@@ -121,10 +121,20 @@ if (isForAdminOnly()) exit();
                 }else{
                         
                     chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+
                     $fpath = realpath($res['db_fullpath']);
+
                     if(!$fpath || !file_exists($fpath)){
                         chdir(HEURIST_FILES_DIR);  // relatively db root
                         $fpath = realpath($res['db_fullpath']);
+                    }
+
+                    //realpath gives real path on remote file server
+                    if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $fpath);
+                    }else
+                    if(strpos($fpath, '/misc/heur-filestore/')===0){
+                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $fpath);
                     }
                     
                     //check that the relative path is correct

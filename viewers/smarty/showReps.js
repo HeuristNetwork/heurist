@@ -1299,8 +1299,27 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         return "\n{if ($"+varname+")}"+remark+"\n\n   {$"+varname+"} \n\n{/if}\n"+remark+" {* you can also add {/else} before {/if}} *}\n";
     }
 
+    //
+    // 
+    //
+    function _addMagicLoopOperator(_nodep, varname){
+        
+        var gp_node = _findNodeById(_nodep.parent_full_id);
+        if(gp_node && gp_node.data){
+            
+            var parent_name = _getVariableName(_nodep.parent_full_id);
+            var var_name = (parent_name + '>>' +_getVariableName(_nodep.id)).trim(); //was this_id
+            
+            return '{foreach $'+gp_node.data.parent_id+'.'+_nodep.parent_id+'s as $'+_nodep.parent_id+' name=valueloop}{*  multi-value field loop *}'
+                    //+'\n\t'+_addVariable(_nodep, varname)
+                    +'\n\t{$'+_nodep.parent_id+"."+_nodep.this_id+'} {* '
+                            +var_name+' Note: $'+gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id+' outputs first term only *}'
+                    +'\n{/foreach}';
+        }else{
+            return _addVariable(_nodep, varname);
+        }
 
-
+    }
     //
     //
     //
@@ -1634,8 +1653,22 @@ this_id       : "term"
                 }
                 
             }else if(inloop_level==1){
+                
                 _varname = _nodep.parent_id+"."+_nodep.this_id;
+                
+                //2016-03-22 IJ wants to insert loop instead of var. AO - I am strictly against this inconsistency!
+                if(_nodep.this_id=='term' && !isif){
+                    
+                    _text = _addMagicLoopOperator(_nodep, _varname);
+                    insertAtCursor(textedit, _text, false, 0);
+                    return;
+
+                }else{
+                    _varname = _nodep.parent_id+"."+_nodep.this_id;
+                }
+                
             }else{
+                
                 _varname = _nodep.id;
             }
 

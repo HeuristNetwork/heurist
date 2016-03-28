@@ -795,9 +795,9 @@ function mode_crosswalking() {
 
         if ($in_entry->getReferenceType()) {
             unset($out_entry);
-            $out_entry = &$in_entry->crosswalk();
+            $out_entry = $in_entry->crosswalk();
             if ($out_entry) {
-                //print $out_entry->getTitle() . "<br>";
+                print $out_entry->getTitle() . "<br>";
                 if ($out_entry->isValid()) {
                     $out_entries[] = &$out_entry;
                     @++$out_entry_count_by_rectype[$out_entry->getReferenceType()];
@@ -1020,8 +1020,8 @@ function mode_entry_insertion() {
         }
     }
 
-    $tags_for_all = explode(',', $_REQUEST['tags_for_all']);
-    $workgroup_tag_id = intval($_REQUEST["workgroup_tag"]);
+    $tags_for_all = explode(',', @$_REQUEST['tags_for_all']);
+    $workgroup_tag_id = intval(@$_REQUEST["workgroup_tag"]);
 
     $session_data['import_time'] =  date('Y-m-d H:i:s');
     // add a tag (tag) for this import session to all entries
@@ -1055,7 +1055,7 @@ function mode_entry_insertion() {
 
         $_entry = &$entry;
         do { // for each container set up the author records
-            $fields = &$_entry->getFields();
+            $fields = $_entry->getFields();
 
             foreach (array_keys($fields) as $i) {
                 if (! $fields[$i]->getValue()) continue;
@@ -1597,7 +1597,7 @@ function insert_biblio(&$entry) {
     ', from file: ' . $session_data['in_filename'] .
     ', by user: ' . get_user_name(). ']';
 
-    $fields = &$entry->getFields();
+    $fields = $entry->getFields();
     foreach (array_keys($fields) as $i) {
         if (! $fields[$i]->getValue()) continue;
 
@@ -1661,8 +1661,8 @@ function insert_biblio(&$entry) {
     }
 
     $recTitle = $entry->getTitle();
-    mysql_query('set @suppress_update_trigger := 1');
-    mysql_query('update Records set rec_Title = "'.mysql_real_escape_string($recTitle).'", rec_Hash = hhash(rec_ID) where rec_ID='.$rec_id);
+    mysql_query('set @suppress_update_trigger := 1');            //, rec_Hash = hhash(rec_ID) - this function has error
+    mysql_query('update Records set rec_Title = "'.mysql_real_escape_string($recTitle).'" where rec_ID='.$rec_id);
     mysql_query('set @suppress_update_trigger := NULL');
 }
 

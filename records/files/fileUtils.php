@@ -89,7 +89,7 @@ function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
 }
 
-function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=20) {
+function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30) {
 
     if(!function_exists("curl_init"))  {
         return false;

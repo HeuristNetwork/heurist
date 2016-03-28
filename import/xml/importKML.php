@@ -110,7 +110,7 @@ class HeuristKMLParser extends HeuristForeignParser {
 
 		foreach ($matches[0] as $placemarkText) {
 			try {
-				$entries[] = &$this->_makeNewEntry($placemarkText);
+				$entries[] = $this->_makeNewEntry($placemarkText);
 			} catch (Exception $e) {
 				array_push($errors, $e->getMessage());
 			}
@@ -410,7 +410,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 		$heuristType = HeuristKMLParser::getHeuristReferenceTypeByID($this->_type);
 		if (! $heuristType) return NULL;
 
-		$entry = &new HeuristNativeEntry($heuristType);
+		$entry = new HeuristNativeEntry($heuristType);
 
 		foreach ($this->_fields as $kmlTag => $value) {
 			$heuristFieldID = $kml_to_heurist_map[$kmlTag];
@@ -450,7 +450,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 						list($geoType, $geoValue) = $geometry;
 
 						unset($newField);
-						$newField = &new HeuristNativeField($geoDT, $geoType);
+						$newField = new HeuristNativeField($geoDT, $geoType);
 						$newField->setGeographicValue($geoValue);
 						$entry->addField($newField);
 					}

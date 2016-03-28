@@ -2729,7 +2729,8 @@ HAPI.XHR = {
 		var method = jso? "POST" : "GET";
 		req.open(method, url, true);
 
-		req.setRequestHeader("User-Agent", "XMLHTTP/1.0");
+//2016-03-25 XMLHttpRequest isn't allowed to set these headers, they are being set automatically by the browser		
+//req.setRequestHeader("User-Agent", "XMLHTTP/1.0");
 		if (jso) {
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		}

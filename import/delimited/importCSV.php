@@ -37,6 +37,11 @@ set_time_limit(0);
 $mysqli = mysqli_connection_overwrite(DATABASE);
 mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
 
+
+$post_max_size = get_config_bytes(ini_get('post_max_size'));
+$file_max_size = get_config_bytes(ini_get('upload_max_filesize'));
+            
+
 if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
     $res = get_import_value($_REQUEST["recid"], $_REQUEST["table"]);
     header('Content-type: text/javascript');
@@ -69,9 +74,10 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
         <script type="text/javascript" src="../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
         <link rel="stylesheet" href="../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
-        <!--
-        <link rel="stylesheet" href="../../../h4styles.css">
-        -->
+        
+        <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+        
         <link rel=stylesheet href="../../common/css/global.css" media="all">
 
         <style type="text/css">
@@ -150,6 +156,20 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             .help{
                 font-size:0.9em;
             }
+            
+            .ui-progressbar {
+                position: relative;
+                width:100%;   
+                height: 18px;                
+            }
+            .progress-label {
+                position: absolute;
+                left: 50%;
+                top: 4px;
+                font-weight: bold;
+                text-shadow: 1px 1px 0 #fff;
+            }            
+            
         </style>
         <!--
         <script type="text/javascript" src="../../hclient/core/utils.js"></script>
@@ -166,7 +186,6 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             //
             //
             function showProgressMsg(msg){
-//console.log('pm: '+msg);
                 $("#div-progress").html(msg);
                 $("#div-progress").show();
             }
@@ -230,7 +249,6 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                             var ele = parent.document.getElementById(reference_to_parent_dialog);
                             $(ele).addClass('loading');
                             $(frame).hide();
-//console.log('hide frame');
                     }
                 }
 
@@ -264,8 +282,10 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
             echo '<script>showProgressMsg("Please wait, file is processing on server")</script>';
             ob_flush();flush();
 
-
-            if(@$_REQUEST["filename"]){ //after postprocessing - additional step load from temp file
+            if(@$_REQUEST["upload_file_name"]){ //load file into db
+                $imp_session = postmode_file_load_to_db(HEURIST_FILESTORE_DIR.'scratch/'.$_REQUEST["upload_file_name"], 
+                        $_REQUEST["upload_file_name"], true);
+            }else if(@$_REQUEST["filename"]){ //after postprocessing - additional step load from temp file
                 $imp_session = postmode_file_load_to_db($_REQUEST["filename"], $_REQUEST["original"], (@$_REQUEST["preprocess"]=="1"));
             }else{
                 $imp_session = postmode_file_selection();
@@ -358,7 +378,7 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
         <hr width="100%" />
 
         <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form" onsubmit="hideThisFrame()">
-            <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
+            <!--input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
             <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
             <input type="hidden" id="step" name="step" value="1">
             <input type="hidden" name="filename" value="<?=$imp_session['filename']?>">
@@ -1083,14 +1103,103 @@ if(is_array($imp_session)){
 
                 //change title in parent dialog
                 if(window.frameElement){
-                var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
-                if( reference_to_parent_dialog ){ 
-                    var ele = parent.document.getElementById(reference_to_parent_dialog);
-                    $(ele.parentElement).find('.ui-dialog-title').text( 'Import delimited text (csv, tsv)' );
-                    //dialog( "option", "title", 'Import delimited text (csv, tsv)');
+                    var reference_to_parent_dialog = window.frameElement.getAttribute('parent-dlg-id');
+                    if( reference_to_parent_dialog ){ 
+                        var ele = parent.document.getElementById(reference_to_parent_dialog);
+                        $(ele.parentElement).find('.ui-dialog-title').text( 'Import delimited text (csv, tsv)' );
+                        //dialog( "option", "title", 'Import delimited text (csv, tsv)');
+                    }
                 }
-                }
+                
+                var uploadData = null;
+                var pbar_div = $('#progressbar_div');
+                var pbar = $('#progressbar');
+                var progressLabel = pbar.find('.progress-label').text('');
+                pbar.progressbar({value:0});
+                
+                $('#progress_stop').button().on({click: function() {
+                       if(uploadData && uploadData.abort) uploadData.abort();
+                }});
+                
+                var max_file_size = <?php echo $file_max_size;?>;
+                var max_post_size = <?php echo $post_max_size;?>;
+                var max_size = Math.min(max_file_size,max_post_size);
+                
+                var uploadWidget = $('#upload_file');
+                
+                uploadWidget.fileupload({
+        url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
+        formData: [ {name:'db', value: top.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
+                    {name:'max_file_size', value: max_size},
+                    {name:'entity', value:'temp'}],  //just place file into scratch folder
+        //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+        autoUpload: true,
+        sequentialUploads:false,
+        dataType: 'json',
+        //dropZone: $input_img,
+        add: function (e, data) {  
+        
+            uploadData = data;//keep this object to use conviniece methods (abort for instance)
+            data.submit(); 
 
+        },
+        //send: function (e, data) {},
+        //start: function(e, data){},
+        //change: function(){},
+        error: function (jqXHR, textStatus, errorThrown) {
+            $('#upload_form_div').show();
+            pbar_div.hide();
+            if(textStatus!='abort'){
+                top.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
+            }
+        },
+        done: function (e, response) {
+
+                $('#upload_form_div').show();                
+                pbar_div.hide();
+                response = response.result;
+                if(response.status==top.HAPI4.ResponseStatus.OK){
+                    var data = response.data;
+                    $.each(data.files, function (index, file) {
+                        if(file.error){
+                            top.HEURIST4.msg.showMsgErr(file.error);
+                        }else{
+                            $('#upload_file_name').val(file.name);
+                            doUpload();
+                        }
+                    });
+                }else{
+                    top.HEURIST4.msg.showMsgErr(response.message);
+                }
+                 
+                    /* var inpt = this;
+                    btnUploadFile.off('click');
+                    btnUploadFile.on({click: function(){
+                                $(inpt).click();
+                    }});  */              
+                },//done                    
+                progressall: function (e, data) { // to implement
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    progressLabel = pbar.find('.progress-label').text(data.loaded+' / '+data.total);
+                    pbar.progressbar({value: progress});
+                    if (data.total>max_size && uploadData) {
+                            uploadData.abort();
+                            top.HEURIST4.msg.showMsgErr(
+                            'Sorry, this file exceeds the upload '
+                            + ((max_file_size<max_post_size)?'file':'(post data)')
+                            + ' size limit set for this server ('
+                            + Math.round(max_size/1024/1024) + ' MBytes). '
+                            +'Please reduce the file size, or ask your system administrator to increase the upload limit.'
+                            );
+                    }else if(!pbar_div.is(':visible')){
+                        $('#upload_form_div').hide();
+                        pbar_div.show();
+                    }
+                }                            
+                
+                            });
+                
+                
         });
 
         //
@@ -1137,44 +1246,38 @@ if(is_array($imp_session)){
             target="_blank">Importing delimited text files</a> on the Heurist network site for tips on sucessful import.
         <br/>
     </div>
+    
+    <div id="upload_form_div">
 
     <form action="importCSV.php" method="post" enctype="multipart/form-data" name="upload_form" onsubmit="hideThisFrame()" >
-        <!-- input type="hidden" name="DBGSESSID" value="423973326605900002;d=1,p=0,c=0" -->
+        <!-- input type="hidden" name="DBGSESSID" value="424537638752800003;d=1,p=0,c=0" -->
         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
         <input type="hidden" name="step" value="1">
+        <input type="hidden" id="upload_file_name" name="upload_file_name">
 
         <table width="100%">
             <tr>
-                <td align="right"><label>Select previously uploaded file:</label></td>
+                <td align="right" width="250px">Select previously uploaded file:</td>
                 <td><select name="import_id" id="import_id" onchange="doSelectSession()"><?=get_list_import_sessions()?></select>
                     <input type="button" value="Clear all files" style="margin-right: 10px;" onclick="doClearSession('all')">
                 </td>
             </tr>
 
             <tr>
-                <td align="right">OR</td>
-            </tr>
-
-            <tr>
-                <td></td><td></td>
-            </tr>
-
-            <tr>
-                <td align="right"><label>Upload new CSV/TSV file:</label></td>
-                <td><input type="file" name="import_file"></td>
-            </tr>
-
-            <tr>
-                <td>&nbsp;</td>
-            </tr>
-
-            <tr>
                 <td colspan=2><hr/></td>
             </tr>
             <tr>
+                <td align="right"><label>OR Upload new CSV/TSV file</label></td>
+            </tr>
+            <tr>
                 <td>&nbsp;</td>
             </tr>
 
+            <!--tr>
+                <td align="right"><label>Upload new CSV/TSV file:</label></td>
+                <td><input type="file" id="import_file" name="import_file"></td>
+            </tr-->
+            
             <tr>
                 <td align="right">Encoding:</td>
                 <td>
@@ -1299,7 +1402,7 @@ if(is_array($imp_session)){
                         and human friendly dates such as 1827, 1st Sept 1827, 1 sep 1827</span></td>
             </tr>
 
-            <tr>
+            <!-- tr>
                 <td colspan=2><hr/></td>
             </tr>
 
@@ -1313,12 +1416,30 @@ if(is_array($imp_session)){
                     <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 30px;">
                     <input type="button" value="Continue" style="font-weight: bold; margin-right: 100px;" onclick="doUpload()">
                 </td>
-            </tr>
-
-
-
+            </tr -->
+    
         </table>
-    </form>
+        </form>
+        
+        <div style="padding-left:255px;padding-top:10px">
+            <input type="file" id="upload_file">
+        </div>
+        
+    </div> <!-- upload_form_div -->
+            
+        <div id="progressbar_div" style="width:99%;height:40px;padding:5px;text-align:center;display:none">
+            <div id="progressbar">
+                <div class="progress-label">Loading data...</div>
+            </div>
+            <div id="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+        </div>
+                                        
+    
+        <div style="width:99%;text-align:right;padding:5px;">
+            <input type="button" value="Cancel" onClick="window.close();" style="margin-right: 30px;">
+        </div>
+    
+    
     <?php
 }
 ?>
@@ -1381,16 +1502,18 @@ function get_file_size($file_path, $clear_stat_cache = false) {
 //
 function postmode_file_selection() {
 
+    $param_name = 'import_file';
+    
     // there are two ways into the file selection mode;
     // either the user has just arrived at the import page,
     // or they've selected a file *and might progress to file-parsing mode*
     $error = '';
-    if (@$_FILES['import_file']) {
-        if ($_FILES['import_file']['size'] == 0) {
+    if (@$_FILES[$param_name]) {
+        if ($_FILES[$param_name]['size'] == 0) {
             $error = 'no file was uploaded';
         } else {
- print $_FILES['import_file']['error'];            
-            switch ($_FILES['import_file']['error']) {
+ //DEBUG print $_FILES['import_file']['error'];            
+            switch ($_FILES[$param_name]['error']) {
                 case UPLOAD_ERR_OK:
                     break;
                 case UPLOAD_ERR_INI_SIZE:
@@ -1419,8 +1542,8 @@ function postmode_file_selection() {
         if ($post_max_size && ($content_length > $post_max_size)) {
             $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
         }else{
-            if ($_FILES['import_file']['tmp_name'] && is_uploaded_file($_FILES['import_file']['tmp_name'])) {
-                $file_size = get_file_size($_FILES['import_file']['tmp_name']);
+            if ($_FILES[$param_name]['tmp_name'] && is_uploaded_file($_FILES[$param_name]['tmp_name'])) {
+                $file_size = get_file_size($_FILES[$param_name]['tmp_name']);
             } else {
                 $file_size = $content_length;
             }
@@ -1435,7 +1558,7 @@ print $error;
         }
 
         if (!$error) {    // move on to the next stage!
-            $error = postmode_file_load_to_db($_FILES['import_file']['tmp_name'], $_FILES['import_file']['name'], true);
+            $error = postmode_file_load_to_db($_FILES[$param_name]['tmp_name'], $_FILES[$param_name]['name'], true);
         }
     }
 
@@ -1531,8 +1654,16 @@ function postmode_file_load_to_db($filename, $original, $is_preprocess) {
     }
 
     if($is_preprocess){
-        $temp_file = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
-        if (move_uploaded_file($filename, $temp_file)) {
+        
+        if(strpos($filename, HEURIST_FILESTORE_DIR.'scratch/')===0){
+            $temp_file = $filename;
+            $ok_moved = true;
+        }else{
+            $temp_file = tempnam(HEURIST_SCRATCHSPACE_DIR, $filename);
+            $ok_moved = move_uploaded_file($filename, $temp_file);
+        }
+        
+        if ($ok_moved) {
             if($len==1){
                 return array("warning"=>"You appear to have only one value per line. This probably indicates that "
                     ."you have selected the wrong separator type.",

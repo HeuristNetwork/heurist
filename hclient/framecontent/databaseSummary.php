@@ -122,6 +122,7 @@ if(!$system->init(@$_REQUEST['db']) ){
         <script type="text/javascript" src="visualize/visualize.js"></script>
 
         <link rel="stylesheet" type="text/css" href="visualize/visualize.css">
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 
         <!-- On Row Click -->
         <script>
@@ -153,15 +154,15 @@ if(!$system->init(@$_REQUEST['db']) ){
     </head>
 
     <body class="popup">
-        <table id="rectypes" border="0" cellspacing="0" cellpadding="2" align="center">
-            <tr>
-                <td id="visualisation-details" style="width: 350px">
-                    <!-- Record count table -->
-                    <!-- also provides navigation to search for a record type and on/off controls for record types in visualisation -->
-                    <div>
+    
+        <div class="ent_wrapper">
+                <div class="ent_wrapper" style="width:350px">
+                    <div class="ent_header">
                         <h3 id="table-header">Record types (entities)</h3>
                         <button id="expand">Expand &#10142;</button>
                     </div>
+                    <div class="ent_content_full">
+    
                     <table id="records" class="records" cellpadding="4" cellspacing="1">
 
                         <tr>
@@ -259,15 +260,15 @@ if(!$system->init(@$_REQUEST['db']) ){
                         ?>
 
                     </table>
+                       
+                    </div>
+                </div>
+                <div class="ent_wrapper" style="left:350px">
+                    <?php include "visualize/visualize.html";?>
+                </div>
+        </div>    
 
-                </td>
-
-                <!-- D3 visualisation -->
-                <td id="visualisation-column">
-                    <?php include "visualize/visualize.html"; ?>
-                </td>
-            </tr>
-        </table>
+                    
 
         <script>
             $("#expand").click(function(e) {

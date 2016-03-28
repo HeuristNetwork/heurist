@@ -262,7 +262,9 @@ $commonData = array(
         "5"=>"*****"),
     "recordTypes" => $recordTypes,
     "detailTypes" => $detailTypes,
-    "detailRequirements" =>$detailRequirements
+    "detailRequirements" =>$detailRequirements,
+    'max_post_size'=>_get_config_bytes(ini_get('post_max_size')),
+    'max_file_size'=>_get_config_bytes(ini_get('upload_max_filesize'))
 );
 if (! @$_REQUEST["json"]) {
     print "var HAPI_commonData = ";
@@ -272,4 +274,23 @@ if (! @$_REQUEST["json"]) {
     print ";\n";
 }
 
+function _fix_integer_overflow($size) {
+        if ($size < 0) {
+            $size += 2.0 * (PHP_INT_MAX + 1);
+        }
+        return $size;
+}
+function _get_config_bytes($val) {
+    $val = trim($val);
+    $last = strtolower($val[strlen($val)-1]);
+    switch($last) {
+        case 'g':
+            $val *= 1024;
+        case 'm':
+            $val *= 1024;
+        case 'k':
+            $val *= 1024;
+    }
+    return _fix_integer_overflow($val);
+}
 ?>

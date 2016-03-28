@@ -789,6 +789,7 @@
                     xmlhttp.open("GET","processAction.php?"+
                         "db=<?=HEURIST_DBNAME?>"+
                         "&action="+action+
+                        //"&DBGSESSID=424548064757500001;d=1,p=0,c=0"+
                         "&tempDBName="+tempDBName+
                         "&sourceDBName="+sourceDBName+
                         "&sourceDBID="+ (sourceDBID ? sourceDBID : "0")+

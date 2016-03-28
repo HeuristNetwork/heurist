@@ -116,9 +116,9 @@ function hImportDefTerms(_trm_ParentTermID) {
             uploadWidget.fileupload({
     url: top.HAPI4.basePathV4 +  'hserver/utilities/fileUpload.php', 
     formData: [ {name:'db', value: top.HAPI4.database}, 
-                {name:'entity', value:'temp'}],
+                {name:'entity', value:'temp'},
+                {name:'max_file_size', value:'1024*1024'}],
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
-    'max_file_size':1024*1024,
     autoUpload: true,
     sequentialUploads:true,
     dataType: 'json',

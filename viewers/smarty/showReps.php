@@ -673,6 +673,27 @@ function _add_term_val($res, $val){
 }
 
 
+function getFullTermLabel($term, $domain){
+
+    global $dtTerms;
+    
+    $fi = $dtTerms['fieldNamesToIndex'];
+    $parent_id = $term[ $fi['trm_ParentTermID'] ];
+
+    $parent_label = '';
+    
+    if($parent_id!=null && $parent_id>0){
+        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+        if($term_parent){
+            $parent_label = getFullTermLabel($term_parent, $domain);    
+            if($parent_label) $parent_label = $parent_label.'.';
+        }    
+    }
+    return $parent_label.$term[ $fi['trm_Label']];
+}
+                        
+                        
+
 
 //
 // convert details to array to be assigned to smarty variable
@@ -745,21 +766,31 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                         $res_code = "";
                         $res_label = "";
                         $res = array();
+                        
 
                         foreach ($dtValue as $key => $value){
                             if(array_key_exists($value, $dtTerms['termsByDomainLookup'][$domain])){
                                 $term = $dtTerms['termsByDomainLookup'][$domain][$value];
+                                
+                                //IJ wants to show terms for all parents
+                                $term_full = getFullTermLabel($term, $domain);
 
                                 $res_id = _add_term_val($res_id, $value);
                                 $res_cid = _add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                 $res_code = _add_term_val($res_code, $term[ $fi['trm_Code'] ]);
+                                $res_label_full = _add_term_val($res_label, $term_full);
                                 $res_label = _add_term_val($res_label, $term[ $fi['trm_Label'] ]);
 
                                 //NOTE id and label are for backward
-                                array_push($res, array("id"=>$value, "internalid"=>$value, "code"=>$term[ $fi['trm_Code'] ], "label"=>$term[ $fi['trm_Label'] ], "term"=>$term[ $fi['trm_Label'] ], "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
+                                array_push($res, array("id"=>$value, "internalid"=>$value, 
+                                                "code"=>$term[ $fi['trm_Code'] ], 
+                                                "label"=>$term[ $fi['trm_Label'] ], 
+                                                "term"=>$res_label_full, 
+                                                "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
                             }
                         }
-                        $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code, "term"=>$res_label, "label"=>$res_label, "conceptid"=>$res_cid);
+                        $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code, 
+                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid);
 
                         if(count($res)>0){
                             if($issingle){
