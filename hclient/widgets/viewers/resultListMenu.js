@@ -800,9 +800,20 @@ $.widget( "heurist.resultListMenu", {
         var that = this;
         var url = top.HAPI4.basePathV3+ "search/actions/deleteRecordsPopup.php?db=" + top.HAPI4.database;
 
+        //adjust height
+        var dheight = (recIDs_list.length+2)*50+100;
+        if(dheight<300) {
+            dheight = 300;   
+        }
+        else{
+            var body = $(this.document).find('body');
+            dheight = Math.min(dheight, body.innerHeight());
+            
+        }
+        
         top.HEURIST4.msg.showDialog(url, {
             title: top.HR('Delete Records'),
-            height: 300, width: 600,
+            height: dheight, width: 600,
             onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
                 var ele = frame.contentDocument.getElementById("ids");
                 if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;

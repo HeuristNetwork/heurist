@@ -218,7 +218,7 @@ if(document.getElementById('spSelected')){
 </div>
 <?php
 	$bib_ids = explode(',', $_REQUEST['ids']);
-	if(count($bib_ids)>20){
+	if(count($bib_ids)>8){
 ?>
 <div style="height:45px;">
 This is a fairly slow process, taking several minutes per 1000 records, please be patient…
