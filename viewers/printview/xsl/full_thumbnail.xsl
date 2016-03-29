@@ -78,7 +78,7 @@
 					<xsl:call-template name="recordInfo"></xsl:call-template>
 				</div>
 			</xsl:when>
-			
+
 			<xsl:when test="detail[@id=224]">
 				<div id="{id}" class="record L{@depth} full_result_thumb" style="background-image:url({detail[@id=224]/file_fetch_url})">
 					<xsl:call-template name="recordInfo"></xsl:call-template>
@@ -90,7 +90,7 @@
 				</div>
 			</xsl:when>
 			<xsl:otherwise>
-				<div id="{id}" class="record L{@depth} full_result_thumb" style="background-image:url(../../common/images/rectype-icons/thumb/th_{type/@id}.png)">
+				<div id="{id}" class="record L{@depth} full_result_thumb" style="background-image:url(../../../common/images/rectype-icons/thumb/th_{type/@id}.png)">
 					<xsl:call-template name="recordInfo"></xsl:call-template>
 				</div>
 			</xsl:otherwise>

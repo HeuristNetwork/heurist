@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -33,7 +33,7 @@
 
 require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+require_once(dirname(__FILE__)."/uploadFile.php");
 
 mysql_connection_select(DATABASE);
 
@@ -140,7 +140,7 @@ if (@$_REQUEST['ulf_ID']){
 	//var HEURIST = {tmap:null};
 
 	var installDir = window.location.protocol+"//"+window.location.host+
-		window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+		window.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
 	var HRST = {
 		VERSION: "<?=HEURIST_VERSION?>",
 		parameters: params,
@@ -163,7 +163,7 @@ if (@$_REQUEST['ulf_ID']){
 	sendRequest: function(url,callback,postData) {
 		// if we don't have a fully formed or root URL then prepend the base path
 		if ( !(url.match(/^http:/) || url.match(/^https:/))  &&  ! url.match(/^\//))
-			url = HRST.basePath + url;
+			url = HRST.baseURL_V3 + url;
 		var file = url;
 		var req = HRST.util.createXMLHTTPObject();
 		if (!req) return;
@@ -269,7 +269,7 @@ if (@$_REQUEST['ulf_ID']){
 
 <?php
 if(@$_REQUEST['db']){
-if(@$_REQUEST['annedit']=='yes'){
+if(false && @$_REQUEST['annedit']=='yes'){
 	 echo '<div id="mediaviewer" style="position:absolute;top:0;bottom:22px;left:0px;right:0px;"></div>';
 ?>
 <div id="image_digitizer_container" style="text-align:center;position:absolute;height:22px;bottom:0px;left:0px;right:0px;"></div>
@@ -279,7 +279,7 @@ if(@$_REQUEST['annedit']=='yes'){
 }
 ?>
 <script type="text/javascript">
-	showViewer(document.getElementById('mediaviewer'), "<?=$url?>", <?=$recID?>);
+	showViewer(document.getElementById('mediaviewer'), "<?=$url?>", <?=$recID?>, 'image');
 	onResize();
 </script>
 

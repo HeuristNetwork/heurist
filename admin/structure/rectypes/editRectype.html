@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 *
 * @author      Juan Adriaanse
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -105,7 +105,9 @@
             <div class="input-row  required">
                 <div class="input-header-cell"><label for="rty_Name">Record type name *</label></div>
                 <div class="input-cell">
-                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" onKeyUp="editRectypeEditor.createPlural()" />
+                    <input id="rty_Name" maxlength="40" style="min-width:190px;width:190px;" 
+                    onkeypress="editRectypeEditor.onPreventChars(event)"
+                    onKeyUp="editRectypeEditor.createPlural()" />
                     <span style="display:inline-block;text-align:right;width:64px">Plural:</span>
                     <input id="rty_Plural" maxlength="40" style="min-width:190px;width:190px;" />
                     <div class="help prompt">Name for display in selection lists, formats or reporting</div>
@@ -266,7 +268,7 @@
                 <div id="btnSaveAndEditStructure" style="display:inline-block;"><input type="button" value="Save &amp; show fields &gt;&gt;" onClick="EditPopup.save(true)"/></div>
                 -->
                 Click Next save changes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <input type="button" value="Next >>" onClick="editRectypeEditor.save(true);" /> <!-- true = open rec structure popup -->
+                <input type="button" id="btnSave" value="Next >>" onClick="editRectypeEditor.save(true);" /> <!-- true = open rec structure popup -->
                 
                 <!-- <input type="button" value="Cancel" onClick="EditPopup.cancel();" /> -->
             </div>

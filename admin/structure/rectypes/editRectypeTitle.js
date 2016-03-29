@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -75,7 +75,7 @@ function EditRectypeTitle() {
                 (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
             //find variables for given rectypeID and create variable tree
-            var baseurl = top.HEURIST.basePath + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
+            var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
             "&ver=1&w=all&stype=&db="+_db  + "&q=type:" + _rectypeID; //"&q=id:146433";
             top.HEURIST.util.getJsonData(baseurl, _onGenerateVars, "");
         }
@@ -464,7 +464,7 @@ function EditRectypeTitle() {
         var rec_type = top.HEURIST.parameters.rectypeID;
 
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -497,7 +497,7 @@ function EditRectypeTitle() {
         var mask = document.getElementById('rty_TitleMask').value;
         //var rec_type = top.HEURIST.parameters.rectypeID;
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+_rectypeID+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -528,7 +528,7 @@ function EditRectypeTitle() {
                             defs:_defs}}; //{_rectypeID:[{common:[newvalue],dtFields:[]}]}
                 var str = JSON.stringify(oRectype);
                 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                 var callback = _updateTitleMask;// updateResult;
                 var params = "method=saveRT&db="+_db+"&data=" + encodeURIComponent(str);
                 Hul.sendRequest(baseurl, function(xhr) {
@@ -549,7 +549,7 @@ function EditRectypeTitle() {
     * Third step - update records - change title
     */
     function _updateTitleMask(){
-        var URL = top.HEURIST.basePath + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
+        var URL = top.HEURIST.baseURL_V3 + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
@@ -578,7 +578,7 @@ function EditRectypeTitle() {
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {

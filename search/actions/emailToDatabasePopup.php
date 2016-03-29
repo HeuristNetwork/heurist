@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,10 +22,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -65,7 +65,7 @@ if ($_REQUEST['send_notification']) {
  <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
  
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/heurist.css">
 
   <title>Email records to database</title>
   <script type="text/javascript">
@@ -179,7 +179,7 @@ function handle_notification() {
 	if (! count($bib_ids))
 		return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
 
-	$notification_link = HEURIST_BASE_URL . 'search/search.html?w=all&q=ids:' . join(',', $bib_ids);
+	$notification_link = HEURIST_BASE_URL . '?w=all&q=ids:' . join(',', $bib_ids);
 
 	$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . join(',', $bib_ids) . ')');
 	$title_list = "Id      Title\n" . "------  ---------\n";

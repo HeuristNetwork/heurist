@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -24,10 +24,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -56,6 +56,20 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     //$resVarsByType = array();
 
     $mode = @$_REQUEST['mode'];
+    
+    if($mode=='list'){
+        
+        $rectypeIDs = explode(',', @$_REQUEST['rty_id']);
+        foreach ($rectypeIDs as $rectypeID){
+              $res = getRecordTypeTree($rectypeID, 0);
+              array_push($resVars, $res);
+        }        
+        
+        header("Content-type: text/javascript");
+        echo json_format($resVars, true);
+        
+    }else{
+    
     
     $isvarname = ($mode=='varsonly');
 
@@ -103,6 +117,7 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
             header("Content-type: text/javascript");
             echo json_format($resVars, true);
     }
+    }
 
 exit();
 
@@ -125,13 +140,13 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
     }
     
     //add default fields
-    $res['recID'] = 'ID';
-    $res['recTitle'] = 'RecTitle';
-    $res['recTypeID'] = 'RecTypeID';
-    $res['recTypeName'] = 'RecTypeName';
-    $res['recURL'] = 'URL';
-    $res['recModified'] = 'Modified';
-    $res['recWootText'] = 'WootText';
+    $res['recID'] = 'Record ID';
+    $res['recTitle'] = 'Record Title';
+    $res['recTypeID'] = 'Record TypeID';
+    $res['recTypeName'] = 'Record TypeName';
+    $res['recURL'] = 'Record URL';
+    $res['recModified'] = 'Record Modified';
+    $res['recWootText'] = 'Record WootText';
     
     if($recTypeId=="Relationship") {
         //add specific Relationship fields
@@ -217,7 +232,8 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth){
             case 'separator':
             case 'relmarker':
                     return null;
-            case 'enum':    //@todo!!!!
+            case 'enum':
+            case 'relationtype':
 
                 $res = array(
                     "termfield_name" => $dt_label,

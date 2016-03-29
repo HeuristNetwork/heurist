@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,26 +15,26 @@
 */
 
 /**
-* UI for record view 
+* UI for record view
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/View 
+* @subpackage  Records/View
 */
 
 
 if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once('findReplacedRecord.php');
+require_once(dirname(__FILE__).'/findReplacedRecord.php');
 
 mysql_connection_select(DATABASE);
 
@@ -64,10 +64,10 @@ if (@$_REQUEST['bkmk_id']) {
 
 require_once(dirname(__FILE__).'/testPermissions.php');
 if (! canViewRecord($rec_id)) {
-    
+
 //    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL));
 //    return;
-    
+
 	header('Location: ' . HEURIST_BASE_URL . 'common/html/msgAccessDenied.html?'.$rec_id);
 	return;
 }
@@ -86,17 +86,17 @@ $rec_title = $row['rec_Title'];
 <head>
 	<title>HEURIST - View record</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-	<link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+	<link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
 
-	<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
 </head>
 
 <body <?php if (@$_REQUEST['popup']) { ?>style="width: 480px; height: 600px; background-color: transparent;" <?php } ?> class="popup">
 	<div><h2>Record details</h2></div>
 	<div>
 	<h3><?= htmlspecialchars($rec_title) ?></h3>
-	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_SITE_PATH?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_BASE_URL?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id)) ?><?= $noclutter ?>"></iframe>
 	</div>
 </body>
 </html>

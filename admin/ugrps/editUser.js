@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -319,7 +319,7 @@ function UserEditor() {
 
 				if(_isRegistration){
 					//reload page with reg success message
-					window.location.replace(top.HEURIST.baseURL + "admin/ugrps/msgRegistrationSuccess.html")
+					window.location.replace(top.HEURIST.baseURL_V3 + "admin/ugrps/msgRegistrationSuccess.html")
 				}else{
 					// this alert is a pain  alert("User with ID " + report + " was succesfully "+ss);
                     window.close(context); //send back new HEURIST strcuture
@@ -369,10 +369,9 @@ function UserEditor() {
 
 
 		if(str !== null) {
-//DEBUG alert("Stringified changes: " + str);
 
 			// 3. sends data to server
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
 			var callback = _updateResult;
 			var params = "method=saveUser&db=" + _db + "&data=" + encodeURIComponent(str);
 			if(!Hul.isnull(_groupID)){

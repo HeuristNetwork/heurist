@@ -8,12 +8,11 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @author      Tom Murtagh, Kim Jackson, Stephen White
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
+* @version     4
 */
 
 /*
@@ -26,42 +25,61 @@
 
 
 /*
-    **************************************************************
+**************************************************************
 
-    WARNING:
+WARNING:
 
-    Setting any of the values in the configIni.php file overrides the
-    values set in ../heuristConfigIni.php for that instance of Heurist.
-    All other instances will use the value set in ../heuristConfigIni.php
+Setting any of the values in the configIni.php file overrides the
+values set in ../heuristConfigIni.php FOR THAT INSTANCE ONLY of Heurist.
+All other instances will use the value set in ../heuristConfigIni.php
 
-    WE THEREFORE RECOMMEND NOT CHANGING ANYTHING IN THIS FILE
+WE THEREFORE RECOMMEND NOT CHANGING ANYTHING IN THIS FILE
 
-    Values in this file should only be set for testing purposes or
-    by an experienced sysadmin for very unusual server setups
+Values in this file should only be set for testing purposes or
+by an experienced sysadmin for very unusual server setups
 
-    **************************************************************
+**************************************************************
 */
 
 /* --------------------------------------------------------------------------------------------
 
-     Setting up the server to support multiple code versions
-     -------------------------------------------------------
+Setting up the server to support multiple code versions
+-------------------------------------------------------
 
-     Move the file parentDirectory_heuristConfigIni.php to the parent directory of the codebase
-     rename to heuristConfigIni.php and enter MySQL passwords, paths and other config settings there.
-     This allows Heurist instances to exist as multiple codebases on a single server and avoids
-     the need for duplication of information or the accidental distribution of passwords etc.
-     if one of these codebases is used as a code source.
+Note: This is done automatically by the installation routies in install_heurist.sh
 
- --------------------------------------------------------------------------------------------
+Move the file move_to_parent_as_heuristConfigIni.php to the parent directory of the codebase
+rename to heuristConfigIni.php and enter MySQL passwords, paths and other config settings there.
+This allows Heurist instances to exist as multiple codebases on a single server and avoids
+the need for duplication of information or the accidental distribution of passwords etc.
+if one of these codebases is used as a code source.
+
+Also move move_to_parent_as_index.html - the Heurist 'switchboard' to the parent directory
+of the codebase and rename it to index.html
+
+--------------------------------------------------------------------------------------------
 */
 
-// *** DO NOT CHANGE VERSION NUMBER ***
+// *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "3.4.0"; // sets current program version number, determined by Heurist development lead
-                    // 3.2.0 alpha 8th July 2014, beta 21st July 2014
-                    // 3.3.0 beta 11th Nov 2014
-                    // 3.3.0 27th Nov 2014 / 3.4.0-beta
+$version = "4.2.5"; // sets current program version number, determined by Heurist development lead
+
+// Vsn 4.2.5 19 Mar 2016  Further fixes including serious problem with Win 10 (not saving subsidiary records)
+// Vsn 4.2.4 19 Mar 2016  Further debugging, fix up database archive
+// Vsn 4.2.3 8 Mar 2016  Further testing and fixes, fix up exemplar DB function
+// Vsn 4.2.2 17 Feb 2016 Further testing and fixes, fix up new database functions
+// Vsn 4.2.1 05 Feb 2016 Further testing and fixes
+// Vsn 4.2.0 17 Jan 2016 Testing for beta release
+// Vsn 4.1.4 17 Dec 2015 Restructure, move H3 code back to codebase level
+// Vsn 4.1.3 16 Dec 2015 Distribution as ...alpha  16/12/15
+// Vsn 4.1.2 15 Nov 2015
+// Vsn 4.1.1 02 Nov 2015
+// Vsn 4.1.0 15 sep 2015
+
+// 3.2.0 alpha 8th July 2014, beta 21st July 2014
+// 3.3.0 beta 11th Nov 2014
+// 3.3.0 27th Nov 2014 / 3.4.0-beta
+// 3.4.0 22nd Jan 2015
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
@@ -89,13 +107,15 @@ $websiteThumbnailPassword = "";
 // $websiteThumbnailXsize = 500;
 // $websiteThumbnailYsize = 300;
 
-
 // system default file - if a heuristConfigIni.php file exists in the parent directory of the installation,
-// the ConfigIni.php in the installation need not be configured. This allows unconfigured ConfigIni.php files to exist
-// in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
+// the configIni.php in the installation does not need to be configured. This allows unconfigured ConfigIni.php files
+// to exist in multiple experimental codebases on a single server and avoids accidental distribution of passwords etc.
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
+$defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
+
+// parent directory configuration file is optional, hence include not require
 if (is_file($parentIni)){
-	include_once($parentIni);
+    include_once($parentIni);
 }
 ?>

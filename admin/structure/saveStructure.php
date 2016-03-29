@@ -1,6 +1,6 @@
 <?php
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -33,15 +33,13 @@
     define('ISSERVICE',1);
 
     require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once('saveStructureLib.php');
 
     header('Content-type: text/javascript; charset=utf-8');
-    
-/*****DEBUG****///error_log(">>>".print_r($_REQUEST, true));
+
     $rv = array();
-  
+
     if (!is_admin()) {
         error_exit("Sorry, you need to be a database owner to be able to modify the database structure");
     }
@@ -66,14 +64,14 @@
         "deleteDTG",
         "checkDTusage"
     );
- 
+
 $method = @$_REQUEST['method'];
 if ($method && !in_array($_REQUEST['method'],$legalMethods)) {
     $method = null;
 }
-    
+
 if(!$method){
-  error_exit("Invalid call to saveStructure, there is no valid 'method' parameter");  
+  error_exit("Invalid call to saveStructure, there is no valid 'method' parameter");
 }
 else
 {
@@ -83,10 +81,10 @@ else
             $data = json_decode(urldecode(@$_REQUEST['data']), true);
         }
         $mysqli = mysqli_connection_overwrite(DATABASE); // mysqli
-        mysql_connection_overwrite(DATABASE); // need for getRecordInfoLibrary 
+        mysql_connection_overwrite(DATABASE); // need for getRecordInfoLibrary
 
         switch ($method) {
-            
+
 
             //{ rectype:
             //            {colNames:{ common:[rty_name,rty_OrderInGroup,.......],
@@ -107,27 +105,26 @@ else
                 //$dtFieldNames = $rtData['rectype']['colNames']['dtFields'];
 
                 $rv['result'] = array(); //result
-                
-                
+
+
                 foreach ($data['rectype']['defs'] as $rtyID => $rt) {
                     if ($rtyID == -1) {    // new rectypes
                         $definit = @$_REQUEST['definit'];  //create set of default fields for new rectype
-                        
+
                         $ret = createRectypes($commonNames, $rt, ($definit=="1"), true, @$_REQUEST['icon']);
                         array_push($rv['result'], $ret);
-                        
+
                     }else{
                         array_push($rv['result'], updateRectype($commonNames, $rtyID, $rt));
                     }
                 }
 
                 $rv['rectypes'] = getAllRectypeStructures(false);
-                
+
                 break;
 
             case 'saveRTS': // Record type structure
 
-                /*****DEBUG****///DEBUG   error_log(">>>>>>>".print_r($data,true));
                 if (!array_key_exists('rectype',$data) ||
                     !array_key_exists('colNames',$data['rectype']) ||
                     !array_key_exists('defs',$data['rectype']))
@@ -137,7 +134,7 @@ else
 
                 //$commonNames = $rtData['rectype']['colNames']['common'];
                 $dtFieldNames = $data['rectype']['colNames']['dtFields'];
-                
+
                 $rv['result'] = array(); //result
 
                 //actually client sends the definition only for one record type
@@ -362,22 +359,22 @@ else
                 $rv['terms'] = getTerms();
                 break;
 
-            case 'mergeTerms':    
-            
+            case 'mergeTerms':
+
                 $retain_id = @$_REQUEST['retain'];
                 $merge_id = @$_REQUEST['merge'];
                 if($retain_id==null || $merge_id==null || $retain_id == $merge_id){
                     error_exit("Invalid data structure sent with mergeTerms method call to saveStructure.php");
                 }
-                
+
                 $colNames = $data['terms']['colNames'];
                 $dt = @$data['terms']['defs'][$retain_id];
-                
+
                 $res = mergeTerms($retain_id, $merge_id, $colNames, $dt);
-                
+
                 $rv['terms'] = getTerms();
                 break;
-                
+
             case 'deleteTerms':
                 $trmID = @$_REQUEST['trmID'];
 

@@ -5,12 +5,12 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.0
 */
@@ -93,9 +93,9 @@
                 favsrch = top.HEURIST.util.getDisplayPreference("showFavouritesSearch");
                 document.getElementById("showFavouritesSearch").checked = (favsrch!=='false');
 
-                var mol = top.HEURIST.util.getDisplayPreference("report-output-limit");
+                var mol = top.HEURIST.util.getDisplayPreference("smarty-output-limit");
                 if(isNaN(mol) || parseInt(mol)<1) mol = 1000;
-                document.getElementById("report-output-limit").value = mol;
+                document.getElementById("smarty-output-limit").value = mol;
 
                 var showquery = top.HEURIST.util.getDisplayPreference("searchQueryInBrowser");
                 document.getElementById("showSearchQueryInBrowser").checked = (showquery!=='false');
@@ -126,7 +126,7 @@
                     return;
                 }
 
-                var mol = parseInt(document.getElementById("report-output-limit").value);
+                var mol = parseInt(document.getElementById("smarty-output-limit").value);
                 if(favsrch != new_val){
                     reload_nav = true;
                     favsrch = new_val;
@@ -173,7 +173,7 @@
                     "showAggregations",
                     "showNavMenuAlways",
                     "showFavouritesSearch",
-                    "report-output-limit",
+                    "smarty-output-limit",
                     "searchQueryInBrowser",
                     "record-edit-advancedmode"],
                     [rpp,def,fav,rel,rec,rec2,bkm,mybkm,asr,adl,ptd,agg,navi,favsrch,mol,showquery,edadv]);
@@ -201,7 +201,7 @@
         <br /><i>Drag this link </i> &nbsp;&nbsp;<b><u>
         
         <script>
-            var hBase = (top.HEURIST && top.HEURIST.baseURL)? top.HEURIST.baseURL
+            var hBase = (top.HEURIST && top.HEURIST.baseURL_V3)? top.HEURIST.baseURL_V3
             : document.location.href.replace(/admin\/.*/,"");
             var database = location.search.match(/db=([^&]+)/) ? location.search.match(/db=([^&]+)/)[1]:"";
 
@@ -237,7 +237,7 @@
         <div class="input-row">
             <div class="input-header-cell">Limit number of lines in report output (no warning if limit exceeded)
             </div>
-            <div  class="input-cell"><input id="report-output-limit">
+            <div  class="input-cell"><input id="smarty-output-limit">
             </div>
         </div>
 

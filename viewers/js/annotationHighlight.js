@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -312,12 +312,12 @@ console.log("sections: " + sections.toSource());
 				var a = document.createElement("a");
 				a.className = (section.refCount > 1 ? "annotation multiple" : "annotation");
 				//a.href = "#ref" + ref.recordID;
-				//a.href = top.HEURIST.basePath+"search/search.html?q=ids:"+ref.recordID+"&db="+((top.HEURIST.database) ? top.HEURIST.database.name : "");
+				//a.href = top.HEURIST.baseURL_V4+"?q=ids:"+ref.recordID+"&db="+((top.HEURIST.database) ? top.HEURIST.database.name : "");
 				if (ref.linkhref && ref.linkhref != "") {
 					if ( ref.popup && ref.popup != "") {
-						a.href = "javascript:top.HEURIST.util.popupURL(window,\""+top.HEURIST.baseURL+ref.linkhref+"\","+ref.popup+")";
+						a.href = "javascript:top.HEURIST.util.popupURL(window,\""+top.HEURIST.baseURL_V3+ref.linkhref+"\","+ref.popup+")";
 					}else{
-						a.href = top.HEURIST.basePath+ref.linkhref;
+						a.href = top.HEURIST.baseURL_V3+ref.linkhref;
 						a.target = "_blank";
 					}
 				}else{

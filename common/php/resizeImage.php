@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -28,10 +28,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -39,7 +39,7 @@
 */
 
 
- header('Content-type: image/png');
+header('Content-type: image/png');
 
 require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/dbMySqlWrappers.php');
@@ -48,17 +48,17 @@ require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
-	$standard_thumb = true;
-	$x = 100;
-	$y = 100;
-	$no_enlarge = false;
+    $standard_thumb = true;
+    $x = 100;
+    $y = 100;
+    $no_enlarge = false;
 } else {
-	$standard_thumb = false;
-	$x = @$_REQUEST['w'] ? intval($_REQUEST['w']) : 0;
-	$y = @$_REQUEST['h'] ? intval($_REQUEST['h']) : 0;
-	$x = @$_REQUEST['maxw'] ? intval($_REQUEST['maxw']) : $x;
-	$y = @$_REQUEST['maxh'] ? intval($_REQUEST['maxh']) : $y;
-	$no_enlarge = @$_REQUEST['maxw']  ||  @$_REQUEST['maxh'];
+    $standard_thumb = false;
+    $x = @$_REQUEST['w'] ? intval($_REQUEST['w']) : 0;
+    $y = @$_REQUEST['h'] ? intval($_REQUEST['h']) : 0;
+    $x = @$_REQUEST['maxw'] ? intval($_REQUEST['maxw']) : $x;
+    $y = @$_REQUEST['maxh'] ? intval($_REQUEST['maxh']) : $y;
+    $no_enlarge = @$_REQUEST['maxw']  ||  @$_REQUEST['maxh'];
 }
 
 $img = null;
@@ -68,117 +68,121 @@ mysql_query('set character set binary');
 
 if (array_key_exists('ulf_ID', $_REQUEST))
 {
-	$thumbnail_file = HEURIST_THUMB_DIR."ulf_".$_REQUEST['ulf_ID'].".png";
-	/* if we here we create file. See uploadFile, there we check the existence of file
-	if($standard_thumb && file_exists($thumbnail_file)){
-		header("Location: ".HEURIST_THUMB_URL."ulf_".$_REQUEST['ulf_ID'].".png");
-		return;
-	}*/
+    $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$_REQUEST['ulf_ID'].".png";
+    /* if we here we create file. See uploadFile, there we check the existence of file
+    if($standard_thumb && file_exists($thumbnail_file)){
+    header("Location: ".HEURIST_THUMB_URL."ulf_".$_REQUEST['ulf_ID'].".png");
+    return;
+    }*/
 
+    $res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
+    if (mysql_num_rows($res) != 1) return;
+    $file = mysql_fetch_assoc($res);
 
-	$res = mysql_query('select * from recUploadedFiles where ulf_ObfuscatedFileID = "' . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
-	if (mysql_num_rows($res) != 1) return;
-	$file = mysql_fetch_assoc($res);
+    if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
 
-	if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
+        //save as file
+        $img = imagecreatefromstring($file['ulf_Thumbnail']);
+        imagepng($img, $thumbnail_file);
 
-		//save as file
-		$img = imagecreatefromstring($file['ulf_Thumbnail']);
-		imagepng($img, $thumbnail_file);
-
-		// thumbnail exists
-		echo $file['ulf_Thumbnail'];
-		return;
-	}
-/*****DEBUG****///error_log(">>>>>>>>>".print_r($file, true));
-	$fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
-	$type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
-	$type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
-
-	if($type_source==null || $type_source=='heurist') {
-		if ($file['ulf_FileName']) {
-			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-		} else {
-			$filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
-		}
-		$filename = str_replace('/../', '/', $filename);
-	}
-
-    if(isset($filename)){        
-            //add database media storage folder for relative paths
-            $path = $filename;
-            if( $path && !file_exists($path) ){
-                chdir(HEURIST_FILESTORE_DIR);
-                $path = realpath($path);
-                if(file_exists($path)){
-                    $filename = $path;
-                }
-            }
+        // thumbnail exists
+        echo $file['ulf_Thumbnail'];
+        return;
     }
-    
-	if (isset($filename) && file_exists($filename)){
+    $fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
+    $type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
+    $type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
 
-		/*if ($file['ulf_FileName']) {
-			$filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
-		} else {
-			$filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
-		}
-		$filename = str_replace('/../', '/', $filename);*/
+    if($type_source==null || $type_source=='heurist') {
+        if ($file['ulf_FileName']) {
+            $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+        } else {
+            $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+        }
+        $filename = str_replace('/../', '/', $filename);
+    }
 
-		$mimeExt = '';
-		if ($file['ulf_MimeExt']) {
-			$mimeExt = $file['ulf_MimeExt'];
-		} else {
-			preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
-			$mimeExt = $matches[1];
-		}
+    if(isset($filename)){
+        //add database media storage folder for relative paths
+        $filename = resolveFilePath($filename);
+    }
 
-	/*****DEBUG****///error_log("filename = $filename and mime = $mimeExt");
+    if (isset($filename) && file_exists($filename)){
 
-		switch($mimeExt) {
-		case 'image/jpeg':
-		case 'jpeg':
-		case 'jpg':
-			$img = imagecreatefromjpeg($filename);
-			break;
-		case 'image/gif':
-		case 'gif':
-			$img = imagecreatefromgif($filename);
-			break;
-		case 'image/png':
-		case 'png':
-			$img = imagecreatefrompng($filename);
-			break;
-		default:
-			$desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
-			$img = make_file_image($desc); //from string
-			break;
-		}
+        /*if ($file['ulf_FileName']) {
+        $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+        } else {
+        $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+        }
+        $filename = str_replace('/../', '/', $filename);*/
 
-	}else if($file['ulf_ExternalFileReference']){
+        $mimeExt = '';
+        if ($file['ulf_MimeExt']) {
+            $mimeExt = $file['ulf_MimeExt'];
+        } else {
+            preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
+            $mimeExt = $matches[1];
+        }
+        
+        if (function_exists('exif_imagetype')) {
+            switch(@exif_imagetype($filename)){
+                case IMAGETYPE_JPEG:
+                    $mimeExt = 'jpg';
+                    break;
+                case IMAGETYPE_PNG:
+                    $mimeExt = 'png';
+                    break;
+                case IMAGETYPE_GIF:
+                    $mimeExt = 'gif';
+                    break;
+            }
+        }
 
-		 if($type_media=='image'){ //$type_source=='generic' &&
-		 		//@todo for image services (panoramio, flikr) take thumbnails directly
-		 		$img = get_remote_image($file['ulf_ExternalFileReference']);
-		}else if($type_source=='youtube'){
-				$url = $file['ulf_ExternalFileReference'];
-				$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
-				$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
-		}
-	}
+
+        switch($mimeExt) {
+            case 'image/jpeg':
+            case 'jpeg':
+            case 'jpg':
+                $img = imagecreatefromjpeg($filename);
+                break;
+            case 'image/gif':
+            case 'gif':
+                $img = imagecreatefromgif($filename);
+                break;
+            case 'image/png':
+            case 'png':
+                $img = imagecreatefrompng($filename);
+                break;
+            default:
+                $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
+                $img = make_file_image($desc); //from string
+                break;
+        }
+
+    }else if($file['ulf_ExternalFileReference']){
+
+        if($type_media=='image'){ //$type_source=='generic' &&
+            //@todo for image services (panoramio, flikr) take thumbnails directly
+            $img = get_remote_image($file['ulf_ExternalFileReference']);
+        }else if($type_source=='youtube'){
+            $url = $file['ulf_ExternalFileReference'];
+            $youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
+            $img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
+        }
+    }
 
 }
 else if (array_key_exists('file_url', $_REQUEST))   //get thumbnail for any URL
 {
 
-	$img = get_remote_image($_REQUEST['file_url']);
+    $img = get_remote_image($_REQUEST['file_url']);
 
 }
 
 
 if (!$img) {
-	header('Location: ../images/100x100-check.gif');
-	return;
+    header('Location: ../images/100x100-check.gif');
+    return;
 }
 
 
@@ -187,27 +191,25 @@ if (!$img) {
 $orig_x = imagesx($img);
 $orig_y = imagesy($img);
 
-/*****DEBUG****///error_log(" image orig size x= $orig_x  y=$orig_y");
 $rx = $x / $orig_x;
 $ry = $y / $orig_y;
 
 $scale = $rx ? $ry ? min($rx, $ry) : $rx : $ry;
 
 if ($no_enlarge  &&  $scale > 1) {
-	$scale = 1;
+    $scale = 1;
 }
 
 $new_x = ceil($orig_x * $scale);
 $new_y = ceil($orig_y * $scale);
-/*****DEBUG****///DEBUG error_log(" image new size x= $new_x  y=$new_y");
 
 $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
 imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
 
 if ($standard_thumb  &&  @$file) {
-	$resized_file = $thumbnail_file;
+    $resized_file = $thumbnail_file;
 }else{
-	$resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
+    $resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
 }
 
 imagepng($img_resized, $resized_file);
@@ -217,10 +219,10 @@ imagedestroy($img_resized);
 $resized = file_get_contents($resized_file);
 
 if ($standard_thumb  &&  @$file) {
-	// store to database
-	mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . mysql_real_escape_string($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
+    // store to database
+    mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . mysql_real_escape_string($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
 }else{
-	unlink($resized_file);
+    unlink($resized_file);
 }
 
 // output to browser
@@ -233,50 +235,50 @@ echo $resized;
 * @return resource - image with the given text
 */
 function make_file_image($desc) {
-	$desc = preg_replace('/\\s+/', ' ', $desc);
+    $desc = preg_replace('/\\s+/', ' ', $desc);
 
-	$font = 3; $fw = imagefontwidth($font); $fh = imagefontheight($font);
-	$desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", false));
-	$longlines = false;
-	if (count($desc_lines) > intval(100/$fh)) {
-		$longlines = true;
-	} else {
-		foreach ($desc_lines as $line) {
-			if (strlen($line) >= intval(100/$fw)) {
-				$longlines = true;
-				break;
-			}
-		}
-	}
-	if ($longlines) {
-		$font = 1; $fw = imagefontwidth($font); $fh = imagefontheight($font);
-		$desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", true));
-	}
+    $font = 3; $fw = imagefontwidth($font); $fh = imagefontheight($font);
+    $desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", false));
+    $longlines = false;
+    if (count($desc_lines) > intval(100/$fh)) {
+        $longlines = true;
+    } else {
+        foreach ($desc_lines as $line) {
+            if (strlen($line) >= intval(100/$fw)) {
+                $longlines = true;
+                break;
+            }
+        }
+    }
+    if ($longlines) {
+        $font = 1; $fw = imagefontwidth($font); $fh = imagefontheight($font);
+        $desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", true));
+    }
 
 
-	$im = imagecreate(100, 100);
-	$white = imagecolorallocate($im, 255, 255, 255);
-	$grey = imagecolorallocate($im, 160, 160, 160);
-	$black = imagecolorallocate($im, 0, 0, 0);
-	imagefilledrectangle($im, 0, 0, 100, 100, $white);
+    $im = imagecreate(100, 100);
+    $white = imagecolorallocate($im, 255, 255, 255);
+    $grey = imagecolorallocate($im, 160, 160, 160);
+    $black = imagecolorallocate($im, 0, 0, 0);
+    imagefilledrectangle($im, 0, 0, 100, 100, $white);
 
-	//imageline($im, 35, 25, 65, 75, $grey);
-	imageline($im, 33, 25, 33, 71, $grey);
-	imageline($im, 33, 25, 62, 25, $grey);
-	imageline($im, 62, 25, 67, 30, $grey);
-	imageline($im, 67, 30, 62, 30, $grey);
-	imageline($im, 62, 30, 62, 25, $grey);
-	imageline($im, 67, 30, 67, 71, $grey);
-	imageline($im, 67, 71, 33, 71, $grey);
+    //imageline($im, 35, 25, 65, 75, $grey);
+    imageline($im, 33, 25, 33, 71, $grey);
+    imageline($im, 33, 25, 62, 25, $grey);
+    imageline($im, 62, 25, 67, 30, $grey);
+    imageline($im, 67, 30, 62, 30, $grey);
+    imageline($im, 62, 30, 62, 25, $grey);
+    imageline($im, 67, 30, 67, 71, $grey);
+    imageline($im, 67, 71, 33, 71, $grey);
 
-	$y = intval((100 - count($desc_lines)*$fh) / 2);
-	foreach ($desc_lines as $line) {
-		$x = intval((100 - strlen($line)*$fw) / 2);
-		imagestring($im, $font, $x, $y, $line, $black);
-		$y += $fh;
-	}
+    $y = intval((100 - count($desc_lines)*$fh) / 2);
+    foreach ($desc_lines as $line) {
+        $x = intval((100 - strlen($line)*$fw) / 2);
+        imagestring($im, $font, $x, $y, $line, $black);
+        $y += $fh;
+    }
 
-	return $im;
+    return $im;
 }
 
 /**
@@ -287,13 +289,13 @@ function make_file_image($desc) {
 */
 function get_remote_image($remote_url){
 
-	$img = null;
+    $img = null;
 
-	$data = loadRemoteURLContent($remote_url); //from fileUtils.php
-	if($data){
-		$img = imagecreatefromstring($data);
-	}
+    $data = loadRemoteURLContent($remote_url, false); //from fileUtils.php
+    if($data){
+        $img = imagecreatefromstring($data);
+    }
 
-	return $img;
+    return $img;
 }
 ?>

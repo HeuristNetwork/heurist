@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -35,7 +35,12 @@ if (! document.body) {
 }
 
 if (! top.HEURIST) {
-    var installDir = top.location.pathname.replace(/(((admin|applications|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+
+    var installDir = top.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
+    if(top.installDirFromH4){
+         installDir = top.installDirFromH4;
+    }
+
 
     /**
      * main Heurist Namespace
@@ -49,10 +54,10 @@ if (! top.HEURIST) {
          */
         VERSION: "*.*.*",
 
-        basePath: installDir,
+        baseURL_V3: installDir,
 /**
  * bookmarklet code snippet to launch an applet for Heurist bookmarking from the browser.
- * @todo needs to change to be perminent heuristscholar or relative to the installed version's INSTALL_DIR  can use basePath
+ * @todo needs to change to be relative to the installed version's INSTALL_DIR  can use baseURL_V3
  */
         bookmarkletCode: "(function(){h='" + document.location.href.replace(/search\/.*/,"") + "';d=document;c=d.contentType;if(c=='text/html'||!c){if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();s=d.createElement('script');s.type='text/javascript';s.src=h+'import/bookmarklet/bookmarkletPopup.php?db=;d.getElementsByTagName('head')[0].appendChild(s);}else{e=encodeURIComponent;w=open(h+'records/add/addRecord.php?db=&t='+e(d.title)+'&u='+e(location.href));window.setTimeout('w.focus()',200);}})();",
 /**
@@ -302,6 +307,7 @@ if (! top.HEURIST) {
             }
 
             paramString = paramString.replace(/[+]/g, ' ');	// frustratingly, decodeURIComponent does not decode '+' to ' '
+            paramString = paramString.replace('%%', '%25%');
 
             var parmBits = paramString.split('&');
             var parms = {};
@@ -472,7 +478,7 @@ if (! top.HEURIST) {
                 return (webkitTest  &&  parseInt(webkitTest[1]) < 400);
             }()
         }
-        
+
     };
 /**
 * Legacy code to setup fake console for debug output
@@ -553,8 +559,8 @@ if (! window.HEURIST_WINDOW_ID) {
 
 top.HEURIST.parseParams.apply(window);
 
-if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/utilsUI.js", true);
-//if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.basePath+"common/js/loadGroupInfo.js", true);//saw  moved to util
+if (! top.HEURIST.util) top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/js/utilsUI.js", true);
+//if (! top.HEURIST.json) top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/js/loadGroupInfo.js", true);//saw  moved to util
 
 if (window != top) {
     /* Invoke  autosizeAllElements()  when the window loads or is resized */

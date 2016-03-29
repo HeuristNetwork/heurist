@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -51,34 +51,34 @@
 
 <style type="text/css">
 .dtyField {
-	display: block;
+    display: block;
 }
 .dtyHiddenField {
-	display: none;
+    display: none;
 }
 .dtyLabel {
-	display: inline-block;
-	width: 130px;
-	text-align: right;
-	padding-right: 3px;
+    display: inline-block;
+    width: 130px;
+    text-align: right;
+    padding-right: 3px;
 }
 .dtyLabel.required {
-	color: red;
-	font-weight: bold;
+    color: red;
+    font-weight: bold;
 }
 .dtyLabel.required:before {
-	content: "* ";
+    content: "* ";
 }
 .dtyValue {
-	display: inline-block;
+    display: inline-block;
 }
 .help1 {
-	padding-left: 133px;
-	padding-bottom: 2px;
+    padding-left: 133px;
+    padding-bottom: 2px;
 }
 .actionButtons {
-	float:right;
-	padding-right: 130px;
+    float:right;
+    padding-right: 130px;
 }
 
 </style>
@@ -86,30 +86,30 @@
 </head>
 
 <body>
-		<script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-		<script src="../../common/php/displayPreferences.php"></script>
+        <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+        <script src="../../common/php/displayPreferences.php"></script>
 
-		<!-- access to functions about current user
-		<script src="loadUserInfoShort.php"></script> -->
-		<script type="text/javascript" src="editReportSchedule.js"></script>
+        <!-- access to functions about current user
+        <script src="loadUserInfoShort.php"></script> -->
+        <script type="text/javascript" src="editReportSchedule.js"></script>
 
-		<script type="text/javascript">
+        <script type="text/javascript">
 
-			if(Hul.isnull(top.HEURIST)) { top.HEURIST = {}; }
+            if(Hul.isnull(top.HEURIST)) { top.HEURIST = {}; }
 
-			var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-						(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var _url = top.HEURIST.basePath +'export/publish/loadReports.php?method=getreport&db='+_db;
+            var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                        (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            var _url = top.HEURIST.baseURL_V3 +'export/publish/loadReports.php?method=getreport&db='+_db;
 
-			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			var _recID = top.HEURIST.parameters.recID;
+            top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
+            var _recID = top.HEURIST.parameters.recID;
 
-			if(Hul.isnull(_recID)) { _recID = 0; }
-			_url = _url + "&recID="+_recID;
+            if(Hul.isnull(_recID)) { _recID = 0; }
+            _url = _url + "&recID="+_recID;
 
-			//top.HEURIST.Hul.loadScript(_url, true);
-			Hul.loadScript2(this.document, _url); //load information about report schedule
-		</script>
+            //top.HEURIST.Hul.loadScript(_url, true);
+            Hul.loadScript2(this.document, _url); //load information about report schedule
+        </script>
 
 
 <div style="width:580;margin:auto;">
@@ -117,61 +117,61 @@
 <div id="statusMsg"></div>
 <div id="detailTypeValues" style="padding:5px;">
 
-	<div class="dtyField">
-		<label class="dtyLabel" for="rps_ID">ID:</label>
-		<label id="rps_ID"></label>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel required" for="rps_Title">Title:</label>
-		<input id="rps_Title" style="width:400;" maxlength="64" />
-		<div class="help prompt help1">
-			<label>The title of scheduled report</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel required" for="rps_Type">Type:</label>
-		<select class="dtyValue" id="rps_Type" disabled="disabled">
-			<option selected="selected">smarty</option>
-		</select>
-		<div class="help prompt help1">
-			<label>Type of report</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="rps_FilePath">File path:</label>
-		<input id="rps_FilePath" style="width:400;" maxlength="128" />
-		<div class="help prompt help1">
-			<label id="lblFilePathHelp"></label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel required" for="rps_FileName">File name:</label>
-		<input id="rps_FileName" style="width:400;" maxlength="64" />
-		<div class="help prompt help1">
-			<label>The base name of the report being published - will be compelted with file types</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel required" for="rps_HQuery">Query:</label>
-		<input id="rps_HQuery" style="width:400;" maxlength="2000" />
-		<div class="help prompt help1">
-			<label>The Heurist query to be used in generating this report</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel required" for="rps_Template">Template:</label>
-		<select id="rps_Template" style="width:400;" maxlength="64"></select>
-		<div class="help prompt help1">
-			<label>The name of the template to be used in generating this report</label>
-		</div>
-	</div>
-	<div class="dtyField">
-		<label class="dtyLabel" for="rps_IntervalMinutes">Interval (minutes):</label>
-		<input id="rps_IntervalMinutes" style="width:50;" maxlength="5" />
-		<div class="help prompt help1">
-			<label>The interval in minutes between regenerations of the report output</label>
-		</div>
-	</div>
+    <div class="dtyField">
+        <label class="dtyLabel" for="rps_ID">ID:</label>
+        <label id="rps_ID"></label>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel required" for="rps_Title">Title:</label>
+        <input id="rps_Title" style="width:400;" maxlength="64" />
+        <div class="help prompt help1">
+            <label>The title of scheduled report</label>
+        </div>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel required" for="rps_Type">Type:</label>
+        <select class="dtyValue" id="rps_Type" disabled="disabled">
+            <option selected="selected">smarty</option>
+        </select>
+        <div class="help prompt help1">
+            <label>Type of report</label>
+        </div>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel" for="rps_FilePath">File path:</label>
+        <input id="rps_FilePath" style="width:400;" maxlength="128" />
+        <div class="help prompt help1">
+            <label id="lblFilePathHelp"></label>
+        </div>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel required" for="rps_FileName">File name:</label>
+        <input id="rps_FileName" style="width:400;" maxlength="64" />
+        <div class="help prompt help1">
+            <label>The base name of the report being published - will be compelted with file types</label>
+        </div>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel required" for="rps_HQuery">Query:</label>
+        <input id="rps_HQuery" style="width:400;" maxlength="2000" />
+        <div class="help prompt help1">
+            <label>The Heurist query to be used in generating this report</label>
+        </div>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel required" for="rps_Template">Template:</label>
+        <select id="rps_Template" style="width:400;" maxlength="64"></select>
+        <div class="help prompt help1">
+            <label>The name of the template to be used in generating this report</label>
+        </div>
+    </div>
+    <div class="dtyField">
+        <label class="dtyLabel" for="rps_IntervalMinutes">Interval (minutes):</label>
+        <input id="rps_IntervalMinutes" style="width:50;" maxlength="5" />
+        <div class="help prompt help1">
+            <label>The interval in minutes between regenerations of the report output</label>
+        </div>
+    </div>
 
 </div>
 <br/>
@@ -186,18 +186,18 @@
 
 <script type="text/javascript">
 
-	var reportScheduleEditor;
+    var reportScheduleEditor;
 
-	//
-	//  starts initialization on load completion of this window
-	//
-	function loadHandler(){
+    //
+    //  starts initialization on load completion of this window
+    //
+    function loadHandler(){
 
-		Dom.get("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ _db+"/generated-reports)";
+        Dom.get("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ _db+"/generated-reports)";
 
-		window.reportScheduleEditor = new ReportScheduleEditor();
-	}
-	YAHOO.util.Event.addListener(window, "load", loadHandler );
+        window.reportScheduleEditor = new ReportScheduleEditor();
+    }
+    YAHOO.util.Event.addListener(window, "load", loadHandler );
 
 </script>
 

@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 * Timemap = Mapstraction+Timeline
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -338,12 +338,12 @@ button {height:auto !important;
 
 		HRST = top.HEURIST; //alias that are in use in showMap.js
 
-		RelBrowser.baseURL = HRST.basePath;
+		RelBrowser.baseURL = HRST.baseURL_V3;
 		RelBrowser.iconBaseURL =  HRST.iconBaseURL;
 		RelBrowser.database = HRST.database.name;
 
-		//Timeline.urlPrefix = HRST.baseURL + "external/timemap.2.0/lib/timeline/"; //"external/timemap.2.0/lib/";
-		//Timeline.urlPrefix = HRST.baseURL + "external/timemap.2.0/lib/";
+		//Timeline.urlPrefix = HRST.baseURL_V3 + "external/timemap.2.0/lib/timeline/"; //"external/timemap.2.0/lib/";
+		//Timeline.urlPrefix = HRST.baseURL_V3 + "external/timemap.2.0/lib/";
 
 		window.showMap = new ShowMap();
 	}

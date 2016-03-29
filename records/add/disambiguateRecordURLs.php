@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -55,10 +55,10 @@
   <head>
     <title>Heurist - Add bookmark (disambiguation)</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-    <link rel=stylesheet type=text/css href='<?=HEURIST_SITE_PATH?>common/css/disambiguate.css'>
-    <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+    <link rel=stylesheet type=text/css href='<?=HEURIST_BASE_URL?>common/css/disambiguate.css'>
+    <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
   </head>
   <body>
     <a id=home-link href='../../'>
@@ -265,7 +265,7 @@
           ?>
         </form>
       </div>
-      <div style="position: absolute; display: none; background: url('<?=HEURIST_SITE_PATH?>common/images/100x100-check.gif');" id="popupProtector"></div>
+      <div style="position: absolute; display: none; background: url('<?=HEURIST_BASE_URL?>common/images/100x100-check.gif');" id="popupProtector"></div>
       <div style="background-color: #600000; border: 0px; margin: 0px; padding: 10px; overflow: hidden; display: none; position: absolute; text-align: center;" id="url_checker">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%" style="font-size: 12px;">
           <tr>

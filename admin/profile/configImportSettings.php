@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -94,10 +94,13 @@ function _issel($val){
 	    <link rel="stylesheet" type="text/css" href= "../../common/css/global.css">
 	    <style type="text/css">
 		    #ignored_hyperlinks {
-				    overflow: auto; background-color: #AAAAAA;
-				    padding-left: 5px;
-				    height: 260px;
-		    }
+                overflow: auto;
+                background-color: lightgrey;
+                padding: 5px;
+                height: 200px;
+                border: 1px solid darkgrey;
+                margin-top:10px;
+            }
 	    </style>
     </head>
 
@@ -137,15 +140,15 @@ function _issel($val){
 	                    in the text of the link.
 		             </p>
 	            </td>
-                    
+
 	            <td>
 			        Hyperlink text to ignore:<br />
 	 		        <input type="text" name="new_hyp_text" value="" size="30">
 	 		        <input type="hidden" id="isdelete" name="isdelete" value="0">
 	 		        <input type="submit" value="Add">
 	 		        <input type="button" value="Remove" onclick="onDeleteSubmit()"> <br />
-
-			        <b>Ignore the following hyperlink texts when importing bookmarks:</b><br /><br />
+                    <br /><br />
+			        <b>Ignore the following hyperlink texts when importing bookmarks:</b>
 			        <div id="ignored_hyperlinks">
 				        <?=$hyperlinks_ignored?>
 			        </div>
@@ -153,9 +156,9 @@ function _issel($val){
 	        </tr>
 	        </table>
         </form>
-        
+
 	    <div style="position:absolute;bottom:10; text-align:right;">
-		    <input type=button value=Done onclick="window.close();">
+		    <input type=button value="Done and Rerun Analyze" onclick="window.close(true);">
 	    </div>
     </body>
 </html>

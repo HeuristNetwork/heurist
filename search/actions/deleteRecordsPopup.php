@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -48,7 +48,8 @@ mysql_connection_overwrite(DATABASE);
 <head>
   <title>HEURIST: Delete records</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+  <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+  <script type="text/javascript" src="../../external/jquery/jquery.js"></script>
 
   <style type=text/css>
   span { font-weight:bold; }
@@ -57,17 +58,52 @@ mysql_connection_overwrite(DATABASE);
 		p {line-height:11px;margin:6px 0}
 		.deleteButton {color: #BB0000;float: right;font-weight: bold;height: 20px;margin: 10px 0;text-transform: uppercase; width: 60px;}
   </style>
+  
+    <script type="text/javascript">
+            
+            function deleteSubmit(){
+                if(top.HEURIST4.msg){
+                    
+                    top.HEURIST4.msg.showMsgDlg('<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'+
+                    'Please confirm that you really wish to delete the selected records, <br/>along with all associated bookmarks?', function(){
+                        document.forms[0].submit();
+                        $(document.forms[0]).hide();
+                    },'Confirm')
+                    
+                    
+                }else{
+                   if(confirm('Are you sure you wish to delete the selected records, along with alll associated bookmarks?')){
+                        document.forms[0].submit();   
+                   }
+                }
+            }
+    
+            function onDocumentReady(){
+                //resize parent dialog
+                setTimeout(function(){
+
+                    var body = document.body,
+                        html = document.documentElement;
+
+                    var desiredHeight = Math.max( 250, body.scrollHeight, body.offsetHeight, 
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight )+50;                    
+                                                              
+                    if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
+                        doDialogResize(0, desiredHeight);              
+                    }
+                }, 500);
+            }
+    </script>
+  
 </head>
 
-<body class="popup" width=450 height=350>
+<body class="popup" width=450 height=350 onload="onDocumentReady()">
 <?php
 
 	if(!@$_REQUEST['ids'] && @$_REQUEST['delete']!=1){
-?>
-	<form method="post">
-		<input id="ids" name="ids" type="hidden" />
-	</form>
-<?php
+
+	    print '<form method="post"><input id="ids" name="ids" type="hidden" /></form>';
+
 	}else if (@$_REQUEST['delete'] == 1) {
 
 		$recs_count = 0;
@@ -86,11 +122,12 @@ function update_counts(processed, deleted, relations, bookmarks, errors)
 	document.getElementById('relations').innerHTML = relations;
 	document.getElementById('bookmarks').innerHTML = bookmarks;
 	document.getElementById('errors').innerHTML = errors;
-	document.getElementById('percent').innerHTML = Math.round(1000 * processed / <?=$total_cnt?>) / 10;
+<?php 
+    echo "document.getElementById('percent').innerHTML = Math.round(1000 * processed / ".$total_cnt." ) / 10;";
+?>
 }
 </script>
 <?php
-
 
 print '<div><span id=total_count>'.$total_cnt.'</span> records in total to be deleted</div>';
 print '<div><span id=processed_count>0</span> processed so far  <span id=percent>0</span>%</div>';
@@ -181,11 +218,11 @@ if(document.getElementById('spSelected')){
 </div>
 <?php
 	$bib_ids = explode(',', $_REQUEST['ids']);
-	if(count($bib_ids)>20){
+	if(count($bib_ids)>8){
 ?>
 <div style="height:45px;">
 This is a fairly slow process, taking several minutes per 1000 records, please be patient…
-<input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+<input class="deleteButton" type="button" style="color:red !important" value="delete" onClick="deleteSubmit()">
 </div>
 <?php
 	}
@@ -224,7 +261,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 
 		print "<div".(! $allowed ? ' class=greyed' : '').">";
 		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($is_checked ? ' checked' : '').(! $allowed ? ' disabled' : ' onchange="onSelect(this)"').'>';
-		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'"><img src='.HEURIST_SITE_PATH.'common/images/external_link_16x16.gif></a>';
+		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'"><img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a>';
 		print ' ' . $rec_title ."</p>";
 
 		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "  ";
@@ -234,7 +271,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 		if ($refs) {
 			print ' <p style="margin-left: 20px;">Referenced by: ';
 			while ($row = mysql_fetch_assoc($refs_res)) {
-				print '  <a target=_new href="'.HEURIST_SITE_PATH.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>';
+				print '  <a target=_new href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$row['dtl_RecID'].'">'.$row['dtl_RecID'].'</a>';
 			}
 			print "</p>";
 		}
@@ -244,16 +281,18 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 ?>
 <input type="hidden" name="delete" value="1">
 <div style="padding-top:5px;">
-<?=(count($bib_ids)>20)?"This is a fairly slow process, taking several minutes per 1000 records, please be patient…":""?>
-<input class="deleteButton" type="submit" style="color:red !important" value="delete" onClick="return confirm('ARE YOU SURE YOU WISH TO DELETE THE SELECTED RECORDS, ALONG WITH ALL ASSOCIATED BOOKMARKS?')  &&  confirm('REALLY REALLY SURE?');">
+<?php echo (count($bib_ids)>20)?"This is a fairly slow process, taking several minutes per 1000 records, please be patient…":""; ?>
+<input class="deleteButton" type="button" style="color:red !important" value="delete" onClick="deleteSubmit()">
 </div>
 </form>
 <?php
 	if(count($bib_ids)>3){
 ?>
-	<div>Total count of records: <b><?=count($bib_ids)?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
+	<div>Total count of records: <b><?php echo count($bib_ids);?></b>.   Selected to be deleted <span id="spSelected2">0</span></div>
 <script>
- cnt_checked = <?=$cnt_checked?>;
+<?php
+  echo "cnt_checked = $cnt_checked ;";                                  
+?> 
  document.getElementById('spSelected').innerHTML = "<?=$cnt_checked?>";
  document.getElementById('spSelected2').innerHTML = "<?=$cnt_checked?>";
 </script>
@@ -264,4 +303,3 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 
 </body>
 </html>
-

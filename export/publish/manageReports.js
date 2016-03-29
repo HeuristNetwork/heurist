@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -84,7 +84,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				var sfilter = "";
 
-				var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
+				var baseurl = top.HEURIST.baseURL_V3 + "export/publish/loadReports.php";
 				var params = "method=searchreports&db=" + _db + sfilter;
 				Hul.getJsonData(baseurl, __updateRecordsList, params);
 	};
@@ -282,10 +282,11 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 
 			{ key: "rps_Title", label: "Title", sortable:true, resizeable:true},
-			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true,
+			{ key: "rps_HQuery", label: "Query", sortable:false, resizeable:true, 
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 						var hquery = oRecord.getData('rps_HQuery');
-						elLiner.innerHTML = hquery;//"<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
+						elLiner.innerHTML = "<div style='max-width:400px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;'>"+hquery+"</div>";
+                        //"<div style='max-width:100px;'>"+hquery+"</div>";//substr(hquery, 25);
 			}},
 			{ key: "rps_IntervalMinutes", label: "Interval", sortable:true, resizeable:false},
 
@@ -353,7 +354,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 								}
 							}
 
-							var baseurl = top.HEURIST.basePath + "export/publish/loadReports.php";
+							var baseurl = top.HEURIST.baseURL_V3 + "export/publish/loadReports.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deletereport&db=" + _db + "&recID=" + recID;
 							Hul.getJsonData(baseurl, callback, params);
@@ -485,7 +486,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 	*/
 	function _onAddEditRecord(params){
 
-		var url = top.HEURIST.basePath + "export/publish/editReportSchedule.html";
+		var url = top.HEURIST.baseURL_V3 + "export/publish/editReportSchedule.html";
 		if(!Hul.isempty(params)){
 			url = url + params;
 		}

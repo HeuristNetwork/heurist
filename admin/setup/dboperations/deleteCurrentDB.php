@@ -5,10 +5,10 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.0   
+    * @version     3.0
     */
 
     /*
@@ -24,47 +24,47 @@
     require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 
-    if(isForAdminOnly("to delete a database")){
+    if(isForOwnerOnly("to delete a database")){
         return;
     }
 ?>
-<html> 
-    <head> 
+<html>
+    <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Delete Current Heurist Database</title> 
-        <link rel='stylesheet' type='text/css' href='../../../common/css/global.css'> 
-        <link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'> 
-        <link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'> 
-    </head> 
-    <body class='popup'> 
-        <div class='banner'><h2>Delete Current Heurist Database</h2></div> 
-        <div id='page-inner' style='overflow:auto'> 
+        <title>Delete Current Heurist Database</title>
+        <link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>
+        <link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>
+        <link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'>
+    </head>
+    <body class='popup'>
+        <div class='banner'><h2>Delete Current Heurist Database</h2></div>
+        <div id='page-inner' style='overflow:auto'>
 <?php
     $dbname = $_REQUEST['db'];
 
-    if ($dbname=='H3Sandpit') {// we require a valid DB incase the user deletes all DBs
-        print "<p>Deletion of H3Sandpit is not supported through this interface as it is required for initial user registration.</p>";
-        //"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=H3Sandpit' >Return to Heurist</a>";
+    if ($dbname=='Heurist_Sandpit') {// we require a valid DB incase the user deletes all DBs
+        print "<p>Deletion of Heurist_Sandpit is not supported through this interface as it is required for initial user registration.</p>";
+        //"<p><a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=Heurist_Sandpit' >Return to Heurist</a>";
         return;
     }
 
     if(!@$_REQUEST['mode']) {
-?>        
-        <h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../../common/images/url_error.png' /> 
+?>
+        <h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../../common/images/url_error.png' />
             DANGER <img src='../../../common/images/url_error.png' /></span></h4>
-        <h1 style='display:inline-block'>DELETION OF CURRENT DATABASE</h1><br> 
-        <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3> 
+        <h1 style='display:inline-block'>DELETION OF CURRENT DATABASE</h1><br>
+        <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>
         <h2>About to delete database: <?=$dbname?></h2>
-        <form name='deletion' action='deleteCurrentDB.php' method='get'> 
+        <form name='deletion' action='deleteCurrentDB.php' method='get'>
             <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
             <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='del'>
             &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Delete' style='font-weight: bold;' >
             <input name='mode' value='2' type='hidden'>
-            <input name='db' value='<?=$dbname?>' type='hidden'> 
+            <input name='db' value='<?=$dbname?>' type='hidden'>
         </form>
-<?php        
+<?php
     }else if(@$_REQUEST['mode']=='2') {
-        
+
         if (@$_REQUEST['del']=='DELETE MY DATABASE') {
             print "<br/><br/><hr>";
             if ($dbname=='') {
@@ -79,11 +79,11 @@
                     echo ("<p>Please ask your system adminstrator to delete this folder if it exists.<br></p>");
                     echo($output2);
                 }
-                
-                
+
+
                 //$cmdline = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e'drop database ".HEURIST_DB_PREFIX."$dbname'";
                 //$output2 = exec($cmdline . ' 2>&1', $output, $res2); // this is the one we really care about
-                
+
                 if (!db_drop(HEURIST_DB_PREFIX.$dbname, false)) {
                     echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
                     echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br></p>");
@@ -92,12 +92,12 @@
                     // Remove from Elasticsearch
                     print "<p>Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br /><br /></p>";
                     deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
-?>                    
+?>
                     <h2>Database <b><?=$dbname?></b> has been deleted</h2>
                     <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>deleted_databases.</p>
                     <p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>
                     <p><a href='#' onclick='{top.location.href="<?=HEURIST_BASE_URL?>index.php" }' >Return to Heurist</a></p>
-<?php                    
+<?php
                 }
             }
         } else { // didn't request properly
@@ -107,7 +107,7 @@
 ?>
     </div>
     </body>
-</html> 
+</html>
 
 
 

@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -104,9 +104,9 @@
         <div><span id=total_count><?=count($recs)?></span> records in total</div>
         <div><span id=processed_count>0</span> processed</div>
         <div><span id=percent>0</span> %</div>
-        
+
         <br />
-        
+
         <div><span id=changed_count>0</span> to be updated</div>
         <div><span id=same_count>0</span> are unchanged</div>
         <div><span id=repair_count>0</span> marked for update</div>
@@ -180,7 +180,7 @@
 
                 $i = 0;
                 foreach ($updates as $rec_id => $new_title) {
-                    mysql_query('update Records set rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
+                    mysql_query('update Records set rec_Modified=rec_Modified, rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
                     ++$i;
                     if ($rec_id % $step_uiupdate == 0) {
                         print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
@@ -193,12 +193,12 @@
 
                 print '<hr><br/>';
 
-                print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'
+                print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q=ids:'
                 .implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.'">Click to view updated records</a><br/>&nbsp;<br/>';
             }
 
             if(count($blanks)>0){
-                print '<a target=_blank href="'.HEURIST_BASE_URL.'search/search.html?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
+                print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q=ids:'.implode(',', $blanks).'&db='.HEURIST_DBNAME.
                 '">Click to view records for which the data would create a blank title</a>'.
                 '<br/>This is generally due to a faulty title mask (verify with Check Title Masks)'.
                 '<br/>or faulty data in individual records. These titles have not been changed.';
@@ -211,7 +211,7 @@
 
         <div style="color: green;padding-top:10px;">
             If the titles of other record types depend on these titles,
-            you should run Designer View > Utilities > Rebuild Titles to rebuild all record titles in the database
+            you should run Database administration > Utilities > Rebuild Titles to rebuild all record titles in the database
         </div>
     </body>
 

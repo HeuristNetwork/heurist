@@ -1,7 +1,7 @@
 <?php
 
     /*
-    * Copyright (C) 2005-2013 University of Sydney
+    * Copyright (C) 2005-2016 University of Sydney
     *
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
     * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
     * @author      Tom Murtagh
     * @author      Kim Jackson
     * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
+    * @author      Stephen White   
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2013 University of Sydney
-    * @link        http://Sydney.edu.au/Heurist
+    * @copyright   (C) 2005-2016 University of Sydney
+    * @link        http://HeuristNetwork.org
     * @version     3.1.0
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @package     Heurist academic knowledge management system
@@ -38,11 +38,21 @@
 
     if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
 
+    $rt_id = intval(@$_REQUEST['trm_ID']);
+    if($rt_id>0){
+        
+        if( @$_FILES['new_term']['size']>0 ){
+            list($success_msg, $failure_msg) = upload_file($rt_id, 'new_term');
+            header('Content-type: application/json'); //'text/javascript');
+            print json_encode(array('sucess'=>$success_msg,'error'=>$failure_msg));
+        }        
+        exit();
+    }
+    
     $rt_id = intval($_REQUEST['rty_ID']);
     $mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
     if ($mode!=3 && !$rt_id) { // no ID set, hopefully this should not occur
-        error_log("uploadRectypeIcon.php called without a record type ID set");
         return;
     }
     $rt_name = @$_REQUEST['rty_Name'];
@@ -52,16 +62,13 @@
     $success_msg = null;
     $failure_msg = null;
 
-    /*****DEBUG****///error_log("image directory / image url: ".$image_dir."  /  ".$image_url);
-
-
-    /* ???????
+    /* TODO: ???????
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     mysql_connection_select(DATABASE);
     $res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
     $rt = mysql_fetch_assoc($res);
     */
-    
+
     if(@$_REQUEST['libicon']){
         //take from  library
         if(copy_IconAndThumb_FromLibrary($rt_id, $_REQUEST['libicon'])){
@@ -71,11 +78,10 @@
         }else{
             list($success_msg, $failure_msg) = array('Icon and thumbnail have been set successfully', '');
         }
-        
+
     }else{
         //upload new one
-//error_log("thumb :".@$_FILES['new_thumb']['size']."  icon:".@$_FILES['new_icon']['size']);
-        
+
         if( @$_FILES['new_thumb']['size']>0 ){
             list($success_msg, $failure_msg) = upload_file($rt_id, 'new_thumb');
         }else if( @$_FILES['new_icon']['size']>0 ){
@@ -89,9 +95,9 @@
 
         <title>Choose record type icon<?=(($mode==3)?"":" for ".$rt_id." : ".htmlspecialchars($rt_name))?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/admin.css">
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }
@@ -114,10 +120,10 @@
                     var ele = document.getElementById('libicon');
                     ele.value = name;
                     document.forms[0].submit();
-                <?php } ?>    
+                <?php } ?>
             }
         </script>
-    
+
 <?php if($mode!=3){ ?>
         <div class="input-row">
             <div class="input-header-cell">Current thumbnail:</div>
@@ -125,7 +131,7 @@
             <div class="input-header-cell">Current icon:</div>
             <div class="input-cell"><img src="<?=$image_icon?>?<?= time() ?>" style="vertical-align: middle; height:16px;"></div>
         </div>
-<?php } ?>        
+<?php } ?>
         <div class="actionButtons" style="position:absolute; right:10px; top:4px">
                 <!-- input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px" -->
                 <input type="button" value="Close window" onClick="closewin()">
@@ -135,7 +141,7 @@
             <input type="hidden" name="rty_ID" value="<?= $rt_id ?>">
             <input type="hidden" name="libicon" id="libicon" value="" />
             <input type="hidden" name="mode" value="<?=$mode?>">
-            
+
 <?php if($mode!=3){ ?>
 
             <?php    if ($success_msg) { ?>
@@ -157,22 +163,22 @@
             <div class="input-row">
                 <div class="input-header-cell">Select new thumbnail</div>
                 <div class="input-cell"><input type="file" name="new_thumb" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
-                
+
                 <div class="input-header-cell">Select new icon</div>
                 <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
             </div>
-<?php 
+<?php
             $select_tip = "or select a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons)";
       }else{
             $select_tip = "Select a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons) <br> You may choose your own custom icons later by editing the record type definition";
-      } 
-?>            
+      }
+?>
             <div style="margin-bottom:30px;">
                 <span class="help"><?=$select_tip?></span><br />
-<?php            
+<?php
 //get list of files
     $dim = 16; //always show icons  ($mode!=1) ?16 :64;
-    $lib_path = 'setup/iconLibrary/'.$dim.'px/';    
+    $lib_path = 'setup/iconLibrary/'.$dim.'px/';
     $lib_dir = dirname(__FILE__).'/../../'.$lib_path;
 
     $files = scandir($lib_dir);
@@ -184,28 +190,27 @@
         if(array_key_exists('extension', $path_parts))
         {
             $ext = strtolower($path_parts['extension']);
-/*****DEBUG****///error_log(">>>>".$path_parts['filename']."<<<<<");//."    ".$filename.indexOf("_")."<<<<");
 
             if(file_exists($lib_dir.$filename) && $ext=="png")
             {
                 //$path_parts['filename'] )); - does not work for nonlatin names
                 $name = substr($filename, 0, -4);
                 print '<div style="display:inline-block;padding:4px;width:40px;">';
-                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_SITE_PATH.'admin/'.$lib_path.$filename.'"/></a></div>';
+                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_BASE_URL.'admin/'.$lib_path.$filename.'"/></a></div>';
                 //array_push($results, array( 'filename'=>$filename, 'name'=>$name));
             }
         }
     }
-?>            
+?>
             </div>
-            
+
         </form>
 
         <?php    if ($success_msg) { ?>
             <script  type="text/javascript">
                 //setTimeout(function(){closewin('ok');}, 1000);
             </script>
-            <?php    } ?>        
+            <?php    } ?>
     </body>
 </html>
 <?php
@@ -216,11 +221,15 @@
     //
     function upload_file($rt_id, $type) {
 
-        $image_dir = HEURIST_ICON_DIR.(($type=='new_icon')?'':'thumb/th_');
-        $dim = ($type=='new_icon')?16:64;
+        if($type=='new_term'){
+            $image_dir = HEURIST_FILESTORE_DIR . 'term-images/';
+            $dim = 400;
+        }else{
+            $image_dir = HEURIST_ICON_DIR.(($type=='new_icon')?'':'thumb/th_');
+            $dim = ($type=='new_icon')?16:64;
+        }        
 
         if ( !$_FILES[$type]['size'] ) return array('', 'Error occurred during upload - file had zero size '.$type.'  '.$_FILES[$type]['size']);
-        /*****DEBUG****///error_log(" file info ".print_r($_FILES,true));
         $mimeExt = $_FILES[$type]['type'];
         $filename = $_FILES[$type]['tmp_name'];
         $origfilename = $_FILES[$type]['name'];
@@ -258,7 +267,7 @@
         }else if (move_uploaded_file($filename, $newfilename)) { // actually save the file
             return array('File has been uploaded successfully', '');
         }
-        /* something messed up ... make a note of it and move on *///error_log("upload_file: <$name> / <$tmp_name> couldn't be saved as <" . $newfilename . ">");
+        /* something messed up ... make a note of it and move on */
         return array('', "upload file: $name couldn't be saved to upload path defined for db = "
             .HEURIST_DBNAME." (".$image_dir."). Please ask your system administrator to correct the path and/or permissions for this directory");
     }

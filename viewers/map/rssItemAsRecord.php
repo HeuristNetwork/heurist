@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 * Simple import for RSS
 *
 * @author      Kim Jackson
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @author      Stephen White
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -28,7 +28,7 @@
 */
 
 
-require_once('class.geometry.php');
+require_once(dirname(__FILE__).'/class.geometry.php');
 
 class PseudoRssBiblio {
 	var $rec_id;
@@ -45,7 +45,6 @@ class PseudoRssBiblio {
 
 	function PseudoRssBiblio ($item,$id) {
 		$this->geometry  = array();
-/*****DEBUG****///error_log(" in pseudo with id=$id");
 		$this->minX = null; $this->minY = null; $this->maxX = null; $this->maxY = null;
 
 		if ($item && $item instanceof SimpleXMLElement) {
@@ -59,7 +58,7 @@ class PseudoRssBiblio {
 			if ($geo && is_array($geo) && $geo[0]) {
 				$geo = $geo[0];
 				list($lat,$lng) = split(" ",$geo,2);
-				$geometry = new Geometry('POINT('.$lng.' '.$lat.')', 'p', null);
+				$geometry = new Geometry('POINT ('.$lng.' '.$lat.')', 'p', null);
 				$this->geometry[] = $geometry;
 			}
 		}

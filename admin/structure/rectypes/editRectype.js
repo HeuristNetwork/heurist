@@ -1,9 +1,30 @@
+
+/**
+* filename: explanation
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 var Hul = top.HEURIST.util;
 
 var rectypeID = Hul.getUrlParameter('rectypeID', this.location.search);
 var db = (top.HEURIST.parameters && top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    
+
 
 
 function EditRectype() {
@@ -11,7 +32,7 @@ function EditRectype() {
 var rectype,
     defaultGroupID,
     supressEditStructure,
-    
+
     titleMaskIsOk = true,
     _keepTitleMask,
     _keepStatus,
@@ -19,12 +40,12 @@ var rectype,
 
 var _openEditStrucutreAfterClose = false,
     _isIconWasUpdated = false;
-    
-    
+
+
 function init() {
-    
+
     var query = this.location.search;
-    
+
     defaultGroupID = Hul.getUrlParameter('groupID',query);
     supressEditStructure = (Hul.getUrlParameter('supress',query)=='1');
 
@@ -68,13 +89,14 @@ function _upload_icon(mode) {
         if(mode==3){
             if(context){
                var img = document.getElementById('imgIcon2');
-               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/16px/" + context;
+               img.src = top.HEURIST.baseURL_V3 + "admin/setup/iconLibrary/16px/" + context;
                img.width = 16;
                img.height = 16;
             }
         }else{
                var img = document.getElementById('imgIcon');
-               img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+               img.src = top.HEURIST.iconBaseURL + rectypeID + '&t='+ (new Date()).getTime();
+               //img.src.replace(/\?.*/, '') + '?'+ (new Date()).getTime();
         }
         _isIconWasUpdated = true;
     }
@@ -83,25 +105,26 @@ function _upload_icon(mode) {
             if(context){
                _rectype_icon = context;
                var img = document.getElementById('imgThumb2');
-               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/64px/" + context;
+               img.src = top.HEURIST.baseURL_V3 + "admin/setup/iconLibrary/64px/" + context;
                img.width = 64;
                img.height = 64;
             }
         }else{
             var img = document.getElementById('imgThumb');
-            img.src = img.src.replace(/\?.*/, '') + '?' + (new Date()).getTime();
+            img.src = top.HEURIST.iconBaseURL + 'thumb/th_' + rectypeID + '.png&t='+ (new Date()).getTime();
         }
         _isIconWasUpdated = true;
     }
-    
-    
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
+
+
+    var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
 
     Hul.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
             height: 500, //(mode==0?200:250),
             width: 700,
+            title:' Select thumbnail and icon',
             callback:function(context){
                 icon_refresh(context);
                 thumb_refresh(context);
@@ -121,7 +144,7 @@ function initializeEmptyForm() {
     document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
     document.getElementById("divIconAndThumb").style.display = "none";
     document.getElementById("divIconAndThumbNew").style.display = "block";
-    
+
 
     getGroups();
     // Set group from URL
@@ -142,13 +165,13 @@ function setRtyValues() {
             document.getElementById("rectypeIcon").innerHTML =
             "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(0)\" title=\"Click to change icon\">"+
             "<img id=\"imgIcon\" src=\""+
-            top.HEURIST.iconBaseURL + rectypeID + ".png?" + curtimestamp +
+            top.HEURIST.iconBaseURL + rectypeID + "&t=" + curtimestamp +
             "\" width=\"16\" height=\"16\"></a>";
 
             document.getElementById("rectypeThumb").innerHTML =
             "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(1)\" title=\"Click to change thumbnail\">"+
             "<img id=\"imgThumb\" src=\""+
-            top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp +
+            top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png&t=" + curtimestamp +
             "\" width=\"64\" height=\"64\"></a>";
 
         } catch(e) {
@@ -355,16 +378,21 @@ function checkIfInteger(evt) {
 
 //
 function updateRectypeOnServer() {
+    if($('#btnSave').is(":disabled")) return;
+    $('#btnSave').attr('disabled','disabled');
+    
     testTitleMask(); //then it calls updateRectypeOnServer_continue
 }
 
 function updateRectypeOnServer_continue()
 {
     if(!titleMaskIsOk){
+        $('#btnSave').removeAttr('disabled');
         alert("Title mask is invalid");
         return;
     }
     if(!(rectypeID>0 || _rectype_icon!='')){
+        $('#btnSave').removeAttr('disabled');
         alert("Please select Icon for new record type");
         return;
     }
@@ -375,19 +403,18 @@ function updateRectypeOnServer_continue()
         //do not close the window
 
     }else if(str != null) {
-        //DEBUG            alert("Stringified changes: " + str);
 
         // TODO: Change base URL
-        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
         var callback = updateResult;
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
         "&data=" + encodeURIComponent(str);
-        
+
         if(!(rectypeID>0)){
             params = params + '&icon='+ encodeURIComponent(_rectype_icon);
         }
-        
+
         Hul.getJsonData(baseurl, callback, params);
 
     } else { //nothing changed
@@ -405,6 +432,7 @@ function updateRectypeOnServer_continue()
 }
 
 var updateResult = function(context) {
+    $('#btnSave').removeAttr('disabled');
     top.HEURIST.rectypes.saveStatus = context;
 
     if(!Hul.isnull(context)) {
@@ -460,9 +488,10 @@ var updateResult = function(context) {
  */
 function editRecStructure()
 {
-    Hul.popupURL(top, top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
+    Hul.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
             "close-on-blur": false,
             "no-resize": false,
+            title: 'RECORD STRUCTURE',
             height: 480,
             width: 620,
             callback: function(context) {
@@ -602,7 +631,7 @@ function fromUItoArray(isShowWarn) {
 
 /**
 * put your comment there...
-* 
+*
 */
 function testTitleMask()
 {
@@ -624,7 +653,7 @@ function testTitleMask()
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
             (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        var baseurl = top.HEURIST.basePath + "admin/structure/rectypes/editRectypeTitle.php";
+        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectypeTitle.php";
         var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -651,7 +680,7 @@ function _onEditMask(){
 
     var maskvalue = document.getElementById("rty_TitleMask").value;
 
-    Hul.popupURL(top, top.HEURIST.basePath +
+    Hul.popupURL(top, top.HEURIST.baseURL_V3 +
         "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
         {
             "close-on-blur": false,
@@ -666,6 +695,25 @@ function _onEditMask(){
     });
 }
 
+function _onPreventChars(event){
+
+    event = event || window.event;
+    var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+    if (charCode && charCode > 31)
+    {
+        var keyChar = String.fromCharCode(charCode);
+        if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
+            return false;
+        }
+    }
+    return true;
+}
+
+
         //public members
         var that = {
 
@@ -673,18 +721,22 @@ function _onEditMask(){
                 document.getElementById("rty_Plural").value = (document.getElementById("rty_Name").value + 's');
             },
 
+            onPreventChars: function(event) {
+                _onPreventChars(event);
+            },
+            
             onChangeStatus: function(e) {
                 _onChangeStatus(e);
             },
-            
+
             editMask: function(){
                 _onEditMask();
             },
-            
+
             upload_icon: function (mode){
                 _upload_icon(mode);
             },
-            
+
             save : function (openEditStructure) {
                 _openEditStrucutreAfterClose = openEditStructure;
                 updateRectypeOnServer();
@@ -706,7 +758,7 @@ function _onEditMask(){
         return that;
 };
 /*var structureFrame = document.getElementById("structureFrame");
-var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
+var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
 structureFrame.src = URL;
 */
 
@@ -766,7 +818,7 @@ function _showInfoToolTip(event) {
         //xy = [posx = event.target.x,posy = event.target.y];
 
 
-        my_tooltip.html(textTip);    //DEBUG xy[0]+",    "+xy[1]+"<br/>"+
+        my_tooltip.html(textTip);
 
         var border_top = $(window).scrollTop();
         var border_right = $(window).width();

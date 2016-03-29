@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -35,7 +35,7 @@
 * @author: Artem Osmakov
 *
 * @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
+* @link: http://HeuristNetwork.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
 * @package Heurist academic knowledge management system
 * @todo
@@ -136,7 +136,7 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
+							var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
 							var callback = _updateGroupList;
 							var params = "method=searchgroup&db=" + _db + sfilter;
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -200,7 +200,6 @@ function GroupManager(_isFilterMode, _isSelection, _isWindowMode) {
 		_rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
 		_ispopup = (Dom.get('titleBanner')==null);
-//		Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				_usrID = usrID;
 				//////////////////// create data table
@@ -294,11 +293,11 @@ elLiner.innerHTML = '<a href="#edit_group"><img src="../../common/images/edit-pe
 			{ key: "members", label: "Edit Membership", sortable:false, className:'center',
 				formatter: function(elLiner, oRecord, oColumn, oData){
 elLiner.innerHTML = '<div align="center">'+
-		'<a href="'+top.HEURIST.baseURL + "admin/ugrps/manageUsers.php?db=" +
+		'<a href="'+top.HEURIST.baseURL_V3 + "admin/ugrps/manageUsers.php?db=" +
 		_db + "&grpID="+oRecord.getData("id")+(_ispopup?"&popup=yes":"")+
 		'" title="Show listing of members/Edit membership"><span class="count_edit">'+oRecord.getData('members')+'</span></a></div>';
 
-//IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
+//IREK that does not work! <a href="#" onClick=top.HEURIST.search.popupLink("'+top.HEURIST.baseURL_V3 + 'admin/ugrps/manageUsers.//html?db=' +_db + '&grpID='+oRecord.getData("id")+'","wide") title="Show listing of members/Edit membership">
 				}},
 			{ key: "name", label: "<div align='left'><u>Name</u></div>", sortable:true,
 				formatter: function(elLiner, oRecord, oColumn, oData){
@@ -409,7 +408,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+							var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
 							var callback = _updateAfterDelete;
 							var params = "method=deleteGroup&db=" + _db + "&recID=" + recID;
 							top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -634,13 +633,13 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 		var userID = (!Hul.isnull(user))?Number(user):0;
 
 		if(userID>0) {
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
+			URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=" + _db + "&recID="+userID;
 		} else if (userID<0) {
-			URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db; //new user
+			URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=" + _db; //new user
 		}else{
 			return;
 		//}else if(!Hul.isnull(user)){
-		//	URL = top.HEURIST.basePath + "admin/ugrps/editUser.html?db=" + _db + "&user="+user; //email
+		//	URL = top.HEURIST.baseURL_V3 + "admin/ugrps/editUser.html?db=" + _db + "&user="+user; //email
 		}
 		var dim = top.HEURIST.util.innerDimensions(window);
 		top.HEURIST.util.popupURL(top, URL, {
@@ -664,7 +663,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_group"><img src="../..
 	*/
 	function _onAddEditGroup(oArgs){
 
-		var url = top.HEURIST.basePath + "admin/ugrps/editGroup.html?db=" + _db;
+		var url = top.HEURIST.baseURL_V3 + "admin/ugrps/editGroup.html?db=" + _db;
 		if(Number(oArgs)>0){
 			url = url + "&recID="+Number(oArgs); //existing
 		}

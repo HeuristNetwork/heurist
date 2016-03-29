@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -115,7 +115,6 @@ function parseName($allnames) {
 
 		} else {
 			array_push($parsed_names, array('full name' => $name, 'questionable' => $name));
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 			continue;
 		}
 
@@ -168,7 +167,6 @@ function checkNames($allnames, $force_authors=0) {
 
 		if (preg_match('/\\b(?:university|dept|department|national|of|for)\\b|[()]/i', $name)) {
 			array_push($errors, '"'.$name.'" doesn\'t look like a person\'s name.  Put the name in "double quotes" to force import.');
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 			continue;
 		}
 
@@ -178,7 +176,6 @@ function checkNames($allnames, $force_authors=0) {
 		if (strpos($name, ' ') === FALSE  &&  ! $force_authors) {
 			// single word name? realllllly?
 			array_push($errors, '"'.$name.'" doesn\'t look like a person\'s name.  Put the name in "double quotes" to force import.');
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 			continue;
 		}
 
@@ -203,7 +200,6 @@ function checkNames($allnames, $force_authors=0) {
 
 		} else {
 			array_push($errors, '"'.$name.'" doesn\'t look like a person\'s name.  Put the name in "double quotes" to force import.');
-			error_log( "UNRECOGNISED NAME FORMAT: " . $name );
 		}
 	}
 

@@ -86,8 +86,8 @@
 <div style="font-size: 11px; font-weight: bold;">
         <img>
           <xsl:attribute name="align">abstop</xsl:attribute>
-          <xsl:attribute name="src">../../common/images/rectype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
-        </img> &#160; 
+          <xsl:attribute name="src">../../../common/images/rectype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
+        </img> &#160;
         <xsl:value-of select="title"/> &#160; <span style="font-weight:normal">[id: <xsl:value-of select="id"/>]</span>
 </div>
 <div style="font-size: 11px;">
@@ -423,7 +423,7 @@
     <xsl:param name="key"/>
     <xsl:param name="value"/>
     <xsl:element name="a">
-    <xsl:attribute name="TARGET">_blank</xsl:attribute>  
+    <xsl:attribute name="TARGET">_blank</xsl:attribute>
       <xsl:attribute name="href">
         <xsl:value-of select="$key"/>
       </xsl:attribute>

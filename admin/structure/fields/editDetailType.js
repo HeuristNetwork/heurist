@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Stephen White
@@ -248,12 +248,22 @@ function DetailTypeEditor() {
         el_sel.id = "selVocab";
 
         Hul.addoption(el_sel, -1, 'select...');
-
+        
+        //add to temp array
+        var vocabs = [];
         for(termID in termTree) { // For every term in first levet of tree
             if(!Hul.isnull(termID)){
                 termName = terms[termID][fi_label];
-                Hul.addoption(el_sel, termID, termName);
-                if(Number(termID)==vocabId){
+                vocabs.push({key:termID, title:termName });
+            }
+        }
+        //sort array 
+        vocabs.sort(function(a,b){ return a.title<b.title?-1:1; });
+
+        for(var idx in vocabs) { // For every term in first levet of tree
+            if(vocabs[idx]){
+                Hul.addoption(el_sel, vocabs[idx].key, vocabs[idx].title);
+                if(Number(vocabs[idx].key)==vocabId){
                     sel_index = el_sel.length-1;
                 }
             }
@@ -421,14 +431,15 @@ function DetailTypeEditor() {
         var el_sel = Dom.get("selVocab");
         if(is_add_vocab || el_sel.value>0){ //add term to vocabulary
 
-            Hul.popupURL(top, top.HEURIST.basePath +
+            Hul.popupURL(top, top.HEURIST.baseURL_V3 +
                 "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": true,
                     "no-close": true,
-                    height: 280,
-                    width: 650,
+                    title: 'Edit Vocabulary',
+                    height: 340,
+                    width: 700,
                     callback: function(context) {
                         if(context!="") {
 
@@ -446,11 +457,12 @@ function DetailTypeEditor() {
 
         }else{ //select terms (advanced)
 
-            Hul.popupURL(top, top.HEURIST.basePath +
+            Hul.popupURL(top, top.HEURIST.baseURL_V3 +
                 "admin/structure/terms/selectTerms.html?dtname="+_dtyID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": true,
+                    title: 'Select terms',
                     height: 500,
                     width: 750,
                     callback: function(editedTermTree, editedDisabledTerms) {
@@ -494,16 +506,17 @@ function DetailTypeEditor() {
             }
 
             if(args) {
-                URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
+                URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
             } else {
-                URL =  top.HEURIST.basePath + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
+                URL =  top.HEURIST.baseURL_V3 + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
             }
 
             Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": true,
+                title: 'Select Record Type',
                 height: 480,
-                width: 440,
+                width: 540,
                 callback: function(recordTypesSelected) {
                     if(!Hul.isnull(recordTypesSelected)) {
                         _setRecordsPointerValue(recordTypesSelected);
@@ -625,7 +638,7 @@ function DetailTypeEditor() {
 
             var aUsage = top.HEURIST.detailTypes.rectypeUsage[_dtyID];
             var iusage = (Hul.isnull(aUsage)) ? 0 : aUsage.length;
-            var warningImg = "<img src='" + top.HEURIST.basePath + "common/images/url_warning.png'>";
+            var warningImg = "<img src='" + top.HEURIST.baseURL_V3 + "common/images/url_warning.png'>";
 
             if(iusage > 0) {
 
@@ -684,7 +697,7 @@ function DetailTypeEditor() {
         }
         if(swarn!=""){
             if(isShowWarn) {
-                alert(swarn);
+                top.HEURIST.util.showError(swarn);
             }
             Dom.get("dty_Name").focus();
             _updatedFields = [];
@@ -693,7 +706,7 @@ function DetailTypeEditor() {
 
         if(Dom.get("dty_HelpText").value==="") {
             if(isShowWarn) {
-                alert("Help text is mandatory field");
+                top.HEURIST.util.showError("Help text is mandatory field");
             }
             Dom.get("dty_HelpText").focus();
             _updatedFields = [];
@@ -704,7 +717,7 @@ function DetailTypeEditor() {
             var dd = Dom.get("dty_JsonTermIDTree").value;
             if( dd==="" || dd==="{}" ) {
                 if(isShowWarn) {
-                    alert("For an enum field types you msut select at least one term. Please click 'Change vocabulary'");
+                    top.HEURIST.util.showError("For a terms list field you must select at least one term. Please click 'Change vocabulary'");
                 }
                 _updatedFields = [];
                 return "mandatory";
@@ -713,7 +726,7 @@ function DetailTypeEditor() {
         var val = Dom.get("dty_Type").value;
         if(Hul.isempty(val)){
             if(isShowWarn) {
-                alert("Data Type is madatory field");
+                top.HEURIST.util.showError("Data Type is mandatory field");
             }
             Dom.get("dty_Type").focus();
             _updatedFields = [];
@@ -731,6 +744,8 @@ function DetailTypeEditor() {
     * @param context - data from server
     */
     function _updateResult(context) {
+        $('#btnSave').removeAttr('disabled');
+
         if(!Hul.isnull(context)){
 
             var error = false,
@@ -775,9 +790,12 @@ function DetailTypeEditor() {
     */
     function _updateDetailTypeOnServer()
     {
+        if($('#btnSave').is(":disabled")) return;
+        $('#btnSave').attr('disabled','disabled');
 
         //1. gather changed data
         if(_fromUItoArray(true)==="mandatory"){ //save all changes
+            $('#btnSave').removeAttr('disabled');
             return;
         }
 
@@ -811,10 +829,9 @@ function DetailTypeEditor() {
 
 
         if(str !== null) {
-            //DEBUG alert("Stringified changes: " + str);
 
             // 3. sends data to server
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveDT&db="+_db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -839,7 +856,7 @@ function DetailTypeEditor() {
 
         //prevent setting outdated types for new field type
         if(!isInitialCall && (el.value==="relationtype" || el.value==="year" || el.value==="boolean" || el.value==="integer")){
-            alert('You selected an outdated type. It is not allowed anymore');
+            top.HEURIST.util.showError('You selected an outdated type. It is not allowed anymore');
             if(that.keepType){
                 el.value = that.keepType;
             }else{
@@ -874,7 +891,10 @@ function DetailTypeEditor() {
                 _recreateRecTypesPreview(that.keepType, null);
 
                 if((el.value=="freetext" || el.value=="blocktext") && _dtyID<0){
-                    _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 500, width:800, title:"Information", modal:true} );
+                    if(top.HEURIST4){
+                        $("#topdiv_closebtn").hide();
+                    }
+                    _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
 
             }
@@ -925,6 +945,25 @@ function DetailTypeEditor() {
 
     }
 
+    function _onPreventChars(event){
+
+        event = event || window.event;
+        var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+        if (charCode && charCode > 31)
+        {
+            var keyChar = String.fromCharCode(charCode);
+            if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+                event.cancelBubble = true;
+                event.returnValue = false;
+                event.preventDefault();
+                if (event.stopPropagation) event.stopPropagation();
+                return false;
+            }
+        }
+        return true;
+    }
+        
+    
     //public members
     var that = {
 
@@ -940,6 +979,9 @@ function DetailTypeEditor() {
             _updateDetailTypeOnServer();
         },
 
+        onPreventChars: function(event) {
+            _onPreventChars(event);
+        },        
         /**
         *	handles change type event
         */
@@ -973,10 +1015,11 @@ function DetailTypeEditor() {
             var el_sel = Dom.get("selVocab");
             var vocab_id =  el_sel.value>0?el_sel.value:'';
 
-            top.HEURIST.util.popupURL(top, top.HEURIST.basePath + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 + "admin/structure/terms/editTerms.php?popup=1&vocabid="+vocab_id+"&domain="+type+"&db="+_db,
                 {
                     "close-on-blur": false,
                     "no-resize": false,
+                    title: 'Edit Terms',
                     height: 620,
                     width: 900,
                     callback: function(needTreeReload) {

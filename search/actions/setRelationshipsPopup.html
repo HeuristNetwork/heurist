@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -70,7 +70,7 @@ var recCountSpan;
 var relTypeSelect;
 var relTargetInput;
 var hBase = window.location.protocol + "//" + window.location.host +
-			(top && top.HEURIST && top.HEURIST.basePath? top.HEURIST.basePath : window.location.pathname.match(/^\/[^\/]+\//));
+			(top && top.HEURIST && top.HEURIST.baseURL_V3? top.HEURIST.baseURL_V3 : window.location.pathname.match(/^\/[^\/]+\//));
 var database = (top && top.HEURIST && top.HEURIST.database? top.HEURIST.database.name : location.search.match(/db=([^&]+)/)[1]);
 
 function init () {
@@ -84,7 +84,7 @@ function init () {
 	    recCountSpan.innerHTML = top.HEURIST.search.getSelectedRecIDs().get().length;
     }
     //if(!top.HEURIST.rectypes){
-    //    top.HEURIST.loadScript(top.HEURIST.basePath+"common/php/loadCommonInfo.php?db="+database);    // core HEURIST object definitions (dynamically generated)
+    //    top.HEURIST.loadScript(top.HEURIST.baseURL_V3+"common/php/loadCommonInfo.php?db="+database);    // core HEURIST object definitions (dynamically generated)
     //}
     
 	var reltypDT = top.HEURIST.magicNumbers['DT_RELATION_TYPE'];
@@ -115,7 +115,8 @@ function selectRelRecord() {
 
 		//deft="+top.HEURIST.magicNumbers['RT_AGGREGATION']+"
 
-		Hul.popupURL(window, hBase + "records/pointer/selectRecordFromSearch.html?q=&db=" + database, {
+		Hul.popupURL(window, top.HEURIST.baseURL_V3 + "records/pointer/selectRecordFromSearch.html?q=&db=" + database, {
+            title: 'Select Related Record',
 			callback: function(recID, recTitle) {
 				relTargetInput.value = recID && recTitle ? recTitle : "";
 				relTargetID = recID || null;
@@ -132,7 +133,7 @@ function save () {	// xhrFormSubmit only uses the form's action and elements(nam
     }
 
 	var fakeForm = {
-		action: top.HEURIST.basePath + "records/relationships/saveRelationships.php?db=" + database,
+		action: top.HEURIST.baseURL_V3 + "records/relationships/saveRelationships.php?db=" + database,
 		elements: [
 			{ name: "recID", value: recIDs_list },
 			{ name: "save-mode", value: "new" },

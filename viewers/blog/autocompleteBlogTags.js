@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,10 +22,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -776,13 +776,13 @@ top.HEURIST.showConfirmNewTag = function(tag) {
 	var confirmOption = confirmImg.appendChild(this.document.createElement("div"));
 		confirmOption.style.top = "2px";
 		confirmOption.style.color = "#fff";
-		confirmOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL+"common/images/tick-grey.gif'></div>Confirm New Tag";
+		confirmOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL_V3+"common/images/tick-grey.gif'></div>Confirm New Tag";
 		confirmOption.className = "option";
 		confirmOption.onmousedown = function() { top.HEURIST.autocompleteConfirm.call(that); return false; };
 	var changeOption = confirmImg.appendChild(this.document.createElement("div"));
 		changeOption.style.top = "14px";
 		changeOption.style.color = "#fff";
-		changeOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL+"common/images/cross.png'></div>Change Tag";
+		changeOption.innerHTML = "<div style='display:inline-block;'><img src='"+top.HEURIST.baseURL_V3+"common/images/cross.png'></div>Change Tag";
 		changeOption.className = "option";
 		changeOption.onmousedown = function() { top.HEURIST.autocompleteChange.call(that); return false; };
 

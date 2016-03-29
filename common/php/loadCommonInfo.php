@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -42,8 +42,8 @@
 	//ob_start('ob_gzhandler');
 
 	require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
-	require_once("dbMySqlWrappers.php");
-	require_once("getRecordInfoLibrary.php");
+	require_once(dirname(__FILE__)."/dbMySqlWrappers.php");
+	require_once(dirname(__FILE__)."/getRecordInfoLibrary.php");
 
 	mysql_connection_select(DATABASE);
 
@@ -58,11 +58,9 @@
 	$res = mysql_query("select max(tlu_DateStamp) from sysTableLastUpdated where tlu_CommonObj = 1");
 	$lastModified = mysql_fetch_row($res);
 	$lastModified = strtotime($lastModified[0]);
-	/*****DEBUG****///error_log("lastmod = $lastModified with current time = ".@$_SERVER["REQUEST_TIME"]);
 	// not changed since last requested so return
 	if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
 		header('HTTP/1.1 304 Not Modified');
-		/*****DEBUG****///error_log(" exiting loadCommonInfo with 'Not Modified' $lastModified");
 		exit();
 	}
 
@@ -71,7 +69,7 @@
 	header('Pragma: no-cache');
 
     ob_start();
-    
+
     // This is the best place I can think of to stick this stuff --kj, 2008-07-21
 	print "if (!top.HEURIST) top.HEURIST = {};\n";
 	print "top.HEURIST.VERSION = " . json_format(HEURIST_VERSION) . ";\n";
@@ -79,16 +77,18 @@
 	print "top.HEURIST.database.id = " . json_format(HEURIST_DBID) . ";\n";
 	print "top.HEURIST.database.name = " . json_format(HEURIST_DBNAME) . ";\n";
 	print "top.HEURIST.database.sessionPrefix = " . json_format(HEURIST_SESSION_DB_PREFIX) . ";\n";
-	print "if (!top.HEURIST.basePath) top.HEURIST.basePath = ".json_format(HEURIST_SITE_PATH) . ";\n";
-	print "if (!top.HEURIST.baseURL) top.HEURIST.baseURL = ".json_format(HEURIST_BASE_URL) . ";\n";
+    print "top.HEURIST.database.version = ". json_format(HEURIST_DBVERSION) . ";\n";
+	print "if (!top.HEURIST.baseURL_V3) top.HEURIST.baseURL_V3 = ".json_format(HEURIST_BASE_URL) . ";\n";
+    print "if (!top.HEURIST.baseURL_V4) top.HEURIST.baseURL_V4 = ".json_format(HEURIST_BASE_URL) . ";\n";
 	print "if (!top.HEURIST.iconDir) top.HEURIST.iconDir = ".json_format(HEURIST_ICON_DIR) . ";\n";
-	print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = ".json_format(HEURIST_ICON_URL) . ";\n";
-    
+	print "if (!top.HEURIST.iconBaseURL) top.HEURIST.iconBaseURL = top.HEURIST.baseURL_V4+ 'hserver/dbaccess/rt_icon.php?db='+top.HEURIST.database.name+'&id=';\n";
+    //.json_format(HEURIST_ICON_URL) . ";\n";
+
     //print "alert(top.HEURIST.iconBaseURL);";
 
 	// $cache=true - use cache
 	//$cache = (!array_keys(@$_REQUEST, 'cache') || @$_REQUEST['cache']=="1");
-    
+
 	/* rectypes are an array of names sorted alphabetically, and lists of
 	primary (bibliographic) and other rectypes, also sorted alphbetically */
 	print "top.HEURIST.rectypes = ".json_format(getAllRectypeStructures(true)).";\n";
@@ -167,7 +167,6 @@ top.HEURIST.ratings = {"0": "not rated",
 	print "top.HEURIST.workgroups = " . json_format($workgroups) . ";\n";
 	print "top.HEURIST.workgroupIDs = " . json_format($workgroupIDs) . ";\n";
 	print "\n";
-	/*****DEBUG****///error_log("made to line ".__LINE__." in file ".__FILE__);
 
 ?>
 

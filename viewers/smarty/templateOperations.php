@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -86,7 +86,7 @@
                 
                     break;
                 case 'serve':
-                // TODO: convert template file to global concept IDs and serve up to caller
+                    // TODO: convert template file to global concept IDs and serve up to caller
 
                     smartyLocalIDsToConceptIDs($template_file);
                     break;
@@ -123,7 +123,6 @@
             if(array_key_exists('extension', $path_parts))
             {
                 $ext = strtolower($path_parts['extension']);
-                /*****DEBUG****///error_log(">>>>".$path_parts['filename']."<<<<<");//."    ".$filename.indexOf("_")."<<<<");
 
                 $ind = strpos($filename,"_");
                 $isnot_temp = (!(is_numeric($ind) && $ind==0));
@@ -137,8 +136,6 @@
             }
         }
         header("Content-type: text/javascript");
-        //header('Content-type: text/html; charset=utf-8');
-        /*****DEBUG****/// error_log(">>>>>>>>>>>>>".print_r($results, true));
 
         print json_format( $results, true );
     }
@@ -159,6 +156,33 @@
             header("Content-type: text/javascript");
             print json_format(array("error"=>"file not found"));
         }
+    }
+    
+    function getUniqueTemplateName($template_file){
+
+        global $dir;
+
+        $path_parts = pathinfo($template_file);
+        $template_file = $path_parts['filename'];
+        $cnt = 0;
+        
+        $template_file_fullpath = $dir.$template_file.'.tpl';
+        
+        do{
+            if(file_exists($template_file_fullpath)){
+                if($cnt>0){
+                    $cnt = $cnt+1;
+                }else{
+                    $k = strpos($template_file_fullpath,'(');
+                    $k2 = strpos($template_file_fullpath,').tpl');
+                    $cnt = intval(substr($template_file_fullpath,$k,$k2-$k));
+                    $cnt = ($cnt>1)?$cnt+1:1;
+                }
+                $template_file_fullpath = $dir.$template_file."($cnt).tpl";
+            }
+        }while (file_exists($template_file_fullpath));
+        
+        return $template_file_fullpath;
     }
 
     function  saveTemplate($template_body, $template_file){
@@ -184,6 +208,10 @@
     }
 
     
+    function endsWith($haystack, $needle) {
+        // search forward starting from end minus needle length characters
+        return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+    }    
 
     /**
     * Returns the content of template file as text with local IDs replaced by concept IDs or viseverse
@@ -235,10 +263,10 @@
                     $parts2 = array();
                     foreach ($parts as $part) {
         //5. find starting with "f"
-                        if(strpos($part, "f")===0){
-                            $prefix = "f";
-                        }else if(strpos($part, "\$f")===0){
-                            $prefix = "\$f";
+                        if(strpos($part, 'f')===0){
+                            $prefix = 'f';
+                        }else if(strpos($part, '$f')===0){
+                            $prefix = '$f';
                         }else{
                             $prefix = null;
                         }
@@ -246,9 +274,12 @@
                         if($prefix){
         //6. get local DT ID - find Concept Code
                             $code = substr($part, strlen($prefix));
-                            if(substr($part, -1)=="s"){
-                                    $suffix = "s";
+                            if(substr($part, -1)=='s'){
+                                    $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
+                            }else if(endsWith($part,'_originalvalue')){                                            
+                                    $suffix = '_originalvalue';
+                                    $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{
                                     $suffix = "";
                             }
@@ -315,10 +346,8 @@
         global $dir, $dbID;
         
         if(!$dbID){
-            return array("error"=>"Database must be registered to allow translation of local template to global template");    
-        }
-
-        if($filename && file_exists($dir.$filename)){
+             $res = array("error"=>"Database must be registered to allow translation of local template to global template");    
+        }else if($filename && file_exists($dir.$filename)){
             $template = file_get_contents($dir.$filename);
             $res = convertTemplate($template, 0);
         }else{
@@ -349,7 +378,7 @@
         }else{
             $filename = $_FILES['import_template']['tmp_name'];
             $origfilename = $_FILES['import_template']['name'];
-        
+
             //read tempfile
             $template = file_get_contents($filename);
         
@@ -360,6 +389,12 @@
             }
             
             if(!@$res['error']){
+                  //check if template with such name already exists 
+                  /*while (file_exists($dir.$origfilename)){
+                      $dir.$origfilename = $dir.$origfilename . "($cnt)";
+                  }*/
+                  $origfilename = getUniqueTemplateName($origfilename);
+                
                   $res2 = saveTemplate($res['template'], $origfilename);
                   if(count(@$res['details_not_found'])>0){
                       $res2['details_not_found'] = $res['details_not_found'];
@@ -368,8 +403,10 @@
             }
         }
         
-        header("Content-type: text/javascript");
-        print json_format($res);
+        //header("Content-type: text/javascript");
+        header('Content-type: application/json');
+        print json_encode($res);
+        //print json_format($res);
     }
 
     if (! function_exists('array_str_replace')) {

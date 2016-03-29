@@ -2,12 +2,12 @@
 
     /**
     /**
-    *   Sync h3 database with zotero group or user items
+    *   Sync Heurist database with zotero group or user items
     *   zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC and mapping are specified in zoteroMap.xml
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -32,9 +32,15 @@
     require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
-    require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 
-    define("DT_ZOTERKEY", 94);
+    require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
+    //require_once dirname(__FILE__).'/../../external/libZotero/build/libZoteroSingle.php';
+
+    $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
+    if($dt_SourceRecordID==0){
+        print "Detail type 'source record id' not defined";
+        return;
+    }
 ?>
 
 <html>
@@ -44,6 +50,15 @@
         <title>Zotero synchronization</title>
         <link rel=stylesheet href="../../common/css/global.css" media="all">
         <link rel=stylesheet href="../../common/css/admin.css" media="all">
+        <script>
+            function __showLoading(){
+                var ele = document.getElementById('divStart2');
+                ele.style.display = 'none';
+                ele = document.getElementById('divLoading');
+                ele.style.display = 'block';
+                return true;
+            }
+        </script>
     </head>
 
     <body class="popup">
@@ -66,12 +81,15 @@
             $mapping_rt = array();
             $mapping_dt_errors = array();
             $mapping_rt_errors = array();
+            $mapping_rt_errors2 = array();
             $rep_errors_only = true;
 
 
             if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
                 die("Sorry, library key for Zotero synchronisation is not defined. To set it, go to Admin > Database > Advanced Properties");
             }
+
+            //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
 
 
             $lib_keys = explode("|", HEURIST_ZOTEROSYNC);
@@ -109,15 +127,20 @@
     }
 
     $key = $lib_keys[$lib_key_idx];
+    
     $vals = explode(",",$key);
 
     $user_ID = @$vals[1];
     $group_ID = @$vals[2];
     $api_Key  = @$vals[3];
+    
+    if($user_ID!=null)$user_ID = trim($user_ID);
+    if($group_ID!=null)$group_ID = trim($group_ID);
+    if($api_Key!=null)$api_Key = trim($api_Key);
 
     if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
         print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
-        " ' <p>Please go to Designer View > Database > Advanced Properties to enter access details for your Zotero library</div></body>
+        " ' <p>Please go to Database administration page > Database > Advanced Properties to enter access details for your Zotero library</div></body>
         </html>";
         exit;
     }
@@ -129,7 +152,7 @@
     $fh_data = simplexml_load_file($mapping_file);
     if($fh_data==null || is_string($fh_data)){
         die("Sorry, mapping/configuration file import/biblio/zoteroMap.xml for Zotero synchronisation ".
-            "is corrupted - please ask your sysadmin to update it");
+            "is corrupted - please ask your system administrator to update it");
     }
 
 
@@ -147,8 +170,7 @@
                         // find record type with such code (or concept code)
                         $rt_id = getRecTypeLocalID($arr['h3id']);
                         if($rt_id == null){
-                            array_push($mapping_rt_errors, "Record type ".$arr['h3id']."  ".$zType.
-                                " was not found in the database (use Import Structure to obtain)");
+                            array_push($mapping_rt_errors, $arr['h3id']."  ".$zType);
                         }else{
 
                             $mapping_dt = array();
@@ -177,7 +199,7 @@
                             }
 
                             if(count($mapping_dt)<1){
-                                array_push($mapping_rt_errors, "No proper field mapping found for ".$zType);
+                                array_push($mapping_rt_errors2, $zType);
                             }else{
                                 $mapping_dt["h3rectype"] = $rt_id;
                                 $mapping_rt[$zType] = $mapping_dt;
@@ -191,13 +213,26 @@
     }///foreach
 
     $zotero = null;
-
-
     $zotero = new phpZotero($api_Key);
 
     print "<div>zotero component has been inited with api key $api_Key   step:$step</div>";
 
+    /* test connection
+    $items = $zotero->getItemsTop($group_ID,
+                array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
+    $code = $zotero->getResponseStatus();
+    print $code;
 
+    //test new library
+    $zotero = new \Zotero\Library('user', $user_ID, 'Library', $api_Key);
+    $permissions = $zotero->getKeyPermissions('','');
+    print json_encode($permissions, JSON_PRETTY_PRINT);
+
+    $items = $zotero->fetchItemsTop(array(
+    'format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'10', 'order'=>'dateModified', 'sort'=>'desc' ));
+    //'limit'=>10, 'collectionKey'=>$collectionKey, 'order'=>'dateAdded', 'sort'=>'desc'));
+    */
+    
     if($step=="1"){  //first step - info about current status
 
         // 1) verify connection to zotero (get total count of top-level items in zotero)
@@ -206,7 +241,7 @@
                 array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ), "groups");
         }else{
             $items = $zotero->getItemsTop($user_ID,
-                array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'order'=>'dateModified', 'sort'=>'desc' ));
+                array('format'=>'atom', 'content'=>'none', 'start'=>'0', 'limit'=>'1', 'sort'=>'dateModified', 'direction'=>'desc' ));
         }
 
         $code = $zotero->getResponseStatus();
@@ -216,40 +251,57 @@
             ."Please try this operation later.</div>";
         }else if($code>399){
             $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
-            if($code==401 || $code==403){
-                $msg = $msg."Verify API key in Designer View > Database > Advanced Properties";
+            if($code==400 || $code==401 || $code==403){
+                $msg = $msg."Verify API key in Database administration page > Database > Advanced Properties. It can be incorrect or truncated";
             }else if($code==404 ){
-                $msg = $msg."Verify User and Group ID in Designer View > Database > Advanced Properties";
+                $msg = $msg."Verify User and Group ID in Database administration page > Database > Advanced Properties";
             }else if($code==407 ){
-                $msg = $msg."Proxy Authentication Required, please ask sysadmin to set it";
+                $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
             }
             print $msg."</div>";
-        }else if(!items){
+        }else if(!$items){
             print "<div style='color:red'><br />Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
+            if($code==0){
+                print "<div style='color:red'><br />Verify your Heurist proxy settings.</div>";
+            }
         }else{
 
-            $totalitems = intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,
-                strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
+            //DEBUG print '<xmp>'.$items.'</xmp>';    
+            //it does not work anymore
+            //intval(substr($items,strpos($items, "<zapi:totalResults>") + 19,strpos($items, "</zapi:totalResults>") - strpos($items, "<zapi:totalResults>") - 19));
+            //Responses for multi-object read requests will include a custom HTTP header, Total-Results        
+            $totalitems = $zotero->getTotalCount();
 
             //print $items;
 
             print "<div>Count items in Zotero: $totalitems</div>";
             if($totalitems>0){
-                print "<div><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
-                "&lib_key=".$lib_key_idx."'><button>Start</button></a></div>";
+                print "<div id='divStart2'><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
+                "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button>Start</button></a></div>";
+                print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../common/images/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
             }
 
 
 
             // 2) show mapping issues report
-            if(count($mapping_rt_errors)>0 || count($mapping_dt_errors)>0){
-                print "<div style='color:red'><br />Warning: there are problem in the mapping file in the code at import/biblio/zoteroMap.xml<br />";
+            if(count($mapping_rt_errors)>0 || count($mapping_rt_errors2)>0 || count($mapping_dt_errors)>0){
+
+                print "<div style='color:red'><br />
+                Synchronisation requires bibliographic record types to be defined in the database (Zotero to Heurist type mappings are defined in the code at /import/biblio/zoteroMap.xml)."; 
+
                 if(count($mapping_rt_errors)>0){
-                    print "<br />".implode("<br />",$mapping_rt_errors);
+                    print "<p style='color:red'>The following record types were not found:";                    
+                    print "<br />".implode("<br />",$mapping_rt_errors).'</p>';
+                }
+                if(count($mapping_rt_errors2)>0){
+                    print "<p style='color:red'><br />No proper field mapping found for record types:";                    
+                    print "<br />".implode("<br />",$mapping_rt_errors2).'</p>';
                 }
                 if(count($mapping_dt_errors)>0){
-                    print "<br /><br />Issues with base field (detail) types:<br />".implode("<br />",$mapping_dt_errors);
+                    print "<p style='color:red'><br />Issues with base field (detail) types:<br />".implode("<br />",$mapping_dt_errors).'</p>';
                 }
+                
+                print "<p style='color:red'>Use Database > Structure > Acquire from databases to acquire these record types from the Heurist Core Definitions database (# 2)</p>";
                 print "</div>";
             }
 
@@ -268,6 +320,8 @@
 
 
         // 1) start loop: fetch items by 100
+        $cnt_updated = 0;
+        $cnt_added = 0;
         $start = 0;
         $fetch = min($_REQUEST['cnt'],100);
         $totalitems = $_REQUEST['cnt'];
@@ -310,7 +364,7 @@
 
                     // 3) try to search record in database by zotero id
                     $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
-                    "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".DT_ZOTERKEY." and d.dtl_Value='".$zotero_itemid."'";
+                    "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".$dt_SourceRecordID." and d.dtl_Value='".$zotero_itemid."'";
                     $res = mysql_query($query);
                     if($res){
                         $row = mysql_fetch_array($res);
@@ -319,7 +373,7 @@
 
                             $rec_modified = strtotime($row[1]);
 
-                            // 4) compare updated time - if it is less than in H3 database, ignore this entry
+                            // 4) compare updated time - if it is less than in Heurist database, ignore this entry
                             $t_updated = strtotime(strval(findXMLelement($entry, null, "updated")));
 
                             if(false && $t_updated && $rec_modified>$t_updated){
@@ -469,12 +523,21 @@
                     }//for fields in content
 
 
+                    echo print_r($details, true);
+
+
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid);
                     if($new_recid){
                         if(count($unresolved_records)>0){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
+                        if($recId==$new_recid){
+                            $cnt_updated++;
+                        }else{
+                            $cnt_added++;
+                        }
                     }
+
 
                 }//entry
 
@@ -483,6 +546,10 @@
             $start = $start + $fetch;
 
         }// end of loop
+
+
+        print "<div>Added: ".$cnt_added."</div>";
+        print "<div>Updated: ".$cnt_updated."</div>";
 
 
         print "<div>Create/update resource records</div>";
@@ -494,6 +561,7 @@
         // $dt_id - field that must contain pointer to resource
         // $resource_rt_id - record type for resouce record
         // $resource_dt_id
+
 
         $ptr_cnt = 0;
         foreach($unresolved_pointers as $rec_id=>$pntdata)
@@ -512,6 +580,7 @@
                     if(!is_array($recource_recid)){
                         $recource_recid = array("0"=>$recource_recid);
                     }
+
                     foreach($recource_recid as $idx=>$res_rec_id){
                         //update main record
                         $inserts = array($rec_id, $dt_id, $res_rec_id, 1);
@@ -524,7 +593,7 @@
             }
 
         }
-        print "<br><br>Total count of resolved pointers:".$ptr_cnt;
+        print "<br><br>Total count of RESOLVED pointers:".$ptr_cnt;
 
         // done - show report log
 
@@ -842,14 +911,14 @@
     */
     function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid){
 
-        global $rep_errors_only;
+        global $rep_errors_only, $dt_SourceRecordID;
 
         $new_recid = null;
 
         if( count($details)>0){
 
             if($zotero_itemid){
-                $details["t:".DT_ZOTERKEY] = array("0"=>$zotero_itemid);
+                $details["t:".$dt_SourceRecordID] = array("0"=>$zotero_itemid);
             }
             // 8) save rtecord
             $ref = null;
@@ -862,7 +931,7 @@
 
                 if(!$res){
                     $syserror = mysql_error();
-                    print "<div style='color:red'> Error: Can not delete record details ".$syserror."</div>";
+                    print "<div style='color:red'> Error: Cannot delete record details ".$syserror."</div>";
                     return;
                 }
             }

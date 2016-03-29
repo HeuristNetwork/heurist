@@ -1,0 +1,82 @@
+<!--
+/**
+* Editing form for faceted searches
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<fieldset>
+<input type="hidden" name="svs_ID" id="svs_ID" />
+<div>
+    <div class="header"><label for="svs_Name">Faceted search name</label></div>
+    <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
+        maxlength="30" size="30" />
+    <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+        Used in navigation tree (limit to ~25 characters).
+
+    </div>
+</div>
+
+<div>
+    <div class="header"  style="margin-bottom: 10px; "><label for="svs_UGrpID">Save in work group</label></div>
+    <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
+    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+        Use a shared workgroup if you want other people to be able to use your search.
+    </div>
+</div>
+
+<div class="simple-mode"">
+<div class="header"><label for="opt_rectypes">Search for (entity type)</label></div>
+<select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+<div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+This determines the record type which will be retrieved by the search.
+The facets can, however, be based on attributes of other record types linked from this type.
+</div>
+</div>
+
+<div>
+<div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
+<textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
+style="margin-top:0.4em;width:450px"></textarea>
+<div style="width: 420px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
+A standard Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
+</div>
+</div>
+
+<div>
+<div class="header" style="vertical-align:top"><label for="svs_Rules">Expansion rules</label></div>
+<textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
+style="margin-top:0.4em;width:450px" readonly="readonly"></textarea>
+<div style="width: 420px; font-size: smaller; margin-top: 5px;  margin-bottom: 5px;">
+Rules are applied to the result set after each selection. They expand the results
+to include connected records (entities). This expansion may be restricted
+to specific entity types, connection types or filters.
+Use rules to bring in information such as map location or dates for display on a map or timeline.
+Edit with the pencil icon on the right.
+</div>
+
+
+<div id="svs_btnset">
+<div id="svs_Rules_edit"  style="margin-top:0.4em"></div>
+<div id="svs_Rules_clear" style="margin-top:0.4em"></div>
+</div>
+
+</div>
+
+</fieldset>
+
+<!-- TODO: If the only function of this class is name length warning, remove it and replace with better methodology -->
+<div class="messages"></div>

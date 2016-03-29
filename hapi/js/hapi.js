@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -66,7 +66,6 @@ var HAPI = {
 					HAPI.key = key;
 					HAPI.database = database;
 					HAPI.HeuristBaseURL = url;
-					if (HeuristSitePath) HAPI.HeuristSitePath = HeuristSitePath;
 					return;
 				}
 				path = path.replace(/[^\/]*\/$/, "");
@@ -1924,10 +1923,17 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 
 			// related values are given as well; enums is an array of string-string pairs
 			// enum(trmID,trmLabel,[invID, invLabel])
-			if (top.HEURIST && typeof top.HEURIST.terms != "undefined"){
-				ciIndex = top.HEURIST.terms.fieldNamesToIndex['trm_ConceptID'];
-				enumLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
-				relLookup = top.HEURIST.terms.termsByDomainLookup['relation'];
+            var terms = null;
+            if (top.HEURIST && typeof top.HEURIST.terms != "undefined"){
+                terms = top.HEURIST.terms;
+            }else if (top.HEURIST4 && typeof top.HEURIST4.terms != "undefined") {
+                terms = top.HEURIST4.terms;
+            }
+            
+			if (terms != null){
+				ciIndex = terms.fieldNamesToIndex['trm_ConceptID'];
+				enumLookup = terms.termsByDomainLookup['enum'];
+				relLookup = terms.termsByDomainLookup['relation'];
 
 				for (i=0; i < enums.length; ++i) {
 					_enums.push(enums[i][1]);
@@ -1973,8 +1979,10 @@ var HDetailType = function(id, name, prompt, variety, enums, constraint) {
 		return _constrainedRecTypeID;
 	};
 	this.getRelatedEnumerationValues = function() { return _relatedEnums; };
-	this.getIdForEnumerationValue = function(value) { return (isNaN(value) ? _termsMap[("" + value).toLowerCase()]  ||  null :
-																			(_enumsMap[value] ? value : null)); };
+	this.getIdForEnumerationValue = function(value) { 
+            return (isNaN(value) ? _termsMap[("" + value).toLowerCase()]  ||  null :
+																			(_enumsMap[value] ? value : null)); 
+    };
 	this.getEnumerationValueFromId = function(id) { return (isNaN(id) ? (_enumsMap[("" + id).toLowerCase()] || null) :
 																			(_enumsMap[id] || null)); };
 
@@ -2721,7 +2729,8 @@ HAPI.XHR = {
 		var method = jso? "POST" : "GET";
 		req.open(method, url, true);
 
-		req.setRequestHeader("User-Agent", "XMLHTTP/1.0");
+//2016-03-25 XMLHttpRequest isn't allowed to set these headers, they are being set automatically by the browser		
+//req.setRequestHeader("User-Agent", "XMLHTTP/1.0");
 		if (jso) {
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		}

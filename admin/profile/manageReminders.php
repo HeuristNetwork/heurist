@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -51,16 +51,16 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
      <head>
           <title>My Profile. Manage Reminders</title>
           <meta http-equiv="content-type" content="text/html; charset=utf-8">
-          <link rel="icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-          <link rel="shortcut icon" href="<?=HEURIST_SITE_PATH?>favicon.ico" type="image/x-icon">
-          <link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-          
+          <link rel="icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+          <link rel="shortcut icon" href="<?=HEURIST_BASE_URL?>favicon.ico" type="image/x-icon">
+          <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+
           <style>
                div#page { padding: 10px; }
                div#page .headline { margin-bottom: 10px; }
                div#page img { border: none; }
           </style>
-          
+
           <script>
 	        function del(rem_id) {
 		        document.getElementById("rem_id_input").value = rem_id;
@@ -69,11 +69,11 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
 	        }
           </script>
      </head>
-     
+
      <body class="popup" width=600 height=300>
         <div>
             <div class=headline>Reminders</div>
-            
+
            <form>
                 <input type=hidden name="db" value="<?= HEURIST_DBNAME?>">
                 <label for=show-future>
@@ -124,8 +124,8 @@ $future = (! @$_REQUEST["show"]  ||  $_REQUEST["show"] === "future");
 					                ($row["username"] ? $row["username"] : $row["rem_ToEmail"]);
                 ?>
                     <tr>
-                     <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_SITE_PATH?>common/images/cross.png"></a></td>
-                     <td><a href="<?=HEURIST_SITE_PATH?>records/edit/editRecord.html?recID=<?= $row["rem_RecID"] ?>&db=<?= HEURIST_DBNAME?>#personal"><b><?= $row["rec_Title"] ?></b></a></td>
+                     <td><a title=delete href=# onclick="del(<?= $row["rem_ID"] ?>); return false;"><img src="<?=HEURIST_BASE_URL?>common/images/cross.png"></a></td>
+                     <td><a href="<?=HEURIST_BASE_URL?>records/edit/editRecord.html?recID=<?= $row["rem_RecID"] ?>&db=<?= HEURIST_DBNAME?>#personal" target="_blank"><b><?= $row["rec_Title"] ?></b></a></td>
                      <td><b><?= $recipient ?></b></td>
                      <td><b><?= $row["rem_Freq"] ?></b> from <b><?= $row["rem_StartDate"] ?></b></td>
                      <td><?= $row["rem_Message"] ?></td>

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -42,12 +42,13 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 				$tDate[$tag] = $val;
 			}
             
-            if ($tDate["CLD"] && $tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
+            if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
                 $cld = $tDate["CL2"]." ".$tDate["CLD"];
+                if(strpos($cld,'null')!==false) $cld = substr($cld,4); //some dates were saved in wrong format - fix it
             }
             
-            $is_greg_or_julian = ((!$tDate["CLD"]) || 
-                                strtolower($tDate["CLD"])=='gregorian' || strtolower($tDate["CLD"])=='julian');
+            $is_greg_or_julian = ((!@$tDate["CLD"]) || 
+                                strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
 
 			switch ($tDate["TYP"]){
 				case 's'://simple
@@ -69,10 +70,12 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 					$value = (@$tDate['BPD']? '' . $tDate['BPD'] . ' BPD':
 									@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "");
 					if ($value) {
-						$value = $value.(@$tDate['DEV']? ' ' . convertDurationToDelta($tDate['DEV'],'±'):
-											@$tDate['DVP']? ' ' . convertDurationToDelta($tDate['DVP'],'+').
-													(@$tDate['DVN']?"/ ".convertDurationToDelta($tDate['DVN'],'-'):""):
-											@$tDate['DVN']?" ".convertDurationToDelta($tDate['DVN'],'-'):"");
+						$value = $value.(@$tDate['DEV']
+                            ? ' ' . convertDurationToDelta($tDate['DEV'],'±')
+                            : (@$tDate['DVP']
+                                ? ' ' . convertDurationToDelta($tDate['DVP'],'+').
+										(@$tDate['DVN']?"/ ".convertDurationToDelta($tDate['DVN'],'-'):"")
+                                : (@$tDate['DVN']?" ".convertDurationToDelta($tDate['DVN'],'-'):"") ));
 					}else{
 						$value = "unknown carbon temporal format";
 					}
@@ -103,12 +106,49 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 		return $value;
 }
 
-//
-//
-//
-function removeLeadingYearZeroes($value, $is_greg_or_julian=true){
 
-	$date = parseDateTime($value);
+//
+//
+//
+function validateAndConvertToISO($value){
+          if (strpos($value,"|")!==false) {// temporal encoded date
+                return 'Temporal';
+          }else{
+                //$date = parseDateTime($value);
+                //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
+                return removeLeadingYearZeroes($value, false, true);
+          }
+}
+//
+//   $is_greg_or_julian true - returns full month names
+//
+function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false){
+
+	//$date = parseDateTime($value);
+    // preg_match('/^\d+$/', $value)  && is_int(intval($value))
+    
+    $need_day = true;
+    
+    if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
+        $date = array('year'=>$value);
+    }else{
+        
+        $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
+        if( $cnt_slash>0){  // 6/2006  =  1-6-2006
+            if($cnt_slash==1){
+                $value = '1-'.$value;
+                $need_day = false;
+            }
+            $value = str_replace('/','-',$value);
+            
+        }else if(substr_count($value,'-')==1) {
+            $need_day = false;
+        }
+        
+        $timestamp = strtotime($value);
+        $datestamp = date('Y-m-d H:i:s', $timestamp);
+        $date = date_parse($datestamp);
+    }
 
 	if($date){
 
@@ -124,54 +164,71 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true){
 				$isbce = true;
 				$res = abs($res + 1);
 			}*/
-			$res = "".abs($date['year']);
-		}
+            $res = ''.abs($date['year']);
+            
+            if($is_strict_iso && abs($date['year'])<10000){
+               $res = str_pad($res,4,'0',STR_PAD_LEFT);
+            }
+		}else if($is_strict_iso){
+            return null;
+        }
         
-        if($is_greg_or_julian){
+        $has_time = (@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0);
+        
+        if($is_greg_or_julian && !$is_strict_iso){
 
             $res2 = "";
             if(@$date['day']){
                 $res2 = $date['day']; 
             }
             if(@$date['month']){
-                $res2 = $res2." ".date('M', mktime(0, 0, 0, $date['month'], 1)); //strtotime($date['month'].'01')); 
+                $res2 = $res2.' '.date('M', mktime(0, 0, 0, $date['month'], 1)); //strtotime($date['month'].'01')); 
             }
             
             $res = trim($res2."  ".$res);
 
         }else{
         
-		    if(@$date['month']){
-			    $res = $res."-".str_pad($date['month'],2,'0',STR_PAD_LEFT);
-		    }
-		    if(@$date['day']){
-			    $res = $res."-".str_pad($date['day'],2,'0',STR_PAD_LEFT);
-		    }
+		    if(@$date['month'] || $has_time){
+			    $res = $res.'-'.str_pad($date['month'],2,'0',STR_PAD_LEFT);
+		        if(@$date['day'] && ($need_day || $has_time)){
+			        $res = $res.'-'.str_pad($date['day'],2,'0',STR_PAD_LEFT);
+		        }
+            }
         }
 
-		if(@$date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+        if(true){
+		if($has_time){
 			if(!@$date['hour']) {
 					$date['hour'] = 0;
 			}
 
 			if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
-				$res = $res." ".str_pad($date['hour'],2,'0',STR_PAD_LEFT);
+				$res = $res.' '.str_pad(''.$date['hour'],2,'0',STR_PAD_LEFT);
 
 				if(!@$date['minute']) { $date['minute'] = 0; }
-				$res = $res.":".str_pad($date['minute'],2,'0',STR_PAD_LEFT);
+				$res = $res.':'.str_pad(''.$date['minute'],2,'0',STR_PAD_LEFT);
 			}
 			if(@$date['second']>0){
-				$res = $res.":".str_pad($date['second'],2,'0',STR_PAD_LEFT);
+				$res = $res.':'.str_pad(''.$date['second'],2,'0',STR_PAD_LEFT);
 			}
 		}
+        }else{   //debug
+            $res = $res.' '.@$date['hour'].':'.@$date['minute'].':'.@$date['second'];
+        }
 
 
 		if($isbce){
-			$res = $res." BCE";
+            if($is_strict_iso){
+                $res = '-'.$res;
+            }else{
+			    $res = $res.' BCE';
+            }
 		}
+        
 		return $res;
 	}else{
-		return $value;
+		return ($is_strict_iso)?null:$value;
 	}
 }
 
@@ -179,17 +236,17 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true){
 //
 //
 function parseDateTime($value) {
-	$isbce= (strpos($value,"-")===0);
+	$isbce= (strpos($value,'-')===0);
 	if($isbce){
 		$value = substr($value,1);
 	}
 
 	//if (preg_match('/^P([^T]*)T?(.*)$/', $value, $matches)) { // valid ISO Duration split into date and time
 
-	if($value && strlen($value)>10 && strpos($value,"T")>0){
-		$matches = explode("T",$value);
-	}else if($value && strlen($value)>10 && strpos($value," ")>0){
-		$matches = explode(" ",$value);
+	if($value && strlen($value)>10 && strpos($value,'T')>0){
+		$matches = explode('T',$value);
+	}else if($value && strlen($value)>10 && strpos($value,' ')>0){
+		$matches = explode(' ',$value);
 	}else{
 		$matches = array();
 		$matches[0] = $value;

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -50,10 +50,10 @@ mysql_connection_select(DATABASE);
          <title>Workgroup Tags</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
-        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/edit.css">
-        <link rel="stylesheet" href="<?=HEURIST_SITE_PATH?>common/css/admin.css">
-        
+        <link rel="stylesheet" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+        <link rel="stylesheet" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
+        <link rel="stylesheet" href="<?=HEURIST_BASE_URL?>common/css/admin.css">
+
         <style type="text/css">
             .tbox { border: 1px solid black; margin: 1px; }
             .gr_div { padding: 4px 0px; }
@@ -74,7 +74,7 @@ mysql_connection_select(DATABASE);
         <?php if(@$_REQUEST['popup']!="yes") { ?>
         <div class="banner"><h2>Workgroup Tags</h2></div>
         <?php } ?>
-        
+
         <div id="page-inner">
             Unlike personal tags, which can be freely added by individual users while editing data and apply only to that user,
             workgroup tags are a controlled list of shared tags established by a workgroup administrator.
@@ -101,7 +101,7 @@ mysql_connection_select(DATABASE);
 
                 <?php
 	                $adminGroupList = array();
-	                // This retrieves all the user groups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
+	                // This retrieves all the Workgroups of which the user is a member IN THE DEFAULT DATABASE, ratehr than the current
 	                // foreach ($_SESSION['heurist']['user_access'] as $grp_id => $access) {
 	                //	if ($access == "admin") array_push($adminGroupList,$grp_id);
 	                $q='select distinct ugl_GroupID from '.USERS_DATABASE.'.sysUsrGrpLinks where ugl_UserID='.get_user_id().' and ugl_Role="admin"';
@@ -122,7 +122,7 @@ mysql_connection_select(DATABASE);
 		                print '<ul>';
 		                $res = mysql_query('select tag_ID, tag_Text, count(rtl_ID) as tgi_count from usrTags left join usrRecTagLinks on rtl_TagID=tag_ID where tag_UGrpID='.$grp['ugr_ID'].' group by tag_ID, rtl_TagID order by tag_Text');
 		                while ($tag = mysql_fetch_assoc($res)) {
-			                $searchlink = HEURIST_BASE_URL.'search/search.html?q=tag%3A%22'.$grp['ugr_Name'].'%5C'.$tag['tag_Text'].'%22&w=all&stype=';
+			                $searchlink = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=tag%3A%22'.$grp['ugr_Name'].'%5C%5C'.$tag['tag_Text'].'%22&w=all&stype=';
 			                if ($tag['tgi_count'] == 0) $used = '';
 			                else $used = '<i>(<a target=_blank href="'.$searchlink.'">used '.($tag['tgi_count'] == 1 ? 'once' : $tag['tgi_count'].' times').'</a>)</i>';
                 ?>

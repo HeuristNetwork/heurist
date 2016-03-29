@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
@@ -36,7 +36,11 @@
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
     require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
 
-    //ART - It breaks everything! require_once(dirname(__FILE__).'/../../../viewers/smarty/templateOperations.php'); // for listing and converting smarty templates
+    // Artem - It breaks everything! Ian - all well and good, but why?
+    // TODO: investigate why smarty template operation file breaks something in crosswalks
+    // TODO: I think it had one level of relative path too few - have added a ../
+    // require_once(dirname(__FILE__).'/../../../../viewers/smarty/templateOperations.php');
+    // for listing and converting smarty templates
 
     mysql_connection_insert($tempDBName); // Use temp database
 
@@ -265,7 +269,7 @@
                                 if(dup<0){
                                     elLiner.innerHTML = 'Same origin (x '+Math.abs(dup)+')';
                                 }else if (isNaN(Number(dup))){
-                                    elLiner.innerHTML = dup+' has same origin';
+                                    elLiner.innerHTML = '<b>'+dup+'</b> (this database) came from same source (same original database + code)';
                                 }else if (dup>0){
                                     elLiner.innerHTML = 'Duplicate name (x '+dup+')';
                                 }else{
@@ -289,7 +293,7 @@
 
                             if (req) {
 
-                                var fvals = req.split("|");
+                                var fvals = req.split("|");   //filter values
 
                                 var sByGroup  = fvals[0];
                                 var showIdentical = (fvals[1]==="1");
@@ -544,13 +548,13 @@
 
     <body class="popup yui-skin-sam" onbeforeunload="dropTempDB(false)">
         <div id=popup-saved style="display: none">
-            <b>Import succesful</b>
+            <b>Import successful</b>
         </div>
 
         <div class="banner">
             <h2>Import record types from <?= "\"".($source_db_id ?$source_db_id." : " : "").$source_db_name."\""?> </h2>
         </div>
-        
+
         <script src="../../../common/js/utilsLoad.js"></script>
         <script src="../../../common/js/utilsUI.js"></script>
 
@@ -560,12 +564,12 @@
             -->
 
             <?php ?>
-            <!-- Smarty templates 
+            <!-- Smarty templates
                  TODO:  functions are in templateOperations.php
                      selection list of TPL files - use getList();
                      call smartyLocalIDsToConceptIDs
                      serve up to the calling database
-                
+
             <div id="smarty" style="width:100%; margin:auto;">
                 <h3>Smarty report templates</h3>
                 <p>
@@ -592,12 +596,13 @@
                         <label for="noRecursion">&nbsp;&nbsp;Direct record types import only (w/out all related types - constrained pointers)
                         </label><br />
                         <input type="checkbox" id="strict" title="Check this for strict import of types!" checked>
-                        <label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct</label>
+                        <label for="strict">&nbsp;&nbsp;Strict import - only import if structure is entirely correct
+                        </label><br />
                         <input type="checkbox" id="importVocabs" checked>
                         <label for="importVocabs">&nbsp;&nbsp;Import complete vocabulary even if a limited set of terms is specified</label>
                     </div>
                 </div>
-                
+
                 <div id="topPagination"></div>
                 <div id="crosswalkTable"></div>
                 <div id="bottomPagination"></div>
@@ -607,7 +612,7 @@
                definitions in the selected database which are not already in the current database.</i>
 
             <p>
-                <i>In version 3.0 this may also mean that the database is in a 
+                <i>In version 3.0 this may also mean that the database is in a
                 different format version which is not being read correctly</i>
             </p>
 
@@ -621,10 +626,10 @@
                 <p>Logs give a more detailed history of the actions taken to import structure.
                 Click the links below to see the short version and long version respectively.</p>
             </div>
-            
+
             <a id="shortLog" onClick="showShortLog()" href="#">Show short log</a><br />
             <a id="detailedLog" onClick="showDetailedLog()" href="#">Show detailed log</a><br /><br />
-            
+
             <div id="log"></div><br />
             <div id="log"></div>
 
@@ -638,6 +643,31 @@
                 var strictImport = false;
                 var noRecursion = false;
                 var importVocabs = true;
+
+                if (!Array.prototype.indexOf)
+                    {
+                    Array.prototype.indexOf = function(elt /*, from*/)
+                    {
+                        var len = this.length;
+
+                        var from = Number(arguments[1]) || 0;
+                        from = (from < 0)
+                        ? Math.ceil(from)
+                        : Math.floor(from);
+                        if (from < 0)
+                            from += len;
+
+                        for (; from < len; from++)
+                        {
+                            if (from in this &&
+                                this[from] === elt)
+                                return from;
+                        }
+                        return -1;
+                    };
+                }
+
+
                 // Start an asynchronous call, sending the recordtypeID and action
                 function processAction(rtyID, action, rectypeName) {
                     // Lock import, and set import icon to loading icon
@@ -664,6 +694,8 @@
                     else { // code for IE6, IE5
                         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
                     }
+
+                    //Juan made stupid response as string!!! @todo - change to JSON
                     xmlhttp.onreadystatechange=function() {
                         // executed on change of ready state:
                         // 0=not init, 1=server connection, 2=request received, 3=processing request, 4= done
@@ -699,6 +731,15 @@
                             } else {
                                 document.getElementById("importIcon"+rtyID).src = "../../../common/images/import_icon.png";
 
+
+                                var k = response.indexOf('IMPORTED:');
+                                var rt_ids = [];
+                                if(k>0){
+                                    rt_ids = response.substr(k+9).split(',');
+                                    response = response.substr(0,k);
+                                }
+
+
                                 detailedImportLog = '<p style="color:green">'+ logHeader+response+"</p>" + detailedImportLog;
                                 result += logHeader;
                                 response = response.split("<br />");
@@ -727,7 +768,20 @@
                                     document.getElementById("log").innerHTML = shortImportLog;
                                 }
 
-                                myDataTable.deleteRow(importedRowID, -1);
+                                //myDataTable.deleteRow(importedRowID, -1); //wrong way - need to refresh filter
+                                var oRecord = myDataTable.getRecord(importedRowID);
+                                //matches
+                                var rt_id = oRecord.getData("rtyID");
+                                //find
+                                var k, cnt = 0;
+                                for (k=0;k<tableData.length;k++){
+                                    if(tableData[k][1]==rt_id || rt_ids.indexOf(tableData[k][1])>=0){
+                                        tableData[k][3] = -1;
+                                        cnt++;
+                                        if(cnt==rt_ids.length) break;
+                                    }
+                                }
+                                _updateFilter();
                             }
                         }
                     } // end readystate callback
@@ -735,6 +789,7 @@
                     xmlhttp.open("GET","processAction.php?"+
                         "db=<?=HEURIST_DBNAME?>"+
                         "&action="+action+
+                        //"&DBGSESSID=424548064757500001;d=1,p=0,c=0"+
                         "&tempDBName="+tempDBName+
                         "&sourceDBName="+sourceDBName+
                         "&sourceDBID="+ (sourceDBID ? sourceDBID : "0")+
@@ -810,7 +865,7 @@
                         dropped = true;
 
                         top.HEURIST.util.popupURL(top,
-                            "../admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
+                            "<?=HEURIST_BASE_URL?>admin/structure/import/processAction.php?action=drop&db=<?=HEURIST_DBNAME?>&tempDBName=<?=$tempDBName?>", {
                                 "close-on-blur": true,
                                 "no-resize": true,
                                 //"no-close": true,
@@ -821,7 +876,7 @@
                                 callback: function(context) {
 
                                     if(redirect) {
-                                        window.location = "<?=HEURIST_BASE_URL?>/admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
+                                        window.location = "<?=HEURIST_BASE_URL?>admin/structure/import/selectDBForImport.php?db=<?=HEURIST_DBNAME?>";
                                     }
                                 }
                         });

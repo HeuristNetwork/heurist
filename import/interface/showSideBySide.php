@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -75,7 +75,7 @@ while (count($bib_ids_to_fetch) > 0) {
 <html>
  <head>
   <title>HEURIST - compare resources</title>
-  <link rel=stylesheet href="<?=HEURIST_SITE_PATH?>common/css/heurist.css">
+  <link rel=stylesheet href="<?=HEURIST_BASE_URL?>common/css/heurist.css">
 
  <script>
   var bibs = <?= json_format($bib_data) ?>;
@@ -84,8 +84,8 @@ while (count($bib_ids_to_fetch) > 0) {
  </head>
  <body>
 
-  <script src="<?=HEURIST_SITE_PATH?>common/js/utilsLoad.js"></script>
-  <script src="<?=HEURIST_SITE_PATH?>common/php/loadCommonInfo.php"></script>
+  <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
+  <script src="<?=HEURIST_BASE_URL?>common/php/loadCommonInfo.php"></script>
   <script src="showSideBySide.js"></script>
 
  <style>

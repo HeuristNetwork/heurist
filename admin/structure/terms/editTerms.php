@@ -6,7 +6,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -55,7 +55,10 @@
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
         <!-- END TREEVIEW DEFS-->
 
-        <script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
@@ -127,7 +130,10 @@
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
                 <div id="formEditor" style="display:none;width:500px;">
-                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;">Edit selected term / vocabulary</h3>
+                    <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block">Edit selected term / vocabulary</h3>
+                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+                                <b>term saved</b>
+                            </div>
 
                     <div style="margin-left:10px; border: black; border-style: solid; border-width:thin; padding:10px;">
 
@@ -137,9 +143,6 @@
                             <input id="edParentId" type="hidden"/>
                             &nbsp;&nbsp;&nbsp;
                             <div id="div_ConceptID" style="display: inline-block;">
-                            </div>
-                            <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                                <b>term saved</b>
                             </div>
                         </div>
 
@@ -166,6 +169,15 @@
                             </div>
 
                         </div>
+                        
+            <div  class="dtyField" id="divImage">
+                            <div style="float:left;">
+                                <label class="dtyLabel" style="margin-top:10px;">
+                                    Image (~400x400):</label>
+                <div style="vertical-align: middle;display:inline-block;">
+                    <div id="termImage" style="border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" ></div>
+                </div>
+            </div>                        
 
                         <div class="dtyField">
                             <label class="dtyLabel">Description of term</label>
@@ -195,7 +207,7 @@
                             <label for="cbInverseTermItself">Term is inverse of another term</label>
                         </div>
                         <div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term</label>
-                            <input id="edInverseTerm" readonly="readonly" style="width:250px"/>
+                            <input id="edInverseTerm" readonly="readonly" style="width:250px;background-color:#DDD;"/>
                             <input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
@@ -249,10 +261,10 @@
 
 
                 <!-- search for and set inverse terms, only for relationship types -->
-                <div id="formInverse" style="display:none;">
+                <div id="formInverse" style="display:none;width:500px;">
 
-                    <h3 style="border-style: none;">Select Inverse Term</h3>
-                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
+                    <h3 style="border-style: none;margin-left:10px;">Select Inverse Term</h3>
+                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;margin-left:10px;">
 
                         <div style="display:inline-block;vertical-align: top; width:130px;">
                             <label class="dtyLabel" style="width:30px;">Find:</label>
@@ -399,12 +411,10 @@
                         </div>
                 </div>
 
-
-
-
+                <input type="file" id="new_term_image" style="display:none">
 
         <script  type="text/javascript">
-
+        
             YAHOO.util.Event.addListener(window, "load", function(){ editTerms = new EditTerms();} );
             //YAHOO.util.Event.onDOMReady(EditTerms.init);
         </script>

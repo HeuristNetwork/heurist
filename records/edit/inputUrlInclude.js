@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -105,7 +105,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 	var valueVisible = "";
 	var valueHidden = "";
-	var thumbUrl = top.HEURIST.basePath+"common/images/icon_file.jpg";
+	var thumbUrl = top.HEURIST.baseURL_V3+"common/images/icon_file.jpg";
 
 	if(bdValue){
 		if(bdValue.file){
@@ -204,7 +204,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 
 	var removeImg = newDiv.appendChild(this.document.createElement("img"));
-		removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+		removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
 		removeImg.className = "delete-resource";
 		removeImg.title = "Clear";
 		var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -217,12 +217,12 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.addInput = function(b
 
 /*
 	var editImg = newDiv.appendChild(this.document.createElement("img"));
-		editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
+		editImg.src = top.HEURIST.baseURL_V3 +"common/images/edit-pencil.png";
 		editImg.className = "edit-resource";
 		editImg.title = "Edit this record";
 
 	top.HEURIST.registerEvent(editImg, "click", function() {
-		top.HEURIST.util.popupURL(window,top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value, {
+		top.HEURIST.util.popupURL(window,top.HEURIST.baseURL_V3 +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value, {
 			callback: function(bibTitle) { if (bibTitle) textElt.defaultValue = textElt.value = bibTitle; }
 		});
 	});
@@ -257,7 +257,7 @@ top.HEURIST.edit.inputs.BibDetailURLincludeInput.prototype.defineURL = function(
 		recID = "&recid="+top.HEURIST.edit.record.bibID;
 	}
 
-	var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
+	var url = top.HEURIST.baseURL_V3+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
 	/*if (element.input.constrainrectype){
 		url += "&t="+element.input.constrainrectype;
 	}*/

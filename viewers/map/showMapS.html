@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 * Timemap = Mapstraction+Timeline
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -243,23 +243,23 @@ body {
     if(!params['db']){
         params['db'] = '';
     }
-    
+
 
 	var HEURIST = {tmap:null};
 
 	var installDir = window.location.protocol+"//"+window.location.host+
-		window.location.pathname.replace(/(((admin|common|export|external|hapi|help|import|records|search|viewers)\/.*)|(index.*))/, "");
+		window.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
 	var HRST = {
-		basePath: installDir,
+		baseURL_V3: installDir,
 		iconBaseURL: installDir + "/HEURIST_FILESTORE/" + params['db'] + "/rectype-icons/",
 		external_publish: true,
-        
+
         currentQuery_main: '',
         currentQuery_sel: '',
         currentQuery_all: '',
         displayPreferences: [],
-        
-        
+
+
 		database: {
 			name: params['db']
 			},
@@ -270,14 +270,14 @@ body {
             isempty: function(obj){
                 return ( HRST.util.isnull(obj) || (obj==="") || (obj==="null") );
             },
-            
+
     setDisplayPreference: function(param, value){},
     getDisplayPreference: function(param){ return null; },
-            
+
 	sendRequest: function(url,callback,postData) {
 		// if we don't have a fully formed or root URL then prepend the base path
 		if ( !(url.match(/^http:/) || url.match(/^https:/))  &&  ! url.match(/^\//))
-			url = HRST.basePath + url;
+			url = HRST.baseURL_V3 + url;
 		var file = url;
 		var req = HRST.util.createXMLHTTPObject();
 		if (!req) return;
@@ -399,16 +399,16 @@ body {
 	function loadHandler(){
 
         if(params['db']==''){
-           
+
             $('#map').html('DATABASE IS NOT DEFINED');
-            
+
         }else{
-        
-		    RelBrowser.baseURL = HRST.basePath;
+
+		    RelBrowser.baseURL = HRST.baseURL_V3;
 		    RelBrowser.iconBaseURL =  HRST.iconBaseURL;
 		    RelBrowser.database = HRST.database.name;
 
-		    //Timeline_urlPrefix = HRST.basePath + "external/timemap.2.0/lib/";
+		    //Timeline_urlPrefix = HRST.baseURL_V3 + "external/timemap.2.0/lib/";
 
 		    window.showMap = new ShowMap();
         }

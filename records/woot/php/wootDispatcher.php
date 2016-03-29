@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -15,19 +15,19 @@
 */
 
 /**
-* dispatch service for Woot commands    
+* dispatch service for Woot commands
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Woot 
+* @subpackage  Records/Woot
 */
 
 
@@ -91,14 +91,10 @@ $key = @$_REQUEST["key"];
 require_once(dirname(__FILE__)."/../../../common/connect/applyCredentials.php");
 require_once(dirname(__FILE__)."/../../../common/php/dbMySqlWrappers.php");
 
-/*****DEBUG****/// error_log(print_r($auth, 1));
 $baseURL = HEURIST_BASE_URL;
 //$baseURL = $auth["hl_location"];
 
 //define_constants($auth["hl_instance"]);
-
-/*****DEBUG****/// error_log(" woot xss baseURL = ".$baseURL." Heurist base = ".HEURIST_BASE_URL);
-
 
 if (! @$method  ||  ! in_array($method, $legalMethods)) {
 	print "{\"error\":\"unknown method\"}";
@@ -107,7 +103,7 @@ if (! @$method  ||  ! in_array($method, $legalMethods)) {
 
 define('USING-XSS', 1);
 
-require_once("$method.php");
+require_once(dirname(__FILE__)."/$method.php");
 
 ob_end_flush();
 

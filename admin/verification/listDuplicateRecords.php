@@ -6,10 +6,10 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Tom Murtagh
     * @author      Kim Jackson
-    * @author      Stephen White   <stephen.white@sydney.edu.au>
+    * @author      Stephen White   
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -49,7 +49,7 @@
         array_push($dupeDifferences,$row['snd_SimRecsList']);
     }
 
-    if ($_REQUEST['dupeDiffHash']){
+    if (@$_REQUEST['dupeDiffHash']){
         foreach($_REQUEST['dupeDiffHash'] as $diffHash){
             if (! in_array($diffHash,$dupeDifferences)){
                 array_push($dupeDifferences,$diffHash);
@@ -217,7 +217,7 @@
 
                             print '<a target="fix" href="combineDuplicateRecords.php?db='.HEURIST_DBNAME.
                             '&bib_ids=' . join(',', array_keys($bibs[$key])) . '">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
-                            print '<a target="_new" href="'.HEURIST_BASE_URL.'search/search.html?db='.HEURIST_DBNAME.
+                            print '<a target="_new" href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
                             '&w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">view as search</a>';
 
                             print '&nbsp;&nbsp;&nbsp;&nbsp;<a href="#"  onclick="setAsNonDuplication()">ignore in future</a>';

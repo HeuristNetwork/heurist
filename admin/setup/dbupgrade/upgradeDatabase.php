@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -24,7 +24,7 @@
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
+    require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
 
     /*if(isForAdminOnly("to upgrade database structure")){
     return;
@@ -222,8 +222,8 @@
                         echo ("Please check whether this file is valid; consult Heurist helpdesk if needed <br />&nbsp;<br></p>");
                         return false;
                     }
-        
-/* OLD APPROACH        
+
+/* OLD APPROACH
         $cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D".DATABASE." < ".$filename;
         $output2 = exec($cmdline . ' 2>&1', $output, $res2);
 

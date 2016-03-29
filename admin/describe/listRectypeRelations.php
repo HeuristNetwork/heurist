@@ -8,7 +8,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -26,7 +26,7 @@
     require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
     require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
 
-    //TODO: why do we need to be logged in?
+    // Although the relationships are part of record strucutre, this also outputs the actual counts, hence login
     if (!is_logged_in()) {
         header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
         return;
@@ -182,7 +182,7 @@
         <title>Heurist record type schema (simple fields, pointers and relationship markers)</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        
+
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="icon" href="../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
@@ -259,8 +259,8 @@
 
                         print '<div class="lvl1"><u><b>'.$details['dt_name'].'</b></u>'.
                         (($details['type']=="resource")?" <i>[pointer ":" <i>[".$details['type']);
-                        if(@$details[req]){
-                            print ", ".substr($details[req],0,3)." ";
+                        if(@$details['req']){
+                            print ", ".substr($details['req'],0,3)." ";
                         }
                         $mv = intval(@$details['max']);
                         print ", ".($mv==1?"sng":($mv>1?"lim":"rpt"))." ";

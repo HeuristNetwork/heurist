@@ -1,0 +1,26 @@
+
+Directory:	/viewers/printview
+
+Overview:	Routines for rendering views of the search subset using XSL transforms
+
+Notes:      This functionality has not been updated from version 3. Heurist version 3 search
+            rendering operates as an independent retrieval based on the search criteria and
+            will not therefore render the expanded subset resulting from the application of rules.
+
+            In theory, these functions can render quite sophisticated views of the data, however the
+            XSLs are built on internal codes from version 2 which in many cases will have changed
+            with the introduction of improved data structures in version 3. They will therefore require
+            significant editing, and should be revised to use global concept codes rather than internal
+            codes which are inherently unstable.
+
+Updated:     26 Nov 2015
+
+---------------------------------------------------------------------
+
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     3.2
+

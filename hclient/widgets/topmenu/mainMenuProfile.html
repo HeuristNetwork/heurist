@@ -1,0 +1,56 @@
+<!--
+/**
+* mainMenuProfile.html: Profile top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<!-- Note: h3link class implies location of older (Vsn 3) code, which is prepended to the URLs.
+Since Jan 2016 Vsn 3 code this is blank, as this code is at the same level as Vsn 4 code
+See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
+
+<li>PROFILE</li>
+
+<li style="padding-left:5px;"  id="menu-profile-preferences"><a href="#"
+    title="Display preferences relating to behaviours related to this database">Preferences</a>
+</li>
+
+<li style="padding-left:5px;">
+    <a href="admin/profile/configureProfile.php?body_only&amp;tag_edit=1"  name="auto-popup" class="small h3link"
+        onClick="{return false;}"
+        title="Delete, combine, rename your personal tags">Manage tags</a>
+</li>
+
+<li style="padding-left:5px;"><a href="admin/profile/manageReminders.php" name="auto-popup" class="h3link"
+    onClick="{return false;}"
+    title="View and delete automatic notification emails sent from the records you have bookmarked">Manage reminders</a>
+</li>
+
+<li>-</li>
+
+<li>ACCESS</li>
+
+<li style="padding-left:5px;"><a href="admin/ugrps/manageGroups.php?popup=yes" name="auto-popup" class="fixed2 h3link"
+    onClick="{return false;}"
+    title="List of groups you are member of">My workgroups</a>
+</li>
+
+<li style="padding-left:5px;"><a href="admin/ugrps/editUser.html" name="auto-popup" class="fixed2 h3link"
+    onClick="{return false;}"
+    title="User personal information">My user info</a>
+</li>

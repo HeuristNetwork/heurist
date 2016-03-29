@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 * Googlemap loader
 *
 * @author      Kim Jackson
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -255,7 +255,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 			}
 		}
 
-		var showRecsURL = top.HEURIST.baseURL + "search/search.html?w=all&amp;q=ids:" + recIDs.join(",") + "&amp;db=" + top.HEURIST.database.name;
+		var showRecsURL = top.HEURIST.baseURL_V4 + "?w=all&amp;q=ids:" + recIDs.join(",") + "&amp;db=" + top.HEURIST.database.name;
 
 		function compareNumbers(a, b) {
 			return a - b
@@ -277,7 +277,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 									(numMarkers < 7 ? 32 : 40)))+iconHeight;
 
 		function getURLforRecords(Records,recType){
-			var url = top.HEURIST.baseURL;
+			var url = top.HEURIST.baseURL_V3;
 			if (Records.length == 1 && Records[0]['thumb_file_id']){
 				//get thumb
 				url += "common/php/resize_image.php?db=" + top.HEURIST.database.name + "&amp;file_id=" + Records[0]['thumb_file_id'];
@@ -290,7 +290,7 @@ function getHtmlMarker(y,x,arrayRecsByTypeObjs,numMarkers, options) {
 
 		function getHTMLforIcon(Records,recType){
 			var recNum = Records.length;
-			var showRecsTypeURL = top.HEURIST.baseURL + "search/search.html?w=all&amp;q=ids:" + recIDsByType[recType].join(",") + "&amp;db=" + top.HEURIST.database.name;
+			var showRecsTypeURL = top.HEURIST.baseURL_V4 + "?w=all&amp;q=ids:" + recIDsByType[recType].join(",") + "&amp;db=" + top.HEURIST.database.name;
 			var html = "<a href=\""+showRecsTypeURL+"\" target=\"_blank\"><div class=\"icon\" style=\"background-image:url("+getURLforRecords(Records,recType) +")\" onmouseover=\"this.firstChild.style.display='block'\" onmouseout=\"this.firstChild.style.display='none'\">";
 			// create info div
 			html += "<div class=\"recInfo\" style=\"display:none\">";

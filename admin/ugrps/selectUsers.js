@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -35,7 +35,7 @@
 * @author: Artem Osmakov
 *
 * @copyright (C) 2005-2011 University of Sydney Digital Innovation Unit.
-* @link: http://HeuristScholar.org
+* @link: http://HeuristNetwork.org
 * @license http://www.gnu.org/licenses/gpl-3.0.txt
 * @package Heurist academic knowledge management system
 * @todo
@@ -96,7 +96,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 	* Result handler for search on server
 	*/
 	var _updateUserList = function (context) {
-   
+
 		var arr = [],
 			user, ind;
 
@@ -130,7 +130,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 		Dom.get("dbOwnerInfo").style.display = (filter_group==top.HEURIST.grpDbOwners)?"block":"none";
 
-		var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
+		var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
 		var callback = _updateUserList;
 		var params = "method=searchuser&db=" + _db +
 							"&nogrpID=" + filter_nogroup +
@@ -156,7 +156,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
         $("#pnlFilterByRole").css('display',nstyle2);
         $("#btnSelectAdd1").css('display',nstyle2);
         $("#btnSelectAdd2").css('display',nstyle2);
-        
+
 		if(!top.HEURIST.is_admin()){
 			//hide create new user for non admin - IJ req 27-09-2012
 			$("#pnlAdd1").css('display','none');
@@ -231,7 +231,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 	* Updates LOCAL filter conditions for datatable
 	*/
 	var _updateFilterLocal  = function () {
-        
+
 	    var filter_select = ((filterBySelection2 && filterBySelection2.checked)?1:0);
 	    // Reset sort
 	    var state = _myDataTable.getState();
@@ -245,7 +245,7 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 		    scope   : _myDataTable,
 		    argument : { pagination: { recordOffset: 0 } } // to jump to page 1
 	    });
-        
+
 	};
 
 
@@ -307,7 +307,6 @@ function SelectManager(_isFilterMode, _isSelection, _isWindowMode) {
 
 				_grpID = grpID;
 
-//				Dom.get('currUserInfo').innerHTML = 'DEBUG '+top.HEURIST.get_user_name();
 
 				//init listeners for filter controls
 				_initListeners();
@@ -576,7 +575,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 					//keep the track of changes in special object
 					//TODO _updateUser(record);
-					var baseurl = top.HEURIST.baseURL + "admin/ugrps/saveUsergrps.php";
+					var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/saveUsergrps.php";
 					var params = "method=changeRole&db="+_db+"&recID=" + groupToBeUpdated +
 								"&oldrole=" + oldValue+
 								"&role=" + newValue+"&recIDs="+encodeURIComponent(data.id);
@@ -642,7 +641,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 				my_tooltip.mouseout(__hideToolTip2);
 
 				var xy = Hul.getMousePos(event);
-				my_tooltip.html(textTip);  //DEBUG xy[0]+",  "+xy[1]+"<br/>"+
+				my_tooltip.html(textTip);
 
 				Hul.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height());
 				hideTimer = window.setTimeout(_hideToolTip, 5000);
@@ -714,7 +713,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
 
 			filterByGroup = Dom.get('inputFilterByGroup');
 
-			var baseurl = top.HEURIST.baseURL + "admin/ugrps/loadUserGrps.php";
+			var baseurl = top.HEURIST.baseURL_V3 + "admin/ugrps/loadUserGrps.php";
 			var callback = _updateGroupList;
 			var params = "method=searchgroup&db=" + _db;
 			top.HEURIST.util.getJsonData(baseurl, callback, params);

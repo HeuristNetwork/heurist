@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 *
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -29,7 +29,7 @@
 */
 
 
-require_once('class.geometry.php');
+require_once(dirname(__FILE__).'/class.geometry.php');
 
 class Biblio {
 	var $rec_id;
@@ -111,7 +111,7 @@ class Biblio {
 				$this->description .= $details[$text];
 			}
 
-			$res = mysql_query('SELECT AsText(dtl_Geo) geo, dtl_Value, astext(envelope(dtl_Geo)) as rect
+			$res = mysql_query('SELECT AsWKT(dtl_Geo) geo, dtl_Value, AsWKT(envelope(dtl_Geo)) as rect
 			                      FROM recDetails
 			                     WHERE NOT IsNULL(dtl_Geo)
 			                       AND dtl_RecID = ' . $rec_id);
@@ -122,7 +122,7 @@ class Biblio {
 				// and it points to record(s) with spatial data, use that.
 				// Although this is written in a general fashion it was
 				// created for Event records, which may point to Site records
-				$res = mysql_query('select astext(g.dtl_Geo) geo, g.dtl_Value, astext(envelope(g.dtl_Geo)) as rect
+				$res = mysql_query('select AsWKT(g.dtl_Geo) geo, g.dtl_Value, AsWKT(envelope(g.dtl_Geo)) as rect
 				                      from recDetails p
 				                 left join defDetailTypes on dty_ID = p.dtl_DetailTypeID
 				                 left join Records on rec_ID = p.dtl_Value

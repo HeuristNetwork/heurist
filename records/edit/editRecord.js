@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Stephen White
@@ -127,11 +127,11 @@ if (! top.HEURIST.edit) {
                 try {
                     newIframe.contentWindow.HEURIST_WINDOW_ID = newHeuristID;
 
-                    var helpLink = top.document.getElementById("help-link");
+                    var helpLink = top.document.getElementById("ui-pref-showhelp");
                     top.HEURIST.util.setHelpDiv(helpLink,null);
 
                     var status = top.HEURIST.displayPreferences["input-visibility"];
-                    document.getElementById("input-visibility").checked = (status === "all");
+                    document.getElementById("ui-pref-optfields").checked = (status === "all");
                     //init class for body element
                     top.HEURIST.util.setDisplayPreference("input-visibility", status);
 
@@ -288,7 +288,8 @@ if (! top.HEURIST.edit) {
         * @returns {Boolean}
         */
         userCanEdit: function() {
-            if (top.HEURIST.user.isInWorkgroup(parseInt(window.HEURIST.edit.record.workgroupID))){ // user is owner
+            var wgID = parseInt(window.HEURIST.edit.record.workgroupID);
+            if (window.HEURIST.user.isInWorkgroup(wgID)){ // user is owner
                 return true;
             }
             return false;
@@ -337,7 +338,7 @@ if (! top.HEURIST.edit) {
             if (document) {
                 /* TODO: remove? ARTEM commented out 2012-10-08
                 if (document.getElementById('rectype-img')) {
-                document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ".png)";
+                document.getElementById('rectype-img').style.backgroundImage = "url("+ top.HEURIST.iconBaseURL + top.HEURIST.edit.record.rectypeID + ")";
                 }*/
                 if (document.getElementById('title-val')) {
                     document.getElementById('title-val').innerHTML = top.HEURIST.edit.record.title;
@@ -346,18 +347,18 @@ if (! top.HEURIST.edit) {
                 if (document.getElementById('workgroup-val')) {
                     if (top.HEURIST.edit.record.workgroup) {
                         document.getElementById('workgroup-val').innerHTML = '';
-                        document.getElementById('workgroup-val').appendChild(document.createTextNode(top.HEURIST.edit.record.workgroup));
+                        document.getElementById('workgroup-val').appendChild(document.createTextNode('Owner: '+top.HEURIST.edit.record.workgroup));
                     } else {
-                        document.getElementById('workgroup-val').innerHTML = 'everyone';
+                        document.getElementById('workgroup-val').innerHTML = 'Owner: everyone';
                     }
                     if (top.HEURIST.edit.record.visibility) {
                         var recVis = top.HEURIST.edit.record.visibility;
                         var othersAccess = (recVis == "hidden")? "hidden (owners only)" :
                         (recVis == "viewable")? "any logged-in user" :
                         (recVis == "pending")? "pending publication" : "public";
-                        document.getElementById('workgroup-access').innerHTML = othersAccess;
+                        document.getElementById('workgroup-access').innerHTML = "<b>Access: </b> "+othersAccess;
                     } else {
-                        document.getElementById('workgroup-access').innerHTML = 'visible';
+                        document.getElementById('workgroup-access').innerHTML = "<b>Access: </b> visible";
                     }
                     document.getElementById('workgroup-div').style.display = "inline-block";
                 }
@@ -388,7 +389,7 @@ if (! top.HEURIST.edit) {
                 top.HEURIST.edit.modules.personal.disabledFunction = null;
 
                 // add the bookmark, patch the record structure, and view the personal tab
-                top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/bookmarks/addBookmark.php?recID="
+                top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3 + "records/bookmarks/addBookmark.php?recID="
                     + top.HEURIST.edit.record.bibID + "&db=" + HAPI.database, function(vals) {
                         for (var i in vals) {
                             top.HEURIST.edit.record[i] = vals[i];
@@ -513,16 +514,19 @@ if (! top.HEURIST.edit) {
                 personalWindow.tagCheckDone = true;
 
                 if(top.HEURIST.util.getDisplayPreference('tagging-popup') !== "false"){
-                    top.HEURIST.util.popupURL(top, top.HEURIST.basePath
-                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", { callback: function(tags) {
-                            if (tags) {
-                                personalWindow.document.getElementById("tags").value = tags;
-                                top.HEURIST.edit.changed("personal");
+                    top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3
+                        + "records/tags/addTagsPopup.html?db="+HAPI.database+"&no-tags", {
+                            title: 'Add tags',
+                            height:400, width:550,
+                            callback: function(tags) {
+                                if (tags) {
+                                    personalWindow.document.getElementById("tags").value = tags;
+                                    top.HEURIST.edit.changed("personal");
+                                }
+                                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
+                                setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
                             }
-                            top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
-
-                            setTimeout(function() { top.HEURIST.edit.save(callback); }, 0);
-                    } });
+                        });
                     return;
                 }
             }
@@ -541,6 +545,7 @@ if (! top.HEURIST.edit) {
                     form.heuristForceSubmit();
                 }
 
+                top.HEURIST.deregisterEvent(module.frame, "load", moduleUnchangeFunction);
                 if (module.changed) { // don't bother saving unchanged tabs
                     if (form.onsubmit  &&  ! form.onsubmit()) {
                         top.HEURIST.edit.showModule(moduleName);
@@ -636,6 +641,9 @@ if (! top.HEURIST.edit) {
                 link.title = "Content has been modified";
             }
 
+            $("#changed_marker").show();
+
+
             $("#close-button").hide();
             $("#save-record-buttons").show();
             $("#close-button2").hide();
@@ -663,6 +671,9 @@ if (! top.HEURIST.edit) {
                 $("#close-button").show();
                 $("#save-record-buttons2").hide();
                 $("#close-button2").show();
+                $("#changed_marker").hide();
+            }else{
+                $("#changed_marker").show();
             }
         },
 
@@ -892,6 +903,15 @@ if (! top.HEURIST.edit) {
         * @returns {top.HEURIST.edit.inputs.BibDetailFreetextInput}
         */
         createInput: function(recID, detailTypeID, rectypeID, fieldValues, container, stylename_prefix) {
+            
+            if(!top) {
+console.log('top not defined');                
+                window.top = window.self;    
+            }
+            if(!top.HEURIST){
+console.log('heurist not defined'); 
+            }               
+            
             // Get Detail Type info
             // 0,"dty_Name" 1,"dty_ExtendedDescription" 2,"dty_Type" 3,"dty_OrderInGroup" 4,"dty_HelpText" 5,"dty_ShowInLists"
             // 6,"dty_Status" 7,"dty_DetailTypeGroupID" 8,"dty_FieldSetRectypeID" 9,"dty_JsonTermIDTree"
@@ -1030,7 +1050,24 @@ if (! top.HEURIST.edit) {
             }
             return rdtConstrainedLookups;
         },
-
+        
+                                       
+        //
+        //
+        //
+        inputOnChangeEventHandler: function(event){
+            var element = event.target;
+            var val_size = element.value?top.HEURIST.util.byteLengthOf(element.value):0;
+            if(val_size>20480){
+                top.HEURIST.util.stopEvent(event);                             //was 65535 
+                top.HEURIST.util.showMessage('Text fields are limited to 20480 bytes (20Kb typically ~15 pages).<p>"'
+     +element.getAttribute('data-dispname')+ '" has '+val_size+' bytes ('+element.value.length+' characters)</p>'
+     +'Please shorten text or divide into repeat values for this field)');
+                return false;
+            }else{
+                return true;
+            }
+        },
 
 
         /**
@@ -1061,7 +1098,7 @@ if (! top.HEURIST.edit) {
             var thisRef = this;
             var element = fileInput.parentNode;
             //call thumbnail maker
-            top.HEURIST.util.getJsonData(top.HEURIST.basePath + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
+            top.HEURIST.util.getJsonData(top.HEURIST.baseURL_V3 + "records/files/saveURLasFile.php?url=" + sURL + "&db=" + HAPI.database,
                 function(vals) {
                     top.HEURIST.edit.fileInputURLsaved.call(thisRef, element, vals);
             });
@@ -1109,11 +1146,29 @@ if (! top.HEURIST.edit) {
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
             if (fileInput.value == "") return;
+            
+            var filesize = fileInput.files[0].size;
+            var max_size = Math.min(HAPI_commonData.max_file_size,HAPI_commonData.max_post_size);
+            if (filesize>max_size) {
+                    top.HEURIST.util.showError(
+'Sorry, this file exceeds the upload '
++ ((HAPI_commonData.max_file_size<HAPI_commonData.max_post_size)?'file':'(post data)')
++ ' size limit set for this server ('
++ Math.round(max_size/1024/1024) 
++ ' MBytes). Please reduce the file size eg. by reducing resolution of images, or ask your system administrator to increase the upload limit. '
++ '<br><br>'
++ 'For sound and video files we STRONGLY recommend uploading to a streaming service such as Soundcloud, Youtube or Vimeo and entering the URL in the URL field. They will play in situ in Heurist and the streaming service will deliver the appropriate resolution for the device. Choose private but playable by anyone with the URL if they are to be embedded in a public website.'
+                    );
+                    fileInput.value = '';
+                    return;
+            }            
+
+            
             if (! windowRef.HEURIST.uploadsDiv  ||  ! this.document.getElementById("uploads")) {
                 var uploadsDiv = windowRef.HEURIST.uploadsDiv = this.document.body.appendChild(this.document.createElement("div"));
                 uploadsDiv.id = "uploads";
             }
-
+            
             var statusDiv = this.document.createElement("div");
             statusDiv.className = "upload-status";
             statusDiv.appendChild(this.document.createTextNode("Uploading file ..."));
@@ -1322,9 +1377,11 @@ if (! top.HEURIST.edit) {
             var missingFields = [];
             var firstInput = null;
 
-            //check duplication
+            //check duplication and oversize
             var details = {};
             var duplicatedInputs = [];
+            var oversizeInputs = [];
+            
             var fi_id = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ID;
             for (var i=0; i < inputs.length; ++i) {
 
@@ -1356,6 +1413,10 @@ if (! top.HEURIST.edit) {
                                     }
                                 }else{
                                     details[det_id] = {vals:[val]};
+                                }
+                                
+                                if(top.HEURIST.util.byteLengthOf(val)>20480 && oversizeInputs.indexOf(inputs[i].shortName)<0){
+                                    oversizeInputs.push(inputs[i].shortName);
                                 }
                             }
                         }
@@ -1393,9 +1454,20 @@ if (! top.HEURIST.edit) {
             }//for inputs
 
             if(duplicatedInputs.length>0){
-                alert("There are duplicated values in your fields:<br />" + duplicatedInputs.join("<br />"));
+                top.HEURIST.util.showMessage("There are duplicated values in your fields:<br />" 
+                    + duplicatedInputs.join("<br />"));
                 return false;
             }
+            
+            if(oversizeInputs.length>0){
+                
+                top.HEURIST.util.showMessage('Text fields are limited to 20480 bytes (20Kb typically ~15 pages).<p>'
+     + oversizeInputs.join(",<br />")+'<br/> ha'
+     + (oversizeInputs.length>1?'s':'ve') +' bigger size</p>'
+     +'Please shorten text or divide into repeat values for '+(oversizeInputs.length>1?'these fields':'this field'));
+                return false;
+            }
+            
 
             if (missingFields.length == 0) {
 
@@ -1456,6 +1528,7 @@ if (! top.HEURIST.edit) {
         * @param options
         */
         createDraggableTextarea: function(name, value, parentElement, options) {
+
             var elt = parentElement;
             do { elt = elt.parentNode; } while (elt.nodeType != 9 /* DOCUMENT_NODE */);
             var ownerDocument = elt;
@@ -1575,14 +1648,8 @@ if (! top.HEURIST.edit) {
 
         calendarViewer: null,
 
-        /**
-        * create a button to pop up standard calendar component
-        * see also makeTemporalButton for fuzzy date component
-        *
-        * @param dateBox
-        * @param doc
-        */
         makeDateButton: function(dateBox, doc) {
+/* OLD WAY            
             var buttonElt = doc.createElement("input");
             buttonElt.type = "button";
             buttonElt.title = "Pop up calendar widget to enter year-month-day dates";
@@ -1620,9 +1687,55 @@ if (! top.HEURIST.edit) {
                 }
                 top.HEURIST.edit.calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback); //offsetLeft-120
             }
-
             return buttonElt;
+*/                
+            var isInit = false;    
 
+            var callback2 = function() {
+                
+                if(isInit){
+                    isInit = false;
+                }else{
+                    var windowRef = doc.parentWindow  ||  doc.defaultView  ||  this.document._parentWindow;
+                    if (windowRef.changed) windowRef.changed();
+                    dateBox.strTemporal = "";
+                    dateBox.style.width = '100px';
+                    dateBox.disabled = false;
+                    dateBox.disabledStrictly = false;
+
+                    if(top.HEURIST.util.setDisplayPreference){
+                        top.HEURIST.util.setDisplayPreference("record-edit-date", dateBox.value);
+                    }
+                    
+                    $(dateBox).parents('body').find('input.hasCalendarsPicker')     
+                            .calendarsPicker('option', {defaultDateOnShow: dateBox.value});
+                    
+                }
+
+            }
+            
+            var defDate = top.HEURIST.util.getDisplayPreference("record-edit-date");
+            
+            $(dateBox).calendarsPicker({
+                calendar: $.calendars.instance('gregorian'),
+                showOnFocus: false,
+                defaultDate: '', //defDate?defDate:'',
+                defaultDateOnShow: defDate?defDate:'',
+                selectDefaultDate: true,
+                dateFormat: 'yyyy-mm-dd',
+                pickerClass: 'calendars-jumps',
+                popupContainer: $(dateBox).parents('body'),
+                onSelect: function(dates){
+                    callback2();
+                },
+                renderer: $.extend({}, $.calendars.picker.defaultRenderer,
+                        {picker: $.calendars.picker.defaultRenderer.picker.
+                            replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
+                            replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
+                showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" alt="Popup" class="trigger">'}
+            );            
+                
+            return null;
         }, // makeDateButton
 
 
@@ -1646,27 +1759,34 @@ if (! top.HEURIST.edit) {
             function disableCtrls (value) {
                 dateBox.disabled = value;
                 dateBox.disabledStrictly = value;
-                dateBox.dateButton.disabled = value;
-                dateBox.dateButton.disabledStrictly = value;
-                dateBox.dateButton.style.visibility = value ?"hidden":"visible";
+                if(dateBox.dateButton){
+                    dateBox.dateButton.disabled = value;
+                    dateBox.dateButton.disabledStrictly = value;
+                    dateBox.dateButton.style.visibility = value ?"hidden":"visible";
+                }
             }
 
             /* Artem Osmakov 2013? : moved function decodeValue to temporalObjectLibrary.js */
 
             dateBox.initVal = dateBox.value;
+            dateBox.style['min-width'] = '100px';
             if (dateBox.value) {
-                disableCtrls(isTemporal(dateBox.value));
+                var isTemporalValue = dateBox.value && dateBox.value.search(/\|VER/) != -1; // isTemporal(dateBox.value);
+                disableCtrls(isTemporalValue);
 
-                if (dateBox.value.search(/\|VER/) != -1){
+                if (isTemporalValue){ //keep temporal value
                     dateBox.strTemporal = dateBox.value;
+                    dateBox.style.width = '200px';
                 }else{
-                    dateBox.strTemporal = "";
+                    dateBox.strTemporal = '';
+                    dateBox.style.width = '100px';
                 }
                 dateBox.value = temporalToHumanReadableString(dateBox.value);
             }
-            dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
+            //dateBox.style.width = 'auto';//(dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
 
             var popupOptions = {
+                title: 'Temporal Object',
                 callback: function(str) {
                     if(str!==undefined){
 
@@ -1677,12 +1797,12 @@ if (! top.HEURIST.edit) {
                         }
                         dateBox.strTemporal = str;
                         dateBox.value = temporalToHumanReadableString(str);
-                        dateBox.style.width = (dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
+                        dateBox.style.width = '200px';//(dateBox.value && dateBox.value.length>14?dateBox.value.length:14)+'ex';
                         if( dateBox.strTemporal != dateBox.value) {
                             buttonElt.title = "Edit compound date " + dateBox.strTemporal;
                         }
                     }
-                    top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                    top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                 },
                 width: "700",
                 height: "500"
@@ -1700,7 +1820,7 @@ if (! top.HEURIST.edit) {
                     popupOptions.y = 0;
                 }
 
-                top.HEURIST.util.popupURL(windowRef, top.HEURIST.basePath + "common/html/editTemporalObject.html?"
+                top.HEURIST.util.popupURL(windowRef, top.HEURIST.baseURL_V3 + "common/html/editTemporalObject.html?"
                     + (dateBox.strTemporal ? dateBox.strTemporal : dateBox.value), popupOptions);
             }
 
@@ -1766,6 +1886,11 @@ if (! top.HEURIST.edit) {
         this.required = required;
         var maxValue = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_MaxValues']];
         this.repeatable = ( Number(maxValue) != 1 );//saw TODO this really needs to check many exist
+        
+        if(recFieldRequirements[rstFieldNamesToRdrIndexMap['dty_Type']] === "separator"){
+            this.required = '';
+            this.repeatable = false;    
+        }
 
         this.row = this.document.createElement("div");
         parentElement.appendChild(this.row);
@@ -1779,7 +1904,7 @@ if (! top.HEURIST.edit) {
 
         if (this.repeatable) {
             var dupImg = this.headerCell.appendChild(this.document.createElement('img'));
-            dupImg.src = top.HEURIST.basePath + "common/images/duplicate.gif";
+            dupImg.src = top.HEURIST.baseURL_V3 + "common/images/duplicate.gif";
             dupImg.className = "duplicator";
             dupImg.alt = dupImg.title = "Add another " + recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']] + " value";
             top.HEURIST.registerEvent(dupImg, "click", function() { thisRef.duplicateInput.call(thisRef); } );
@@ -1860,15 +1985,20 @@ if (! top.HEURIST.edit) {
 
         this.elementName = "type:" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
         element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
-        
+
         var helpPrompt = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
-        
-        element.title = helpPrompt?helpPrompt:this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
+
+        element.title = helpPrompt ?helpPrompt :this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
         element.setAttribute("bib-detail-type", this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']]);
+        element.setAttribute('data-dispname', this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']]);
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (element.value !== undefined) {    /* if this is an input element, register the onchange event */
-            top.HEURIST.registerEvent(element, "change", function() { if (windowRef.changed) windowRef.changed(); });
+            top.HEURIST.registerEvent(element, "change", function(event){
+                if(top.HEURIST.edit.inputOnChangeEventHandler(event) && windowRef.changed){
+                        windowRef.changed();
+                }
+            });
 
             /* also, His Nibs doesn't like the fact that onchange doesn't fire until after the user has moved to another field,
             * so ... jeez, I dunno.  onkeypress?
@@ -1920,7 +2050,7 @@ if (! top.HEURIST.edit) {
                 var span = this.document.createElement("span");
                 span.style.paddingLeft = "20px";
                 span.style.lineHeight = "16px";
-                span.style.backgroundImage = "url("+top.HEURIST.basePath+"common/images/external_link_16x16.gif)";
+                span.style.backgroundImage = "url("+top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif)";
                 span.style.backgroundRepeat = "no-repeat";
                 span.style.backgroundPosition = "center left";
                 span.appendChild(this.document.createTextNode("look up"));
@@ -2083,7 +2213,6 @@ if (! top.HEURIST.edit) {
         newDiv.className = "date-div";
         newDiv.expando = true;
         newDiv.style.whiteSpace = "nowrap";
-        this.addInputHelper.call(this, bdValue, newDiv);
 
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         var textElt = newDiv.textElt = newDiv.appendChild(this.document.createElement("input"));
@@ -2091,17 +2220,20 @@ if (! top.HEURIST.edit) {
         textElt.name = newDiv.name;
         textElt.value = bdValue? bdValue.value : "";
         textElt.className = "in";
-        textElt.title = "Enter a standard ISO format date (yyyy or yyyy-mm-dd). You may also enter 'today' or 'now', and negative dates for BCE. ";
+        textElt.title = "Enter a standard ISO format date (yyyy or yyyy-mm-dd), 'today', 'yesterday', 'tomorrow' or 'now'. Enter negative dates for BCE.";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
-        top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
-
+        //top.HEURIST.registerEvent(textElt, "change", function() { if (windowRef.changed) windowRef.changed(); });
+        this.addInputHelper.call(this, textElt.value, textElt);
+        
         top.HEURIST.edit.makeDateButton(textElt, this.document);
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailDateInput.prototype.addInput
 
 
-    top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
+    top.HEURIST.edit.inputs.BibDetailDateInput.prototype.getPrimaryValue = function(input) { 
+        return input? input.textElt.value : ""; 
+    };
 
     top.HEURIST.edit.inputs.BibDetailDateInput.prototype.typeDescription = "a date value";
 
@@ -2133,28 +2265,34 @@ if (! top.HEURIST.edit) {
         textElt.title = "Enter a date or click the icons to the right. Date can be 'now' or 'today', or year only - negative for BCE.";
         textElt.style.width = newDiv.style.width;
         newDiv.style.width = "";
+
+        if(!isTemporal(textElt.value)){
+            textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);    
+        }
+        top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
+        
         top.HEURIST.registerEvent(textElt, "change", function() {
             textElt.strTemporal = null;
             if (windowRef.changed) windowRef.changed();
         }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
-
-        // TODO: are these relevant any more?
-        //    var isTemporal = /^\|\S\S\S=/.test(textElt.value);        //sw check the beginning of the string for temporal format
-        //    var isDate = ( !isTemporal && /\S/.test(textElt.value));    //sw not temporal and has non - white space must be a date
-        //    if (!isTemporal) top.HEURIST.edit.makeDateButton(textElt, this.document); //sw
-
-        textElt.dateButton = top.HEURIST.edit.makeDateButton(textElt, this.document);
-        top.HEURIST.edit.makeTemporalButton(textElt, this.document); //sw
+        top.HEURIST.registerEvent(textElt, "keypress", function() {
+            textElt.strTemporal = null;
+            if (windowRef.changed) windowRef.changed();
+        }); // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
+        
         return newDiv;
     }; // top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.addInput
 
 
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getValue = function(input) {
-        return input && input.textElt ? (input.textElt.strTemporal ? input.textElt.strTemporal :
-            (input.textElt.value ? input.textElt.value : "" )) : "";
+        return input && input.textElt 
+                    ?(input.textElt.strTemporal ? input.textElt.strTemporal 
+                            :(input.textElt.value ? input.textElt.value : "" )) : "";
     };
 
-    top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { return input? input.textElt.value : ""; };
+    top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.getPrimaryValue = function(input) { 
+            return input? input.textElt.value : ""; 
+    };
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.typeDescription = "a compound date value";
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.regex = new RegExp("\\S");
     top.HEURIST.edit.inputs.BibDetailTemporalInput.prototype.verifyTemporal = function(){
@@ -2281,7 +2419,7 @@ if (! top.HEURIST.edit) {
         newDiv.appendChild(hiddenElt);    // have to do this AFTER the type is set
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Remove this record pointer";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2293,23 +2431,38 @@ if (! top.HEURIST.edit) {
         });
 
         var editImg = newDiv.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.basePath +"common/images/edit-pencil.png";
+        editImg.src = top.HEURIST.baseURL_V3 +"common/images/edit-pencil.png";
         editImg.className = "edit-resource";
-        editImg.title = "Edit this record";
+        editImg.title = "Edit this record (opens in a new tab)";
 
         top.HEURIST.registerEvent(editImg, "click", function() {
             if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
-                window.open(top.HEURIST.basePath +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
+                window.open(top.HEURIST.baseURL_V3 +"records/edit/editRecord.html?recID=" + hiddenElt.value + "&caller=" + encodeURIComponent(textElt.id) +
                     (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""))
             }
-            // TODO: remove?
-            //                top.HEURIST.util.popupURL(window,
-            //                            top.HEURIST.basePath +"records/edit/formEditRecordPopup.html?recID=" + hiddenElt.value +
-            //                                    (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:""),
-            //                            {callback: function(bibTitle) {
-            //                                if (bibTitle) textElt.defaultValue = textElt.value = bibTitle;
-            //                                }
-            //                            });
+        });
+
+        // TO DO: We really want this record view popping up in a popup window rather than a new tab
+        var ViewRec = newDiv.appendChild(this.document.createElement("img"));
+        ViewRec.src = top.HEURIST.baseURL_V3 +"common/images/magglass_15x14.gif";
+        ViewRec.className = "view-resource";
+        ViewRec.title = "View the record linked via this pointer field (opens in a new tab)";
+
+        top.HEURIST.registerEvent(ViewRec, "click", function() {
+            if( hiddenElt.value && !isNaN(Number(hiddenElt.value)) ){
+
+                var url = top.HEURIST.baseURL_V3 +"records/view/renderRecordData.php?recID=" + hiddenElt.value  +
+                        (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
+
+                if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
+
+                        var dim = top.HEURIST.util.innerDimensions(window);
+                        var options = {height:dim.h*0.9, width:700, 'close-on-blur':true, title:'Record Details'};
+
+                        top.HEURIST.util.popupURL(top, url, options);
+                        return false;
+                }
+            }
         });
 
         if (window.HEURIST && window.HEURIST.parameters && window.HEURIST.parameters["title"]
@@ -2334,20 +2487,22 @@ if (! top.HEURIST.edit) {
         if (this.choosing) return;    // we are already choosing a record pointer (aka resource)!
         this.choosing = true;
         var thisRef = this;
+        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
 
         if (! searchValue) searchValue = element.textElt.value;
-        var url = top.HEURIST.basePath+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
+        var url = top.HEURIST.baseURL_V3+"records/pointer/selectRecordFromSearch.html?q="+encodeURIComponent(searchValue) +
         (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
-        if (top.HEURIST.edit.record)
-            url += "&target_recordtype="+top.HEURIST.edit.record.rectypeID;
+        if (windowRef.parent.HEURIST.edit.record)   //0317 top
+            url += "&target_recordtype="+windowRef.parent.HEURIST.edit.record.rectypeID; //0317 top
         if (element.input.constrainrectype)
             url += "&t="+element.input.constrainrectype;
         top.HEURIST.util.popupURL(window, url, {
+            title: 'Select Record',
             callback: function(bibID, bibTitle) {
                 if (bibID) element.input.setResource(element, bibID, bibTitle);
                 thisRef.choosing = false;
                 setTimeout(function() { element.textElt.focus(); }, 100);
-                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
             },
             height: (window.innerHeight<700?window.innerHeight-40:660)
         } );
@@ -2517,9 +2672,13 @@ if (! top.HEURIST.edit) {
 
         var    allTerms = typeof sAllTerms == "string" ? top.HEURIST.util.expandJsonStructure(sAllTerms) : null;
         if(allTerms==null){
-            allTerms = (this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum")
-            ?top.HEURIST.terms.treesByDomain['enum']
-            :top.HEURIST.terms.treesByDomain.relation;
+            
+            if(this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']] == "enum"){
+                //2016-03-25 vocabulary must be defined! top.HEURIST.terms.treesByDomain['enum']
+                allTerms = -1;
+            }else{
+                allTerms = top.HEURIST.terms.treesByDomain.relation;
+            }
         }
         var    disabledTerms = typeof sDisTerms == "string" ? top.HEURIST.util.expandJsonStructure(sDisTerms) : [];
 
@@ -2542,6 +2701,10 @@ if (! top.HEURIST.edit) {
             this.inputCell.removeChild(this.linkSpan);
             this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
         }
+        /*if(this.selectSpan){
+            this.inputCell.removeChild(this.selectSpan);
+            this.inputCell.insertBefore(this.selectSpan, this.linkSpan?this.linkSpan:this.promptDiv);
+        }*/
 
         return newInput;
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
@@ -2567,7 +2730,8 @@ if (! top.HEURIST.edit) {
         //        urlSpan.style['float'] = "right";
         urlSpan.style.cursor = "pointer";
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
-        editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+        //var viewRec = urlSpan.appendChild(this.document.createElement("img"));
+        editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
         urlSpan.appendChild(editImg);
         urlSpan.appendChild(this.document.createTextNode("edit")); //isVocabulary?"add":"list"));
 
@@ -2599,7 +2763,7 @@ if (! top.HEURIST.edit) {
                     _recreateTermsPreviewSelector(Dom.get("dty_Type").value, editedTermTree, editedDisabledTerms);
                     */
                 }
-                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
             } // onSelecTermsUpdate
 
             var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
@@ -2610,28 +2774,30 @@ if (! top.HEURIST.edit) {
                     type="relation";
                 }
 
-                top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
                     "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
                         "no-resize": true,
                         height: 280,
                         width: 650,
+                        title:'Edit Term',
                         callback: function(context) {
                             if(context=="ok") {
                                 onSelecTermsUpdate(sAllTerms, "");
                             }
-                            top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                            top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                         }
                     }
                 );
 
             }else{
-                top.HEURIST.util.popupURL(top, top.HEURIST.basePath +
+                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
                     "admin/structure/terms/selectTerms.html?detailTypeID="+_dtyID+"&db="+db+"&mode=editrecord",
                     {//options
                         "close-on-blur": false,
                         "no-resize": true,
+                        title:'Select Term',
                         height: 500,
                         width: 750,
                         callback: onSelecTermsUpdate
@@ -2648,6 +2814,55 @@ if (! top.HEURIST.edit) {
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanLinkTerms
 
 
+    top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSelectTermsByImage = function(selector){
+
+        var urlSpan = this.document.createElement("span");
+        //urlSpan.style.paddingLeft = "1em";
+        urlSpan.style.color = "blue";
+        //        urlSpan.style['float'] = "right";
+        urlSpan.style.cursor = "pointer";
+        var editImg = urlSpan.appendChild(this.document.createElement("img"));
+        editImg.src = top.HEURIST.baseURL_V3+"common/images/icon_picture.png";
+        urlSpan.appendChild(editImg);
+
+        urlSpan.thisElement = this;
+        //urlSpan.bdValue = bdValue;
+
+        //open selectTerms to update detailtype
+        urlSpan.onclick = function() {
+            var _element = this.thisElement;
+            var _bdValue = this.bdValue;
+            
+            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            
+            var allTerms = $.map($(selector).find('option'), function(e) { return e.value; });
+
+            top.HEURIST.util.popupURL(top, top.HEURIST.baseURL_V3 +
+                    "admin/structure/terms/selectTermsByImage.php?db="+db+"&ids="+allTerms.join(','),
+                    {
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        height: 280,
+                        width: 650,
+                        title:'Select Term',
+                        callback: function(context) {
+                            if(context!==undefined) {
+                                selector.value = context;
+                            }
+                        }
+                    }
+                );
+        }; // urlSpan.onclick
+
+        //$(urlSpan).insertAfter($(selector));
+        this.inputCell.insertBefore(urlSpan, selector);
+        //this.inputCell.appendChild(urlSpan);
+
+        this.selectSpan = urlSpan;
+
+    } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSpanSelectTerms
+    
+    
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput = function(bdValue) {
 
         var newInput = this.recreateSelector(bdValue, false);
@@ -2661,9 +2876,10 @@ if (! top.HEURIST.edit) {
             //this.inputCell.insertBefore(br, newInput);
         }
 
+        this.createSelectTermsByImage(newInput);
         if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
-        this.createSpanLinkTerms(bdValue);
+        this.createSpanLinkTerms();
         return newInput;
     }; //top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.addInput
 
@@ -2744,7 +2960,7 @@ if (! top.HEURIST.edit) {
             var link = inputDiv.appendChild(this.document.createElement("a"));
             if (bdValue.file.nonce) {
                 //not used anymore   @todo - remove
-                link.href = top.HEURIST.basePath+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
+                link.href = top.HEURIST.baseURL_V3+"records/files/downloadFile.php/" + /*encodeURIComponent(bdValue.file.origName)*/
                 "?ulf_ID=" + encodeURIComponent(bdValue.file.nonce)+
                 (top.HEURIST.database && top.HEURIST.database.name ? "&db="+top.HEURIST.database.name:"");
             } else if (bdValue.file.URL) {
@@ -2756,7 +2972,7 @@ if (! top.HEURIST.edit) {
             link.appendChild(this.document.createTextNode(bdValue.file.origName));    //saw TODO: add a title to this which is the bdValue.file.description
 
             var linkImg = link.appendChild(this.document.createElement("img"));
-            linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
+            linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
             linkImg.className = "link-image";
 
             var fileSizeSpan = inputDiv.appendChild(this.document.createElement("span"));
@@ -2764,7 +2980,7 @@ if (! top.HEURIST.edit) {
             fileSizeSpan.appendChild(this.document.createTextNode("[" + bdValue.file.fileSize + "]"));
 
             var removeImg = inputDiv.appendChild(this.document.createElement("img"));
-            removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+            removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
             removeImg.className = "delete-file";
             removeImg.title = "Remove this file";
             var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -2782,7 +2998,7 @@ if (! top.HEURIST.edit) {
         } else {
             if (top.HEURIST.browser.isEarlyWebkit) {    // old way of doing things
                 var newIframe = this.document.createElement("iframe");
-                newIframe.src = top.HEURIST.basePath+"records/files/uploadFileForm.php?recID="
+                newIframe.src = top.HEURIST.baseURL_V3+"records/files/uploadFileForm.php?recID="
                 + windowRef.parent.HEURIST.edit.record.bibID + "&bdt_id=" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
                 newIframe.frameBorder = 0;
                 newIframe.style.width = "90%";
@@ -2810,18 +3026,18 @@ if (! top.HEURIST.edit) {
                 inputDiv.fileElt = fileElt;
 
                 var thisRef = this;
-                fileElt.onchange = function() { top.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };
+                fileElt.onchange = function() { windowRef.parent.HEURIST.edit.uploadFileInput.call(thisRef, fileElt); };   //top 0317
                 inputDiv.className = "file-div empty";
 
                 //additional button for Thumbnail Image - to create web snap shot
-                if(top.HEURIST.edit.record && top.HEURIST.edit.record.rectypeID &&
-                    Number(top.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
+                if(windowRef.parent.HEURIST.edit.record && windowRef.parent.HEURIST.edit.record.rectypeID &&             //top 0317
+                    Number(windowRef.parent.HEURIST.edit.record.rectypeID) === top.HEURIST.magicNumbers['RT_INTERNET_BOOKMARK']){
                     var thumbElt = this.document.createElement("input");
                     thumbElt.name = inputDiv.name;
                     thumbElt.value = "Web page snapshot";
                     thumbElt.type = "button";
                     thumbElt.title = "Click here to snapshot the web page indicated by the URL and store as the thumbnail field";
-                    thumbElt.onclick = function(){top.HEURIST.edit.uploadURL.call(thisRef, fileElt);}
+                    thumbElt.onclick = function(){windowRef.parent.HEURIST.edit.uploadURL.call(thisRef, fileElt);}       //top 0317
                     inputDiv.appendChild(thumbElt);
                     inputDiv.thumbElt = thumbElt;
                 }
@@ -2909,7 +3125,7 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype = new top.HEURIST.edit.inputs.BibDetailInput;
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.parent = top.HEURIST.edit.inputs.BibDetailInput.prototype;
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.regex =
-    new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
+    new RegExp("^(?:p|c|r|pl|l) (?:point|polygon|linestring)\\s?\\(?\\([-0-9.+, ]+?\\)\\)?$", "i");
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.getPrimaryValue = function(input) { return input? input.input.value : ""; };
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.typeDescription = "a geographic object";
 
@@ -2941,7 +3157,7 @@ if (! top.HEURIST.edit) {
 
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.wktValueToDescription = function(wkt) {
         // parse a well-known-text value and return the standard description (type + summary)
-        var matches = wkt.match(/^(p|c|r|pl|l) (?:point|polygon|linestring)\(?\(([-0-9.+, ]+?)\)/i);
+        var matches = wkt.match(/^(p|c|r|pl|l) (?:point|polygon|linestring)\s?\(?\(([-0-9.+, ]+?)\)/i);
         var typeCode = matches[1];
 
         var pointPairs = matches[2].split(/,/);
@@ -3002,7 +3218,7 @@ if (! top.HEURIST.edit) {
         newDiv.input = input;
 
         var geoImg = this.document.createElement("img");
-        geoImg.src = top.HEURIST.basePath+"common/images/16x16.gif";
+        geoImg.src = top.HEURIST.baseURL_V3+"common/images/16x16.gif";
         geoImg.className = "geo-image";
         geoImg.onmouseout = function(e) { mapViewer.hide(); };
 
@@ -3022,24 +3238,30 @@ if (! top.HEURIST.edit) {
                 return;
             }
 
-            HAPI.PJ.store("gigitiser_geo_object", input.value, {
+            /*HAPI.PJ.store("gigitiser_geo_object", input.value, {
                 height: 550,
                 width: 780,
                 callback: function(_, _, response) {
+                }
+            });*/
 
-                    var sURL = top.HEURIST.basePath+"records/edit/digitizer/index.html?" + (response.success ? "edit" : encodeURIComponent(input.value))
+                    var sURL = top.HEURIST.baseURL_V3+"records/edit/digitizer/index.html";
+                     //+ (response.success ? "edit" : encodeURIComponent(input.value))
                     top.HEURIST.util.popupURL(
                         windowRef,
                         sURL,
-                        { callback: function(type, value)
+                        {   onpopupload: function( frame ){
+                                if(frame &&  frame.contentWindow)
+                                 frame.contentWindow.loadParameters( input.value );
+                            },
+                            title: 'Heurist digitizer',
+                            callback: function(type, value)
                             {
                                 thisRef.setGeo(newDiv, value? (type+" "+value) : "");
-                                top.HEURIST.util.setHelpDiv(document.getElementById("help-link"),null);
+                                top.HEURIST.util.setHelpDiv(document.getElementById("ui-pref-showhelp"),null);
                             }
                         }
                     );
-                }
-            });
 
         }; // editLink.onclick
 
@@ -3047,7 +3269,7 @@ if (! top.HEURIST.edit) {
         editSpan.appendChild(editLink);
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
         newDiv.removeImg = removeImg;
         removeImg.className = "delete-geo";
         removeImg.title = "Remove this geographic object";
@@ -3061,7 +3283,7 @@ if (! top.HEURIST.edit) {
 
             geoImg.onmouseover= function(e) {
                 //mapViewer.showAt(e, bdValue.geo.value); //dynamic google map (use digitizer.js)
-                mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID, input.value); //static google map (use showMapUrl.php) see mapViewer.js
+                mapViewer.showAtStatic(e, windowRef.parent.HEURIST.edit.record.bibID, input.value); //static google map (use showMapUrl.php) see mapViewer.js
             };
 
             var description = this.geoValueToDescription(bdValue.geo);
@@ -3084,6 +3306,8 @@ if (! top.HEURIST.edit) {
     top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo = function(element, value) {
         if (! value) return; // "cancel"
 
+        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+        
         var description = this.wktValueToDescription(value); //get human readable string
 
         element.input.name = element.input.name.replace(/^_/, "");
@@ -3093,13 +3317,12 @@ if (! top.HEURIST.edit) {
         element.descriptionSpan.appendChild(this.document.createTextNode(" " + description.summary + " "));
         element.geoImg.onmouseover= function(e) {
             //mapViewer.showAt(e, value);  //dynamic
-            mapViewer.showAtStatic(e, top.HEURIST.edit.record.bibID, element.input.value ); //static google map (use showMapUrl.php) see mapViewer.js
+            mapViewer.showAtStatic(e, windowRef.parent.HEURIST.edit.record.bibID, element.input.value ); //static google map (use showMapUrl.php) see mapViewer.js
         };
 
         element.editLink.innerHTML = "edit";
         element.className = "geo-div";    // not empty
 
-        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         if (windowRef.changed) windowRef.changed();
 
     }; // top.HEURIST.edit.inputs.BibDetailGeographicInput.prototype.setGeo
@@ -3162,8 +3385,8 @@ if (! top.HEURIST.edit) {
         //newInput.style.width = '105ex';    // this will effectively override the sizing control in the record definition, may have to remove
         this.addInputHelper.call(this, bdValue, newInput);
         if (this.promptDiv){
-            this.promptDiv.className = "";
-            this.promptDiv.style.display = "none";
+            //this.promptDiv.className = "";
+            //2016-03-28 this.promptDiv.style.display = "none";
             newInput.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
         }
         return newInput;
@@ -3187,16 +3410,24 @@ if (! top.HEURIST.edit) {
     * @param {Object} parentElement
     */
     top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.changeNotification = function(cmd, relID) {
+        
+        var windowRef = parent;
+        if(this.document){
+            windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+        }else{
+            windowRef = document.parentWindow  ||  document.defaultView  ||  document._parentWindow;
+        }
+        
         if (cmd == "delete") {
-            var fakeForm = { action: top.HEURIST.basePath+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
+            var fakeForm = { action: top.HEURIST.baseURL_V3+"records/relationships/saveRelationships.php?db="+top.HEURIST.database.name,
                 elements: [ { name: "delete[]", value: relID },
                     { name: "recID", value: this.recID } ] };
             var thisRef = this;
             top.HEURIST.util.xhrFormSubmit(fakeForm, function(json) {
                 var val = eval(json.responseText);
                 if (val && val.byRectype) {
-                    top.HEURIST.edit.record.relatedRecords = val;
-                }else if(val.error) {
+                    windowRef.parent.HEURIST.edit.record.relatedRecords = val; //top 0317
+                }else if(val && val.error) {
                     alert(" Problem with relationship marker: " + val.error);
                 }
             });
@@ -3240,13 +3471,13 @@ if (! top.HEURIST.edit) {
         var newInput = this.document.createElement("div");
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.id = "relations-tbody";
-        var relatedRecords = (    this.recID &&
-            parent.HEURIST &&
-            parent.HEURIST.edit &&
-            parent.HEURIST.edit.record &&
-            parent.HEURIST.edit.record.bibID == this.recID &&
-            parent.HEURIST.edit.record.relatedRecords ? parent.HEURIST.edit.record.relatedRecords : null);
-        this.relManager = new top.RelationManager(newInput,top.HEURIST.edit.record, relatedRecords,
+        var relatedRecords = (    this.recID &&                            //0317 was just parent
+            this.windowRef.parent.HEURIST &&
+            this.windowRef.parent.HEURIST.edit &&
+            this.windowRef.parent.HEURIST.edit.record &&
+            this.windowRef.parent.HEURIST.edit.record.bibID == this.recID &&
+            this.windowRef.parent.HEURIST.edit.record.relatedRecords ? this.windowRef.parent.HEURIST.edit.record.relatedRecords : null);
+        this.relManager = new top.RelationManager(newInput, this.windowRef.parent.HEURIST.edit.record, relatedRecords,
             this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']],this.changeNotification, true, false);
         return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailRelationMarker.prototype.addInput
@@ -3287,7 +3518,7 @@ if (! top.HEURIST.edit) {
         }
 
         var removeImg = this.reminderDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/cross.png";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/cross.png";
         removeImg.title = "Remove this reminder";
         var thisRef = this;
         removeImg.onclick = function() { if (confirm("Remove this reminder?")) thisRef.remove(); };
@@ -3304,7 +3535,7 @@ if (! top.HEURIST.edit) {
     */
     top.HEURIST.edit.Reminder.prototype.remove = function() {
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        var fakeForm = { action: top.HEURIST.basePath+"records/reminders/saveReminder.php",
+        var fakeForm = { action: top.HEURIST.baseURL_V3+"records/reminders/saveReminder.php",
             elements: [ { name: "rem_ID", value: this.reminderID },
                 { name: "recID", value: windowRef.parent.HEURIST.edit.record.bibID },
                 { name: "save-mode", value: "delete" } ] };
@@ -3364,7 +3595,7 @@ if (! top.HEURIST.edit) {
         this.fieldset.appendChild(this.document.createElement("legend")).appendChild(this.document.createTextNode("Add reminder"));
 
         var p = this.fieldset.appendChild(this.document.createElement("p"));
-        p.appendChild(this.document.createTextNode("Set up email reminders about this record"));
+        p.appendChild(this.document.createTextNode("Set up email reminders about this record. Reminders can be immediate, delayed or periodic."));
 
         var tbody = this.fieldset.appendChild(this.document.createElement("div"));
         tbody.className = "reminder-table";
@@ -3438,7 +3669,7 @@ if (! top.HEURIST.edit) {
         this.nowRadioButton.type = "radio";
         this.nowRadioButton.name = "when";
         this.nowRadioButton.checked = true;
-        this.nowRadioButton.onclick = function() { thisRef.whenSpan.style.display = "none"; thisRef.saveButton.value = "Send"; };
+        this.nowRadioButton.onclick = function() { thisRef.whenSpan.style.display = "none"; thisRef.saveButton.value = "Send now"; };
         td.appendChild(this.nowRadioButton);
         td.appendChild(this.document.createTextNode("Now"));
 
@@ -3446,7 +3677,7 @@ if (! top.HEURIST.edit) {
         this.laterRadioButton.type = "radio";
         this.laterRadioButton.name = "when";
         //this.laterRadioButton.style.marginLeft = "20px";
-        this.laterRadioButton.onclick = function() { thisRef.whenSpan.style.display = ""; thisRef.saveButton.value = "Store" };
+        this.laterRadioButton.onclick = function() { thisRef.whenSpan.style.display = ""; thisRef.saveButton.value = "Set reminder" };
         td.appendChild(this.laterRadioButton);
         td.appendChild(this.document.createTextNode("Later / periodic"));
 
@@ -3499,7 +3730,7 @@ if (! top.HEURIST.edit) {
         //td.style.textAlign = "right";
         this.saveButton = this.document.createElement("input");
         this.saveButton.type = "button";
-        this.saveButton.value = "Send";
+        this.saveButton.value = "Send now";
         this.saveButton.style.margin = "0 10px 0 0";
         var thisRef = this;
         this.saveButton.onclick = function() { thisRef.save(thisRef.nowRadioButton.checked); };
@@ -3509,8 +3740,8 @@ if (! top.HEURIST.edit) {
         td.style.textAlign = "left";
         //td.style.verticalAlign = "baseline";
         //td.style.paddingTop = "10px";
-        td.appendChild(this.document.createTextNode("You must Send (now) or Set (periodic) your reminder before saving record. " +
-            "Periodic reminders are normally sent shortly after midnight (server time) on the reminder day."));
+        td.appendChild(this.document.createTextNode("You must Send (now) or Set (future/periodic) the reminder before saving the record. " +
+            "Periodic reminders are normally sent shortly after midnight server time on the reminder day."));
 
         var bibIDelt = this.document.createElement("input");
         bibIDelt.type = "hidden";
@@ -3615,7 +3846,7 @@ if (! top.HEURIST.edit) {
         this.document = elt;
 
         this.typeDescription = "URL (internet address)";
-        this.shortName = "URL";
+        this.shortName = "Primary URL";
 
         var row = parentElement.appendChild(this.document.createElement("div"));
         if (required) {    // internet bookmark
@@ -3657,13 +3888,14 @@ if (! top.HEURIST.edit) {
             urlOutput.href = defaultValue;
 
             var linkImg = urlOutput.appendChild(this.document.createElement("img"));
-            linkImg.src = top.HEURIST.basePath+"common/images/external_link_16x16.gif";
+            linkImg.src = top.HEURIST.baseURL_V3+"common/images/external_link_16x16.gif";
             linkImg.className = "link-image";
             if(!displayValue) displayValue =  defaultValue;
             displayValue = (displayValue.length>60)? displayValue.substr(0, 60)+'...':displayValue;
             urlOutput.appendChild(this.document.createTextNode(displayValue));
 
             inputCell.editImg = editImg;
+            inputCell.viewRec = viewRec;
             inputCell.appendChild(urlOutput);
 
             if(canEdit){
@@ -3672,9 +3904,13 @@ if (! top.HEURIST.edit) {
                 urlSpan.style.color = "blue";
                 urlSpan.style.cursor = "pointer";
                 var editImg = urlSpan.appendChild(this.document.createElement("img"));
-                editImg.src = top.HEURIST.basePath+"common/images/edit-pencil.png";
+                editImg.src = top.HEURIST.baseURL_V3+"common/images/edit-pencil.png";
                 urlSpan.appendChild(editImg);
                 urlSpan.appendChild(this.document.createTextNode("edit"));
+                var viewRec = urlSpan.appendChild(this.document.createElement("img"));
+                viewRec.src = top.HEURIST.baseURL_V3+"common/images/magglass_15x14.gif";
+                urlSpan.appendChild(viewRec);
+                urlSpan.appendChild(this.document.createTextNode("view"));
 
                 urlSpan.onclick = function() {
                     inputCell.removeChild(urlOutput);
@@ -3697,11 +3933,17 @@ if (! top.HEURIST.edit) {
             if (this.inputCell.editImg){
                 this.inputCell.editImg.setAttribute("disabled","disabled");
             }
+            if (this.inputCell.viewRec){
+                this.inputCell.viewRec.setAttribute("disabled","disabled");
+            }
             this.inputCell.inputField.setAttribute("disabled","disabled");
         } else {
             this.inputCell.className = this.inputCell.className.replace(/\s*\breadonly\b/, "");
             if (this.inputCell.editImg){
                 this.inputCell.editImg.removeAttribute("disabled");
+            }
+            if (this.inputCell.viewRec){
+                this.inputCell.viewRec.removeAttribute("disabled");
             }
             this.inputCell.inputField.removeAttribute("disabled");
         }
@@ -3739,7 +3981,7 @@ if (! top.HEURIST.edit) {
 
         var valueVisible = "";
         var valueHidden = "";
-        var thumbUrl = top.HEURIST.basePath+"common/images/icon_file.jpg";
+        var thumbUrl = top.HEURIST.baseURL_V3+"common/images/icon_file.jpg";
 
         if(bdValue){
             if(bdValue.file){
@@ -3827,7 +4069,7 @@ if (! top.HEURIST.edit) {
 
 
         var removeImg = newDiv.appendChild(this.document.createElement("img"));
-        removeImg.src = top.HEURIST.basePath+"common/images/12x12.gif";
+        removeImg.src = top.HEURIST.baseURL_V3+"common/images/12x12.gif";
         removeImg.className = "delete-resource";
         removeImg.title = "Clear";
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
@@ -3862,7 +4104,7 @@ if (! top.HEURIST.edit) {
             recID = "&recid="+top.HEURIST.edit.record.bibID;
         }
 
-        var url = top.HEURIST.basePath+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
+        var url = top.HEURIST.baseURL_V3+"records/files/uploadFileOrDefineURL.html?value="+encodeURIComponent(editValue)+recID+"&db="+_db;
         /*if (element.input.constrainrectype){
         url += "&t="+element.input.constrainrectype;
         }*/
@@ -3871,6 +4113,7 @@ if (! top.HEURIST.edit) {
             height: 480,
             width: 640,
             "no-close": true,
+            title:'Upload file or define URL',
             callback: function(isChanged, fileJSON) {
 
                 if(isChanged){
@@ -3886,10 +4129,8 @@ if (! top.HEURIST.edit) {
                     }
 
                 }
-                var helpDiv = document.getElementById("help-link");
-                if(helpDiv) {
-                    top.HEURIST.util.setHelpDiv(helpDiv,null);
-                }
+                var helpDiv = document.getElementById("ui-pref-showhelp");
+                top.HEURIST.util.setHelpDiv(helpDiv,null);
 
                 return true; //prevent close
             }

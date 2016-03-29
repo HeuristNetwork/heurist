@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -51,10 +51,21 @@
 </head>
 
 <body class="popup" width="300" height="800" style="font-size: 11px;overflow:auto;">
-
-<?=(@$_REQUEST['popup']=="1"?"":"<div class='banner'><h2>Open Database</h2></div>") ?>
-<div id='page-inner'>
 <?php
+if(@$_REQUEST['popup']=="1"){
+    print "<div style='padding:5px'>";
+}else{
+    print "<div class='banner'><h2>Open Database</h2></div>";
+    print "<div id='page-inner'>";
+}
+$url = HEURIST_BASE_URL;
+/*
+if(@$_REQUEST['v']=="4"){
+    $url = "../../../";
+}else{
+    $url = HEURIST_BASE_URL;
+}
+*/
 
 	$email = null;
 	$role = null;
@@ -75,7 +86,9 @@
 		if(array_key_exists('role',$_REQUEST)){
 			$role = $_REQUEST['role'];
 		}else{
-			$role = 'user'; // by default
+            if(@$_REQUEST['v']!="4"){
+			    $role = 'user'; // by default
+            }
 		}
 	}
 
@@ -85,7 +98,7 @@
 			$role = null;
 		}
 
-		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&popup=".@$_REQUEST['popup']."&role=\"+this.value;}'>";
+		print "<div>Filter list: <select onchange='{document.location.href=\"getListOfDatabases.php?db=".HEURIST_DBNAME."&popup=".@$_REQUEST['popup']."&v=".@$_REQUEST['v']."&role=\"+this.value;}'>";
 		print "<option ".
 					(($role==null)?'selected':'')." value='0'>All</option><option ".
 					(($role=='user')?'selected':'')." value='user'>User</option><option ".
@@ -93,13 +106,13 @@
 	}
 
 
-    print "<br /><div>Click on the database name to open in a new tab. ".
+    print "<br /><div>Click on the database name to open in a new tab. <br />".
         "Databases are filtered by default to show only those to which you have access</div>";
 	print "<ul class='dbList'>";
 
 	$list = mysql__getdatabases(false, $email, $role);
 	foreach ($list as $name) {
-            print("<li><a href=".HEURIST_BASE_URL."?db=$name target=_blank>$name</a></li>");
+            print("<li><a href=".$url."?db=$name target=_blank>$name</a></li>");
 	}
 	print "</ul>";
 ?>

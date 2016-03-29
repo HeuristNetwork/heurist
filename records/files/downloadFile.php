@@ -2,7 +2,7 @@
 
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -16,19 +16,19 @@
 */
 
 /**
-* returns an attached file requested using the obfuscated file identifier 
+* returns an attached file requested using the obfuscated file identifier
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Records/Util 
+* @subpackage  Records/Util
 */
 
 
@@ -36,8 +36,8 @@
 
   require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
   require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-  require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
-  require_once(dirname(__FILE__)."/../../records/files/fileUtils.php");
+  require_once(dirname(__FILE__)."/uploadFile.php");
+  require_once(dirname(__FILE__)."/fileUtils.php");
 
   if (@$_REQUEST['mobcfg']){
     downloadFile("text/xml", HEURIST_FILESTORE_DIR."settings/mobile-config.xml");
@@ -61,7 +61,6 @@
   $isplayer = (array_key_exists('player',$_REQUEST) &&  $_REQUEST['player']=='yes');
   $isannotation_editor = (defined('DT_ANNOTATION_RANGE') && defined('DT_ANNOTATION_RESOURCE') && @$_REQUEST['annedit']=='yes');
 
-  /*****DEBUG****///error_log(">>>>>".$type_media."   ".$isplayer);
 
   if($isplayer){
 
@@ -107,7 +106,6 @@
     }
     else if($type_media=='audio')
     {
-      /*****DEBUG****///error_log(">>>>>".createAudioTag($filedata['URL'], $filedata['mimeType']));
 
       print createAudioTag($filedata['URL'], $filedata['mimeType']);
     }
@@ -124,10 +122,9 @@
     } else {
       $filename = HEURIST_FILESTORE_DIR ."/". $filedata['id']; // pre 18/11/11 - bare numbers as names, just use file ID
     }
-
+    
     $filename = str_replace('/../', '/', $filename);  // not sure why this is being taken out, pre 18/11/11, unlikely to be needed any more
     $filename = str_replace('//', '/', $filename);
-    /*****DEBUG****///error_log("filename = ".$filename."  ".file_exists($filename));
   }
 
   if(isset($filename) && file_exists($filename)){ //local resources
@@ -157,7 +154,6 @@
       $zz=zip_entry_read($zip_entry, $zip_fs);
 
       $zname = HEURIST_FILESTORE_DIR."/".$zname;
-      /*****DEBUG****///error_log(">>>>>>>>>>".$zname);
       /*	       $z=fopen($zname,"w");
       fwrite($z,$zz);
       fclose($z);
@@ -171,9 +167,6 @@
       */
     }else{
 
-      /*****DEBUG****///error_log(">>>>mineTYPE=".$filedata['mimeType']);
-      /*****DEBUG****///error_log(">>>>filename=".$filename);
-
       // set the mime type, set to binary if mime type unknown
       downloadFile($filedata['mimeType'], $filename);
 
@@ -186,10 +179,10 @@
       downloadViaProxy(HEURIST_FILESTORE_DIR."proxyremote_".$filedata['id'].".kml", $filedata['mimeType'], $filedata['URL']);
 
     }else{
-      /*****DEBUG****///error_log("REDIRECT>>>>>".$filedata['URL']);
       /* Redirect browser */
       //header('HTTP/1.1 201 Created', true, 201);
       //if you actually moved something to a new location (forever) use: header("HTTP/1.1 301 Moved Permanently");
+
       header('Location: '.$filedata['URL']);
     }
     /* Make sure that code below does not get executed when we redirect. */
@@ -252,9 +245,6 @@
       '<iframe '.$size.' src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
       $text);
 
-    //'<a href="http://www.youtube.com/watch?v=$1">YouTube link: $1</a>'
-    //'<iframe width="420" height="345" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>',
-    /*****DEBUG****///error_log(">>>".$text."<<<<");
     return $text;
   }
 

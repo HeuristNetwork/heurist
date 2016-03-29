@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 * Dialog to publish map
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -47,14 +47,14 @@
 			if(currentSearchQuery)
 			{
 
-	 			var url = top.HEURIST.baseURL+"viewers/map/showMapS.html?" + currentSearchQuery;
+	 			var url = top.HEURIST.baseURL_V3+"viewers/map/showMapS.html?" + currentSearchQuery;
 
 				document.getElementById("linkTimeline").href = url;
 
      			document.getElementById("code-textbox").value = '<iframe src="' + url +
      										'" width="800" height="650" frameborder="0"></iframe>';
 
-	 			var url_kml = top.HEURIST.baseURL+"export/xml/kml.php?" + currentSearchQuery;
+	 			var url_kml = top.HEURIST.baseURL_V3+"export/xml/kml.php?" + currentSearchQuery;
 
 				document.getElementById("linkKml").href = url_kml;
 

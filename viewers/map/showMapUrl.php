@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 * return static google map image with feature either by record Id or by geovalue
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -31,6 +31,7 @@
 	require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
 	require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
 	require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");
+    require_once(dirname(__FILE__)."/encodePolyline.php");
 
 	$mapobjects = null;
 
@@ -98,27 +99,98 @@
 			}else if($geoObject['type']=="polyline"){
 
 				$path = "";
-				foreach ($geoObject['geo']['points'] as $point) {
-					if($path!="") $path = $path."|";
-					$path = $path.$point['y'].",".$point['x'];
-				}
-				if($path!=""){
+                $points = array();
+                $cnt = count($geoObject['geo']['points']);
+                if(true){
+
+                    $dvd = ($cnt>200)?10:1;
+
+                    while(true){
+
+                        $idx = 0;
+                        foreach ($geoObject['geo']['points'] as $point) {
+                            if($idx==0 || $idx+1==$cnt || $idx % $dvd ==0){
+                                array_push($points, array(floatval($point['y']), floatval($point['x'])) );
+                                //if($path!="") $path = $path."|";
+                                //$path = $path.$point['y'].",".$point['x'];
+                            }
+                            $idx++;
+                        }
+                        $encodedPoints = dpEncode($points);
+                        if(strlen($encodedPoints[0])<1900){
+                            break;
+                        }else{
+                            $dvd = $dvd * 2;
+                        }
+                    }
+
+                    if(@$_REQUEST['debug']){
+                        print( "points=".$cnt.'   '.$dvd.'   '.strlen($encodedPoints[0]).'<br>' );
+                    }
+                }else{
+				    foreach ($geoObject['geo']['points'] as $point) {
+                        array_push($points, array(floatval($point['y']), floatval($point['x'])) );
+					    if($path!="") $path = $path."|";
+					    $path = $path.$point['y'].",".$point['x'];
+				    }
+                }
+
+                //
+				if(false && $path!=""){
 					$path_all = $path_all."&path=".$style_path."|".$path;
-				}
+				}else{
+                    $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];
+                }
 
 			}else if($geoObject['type']=="polygon"){
 
 				$poly = "";
 				$firstpoint = "";
-				foreach ($geoObject['geo']['points'] as $point) {
-					if($poly=="") {
-						$firstpoint = $point['y'].",".$point['x'];
-					}
-					$poly = $poly.$point['y'].",".$point['x']."|";
-				}
-				if($poly!=""){
-					$poly_all = $poly_all."&path=".$style_poly."|".$poly.$firstpoint;
-				}
+
+                $points = array();
+                $cnt = count($geoObject['geo']['points']);
+                if(true){
+
+                    $dvd = ($cnt>200)?10:1;
+
+                    while(true){
+
+                        $idx = 0;
+                        foreach ($geoObject['geo']['points'] as $point) {
+                            if($idx==0 || $idx % $dvd ==0){
+                                array_push($points, array(floatval($point['y']), floatval($point['x'])) );
+                            }
+                            $idx++;
+                        }
+                        if(count($points)>0)
+                            array_push($points, $points[0]);
+
+                        $encodedPoints = dpEncode($points);
+                        if(strlen($encodedPoints[0])<1900){
+                            break;
+                        }else{
+                            $dvd = $dvd * 2;
+                        }
+                    }
+
+                    if(@$_REQUEST['debug']){
+                        print( "points=".$cnt.'   '.$dvd.'   '.strlen($encodedPoints[0]).'<br>' );
+                    }
+                    $poly_all = $poly_all."&path=".$style_poly."|enc:".$encodedPoints[0];
+
+                }else{
+
+				    foreach ($geoObject['geo']['points'] as $point) {
+					    if($poly=="") {
+						    $firstpoint = $point['y'].",".$point['x'];
+					    }
+					    $poly = $poly.$point['y'].",".$point['x']."|";
+				    }
+				    if($poly!=""){
+					    $poly_all = $poly_all."&path=".$style_poly."|".$poly.$firstpoint;
+				    }
+
+                }
 
 			}else if($geoObject['type']=="rect"){
 
@@ -147,11 +219,15 @@
 			$url = $url.$poly_all;
 		}
 
-/*****DEBUG****///error_log(">>>>>".$url);
-		header('Location: '.$url);
+        if(@$_REQUEST['debug']){
+            print '<div>'.strlen($url)."</div>";
+            print $url;
+        }else{
+		    header('Location: '.$url);
+        }
 		//return $url;
 	}else{
-		header('Location: '.HEURIST_SITE_PATH.'common/images/notfound.png');
+		header('Location: '.HEURIST_BASE_URL.'common/images/notfound.png');
 		//print "noting found";
 	}
 ?>

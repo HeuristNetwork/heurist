@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -72,11 +72,11 @@ function receiveMessage(event)
     } else {
         //message = 'I got "' + event.data + '" from "' + event.origin + '"';
 
-        if(event.data.indexOf('heurist:add:RecTypeSource=')===0){
+        if(event.data.indexOf('heurist:add:')===0){  //RecTypeSource=
 
-            var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
+            var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&id="+rectype;
+            var url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&id="+rectype;
 
             top.HEURIST.util.popupURL(top, url,
                 {   "close-on-blur": true,
@@ -89,12 +89,12 @@ function receiveMessage(event)
                         }
                     }
             });
-        }else if(event.data.indexOf('heurist:check:RecTypeSource=')===0){
-            
-            
-            var rectype = event.data.substr(event.data.lastIndexOf('=')+1);
+        }else if(event.data.indexOf('heurist:check:')===0){ //RecTypeSource=
+
+
+            var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var _url = top.HEURIST.basePath + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
+            var _url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&output=json&checkid="+rectype;
 
             $.ajax({
                 url: _url,
@@ -119,6 +119,11 @@ function receiveMessage(event)
 
 // -----------------------------------------------------------------------------------------------------------------------------
 //          CODE FOR INCLUSION IN WORDPRESS SITE
+//
+// To allow import an annotated template, the page must have the following piece of html code
+// <div id="HeuristRecTypeSource">DB_ID-RECTYPE_ID</div>
+// Where DB_ID is id of database and RECTYPE_ID is record type to be imported.
+//
 // -----------------------------------------------------------------------------------------------------------------------------
 
 
@@ -174,16 +179,23 @@ var message;
 if (false) {
 message = 'Response: ("' + event.origin + '"), but not from HeuristScholar.org';
 } else {
-message = 'RECORD TYPE IMPORT UNDER DEVELOPMENT LATE APRIL 2014. Response: "' + event.data + '" from "' + event.origin + '"';
 
 var dv = jQuery('#HeuristRecTypeSource');
 
 if(event.data=="heurist"){
 
 //document.getElementById('topbar').style.display = 'none';
-jQuery('#header-full').hide();
-jQuery('#topbar').hide();
-jQuery('#footer').hide();
+//hide elements - old way
+//jQuery('#header-full').hide();
+//jQuery('#topbar').hide();
+//jQuery('#footer').hide();
+
+//new way
+jQuery('#sidebar').hide();
+jQuery('#main-header').hide();
+jQuery('#main-footer').hide();
+jQuery('#page-container').css('padding-top','1px);
+
 
 //create button
 //HeuristRecTypeSource

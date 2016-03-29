@@ -1,0 +1,199 @@
+<!--
+/**
+* Set user's preferences for session
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+<script type="text/javascript">
+
+    function initProfilePreferences(){
+
+        var sel = $("#layout_language");
+        if(!(typeof regional === 'undefined') && sel.length==1){ //global variable defined in localization.js
+
+            var key;
+            sel.empty();
+            sel = sel.get(0);
+            for(key in regional){
+                if(key){
+                    top.HEURIST4.ui.addoption(sel, key, regional[key].language);
+                }
+            }
+        }
+
+        sel = $("#layout_id");
+        if(sel.length==1){ //global variable defined in layout_default.js
+
+            var key;
+            sel.empty();
+            sel = sel.get(0);
+            for(key in cfg_layouts){
+                if(key){
+                    top.HEURIST4.ui.addoption(sel, cfg_layouts[key]['id'], cfg_layouts[key]['name']);
+                }
+            }
+        }
+
+        //init bookmarklet
+        sel = $("#bookmarklet-link");
+        if(sel.length==1){ //global variable defined in layout_default.js
+            sel.attr('href',
+                "javascript:(function(){ "
+                + "if(location.protocol=='https:'){alert('Sorry, only http:// pages can be bookmarked with the bookmarklet, "
+                + "you will need to add https:// pages manually (Add Record then copy and paste information)'); return;}"
+                + "h='" + top.HAPI4.basePathV3 + "';"
+                + "d=document;c=d.contentType;"
+                + "if(c=='text/html'||!c){"
+                + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+                + "s=d.createElement('script');s.type='text/javascript';"
+                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+top.HAPI4.database+"';"
+                + "d.getElementsByTagName('head')[0].appendChild(s);}"
+                + "else{e=encodeURIComponent;w=open(h+'records/add/addRecordPopup.php?db="+top.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+                //+ "window.setTimeout('w.focus()',200);}"
+                + "}})();"
+            );
+            sel.text('>> '+top.HAPI4.database)
+        }
+    }
+
+</script>
+
+    <fieldset>
+
+        <h3>Bookmarklet</h3>
+        <div>
+            <label class="header">Drag this link on your bookmarks bar</label><b><u>
+                    <a id="bookmarklet-link"
+                        onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}"
+                        title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."
+                        href="#"></a>
+                </u></b><label>&nbsp;(it provides bookmarking of web pages)</label><br><br>
+        </div>
+
+        <hr/>
+
+        <h3>Search</h3>
+        <div>
+            <div class="header"><label for="defaultSearch">Heurist search string to execute when loading the search page</label></div>
+            <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"/>
+        </div>
+        <div>
+            <div class="header"><label for="searchQueryInBrowser">Show current search query in browser address field</label></div>
+            <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all h3pref"/>
+        </div>
+        <div>
+            <div class="header">
+                <label for="smarty-output-limit">
+                    Limit number of lines in interactive report output<br/>(only applies to web interface, not external calls)
+                </label>
+            </div>
+            <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"
+                title="This limit does not apply to external calls or periodic report generation to file">
+                <option value="50">50</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1,000</option>
+                <option value="2000">2,000 (not recommended)</option>
+                <option value="5000">5,000 (not recommended)</option>
+                <option value="10000">10,000 (not recommedned)</option>
+                <option value="20000">20,000 (not recommended)</option>
+            </select>
+        </div>
+        <div>
+            <div class="header"><label for="search_detail_limit">
+                    Limit number of objects on map/timeline in search interface<br/>(only applies to web interface, not external calls)
+                </label></div>
+            <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:300px"
+                title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
+                <option value="500">500</option>
+                <option value="1000">1,000</option>
+                <option value="2000">2,000</option>
+                <option value="5000">5,000 (not recommended)</option>
+                <!--
+                <option value="10000">10,000 (not recommended)</option>
+                <option value="20000">20,000 (not recommended)</option>
+                -->
+            </select>
+        </div>
+
+
+        <hr />
+        <h3>Edit</h3>
+        <div>
+            <div class="header"><label for="tagging-popup">When saving record, prompt for tags if no tags have been set</label></div>
+            <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all h3pref"/>
+        </div>
+        <div>
+            <div class="header"><label for="defaultRecentPointerSearch">When entering a pointer field in record edit, default to recent records search (otherwise All Records)</label></div>
+            <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all h3pref"/>
+        </div>
+        <div>
+            <div class="header"><label for="findFuzzyMatches">Check for similar records on creation (can slow down new record save significantly)</label></div>
+            <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all h3pref"/>
+        </div>
+        <div>
+            <div class="header"><label for="record-edit-advancedmode">Advanced edit mode</label></div>
+            <input type="checkbox" name="record-edit-advancedmode" id="record-edit-advancedmode" class="text ui-widget-content ui-corner-all h3pref"/>
+        </div>
+
+
+        <hr />
+        <h3>Appearance</h3>
+        <div>
+            <div class="header"><label for="layout_id">Layout</label></div>
+            <select name="layout_id" id="layout_id" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        </div>
+        <div>
+            <div class="header"><label for="layout_language">Language</label></div>
+            <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
+        </div>
+        <div>
+            <div class="header"><label>Theme</label></div>
+            <div id="layout_theme" style="min-width: 300px;"></div>
+            <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
+        </div>
+        <div>
+            <div class="header"><label for="help_on">Show help</label></div>
+            <input type="checkbox" name="help_on" id="help_on" class="text ui-widget-content ui-corner-all"/>
+        </div>
+        <div>
+            <div class="header"><label for="bookmarks_on">Show boomarks search</label></div>
+            <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
+        </div>
+
+        <!--
+        <br />
+        <hr />
+        <br />
+
+        <div>
+        <div class="header"><label for="edit_open_in_new_window">Open edit in new window</label></div>
+        <input type="checkbox" name="edit_open_in_new_window" id="edit_open_in_new_window" class="text ui-widget-content ui-corner-all" value="1"/>
+        </div>
+        <div>
+        <div class="header"><label for="edit_force_tags">When exiting record edit, prompt for tags if no tags have been set</label></div>
+        <input type="checkbox" name="edit_force_tags" id="edit_force_tags" class="text ui-widget-content ui-corner-all" value="1"/>
+        </div>
+        <div>
+        <div class="header"><label for="edit_pointer_recentsearch">When entering a pointer field, default to recent records search (otherwise All Records)</label></div>
+        <input type="checkbox" name="edit_pointer_recentsearch" id="edit_pointer_recentsearch" class="text ui-widget-content ui-corner-all" value="1"/>
+        </div>
+        -->
+    </fieldset>
+
+<br />
+<p class="messages"></p>

@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -36,38 +36,51 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-1.10.2/themes/heurist/jquery-ui.css">
 	<link rel=stylesheet href="../../../common/css/global.css">
 	<link rel=stylesheet href="../../../common/css/edit.css">
 
-	<link rel="stylesheet" type="text/css" href="../../../common/css/calendar.css" />
-	<script type="text/javascript" src="../../../external/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../ext/jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+    
 	<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="../../../external/js/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+    <style>
+            .temporal-div > img{
+                vertical-align:super !important;
+            }
+     </style>
 </head>
-<body class="editTab" onload="onshow()" >
+<body class="editTab ui-heurist-bg-light">
 
 	<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-	<script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
+
+<!-- replaced to jquery.calendar
+    <script type="text/javascript" src="../../../common/php/displayPreferences.php"></script>
 
 	<script type="text/javascript" src="../../../common/js/calendarViewer.js"></script>
 	<script type="text/javascript" src="../../../common/js/calendar.js"></script>
-
+-->
+    
 <script>
+        //$.getScript('../../../common/php/displayPreferences.php?db='+top.HEURIST.database.name);
 
 		document.write('<form method=post enctype="multipart/form-data"'+
 				' onsubmit="return top.HEURIST.edit.requiredInputsOK(window.HEURIST.inputs, window);"' +
-				' jsonAction="'+top.HEURIST.basePath+'records/edit/saveRecordDetails.php?db=' + top.HEURIST.database.name +'"' +
-				' action="'+top.HEURIST.basePath+'records/edit/saveRecordDetails.php?db=' + top.HEURIST.database.name +'" target=save-frame>' +
+				' jsonAction="'+top.HEURIST.baseURL_V3+'records/edit/saveRecordDetails.php?db=' + top.HEURIST.database.name +'"' +
+				' action="'+top.HEURIST.baseURL_V3+'records/edit/saveRecordDetails.php?db=' + top.HEURIST.database.name +'" target=save-frame>' +
 				' <input type=hidden name=save-mode id=save-mode>' +
 				' <input type=hidden name=notes id=notes>' +
-				' <div id=all-inputs></div>' +
+				' <div id=all-inputs style="overflow:scroll;position:absolute;top:0;bottom:0;left:30;right:0"></div>' +
 				' </form>');
+                
+        $(document).ready(onshow);
 </script>
 
 <script>
 function onshow() {
 	// Invoked when this frame is made visible.
-	top.HEURIST.edit.calendarViewer = calendarViewer;
+	//repalce to jquery top.HEURIST.edit.calendarViewer = calendarViewer;
 
 	// Find the first required input and focus it.
 	var inputs = window.HEURIST.inputs || [];
@@ -75,7 +88,7 @@ function onshow() {
 	var firstInput = null, firstRequiredInput = null, firstEmptyRequiredInput = null;
 	for (var i=0; i < inputs.length; ++i) {
 		if (inputs[i].inputs && inputs[i].inputs[0].style.display == "none") continue;
-
+        
 		if (firstInput == null)
 			firstInput = inputs[i];
 		if (firstRequiredInput == null && inputs[i].required == "required")
@@ -135,9 +148,10 @@ function unchanged() {
 		parent.HEURIST.edit.unchanged("public");
 }
 function handleSaved(json) {
-    console.log(json);
+    //console.log(json);
 	var vals = eval(json.responseText);
 	if (! vals) {
+        //parent.HEURIST = null;
 		window.location.reload();	// no changes to save ... make with the flishy-flashy
 		return;
 	}
@@ -149,8 +163,10 @@ function handleSaved(json) {
 
 	if (! vals.matches) {
 		// regular case -- we get back an object containing updates to the record details
-		for (var i in vals)
+		for (var i in vals){
 			parent.HEURIST.edit.record[i] = vals[i];
+        }
+        //parent.HEURIST = null;
 		window.location.reload();
 	}else {
 		// we have been supplied with a list of biblio records that look like this one
@@ -182,11 +198,11 @@ function renderInputs(bibID, rectype) {
 		}
 
 		var record = parent.HEURIST.edit.record;
-
+                        //top.HEURIST
 		var inputs = top.HEURIST.edit.createInputsForRectype(bibID,record.rectypeID, record.bdValuesByType, allInputs);
 
 		var extrasHeader = renderExtraDataHeader(allInputs);
-
+                    //top.HEURIST
 		var extraInputs = top.HEURIST.edit.createInputsNotForRectype(bibID,record.rectypeID, record.bdValuesByType, allInputs);
 		if (extraInputs.length > 0) {
 			for (var i=0; i < extraInputs.length; ++i) {
@@ -202,13 +218,14 @@ function renderInputs(bibID, rectype) {
 			renderAdditionalDataSection(allInputs, bibID, record.rectypeID, record.bdValuesByType);
 		}
 
+        //top.HEURIST
 		top.HEURIST.edit.setAllInputsReadOnly(!userCanEdit);
 
 		if (! top.document.getElementById("notes")) {
-			var width = 400;
-			var height = 160;
-			var bottom = 32;
-			var right = 32;
+			var width = 200;
+			var height = 400;
+			var bottom = 16;
+			var right = 16;
 
 			// Find some notes to drop in the scratchpad ... traipse up the window hierarchy
 			var noteText = record.notes;
@@ -220,12 +237,13 @@ function renderInputs(bibID, rectype) {
 				win = win.parent;
 			}
 
+            //top.HEURIST
 			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-width")))
 				width = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-width"));
 			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-height")))
 				height = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-height"));
 			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-bottom")))
-				bottom = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-bottom")) || bottom;
+				bottom = parseInt(parent.HEURIST.util.getDisplayPreference("scratchpad-bottom")) || bottom;
 			if (parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")))
 				right = parseInt(top.HEURIST.util.getDisplayPreference("scratchpad-right")) || right;
 
@@ -257,6 +275,7 @@ function renderInputs(bibID, rectype) {
 
 	}else if (rectype) {
 
+        //top.HEURIST
 		var defaultInputValues = {};
 		if (window.HEURIST.parameters["title"]) {
 			if (top.HEURIST.magicNumbers &&
@@ -322,6 +341,7 @@ function renderInputs(bibID, rectype) {
 			}
 
 		}
+        //top.HEURIST
 		var inputs = top.HEURIST.edit.createInputsForRectype(null,rectype, defaultInputValues, allInputs);
 
 		renderExtraDataHeader(allInputs);

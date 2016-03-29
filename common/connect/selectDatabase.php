@@ -1,11 +1,11 @@
 <?php
 
     /**
-    * selectDatabase.php: select database from list of databases, create and configure H3Sandpit if it doesn't exist
+    * selectDatabase.php: select database from list of databases, create and configure Heurist_Sandpit if it doesn't exist
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Tom Murtagh
@@ -40,19 +40,19 @@
     $query_create = "";
     $query_owner  = "";
 
-    $sandpitDB = "H3Sandpit";
+    $sandpitDB = "Heurist_Sandpit";
 
     function buildSandpitDB($dbName){  // creates the sandpit database as a starting point for users to register and create databases
-        
+
         echo_flush ("<p>Create new empty database</p>");
-        
+
         if(!createDatabaseEmpty($dbName)){
             return false;
         }
         createDatabaseFolders($dbName);
-        
+
         return true;
-        
+
     } //buildSandpitDB
 ?>
 <html>
@@ -93,8 +93,8 @@
                         // but check to see if any databases have ben listed. if not it's an initialised instance, need to create sandpit db
                         if ( $i == 0 ) { // no database can be created until sandpit db exists, so this is an adequate test
                             $res = buildSandpitDB($sandpitDB); // TODO: supply prefix from code rather than hardcoded
-                            
-                            
+
+
                             //if ($res != 0 ) { //error
                             //    print "<h2>Unable to create $sandpitDB example database<h2> SQL error:".$res.
                             //   "Query: ".$query_create." <p>Please contact Heurist developers for help";

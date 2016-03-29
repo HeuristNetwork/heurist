@@ -9,7 +9,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
+    * @copyright   (C) 2005-2016 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -113,16 +113,19 @@
                     die ("<p><b>Sorry, unable to read the sysIdentification table from the current database. ".
                         "Possibly wrong database format, please consult Heurist team</b></p>");
                 }
-                
+
                 $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_FILESTORE_DIR."/generated-reports/",
+                        HEURIST_FILESTORE_DIR."generated-reports/",
                         HEURIST_ICON_DIR,
-                        HEURIST_FILESTORE_DIR."/settings/",
+                        HEURIST_FILESTORE_DIR."settings/",
+                        HEURIST_FILESTORE_DIR.'documentation_and_templates/',
+                        HEURIST_FILESTORE_DIR.'backup/',
+                        HEURIST_FILESTORE_DIR.'entity/',
                         HEURIST_SMARTY_TEMPLATES_DIR,
                         HEURIST_XSL_TEMPLATES_DIR);
                 if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
                 if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-                
+
 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 // These are the most likely location for bulk upload (of images) and restricting to these directories
@@ -136,7 +139,7 @@
                         if(substr($dir, -1) != '/'){
                             $dir .= "/";
                         }
-                    
+
                         if(!file_exists($dir) ){ //probable this is relative
                             $orig = $dir;
                             chdir(HEURIST_FILESTORE_DIR);
@@ -147,11 +150,12 @@
                         }
                     }
                 }
-                $dirs = $dirs2;                
-                
-                
+                $dirs = $dirs2;
+
+
                 // add the scratch directory, which will be the default for upload of material for import
-                array_push($dirs, HEURIST_UPLOAD_ROOT.'scratch');
+                array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
+                array_push($dirs, HEURIST_FILES_DIR);
 
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded
@@ -164,13 +168,13 @@
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
                     print ("<p><b>If you wish to upload files to a directory other than the scratch space, define the folders in <br />".
-                        "Designer View > Database > Advanced Properties > Additional Folders for indexing.<br />".
+                        "Database administration page > Database > Advanced Properties > Additional Folders for indexing.<br />".
                         "You may also add additional file extensions.</b></p>");
                 }else{
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
 
-                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1' "
+                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=3' "
                     ." title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
                     ."Click here to set media/upload folders</a></p>";
 

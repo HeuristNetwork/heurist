@@ -1,40 +1,40 @@
 <?php
 
-    /**
-    * cloneDatabase.php: Copies an entire databsae verbatim
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2014 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* cloneDatabase.php: Copies an entire database verbatim
+*                    Note that the cloning method was changed in 2014, using our own SQL dump function, to give more control
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
-    //require_once(dirname(__FILE__).'/../../../external/php/Mysqldump.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbScript.php');
+require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
+require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
 
-    if(isForAdminOnly("to clone a database")){
-        return;
-    }
+if(isForAdminOnly("to clone a database")){
+    return;
+}
 
-    mysql_connection_overwrite(DATABASE);
-    if(mysql_error()) {
-        die("<h2>Error</h2>Sorry, could not connect to the database (mysql_connection_overwrite error)");
-    }
+mysql_connection_overwrite(DATABASE);
+if(mysql_error()) {
+    die("<h2>Error</h2>Sorry, could not connect to the database (mysql_connection_overwrite error)");
+}
 ?>
 
 <html>
@@ -81,6 +81,28 @@
                 }
                 return true;
             }
+
+            function onSubmit(event){
+                event.target.disabled = 'disabled';
+
+                var ele = document.getElementById("loading");
+                ele.style.display = "block";
+                ele = document.getElementById("mainform");
+                ele.style.display = "none";
+
+                showProgress();
+                document.forms[0].submit();
+            }
+
+            function showProgress(){
+
+                var ele = document.getElementById("divProgress");
+                if(ele){
+                    ele.innerHTML = ele.innerHTML + ".";
+                    setTimeout(showProgress, 500);
+                }
+            }
+
         </script>
 
 
@@ -91,270 +113,200 @@
         <script src="../../../common/php/loadCommonInfo.php"></script>
         <div id="page-inner" style="overflow:auto">
 
-            <p>This script simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
-                The new database is identical to the old in all respects including users, access and attaachments <br />
-                (beware of making many copies of databases containing many large files, as all uploaded files are copied).</p>
-
-            <p>For large databases (several tens of thousands of records and upwards),
-            the script will take a long time to execute and could fail on reload of the dumped data.
-            <br />In that case we recommend requesting the system adminstrtor to carry out the following steps from the command line interface:
-            <ul>
-                <li><span>Dump the existing database with mysqldump:  mysqldump -u... -p... --routines --triggers hdb_xxxxx > filename</span></li>
-                <li><span>Create database, switch to database: mysql -u... -p... -e 'create database hdb_yyyyy'</span></li>
-                <li><span>Load the dumped database: mysql -u... -p... hdb_yyyyyy < filename </span></li>
-                <li><span>Change to <?HEURIST_FILESTORE_DIR?> and copy the following directories and contents:</span>
-                    <ul>
-                        <li><span>Copy contents of the directory <?=HEURIST_UPLOAD_ROOT?><?=HEURIST_DBNAME?> to a new directory <br />
-                            in the same location, with the name of the new database <i>excluding the <?=HEURIST_DB_PREFIX?> prefix</i></span></li>
-
-                    </ul>
-                </li>
-            </ul>
+            <div id="loading" style="display:none">
+                <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
+                <strong><span id="divProgress">&nbsp; Cloning of database will take a few seconds </span></strong>
+            </div>
+            <div id="mainform">
 
 
-    <?php
+                <p>
+                    This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
+                    The new database is identical to the old in all respects including users, access and attaachments <br />
+                    (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
+                    The target database is unregistered with the Heurist central index even if the source database is registered.
+                </p>
+
+                <?php
 
 
                 // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
 
                 if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
-    ?>
-                <div class="separator_row" style="margin:20px 0;"></div>
-                <form name='selectdb' action='cloneDatabase.php' method='get'>
-                    <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
-                    <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
-                    <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
-                        (all databases created by this installation of the software will have the same prefix).</p>
-                    <h3>Enter a name for the cloned database:</h3>
-                    <div style="margin-left: 40px;">
-                        <input type='text' name='targetdbname' onkeypress="{onKeyPress(event)}"/>
-                        <input type='submit' value='Clone "<?=HEURIST_DBNAME?>"'/>
-                    </div>
+                    ?>
+                    <div class="separator_row" style="margin:20px 0;"></div>
+                    <form name='selectdb' action='cloneDatabase.php' method='get'>
+                        <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
+                        <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
+                        <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
+                            (all databases created by this installation of the software will have the same prefix).</p>
+                        <h3>Enter a name for the cloned database:</h3>
+                        <div style="margin-left: 40px;">
+                            <input type='text' name='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
+                            <input type='button' value='Clone "<?=HEURIST_DBNAME?>"'
+                                onclick='onSubmit(event)'/>
+                        </div>
 
-                </form>
+                    </form>
+                </div>
             </div>
         </body>
     </html>
     <?php
-                    exit;
-              }
+    exit;
+}
 
-    // ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
-
-
-    function isInValid($str) {
-        return preg_match('[\W]', $str);
-    }
-    function arraytolower($item)
-    {
-         return strtolower($item);
-    }            
-
-    if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
-        $targetdbname = $_REQUEST['targetdbname'];
-        /*****DEBUG****///error_log("Target database is $dbPrefix$targetdbname");
-
-        // Avoid illegal chars in db name
-        $hasInvalid = isInValid($targetdbname);
-        if ($hasInvalid) {
-            echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
-                "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
-            return false;
-        } // rejecting illegal characters in db name
+// ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
 
 
-        $list = mysql__getdatabases();
-        $list = array_map("arraytolower", $list);
-        if(in_array(strtolower($targetdbname), $list)){
-            echo ("<p class='error'>Error: database '".$targetdbname."' already exists. Choose different name<br/></p>");
-            return false;
-        }
+function isInValid($str) {
+    return preg_match('[\W]', $str);
+}
+function arraytolower($item)
+{
+    return strtolower($item);
+}
 
-        cloneDatabase($targetdbname);
-        
-        print "</div></body></html>";
+if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
+    $targetdbname = $_REQUEST['targetdbname'];
+
+    // Avoid illegal chars in db name
+    $hasInvalid = isInValid($targetdbname);
+    if ($hasInvalid) {
+        echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
+            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
+        return false;
+    } // rejecting illegal characters in db name
+
+
+    $list = mysql__getdatabases();
+    $list = array_map("arraytolower", $list);
+    if(in_array(strtolower($targetdbname), $list)){
+        echo ("<p class='error'>Warning: database '".$targetdbname."' already exists. Please choose a different name<br/></p>");
+        return false;
     }
 
-    // ---- COPY FUNCTION -----------------------------------------------------------------
+    cloneDatabase($targetdbname);
 
-    function cloneDatabase($targetdbname) {
-        set_time_limit(0);
-        
-        // Use the file upload directory for this database because we know it should exist and be writable
-        
-        /*
-        //create dump in temp file
-        if(false){
-            $tmpfname = tempnam ('/tmp', 'dump-');
-            
-            echo_flush ("Temp file name ".$tmpfname."<br/>");
-            
-            try{
-                $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
-                $dump->start($tmpfname);
-            } catch (Exception $e) {
-                print ("<h2>Error</h2>Unable to process database dump.".$e->getMessage());
-                return false;
-            }
-        }*/
+    print "</div></body></html>";
+}
 
-        $newname = HEURIST_DB_PREFIX.$targetdbname;
-        
-        //$tmpfname = 
-        
-                    //create new database
-                    if(!db_create($newname)){
-                        return false;
-                    }
-                    
-                    echo_flush ("<p>Create Database Structure (tables)</p>");
-                    if(db_script($newname, dirname(__FILE__)."/../dbcreate/blankDBStructure.sql")){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        db_drop($newname);
-                        return false;
-                    }
-                    
-                    mysql_connection_insert($newname);
-                    mysql_query('delete from sysIdentification where 1');
-                    mysql_query('delete from sysTableLastUpdated where 1');
-                    mysql_query('delete from sysUsrGrpLinks where 1');
-                    mysql_query('delete from sysUGrps where ugr_ID>=0');
-                    mysql_query('delete from defLanguages where 1');
-                    
-                    
-                    echo_flush ("<p>Copy data</p>");
-                    if( db_clone(DATABASE, $newname) ){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        //db_drop($newname);
-                        return false;
-                    }
-                    
-                    //need to successful addition of constraints
-                    mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID set t1.trm_InverseTermId=null where t1.trm_ID>0 and t2.trm_ID is NULL');
-                    mysql_query('delete FROM usrRecentRecords where rre_RecID>0 and rre_RecID not in (select rec_ID from Records)');
-                    
-                    
-                    /*
-                    if(false){
-                        $tmpfname = 'c:/xampp/htdocs/HEURIST_FILESTORE/artem_delete10/backup/johnson/MySQL_Database_Dump.sql';
-                        //restore from dump
-                        echo_flush ("<p>Create Database Structure and import data</p>");
-                        if(db_script($newname, $tmpfname)){
-                            echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                        }else{
-                            db_drop($newname);
-                            return false;
-                        }
-                    }
-                    //unlink($tmpfname);
-                    */
+// ---- COPY FUNCTION -----------------------------------------------------------------
 
-                    echo_flush ("<p>Addition Referential Constraints</p>");
-                    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        //db_drop($newname);
-                        return false;
-                    }
+//
+// 1. create empty database
+// 2. clean default values from some tables
+// 3. clean content of all tables
+// 4. add contrainsts, procedure and triggers
+// 5. remove registration info and assign originID for definitions
+//
+function cloneDatabase($targetdbname) {
+    set_time_limit(0);
 
-                    echo_flush ("<p>Addition Procedures and Triggers</p>");
-                    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addProceduresTriggers.sql")){
-                        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-                    }else{
-                        //db_drop($newname);
-                        return false;
-                    }
-        
-/* OLD APPROACH        
+    $newname = HEURIST_DB_PREFIX.$targetdbname;
 
-        $dump_command = "mysqldump --routines --triggers -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." ".
-            HEURIST_DB_PREFIX.HEURIST_DBNAME." > ".HEURIST_FILESTORE_DIR.HEURIST_DBNAME.".sql";
-        $create_command = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -e 'create database $newname'";
-        $upload_command = "mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD.
-            " $newname < '".HEURIST_FILESTORE_DIR."/".HEURIST_DBNAME.".sql'";
-        // It is good to leave this file for backup purposes, in any case it isn't used
-        // $cleanup_command = "rm ".HEURIST_FILESTORE_DIR."/temporary_db_dump.sql"; // cleanup
+    //create new database
+    if(!db_create($newname)){
+        return false;
+    }
 
-        echo ("<hr>Execution log:<p>");
+    echo_flush ("<p>Create Database Structure (tables)</p>");
+    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
+        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+    }else{
+        db_drop($newname);
+        return false;
+    }
 
-        $msg=explode(ADMIN_DBUSERPSWD,$dump_command); // $msg[1] strips out the password info ...
-        print " processing: <i>mysqldump --routines --triggers -u... -p... $msg[1]</i><br>";
-        exec("$dump_command". ' 2>&1', $output, $res1);
-        if ($res1 != 0 ) {
-            die ("<h2>Error</h2>Unable to process database dump: <i>mysqldump -u... -p... $msg[1]</i>".
-                "<p>The most likely reason is that the target directory is not writable by php, or the SQL output file already exists".
-                "Please check the target directory listed above, or ask your sysadmin to make it writable/remove existing SQL file");
+    // Remove chatac
+    mysql_connection_insert($newname);
+    mysql_query('delete from sysIdentification where 1');
+    mysql_query('delete from sysTableLastUpdated where 1');
+    mysql_query('delete from sysUsrGrpLinks where 1');
+    mysql_query('delete from sysUGrps where ugr_ID>=0');
+    mysql_query('delete from defLanguages where 1');
+
+
+    echo_flush ("<p>Copy data</p>");
+    // db_clone function in /common/php/db_utils.php does all the work
+    if( db_clone(DATABASE, $newname) ){
+        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+    }else{
+        db_drop($newname);
+        return false;
+    }
+
+    //TODO: need to check for successful addition of constraints
+    mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
+        set t1.trm_InverseTermId=null
+    where t1.trm_ID>0 and t2.trm_ID is NULL');
+    mysql_query('delete FROM usrRecentRecords
+        where rre_RecID>0
+    and rre_RecID not in (select rec_ID from Records)');
+
+    $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues contact the Heurist developers at info heuristnetwork dot org</p>";
+    
+    // 4. add contrainsts, procedure and triggers
+    echo_flush ("<p>Addition of Referential Constraints</p>");
+    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
+        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+    }else{
+        db_drop($newname);
+        print $sHighLoadWarning;
+        return false;
+    }
+
+    echo_flush ("<p>Addition of Procedures and Triggers</p>");
+    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addProceduresTriggers.sql")){
+        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+    }else{
+        db_drop($newname);
+        print $sHighLoadWarning;
+        return false;
+    }
+
+    // 5. remove registration info and assign originID for definitions
+    mysql_connection_insert($newname);
+    $sourceRegID = 0;
+    $res = mysql_query('select sys_dbRegisteredID from sysIdentification where 1');
+    if($res){
+        $row = mysql_fetch_row($res);
+        if($row){
+            $sourceRegID = $row[0];
         }
+    }
+    //print "<p>".$sourceRegID."</p>";
+    // RESET register db ID
+    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null where 1";
+    $res1 = mysql_query($query1);
+    if (mysql_error())  { //(mysql_num_rows($res1) == 0)
+        print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
+        ")<br> Please reset the registration ID manually</b></p>";
+    }
+    //assign origin ID    
+    db_register($newname, $sourceRegID);
 
-        $msg=explode(ADMIN_DBUSERPSWD,$create_command); // $msg[1] strips out the password info ...
-        print " processing: <i>mysql -u... -p... $msg[1]</i><br>";
-        exec("$create_command". ' 2>&1', $output, $res1);
-        if ($res1 != 0 ) {
-            die ("<h2>Error</h2>Unable to process database create command: <i>mysql -u... -p... $msg[1]</i>".
-                "<p>The database may already exist - please check on your MySQL server or ask your sysadmin for help".
-                "<p><a href='../common/connect/getListOfDatabases.php' target=_blank>List of Heurist databases</a>");
-        }
+    // Index new database for Elasticsearch
+    //TODO: Needs error report, trap error and warn or abort clone
+    buildAllIndices($targetdbname);
 
-        $msg=explode(ADMIN_DBUSERPSWD,$upload_command); // $msg[1] strips out the password info ...
-        print " processing: <i>mysql -u... -p... $msg[1]</i><br>";
-        exec("$upload_command". ' 2>&1', $output, $res1);
-        if ($res1 != 0 ) {
-            die ("<h2>Error</h2>Unable to process database upload command: <i>mysql -u... -p... $msg[1]</i>".
-                "<p>The SQL file might not have been written correctly. ".
-                "Please ask your sysadmin for help and report the problem to the Heurist development team");
-        }
-        
-*/        
+    // Copy the images and the icons directories
+    //TODO: Needs error report, trap error and warn or abort clone
+    recurse_copy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
 
-        mysql_connection_insert($newname);
-        // RESET register db ID
-        $query1 = "update sysIdentification set sys_dbRegisteredID=0 where 1";
-        $res1 = mysql_query($query1);
-        if (mysql_error())  { //(mysql_num_rows($res1) == 0)
-            print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
-            ")<br> Please reset the registration ID manually</b></p>";
-        }
+    // Update file path in target database  with absolute paths
+    $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
+    "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
+    $res1 = mysql_query($query1);
+    if (mysql_error())  { //(mysql_num_rows($res1) == 0)
+        print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
+        "<br>Query was:".$query1.
+        "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
+    }
 
-        /* Actually not a bad idea to leave the file in the directory
-        print " processing: $cleanup_command<br><p>";
-        exec("$cleanup_command". ' 2>&1', $output, $res1);
-        if ($res1 != 0 ) {
-        die ("Unable to process cleanup command ($cleanup_command)");
-        }
-        */
-
-        // Index new database for Elasticsearch
-        buildAllIndices($targetdbname);
-
-        // Copy the images and the icons directories
-        recurse_copy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
-        
-        /* OLD WAY
-        $copy_file_directory = "cp -R " . HEURIST_UPLOAD_ROOT.HEURIST_DBNAME . " " . HEURIST_UPLOAD_ROOT."$targetdbname"; // no prefix
-        print "<br>Copying upload files: $copy_file_directory";
-        exec("$copy_file_directory" . ' 2>&1', $output, $res1);
-        if ($res1 != 0 ) {
-            print ("<h3>Error</h3>Unable to copy uploaded files using: <i>$copy_file_directory</i>".
-                "<p>Please copy the directory manually or ask you sysadmin to help you</p>");
-            return false;    
-        }*/
-
-
-        // Update file path in target database
-        $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
-            "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
-        $res1 = mysql_query($query1);
-        if (mysql_error())  { //(mysql_num_rows($res1) == 0)
-            print "<p><h4>Warning</h4><b>Unable to set files path to new path</b><br>Query was:".$query1.
-                "<br>Please consult the system administrator</p>";
-        }
-
-        // Success!
-        echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
-        print "<p>Please go to the <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$targetdbname.
-            "' title='' target=\"_new\"><strong>administration page</strong></a>, to configure your new database</p>";
-
-    } // straightCopyNewDatabase
+    // Success!
+    echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
+    print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."admin/adminMenu.php?db=".$targetdbname.
+    "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
+} // straightCopyNewDatabase
 ?>

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -16,11 +16,11 @@
  * A form to edit field type, or create a new field type. It is utilized as pop-up from manageDetailTypes and manageRectypes
  * it may call another pop-ups: selectTerms and selectRecType
  *
- * @author      Stephen White   <stephen.white@sydney.edu.au>
+ * @author      Stephen White
  * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
  * @author      Juan Adriaanse
- * @copyright   (C) 2005-2013 University of Sydney
- * @link        http://Sydney.edu.au/Heurist
+ * @copyright   (C) 2005-2016 University of Sydney
+ * @link        http://HeuristNetwork.org
  * @version     3.1.0
  * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @package     Heurist academic knowledge management system
@@ -102,21 +102,20 @@ function RectypeManager() {
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: "newGroup",
-                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>add/edit</label>",
-                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:italic'>[add/edit tabs]</label>",
+                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:bold'> +/- </label>",
                     content:
                     ('<div id="formGroupEditor">'+
                         '<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
                         '<h3>Create / edit / delete record type groups (tabs)</h3><br/>'+
                         '<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select>'+
                         '<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Delete selected group" type="submit" style="margin-left:20px"/></div></div>'+
-                        '<div class="input-row"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:150px"/></div></div>'+
-                        '<div class="input-row"><div class="input-header-cell">Description:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
+                        '<div class="input-row required"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:150px"/></div></div>'+
+                        '<div class="input-row required"><div class="input-header-cell">Description:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
                         '<div class="input-row"><div class="input-header-cell"></div>'+
                         '<div class="input-cell">'+
                         '<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
                         '<input id="btnGrpCancel" type="submit" value="Cancel" onclick="{rectypeManager.doGroupCancel()}" style="margin:0 5px" />'+
-                        
+
                         '</div></div>'+
                         '</div>')
             }));
@@ -183,24 +182,34 @@ function RectypeManager() {
                     content:
                     ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + //for="filter"
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
-                        '<label>Filter by name:&nbsp;&nbsp;</label>'+
-                        '<input type="text" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
+
+                        // These are useless clutter. Filter by name was text, active only was checkbox
+                        //'<label>Filter by name:&nbsp;&nbsp;</label>'+
+                        '<input type="hidden" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+
                         // declutter: Probably unecessary to provuide an active/inactive filter
-                        '<input type="checkbox" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">&nbsp;Show active only&nbsp;&nbsp;'+
+                        '<input type="hidden" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">'+
+                        //'&nbsp;Show active only&nbsp;&nbsp;'+
+
                         '</div>'+
-                        '<div style="float:right; text-align:right">'+
+                        '<div>'+
                         // TODO: remove old code - orginally had to manually save changes
                         // '<label id="lblNoticeAboutChanges'+grpID+'" '+
                         // 'style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>'+
                         // '&nbsp;&nbsp;&nbsp;'+
                         // '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
                         // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
-                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add"/>'+
+                        '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
+
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
                         '</div></div>'+
                         '<div id="tabContainer'+grpID+'"></div>'+
                         '<div style="position:absolute;bottom:8px;right:425px;">'+
-                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add"/>'+
+
+                        '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
+                        '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="add" style="margin-right:1em"/>'+
+                        '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add" style="margin-right:1em"/>'+
                         '</div>'+
                         '</div>')
 
@@ -299,15 +308,15 @@ function RectypeManager() {
                     var rectype = td.commonFields;
                     if (rectype && Number(rectype[fi.rty_RecTypeGroupID]) === Number(grpID)) {  //(rectype[9].indexOf(grpID)>-1) {
                         arr.push([Number(rectypeID),
-                                '', //icon 
+                                '', //icon
                                 '', //edit
                                 rectype[fi.rty_Name],
-                                rectype[fi.rty_Description], 
+                                rectype[fi.rty_Description],
                                 (Number(rectype[fi.rty_ShowInLists])===1),
-                                rectype[fi.rty_Status], 
+                                rectype[fi.rty_Status],
                                 grpID, //rectype[fi.rty_RecTypeGroupID],
                                 null,
-                                rectype[fi.rty_ConceptID]]);   
+                                rectype[fi.rty_ConceptID]]);
 
                         /*TODO: top.HEURIST.rectype.rectypeUsage[rectypeID].length*/
                     }
@@ -366,7 +375,7 @@ function RectypeManager() {
             });
 
             var myColumnDefs = [
-                { key: "id", label: "Code", sortable:true, minWidth:25, maxAutoWidth:25, width:25, className:'right',
+                { key: "id", label: "Code", sortable:true, minWidth:30, maxAutoWidth:30, width:30, className:'right',
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
                         elLiner.innerHTML = '<a href="#search" title="Click to launch search for '+oRecord.getData("name")+' records">'+ rectypeID + '</a>';
@@ -374,28 +383,28 @@ function RectypeManager() {
                 },
                 // 8/10/12 Concept ID hidden by Ian to make space, shoudl show on rollover of local code
                 { key: "conceptid", label: "Concept", sortable:true, minWidth:40, maxAutoWidth:40, width:40, className:'right', hidden:true },
-                
+
                 { key: "icon", label: "Icon", className:'center', sortable:false,   width:40,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
 
-                        var str1 = top.HEURIST.iconBaseURL + id + ".png#" + curtimestamp;
-                        var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png#" + curtimestamp;
+                        var str1 = top.HEURIST.iconBaseURL + id + "&t=" + curtimestamp;
+                        var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png&t=" + curtimestamp;
                         var icon ="<div class=\"rectypeImages\">"+
                         "<a href=\"#edit_icon\">"+
                         "<img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\">"+
                         "</a>"+
                         "<div id=\"thumb"+id+"\" style=\"background-image:url("+thumb+");\" class=\"thumbPopup\">"+
                         "<a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a>"+
-                        "</div>"+ 
+                        "</div>"+
                         "</div>";
                         elLiner.innerHTML = icon;
                 }},
-                
+
                 { key: "edit", label: "Edit", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
                 },
-                
+
                 { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("name");
@@ -406,8 +415,8 @@ function RectypeManager() {
                         }
                         elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
                 }},
-                
-                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800, 
+
+                 { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("description");
                         var tit = oRecord.getData("description");
@@ -423,7 +432,7 @@ function RectypeManager() {
                 { key: "struc", hidden:true, label: "Struc", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<a href="#edit_sctructure"><img src="../../../common/images/edit-structure.png" width="16" height="16" border="0" title="Edit record strcuture" /><\/a>'; }
                 },
-                                                                            //minWidth:20, maxWidth:20, maxAutoWidth:20, 
+                                                                            //minWidth:20, maxWidth:20, maxAutoWidth:20,
                 { key: "active", label: "Show", sortable:false, width:"30px", formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
                 { key: "info", label: "Dup", sortable:false, className:'center', formatter: function(elLiner, oRecord, oColumn, oData) {
                         var rectypeID = oRecord.getData('id');
@@ -496,7 +505,7 @@ function RectypeManager() {
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
                     if(elLink.hash === "#search") {
-                        window.open(top.HEURIST.baseURL+'search/search.html?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
+                        window.open(top.HEURIST.baseURL_V4+'?w=all&q=t:'+rectypeID+'&db='+db,'_blank');
                     }else if(elLink.hash === "#edit_rectype") {
                         _onAddEditRecordType(rectypeID, 0);
                         // TO REMOVE editRectypeWindow(rectypeID);
@@ -508,7 +517,7 @@ function RectypeManager() {
                         _upload_icon(rectypeID,1);
                         /*var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
-                        var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
+                        var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&rty_ID="+rectypeID;
                         top.HEURIST.util.popupURL(top, sURL, {
                         "close-on-blur": false,
                         "no-resize": false,
@@ -536,7 +545,7 @@ function RectypeManager() {
                                 }
 
 
-                                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                                 var callback = _updateAfterDelete;
                                 var params = "method=deleteRT&db=" + db + "&rtyID=" + rectypeID;
                                 Hul.getJsonData(baseurl, callback, params);
@@ -669,7 +678,7 @@ function RectypeManager() {
 
             var btnAddRecordType = Dom.get('btnAddRecordType'+grpID);
             btnAddRecordType.onclick = function (e) {
-                if(confirm('Before defining new record types we suggest importing suitable definitions\nfrom Heurist databases registered in the Heurist clearinghouse\n\n(Import Structure link on the left)')){
+                if(confirm('Before defining new record types we suggest importing suitable definitions\nfrom Heurist databases registered in the Heurist clearinghouse\n\n(Database menu > Structure > Acquire from databases)')){
                     var currentTabIndex = tabView.get('activeIndex');
                     var grpID = tabView.getTab(currentTabIndex).get('id');
                     _onAddEditRecordType(0, grpID);
@@ -677,6 +686,51 @@ function RectypeManager() {
             };
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick;
+
+            var body = $(top.document).find('body');
+            var dim = {h:body.innerHeight(), w:body.innerWidth()},
+
+            btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
+            btnAddRecordType.onclick = function(){
+                var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/selectDBForImport.php?popup=1&db="+ db +
+                "&grpId="+grpID;
+
+                Hul.popupURL(top, sURL, {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    title: 'Acquire from databases',
+                    height: dim.h*0.95,
+                    width: dim.w*0.95,
+                    //callback: _import_complete
+                });
+
+
+            };
+            btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
+            btnAddRecordType2.onclick = btnAddRecordType.onclick
+
+            //-------
+
+            btnAddRecordType = Dom.get('btnImportFromTemplate'+grpID);
+            btnAddRecordType.onclick = function(){
+                var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ db +
+                "&grpId="+grpID;
+
+                Hul.popupURL(top, sURL, {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    title: 'Acquire from templates',
+                    height: dim.h*0.95,
+                    width: dim.w*0.95,
+                    //callback: _import_complete
+                });
+
+
+            };
+            btnAddRecordType2 = Dom.get('btnImportFromTemplate'+grpID+'_2');
+            btnAddRecordType2.onclick = btnAddRecordType.onclick
+
+
             /*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
             btnAddFieldType.onclick = function (e) {
             var currentTabIndex = tabView.get('activeIndex');
@@ -688,7 +742,7 @@ function RectypeManager() {
             //
             $th = $( "span:contains('Show')" ).parent().parent(); //yui-dt-col-yui-dt-col23
             $th.css('width','1%');
-            
+
             //$$('.ellipsis').each(ellipsis);
 
         }//if(dt==undefined || dt==null)
@@ -783,13 +837,12 @@ function RectypeManager() {
     //
     function _updateRecordTypeOnServer(event) {
         var str = YAHOO.lang.JSON.stringify(_oRecordType);
-        //DEBUG alert("Stringified changes: " + str);
 
         if(!Hul.isnull(str)) {
             //_updateResult(""); //debug
             //return;//debug
 
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveRT&db="+db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -931,19 +984,20 @@ function RectypeManager() {
     function _editDetailType(detailTypeID) {
         var URL = "";
         if(detailTypeID) {
-            URL = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
+            URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db+"&detailTypeID="+detailTypeID;
         }
         else {
-            URL = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
+            URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
         }
 
-        var dim = Hul.innerDimensions(window);
+        var dim = Hul.innerDimensions(top);
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": false,
                 height: 700,
                 width: 700,
+                title: 'Edit field type',
                 callback: function(changedValues) {
                     if(Hul.isnull(changedValues)) {
                         // Canceled
@@ -958,17 +1012,17 @@ function RectypeManager() {
     // duplicate record type and then call edit type dialogue
     //
     function _duplicateType(rectypeID) {
-        
+
             var value = confirm("Do you really want to duplicate record type # "+rectypeID+"?"); //" '"+rt_name+"' ?");
             if(value) {
 
                 function _editAfterDuplicate(context) {
 
                     if(!Hul.isnull(context) && Number(context.id)>0){
-                        
-                        
+
+
                             var rty_ID = Number(context.id);
-                        
+
                             //refresh the local heurist
                             top.HEURIST.rectypes = context.rectypes;
                             _cloneHEU = null;
@@ -981,34 +1035,35 @@ function RectypeManager() {
                             curtimestamp = d.getMilliseconds();
 
                             _removeTable(grpID, true);
-                        
+
                             _onAddEditRecordType(context.id, null);
                     }
                 }
 
 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/duplicateRectype.php";
+                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/duplicateRectype.php";
                 var callback = _editAfterDuplicate;
                 var params = "db=" + db + "&rtyID=" + rectypeID;
                 Hul.getJsonData(baseurl, callback, params);
 
             }
     }
-    
-    
+
+
     //
     // edit strcuture (from image link in table)
     //
     function _editRecStructure(rty_ID) {
 
-        var URL = top.HEURIST.basePath + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
+        var URL = top.HEURIST.baseURL_V3 + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rty_ID;
         //this.location.replace(URL);
 
-        var dim = Hul.innerDimensions(this.window);
-        
+        var dim = Hul.innerDimensions(top);
+
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": false,
+                title: 'RECORD STRUCTURE',
                 height: dim.h*0.9,
                 width: 860,
                 "no-close": true,
@@ -1025,11 +1080,12 @@ function RectypeManager() {
 
     //art 2014-05-26 - NOT USED ANYMORE now it updates in editRectypeTitle
     function _updateTitleMask(rty_ID){
-        var URL = top.HEURIST.basePath + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+db+"&recTypeIDs="+rty_ID;
+        var URL = top.HEURIST.baseURL_V3 + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+db+"&recTypeIDs="+rty_ID;
 
         Hul.popupURL(top, URL, {
                 "close-on-blur": false,
                 "no-resize": true,
+                title:'Recalculation of composite record titles',
                 height: 400,
                 width: 400,
                 callback: function(context) {
@@ -1041,7 +1097,7 @@ function RectypeManager() {
     // listener of add button
     //
     function _onAddFieldType(){
-    var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
+    var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
 
     Hul.popupURL(top, url,
     {   "close-on-blur": false,
@@ -1061,18 +1117,19 @@ function RectypeManager() {
 
         if(_needToSaveFirst()) { return; }
 
-        var url = top.HEURIST.basePath + "admin/structure/rectypes/editRectype.html?db="+db;
+        var url = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/editRectype.html?db="+db;
         if(rty_ID>0){
             url = url + "&rectypeID="+rty_ID; //existing
         }else{
             url = url + "&groupID="+rtg_ID; //new one
         }
-        var dim = Hul.innerDimensions(this.window);
+        var dim = Hul.innerDimensions(top);
         Hul.popupURL(top, url,
             {   "close-on-blur": false,
                 "no-resize": false,
+                title:'Edit Record Type',
                 height: dim.h*0.9,
-                width: 700,
+                width: 800,
                 callback: function(context) {
                     if(!Hul.isnull(context)){
 
@@ -1167,12 +1224,12 @@ function RectypeManager() {
         grp; //object in HEURIST
 
         if(Hul.isempty(name)){
-            alert('Group name is required. Please sepecify it');
+            alert('Group name is required. Please specify it');
             Dom.get('edName').focus();
             return;
         }
         if(Hul.isempty(description)){
-            alert('Group description is required. Please sepecify it');
+            alert('Group description is required. Please specify it');
             Dom.get('edDescription').focus();
             return;
         }
@@ -1199,8 +1256,6 @@ function RectypeManager() {
 
         //top.HEURIST.rectypes.groups[grpID] = grp;
         var str = YAHOO.lang.JSON.stringify(orec);
-
-        //DEBUG alert(str);
 
         //make this tab active
         function _updateOnSaveGroup(context){
@@ -1243,7 +1298,7 @@ function RectypeManager() {
 
         if(!Hul.isnull(str)){
 
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = _updateOnSaveGroup;
             var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1294,7 +1349,7 @@ function RectypeManager() {
         var str = YAHOO.lang.JSON.stringify(orec);
 
         if(!Hul.isnull(str)) {
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = null;//_updateOnSaveGroup;
             var params = "method=saveRTG&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1352,7 +1407,7 @@ function RectypeManager() {
                 for (ind in _groups){
                     if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
 
-                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                         var callback = _updateAfterDeleteGroup;
                         var params = "method=deleteRTG&db="+db+"&rtgID=" + grpID;
                         Hul.getJsonData(baseurl, callback, params);
@@ -1445,19 +1500,20 @@ function _upload_icon(rectypeID,mode) {
     if (!mode){
         mode = 0;
     }
-    
+
     rt_name =  top.HEURIST.rectypes.names[rectypeID];
 
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID+"&rty_Name=" + rt_name;
+    var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID=" + rectypeID+"&rty_Name=" + rt_name;
     top.HEURIST.util.popupURL(top, sURL, {
             "close-on-blur": false,
             "no-resize": false,
+            title:'Upload Record Type Icon',
             height: 500, //(mode==0?200:250),
             width: 700,
             callback: function(context){
-                icon_refresh(rectypeID)  
-            } 
+                icon_refresh(rectypeID)
+            }
     });
 
 }
@@ -1472,16 +1528,16 @@ function icon_refresh(rectypeID) {
         var img = $(imgIcon);
         if(img){
             //was img.src = top.HEURIST.iconBaseURL+rectypeID+".png" + '?' + (new Date()).getTime();
-            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+".png?"+curtimestamp+'")');
+            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL+rectypeID+"&t="+curtimestamp+'")');
         }
 
         var imgThumb = "#thumb" + rectypeID;
         img = $(imgThumb);
         if(img){
-            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png?"+curtimestamp+'")');
+            img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png&t="+curtimestamp+'")');
             ///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
         }
-        
+
     }
 }
 

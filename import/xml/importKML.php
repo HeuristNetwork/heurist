@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -110,7 +110,7 @@ class HeuristKMLParser extends HeuristForeignParser {
 
 		foreach ($matches[0] as $placemarkText) {
 			try {
-				$entries[] = &$this->_makeNewEntry($placemarkText);
+				$entries[] = $this->_makeNewEntry($placemarkText);
 			} catch (Exception $e) {
 				array_push($errors, $e->getMessage());
 			}
@@ -410,7 +410,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 		$heuristType = HeuristKMLParser::getHeuristReferenceTypeByID($this->_type);
 		if (! $heuristType) return NULL;
 
-		$entry = &new HeuristNativeEntry($heuristType);
+		$entry = new HeuristNativeEntry($heuristType);
 
 		foreach ($this->_fields as $kmlTag => $value) {
 			$heuristFieldID = $kml_to_heurist_map[$kmlTag];
@@ -450,7 +450,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 						list($geoType, $geoValue) = $geometry;
 
 						unset($newField);
-						$newField = &new HeuristNativeField($geoDT, $geoType);
+						$newField = new HeuristNativeField($geoDT, $geoType);
 						$newField->setGeographicValue($geoValue);
 						$entry->addField($newField);
 					}
@@ -479,7 +479,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 			$e = floatval(TrivialXMLParser::getValue($box, "east"));
 			if ($n && $s && $w && $e) {
 				// store a rectangle
-				array_push($geometries, array("r", "POLYGON(($n $w,$n $e,$s $e,$s $w,$n $w))"));
+				array_push($geometries, array("r", "POLYGON (($n $w,$n $e,$s $e,$s $w,$n $w))"));
 			}
 			break;
 
@@ -487,7 +487,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 			list($w,$n) = array_map("floatval", explode(',', $innerTags["coordinates"][0]["-text"][0]));
 			if ($w && $n) {
 				// store a point
-				array_push($geometries, array("p", "POINT($w $n)"));
+				array_push($geometries, array("p", "POINT ($w $n)"));
 			}
 			break;
 
@@ -499,7 +499,7 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 					if ($bdGeoValue) $bdGeoValue .= ",";
 					$bdGeoValue .= floatval($coord[1])." ".floatval($coord[2]);
 				}
-				$bdGeoValue = "LINESTRING(" . $bdGeoValue . ")";
+				$bdGeoValue = "LINESTRING (" . $bdGeoValue . ")";
 				array_push($geometries, array("l", $bdGeoValue));
 			}
 			break;
@@ -519,13 +519,13 @@ class HeuristKMLEntry extends HeuristForeignEntry {
 					}
 				}
 			}
-			array_push($geometries, array("pl", "POLYGON(" . $bdGeoValue . ")"));
+			array_push($geometries, array("pl", "POLYGON (" . $bdGeoValue . ")"));
 			break;
 
 		    case "linearring":
 			$bdGeoValue = $this->_parseLinearRing($innerTags);
 			if ($bdGeoValue) {
-				$bdGeoValue = "POLYGON((" . $bdGeoValue . "))";
+				$bdGeoValue = "POLYGON ((" . $bdGeoValue . "))";
 				array_push($geometries, array("pl", $bdGeoValue));
 			}
 			break;

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -38,8 +38,6 @@
 	if (! is_logged_in()) return;
 
 	mysql_connection_select(DATABASE);
-
-	/*****DEBUG****///error_log("request is ".print_r($_REQUEST,true)); //>>>>DEBUG
 
 	if (@$_REQUEST['send_notification']) {
 		$notification_sent_message = handle_notification();
@@ -60,7 +58,7 @@
 ?>
 <html>
 	<head>
-		<link rel="stylesheet" type="text/css" href="<?=HEURIST_SITE_PATH?>common/css/global.css">
+		<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 		<title>Share records</title>
@@ -97,7 +95,8 @@
 			function reset_person() { document.getElementById('notify_person').selectedIndex = 0; }
 			function reset_email() { document.getElementById('notify_email').value = ''; }
 			function reset_coll_grp() {
-				document.getElementById('notify_coll_grp').selectedIndex = 0;
+                var ele = document.getElementById('notify_coll_grp');
+                if (ele) ele.selectedIndex = 0;
 				document.getElementById('coll_grp_members_link_div').style.display = 'none';
 			}
 			function reset_group() {
@@ -115,9 +114,10 @@
 
 		<form action="sendNotificationsPopup.php" method="post" style="display: inline;">
 
-			<div style="font-weight: bold; margin-bottom: 3px;">
+			<div style="font-weight: bold; margin-bottom: 1em;">
 				Share these records with other users via email:
 			</div>
+            <div style="margin-bottom: 0.5em;">
 			&nbsp;
 			<?php
 				$res = mysql_query('select usr.'.USERS_ID_FIELD.',concat(usr.'.USERS_FIRSTNAME_FIELD.'," ",usr.'.USERS_LASTNAME_FIELD.') as fullname
@@ -155,13 +155,19 @@
 			<br>
 			<div id="grp_members_link_div" style="text-align: center; display: none;">&nbsp;<a id="grp_members_link" href=# onclick="top.HEURIST.util.popupURL(window, '/admin/ugrps/listUsergroupMembers.html?wg_id='+this.wg_id); return false;">Show group members</a></div>
 			&nbsp;
+            </div>
 			<textarea name="notify_message" title="email message" style="width: 95%;" rows="3"
 				onfocus="if (this.value=='(enter message here)') this.value='';">(enter message here)</textarea>
-			<div style="width: 95%; margin-top: 3px;">
-				<input type="submit" name="send_notification" id="notify_submit" value="Share" style="float: right;"
+			<div style="width: 95%; margin-top:1em;">
+				<input type="submit" name="send_notification" id="notify_submit" value="Notify" style="float: right;"
 					onclick="return confirm_notification();">
 			</div>
+            <div style="font-weight: bold;">
+                Notification includes a URL which will open the list of records<br>
+                in a Heurist search, from which they can be bookmarked
+            </div>
 
+            <input type="hidden" name="h4" id="h4" value="<?= htmlspecialchars(@$_REQUEST['h4']) ?>">
 			<input type="hidden" name="bib_ids" id="bib_ids" value="<?= htmlspecialchars($_REQUEST['bib_ids']) ?>">
 
 		</form>
@@ -172,16 +178,15 @@
 
 	function handle_notification() {
 		function getInt($strInt){
-			/*****DEBUG****///error_log("str = ".preg_replace("/[\"']/","",$strInt)." val =". intval($strInt));
 			return intval(preg_replace("/[\"']/","",$strInt));
 		}
 		$bib_ids = array_map("getInt", explode(',', $_REQUEST['bib_ids']));
-		/*****DEBUG****///error_log("bibids = ".print_r($bib_ids,true));
 		if (! count($bib_ids)){
 			return '<div style="color: red; font-weight: bold; padding: 5px;">(you must select at least one bookmark)</div>';
 		}
 		$bibIDList = join(',', $bib_ids);
-		$notification_link = HEURIST_BASE_URL . 'search/search.html?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
+      
+        $notification_link = HEURIST_BASE_URL . '?db='.HEURIST_DBNAME.'&w=all&q=ids:' . $bibIDList;
 
 		$bib_titles = mysql__select_assoc('Records', 'rec_ID', 'rec_Title', 'rec_ID in (' . $bibIDList . ')');
 		$title_list = "Id      Title\n" . "------  ---------\n";
@@ -209,7 +214,7 @@
 
 		$email_text = get_user_name()." would like to draw some records to your attention, with the following note:\n\n"
 		.$msg
-		."Access them and add them (if desired) to your Heurist records at:\n\n"
+		."Access them and add them (if desired) to your Heurist records at: \n\n"
 		.$notification_link
 		."\n\n"
         ."To add records, either click on the unfilled star left of the title\n"

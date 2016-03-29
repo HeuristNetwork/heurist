@@ -1,3 +1,24 @@
+
+/**
+* filename: explanation
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2016 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 // This application is provided by Kjell Scharning
 //  Licensed under the Apache License, Version 2.0;
 //  http://www.apache.org/licenses/LICENSE-2.0
@@ -474,8 +495,11 @@ function createrectangle(point) {
   drawRectangle();
 }
 function drawRectangle() {
-  southWest = startMarker.getPosition(); // used in logCode6()
-  northEast = nemarker.getPosition(); // used in logCode6()
+  var pnt1 = startMarker.getPosition(); // used in logCode6()
+  var pnt2 = nemarker.getPosition(); // used in logCode6()
+  
+  southWest = new google.maps.LatLng( pnt1.lat()<pnt2.lat()?pnt1.lat():pnt2.lat(), pnt1.lng()<pnt2.lng()?pnt1.lng():pnt2.lng() );
+  northEast = new google.maps.LatLng( pnt1.lat()>pnt2.lat()?pnt1.lat():pnt2.lat(), pnt1.lng()>pnt2.lng()?pnt1.lng():pnt2.lng() );
   var latLngBounds = new google.maps.LatLngBounds(
     southWest,
     northEast
@@ -1872,7 +1896,7 @@ function setinfo(text) {
   }
 }
 function directionsintroduction() {
-  setinfo('Ready for Directions. Create a route along roads with markers at chosen locations.\n'
+  setinfo('Ready for Directions. \n\nCreate a route along roads with markers at chosen locations.\n'
     +'Click on the map, or enter an address and click "Search", to place a marker.\n'
     +'Lines will be drawn along roads from marker to marker.\n'
     +'Use "Delete Last Point" if you want to undo.\n'
@@ -1882,19 +1906,19 @@ function directionsintroduction() {
 }
 
 function markerintroduction() {
-  setinfo('Ready for Marker. Click on the map, or enter an address and click "Search", to place a marker.\n');
+  setinfo('Ready for Marker. \n\nClick on the map, or enter an address and click "Search", to place a marker.\n');
   //+'You may enter your content for the infowindow with "KML input" even if your code choice is Javascript.\n'
   //+'Click "Next shape" before each additional marker.';
 }
 function polylineintroduction() {
-  setinfo('Ready for Polyline. Click on the map. The code for the shape you create will be presented here.\n\n'
+  setinfo('Ready for Polyline. \n\nClick on the map. The code for the shape you create will be presented here.\n\n'
     //+'When finished with a shape, click Next shape and draw another shape, if you wish.\n'
     +'\nIf you want to edit a saved polyline or polygon, click on it. Then click Edit lines. '
     +'When editing, you may remove a point with a click on it.\n');
   //+'\nThe complete KML code for what you have created, is always available with Show KML.';
 }
 function polygonintroduction() {
-  setinfo('Ready for Polygon. Click on the map. The code for the shape you create will be presented here. '
+  setinfo('Ready for Polygon. \n\nClick on the map. The code for the shape you create will be presented here. '
     +'The Maps API will automatically "close" any polygons by drawing a stroke connecting the last coordinate back to the '
     +'first coordinate for any given paths.\n'
     //+'\nTo create a polygon with hole(-s), click "Hole" before you start the drawing.\n'
@@ -1904,14 +1928,14 @@ function polygonintroduction() {
   //+'\nThe complete KML code for what you have created, is always available with Show KML.';
 }
 function rectangleintroduction() {
-  setinfo('Ready for Rectangle. Click two times on the map - first for the southwest and '+
+  setinfo('Ready for Rectangle. \n\nClick two times on the map - first for the southwest and '+
     'then for the northeast corner. You may resize and move '+
     'the rectangle with the two draggable markers you then have.\n\n');
   //'The v3 Rectangle is a polygon. But in Javascript code mode an extra code for '+
   //'polyline is presented here in the text area.';
 }
 function circleintroduction() {
-  setinfo('Ready for Circle. Click for center. Then click for radius distance. '+
+  setinfo('Ready for Circle. \n\nClick for center. Then click for radius distance. '+
     'You may resize and move the circle with the two draggable markers you then have.\n\n');
   //'KML code is not available for Circle.';
 }
@@ -1940,25 +1964,25 @@ function loadParameters(val) {
 
   switch (type) {
     case "p":
-      matches = value.match(/POINT\((\S+)\s+(\S+)\)/i);
+      matches = value.match(/POINT\s?\((\S+)\s+(\S+)\)/i);
       break;
     case "r":  //rectangle
-      matches = value.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
+      matches = value.match(/POLYGON\s?\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
       break;
 
     case "c":  //circle
-      matches = value.match(/LINESTRING\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+      matches = value.match(/LINESTRING\s?\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
       break;
 
     case "l":  ///polyline
-    matches = value.match(/LINESTRING\((.+)\)/i);
+    matches = value.match(/LINESTRING\s?\((.+)\)/i);
     if (matches){
       matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
     }
     break;
 
     case "pl": //polygon
-    matches = value.match(/POLYGON\(\((.+)\)\)/i);
+    matches = value.match(/POLYGON\s?\(\((.+)\)\)/i);
     if (matches) {
       matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
     }
@@ -1976,6 +2000,9 @@ Number.prototype.toRad = function() {
 Number.prototype.toDeg = function() {
   return this * 180 / Math.PI;
 }
+//
+// get point within given radius
+//
 function destinationPoint(lat1, lon1, brng, dist) {
   dist = dist / 6371000;
   brng = brng.toRad();
@@ -2026,7 +2053,7 @@ function applyManualEntry(){
 
   var islng = true;
   for (k=0; k<arc.length; k++){
-    if(k==2 && type=="c" && arc[k].indexOf("r=")==0){
+    if(k==2 && type=="c" && arc[k].indexOf("r=")==0){   //circle
       var d = Number(arc[k].substr(2));
       if(isNaN(d)){
         alert(arc[k]+" is wrong radius value");
@@ -2296,7 +2323,7 @@ function closeWithValue() {
     type = "p";
     if(markerShape){
       var point = markerShape.getPosition();
-      value = "POINT("+r(point.lng())+" "+r(point.lat())+")";
+      value = "POINT ("+r(point.lng())+" "+r(point.lat())+")";
     }else{
       value = null;
     }
@@ -2304,7 +2331,7 @@ function closeWithValue() {
 
     case 3: //"rectangle":
       type = "r";
-      value = "POLYGON((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
+      value = "POLYGON ((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
       break;
 
     case 4: //"circle":
@@ -2317,33 +2344,33 @@ function closeWithValue() {
       var bounds = circle.getBounds();
 
       // I need only 2 points
-      value = "LINESTRING("+lng+" "+lat+","+r(bounds.getNorthEast().lng())+" "+lat+","+
+      value = "LINESTRING ("+lng+" "+lat+","+r(bounds.getNorthEast().lng())+" "+lat+","+
       r(bounds.getSouthWest().lng())+" "+r(bounds.getSouthWest().lat())+","+
       r(bounds.getSouthWest().lng())+" "+r(bounds.getNorthEast().lat())+
       ")";
 
-      //value = "LINESTRING("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
+      //value = "LINESTRING ("+lng+" "+lat+","+(lng+rad)+" "+lat+","+(lng-rad)+" "+(lat-rad)+","+(lng-rad)+" "+(lat+rad)+")";
 
       break;
 
     case 2: //"polygon":
     type = "pl";
     if(pointsArrayKml.length>2){
-      value = "POLYGON((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
+      value = "POLYGON ((" + pointsArrayKml.join(",") + "," + pointsArrayKml[0] + "))";
     }
     break;
 
     case 1: //"path":
     type = "l";
     if(pointsArrayKml.length>1){
-      value = "LINESTRING(" + pointsArrayKml.join(",") + ")";
+      value = "LINESTRING (" + pointsArrayKml.join(",") + ")";
     }
   }
 
-  if(top.HAPI){
+  if(true || top.HAPI){
     window.close(type, value);
   }else{
-    alert(type+" "+value);
+    //DEBUG alert(type+" "+value);
   }
 }
 
@@ -2352,7 +2379,7 @@ function closeWithValue() {
  */
 function _load_layers(mode) {
 
-  var baseurl = top.HEURIST.basePath + "viewers/map/showMap.php";
+  var baseurl = top.HEURIST.baseURL_V3 + "viewers/map/showMap.php";
   var callback = _updateLayersList;
   var params =  "ver=1&layers="+mode+"&db="+top.HEURIST.database.name;
   top.HEURIST.util.getJsonData(baseurl, callback, params);
@@ -2380,7 +2407,7 @@ function _updateLayersList(context){
         geoobj = context.geoObjects[ind];
         if(geoobj.type === "kmlfile"){
 
-          var url = top.HEURIST.baseURL;
+          var url = top.HEURIST.baseURL_V3;
           url += "records/files/downloadFile.php?db=" + top.HEURIST.database.name + "&ulf_ID="+geoobj.fileid;
           geoobj.url = url;
 

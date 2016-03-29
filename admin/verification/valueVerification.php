@@ -3,12 +3,12 @@
 /**
 * valueVerification.php - library of functions to verify values - pointers and terms to conform to
 * the constraints in detail and record type definitions
-* Used in listDataErrors.php, importCSV_lib.php
+* Used in listDatabaseErrors.php, importCSV_lib.php
 * @todo saveRecordDetail and importRectype
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -39,25 +39,36 @@ function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     $allowed_terms = null;
 
     if($dtyID==null || !@$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
-        $terms = getTermsFromFormat($defs);
-        if (($cntTrm = count($terms)) > 0) {
-            if ($cntTrm == 1) {  //vocabulary
-                $terms = getTermOffspringList($terms[0]);
 
-            }else{
-                $nonTerms = getTermsFromFormat($defs_nonsel);
-                if (count($nonTerms) > 0) {
-                    $terms = array_diff($terms, $nonTerms);
+        if ( $dtyID == DT_RELATION_TYPE) {
+            //get all root terms (vocabs)
+            $allowed_terms = getTermListAll('relation');
+            $dtyIDDefs[$dtyID] = $allowed_terms;
+
+        } else {
+
+            $terms = getTermsFromFormat($defs);
+            if (($cntTrm = count($terms)) > 0) {
+
+                if ($cntTrm == 1) {  //vocabulary
+                    $terms = getTermOffspringList($terms[0]);
+
+                }else{
+                    $nonTerms = getTermsFromFormat($defs_nonsel);
+                    if (count($nonTerms) > 0) {
+                        $terms = array_diff($terms, $nonTerms);
+                    }
                 }
-            }
-            if (count($terms)<1) {
-                $allowed_terms = "all";
-            }else{
-                $allowed_terms = $terms;
-            }
+                if (count($terms)<1) {
+                    $allowed_terms = "all";
+                }else{
+                    $allowed_terms = $terms;
+                }
 
-            if($dtyID!=null){ //keep for future use
-                $dtyIDDefs[$dtyID] = $allowed_terms;
+                if($dtyID!=null){ //keep for future use
+                    $dtyIDDefs[$dtyID] = $allowed_terms;
+                }
+
             }
         }
     }else{
@@ -114,42 +125,43 @@ function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID){
     }
 
     $label = mb_strtolower($label);
-    
+
     if(is_array($allowed_terms)){
         $term_ID = array_search($label, $allowed_terms, true);
     }else{
         $term_ID = getTermByLabel($label);
     }
-    
+
     return $term_ID;
-    
-    //OLD WAY return $allowed_terms && ($allowed_terms === "all" || in_array($label, $allowed_terms));
+
 }
 
-function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){        
-    global $dtyIDDefs;        
+function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
+    global $dtyIDDefs;
 
-    if(!@$dtyIDDefs[$dtyID]){        
-        $terms = getTermsFromFormat($defs);        
-        if (($cntTrm = count($terms)) > 0) {        
-            if ($cntTrm == 1) {  //vocabulary        
-                $terms = getTermOffspringList($terms[0]);        
-            }else{        
-                $nonTerms = getTermsFromFormat($defs_nonsel);        
-                if (count($nonTerms) > 0) {        
-                    $terms = array_diff($terms,$nonTerms);        
-                }        
-            }        
-            if (count($temp)<1) {        
-                $dtyIDDefs[$dtyID] = "all";        
-            }else{        
-                $dtyIDDefs[$dtyID] = $terms;        
-            }        
-        }        
-    }        
-
-    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);        
-}        
+    if(!@$dtyIDDefs[$dtyID]){
+        $terms = getTermsFromFormat($defs);
+        if (($cntTrm = count($terms)) > 0) {
+            if ($cntTrm == 1) {  //vocabulary
+                $terms = getTermOffspringList($terms[0]);
+            }else{
+                $nonTerms = getTermsFromFormat($defs_nonsel);
+                if (count($nonTerms) > 0) {
+                    $terms = array_diff($terms,$nonTerms);
+                }
+            }
+            if (count($terms)<1) {
+                $dtyIDDefs[$dtyID] = "all";
+            }else{
+                $dtyIDDefs[$dtyID] = $terms;
+            }
+        }
+    }
+    if(!@$dtyIDDefs[$dtyID]){
+        return false; //terms not found
+    }
+    return $dtyIDDefs[$dtyID] === "all" || in_array($id, $dtyIDDefs[$dtyID]);
+}
 
 //
 // similar functions are in saveRecordDetail and importRectype
@@ -157,23 +169,22 @@ function isInvalidTerm($defs, $defs_nonsel, $id, $dtyID){
 //
 function getTermsFromFormat($formattedStringOfTermIDs){
 
-        if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
-            return array();
-        }
+    if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
+        return array();
+    }
 
-        if (strpos($formattedStringOfTermIDs,"{")!== false) {
-            /*****DEBUG****///error_log( "term tree string = ". $formattedStringOfTermIDs);
-            $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
-            if (strrpos($temp,":") == strlen($temp)-1) {
-                $temp = substr($temp,0, strlen($temp)-1);
-            }
-            $termIDs = explode(":",$temp);
-        } else {
-            /*****DEBUG****///echo ( "term array string = ". $formattedStringOfTermIDs);
-            $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
-            $termIDs = explode(",",$temp);
+
+    if (strpos($formattedStringOfTermIDs,"{")!== false) {
+        $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
+        if (strrpos($temp,":") == strlen($temp)-1) {
+            $temp = substr($temp,0, strlen($temp)-1);
         }
-        return $termIDs;
+        $termIDs = explode(":",$temp);
+    } else {
+        $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
+        $termIDs = explode(",",$temp);
+    }
+    return $termIDs;
 }
 
 //-------------------------------------
@@ -181,29 +192,30 @@ function getTermsFromFormat($formattedStringOfTermIDs){
 function isValidPointer($constraints, $rec_id, $dtyID ){
     global $dtyIDDefs;
 
-    $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$rec_id);
-    if ($res){
-        $tempRtyID = mysql_fetch_row($res);
-        if ($tempRtyID){
-              $tempRtyID = @$tempRtyID[0];
-        } else {
-             return false;
-        }
+    $isvalid = false;
+    
+    if(isset($rec_id) && is_numeric($rec_id) && $rec_id>0){
+    
+        $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$rec_id);
+        if ($res){
+            $tempRtyID = mysql_fetch_row($res);
+            if ($tempRtyID){
+                $tempRtyID = @$tempRtyID[0];
 
-        $allowed_types = "all";
-        if ($constraints!=null && $constraints != "") {
-                $temp = explode(",",$constraints); //get allowed record types
-                if (count($temp)>0) {
-                       $allowed_types = $temp;
+                $allowed_types = "all";
+                if ($constraints!=null && $constraints != "") {
+                    $temp = explode(",",$constraints); //get allowed record types
+                    if (count($temp)>0) {
+                        $allowed_types = $temp;
+                    }
                 }
+
+                $isvalid = ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));
+
+            }
         }
-
-        return ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));
-
-    }else{
-        //record not found
-        return false;
     }
+    return $isvalid;
 }
 
 ?>

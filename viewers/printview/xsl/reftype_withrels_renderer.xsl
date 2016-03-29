@@ -2,7 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
 	<xsl:param name="arg"/>
-<!-- 
+<!--
 	<xsl:include href="course_unit.xsl"/>
 	<xsl:include href="event.xsl"/>
 	<xsl:include href="conference.xsl"/>
@@ -67,7 +67,7 @@
 		<tr>
 			<td class="detailType">
 				<img>
-					<xsl:attribute name="src">../../common/images/rectype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
+					<xsl:attribute name="src">../../../common/images/rectype-icons/<xsl:value-of select="type/@id"/>.png</xsl:attribute>
 				</img>
 			</td>
 			<td class="detail" style="font-weight: bold;">
@@ -148,10 +148,10 @@
 				<xsl:apply-templates select="detail[@id=264]/record"></xsl:apply-templates>
 			</td>
 		</tr>
-		
+
 		<tr>
 			<td class="detailType">
-				<xsl:value-of select="detail[@id=267]/record/@name"/> 
+				<xsl:value-of select="detail[@id=267]/record/@name"/>
 			</td>
 			<td class="detail">
 				<xsl:apply-templates select="detail[@id=267]/record"></xsl:apply-templates>

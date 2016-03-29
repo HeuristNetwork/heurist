@@ -1,6 +1,6 @@
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.2
@@ -10,7 +10,7 @@
 
 Directory:	/common
 
-Overview:	Shared code and resources of general utility across multiple program area
+Overview:	Heurist vsn 3 shared code and resources of general utility across multiple program area
 
 Notes:
 

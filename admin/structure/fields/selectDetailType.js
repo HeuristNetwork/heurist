@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2013 University of Sydney
+* Copyright (C) 2005-2016 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,10 +18,10 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
+* @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2013 University of Sydney
-* @link        http://Sydney.edu.au/Heurist
+* @copyright   (C) 2005-2016 University of Sydney
+* @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
@@ -110,7 +110,7 @@ function SelectDetailType() {
 
 		//refill array
 		// 1. Reads GET parameters
-		if (location.search.length > 1) {
+		if (location.search && location.search.length > 1) {
 			//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
 			rty_ID = top.HEURIST.parameters.rty_ID;
@@ -214,7 +214,7 @@ function SelectDetailType() {
 								{ key: "description",   hidden:true},
 								{ key: "group",   hidden:true},
 								{ key: "info", hidden:true, label: "Info", sortable:false, formatter: function(elLiner, oRecord, oColumn, oData){
-										elLiner.innerHTML = '<img src="../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
+										elLiner.innerHTML = '<img src="../../../common/images/info.png" width="16" height="16" border="0" title="Info"/>';} },
 					            { key: "usage", label: "Used in ...", sortable:true, className:'center',
 					                formatter: function(elLiner, oRecord, oColumn, oData) {
 					                var str = oRecord.getData("usage");
@@ -334,7 +334,7 @@ function SelectDetailType() {
 	}//end of initialization ==============================
 
 	function _showSelectCount(){
-				lblSelect1.innerHTML = "You selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length>1)?"s":"");
+				lblSelect1.innerHTML = "Selected <b>"+_arr_selection.length+"</b> field"+((_arr_selection.length!=1)?"s":"");
 				if(!Hul.isnull(lblSelect2)) {
 					lblSelect2.innerHTML = lblSelect1.innerHTML;
 				}
@@ -555,11 +555,12 @@ function SelectDetailType() {
 
 			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
 								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.basePath + "admin/structure/fields/editDetailType.html?db="+db;
+			var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db;
 
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
+                title: 'Define new field type',
 			height: 700,
 			width: 700,
 				callback: function(context) {
@@ -572,9 +573,10 @@ function SelectDetailType() {
 						if(!isNaN(_dtyID)){
 							_arr_selection.push(""+Math.abs(_dtyID));
 
-                            //close after creation of new field                            
+                            //close after creation of new field
                             var res = _arr_selection.join(",");
                             window.close(res);
+                            return true;
                         }
 
 						//new field type to be added - refresh list
@@ -595,6 +597,11 @@ function SelectDetailType() {
 						var res = _arr_selection.join(",");
 						window.close(res);
 				},
+
+                addHeader : function () {
+                        var res = "section_header";
+                        window.close(res);
+                },
 
 				/**
 				 * Cancel form - closes this window

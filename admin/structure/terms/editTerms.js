@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2014 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @author      Stephen White
@@ -82,7 +82,7 @@ function EditTerms() {
 
         _tabView.addTab(new YAHOO.widget.Tab({
             id: 'enum',
-            label: 'Term list fields',
+            label: 'Terms',
             content: '<div style="height:90%; max-width:300; overflow: auto;"><div id="termTree1" class="termTree ygtv-highlight" style="width:100%;height:100%;"></div></div>'
         }));
         _tabView.addTab(new YAHOO.widget.Tab({
@@ -108,6 +108,8 @@ function EditTerms() {
             dv1.style.display = "none";
             dv2.style.display = "block";
         }
+        
+        _initFileUploader();
     }
 
     /**
@@ -199,6 +201,10 @@ function EditTerms() {
                             if(!Hul.isnull(arTerm)){
 
                                 term = {};//new Object();
+                                //if(child==5746){ //debug
+                                //    term.id = child;
+                                //}
+                                
                                 term.id = child;
                                 term.parent_id = parent_id;
                                 term.conceptid = arTerm[fi.trm_ConceptID];
@@ -317,7 +323,14 @@ function EditTerms() {
     */
     function _onNodeClick(obj){
 
-        var node = obj.node;
+        var node = null;
+        if(obj){
+            if(obj.node){
+                node = obj.node;
+            }else{
+                node = obj;
+            }
+        }
 
         _parentNode = null;
 
@@ -363,6 +376,20 @@ function EditTerms() {
                 }
                 Dom.get('edDescription').value = node.data.description;
                 Dom.get('edCode').value = node.data.termcode;
+                
+                //image
+                if(node.data.id>0){
+                    var curtimestamp = (new Date()).getMilliseconds();
+                    Dom.get('termImage').innerHTML =
+            "<a href=\"javascript:void(0)\" onClick=\"{editTerms.showFileUploader()}\" title=\"Click to change image\">"+
+            "<img id=\"imgThumb\" src=\""+
+            top.HEURIST.iconBaseURL + node.data.id + "&ent=term&t=" + curtimestamp +
+            "\" height=\"120\"></a>";
+                    Dom.get('termImage').style.display = 'block';
+                }else{
+                    Dom.get('termImage').style.display = 'none';
+                }
+                
 
                 var node_invers = null;
                 if(node.data.inverseid>0){
@@ -379,7 +406,7 @@ function EditTerms() {
                 }else{
                     node.data.inverseid = null;
                     Dom.get('edInverseTermId').value = '0';
-                    Dom.get('edInverseTerm').value = '';
+                    Dom.get('edInverseTerm').value = 'click me to select inverse term...';
                     Dom.get('btnInverseSetClear').value = 'set';
 
                     Dom.get('divInverse').style.display = "none"; //(_currTreeView === _termTree2)?"block":"none";
@@ -434,10 +461,11 @@ function EditTerms() {
             Dom.get('formMessage').style.display = "block";
         }
 
-
-        var ind = _tabView.get("activeIndex");
-        var tv = (ind===0)?_termTree1:_termTree2;
-        tv.onEventToggleHighlight(obj);
+        if(node){ //obj && obj.event){
+            var ind = _tabView.get("activeIndex");
+            var tv = (ind===0)?_termTree1:_termTree2;
+            tv.onEventToggleHighlight(node);
+        }
     }
 
     /**
@@ -463,12 +491,14 @@ function EditTerms() {
         if(disable){
             Dom.get("btnDelete").onclick = _disableWarning;
             Dom.get("btnInverseSetClear").onclick = _disableWarning2;
+            Dom.get('edInverseTerm').onclick = _disableWarning2;
 
             Dom.get("cbInverseTermItself").onclick= _disableWarning2;
             Dom.get("cbInverseTermOther").onclick= _disableWarning2;
         }else{
             Dom.get("btnDelete").onclick = _doDelete;
             Dom.get("btnInverseSetClear").onclick = _setOrclearInverseTermId;
+            Dom.get('edInverseTerm').onclick = _setOrclearInverseTermId2;
 
             Dom.get("cbInverseTermItself").onclick= _onInverseTypeClick;
             Dom.get("cbInverseTermOther").onclick= _onInverseTypeClick;
@@ -491,13 +521,18 @@ function EditTerms() {
         }
     }
 
+    function _setOrclearInverseTermId2(){
+        Dom.get('formInverse').style.display = "block";
+        Dom.get('edInverseTerm').value = "";
+    }
+    
     /**
     * Clear button listener
     */
     function _setOrclearInverseTermId(){
         if(Dom.get('btnInverseSetClear').value==='cancel'){
             Dom.get('btnInverseSetClear').value = (Dom.get('edInverseTermId').value!=="0")?'clear':'set';
-            Dom.get('formInverse').style.display = "none";
+            Dom.get('formInverse').style.display = "block";
         }else if(Dom.get('edInverseTermId').value==="0"){
             //show inverse div
             Dom.get('btnInverseSetClear').value = 'cancel';
@@ -507,6 +542,7 @@ function EditTerms() {
 
         }else{
             Dom.get('btnInverseSetClear').value = 'set';
+            Dom.get('formInverse').style.display = "block";
             Dom.get('edInverseTerm').value = "";
             Dom.get('edInverseTermId').value = "0";
         }
@@ -570,7 +606,7 @@ function EditTerms() {
 
 
                         if(Hul.isempty(trmLabel)){
-                            alert('Term label can not be empty');
+                            alert('Term label cannot be empty');
                             return;
                         }
 
@@ -587,7 +623,7 @@ function EditTerms() {
 
                         //alert(str);
 
-                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                        var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                         var callback = _updateResult;
                         var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
                         Hul.getJsonData(baseurl, callback, params);
@@ -774,11 +810,11 @@ function EditTerms() {
         for (ind in sibs){
             if(!Hul.isnull(ind)){
                 if(sibs[ind].label == new_name){
-                    alert("Duplicate term - there is already a term with the same label in this branch at this level");
+                    alert("Duplicate term '"+new_name+"' - there is already a term with the same label in this branch at this level");
                     return false;
                 }
                 if(new_code!='' && sibs[ind].data.termcode == new_code){
-                    alert("There is already a term with the same standard code in this branch");
+                    alert("There is already a term with the standard code '"+new_code+"' in this branch");
                     return false;
                 }
             }
@@ -839,7 +875,6 @@ function EditTerms() {
         var str = YAHOO.lang.JSON.stringify(oTerms);
 
         if(!Hul.isnull(str)) {
-            //DEBUG alert("Stringified changes: " + str);
 
             var _updateResult = function(context){
 
@@ -921,7 +956,7 @@ function EditTerms() {
             };
 
             //
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
             var callback = _updateResult;
             var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
             Hul.getJsonData(baseurl, callback, params);
@@ -981,7 +1016,7 @@ function EditTerms() {
                     Dom.get('deleteMessage').style.display = "none";
                 }
 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                 var callback = __updateAfterDelete;
                 var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
                 Hul.getJsonData(baseurl, callback, params);
@@ -1010,7 +1045,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.basePath +
+        var url = top.HEURIST.baseURL_V3 +
             "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
@@ -1062,7 +1097,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.basePath +
+        var url = top.HEURIST.baseURL_V3 +
             "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
             url = url + "&parent=" + keep_target_newparent_id;
@@ -1186,18 +1221,28 @@ function EditTerms() {
 
             var term_id = (isRoot)?0:_currentNode.data.id;
 
-            var sURL = top.HEURIST.baseURL + "admin/structure/terms/editTermsImport.php?db="+ _db +
+            var term_label = (isRoot)?'root vocabulary':_currentNode.label;
+            
+            /* old way
+            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/editTermsImport.php?db="+ _db +
             "&parent="+term_id+
             "&domain="+_currentDomain;
+            */
 
+            var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/importDefTerms.php?db="+ _db +
+            "&trm_ID="+term_id;
+            
             Hul.popupURL(top, sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
-                height: 160,
-                width: 500,
+                title: 'Import Terms for '+term_label,
+                //height: 200,
+                //width: 500,
+                height: 460,
+                width: 800,
                 callback: _import_complete
             });
-
+            
         }
     }
 
@@ -1395,7 +1440,7 @@ function EditTerms() {
         var disTerms = deftype[fi.dty_TermIDTreeNonSelectableIDs];
         var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
-        Hul.popupURL(top, top.HEURIST.basePath +
+        Hul.popupURL(top, top.HEURIST.baseURL_V3 +
             "admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
             {
                 "close-on-blur": false,
@@ -1450,7 +1495,7 @@ function EditTerms() {
 
                         if(!Hul.isnull(str)) {
 
-                            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                            var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
                             var callback = _updateResult;
                             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
                             Hul.getJsonData(baseurl, callback, params);
@@ -1460,6 +1505,42 @@ function EditTerms() {
                 }
         });
 
+    }
+
+    function _initFileUploader(){
+        
+            var $input = $('#new_term_image');
+            var $input_img = $('#termImage');
+        
+            $input.fileupload({
+    url: top.HEURIST.baseURL_V3 +  'hserver/utilities/fileUpload.php', 
+    formData: [ {name:'db', value: _db}, 
+                {name:'entity', value:'terms'},
+                {name:'newfilename', value: Dom.get('edId').value }],
+    acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+    autoUpload: true,
+    sequentialUploads:true,
+    dataType: 'json',
+    //dropZone: $input_img,
+    // add: function (e, data) {  data.submit(); },
+    done: function (e, response) {
+                response = response.result;
+                if(response.status=='ok'){
+                    var data = response.data;
+                    $.each(data.files, function (index, file) {
+                        if(file.error){
+                            $input_img.find('img').prop('src', '');
+                            //top.HEURIST4.msg.showMsgErr(file.error);
+                        }else{
+                            var curtimestamp = (new Date()).getMilliseconds();
+                            var url = top.HEURIST.iconBaseURL + Dom.get('edId').value+ "&ent=term&t=" + curtimestamp
+                            $input_img.find('img').prop('src', url); //file.url);
+                        }
+                    });
+                }
+            }                    
+                        });
+        
     }
 
     //
@@ -1494,6 +1575,18 @@ function EditTerms() {
             _showFieldUpdater();
         },
 
+        showFileUploader: function(){
+            
+            var $input = $('#new_term_image');
+            $input.fileupload('option','formData',
+                [ {name:'db', value: _db}, 
+                {name:'entity', value:'terms'},
+                {name:'newfilename', value: Dom.get('edId').value }]);
+    
+            $input.click();
+            
+        },
+        
         getClass: function () {
             return _className;
         },
