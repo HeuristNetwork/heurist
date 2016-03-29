@@ -4,7 +4,7 @@ if (!top.HEURIST4){
 
 /*
 showMsgErrJson - check if response is json 
-showMsgErr
+showMsgErr     -    loads into id=dialog-error-messages
 showMsgDlgUrl  - loads content url (not frame!) into dialog (getMsgDlg) and show it (showMsgDlg)
 
 getMsgDlg      - creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
@@ -173,8 +173,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         var isPopup = false; //bigger and resizable
 
         if(message!=null){
-            $dlg.empty();
-
+            
             var isobj = (typeof message ===  "object");
 
             if(!isobj){
@@ -195,6 +194,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 isPopup = true;
 
             }else{
+                $dlg.empty();
                 isPopup = false;
                 if(isobj){
                     $dlg.append(message);

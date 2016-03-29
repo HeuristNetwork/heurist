@@ -58,7 +58,8 @@ $.widget( "heurist.dh_maps", {
             if(top.HAPI4.sysinfo['layout']=='DigitalHarlem1935'){
                 query["f:144"] = "4802";
             }else{
-                query["f:144"] = "531,4802,4803"; //'{"t":"19","f:144":"-532,4749"}'
+                query["f:144"] = "531,4802,4803";
+                //query = {"t":"19","f:144":"-532,4749"};
             }
 
 
