@@ -1383,8 +1383,8 @@ class FieldPredicate extends Predicate {
             $date_match_pred = $this->makeDateClause();
         }
 
+
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
-            
             return $not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' left join Records link on rd.dtl_Value=link.rec_ID '
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rd.dtl_DetailTypeID=' . intval($this->field_type).' and ' 
@@ -1400,10 +1400,15 @@ class FieldPredicate extends Predicate {
 
         }else if($this->field_type_value=='date'){ 
 
-            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            $res = $not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-            . ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. ')';
+            . ' and rd.dtl_DetailTypeID=' . intval($this->field_type);
+            if(trim($this->value)==''){
+                $res = $res. " and rd.dtl_Value !='' )";
+            }else{
+                $res = $res. ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. ')';
+            }
+            return $res;
             
         }else if($this->field_type_value){ 
 
@@ -1445,8 +1450,12 @@ class FieldPredicate extends Predicate {
 
     function get_field_type_clause(){
         global $mysqli;
-
-        if (preg_match('/^\\d+$/', $this->field_type)) {
+        
+        if(trim($this->value)==''){
+            
+            $rd_type_clause = "!=''";
+            
+        }else if (preg_match('/^\\d+$/', $this->field_type)) {
             /* handle the easy case: user has specified a (single) specific numeric type */
             $rd_type_clause = '= ' . intval($this->field_type);
         }
@@ -1466,7 +1475,11 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
-        if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
+        if(trim($this->value)==''){
+            
+            $match_pred = " !='' ";
+        
+        }else if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
             
             if(preg_match('/^\d+(?:,\d+)+$/', $this->value)){
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('

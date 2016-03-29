@@ -712,7 +712,7 @@ class HPredicate {
 
         }else{
             
-            if($this->field_type == 'date'){ //false && $this->isDateTime()){
+            if($this->field_type == 'date' && trim($this->value)!='') { //false && $this->isDateTime()){
                 $field_name = 'getTemporalDateString('.$p.'dtl_Value) ';
                 //$field_name = 'str_to_date(getTemporalDateString('.$p.'dtl_Value), "%Y-%m-%d %H:%i:%s") ';
             }else{
@@ -965,7 +965,7 @@ class HPredicate {
         return ($timestamp0  &&  $timestamp0 != -1 && $timestamp1  &&  $timestamp1 != -1);
     }
 
-    function makeDateClause() {
+    function    makeDateClause() {
 
         if (strpos($this->value,"<>")) {
 
@@ -1037,7 +1037,7 @@ class HPredicate {
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
-        if($this->value=='') return null;
+        if(trim($this->value)=='') return "!=''";
 
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
