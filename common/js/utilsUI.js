@@ -1354,7 +1354,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     },
 
     //reload rectype, details and terms for top.HEURIST
-    reloadStrcuture: function() {
+    reloadStrcuture: function( is_message ) {
 
         var _updateHEURIST = function(context){
 
@@ -1366,12 +1366,14 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 top.HEURIST.detailTypes = context.detailTypes;
                 top.HEURIST.terms = context.terms;
 
-                var sMsg = 'Database structure definitions in browser memory have been refreshed. <br/>'+
-                        'You may need to reload pages to see changes.';
-                if(top.HEURIST4){
-                    top.HEURIST4.msg.showMsgDlg(sMsg);
-                }else{
-                    alert(sMsg);
+                if(is_message==true){
+                    var sMsg = 'Database structure definitions in browser memory have been refreshed. <br/>'+
+                            'You may need to reload pages to see changes.';
+                    if(top.HEURIST4){
+                        top.HEURIST4.msg.showMsgDlg(sMsg);
+                    }else{
+                        alert(sMsg);
+                    }
                 }
             }
         }

@@ -484,16 +484,16 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
                         content.close = function() {
                             var did = $dlg.attr('id');
-                            $dlg.dialog('close');
 
                             var rval = true;
                             var closeCallback = options['callback'];
-                            if(closeCallback){
+                            if($.isFunction(closeCallback)){
                                 rval = closeCallback.apply(opener, arguments);
                             }
                             if ( rval===false ){ //!rval  &&  rval !== undefined){
                                 return false;
                             }
+                            $dlg.dialog('close');
                             return true;
                         };
 
@@ -538,6 +538,10 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                                     $dosframe.css('width','100%');
                                 },
                                 close: function(event, ui){
+                                    var closeCallback = options['afterclose'];
+                                    if($.isFunction(closeCallback)){
+                                        closeCallback.apply();
+                                    }
                                     $dlg.remove();
                                 }
                         };

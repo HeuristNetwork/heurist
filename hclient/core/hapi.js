@@ -212,6 +212,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   ssearch_savetree - save saved search treeview data
     *   ssearch_gettree - get saved search treeview data
     *   get_defs     - get the desired database structure definition
+    *   get_defs_all
     *
     * @returns {Object}
     */
@@ -345,6 +346,29 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('sys_structure', request, callback);
             }
 
+            ,get_defs_all: function(is_message, document){
+                
+                this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                        top.HEURIST4.rectypes = response.data.rectypes;
+                        top.HEURIST4.terms = response.data.terms;
+                        top.HEURIST4.detailtypes = response.data.detailtypes;
+
+                        if(top.HEURIST && top.HEURIST.rectypes){
+                            top.HEURIST.util.reloadStrcuture( is_message ); //relaod H3 structure
+                        }else if (is_message==true) {
+                            top.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                                'You may need to reload pages to see changes.');
+                        }
+                        
+                        $(document).trigger(top.HAPI4.Event.ON_STRUCTURE_CHANGE);
+
+                    }
+                });
+                
+            }
+            
+            
             /*
             ,databases: function(request, callback){
             _callserver('sys_databases', request, callback);
@@ -776,7 +800,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             ON_REC_PAGESET: "ON_REC_PAGESET",
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
-            ON_SYSTEM_INITED: "ON_SYSTEM_INITED"
+            ON_SYSTEM_INITED: "ON_SYSTEM_INITED",
+            ON_STRUCTURE_CHANGE: 'ON_STRUCTURE_CHANGE'
         },
 
         /**

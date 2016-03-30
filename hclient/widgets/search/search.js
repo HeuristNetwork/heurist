@@ -313,11 +313,11 @@ $.widget( "heurist.search", {
         
         
         // Manage structure button
-            this.div_add_record = $('<div>')
+        this.div_add_record = $('<div>')
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
 
-            this.btn_mamage_structure = $( "<button>", {
+        this.btn_mamage_structure = $( "<button>", {
                 text: top.HR("Manage Structure"),
                 title: "Add new / modify existing record types - general characteristics, data fields and rules which compose a record"
             })
@@ -328,7 +328,8 @@ $.widget( "heurist.search", {
             .button()
             .click( function(){ 
                     top.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+top.HAPI4.database,
-                    { width:1200, height:600, title:'Manage Structure'});
+                    { width:1200, height:600, title:'Manage Structure', 
+                      afterclose: function(){top.HAPI4.SystemMgr.get_defs_all( false, that.document);} });
             });
         
 
@@ -410,7 +411,9 @@ $.widget( "heurist.search", {
         });
         $(this.document).on(top.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
-            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data) { that._onSearchGlobalListener(e, data) } );
+            + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
+            + ' ' + top.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(e, data) { that._onSearchGlobalListener(e, data) } );
 
         this._refresh();
 
@@ -536,6 +539,11 @@ $.widget( "heurist.search", {
 
             //ART that.div_search.css('display','inline-block');
 
+        }else if(e.type == top.HAPI4.Event.ON_STRUCTURE_CHANGE){
+            if(this.search_assistant!=null){
+                this.search_assistant.remove();
+                this.search_assistant = null;
+            }
         }
 
 
@@ -852,9 +860,10 @@ $.widget( "heurist.search", {
     ,_destroy: function() {
 
         $(this.document).off(top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT);
-        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART+
-            ' '+top.HAPI4.Event.ON_REC_SEARCHRESULT+
-            ' '+top.HAPI4.Event.ON_REC_SEARCH_FINISH);
+        $(this.document).off(top.HAPI4.Event.ON_REC_SEARCHSTART
+          + ' ' + top.HAPI4.Event.ON_REC_SEARCHRESULT
+          + ' ' + top.HAPI4.Event.ON_REC_SEARCH_FINISH
+          + ' ' + top.HAPI4.Event.ON_STRUCTURE_CHANGE);
 
         // remove generated elements
         //this.btn_search_allonly.remove();  // bookamrks search off

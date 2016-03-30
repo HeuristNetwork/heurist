@@ -579,6 +579,9 @@ if (! top.HEURIST.edit) {
                     if(caller_id_element && opener && opener.updateFromChild){
                         opener.updateFromChild(caller_id_element, top.HEURIST.edit.record.title);
                     }
+                    if(opener && opener.updateCallerAfterSave){
+                        opener.updateCallerAfterSave(top.HEURIST.edit.record);
+                    }
 
                     if(callback && typeof(callback)==="function"){
                         callback.call(this);
@@ -618,7 +621,7 @@ if (! top.HEURIST.edit) {
                 top.close();
                 if (topOpener) topOpener.focus();
             } catch (e) { }
-            s
+            
         },
 
 

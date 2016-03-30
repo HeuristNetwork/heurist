@@ -398,6 +398,10 @@ $.widget( "heurist.mainMenu", {
         if (link.hasClass('currentquery')) {
             url = url + that._current_query_string
         }
+        
+        if (link.hasClass('refresh_structure')) {
+               options['afterclose'] = this._refreshLists;
+        }
 
         top.HEURIST4.msg.showDialog(url, options);
 
@@ -461,7 +465,7 @@ $.widget( "heurist.mainMenu", {
         if(action == "menu-profile-preferences"){
             this._editPreferences(); p=true;
         }else if(action == "menu-database-refresh"){
-            this._refreshLists(); p=true;
+            this._refreshLists( true ); p=true;
         }else if(action == "menu-export-hml-0"){ // Result set
             this.exportHML(true,false,false); p=true; // isAll, includeRelated, ishuni
         }else if(action == "menu-export-hml-1"){ //selected
@@ -663,24 +667,8 @@ $.widget( "heurist.mainMenu", {
     /**
     * Reload database structure image on client side
     */
-    _refreshLists: function(){
-
-        top.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-            if(response.status == top.HAPI4.ResponseStatus.OK){
-                top.HEURIST4.rectypes = response.data.rectypes;
-                top.HEURIST4.terms = response.data.terms;
-                top.HEURIST4.detailtypes = response.data.detailtypes;
-
-                if(top.HEURIST && top.HEURIST.rectypes){
-                    top.HEURIST.util.reloadStrcuture();
-                }else{
-                    top.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
-                        'You may need to reload pages to see changes.');
-                }
-
-            }
-        });
-
+    _refreshLists: function( is_message ){
+        top.HAPI4.SystemMgr.get_defs_all( is_message, this.document);
     },
 
 
