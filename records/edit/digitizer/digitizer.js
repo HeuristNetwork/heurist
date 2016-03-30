@@ -1496,7 +1496,8 @@ function searchAddress(address) {
         var pos = results[0].geometry.location;
         map.setCenter(pos);
         //artem if(directionsYes == 1) drawDirections(pos);
-        if(toolID == 5 && markerShape==null) drawPointMarker(pos);
+        // && markerShape==null
+        if(toolID == 5) drawPointMarker(pos);  
       } else {
         alert("Geocode was not successful for the following reason: " + status);
       }
