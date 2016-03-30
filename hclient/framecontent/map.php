@@ -112,7 +112,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 <script type="text/javascript">
 
     var mapping, menu_datasets, btn_datasets;
-
+    
     // Callback function on map initialization
     function onPageInit(success){
 
@@ -407,6 +407,25 @@ require_once(dirname(__FILE__)."/initPage.php");
         }
     }
 
+    //
+    // update selector after map document add/edit
+    //
+    function updateCallerAfterSave( record ){
+        if(record && record.rectypeID=='<?=checkRt('RT_MAP_DOCUMENT')?>'){
+            
+            var notfound = true;
+            $('#map-doc-select > option').each(function(idx, item){
+                 if($(item).attr('value')==record.bibID){
+                     item.innerHTML = record.title;
+                     notfound = false;
+                     return false;
+                 }
+            });
+            if(notfound){
+                $('<option value="'+record.bibID+'">'+record.title+'</option>').appendTo($('#map-doc-select'));  
+            }
+        }
+    }
 
 </script>
 
