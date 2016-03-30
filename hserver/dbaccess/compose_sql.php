@@ -179,8 +179,9 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         $where_clause = '(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '. ($where_clause? ' and '.$where_clause :'');
     }
     // 4b. SPECIAL CASE for _NOTLINKED_
-    if($neednotlinked){  //TODO: NEED AN APPROPRIATE WHERECLAUSE BELOW  8MAR2016
-        $where_clause = '(to_days(now()) - to_days(rec_URLLastVerified) >= 8) '. ($where_clause? ' and '.$where_clause :'');
+    if($neednotlinked){ 
+        $where_clause = '(not exists (select rl_ID from recLinks where rl_SourceID=TOPBIBLIO.rec_ID  or rl_TargetID=TOPBIBLIO.rec_ID )) '
+            . ($where_clause? ' and '.$where_clause :'');
     }
 
     // 5. DEFINE USERGROUP RESTRICTIONS ---------------------------------------------------------------------------------

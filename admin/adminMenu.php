@@ -132,7 +132,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                     <a href="#" onClick="top.HEURIST.util.popupURL(top, bugReportURL,{'close-on-blur': false,'no-resize': false, height: 400,width: 740,callback: function (title, bd, bibID) {if (bibID) {window.close(bibID, title);}} });return false;"
                         title="Click to send an issue report or feature request to the Heurist developers" >
                         &nbsp;Report an issue&nbsp;&nbsp;</a></li>
-                <li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture();}"
+                <li class="button white"><a href="javascript:void(0)" onClick="{top.HEURIST.util.reloadStrcuture(true);}"
                     title="Click to clear and reload the internal working memory of Heurist" >
                     Refresh memory</a></li>
             </ul>
@@ -344,7 +344,7 @@ if (array_key_exists('mode', $_REQUEST)) {
                                 width="12" height="12" border="0" alt="Search showing records with broken URLs">
                                 </a>
                         </li>
-                        <li><a href="<?=HEURIST_BASE_URL?>?q=_UNLINKED_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                        <li><a href="<?=HEURIST_BASE_URL?>?q=_NOTLINKED_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                             title="Show records with no outgoing or incoming pointers (includes records without any relationships)>">
                             Records without links
                             <img src="../common/images/external_link_16x16.gif"
