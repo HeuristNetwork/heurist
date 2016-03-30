@@ -74,9 +74,13 @@ $colNames = array("rec_ID", "rec_Title", "rec_URL", "rec_RecTypeID");
 $query = REQUEST_to_query("select " . join(", ", $colNames) . " ", BOTH);
 
 if (@$_REQUEST["r"] == "recent") {
-	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " . get_user_id() . ")) and ", $query);
+	$query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_RecTypeID!=1) AND "
+    ."(TOPBIBLIO.rec_ID in (select distinct rre_RecID from usrRecentRecords where rre_UGrpID = " 
+    . get_user_id() . ")) and ", $query);
 	// saw CHECK ME: this code assumes order by is last clause of query
 	$query = preg_replace("/(.*)\\sorder by.*/", "$1 order by TOPBIBLIO.rec_Modified desc", $query);
+}else{
+    $query = preg_replace("/\\swhere\\s/", " where (TOPBIBLIO.rec_RecTypeID!=1) AND ", $query);
 }
 
 $query .= " limit $limit";
