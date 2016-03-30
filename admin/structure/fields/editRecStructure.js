@@ -45,6 +45,7 @@ function EditRecStructure() {
 
     var _className = "EditRecStructure",
     _myDataTable,
+     _actionInProgress = false,
     rty_ID,
     _isDragEnabled = false,
     _updatedDetails = [], //list of dty_ID that were affected with edition
@@ -531,96 +532,10 @@ function EditRecStructure() {
             //
             // Subscribe to a click event to bind to expand/collapse the row
             //
-            var _actionInProgress = false;
+            _actionInProgress = false;
 
-            _myDataTable.subscribe( 'cellClickEvent', function(oArgs)
-                {
-                    if(_actionInProgress){
-                        return;
-                    }
-
-
-                    var column = this.getColumn(oArgs.target);
-
-                    //prevent any operation in case of opened popup
-                    if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
-                        (!Hul.isnull(column) && (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
-                        { return; }
-
-
-
-                    var record_id;
-                    var oRecord;
-                    if(Dom.hasClass( oArgs.target, 'yui-dt-expandablerow-trigger' )){
-                        record_id = oArgs.target;
-                        oRecord = this.getRecord(record_id);
-                    }else{
-                        oRecord = this.getRecord(oArgs.target);
-                        record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
-                    }
-
-
-                    // after expansion - fill input values from HEURIST db
-                    // after collapse - save data on server
-                    function __toggle(){
-
-                        if(!isExpanded){ //now it is expanded
-                            _expandedRecord = rst_ID;
-
-                            _myDataTable.onEventToggleRowExpansion(record_id);
-
-                            _fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
-
-
-                            var rowrec = _myDataTable.getTrEl(oRecord);
-                            var maindiv = Dom.get("page-inner");
-                            var pos = rowrec.offsetTop;
-                            maindiv.scrollTop = pos - 30;
-
-                            var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
-                            elLiner.innerHTML = "";
-
-                        }else{
-                            _saveUpdates(false); //save on server
-                            _expandedRecord = null;
-                        }
-
-                        /*var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
-                        if(_expandedRecord != null){
-                        elLiner.innerHTML = "";
-                        }else{
-                        elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png'>"
-                        }*/
-
-                        _actionInProgress = false;
-                    }
-
-                    if(!Hul.isnull(record_id)){
-                        _actionInProgress = true;
-
-                        oRecord = this.getRecord(record_id);
-                        var rst_ID = oRecord.getData("rst_ID");
-
-                        var state = this._getRecordState( record_id );
-                        var isExpanded = ( state && state.expanded );
-                        if(isExpanded){
-                            _doExpliciteCollapse(rst_ID, true); //save this record on collapse
-                            _setDragEnabled(true);
-                        }else{
-                            //collapse and save by default
-                            if(!Hul.isnull(_expandedRecord)){
-                                _doExpliciteCollapse(_expandedRecord, true);
-                            }
-                            _setDragEnabled(false);
-                        }
-
-                        // after expand/collapse need delay before filling values
-                        setTimeout(__toggle, 300);
-
-                    }
-
-            } );
-
+            _myDataTable.subscribe( 'cellClickEvent', onCellClickEventHandler );
+            
 
             //
             // Subscribe to a click event on delete image
@@ -748,6 +663,98 @@ function EditRecStructure() {
         }
     } // end _initTabDesign -------------------------------
 
+    
+    function onCellClickEventHandler(oArgs){
+                
+                    if(_actionInProgress){
+                        return;
+                    }
+
+
+                    var column = _myDataTable.getColumn(oArgs.target);
+
+                    //prevent any operation in case of opened popup
+                    if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
+                        (!Hul.isnull(column) && 
+                            (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
+                        { return; }
+
+
+
+                    var record_id;
+                    var oRecord;
+                    if(Dom.hasClass( oArgs.target, 'yui-dt-expandablerow-trigger' )){
+                        record_id = oArgs.target;
+                        oRecord = _myDataTable.getRecord(record_id);
+                    }else{
+                        oRecord = _myDataTable.getRecord(oArgs.target);
+                        record_id = _myDataTable.getTdEl({record:oRecord, column:_myDataTable.getColumn("expandColumn")});
+                    }
+
+
+                    // after expansion - fill input values from HEURIST db
+                    // after collapse - save data on server
+                    function __toggle(){
+
+                        if(!isExpanded){ //now it is expanded
+                            _expandedRecord = rst_ID;
+
+                            _myDataTable.onEventToggleRowExpansion(record_id);
+
+                            _fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
+
+
+                            var rowrec = _myDataTable.getTrEl(oRecord);
+                            var maindiv = Dom.get("page-inner");
+                            var pos = rowrec.offsetTop;
+                            maindiv.scrollTop = pos - 30;
+
+                            var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
+                            elLiner.innerHTML = "";
+
+                        }else{
+                            _saveUpdates(false); //save on server
+                            _expandedRecord = null;
+                        }
+
+                        /*var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
+                        if(_expandedRecord != null){
+                        elLiner.innerHTML = "";
+                        }else{
+                        elLiner.innerHTML = "<img src='../../common/images/up-down-arrow.png'>"
+                        }*/
+
+                        _actionInProgress = false;
+                    }
+
+                    if(!Hul.isnull(record_id)){
+                        _actionInProgress = true;
+
+                        oRecord = _myDataTable.getRecord(record_id);
+                        var rst_ID = oRecord.getData("rst_ID");
+
+                        var state = _myDataTable._getRecordState( record_id );
+                        var isExpanded = ( state && state.expanded );
+                        if(isExpanded){
+                            _doExpliciteCollapse(rst_ID, true); //save this record on collapse
+                            _setDragEnabled(true);
+                        }else{
+                            //collapse and save by default
+                            if(!Hul.isnull(_expandedRecord)){
+                                _doExpliciteCollapse(_expandedRecord, true);
+                            }
+                            _setDragEnabled(false);
+                        }
+
+                        // after expand/collapse need delay before filling values
+                        setTimeout(__toggle, 300);
+
+                    }
+
+    }
+
+    
+    
     /**
     * Opens popup with preview
     *
@@ -1378,12 +1385,12 @@ function EditRecStructure() {
 
             $("#recStructure_toolbar").hide();
 
-            _updateOrderAfterInsert();
+            _updateOrderAfterInsert( data_toadd[data_toadd.length-1]['rst_ID'] );
         }
 
     }//end _addDetails
 
-    function _updateOrderAfterInsert() {
+    function _updateOrderAfterInsert( lastID ) {
 
         var recs = _myDataTable.getRecordSet(),
         len = recs.getLength(),
@@ -1428,6 +1435,19 @@ function EditRecStructure() {
             top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
             _saveUpdates(false);
         }
+        
+        //emulate click on last record
+        _isServerOperationInProgress = false;
+        
+        setTimeout(function(){
+            
+            var oRecord = _getRecordById(lastID).record;
+            var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_DisplayName')});
+            //$.find("tr.yui-dt-last > td.yui-dt-col-rst_DisplayName")[0]
+            var oArgs = {event:'MouseEvent', target: elLiner};
+            onCellClickEventHandler(oArgs);
+        },500);
+        
     }
 
 
