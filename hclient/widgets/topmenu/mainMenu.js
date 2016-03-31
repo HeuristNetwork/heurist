@@ -327,7 +327,7 @@ $.widget( "heurist.mainMenu", {
 
             this['menu_'+name] = $('<ul>')
             .load(top.HAPI4.basePathV4+'hclient/widgets/topmenu/mainMenu'+
-             (name=='Help_lo'?'Help':name)+'.html?t='+(new Date().getTime()), function(){
+             (name=='Help_lo'?'Help':name)+'.html', function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
                 that['menu_'+name].addClass('menu-or-popup')
                 .css({'position':'absolute', 'padding':'5px'})
                 .appendTo( that.document.find('body') )

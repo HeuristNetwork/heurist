@@ -181,8 +181,8 @@ $.widget( "heurist.resultListMenu", {
         .appendTo( this.divMainMenuItems );
 
 
-        this['menu_'+name] = $('<ul>')
-        .load(top.HAPI4.basePathV4+'hclient/widgets/viewers/resultListMenu'+name+'.html?t='+(new Date().getTime()), function(){  //'?t='+(new Date().getTime())
+        this['menu_'+name] = $('<ul>')                               //add to avoid cache in devtime '?t='+(new Date().getTime())
+        .load(top.HAPI4.basePathV4+'hclient/widgets/viewers/resultListMenu'+name+'.html', function(){  
             that['menu_'+name].addClass('menu-or-popup')
             .css('position','absolute')
             .appendTo( that.document.find('body') )
