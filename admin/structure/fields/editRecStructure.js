@@ -1833,7 +1833,7 @@ function EditRecStructure() {
     //////////////////////////////////////////////////////////////////////////////
     YAHOO.example.DDRows = function(id, sGroup, config) {
         YAHOO.example.DDRows.superclass.constructor.call(this, id, sGroup, config);
-        Dom.addClass(this.getDragEl(),"custom-class");
+        Dom.addClass(this.getDragEl(),"dragrow-class");
         this.goingUp = false;
         this.lastY = 0;
     };
@@ -1868,10 +1868,12 @@ function EditRecStructure() {
             this.srcData = rec.getData();
             this.srcIndex = srcEl.sectionRowIndex;
             // Make the proxy look like the source element
-            Dom.setStyle(srcEl, "visibility", "hidden");
+            
+            Dom.setStyle(srcEl, "visibility", "hidden");  //hide original
             //proxyEl.innerHTML = "<table><tbody>"+srcEl.innerHTML+"</tbody></table>";
-            proxyEl.innerHTML = '<div style="padding-left:30px;padding-top:6px;font-size:1.2em">'+this.srcData.rst_DisplayName+"</span>";
+            proxyEl.innerHTML = ''; //'<div class="dragrow">'+this.srcData.rst_DisplayName+"</div>";
             proxyEl.style.cursor = "row-resize";
+            $(proxyEl).css({'background':'rgb(200,200,200,0.5)', 'border':'2px dotted red'});
 
             //var rst_ID = this.srcData.rst_ID
             //_fromUItoArray(rst_ID); //before collapse save to UI
@@ -1886,8 +1888,17 @@ function EditRecStructure() {
             srcEl = this.srcEl;
 
             proxyEl.innerHTML = "";
-            Dom.setStyle(this.proxyEl, "visibility", "hidden");
+            Dom.setStyle(this.proxyEl, "visibility", "hidden"); //hide drag div
             Dom.setStyle(srcEl, "visibility", "");
+            
+            //restore color and font
+            if(this.tmpIndex>=0){
+                var rec = _myDataTable.getRecord(this.tmpIndex);
+                var rowrec = _myDataTable.getTrEl(rec);
+                Dom.setStyle(rowrec,'font-weight','normal');
+                Dom.setStyle(rowrec,'background','');
+            }
+            
 
             _updateOrderAfterDrag();
         },
@@ -1928,6 +1939,13 @@ function EditRecStructure() {
 
                     _myDataTable.addRow(this.srcData, destIndex);
                     this.tmpIndex = destIndex;
+                    //add special color for destIndex
+                    var rec = _myDataTable.getRecord(this.tmpIndex);
+                    var rowrec = _myDataTable.getTrEl(rec);
+                    Dom.setStyle(rowrec,'font-weight','bold');
+                    Dom.setStyle(rowrec,'background','blue');
+            
+
 
                     //_updateOrderAfterDrag();
 

@@ -615,6 +615,7 @@ div#termsFilter.popup {
 	visibility:hidden;
 	opacity:0;
 }
+/* YUI drag div */
 #ygddfdiv {
 	background-color:#FFE;
 	opacity:1;
