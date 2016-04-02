@@ -746,7 +746,8 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             doRequest:function(request, callback){
                 //todo - verify basic params
-
+                request['request_id'] = top.HEURIST4.util.random();
+                
                 _callserver('entityScrud', request, callback);
             },
             

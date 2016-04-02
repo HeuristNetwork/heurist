@@ -65,8 +65,26 @@
 
         $response = array("status"=>HEURIST_OK, "data"=> $data );
 
-    }
+    }               
+    
+    /*
+    if ( extension_loaded('zlib') && (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) )
+    {
+            ob_start('ob_gzhandler');
+    }*/    
+/*
+    ini_set("zlib.output_compression", 4096);
+    ini_set("zlib.output_compression_level", 6);
     header('Content-type: text/javascript');
     print json_encode($response);
-    exit();
+*/
+    
+ob_start(); 
+echo json_encode($response);
+$output=gzencode(ob_get_contents(),9); 
+ob_end_clean(); 
+header('Content-Encoding: gzip');
+header('Content-type: text/javascript');
+echo $output; 
+unset($output);   
 ?>
