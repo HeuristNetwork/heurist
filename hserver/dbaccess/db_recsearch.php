@@ -650,6 +650,9 @@ if(@$params['debug']) echo $query."<br>";
             } //for rules
 
 
+            if($is_ids_only){
+                $fin_result['data']['records'] = array_unique($fin_result['data']['records']);
+            }
             $fin_result['data']['count'] = count($fin_result['data']['records']);
 
             if($return_h3_format){
