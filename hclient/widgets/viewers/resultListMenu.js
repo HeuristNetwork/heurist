@@ -325,12 +325,10 @@ $.widget( "heurist.resultListMenu", {
         }else if(action == "menu-selected-value-replace"){
 
             this.detailBatchEditPopup('replace_detail');
-            //this.replaceDetailPopup();
 
         }else if(action == "menu-selected-value-delete"){
 
             this.detailBatchEditPopup('delete_detail');
-            //this.deleteDetailPopup();
 
         }else if(action == "menu-collected-add"){
 
@@ -898,7 +896,7 @@ $.widget( "heurist.resultListMenu", {
     //-------------------------------------- ADD, REPLACE, DELETE FIELD VALUES -------------------------------
 
     // These functions are used to batch modify/recode values for records in a resultset
-
+    // OLD - not used
     addDetailPopup: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);
@@ -929,7 +927,9 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST4.msg.showDialog(url, {height:500, width:700, title: top.HR('Add field value')} );
     },
 
-
+    //
+    //  MAIN  in use
+    //  
     detailBatchEditPopup: function(action_type) {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);
@@ -965,7 +965,8 @@ $.widget( "heurist.resultListMenu", {
             class:'ui-heurist-bg-light'} );
     },
 
-
+    // NOT USED
+    //
     replaceDetailPopup: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);
@@ -994,6 +995,8 @@ $.widget( "heurist.resultListMenu", {
         top.HEURIST4.msg.showDialog(url, {height:500, width:700, title: top.HR('Replace field value') } );
     },
 
+    // NOT USED
+    //
     deleteDetailPopup: function() {
 
         var recIDs_all = top.HAPI4.getSelection("all", true);

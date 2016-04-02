@@ -25,6 +25,11 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
         <!-- it is needed in preference dialog -->
         <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
+        
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
+        <!--
+        <script type="text/javascript" src="ext/fancytree/jquery.fancytree-all.min.js"></script>
+        -->
 
         <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
 
@@ -88,8 +93,9 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
         <!-- move to profile.js dynamic load -->
         <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
 
-        <!--  media viewer -->
+        <!--  media viewer - however it is not used at the moment 
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
+        -->
 
         <!-- os, browser detector -->
         <script type="text/javascript" src="ext/js/platform.js"></script>
@@ -99,20 +105,56 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
            function onPageInit(success){
 
                 if(!success) return;
-
+                
                 // OLD H3 stuff
                 window.HEURIST.baseURL_V3  = window.HAPI4.basePathV3;
                 window.HEURIST.loadScript(window.HAPI4.basePathV3+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                 window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                 window.HEURIST.database = {  name: window.HAPI4.database };
-
+                
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js
                 //
                 top.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
 
+                
+                $( "#heurist-about" ).dialog("close");
+                
+                //
+                // init layout
+                //
                 top.HAPI4.LayoutMgr.appInitAll( top.HAPI4.sysinfo['layout'], "#layout_panes");
+                
+//console.log('ipage layout '+(new Date().getTime() / 1000 - _time_debug));
+_time_debug = new Date().getTime() / 1000;
+                
+                onInitCompleted_PerformSearch();
+           }
+           
+           //
+           // init about dialog
+           //
+           function onAboutInit(){
+                //definition of ABOUT dialog, called from Help > About, see content below
+                $( "#heurist-about" ).dialog(
+                    {
+                        autoOpen: true,
+                        height: 400,
+                        width: 450,
+                        modal: true,
+                        resizable: false,
+                        draggable: false,
+                        hide: {
+                            effect: "puff",
+                            duration: 500
+                        }
+                    }
+                );
+                
+           }
 
+           function onInitCompleted_PerformSearch(){
+                
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
                 if(!top.HEURIST4.util.isempty(qsearch)){
@@ -135,21 +177,6 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
                         $(document).trigger(top.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
                     }
                 }
-                //definition of ABOUT dialog, called from Help > About, see content below
-                $( "#heurist-about" ).dialog(
-                    {
-                        autoOpen: false,
-                        height: 400,
-                        width: 450,
-                        modal: true,
-                        resizable: false,
-                        draggable: false,
-                        hide: {
-                            effect: "puff",
-                            duration: 500
-                        }
-                    }
-                );
 
                 //if database is empty show welcome screen
                 //if(!(top.HAPI4.sysinfo.db_total_records>0)){
@@ -162,6 +189,8 @@ require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
      }
 ?>
 
+var fin_time = new Date().getTime() / 1000;
+//console.log('ipage finished '+( fin_time - _time_debug)+ '  total: '+(fin_time-_time_start));
 
                 $(document).trigger(top.HAPI4.Event.ON_SYSTEM_INITED, []);
 
