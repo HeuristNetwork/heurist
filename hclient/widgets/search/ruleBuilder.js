@@ -481,11 +481,11 @@ $.widget( "heurist.ruleBuilder", {
         this.select_target_rectype.hide();
         }
         */
-        if(arr_fields.length>1){
+        if(arr_fields.length!=1){
             arr_fields.unshift({key:'', title:'Any pointer or relationship'}); //add any as a first element
             this.select_fields.prop('disabled', false);
             //this.select_fields.show();
-        }else{
+        }else if (arr_fields.length==1){
             //this.select_fields.hide();
             this.select_fields.prop('disabled', true);
         }
@@ -536,8 +536,9 @@ $.widget( "heurist.ruleBuilder", {
                     }
                     //reduced list of constraints
                     top.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null); //arr_field.rectypes.length>1?'any':null);
-                    if(arr_field.rectypes.length>1){
+                    if(arr_field.rectypes.length!=1){
                         top.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
+                        this.select_target_rectype.val(0);
                         this.select_target_rectype.prop('disabled', false);
                     }else{
                         this.select_target_rectype.prop('disabled', true);
