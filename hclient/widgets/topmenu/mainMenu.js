@@ -55,19 +55,19 @@ $.widget( "heurist.mainMenu", {
         // bind click events
         this._on( this.div_logo, {
             click: function(){
+                
+                document.location.reload();
 
-                var init_search = top.HEURIST.displayPreferences['defaultSearch'];
+                /*var init_search = top.HEURIST.displayPreferences['defaultSearch'];
                 if(!top.HEURIST4.util.isempty(init_search)){
                     var request = {q: init_search, w: 'a', detail: 'detail', source:'init' };
                     top.HAPI4.SearchMgr.doSearch( this, request );
-                }else{
-                    $( "#heurist-about" ).dialog("open");
-                }
+                }*/
             }
         });
 
         this.div_dbname = $( "<div>").css({'float':'left', 'padding-left':'2em', 'padding-top':'2em', 'text-align':'center' }).appendTo(this.element);
-
+                  
 
         $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
             'background-position': 'left center',

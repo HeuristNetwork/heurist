@@ -71,7 +71,10 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
 <li style="padding-left:5px;">
     <a id=contact-link href="#"
-        onclick="{ $( '#heurist-about' ).dialog('open'); return false; }"
+        onclick="{  $( '#heurist-about > .fullmode').css('display','block');
+                    $( '#heurist-about' ).dialog('option',{height: 360, title:top.HR('About')});
+                    $( '#heurist-about' ).dialog('open');
+                    return false; }"
         title="Version, Credits, Copyright, License">
         About</a>
 </li>
