@@ -616,9 +616,10 @@ function _addQueryLayer(source, index) {
         }catch(err){
         }
         if(request==null){
-            if(source.query){ //this is simple (non JSON) queru without rules
+            if(source.query){ //this is simple (non JSON) query without rules
                 request = {q: source.query, w: 'all'};
             }else{
+                $('#mapping').css('cursor','auto');
                 return;
             }
         }
@@ -638,6 +639,8 @@ function _addQueryLayer(source, index) {
             loadingbar.setPosition(map.getCenter());
         } 
         
+        $('#mapping').css('cursor','progress');
+        
         // Retrieve records for this request
         top.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset, original_recordset ){
 
@@ -651,6 +654,8 @@ function _addQueryLayer(source, index) {
             if( source.callback && $.isFunction(source.callback) ){
                    source.callback( recordset, original_recordset );     
             }
+            
+            $('#mapping').css('cursor','auto');
             
         });
         

@@ -1532,6 +1532,7 @@ ed_html +
         getVersion: function () {return _version;},
 
         load: function(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback){
+            $('#mapping').css('cursor','progress');
             _load(_mapdata, _selection, _startup_mapdocument, _onSelectEventListener, _callback);
         },
 

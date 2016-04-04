@@ -56,6 +56,7 @@ $.widget( "heurist.app_timemap", {
         .attr('id', 'map-frame')
         .appendTo( this.framecontent );
           
+        this.loadanimation(true);
           
         if(this.options.eventbased){
 
@@ -81,10 +82,10 @@ $.widget( "heurist.app_timemap", {
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                    that.loadanimation(false);
                     that.recordset_changed = true;
                     that.option("recordset", data); //hRecordSet
                     that._refresh();
+                    that.loadanimation(false);
 
                     // Search start
                 }else if(e.type == top.HAPI4.Event.ON_REC_SEARCHSTART){
@@ -123,6 +124,7 @@ $.widget( "heurist.app_timemap", {
         // init map on frame load
         this._on( this.mapframe, {
                 load: function(){
+                    //that.loadanimation(false);
                     this.recordset_changed = true;
                     this._refresh();   // this._initmap
                 }
@@ -228,12 +230,13 @@ $.widget( "heurist.app_timemap", {
     }
 
     , loadanimation: function(show){
+       
         if(show){
-            //this.dosframe.hide();
-            this.framecontent.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.mapframe.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            //this.mapframe.css('cursor', 'progress');
         }else{
-            this.framecontent.css('background','none');
-            //this.dosframe.show();
+            //this.framecontent.css('cursor', 'auto');
+            //this.mapframe.css('background','none');
         }
     }
 

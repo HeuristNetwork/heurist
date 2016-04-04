@@ -1088,8 +1088,10 @@ $.widget( "heurist.resultList", {
         if(show){
             this.div_loading.show();
             //this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
+            this.element.css('cursor', 'progress');
         }else{
             this.div_loading.hide();
+            this.element.css('cursor', 'auto');
             //this.div_content.css('background','none');
         }
     },

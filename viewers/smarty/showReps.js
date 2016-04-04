@@ -331,6 +331,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         $('#toolbardiv').hide();
         $('#progressbar_div').show();
+        $('body').css('cursor','progress');
         
         $('#progress_stop').button().on({click: function() {
             $.ajax({
@@ -412,6 +413,9 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     }
     
     function _hideProgress(){
+        
+        
+        $('body').css('cursor','auto');
         
         if(progressInterval!=null){
             

@@ -49,7 +49,6 @@ $.widget( "heurist.recordListExt", {
         //.attr('src',top.HAPI4.basePathV3+"common/html/msgNoRecordsSelected.html")
         .appendTo( this.div_content );
 
-
         //-----------------------     listener of global events
         this._events = top.HAPI4.Event.LOGIN+' '+top.HAPI4.Event.LOGOUT + ' '
         + top.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + top.HAPI4.Event.ON_REC_SEARCHSTART
@@ -105,6 +104,7 @@ $.widget( "heurist.recordListExt", {
         });
         if(!this.options.is_single_selection){
             this.dosframe.on('load', function(){
+                that.loadanimation(false);
                 that._refresh();
             });
         }
@@ -164,6 +164,7 @@ $.widget( "heurist.recordListExt", {
             newurl = top.HAPI4.basePathV3 +  newurl;
 
             if(this.dosframe.attr('src')!==newurl){
+                this.loadanimation(true);
                 this.dosframe.attr('src', newurl);
             }
 
@@ -171,6 +172,7 @@ $.widget( "heurist.recordListExt", {
 
             this.options.url = top.HAPI4.basePathV3 +  this.options.url.replace("[dbname]",  top.HAPI4.database);
 
+            this.loadanimation(true);
             this.dosframe.attr('src', this.options.url);
 
         }else{ //content has been loaded already
@@ -222,7 +224,8 @@ $.widget( "heurist.recordListExt", {
                     this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
                 }
             }
-
+            
+            this.loadanimation(false);
         }
 
     },
@@ -242,12 +245,11 @@ $.widget( "heurist.recordListExt", {
     },
 
     loadanimation: function(show){
+
         if(show){
-            //this.dosframe.hide();
             this.div_content.css('background','url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
-            //this.dosframe.show();
         }
     },
 
