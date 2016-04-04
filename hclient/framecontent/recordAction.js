@@ -1,5 +1,5 @@
 /**
-* Class to perform action on set of recordfs in popup dialog
+* Class to perform action on set of records in popup dialog
 *
 * @param action_type - name of action - used to access help, widget name and method on server side
 * @returns {Object}

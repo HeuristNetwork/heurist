@@ -25,7 +25,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-    define('ISSERVICE',1);
+    if(!defined('ISSERVICE')) define('ISSERVICE',1);
 
     require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
     require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');

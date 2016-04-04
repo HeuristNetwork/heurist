@@ -1703,7 +1703,7 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     
 //error_log($query);    
     $res = mysql_query($query);
-    if (!mysql_num_rows(@$res)) {
+    if (!$res || !mysql_num_rows($res)) {
         return array();
     }
     //if (@$res && mysql_error(@$res)) {

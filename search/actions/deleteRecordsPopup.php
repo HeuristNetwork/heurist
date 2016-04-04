@@ -163,8 +163,8 @@ print '<div><span id=errors>0</span> errors</div>';
 
 			if ($rec_id % 10 == 0) {
 				print '<script type="text/javascript">update_counts('.$processed_count.','.$recs_count.','.$rels_count.','.$bkmk_count.','.count($errors).')</script>'."\n";
-				ob_flush();
-				flush();
+				@ob_flush();
+				@flush();
 			}
 		}
 

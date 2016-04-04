@@ -77,6 +77,7 @@ function getInvalidFieldTypes($rectype_id){
 
 
     $res = mysql_query($query);
+    if($res)
     while ($row = mysql_fetch_assoc($res)) {
         $DTT[$row['dty_ID']] = $row;
     }

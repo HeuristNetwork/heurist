@@ -118,8 +118,10 @@ class System {
 
                 $this->start_my_session();
 
-                define('HEURIST_DBNAME', $this->dbname);
-                define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                if(!defined('HEURIST_DBNAME')){
+                    define('HEURIST_DBNAME', $this->dbname);
+                    define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                }
                 //@todo  - test upload and thumb folder exist and writeable
                 if(!$this->initPathConstants()){
                     $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
@@ -326,7 +328,9 @@ class System {
             define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
         }
 
-        define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
+        if(!defined('HEURIST_FILESTORE_DIR ')){
+            define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
+        }
         define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
         define('HEURIST_FILES_DIR', HEURIST_FILESTORE_DIR . 'file_uploads/');
         define('HEURIST_FILES_URL', HEURIST_FILESTORE_URL . 'file_uploads/');
@@ -618,10 +622,10 @@ class System {
         if (@$_COOKIE['heurist-sessionid']) {
             session_id($_COOKIE['heurist-sessionid']);
             session_cache_limiter('none');
-            session_start();
+            @session_start();
         } else {   //session does not exist - create new one
             //session_id(sha1(rand()));
-            session_start();
+            @session_start();
             $session_id = session_id();
 
             setcookie('heurist-sessionid', $session_id, 0, '/');//, HEURIST_SERVER_NAME);

@@ -26,6 +26,8 @@ $.widget( "heurist.help_tips", {
 
         current_tip: 0  //
     },
+    
+    last_tip_idx:-1,
 
     // the constructor
     _create: function() {
@@ -117,7 +119,7 @@ $.widget( "heurist.help_tips", {
 
         var that = this;
 
-        this.wcontainer.load("context_help/tips/tip"+idx+".html?t="+(new Date().time) , function(response, status, xhr){
+        this.wcontainer.load("context_help/tips/tip"+idx+".html?t="+top.HEURIST4.util.random() , function(response, status, xhr){
             if(status=="error"){
                 if(idx!=1){
                     that._setOption("current_tip", 1); //reset to 1
@@ -126,17 +128,38 @@ $.widget( "heurist.help_tips", {
                 }
             }else{
                 that.options.current_tip = idx;
-                top.HAPI4.save_pref('help_tip', idx);
+                top.HAPI4.save_pref('help_tip_show', idx);
                 top.HAPI4.save_pref('help_tip_last', (new Date()));
                 
                 top.HEURIST4.util.setDisabled($.find('#btnTipPrev'), (idx==1));
+                if(that.last_tip_idx>0){
+                    if(idx+1==that.last_tip_idx){
+                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                    }else{
+                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);
+                    }
+                    return;
+                }
 
-                $.ajax( "context_help/tips/tip"+(idx+1)+".html?t="+(new Date().time) )
+                $.ajax( {
+                    url:"context_help/tips/tip"+(idx+1)+".html?t="+top.HEURIST4.util.random(),
+                    /*global:false,
+                    error: function() {
+                        that.last_tip_idx = idx+1;
+                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                    }*/
+                    })
                     .done(function() {
                         top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);
                     })
-                    .fail(function() {
+                    .error(function() {
+                        //$.event.global.ajaxError = false; 
+                        that.last_tip_idx = idx+1;
                         top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                    })
+                    .complete(function(){
+                        // Enable global error logging
+                        //$.event.global.ajaxError = true;
                     });                
                 
             }

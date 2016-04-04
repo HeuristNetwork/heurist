@@ -314,25 +314,27 @@ function _titlemask__get_rec_detail_types($rt) {
         .' order by rst_DisplayOrder';
 
         $res = mysql_query($query);
-        $rdr[$rt] = array();
+        
+        if($res){
+            $rdr[$rt] = array();
+            while ($row = mysql_fetch_assoc($res)) {
 
-        while ($row = mysql_fetch_assoc($res)) {
+                if (is_numeric($row['dty_OriginatingDBID']) && $row['dty_OriginatingDBID']>0 &&
+                is_numeric($row['dty_IDInOriginatingDB']) && $row['dty_IDInOriginatingDB']>0) {
 
-            if (is_numeric($row['dty_OriginatingDBID']) && $row['dty_OriginatingDBID']>0 &&
-            is_numeric($row['dty_IDInOriginatingDB']) && $row['dty_IDInOriginatingDB']>0) {
+                    $dt_cc = "" . $row['dty_OriginatingDBID'] . "-" . $row['dty_IDInOriginatingDB'];
+                } else if (HEURIST_DBID) {
+                    $dt_cc = "" . HEURIST_DBID . "-" . $row['dty_ID'];
+                } else {
+                    $dt_cc = $row['dty_ID'];
+                }
 
-                $dt_cc = "" . $row['dty_OriginatingDBID'] . "-" . $row['dty_IDInOriginatingDB'];
-            } else if (HEURIST_DBID) {
-                $dt_cc = "" . HEURIST_DBID . "-" . $row['dty_ID'];
-            } else {
-                $dt_cc = $row['dty_ID'];
+                $row['dty_ConceptCode'] = $dt_cc;
+
+                $rdr[$rt][$row['dty_ID']] = $row;
+                $rdr[$rt][$row['rst_DisplayName']] = $row;
+                $rdr[$rt][$dt_cc] = $row;
             }
-
-            $row['dty_ConceptCode'] = $dt_cc;
-
-            $rdr[$rt][$row['dty_ID']] = $row;
-            $rdr[$rt][$row['rst_DisplayName']] = $row;
-            $rdr[$rt][$dt_cc] = $row;
         }
     }
     return $rdr[$rt];

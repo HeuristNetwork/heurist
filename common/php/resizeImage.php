@@ -83,10 +83,12 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 
         //save as file
         $img = imagecreatefromstring($file['ulf_Thumbnail']);
-        imagepng($img, $thumbnail_file);
+        if($img){
+            imagepng($img, $thumbnail_file);
 
-        // thumbnail exists
-        echo $file['ulf_Thumbnail'];
+            // thumbnail exists
+            echo $file['ulf_Thumbnail'];
+        }
         return;
     }
     $fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php

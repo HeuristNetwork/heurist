@@ -125,8 +125,8 @@
                 if ($rec_id % $step_uiupdate == 0) {
                     print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','
                     .$repair_count.','.count($updates).')</script>'."\n";
-                    ob_flush();
-                    flush();
+                    @ob_flush();
+                    @flush();
                 }
 
                 $mask = $masks[$rec['rec_RecTypeID']];
@@ -157,8 +157,8 @@
                 print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 
                 if ($rec_id % $step_uiupdate == 0) {
-                    ob_flush();
-                    flush();
+                    @ob_flush();
+                    @flush();
                 }
             }
 
@@ -184,8 +184,8 @@
                     ++$i;
                     if ($rec_id % $step_uiupdate == 0) {
                         print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
-                        ob_flush();
-                        flush();
+                        @ob_flush();
+                        @flush();
                     }
                 }
 
@@ -204,8 +204,8 @@
                 '<br/>or faulty data in individual records. These titles have not been changed.';
             }
 
-            ob_flush();
-            flush();
+            @ob_flush();
+            @flush();
 
         ?>
 
