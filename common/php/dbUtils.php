@@ -601,7 +601,22 @@ function createDatabaseFolders($newDBName){
         $warnings = 1;
     }
 
-
+    
+    //create filethumbs
+    $filethumbs_folder = $uploadPath.'/filethumbs';
+    if (@mkdir($filethumbs_folder, 0777, true)) {
+        //copy htaccess
+        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $filethumbs_folder.'/.htaccess');
+        if(!$res){
+            echo ("<h3>Warning:</h3> Can not copy htaccess file for filethumbs folder in $uploadPath<br>");
+            $warnings = 1;
+        }
+    }else{
+        echo ("<h3>Warning:</h3> Unable to create file thumbnails folder to $uploadPath<br>");
+        $warnings = 1;
+    }
+    
+    
 
     // Create all the other standard folders required for the database
     // index.html files are added by createFolder to block index browsing
