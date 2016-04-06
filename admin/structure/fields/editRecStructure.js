@@ -1943,7 +1943,7 @@ function EditRecStructure() {
                     var rec = _myDataTable.getRecord(this.tmpIndex);
                     var rowrec = _myDataTable.getTrEl(rec);
                     Dom.setStyle(rowrec,'font-weight','bold');
-                    Dom.setStyle(rowrec,'background','blue');
+                    Dom.setStyle(rowrec,'background','LightSkyBlue');
             
 
 
