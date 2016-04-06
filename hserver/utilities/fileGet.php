@@ -1,9 +1,8 @@
 <?php
 /**
 * 
-* @TODO
-* 
-* fileGet.php - get image for given entity, record ID, version and color 
+* fileGet.php - 1) get image for given entity, record ID, version and color 
+*               2) get or check file from code folders - tips, help, doc content
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,51 +21,61 @@
 */
 
 require_once(dirname(__FILE__)."/../System.php");
-require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
+//require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
 
-$system = new System();
-$system->initPathConstants(@$_REQUEST['db']);
+//secondary purpose - check file existance in code
+$path = @$_REQUEST['check'];
+if($path){
+  if(file_exists(HEURIST_DIR.$path)){
+        print 'ok';      
+  }else{
+        print '';
+  }
+  exit();
+}
 
+//main purpose - download entity images
 $entity_name = @$_REQUEST['entity'];
 $recID = @$_REQUEST['recID'];
+$db = @$_REQUEST['db'];
 
+if(!$db){
+    $system->addError(HEURIST_INVALID_REQUEST, "Db parameter is not defined");
+}else 
 if(!$entity_name){
     $system->addError(HEURIST_INVALID_REQUEST, "Entity parameter is not defined");
+}else
+if(!($recID>0)){
+    $system->addError(HEURIST_INVALID_REQUEST, "Entity ID is not defined");
+}else{
 
+    $system = new System(); //without db connection
+    $system->initPathConstants($db);
 
-
-if($system->init()){
-
-    //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
-    $entity_name = @$_REQUEST['entity'];
-    $recID = @$_REQUEST['recID'];
-    
-    if(!$entity_name){
-            $system->addError(HEURIST_INVALID_REQUEST, "Entity parameter is not defined");
-    }
-    if(!($recID>0)){
-            $system->addError(HEURIST_INVALID_REQUEST, "Record ID parameter is not defined");
-    }
-
-    $filename = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/',
+    $filename = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
 
     $version  = @$_REQUEST['version'];
-    if($version!=null){
+    if($version=='thumbnail' || $version=='icon'){
         $filename =  $filename.$version.'/';   
     }
     //find file by recID
+    $filename = $filename.$recID.'.';
     
+    $exts = array('png','jpg','jpeg','gif');
     
+    foreach ($exts as $ext) {
+       
+        if(file_exists($filename.$ext)){
     
-    if(file_exists($filename)){
-    
-        ob_start();    
-        header('Content-type: image/png');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($filename));
-        @ob_clean();
-        flush();        
-        readfile($filename);
-    
+            ob_start();    
+            header('Content-type: image/'.$ext);
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($filename.$ext));
+            @ob_clean();
+            flush();        
+            readfile($filename.$ext);
+            break;
+        }        
     }
+}
 ?>

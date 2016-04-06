@@ -140,26 +140,19 @@ $.widget( "heurist.help_tips", {
                     }
                     return;
                 }
-
+                
                 $.ajax( {
-                    url:"context_help/tips/tip"+(idx+1)+".html?t="+top.HEURIST4.util.random(),
-                    /*global:false,
-                    error: function() {
-                        that.last_tip_idx = idx+1;
-                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
-                    }*/
-                    })
-                    .done(function() {
-                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);
+                    url: top.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
                     })
                     .error(function() {
-                        //$.event.global.ajaxError = false; 
-                        that.last_tip_idx = idx+1;
-                        top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
                     })
-                    .complete(function(){
-                        // Enable global error logging
-                        //$.event.global.ajaxError = true;
+                    .success(function(response, textStatus, jqXHR){
+                        if(response=='ok'){
+                            top.HEURIST4.util.setDisabled($.find('#btnTipNext'), false);    
+                        }else{
+                            that.last_tip_idx = idx+1;
+                            top.HEURIST4.util.setDisabled($.find('#btnTipNext'), true);
+                        }
                     });                
                 
             }

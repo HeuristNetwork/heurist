@@ -747,6 +747,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = top.HEURIST4.util.random();
+                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';
                 _callserver('entityScrud', request, callback);
             },
             
@@ -1012,9 +1013,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 }
                 return null;
-        },
+        }
         
-        getImageUrl: function(entityName, recID, version){
+        , getImageUrl: function(entityName, recID, version){
             if(recID>0){
                      return top.HAPI4.basePathV4 + 'hserver/utilities/fileGet.php'
                             +'?db='+ top.HAPI4.database
@@ -1024,12 +1025,12 @@ function hAPI(_db, _oninit) { //, _currentUser
             }else{
                 return '';
             }    
-        },
+        }
 
         //
         //
         //        
-        parseCSV: function(request, callback){
+        , parseCSV: function(request, callback){
             //if(request) request.a = 'svs_delete';
             _callserver('fileParse', request, callback);
         }
