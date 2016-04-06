@@ -122,7 +122,7 @@ class DbEntityBase
             }
             
 //error_log(print_r($fields,true));            
-            
+
             //save data
             $ret = mysql__insertupdate($mysqli, 
                                     $this->config['tableName'], $this->config['tablePrefix'],
@@ -134,7 +134,8 @@ class DbEntityBase
                     //rollback
                     $mysqli->rollback();
                     if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                    $this->system->addError(HEURIST_INVALID_REQUEST, "Can not save data in table ".$this->config['entityName'], $ret);
+                    $this->system->addError(HEURIST_INVALID_REQUEST, 
+                        'Can not save data in table '.$this->config['entityName'], $ret);
                     return false;
             }
             
@@ -198,15 +199,27 @@ class DbEntityBase
         
         $fieldvalues = $this->data['fields'];
         
+        $table_prefix = $this->config['tablePrefix'];
+        if (substr($table_prefix, -1) !== '_') {
+            $table_prefix = $table_prefix.'_';
+        }
+        $rec_ID = intval(@$fieldvalues[$table_prefix.'ID']);
+        $isinsert = ($rec_ID<1);
+            
         foreach($this->fields as $fieldname=>$field_config){
             if(@$field_config['dty_Role']=='virtual') continue;
             
-            $value = @$fieldvalues[$fieldname];
+            if(array_key_exists($fieldname, $fieldvalues)){
+                $value = $fieldvalues[$fieldname];    
+            }else{
+                if(!$isinsert) continue;
+                $value = null;
+            }
             
-            if(($value==null || trim($value)=='') && 
+            if( ( $value==null  || trim($value)=='' ) && 
                 (@$field_config['dty_Role']!='primary') &&
                 (@$field_config['rst_RequirementType'] == 'required')){
-                    
+             
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Field $fieldname is mandatory.");
                 return false;    
             }
@@ -278,13 +291,16 @@ class DbEntityBase
         $iterator = new \RecursiveIteratorIterator($directory);        
         
         foreach ($iterator as $filepath => $info) {
+              if(!$info->isFile()) continue;
+              
               $filename = $info->getFilename();
-              if ($filename==$tempfile && file_exists($filename)) {
-                  $pathname = $info->getPathname();
-                  $extension = $info->getExtension();
-                  $new_name = $pathname.$recID.'.'.$extension;
+              $extension = $info->getExtension();
+              
+              if ($filename==$tempfile.'.'.$extension) {
+                  $pathname = $info->getPath();
+                  $new_name = $pathname.'/'.$recID.'.'.$extension;
 
-                  rename ($filepath, $new_name);
+                  rename ($info->getPathname(), $new_name);
               }
         }        
     }

@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Page for popup modal dialog to perform various acvtions related to records
+* Page for popup modal dialog to perform various actions related to records
 *
 *    add/edit/delete details
 *    set relationship
@@ -50,12 +50,24 @@ loginRequired();
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_detail','replace_detail','delete_detail');
-
+$allowed_actions = array('add_detail','replace_detail','delete_detail','merge_term');
 if(!in_array($action_type, $allowed_actions)){
     header('Location: '.ERROR_REDIR.'?msg=Action is not defined or not allowed');
     exit();
 }
+
+//verify parameter scope
+$scope_type = @$_REQUEST['scope'];
+$allowed_scope = array('all','selected','current');
+if (!( intval($scope_type)>0 || in_array($scope_type, $allowed_scope))){
+    header('Location: '.ERROR_REDIR.'?msg=Scope is not allowed');
+    exit();
+}
+
+$field_type = @$_REQUEST['ft'];
+$field_value = @$_REQUEST['value'];
+
+
 
 /*
 switch ($action_type) {
@@ -132,7 +144,8 @@ break;
     // Callback function on map initialization
     function onPageInit(success){
         if(success){
-            var recordAction = new hRecordAction('<?php echo $action_type;?>');
+            var recordAction = new hRecordAction('<?php echo $action_type;?>', 
+                    '<?php echo $scope_type;?>', '<?php echo $field_type;?>', '<?php echo $field_value;?>');
         }
     }
 </script>

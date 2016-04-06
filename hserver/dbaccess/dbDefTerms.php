@@ -184,7 +184,7 @@ class DbDefTerms extends DbEntityBase
             
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $ret);
+                        parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
                     }
                 }
             }

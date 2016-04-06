@@ -426,7 +426,7 @@ class DbEntitySearch
 
                     $records = array();
                     $order = array();
-
+                    
                     // load all records
                     while ($row = $res->fetch_row())// && (count($records)<$chunk_size) ) {  //3000 maxim allowed chunk
                     {

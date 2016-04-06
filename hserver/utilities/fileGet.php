@@ -63,19 +63,26 @@ if(!($recID>0)){
     
     $exts = array('png','jpg','jpeg','gif');
     
+    $file_read = HEURIST_DIR.'hclient/assets/13x13.gif';
+    $file_ext = 'gif';
+    
     foreach ($exts as $ext) {
        
         if(file_exists($filename.$ext)){
-    
-            ob_start();    
-            header('Content-type: image/'.$ext);
-            header('Pragma: public');
-            header('Content-Length: ' . filesize($filename.$ext));
-            @ob_clean();
-            flush();        
-            readfile($filename.$ext);
+            $file_read = $filename.$ext;
+            $file_ext = $ext;
             break;
         }        
     }
+    
+    ob_start();    
+    header('Content-type: image/'.$file_ext);
+    header('Pragma: public');
+    header('Content-Length: ' . filesize($file_read));
+    @ob_clean();
+    flush();        
+    readfile($file_read);
+    
 }
 ?>
+

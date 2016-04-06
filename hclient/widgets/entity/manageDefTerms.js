@@ -212,6 +212,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._addEditRecord(-1);
             }else if(action=='add-import'){
                 
+                var that = this;
+                
                 //open import dialog
                 top.HEURIST4.msg.showDialog(
                     top.HAPI4.basePathV4 + 'hclient/framecontent/importDefTerms.php?db='
@@ -219,11 +221,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             +'&trm_ID='+this._currentParentID,
                   {
                      title: 'Import children from structured data (CSV)',
-                     callback: null,
+                     callback: function(context){that._onImportComplete(context);},
                      width: '800px',
                      height: '460px'
                   }          
                 );
+                
+            }else if(action=='merge'){
+                
+                var url = top.HAPI4.basePathV4 + 'hclient/framecontent/recordAction.php?db='
+                        +top.HAPI4.database+'&action=merge_term&value='+encodeURIComponent();
+
+                top.HEURIST4.msg.showDialog(url, {height:450, width:700,
+                    padding: '0px',
+                    title: top.HR(action_type),
+                    class:'ui-heurist-bg-light'} );
                 
             }
         }else{
@@ -231,6 +243,87 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
     },
+    
+    /**
+    * Add the list of imported terms
+    * context - {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms }
+    */
+    _onImportComplete: function (context){
+        
+        if(!top.HEURIST4.util.isnull(context) && !top.HEURIST4.util.isnull(context.terms))
+        {
+            var tree = this._treeview.fancytree("getTree");        
+            
+            top.HEURIST4.terms = context.terms;
+            var res = context.result,
+            ind,
+            parentNode, node,
+            fi = top.HEURIST4.terms.fieldNamesToIndex;
+
+            var isVocab = !(context.parent>0);
+            if(isVocab){ //add to root
+                parentNode = tree.rootNode;
+            }else { //add new children
+                parentNode = tree.getNodeByKey( context.parent );
+            }
+            
+            if(res.length>0 && parentNode){
+
+                for (ind in res)
+                {
+                    if(!Hul.isnull(ind)){
+                        var termid = Number(res[ind]);
+                        if(!isNaN(termid))
+                        {
+                            var arTerm = top.HEURIST4.terms.termsByDomainLookup[this._currentDomain][termid];
+                            if(!Hul.isnull(arTerm)){
+                                node = parentNode.addChildren( { title:arTerm[fi.trm_Label], key:termid});    
+                            }
+                        }
+                    }
+                }//for
+                
+                this.refreshRecordList();
+                
+                if(isVocab){ //activate last node
+                    if(node) node.setActive();
+                }else{//select parent node
+                    parentNode.setExpanded();
+                    parentNode.setActive();
+                }
+                
+            }//if length>0
+        }
+    },
+    
+    //-----------------------------------------------------
+    //
+    //  change parent
+    //
+    _changeParentTerm: function( termID, newParentTermID, callback ){
+
+            var fields = {'trm_ID':termID, 'trm_ParentTermID':newParentTermID};
+        
+            var request = {
+                'a'          : 'save',
+                'entity'     : this.options.entity.entityName,
+                'fields'     : fields                     
+                };
+                
+                var that = this;                                                
+                //that.loadanimation(true);
+                top.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == top.HAPI4.ResponseStatus.OK){
+                            if(callback && $.isFunction(callback)){
+                                callback();                                
+                            }
+                            top.HEURIST4.msg.showMsgFlash(top.HR('Parent has been changed'));
+                        }else{
+                            top.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+    },     
     
     //  -----------------------------------------------------
     //
@@ -278,7 +371,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(!isNewRecord){//rename
                 node = tree.getNodeByKey( fieldvalues['trm_ID'] );
                 node.setTitle( fieldvalues['trm_Label'] );
-                node.render(true);            
+                //node.render(true);            
         }else{
             var node, //new node
                 parentNode; 
@@ -304,7 +397,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //select parent node
                 parentNode.setExpanded();
                 parentNode.setActive();
-                //reload parent 
+                //reload parent in edit form 
                 this._addEditRecord( fieldvalues['trm_ParentTermID'] );
             }
         }
@@ -371,8 +464,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 dragEnter: function(node, data) {
                     //return true;
                     // return ["before", "after"];
-                    if(node.tree._id == data.otherNode.tree._id){
-                        return node.folder ?true :["before", "after"];
+                    if(data && data.otherNode && node.tree._id == data.otherNode.tree._id)
+                    {
+                        
+                        //recordset.getById(node.key)
+                        //recordset.getById(node.otherNode)
+                        //node.key 
+                        
+                        return ['over'];//true; //node.folder ?true :["before", "after"];
                     }else{
                         return false;
                     }
@@ -380,10 +479,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 },
                 dragDrop: function(node, data) {
-                    /*that._avoidConflictForGroup(groupID, function(){
-                        data.otherNode.moveTo(node, data.hitMode);
-                        that._saveTreeData( groupID );
-                    });*/
+                    
+                    that._changeParentTerm(node.key, data.otherNode.key, function(){
+                        data.otherNode.moveTo(node, data.hitMode);    
+                    });
+                    //that._saveTreeData( groupID );
                 }
             };
             /* fancytree_options['edit'] = {

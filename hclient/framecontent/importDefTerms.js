@@ -339,7 +339,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                                 
                             top.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
-                                    window.close({result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
+                                    window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
                                 }else{
                                     top.HEURIST4.msg.showMsgErr('Can not obtain database definitions, please consult Heurist developers');
                                 }

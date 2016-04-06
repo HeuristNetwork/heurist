@@ -411,10 +411,15 @@ function hRecordSet(initdata) {
     */
     function _getFieldValue(record, fldname){
 
+        if(isnull(record)){
+            return null;
+        }
+        
         //this is field type ID  or field name (nominal for most common fields)
-        if(!isNaN(Number(fldname)) || fldname.indexOf("dtl_")==0){  //@todo - search detail by its code
-            var d = record['d'];
-            if(d){
+        var d = record['d'];
+        if(d){
+            if(!isNaN(Number(fldname)) || fldname.indexOf("dtl_")==0){  //@todo - search detail by its code
+            
                 if(!isNaN(Number(fldname))){ //dt code
                     if(d[fldname] && d[fldname][0]){
                         return d[fldname][0];
@@ -449,9 +454,7 @@ function hRecordSet(initdata) {
         //either take value by index or by name
         // record can be either array or object
         var idx = $.inArray(fldname, fields);
-        if(isnull(record)){
-            return null;
-        }else if(idx>-1){
+        if(idx>-1){
             return record[idx];
         }else{
             return isnull(record[fldname])?null:record[fldname]; //return null;

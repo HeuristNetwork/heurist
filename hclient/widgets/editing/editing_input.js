@@ -855,7 +855,7 @@ $.widget( "heurist.editing_input", {
         var res = null;
         var $input = $(input_id);
 
-        if(!(this.detailType=="resource" || this.detailType=="relmarker")){
+        if(!(this.detailType=="resource" || this.detailType=="relmarker" || this.detailType=="file")){
             res = $input.val();
         }else if (!top.HEURIST4.util.isempty( this.newvalues[$input.attr('id')] ) ){
             res = this.newvalues[$input.attr('id')];
@@ -965,6 +965,15 @@ $.widget( "heurist.editing_input", {
         return (errorMessage=='');
     },
 
+    
+    focus: function(){
+        if(this.inputs && this.inputs.length>0){
+            $(this.inputs[0]).focus();   
+            return true;
+        }else{
+            return false;
+        }
+    },
 
     //
     //

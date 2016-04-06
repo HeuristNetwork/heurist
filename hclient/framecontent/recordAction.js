@@ -24,11 +24,16 @@
 */
 
 
-function hRecordAction(_action_type) {
+function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var _className = "RecordAction",
     _version   = "0.4",
 
-    selectRecordScope, action_type, allSelectedRectypes;
+    selectRecordScope, allSelectedRectypes;
+
+    var action_type = _action_type,
+        init_scope_type = _scope_type,
+        init_field_type = _field_type,
+        init_field_value = _field_value;
 
 
     /*
@@ -46,7 +51,7 @@ function hRecordAction(_action_type) {
 
         //fill header with description
         $('#div_header').html(top.HR('record_action_'+action_type));
-
+        
         //fill selector for records: all, selected, by record type
         selectRecordScope = $('#sel_record_scope')
         .on('change',
@@ -75,28 +80,38 @@ function hRecordAction(_action_type) {
             //return;
         }
 
-        var selScope = selectRecordScope.get(0);
+        var opt, selScope = selectRecordScope.get(0);
 
-        var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
-        allowed.splice(allowed.indexOf("separator"),1);
-        allowed.splice(allowed.indexOf("relmarker"),1);
-
-        //add result count option default
-        var opt = new Option("Current results set (count="+ top.HAPI4.currentRecordset.length()+")", "All");
-        selScope.appendChild(opt);
-        //selected count option
-        if ( top.HAPI4.currentRecordsetSelection &&  top.HAPI4.currentRecordsetSelection.length > 0) {
-            opt = new Option("Selected results set (count=" + top.HAPI4.currentRecordsetSelection.length+")", "Selected");
+        if(init_scope_type=='all'){
+            opt = new Option("All records", "All");
             selScope.appendChild(opt);
-        }
-        //find all types for result and add option for each with counts.
-        var rectype_Ids = top.HAPI4.currentRecordset.getRectypes();
-
-        for (var rty in rectype_Ids){
-            if(rty>=0){
-                rty = rectype_Ids[rty];
-                opt = new Option(top.HEURIST4.rectypes.pluralNames[rty], rty);
+        }else if(init_scope_type>0 && top.HEURIST4.rectypes.pluralNames[init_scope_type]){
+            opt = new Option(top.HEURIST4.rectypes.pluralNames[init_scope_type], init_scope_type);
+            selScope.appendChild(opt);
+        }else{
+            
+            if(init_scope_type=='' || init_scope_type=='current'){
+                //add result count option default
+                opt = new Option("Current results set (count="+ top.HAPI4.currentRecordset.length()+")", "Current");
                 selScope.appendChild(opt);
+            }
+            //selected count option
+            if((init_scope_type=='' || init_scope_type=='selected') &&
+               (top.HAPI4.currentRecordsetSelection &&  top.HAPI4.currentRecordsetSelection.length > 0)) {
+                opt = new Option("Selected results set (count=" + top.HAPI4.currentRecordsetSelection.length+")", "Selected");
+                selScope.appendChild(opt);
+            }
+            if(init_scope_type==''){
+                //find all types for result and add option for each with counts.
+                var rectype_Ids = top.HAPI4.currentRecordset.getRectypes();
+
+                for (var rty in rectype_Ids){
+                    if(rty>=0){
+                        rty = rectype_Ids[rty];
+                        opt = new Option(top.HEURIST4.rectypes.pluralNames[rty], rty);
+                        selScope.appendChild(opt);
+                    }
+                }
             }
         }
         _onRecordScopeChange();
@@ -123,49 +138,57 @@ function hRecordAction(_action_type) {
     //
     function _fillSelectFieldTypes() {
 
-        var scope_type = selectRecordScope.val();
+        var fieldSelect = $('#sel_fieldtype').get(0);
+        if(init_scope_type>0){
+            top.HEURIST4.ui.createSelector(fieldSelect, {key:init_scope_type, title:top.HEURIST4.detailtypes.names[init_scope_type]});
+        }else{
 
-        var rtyIDs = [], dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
-        var rtys = {};
-        var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
+            var scope_type = selectRecordScope.val();
+        
+            var rtyIDs = [], dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
+            var rtys = {};
+            var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
 
-        //get record types
-        if(scope_type=="All"){
-            rtyIDs = top.HAPI4.currentRecordset.getRectypes();
-        }else if(scope_type=="Selected"){
-            rtyIDs = [];
+            //get record types
+            if(scope_type=="All"){
+                rtyIDs = null; //show all details
+            }else if(scope_type=="Current"){
+                rtyIDs = top.HAPI4.currentRecordset.getRectypes();
+            }else if(scope_type=="Selected"){
+                rtyIDs = [];
 
-            //loop all selected records
-            for(i in top.HAPI4.currentRecordsetSelection){
+                //loop all selected records
+                for(i in top.HAPI4.currentRecordsetSelection){
 
-                var rty_total_count = top.HAPI4.currentRecordset.getRectypes().length;
-                var recID = top.HAPI4.currentRecordsetSelection[i];
-                var record  = top.HAPI4.currentRecordset.getById(recID) ;
-                rty = top.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
+                    var rty_total_count = top.HAPI4.currentRecordset.getRectypes().length;
+                    var recID = top.HAPI4.currentRecordsetSelection[i];
+                    var record  = top.HAPI4.currentRecordset.getById(recID) ;
+                    rty = top.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
 
-                if (!rtys[rty]){
-                    rtys[rty] = 1;
-                    rtyIDs.push(rty);
-                    if(rtyIDs.length==rty_total_count) break;
+                    if (!rtys[rty]){
+                        rtys[rty] = 1;
+                        rtyIDs.push(rty);
+                        if(rtyIDs.length==rty_total_count) break;
+                    }
                 }
+
+                allSelectedRectypes = rtyIDs;
+
+            }else{
+                rtyIDs = [scope_type];
             }
 
-            allSelectedRectypes = rtyIDs;
+            var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
+            allowed.splice(allowed.indexOf("separator"),1);
+            allowed.splice(allowed.indexOf("relmarker"),1);
+            allowed.splice(allowed.indexOf("geo"),1);
+            allowed.splice(allowed.indexOf("file"),1);
 
-        }else{
-            rtyIDs = [scope_type];
+
+            top.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
         }
-
-        var allowed = Object.keys(top.HEURIST4.detailtypes.lookups);
-        allowed.splice(allowed.indexOf("separator"),1);
-        allowed.splice(allowed.indexOf("relmarker"),1);
-        allowed.splice(allowed.indexOf("geo"),1);
-        allowed.splice(allowed.indexOf("file"),1);
-
-        var fieldSelect = $('#sel_fieldtype').get(0);
-
-        top.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
-
+        
+        
         fieldSelect.onchange = _createInputElements;
         _createInputElements();
     }
@@ -195,14 +218,16 @@ function hRecordAction(_action_type) {
 
             $('#cb_remove_all').change(function(){ $(this).is(':checked')?$('#fld-1').hide():$('#fld-1').show();  });
             $('.editint-inout-repeat-button').hide();
+            
+        }else if(action_type=='merge_delete_detail'){
+            _createInputElement('fld-1', top.HR('Value to remove'), init_field_value);
+            _createInputElement('fld-2', top.HR('Or repalce it with'));
         }
-
-
 
     }
 
 
-    function _createInputElement(input_id, input_label){
+    function _createInputElement(input_id, input_label, init_value){
 
         var $fieldset = $('#div_widget>fieldset');
 
@@ -217,7 +242,7 @@ function hRecordAction(_action_type) {
             rectypeID = Number(scope_type)
         }else{
             var i, rtyIDs
-            if(scope_type=="All"){
+            if(scope_type=="Current"){
                 rtyIDs = top.HAPI4.currentRecordset.getRectypes();
             }else{
                 rtyIDs = allSelectedRectypes;
@@ -239,13 +264,15 @@ function hRecordAction(_action_type) {
         dtFields[fi['rst_MaxValues']] = 1;
         dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resourse
         //dtFields[fi['rst_DisplayWidth']] = 50;
+        
+        if(top.HEURIST4.util.isnull(init_value)) init_value = '';
 
         var ed_options = {
             recID: -1,
             dtID: dtID,
             //rectypeID: rectypeID,
             rectypes: top.HEURIST4.rectypes,
-            values: '',
+            values: init_value,
             readonly: false,
 
             showclear_button: false,
@@ -331,7 +358,7 @@ function hRecordAction(_action_type) {
             request['recIDs'] = top.HAPI4.currentRecordsetSelection;
         }else{
             request['recIDs'] = top.HAPI4.currentRecordset.getIds();
-            if(scope_type!="All"){
+            if(scope_type!="Current"){
                 request['rtyID'] = scope_type;
             }
         }
@@ -427,7 +454,7 @@ function hRecordAction(_action_type) {
 
     }
 
-    action_type = _action_type;
+    
     _init();
     return that;  //returns object
 }

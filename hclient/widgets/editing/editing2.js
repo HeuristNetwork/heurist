@@ -96,9 +96,19 @@ function hEditing(container, _recdata, _recstructure) {
         
         if(_recstructure) recstructure = _recstructure;
                 
+        var recID = '';
         if(recdata!=null){ //for edit mode
              record = recdata.getFirstRecord();
+            //get record ID
+            var idx;
+            for (idx=0; idx<recstructure.length; idx++){
+               if(recstructure[idx]['keyField']){
+                    recID = recdata.fld(record, idx);
+                    break;
+               }
+            }
         }
+        
         
         //rec structure is arrya in following format
         /*
@@ -217,12 +227,7 @@ function hEditing(container, _recdata, _recstructure) {
                             fields[idx].values = null;    
                         }
                         
-                        if (record) {
-                            var recID = recdata.fld(record, 'rec_ID');
-                            fields[idx].recID = recID;
-                        }else{
-                            fields[idx].recID = '';
-                        }
+                        fields[idx].recID = recID;
                         
                         var inpt = $('<div>').appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
@@ -251,6 +256,17 @@ function hEditing(container, _recdata, _recstructure) {
         __createGroup(recstructure, $container, null);
         
         $container.fadeIn(250);
+        
+        if(editing_inputs.length>0){
+            var idx, ele;
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                if(ele.editing_input('focus')){
+                    break;    
+                }
+            }
+        }
+        
     }
 
     function _save(){
