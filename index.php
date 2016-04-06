@@ -139,11 +139,14 @@ _time_debug = new Date().getTime() / 1000;
                 $( "#heurist-about" ).dialog(
                     {
                         autoOpen: true,
-                        height: 200,
+                        height: 180,
                         width: 450,
                         modal: true,
                         resizable: false,
                         draggable: false,
+                        create:function(){
+                            $(this).parent().find('.ui-dialog-titlebar').addClass('fullmode').hide();
+                        }
                         /*hide: {
                             effect: "puff",
                             duration: 500
