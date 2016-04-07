@@ -137,6 +137,9 @@ $2 rm heurist
 $2 ln -s /var/www/html/HEURIST/$1 h4
 $2 ln -s /var/www/html/HEURIST/index.html heurist
 
+cd /var/www/html/HEURIST
+$2 ln -s /var/www/html/HEURIST/$1 h4
+
 # ------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n"
