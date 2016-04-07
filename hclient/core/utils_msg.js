@@ -56,7 +56,8 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             if(response.status==top.HAPI4.ResponseStatus.SYSTEM_FATAL
             || response.status==top.HAPI4.ResponseStatus.SYSTEM_FATALSYSTEM_CONFIG){
 
-                msg = msg + "<br><br>The system may not be properly configured. Please consult your system administrator.";
+                msg = msg + "<br><br>May result from a network outage, or because the system is not properly configured. "
+                +"If the problem persists, please report to your system administrator";
 
             }else if(response.status==top.HAPI4.ResponseStatus.INVALID_REQUEST){
 

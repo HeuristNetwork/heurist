@@ -36,6 +36,8 @@ require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
 $registeredDBs = array();
 
 $is_named = (@$_REQUEST['named']==1); //return associated array
+$is_curated = (@$_REQUEST['curated']==1); //get only maintained/curated databases with id<1000
+
 
 $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
 
@@ -44,6 +46,9 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $reg_url =  HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getRegisteredDBs.php?t=11&db=Heurist_Master_Index";
     if($is_named){
         $reg_url =  $reg_url.'&named=1';
+    }
+    if($is_curated){
+        $reg_url =  $reg_url.'&curated=1';
     }
 
     //get json array of registered databases
@@ -76,8 +81,12 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     }
 
     // Return all registered databases as a json string
-    $res = mysql_query('select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version '
-    .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22');
+    $query = 'select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version '
+    .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22';
+    if($is_curated){
+        $query = $query.' and rec_ID<1000';    
+    }
+    $res = mysql_query( $query );
 
     while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
 

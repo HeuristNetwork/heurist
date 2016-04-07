@@ -381,7 +381,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                 // request for server side on the Heurist master index
                 var baseurl = "<?=HEURIST_BASE_URL?>admin/setup/dbproperties/getRegisteredDBs.php";
-                var params = "db=<?=HEURIST_INDEX_DBNAME?>";   // &named=1&excluded=dbid
+                var params = "db=<?=HEURIST_INDEX_DBNAME?>&curated=1";   // &named=1&excluded=dbid
                 top.HEURIST.util.getJsonData(baseurl,
                     //top.HEURIST.database.name
 
@@ -390,15 +390,16 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                         registeredDBs = responce;
                         var ddiv = document.getElementById('registered_dbs');
-                        var s = '';
+                        var s = '', isodd = true;
 
                         if(!top.HEURIST.util.isnull(responce)){
 
                             for(var idx in responce){
-                                if(idx){
+                                if(idx && Number(responce[idx][0])<1000){
 
-                                    //regurl = responce[idx][0]
-                                    var bgcolor = (idx % 2 == 0)?'#EDF5FF':'#FFF';
+                                    //regurl = responce[idx][0] idx % 2 == 0
+                                    var bgcolor = (isodd)?'#EDF5FF':'#FFF';
+                                    isodd = !isodd;
 
                                     s = s + '<div class="tabrow" style="background-color:'+bgcolor+'">'
                                     +'<div style="min-width:20px;display:table-cell"><input type="radio" name="dbreg" value="'+idx+'" id="rbdb'+idx+'"/></div>'
