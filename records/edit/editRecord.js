@@ -1450,7 +1450,7 @@ console.log('heurist not defined');
                     var niceName = inputs[i].recFieldRequirements[0].toLowerCase();
                     niceName = niceName.substring(0, 1).toUpperCase() + niceName.substring(1);
                     */
-                    missingFields.push(inputs[i].shortName + ": requires " + inputs[i].typeDescription);
+                    missingFields.push('<font style="font-weight:bold;font-size:13px">'+inputs[i].shortName + "</font>: requires " + inputs[i].typeDescription);
 
                     if (! firstInput) firstInput = inputs[i];
                 }
@@ -1481,7 +1481,9 @@ console.log('heurist not defined');
                 alert(missingFields[0]);
             } else {    // many errors
                 //"There were problems with your inputs:<br /> - " +
-                alert(missingFields.join("<br />"));
+                alert('<div style="text-align:left;font-size:1em;">'+missingFields.join("<br />")+'</div>');
+                $('#alertBox').width('380px');
+                
             }
 
             firstInput.focus();

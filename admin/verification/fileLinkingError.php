@@ -26,7 +26,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
 
-if (isForAdminOnly()) exit();
+if (isForOwnerOnly()) exit();
 ?>
 <html>
     <head>
@@ -63,13 +63,19 @@ if (isForAdminOnly()) exit();
 
             <?php
             
-    $query1 = "SELECT * from recUploadedFiles"; // get a list of all the files
+    $dbs = mysql__getdatabases(true);            
+    foreach ($dbs as $db){
+        
+        print "<h2>".$db."</h2>";
+            
+    $query1 = "SELECT * from ".$db.".recUploadedFiles"; // get a list of all the files
     $res1 = mysql_query($query1);
     if (!$res1 || mysql_num_rows($res1) == 0) {
-        die ("<p><b>This database does not have uploaded files");
+        print "<p><b>This database does not have uploaded files</p>";
+        continue;
     }
     else {
-        print "<p>Number of files to process: ".mysql_num_rows($res1)."<br>";
+        print "<p>Number of files to process: ".mysql_num_rows($res1)."</p><br>";
     }
     
     $files_orphaned = array();
@@ -90,7 +96,7 @@ if (isForAdminOnly()) exit();
             }
             
             //missed link from recDetails - orphaned files       
-            $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
+            $query2 = "SELECT dtl_RecID from ".$db.".recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
             $res2 = mysql_query($query2);
             $currentRecID = null;
             if ($res2) {
@@ -119,13 +125,17 @@ if (isForAdminOnly()) exit();
                                     'is_remote'=>!@$res['ulf_ExternalFileReference'] );
                     
                 }else{
+                    
+                    $dbName = substr($db,4);
+                    //HEURIST_FILESTORE_DIR
+                    $_HEURIST_FILESTORE_DIR = HEURIST_UPLOAD_ROOT . $dbName . '/';
 
-                    chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+                    chdir($_HEURIST_FILESTORE_DIR);  // relatively db root
 
                     $fpath = realpath($res['db_fullpath']);
 
                     if(!$fpath || !file_exists($fpath)){
-                        chdir(HEURIST_FILES_DIR);  // relatively db root
+                        chdir($_HEURIST_FILESTORE_DIR.'file_uploads/');  // relatively db/file_uploads $_HEURIST_FILES_DIR
                         $fpath = realpath($res['db_fullpath']);
                     }
 
@@ -143,10 +153,10 @@ if (isForAdminOnly()) exit();
 
                     $dirname = str_replace("\0", '', $dirname);
                     $dirname = str_replace('\\', '/', $dirname);
-                    if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
+                    if(strpos($dirname, $_HEURIST_FILESTORE_DIR)===0){
                         
                     
-                    $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                    $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);   //db root folder
                     
                     if($relative_path!=@$res['ulf_FilePath']){
                         
@@ -164,6 +174,7 @@ if (isForAdminOnly()) exit();
     }//while
             
             if (count(@$files_orphaned)>0 || count(@$files_notfound)>0 || count(@$files_path_to_correct)>0){
+            if (false){
                 ?>
                 <script>
                     function markAllMissed(){
@@ -239,16 +250,19 @@ if (isForAdminOnly()) exit();
                 </script>
 
                 <?php
+                }   
                 if(count($files_orphaned)>0){
                 ?>
                     <h3>Orphand files</h3>
                     <div><?php echo count($files_orphaned);?> entries</div>
                     <div>No reference to these files found in record details. These files will be removed from db and file system</div>
                     <br>
+                <?php
+                    /*
                     <input type=checkbox id="do_orphaned">&nbsp;Confirm the deletion of these entries
                     <br>
                     <br>
-                <?php
+                    */
                 foreach ($files_orphaned as $row) {
                     ?>
                     <div class="msgline"><b><?php echo $row['ulf_ID'];?></b> 
@@ -264,18 +278,17 @@ if (isForAdminOnly()) exit();
                     <div><?php echo count($files_notfound);?> entries</div>
                     <div>Path specified in database is wrong and file can not be found. Entries will be removed from database</div>
                     <br>
+                <?php
+/*
                     <input type=checkbox id="fnf_all"
                         onclick="markAllMissed()">
                         &nbsp;Mark/unmark all
                     <br><br>
-                    
-                <?php
-                
+                            <input type=checkbox name="fnf" id="fnf<?php echo $row['ulf_ID'];?>" value=<?php echo $row['ulf_ID'];?>>
+*/                
                 foreach ($files_notfound as $row) {
                     ?>
                     <div class="msgline">
-                            <input type=checkbox name="fnf" id="fnf<?php echo $row['ulf_ID'];?>"
-                                     value=<?php echo $row['ulf_ID'];?>>
                             <b><?php echo $row['ulf_ID'];?></b> 
                             <?php echo $row['db_fullpath'];?>
                     </div>
@@ -289,11 +302,13 @@ if (isForAdminOnly()) exit();
                     <div><?php echo count($files_path_to_correct);?> entries</div>
                     <div>These relative paths in database are wrong. They will be updated in database. Files retain untouched</div>
                     <br>
+                <?php
+                /*
                     <input type=checkbox id="do_fixpath">&nbsp;Confirm the correctiom of these entries
                     <br>
                     <br>
-                <?php
-                
+                */    
+                    
                 foreach ($files_path_to_correct as $row) {
                     ?>
                     
@@ -304,12 +319,15 @@ if (isForAdminOnly()) exit();
                 }
                 print '<hr/>';
                 }
+                if(false){
                 ?>
                 To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br/>
                 <?php
+                }
             }else{
                 print "<br/><p><br/></p><h3>All uploaded file entries are valid</h3>";
             }
+    }//for dbs
             ?>
         </div>
     </body>
