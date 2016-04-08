@@ -1,4 +1,4 @@
-THIS IS     TEST        LINE #2
+THIS IS     	TEST        LINE #2
 
 Directory:	/admin
 
