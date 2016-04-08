@@ -1,25 +1,31 @@
 Heurist academic data management system
 
-http://HeuristNetwork.org, http://HeuristScholar.org, http://heurist.sydney.edu.au
+http://HeuristNetwork.org, http://heurist.sydney.edu.au, http://HeuristScholar.org, 
 
-Copyright © 2005 - 2015 University of Sydney
+Copyright © 2005 - 2016 University of Sydney
 
-Concept/direction: Ian Johnson
-Developers: Artem Osmakov, Tom Murtagh, Kim Jackson, Steve White, Maria Shvedova, Steven Hayes, Maxim Nikitin
-Programming Interns: Jan Jaap de Groot, Marco Springer, Erik Baiij, Tobias Peirick, Hanna Chamoun
-Documentation: Vincent Sheehan
+Concept/direction:      Ian Johnson
+Developers:             Artem Osmakov, Tom Murtagh, Kim Jackson, Steve White, Ireneusz Golka, Maria Shvedova, Steven Hayes, Maxim Nikitin
+Programming Interns:    Jan Jaap de Groot, Marco Springer, Erik Baiij, Tobias Peirick, Hanna Chamoun
+Documentation:          Vincent Sheehan
 Graphic design/testing: Andrew Wilson, Ireneusz Golka, Martin King.
 
-Overview:    Heurist is a flexible web-based collaborative database management system built in php, javascript and mysql. It was developed from late 2005 by Ian Johnson, Archaeological Computing Laboratory, University of Sydney, with the assistance of ACL programmers.
+Overview:    Heurist is a flexible web-based collaborative database management system built in 
+             php, javascript and mysql. It was developed from late 2005 by Ian Johnson, 
+             Archaeological Computing Laboratory, University of Sydney, with the assistance of 
+             ACL programmers.
 
-Heurist is designed primarily for academic research data (including web bookmarking and bibliographic data), but has been used successfully in undergraduate teaching as a blogging, bibliography and student project tool.
+Heurist is designed primarily for academic research data, but has been used successfully in 
+undergraduate teaching as a blogging, bibliography and student project tool, as well as for
+administrative data.
 
 For full information please visit http://HeuristNetwork.org
 
-Documentation standards and overall structure are described in files in the /documentation directory.
-This includes a detaiiled description of the layout of the Heurist directories and steps for installation.
+Documentation standards and overall structure are described in files in the /documentation_and_templates
+directory. This includes a detaiiled description of the layout of the Heurist directories and steps for 
+installation.
 
-Updated:     22 Sep 2015
+Updated:     08 April 2016
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -27,8 +33,12 @@ Updated:     22 Sep 2015
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2016 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Ireneusz Golka
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
