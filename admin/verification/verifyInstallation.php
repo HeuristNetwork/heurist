@@ -21,10 +21,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-// SHHOUKLDN'T NEED THESE, SHOUDL BE ABLE TO RUN STANDALONE
-// require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-// require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
 ?>
 
 <html>
@@ -69,25 +65,25 @@
 
         <div id="page-inner">
             This function verifies the presence of required PHP extensions.
-            <!--and the location and writeability of folders required by the software.<br /> -->
+            <!--
+            and the location and writeability of folders required by the software.<br /> 
             It assumes that all instances of Heurist are located in subdirectories
             in a common location (generally /var/www/html/HEURIST)<br />
             and point to the same Heurist filestore (generally .../HEURIST/HEURIST_FILESTORE,
             which is often a simlink to the real storage location).<br />
-            <!-- TODO: Checks should include: external javascript functions; help system; root file upload directory; index.html in parent. <br /> -->
+            TODO: Checks should include: external javascript functions; help system; root file upload directory; index.html in parent. <br /> 
+            -->
 
-            <h3>Please run this using the latest instance on your server</h3><br />
+            <h3>If running within Heurist please run this using the latest instance on your server</h3><br />
             If you use an older instance it may not pick up all requirements for the latest instance.<br/>&nbsp;<br/>
 
             <hr><br />
 
             <?php
             if (extension_loaded("memcache")) {print "memcache ok<br />";} else {print "memcache MISSING<br />";}
-            if (extension_loaded("libapache2-mod-php5")) {print "libapache2-mod-php5 ok<br />";} else {print "libapache2-mod-php5 MISSING<br />";}
             if (extension_loaded("gd")) {print "gd ok<br />";} else {print "gd MISSING<br />";}
             if (extension_loaded("pdo")) {print "pdo ok<br />";} else {print "pdo MISSING<br />";}
             if (extension_loaded("mbstring")) {print "php-mbstring ok<br />";} else {print "php-mbstring MISSING<br />";}
-
             if (extension_loaded("mysql")) {print "mysql ok<br />";} else {print "mysql MISSING<br />";}
             if (extension_loaded("mysqli")) {print "mysqli ok<br />";} else {print "mysqli MISSING<br />";}
             if (extension_loaded("json")) {print "json ok<br />";} else {print "json MISSING<br />";}
@@ -106,7 +102,7 @@
             // zip loads but unzip doesn't, but unzip is installed anyway (possibly with zip?)
             // if (extension_loaded("unzip")) {print "unzip ok<br />";} else {print "unzip MISSING<br />";}
 
-            if (extension_loaded("pdo-sqlite")) {print "pdo-sqlite ok<br />";} else {print "pdo-sqlite MISSING, optional, required for FAIMS<br />";}
+            if (extension_loaded("pdo_sqlite")) {print "pdo_sqlite ok<br />";} else {print "pdo_sqlite MISSING, optional, required for FAIMS<br />";}
             if (extension_loaded("exif")) {print "exif ok<br />";} else {print "exif MISSING, optional, required for image file indexing<br />";}
 
             print "<h3>All loaded extensions:</h3><br />";

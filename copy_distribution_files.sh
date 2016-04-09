@@ -100,9 +100,12 @@ echo The installer and update scripts are accessed directly to download and inst
 cp *.sh /var/www/html/HEURIST/DISTRIBUTION
 cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 
+# PHP extensions verification function
+zip -j /var/www/html/HEURIST/DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
+
 echo
 echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, and help
-cd /var/www/html/HEURIST/HEURIST_SUPPORT
+ cd /var/www/html/HEURIST/HEURIST_SUPPORT
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h4/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
