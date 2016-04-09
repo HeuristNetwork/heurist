@@ -59,10 +59,10 @@ if(!in_array($action_type, $allowed_actions)){
 //verify parameter scope
 $scope_type = @$_REQUEST['scope'];
 $allowed_scope = array('all','selected','current');
-if (!( intval($scope_type)>0 || in_array($scope_type, $allowed_scope))){
+/*if (!( intval($scope_type)>0 || in_array($scope_type, $allowed_scope))){
     header('Location: '.ERROR_REDIR.'?msg=Scope is not allowed');
     exit();
-}
+}*/
 
 $field_type = @$_REQUEST['ft'];
 $field_value = @$_REQUEST['value'];

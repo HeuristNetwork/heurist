@@ -219,7 +219,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#cb_remove_all').change(function(){ $(this).is(':checked')?$('#fld-1').hide():$('#fld-1').show();  });
             $('.editint-inout-repeat-button').hide();
             
-        }else if(action_type=='merge_delete_detail'){
+        }else if(action_type=='merge_delete_detail'){ //@todo
             _createInputElement('fld-1', top.HR('Value to remove'), init_field_value);
             _createInputElement('fld-2', top.HR('Or repalce it with'));
         }
