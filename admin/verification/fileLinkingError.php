@@ -21,6 +21,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+ini_set('max_execution_time', 0);
 
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
@@ -62,6 +63,13 @@ if (isForOwnerOnly()) exit();
         <div id="page-inner">
 
             <?php
+
+    $log_filename = HEURIST_FILESTORE_DIR.'missed_files.log';
+    if(file_exists($log_filename)){
+        unlink($log_filename);
+    }
+
+    
             
     $dbs = mysql__getdatabases(true);            
     foreach ($dbs as $db){
@@ -174,7 +182,7 @@ if (isForOwnerOnly()) exit();
     }//while
             
             if (count(@$files_orphaned)>0 || count(@$files_notfound)>0 || count(@$files_path_to_correct)>0){
-            if (false){
+            if (false){ 
                 ?>
                 <script>
                     function markAllMissed(){
@@ -279,6 +287,8 @@ if (isForOwnerOnly()) exit();
                     <div>Path specified in database is wrong and file can not be found. Entries will be removed from database</div>
                     <br>
                 <?php
+                
+                    $log_data = '';
 /*
                     <input type=checkbox id="fnf_all"
                         onclick="markAllMissed()">
@@ -286,15 +296,20 @@ if (isForOwnerOnly()) exit();
                     <br><br>
                             <input type=checkbox name="fnf" id="fnf<?php echo $row['ulf_ID'];?>" value=<?php echo $row['ulf_ID'];?>>
 */                
-                foreach ($files_notfound as $row) {
-                    ?>
-                    <div class="msgline">
-                            <b><?php echo $row['ulf_ID'];?></b> 
-                            <?php echo $row['db_fullpath'];?>
-                    </div>
-                    <?php
-                }
-                print '<hr/>';
+                    foreach ($files_notfound as $row) {
+                        //DBName, ULF ID, path, filename
+                        $log_data = $log_data.$db.','.$row['ulf_ID'].','.$row['db_fullpath'].','.$row['rec_ID']."\n";
+                        ?>
+                        <div class="msgline">
+                                <b><?php echo $row['ulf_ID'];?></b> 
+                                <?php echo $row['db_fullpath'];?>
+                        </div>
+                        <?php
+                    }
+                    print '<hr/>';
+                
+                    file_put_contents($log_filename, $log_data, FILE_APPEND);                
+
                 }
                 if(count($files_path_to_correct)>0){
                 ?>             
@@ -328,6 +343,10 @@ if (isForOwnerOnly()) exit();
                 print "<br/><p><br/></p><h3>All uploaded file entries are valid</h3>";
             }
     }//for dbs
+    
+    if(file_exists($log_filename)){
+        echo '<a href="'.HEURIST_FILESTORE_URL.'missed_files.log" target="_blank">Get log file with list of missed (not found) files</a><br><br>';
+    }            
             ?>
         </div>
     </body>

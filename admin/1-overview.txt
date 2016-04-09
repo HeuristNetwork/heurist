@@ -1,5 +1,3 @@
-THIS IS     	TEST        LINE #2
-
 Directory:	/admin
 
 Overview:
