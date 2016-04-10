@@ -315,7 +315,7 @@ function translateRtyIDs($strRtyIDs, $contextString, $forDtyID) {
 			// Rectype is not in target DB so import it
 			if(mysql_num_rows($resRtyExist) == 0 ) {
 				if ($importRefdRectypes) {
-					$localRtyID = importRectype($importRty);
+					$localRtyID = importRectype($importRty, null);
                     if($localRtyID){
                         array_push($importedRecTypes, $importRty["rty_ID"]);
                     }
