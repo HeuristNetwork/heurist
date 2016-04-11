@@ -581,11 +581,11 @@ if (!top.Relationship) {
     };
 
     top.EditableRelationship.prototype.isempty = function() {
-        return (! (this.relTypeSelect.value  ||  this.relatedRecordID.value  ||  this.startDate.value  ||  this.endDate));
+        return (! ($(this.relationType.inputs[0]).val()  ||  this.relatedRecordID.value  ||  this.startDate.value  ||  this.endDate));
     };
 
     top.EditableRelationship.prototype.isvalid = function() {
-        if (this.relTypeSelect.value == "") {
+        if ($(this.relationType.inputs[0]).val() == "") {  //this.relTypeSelect.value
             return "You must select a relationship type";
         }
         if (this.relatedRecordID.value == ""  ||  this.relatedRecordID.value == 0) {
@@ -608,7 +608,7 @@ if (!top.Relationship) {
             elements: [
                 { name: "recID", value: this.manager.recID},
                 { name: "save-mode", value: "new" },
-                { name: "RelTermID", value: this.relTypeSelect.value },	//saw Enum change - nothing to do on the save side value is the id
+                { name: "RelTermID", value: $(this.relationType.inputs[0]).val() },	//saw Enum change - nothing to do on the save side value is the id
                 { name: "RelatedRecID", value: this.relatedRecordID.value },
                 { name: "InterpRecID", value: this.interpResourceID.value },
                 { name: "Notes", value: this.notes.value },
@@ -899,7 +899,7 @@ if (!top.Relationship) {
                         var rel = new top.EditableRelationship(newCell, null, rtype || 0, dtID, thisRef);
                         rel.nonce = thisRef.getNonce();
                         thisRef.openRelationships[rel.nonce] = rel;
-                        rel.relTypeSelect.focus();
+                        $(rel.relationType.inputs[0]).focus();
                         }; }(titleRow, rectype, dtIDRelmarker);
 
                     this.parentElement.appendChild(titleRow);
@@ -958,7 +958,7 @@ if (!top.Relationship) {
             var rel = new top.EditableRelationship(newCell,null,rtypes,dtID, thisRef);
             rel.nonce = thisRef.getNonce();
             thisRef.openRelationships[rel.nonce] = rel;
-            rel.relTypeSelect.focus();
+            $(rel.relationType.inputs[0]).focus();
 
             }; }((trgRectypeList ? trgRectypeList : 0),dtIDRelmarker);
 
@@ -1026,8 +1026,8 @@ if (!top.Relationship) {
                 var rel = new top.EditableRelationship(newCell, relationshipRec, ""+top.HEURIST.magicNumbers['RT_AGGREGATION'], dtID, thisRef);
                 rel.nonce = thisRef.getNonce();
                 thisRef.openRelationships[rel.nonce] = rel;
-                rel.relTypeSelect.focus();
-
+                $(rel.relationType.inputs[0]).focus();
+                
                 rel.relatedRecord.chooseResourceAuto();
 
                 };
