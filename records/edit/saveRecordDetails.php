@@ -161,7 +161,7 @@ function isValidID($id, $dtyID, $rtyID = null) {
             " where dty_ID=$dtyID and dty_Type in ('enum','relationtype','resource')");
         while ($res && $row = mysql_fetch_row($res)) {
             //use first element as index
-            if ( $dtyID == DT_RELATION_TYPE ) { //$row[1] === 'relationtype' ){
+            if ( defined('DT_RELATION_TYPE') && $dtyID == DT_RELATION_TYPE ) { //$row[1] === 'relationtype' ){
 
                 $dtyIDDefs[$dtyID] = getTermListAll('relation');
 

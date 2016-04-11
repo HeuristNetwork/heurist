@@ -673,7 +673,7 @@ function rectypeLocalIDLookup($rtID, $dbID = 2) {
             $RTIDs[$row['dbID']][$row['id']] = $row['localID'];
         }
     }
-    return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID] : null);
+    return (@$RTIDs[$dbID][$rtID]>0 ? $RTIDs[$dbID][$rtID] : null);
 }
 
 
@@ -699,7 +699,7 @@ function detailtypeLocalIDLookup($dtID, $dbID = 2) {
             $DTIDs[$row['dbID']][$row['id']] = $row['localID'];
         }
     }
-    return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null);
+    return (@$DTIDs[$dbID][$dtID]>0 ? $DTIDs[$dbID][$dtID] : null);
 }
 
 
