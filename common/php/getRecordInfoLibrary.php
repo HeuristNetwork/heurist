@@ -1097,9 +1097,6 @@ function getAllRectypeStructures($useCachedData = false) {
     " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)".
     " order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
     
-error_log($query);
-error_log($query);
-
     $res = mysql_query($query);
     $rtStructs = array('groups' => getRectypeGroups(),
         'names' => array(),
