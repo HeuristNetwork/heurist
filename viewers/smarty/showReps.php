@@ -87,10 +87,9 @@ if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 function executeSmartyTemplate($params){
 
     global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth, $publishmode,
-           $execution_counter, $execution_total_counter, $session_id, $mysqli;
+    $execution_counter, $execution_total_counter, $session_id, $mysqli;
 
-//error_log('executeSmartyTemplate '.$session_id);           
-           
+
     set_time_limit(0); //no limit
 
     mysql_connection_overwrite(DATABASE);
@@ -109,6 +108,7 @@ function executeSmartyTemplate($params){
     $isJSout	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
     $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
+    $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
 
     $gparams = $params; //keep to use in other functions
 
@@ -145,11 +145,11 @@ function executeSmartyTemplate($params){
 
     }else if(@$params['h4']==1){ //search with h4 search engine
 
-/*    for future use
+        /*    for future use
         $params['detail']='ids';
         $params['vo']='h3';
         $qresult = recordSearch($system, $params);
-*/    
+        */    
         $url = "";
         foreach($params as $key=>$value){
             $url = $url.$key."=".urlencode($value)."&";
@@ -158,7 +158,7 @@ function executeSmartyTemplate($params){
         $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
 
         $result = loadRemoteURLviaSocket($url);// loadRemoteURLContent($url);
-        
+
         $qresult = json_decode($result, true);
 
     }else{
@@ -167,10 +167,16 @@ function executeSmartyTemplate($params){
 
 
     if( !$qresult || ( !array_key_exists('recIDs',$qresult) && !array_key_exists('records',$qresult) ) ||  $qresult['resultCount']==0 ){
-        if($publishmode>0){
-            $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
-        }else{
-            $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+
+        if ($emptysetmessage) {
+            $error = $emptysetmessage; // allows publisher of URL to customise the message if no records retrieved
+        } else {
+
+            if($publishmode>0){
+                $error = "<b><font color='#ff0000'>Note: There are no records in this view. The URL will only show records to which the viewer has access. Unless you are logged in to the database, you can only see records which are marked as Public visibility</font></b>";
+            }else{
+                $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
+            }
         }
 
         if($isJSout){
@@ -223,8 +229,8 @@ function executeSmartyTemplate($params){
         }
     }
     //end pre-parsing of template
-    
-    
+
+
     $mysqli = mysqli_connection_overwrite(DATABASE);
     if($publishmode==0 && $session_id!=null){
         updateProgress($mysqli, $session_id, true, '0,0');
@@ -237,14 +243,14 @@ function executeSmartyTemplate($params){
         $results = array();
         $k = 0;
         $execution_total_counter = count($records); //'tot_count'=>$tot_count,
-        
+
         foreach ($records as $recordID){
 
             if(smarty_function_progress(array('done'=>$k), $smarty)){
                 echo 'Execution was terminated';
                 return;
             }
-            
+
             $rec = loadRecord($recordID, false, true); //from search/getSearchResults.php
 
             $res1 = getRecordForSmarty($rec, 0, $k);
@@ -265,18 +271,18 @@ function executeSmartyTemplate($params){
                 echo 'Execution was terminated';
                 return;
             }
-            
+
             $res1 = getRecordForSmarty($rec, 0, $k);
             $res1["recOrder"]  = $k;
             $k++;
             array_push($results, $res1);
         }
-        
+
     }
     //activate default template - generic list of records
 
     $smarty->assign('results', $results);
-    
+
     //$smarty->getvar()
 
     ini_set( 'display_errors' , 'false'); // 'stdout' );
@@ -329,7 +335,7 @@ function executeSmartyTemplate($params){
     }
     //DEBUG   
     $smarty->registerFilter('post','smarty_post_filter');
-    
+
     if($publishmode==0 && $session_id!=null){
         updateProgress($mysqli, $session_id, true, '0,'.count($results));
         /*session_start();
@@ -348,7 +354,7 @@ function executeSmartyTemplate($params){
         updateProgress($mysqli, $session_id, false, 'REMOVE');
     }
     $mysqli->close();               
-    
+
 }
 
 //
@@ -362,12 +368,12 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
     $offset = strpos($tpl_source,'foreach ($_from as $_smarty_tpl');
     if($offset>0){
         $pos = strpos($tpl_source,'{',$offset);
-    
+
         $res = substr($tpl_source,0,$pos)
-                ."\n".'{ if(smarty_function_progress(array(), $_smarty_tpl)){ return; }'."\n"
-                .substr($tpl_source,$pos+1);
-        
-//DEBUG error_log($res);
+        ."\n".'{ if(smarty_function_progress(array(), $_smarty_tpl)){ return; }'."\n"
+        .substr($tpl_source,$pos+1);
+
+        //DEBUG error_log($res);
         return $res;
     }else{
         return $tpl_source;
@@ -615,23 +621,23 @@ function getRecordForSmarty($rec, $recursion_depth, $order){
 
             // get rel records where current record is source
             $from_res = mysql_query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID='.$record["recID"]);
-            
+
             // get rel records where current record is target
             $to_res = mysql_query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$record["recID"]);
 
             /* old slow way                                   
             $from_res = mysql_query('select recDetails.*
-                from recDetails
-                left join Records on rec_ID = dtl_RecID
-                where dtl_DetailTypeID = '.$relSrcDT.
-                ' and rec_RecTypeID = '.$relRT.
-                ' and dtl_Value = ' . $record["recID"]);        //primary resource
+            from recDetails
+            left join Records on rec_ID = dtl_RecID
+            where dtl_DetailTypeID = '.$relSrcDT.
+            ' and rec_RecTypeID = '.$relRT.
+            ' and dtl_Value = ' . $record["recID"]);        //primary resource
             $to_res = mysql_query('select recDetails.*
-                from recDetails
-                left join Records on rec_ID = dtl_RecID
-                where dtl_DetailTypeID = '.$relTrgDT.
-                ' and rec_RecTypeID = '.$relRT.
-                ' and dtl_Value = ' . $record["recID"]);          //linked resource
+            from recDetails
+            left join Records on rec_ID = dtl_RecID
+            where dtl_DetailTypeID = '.$relTrgDT.
+            ' and rec_RecTypeID = '.$relRT.
+            ' and dtl_Value = ' . $record["recID"]);          //linked resource
             */
 
             if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
@@ -676,12 +682,12 @@ function _add_term_val($res, $val){
 function getFullTermLabel($term, $domain){
 
     global $dtTerms;
-    
+
     $fi = $dtTerms['fieldNamesToIndex'];
     $parent_id = $term[ $fi['trm_ParentTermID'] ];
 
     $parent_label = '';
-    
+
     if($parent_id!=null && $parent_id>0){
         $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
         if($term_parent){
@@ -691,8 +697,8 @@ function getFullTermLabel($term, $domain){
     }
     return $parent_label.$term[ $fi['trm_Label']];
 }
-                        
-                        
+
+
 
 
 //
@@ -766,12 +772,12 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                         $res_code = "";
                         $res_label = "";
                         $res = array();
-                        
+
 
                         foreach ($dtValue as $key => $value){
                             if(array_key_exists($value, $dtTerms['termsByDomainLookup'][$domain])){
                                 $term = $dtTerms['termsByDomainLookup'][$domain][$value];
-                                
+
                                 //IJ wants to show terms for all parents
                                 $term_full = getFullTermLabel($term, $domain);
 
@@ -783,14 +789,14 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
 
                                 //NOTE id and label are for backward
                                 array_push($res, array("id"=>$value, "internalid"=>$value, 
-                                                "code"=>$term[ $fi['trm_Code'] ], 
-                                                "label"=>$term[ $fi['trm_Label'] ], 
-                                                "term"=>$res_label_full, 
-                                                "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
+                                    "code"=>$term[ $fi['trm_Code'] ], 
+                                    "label"=>$term[ $fi['trm_Label'] ], 
+                                    "term"=>$res_label_full, 
+                                    "conceptid"=>$term[ $fi['trm_ConceptID'] ]));
                             }
                         }
                         $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code, 
-                                "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid);
+                            "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid);
 
                         if(count($res)>0){
                             if($issingle){
@@ -937,7 +943,7 @@ function getDetailForSmarty($dtKey, $dtValue, $recursion_depth, $recTypeID, $rec
                                         //add relationship specific variables
                                         if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                                             $res0["recRelationType"] = $value['RelTerm'];
-                                            
+
                                             if(array_key_exists('Notes', $value)){
                                                 $res0["recRelationNotes"] = $value['Notes'];
                                             }
@@ -1060,49 +1066,49 @@ function getWootText($recID){
 //
 function smarty_function_progress($params, &$smarty){
     global $publishmode, $execution_counter, $execution_total_counter,$session_id,$mysqli;
-    
+
     $res = false;
-    
+
     if($publishmode==0 && $session_id!=null){ //check that this call from ui
-        
+
         if(@$params['done']==null){//not set, this is execution from smarty
             $execution_counter++;
         }else{
             $execution_counter = @$params['done'];
         }
-        
+
         if(isset($execution_total_counter) && $execution_total_counter>0){
             $tot_count = $execution_total_counter;
         }else 
-        if(@$params['tot_count']>=0){
-            $tot_count = $params['tot_count'];
-        }else{
-            $tot_count = count(@$smarty->getVariable('results')->value);
+            if(@$params['tot_count']>=0){
+                $tot_count = $params['tot_count'];
+            }else{
+                $tot_count = count(@$smarty->getVariable('results')->value);
         }
-        
+
         if($execution_counter<2 || $execution_counter % 10==0 || $execution_counter>$tot_count-3){
-            
-            
+
+
             //$mysqli = mysqli_connection_overwrite(DATABASE);
-            
+
             //get 
             $current_val = updateProgress($mysqli, $session_id, false, null);
-            
+
             if($current_val && $current_val=='terminate'){
 
                 $session_val = ''; //remove from db
                 $res = true;
             }else{
-/*
-if($execution_counter<2 || $execution_counter>$tot_count-3){  
-    error_log('next '.$execution_counter.'   '.@$params['done'].'  '.$tot_count.'  current_val='.$current_val);        
-}
-*/
+                /*
+                if($execution_counter<2 || $execution_counter>$tot_count-3){  
+                error_log('next '.$execution_counter.'   '.@$params['done'].'  '.$tot_count.'  current_val='.$current_val);        
+                }
+                */
                 $session_val = $execution_counter.','.$tot_count;
             }
             //set
             updateProgress($mysqli, $session_id, false, $session_val);
-            
+
             //$mysqli->close();
 
             /* it does not worl properly            
@@ -1112,7 +1118,7 @@ if($execution_counter<2 || $execution_counter>$tot_count-3){
             session_write_close();
             */
         }
-    
+
     }
     return $res;
 }
@@ -1199,15 +1205,15 @@ function smarty_function_wrap($params, &$smarty)
         }else if($dt=="file"){
             //insert image or link
             $values = $params['var'];
-            
+
             $limit = intval(@$params['limit']);
 
             $sres = "";
-            
+
             if(!is_array($values) || !array_key_exists(0,$values)) $values = array($values);
 
             foreach ($values as $idx => $value){
-                
+
                 if($limit>0 && $idx>=$limit) break;
 
                 $type_media = $value['mediaType'];
