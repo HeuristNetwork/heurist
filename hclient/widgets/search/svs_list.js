@@ -389,7 +389,9 @@ $.widget( "heurist.svs_list", {
 
         //init list of accordions
         var keep_status = top.HAPI4.get_prefs('svs_list_status');
-        if(!keep_status) keep_status = {};
+        if(!keep_status) {
+            keep_status = { 1:true, 'all':true };
+        }
         else keep_status = $.parseJSON(keep_status);
 
         var cdivs = this.accordeon.find('.svs-acordeon');
