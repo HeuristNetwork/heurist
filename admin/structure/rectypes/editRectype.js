@@ -702,11 +702,19 @@ function _onPreventChars(event){
     if (charCode && charCode > 31)
     {
         var keyChar = String.fromCharCode(charCode);
-        if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+        //if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+        if(/^[{}'"\[\]]+$/.test(keyChar)){
             event.cancelBubble = true;
             event.returnValue = false;
             event.preventDefault();
             if (event.stopPropagation) event.stopPropagation();
+            
+            if(top.HEURIST4)
+            top.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+            setTimeout(function(){
+                    $(event.target).focus();
+            }, 750);
+            
             return false;
         }
     }
