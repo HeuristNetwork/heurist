@@ -335,7 +335,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                             top.HEURIST4.msg.showMsgDlg(recIDs.length
                                 + ' term'
                                 + (recIDs.length>1?'s were':' was')
-                                + ' added.', null, 'Info');
+                                + ' added.', null, 'Terms imported'); // Title was an unhelpful and inelegant "Info"
                                 
                             top.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
                                 if(response.status == top.HAPI4.ResponseStatus.OK){

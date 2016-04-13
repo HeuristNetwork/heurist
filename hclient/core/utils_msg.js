@@ -205,7 +205,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             }
         }
 
-        if(!title) title = 'Info';
+        if(!title) title = ''; // was an unhelpful and inelegant "Info"
         if ($.isFunction(buttons)){ //}typeof buttons === "function"){
 
             var titleYes = top.HR('Yes'),
@@ -287,7 +287,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             $dlg.append('<span>'+top.HR(message)+'</span>');
         }
 
-        if(!title) title = top.HR('Info');
+        if(!title) title = top.HR(''); // was an unhelpful and inelegant "Info"
 
         var options =  {
             title: top.HR(title),
