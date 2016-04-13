@@ -972,7 +972,7 @@ function getRectypeFields($rtID) {
         //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
         "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
         //here we check for an override in the recTypeStrucutre for HelpText which is a rectype specific HelpText, use detailType HelpText as default
-        "if(rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0,rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
+        "if(dty_Type='separator' OR (rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
         //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
         "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
         "rst_DisplayOrder", "rst_DisplayWidth", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
@@ -1076,7 +1076,7 @@ function getAllRectypeStructures($useCachedData = false) {
         //here we check for an override in the recTypeStrucutre for displayName which is a rectype specific name, use detailType name as default
         "if(rst_DisplayName is not null and CHAR_LENGTH(rst_DisplayName)>0,rst_DisplayName,dty_Name) as rst_DisplayName",
         //here we check for an override in the recTypeStrucutre for HelpText which is a rectype specific HelpText, use detailType HelpText as default
-        "if(rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0,rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
+        "if(dty_Type='separator' OR (rst_DisplayHelpText is not null and CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
         //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
         "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
         "rst_DisplayOrder", "rst_DisplayWidth", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
@@ -1096,6 +1096,10 @@ function getAllRectypeStructures($useCachedData = false) {
     " left join defDetailTypes on rst_DetailTypeID = dty_ID".
     " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)".
     " order by rst_RecTypeID, rst_DisplayOrder, rst_ID";
+    
+error_log($query);
+error_log($query);
+
     $res = mysql_query($query);
     $rtStructs = array('groups' => getRectypeGroups(),
         'names' => array(),
