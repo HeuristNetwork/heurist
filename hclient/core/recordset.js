@@ -417,7 +417,8 @@ function hRecordSet(initdata) {
         
         //this is field type ID  or field name (nominal for most common fields)
         var d = record['d'];
-        if(d){
+        if(d){   
+            //if fieldname is numeric index of starts with dtl_
             if(!isNaN(Number(fldname)) || fldname.indexOf("dtl_")==0){  //@todo - search detail by its code
             
                 if(!isNaN(Number(fldname))){ //dt code
@@ -447,8 +448,9 @@ function hRecordSet(initdata) {
                         return g[0];  ////take first part of dtl_Geo field - "p wkt"
                     }
                 }
+                
+                return null;
             }
-            return null;
         }
 
         //either take value by index or by name
