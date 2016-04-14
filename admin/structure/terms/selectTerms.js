@@ -414,7 +414,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 		var index = 0,
 			nextParent;
-		// If parent is root
+		// If parent is root - button to do this has been commented out 13 apr 2016 b/c it confuses the form and is not very useful
 		if(parent === _selectedTermsTree.getRoot()) {
 			termArray = {};
 
