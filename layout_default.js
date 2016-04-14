@@ -64,13 +64,13 @@ var cfg_widgets = [
 
     {id:'h3_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/topmenu/mainMenu.js'},
     {id:'h3_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
-    {id:'h3_recordDetails', name:'Record', widgetname:'recordDetails', script:'hclient/widgets/viewers/recordDetails.js'},
+    {id:'h3_recordDetails', name:'Record Viewer', widgetname:'recordDetails', script:'hclient/widgets/viewers/recordDetails.js'},
     {id:'h3_recordListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
 
-    {id:'ha51', name:'Map', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
+    {id:'ha51', name:'Map-Timeline', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'h4_static', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
-    {id:'h4_connections', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
+    {id:'h4_connections', name:'Network Diagram', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
 
     // DIGITAL HARLEM APPS
     {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'hclient/widgets/digital_harlem/dh_search.js'},
@@ -112,10 +112,10 @@ var cfg_layouts = [
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
-                    {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
+                    {appid:'h3_recordListExt', name: 'Record View', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
                     {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
-                    {appid:'h3_recordListExt', name: 'Report', options:{title:'Report', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
-                    {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
+                    {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
+                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/springDiagram.php?db=[dbname]'}}
             ]}]
         }
     },
