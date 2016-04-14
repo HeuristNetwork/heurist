@@ -2438,7 +2438,7 @@ function createCustomAlert(txt,args) {
         return ; }
         
         }else{
-            top.HEURIST4.msg.showMsgDlg(txt, null, "Info");
+            top.HEURIST4.msg.showMsgDlg(txt, null, ""); // removed "Info" title - inelegant and not useful
         }
         
 }

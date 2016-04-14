@@ -89,8 +89,7 @@ function doLogin(isforsed){
                     {
                         top.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
                             if(response.status == top.HAPI4.ResponseStatus.OK){
-                                //$dlg.dialog( "close" );
-                                top.HEURIST4.msg.showMsgDlg(top.HR('Password_Reset'), null, "Info");
+                                top.HEURIST4.msg.showMsgDlg(top.HR('Password_Reset'), null, ""); // Title was an unhelpful and inelegant "Info"
                             }else{
                                 top.HEURIST4.msg.showMsgErr(response);
                             }

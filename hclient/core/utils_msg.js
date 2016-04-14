@@ -394,7 +394,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
                 if(!options) options = {};
 
-                if(!options.title) options.title = 'Information';
+                if(!options.title) options.title = ''; // removed 'Information'  which is not a particualrly useful title
 
                 var opener = options['window']?options['window'] :window;
 
@@ -450,7 +450,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         var content = $dosframe[0].contentWindow;
                         
                         content.alert = function(txt){
-                            top.HEURIST4.msg.showMsgDlg(txt, null, "Info");
+                            top.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
                             return true;
                         }
                         
