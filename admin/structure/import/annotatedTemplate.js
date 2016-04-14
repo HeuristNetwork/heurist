@@ -1,5 +1,5 @@
 /**
-* annotatedTemplate.js: javascriopt functionality for annotated template import from HeuristNetwork.org
+* annotatedTemplate.js: javascript functionality for annotated template import from HeuristNetwork.org
 *
 * @note        End of file includes code to be added to a Wordpress site to enable this function
 *
@@ -76,7 +76,7 @@ function receiveMessage(event)
 
             var rectype = event.data.substr(event.data.lastIndexOf(':')+1);
             var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&id="+rectype;
+            var url = top.HEURIST.baseURL_V3 + "admin/structure/import/importRectype.php?db=" + _db+"&code="+rectype;
 
             top.HEURIST.util.popupURL(top, url,
                 {   "close-on-blur": true,

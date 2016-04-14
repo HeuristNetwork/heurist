@@ -32,7 +32,7 @@
 
     mysql_connection_insert("hdb_Heurist_Master_Index");
 
-    header("Content-type: text/javascript");
+    //header("Content-type: text/javascript"); since this script is included directly
 
     $rec = array();
     $database_id = @$_REQUEST["id"];

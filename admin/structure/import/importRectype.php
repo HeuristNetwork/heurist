@@ -19,8 +19,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
 $outputFormat = @$_REQUEST["output"]; //html (default) or json
 if($outputFormat=="json"){
     define('ISSERVICE',1);
@@ -40,9 +38,13 @@ $excludeDuplication = (@$_REQUEST["dup"]!="1"); //by defaul exclude duplication 
 
 //combination of db and record type id eg. 1126-13
 // TODO: Artem, is this meant to be the concept ID for the record type? or si the record type referenced by local ID?
-$code = @$_REQUEST["id"];
+$code = @$_REQUEST['code'];
+$req_import_types  = @$_REQUEST["import"];
+$req_correspondence = @$_REQUEST["correspondence"];
 
 if(!$code){
+    
+//print print_r($_REQUEST, true);    
     $code = @$_REQUEST["checkid"];
     $is_checkonly = true;
 }else{
@@ -52,6 +54,8 @@ if(!$code){
 if(!$code){
     error_exit("Record type code not defined in call to importRectype.php - should be two numbers separated by a dash(program glitch)");
 }
+
+$req_rectype_code = $code;
 
 $code = explode("-",$code);
 $database_id = @$code[0];
@@ -80,7 +84,9 @@ if(!(is_numeric($database_id) && is_numeric($rectype_id))){
 // 1. get database url by looking it up from the Heusit Master index using database registered ID
 
 $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getDatabaseURL.php" . "?db=Heurist_Master_Index&id=".$database_id;
+
 $data = loadRemoteURLContentSpecial($reg_url);
+
 if (!$data) {
     error_exit("Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
         "URL requested: ".$reg_url);
@@ -111,7 +117,10 @@ if(!$remote_url_params || !$remote_url){
 
 $reg_url = $remote_url."common/php/reloadCommonInfo.php?".$remote_url_params;
 
-$defs = loadRemoteURLContent($reg_url);
+//$defs = loadRemoteURLContent($reg_url); it does not because of proxy settings on usyd server
+
+$defs = loadRemoteURLContentSpecial($reg_url);
+
 if (!$defs) {
     error_exit("Unable to contact the selected source database, possibly due to a timeout or proxy setting");
 }
@@ -161,13 +170,13 @@ $terms_correspondence_existed = array();
 $group_ft_ids = array();
 $group_rt_ids = array();
 
-if(@$_REQUEST["import"] && count($_REQUEST["import"])>0){
+if(is_array($req_import_types) && count($req_import_types)>0){
 
     //rectypes that will be imported - list of source rectype ids
-    $imp_recordtypes = $_REQUEST["import"];
+    $imp_recordtypes = $req_import_types;
 
     //rectypes that will be ommited out of export
-    $data = @$_REQUEST["correspondence"];
+    $data = $req_correspondence;
 
     if($data){ //
         $rectypes_correspondence = json_decode($data, true);
@@ -540,7 +549,7 @@ foreach ($imp_recordtypes as $rtyID){
 
 // ------------------------------------------------------------------------------------------------
 
-// VII. Update titlenasks with new ids
+// VII. Update titlemasks with new ids
 
 $mysqli->commit();
 
@@ -1151,7 +1160,7 @@ function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
 //
 // array($rectype_id=>array('correspondence'=>$correspondence, 'dependence'=>array()));
 function renderPreviewForm(){
-    global $imp_recordtypes_tree, $imp_recordtypes, $rectypes_correspondence, $defs;
+    global $imp_recordtypes_tree, $imp_recordtypes, $rectypes_correspondence, $defs, $req_rectype_code;
     //if(count($imp_recordtypes)>1 || count($rectypes_correspondence)>0){
     $end_s = count($imp_recordtypes)>1?'s':'';
     if(count($imp_recordtypes)>0){
@@ -1177,9 +1186,10 @@ function renderPreviewForm(){
 
             <br/>
             <form action="importRectype.php" method="POST">
+            
                 <input type="hidden" name='correspondence' value='<?=json_encode($rectypes_correspondence)?>' />
                 <input type="hidden" name='db' value='<?=HEURIST_DBNAME?>' />
-                <input type="hidden" name='id' value='<?=@$_REQUEST["id"]?>' />
+                <input type="hidden" name='code' value='<?=$req_rectype_code?>' />
                 <?php
                 if(count($imp_recordtypes)>1){
                     print "<div>The requested record type <b>"

@@ -76,8 +76,10 @@ function loadRemoteURLContentSpecial($url){
 
         parse_str($parsed['query'], $_REQUEST);
 
-        return getScriptOutput($path);
-
+        $out = getScriptOutput($path);
+        
+        return $out;
+        
         //return loadRemoteURLviaSocket($url);
         //$url= str_replace(HEURIST_SERVER_URL,'localhost',$url);
     }else{

@@ -34,11 +34,16 @@
 /* load some very basic HEURIST objects into top.HEURIST */
 
 // session_cache_limiter("private");
-define('ISSERVICE',1);
-define("SAVE_URI", "disabled");
+if(!defined('ISSERVICE')) {
+    define('ISSERVICE',1);   
+    $is_direct_call = true;
+}else{
+    $is_direct_call = false;
+}
+if(!defined('SAVE_URI')) define("SAVE_URI", "disabled");
 
 // using ob_gzhandler makes this stuff up on IE6-
-ini_set("zlib.output_compression_level", 5);
+//ini_set("zlib.output_compression_level", 5);
 //ob_start('ob_gzhandler');
 
 
@@ -47,9 +52,10 @@ require_once(dirname(__FILE__)."/getRecordInfoLibrary.php");
 
 mysql_connection_select(DATABASE);
 
-ob_start();
-
-header("Content-type: text/javascript");
+if($is_direct_call){
+    ob_start();
+    header("Content-type: text/javascript");  
+}
 
 $rv = array();
 if(@$_REQUEST['action']=='usageCount'){
@@ -64,5 +70,7 @@ if(@$_REQUEST['action']=='usageCount'){
 print json_encode($rv);
 //print json_format($rv);
 
-ob_end_flush();
+if($is_direct_call){
+    ob_end_flush();
+}
 ?>
