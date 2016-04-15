@@ -64,7 +64,7 @@ if (isForOwnerOnly()) exit();
 
             <?php
 
-    $log_filename = HEURIST_FILESTORE_DIR.'missed_files.log';
+    $log_filename = HEURIST_HTML_DIR.'missed_files.log';
     if(file_exists($log_filename)){
         unlink($log_filename);
     }
@@ -345,7 +345,7 @@ if (isForOwnerOnly()) exit();
     }//for dbs
     
     if(file_exists($log_filename)){
-        echo '<a href="'.HEURIST_FILESTORE_URL.'missed_files.log" target="_blank">Get log file with list of missed (not found) files</a><br><br>';
+        echo '<a href="'.HEURIST_HTML_URL.'missed_files.log" target="_blank">Get log file with list of missed (not found) files</a><br><br>';
     }            
             ?>
         </div>
