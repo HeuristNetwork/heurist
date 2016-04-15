@@ -600,6 +600,7 @@ div.temporal-div input.temporal-button:hover {
 	font-size:11px;
 	padding: 0.5ex;
 	display:inline-block;
+    margin-bottom: 0.5ex;
 }
 .popup .input-row select {
 	max-width:400px;

@@ -188,7 +188,24 @@ function onRecordDataLoaded(){
             document.getElementById("moddate").appendChild(document.createTextNode("updated: " + top.HEURIST.edit.record.moddate));
         
         top.HEURIST.edit.showRecordProperties();
-        if (top.HEURIST.parameters["sid"]) {
+        if(opener && opener.HAPI4 && opener.HAPI4.currentRecordset.length()>1){
+            
+                //find position in order array
+                var order = opener.HAPI4.currentRecordset.getOrder();
+                var idx = order.indexOf(Number(recID));
+            
+                document.getElementById("search-nav").innerHTML =
+                "<div style=\"padding:10px 0;\">Record "+(idx+1)+" of "+order.length+" search results</div>" +
+                "<div>" +
+                (idx>0 ? "<a class=\"button\" style=\"height:18px !important\" title='It will save changes' "
+                +"onclick='{top.HEURIST.edit.navigate_torecord(null, "+order[idx-1]+
+                "); return false;}'><img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_prev.png\">previous</a>" : "") +
+                (idx<order.length-1 ? "<a class=\"button\" style=\"float:right; height:18px !important\" title='It will save changes' "
+                +"onclick='{top.HEURIST.edit.navigate_torecord(null,"+order[idx+1]+");"
+                +" return false;}'>next<img src=\""+top.HEURIST.baseURL_V3+"/common/images/nav_next.png\"></a>" : "") +
+                "<div style=\"clear:both\"></div></div>";
+            
+        }else if (top.HEURIST.parameters["sid"]) {
             var surl = top.HEURIST.baseURL_V3+"records/edit/setResultsNavigation.php?db="+dbname+"&s="+top.HEURIST.parameters["sid"]+"&id="+top.HEURIST.edit.record.bibID;
             top.HEURIST.util.getJsonData(surl, function(context) {
                 if (!context || context.count<1) return;

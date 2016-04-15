@@ -689,7 +689,7 @@ if (! top.HEURIST.edit) {
         */
         navigate_torecord: function(sid, recid){
             top.HEURIST.edit.save_record(function(){
-                location.href = "?db="+HAPI.database+"&sid="+sid+"&recID="+recid;
+                location.href = "?db="+HAPI.database+(sid!=null?"&sid="+sid:'')+"&recID="+recid;
             });
         },
 
@@ -1917,7 +1917,7 @@ console.log('heurist not defined');
 
         this.inputCell = this.row.appendChild(this.document.createElement("div"));
         this.inputCell.className = stylename_prefix+"-cell";
-
+        
         this.linkSpan = null;
 
         // make sure that the promptDiv is the last item in the input cell
@@ -3384,6 +3384,9 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput = function(bdValue) {
         var rstFieldNamesToRdrIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+        
+
+        $(this.inputCell).css('vertical-align', 'bottom');
 
         var newInput = this.document.createElement("div");
         //newInput.style.border = '1px solid grey';
