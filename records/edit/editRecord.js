@@ -2783,6 +2783,7 @@ console.log('heurist not defined');
                     "admin/structure/terms/editTermForm.php?domain="+type+"&parent="+Number(sAllTerms)+"&db="+db,
                     {
                         "close-on-blur": false,
+                        'no-close': true, //hide close button
                         "no-resize": true,
                         height: 280,
                         width: 650,

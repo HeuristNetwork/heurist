@@ -436,7 +436,7 @@ function DetailTypeEditor() {
                 {
                     "close-on-blur": false,
                     "no-resize": true,
-                    "no-close": true,
+                    "no-close": true, //hide close button
                     title: 'Edit Vocabulary',
                     height: 340,
                     width: 700,
