@@ -178,6 +178,9 @@ function getRecordTypeTree($recTypeId, $recursion_depth){
             }
         }//for
     }//else unconstrained
+    else {
+        $res['remark'] = 'Unconstrained pointer; constrain to record type to see field';    
+    }
     
     if($recursion_depth==0){
         $res["Relationship"] = getRecordTypeTree('Relationship', $recursion_depth+1);

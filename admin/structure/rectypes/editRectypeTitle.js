@@ -190,7 +190,8 @@ function EditRectypeTitle() {
                 function() { // On click, select the term, and add it to the selected terms tree
 
                     var _node = arguments[0].node;
-                    if(_node.children.length<1){
+                    
+                    if(_node.children.length<1 && _node.data.this_id!='remark'){
                         this.onEventToggleHighlight.apply(this,arguments);
                     }
 
@@ -206,6 +207,14 @@ function EditRectypeTitle() {
         }
         //fill treeview with content
         _fillTreeView(_varsTree, _variables);
+        
+        /* it does not work since yui tree is formed dynamically
+        $('#varsTree').find('.nocheckbox').each(function(idx, item){
+                $(item).parents('td.ygtvcell').css('background','none');
+        });
+        */
+        
+        
     }
 
     /**
@@ -250,24 +259,29 @@ function EditRectypeTitle() {
                     // unconstained pointers fNNN:array(rt_name
                     // multi-contrained pointers fNNN:array(array(rt_id  - need another recursive loop
 
+                    child = rectypeTree[id];
+                    var is_record = ((typeof(child) == "object") &&
+                                    Object.keys(child).length > 0);
+                                    
+                    
                     term = {};//new Object();
                     term.id = parent_full+"."+id; //fullid;
                     term.parent_id = parent_id;
                     term.this_id = id;
-                    term.label = '<div style="padding-left:10px;">';
+                    term.label = '<div style="padding-left:10px;"'+(is_record||id=='remark'?' class="nocheckbox"':'')+'>';
                     
                     
-                    child = rectypeTree[id];
-
-                    var is_record = ((typeof(child) == "object") &&
-                                    Object.keys(child).length > 0);
-                                    
                     var is_multicontstrained = false; 
                                    
                     if(!is_record){ //simple
                     
                         label = child;   
-                        term.label = term.label + label + '</div>';
+                        if(id=='remark'){
+                            term.label = term.label + '<i>' + label + '</i></div>';
+                        }else{
+                            term.label = term.label + label + '</div>';    
+                        }
+                        
                         
                     }else{
                          

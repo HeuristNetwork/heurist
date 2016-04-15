@@ -568,18 +568,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         } );
 
-
-        /*
-        var squery = _getQuery();
-
-        if(Hul.isnull(squery)){
-        alert('Please select some records in search results');
-        }else{
-        var baseurl = top.HEURIST.baseURL_V3 + "common/php/recordTypeTree.php";
-        Hul.getJsonData(baseurl, __onGenerateTemplate, squery);//+'&db='+_db);
-        }
-        */
-
     }
 
 
@@ -1107,6 +1095,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
                     var is_record = ((typeof(child) == "object") &&
                         Object.keys(child).length > 0);
+                        
+                    var is_remark = (id=='remark');    
 
                     var is_multiconstrained = false;
                     var is_single = true; //non repeatable field
@@ -1129,7 +1119,10 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     if(!is_record){ //simple - leaf - field or term id,label,code
 
                         label = child;
-
+                        
+                        if(is_remark){
+                            term.label = term.label + '<i>' + label + '</i></div>';
+                        }else
                         if(parent_single){   //parent_id=="r"){ // || parent_id.indexOf("r")==0){
                         
                             if(grandparent_single){
