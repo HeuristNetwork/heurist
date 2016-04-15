@@ -216,6 +216,8 @@ if(intval(@$_REQUEST["recid"])>0 && @$_REQUEST["table"] ){
                             if(response=="ok"){
                                 if(session_id=='all'){
                                     $("#import_id").empty();
+                                    $("#btnClearUploaded").prop('disabled', 'disabled');
+                                    $("#btnClearUploaded").css('color','lightgray');
                                 }else{
                                     window.close();
                                     //setTimeout(function(){window.close();}, 2000);
@@ -1111,6 +1113,11 @@ if(is_array($imp_session)){
                     }
                 }
                 
+                if($('#import_id > option').length<2){
+                    $("#btnClearUploaded").prop('disabled', 'disabled');    
+                    $("#btnClearUploaded").css('color','lightgray');
+                }
+                
                 var uploadData = null;
                 var pbar_div = $('#progressbar_div');
                 var pbar = $('#progressbar');
@@ -1259,7 +1266,9 @@ if(is_array($imp_session)){
             <tr>
                 <td align="right" width="250px">Select previously uploaded file:</td>
                 <td><select name="import_id" id="import_id" onchange="doSelectSession()"><?=get_list_import_sessions()?></select>
-                    <input type="button" value="Clear all files" style="margin-right: 10px;" onclick="doClearSession('all')">
+                    <input type="button" value="Clear all files" 
+                                            id="btnClearUploaded"
+                                            style="margin-right: 10px;" onclick="doClearSession('all')">
                 </td>
             </tr>
 
