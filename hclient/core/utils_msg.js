@@ -403,7 +403,6 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 //create new div for dialogue with $(this).uniqueId();
                 var $dlg = $('<div>')
                         .addClass('loading')
-                        //.css('background','red')
                         .appendTo( $(opener.document).find('body') ).uniqueId();
                         
                 if(options.class){
@@ -445,14 +444,21 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
                 //on load content event listener
                 $dosframe.on('load', function(){
-                    
-                        $dosframe.show();
-                        var content = $dosframe[0].contentWindow;
+                         
+                        if(top.HEURIST4.util.isempty($dosframe.attr('src'))){
+                            return;
+                        }
                         
+                        var content = $dosframe[0].contentWindow;
                         content.alert = function(txt){
                             top.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
                             return true;
                         }
+                        
+                        if(!options["title"]){
+                            $dlg.dialog( "option", "title", content.document.title );
+                        }      
+                        
                         
                         /*
                         content.confirm = function(txt){
@@ -477,10 +483,6 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                         
                         //content.document.reference_to_parent_dialog = $dlg.attr('id');
                         //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
-                        if(!options["title"]){
-                            $dlg.dialog( "option", "title", content.document.title );
-                        }
-
                         //functions in internal document
                         //content.close = $dosframe[0].close;    // make window.close() do what we expect
                         content.close = function() {
@@ -507,7 +509,8 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                                 onloadCallback.call(opener, $dosframe[0]);
                         }
 
-                        $dlg.removeClass('loading'); //.css('background','none');
+                        $dlg.removeClass('loading');
+                        $dosframe.show();    
                 });
 
 //    options['callback']
