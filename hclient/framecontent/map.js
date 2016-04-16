@@ -41,6 +41,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     var tmap = null,  // timemap object
     vis_timeline = null, // vis timeline object
     vis_timeline_range = null,
+    vis_timeline_label_mode = 2,
     drawingManager,     //manager to draw the selection rectnagle
     lastSelectionShape,
 
@@ -533,40 +534,20 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         .menu({
             select: function( event, ui ) {
 
-                var contents = $(".vis-item-content");
-                var spinner = $("#timeline_spinner");
-
                 menu_label_settings.find('span').removeClass('ui-icon ui-icon-check');
                 ui.item.find('span').addClass('ui-icon ui-icon-check');
-
                 var mode =  Number(ui.item.attr('id').substr(3));
-
-                if(mode==0){
-                    $.each(contents, function(i,item){item.style.width = 'auto';});//.css({'width':''});
-                }else if(mode==2){
-                    contents.css({'width': spinner.spinner('value')+'em'});
-                }
-
-                $('div .vis-item-overflow').css('overflow',(mode===1)?'hidden':'visible');
-
-                //'label_in_bar':(mode==1),
-                vis_timeline.setOptions({'margin':1,  'stack':(mode!=4)});
-
+                vis_timeline_label_mode = mode;
+                var spinner = $("#timeline_spinner");
                 if(mode==2){
                     spinner.show();
                 }else{
                     spinner.hide();
                 }
 
-                if(mode>=3){
-                    contents.find("span").hide();
-                }else{
-                    contents.find("span").show();
-                }
+                _applyTimeLineLabelsSettings(mode);                
 
                 vis_timeline.redraw();
-
-
         }})
         .hide();
 
@@ -615,6 +596,33 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         */
 
     }
+    
+    //
+    //
+    //
+    function _applyTimeLineLabelsSettings(mode){
+        
+                var contents = $(".vis-item-content");
+                var spinner = $("#timeline_spinner");
+
+                if(mode==0){  //full length
+                    $.each(contents, function(i,item){item.style.width = 'auto';});//.css({'width':''});
+                }else if(mode==2){  //specific length 
+                    contents.css({'width': spinner.spinner('value')+'em'});
+                }
+
+                $('div .vis-item-overflow').css('overflow',(mode===1)?'hidden':'visible');
+
+                //'label_in_bar':(mode==1),
+                vis_timeline.setOptions({'margin':1,  'stack':(mode!=4)});
+
+                if(mode>=3){ //hide labels at all
+                    contents.find("span").hide();
+                }else{
+                    contents.find("span").show();
+                }
+        
+    }                
 
     //init visjs timeline
     function _loadVisTimeline(){
@@ -701,6 +709,10 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         
         vis_timeline.setGroups(groups);
         vis_timeline.setItems(items);
+        
+        //apply label settings
+        _applyTimeLineLabelsSettings(vis_timeline_label_mode);
+        
 //console.log('TIMELINE DATASET. set data: '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
 //        top.HEURIST4._time_debug = new Date().getTime() / 1000;
         _timelineZoomToAll();
