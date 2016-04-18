@@ -175,7 +175,7 @@
                                 <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">
                                     Image (~400x400):</label>
                 <div style="vertical-align: middle;display:inline-block;">
-                    <div id="termImage" style="border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
+                    <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
                     </div>
                 </div>
             </div>                        

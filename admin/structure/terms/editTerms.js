@@ -1522,8 +1522,14 @@ function EditTerms() {
     sequentialUploads:true,
     dataType: 'json',
     //dropZone: $input_img,
-    // add: function (e, data) {  data.submit(); },
+    add: function (e, data) {  
+        $input_img.addClass('loading');
+        $input_img.find('img').hide();
+        data.submit(); 
+    },    
     done: function (e, response) {
+                $input_img.removeClass('loading');
+                $input_img.find('img').show();
                 response = response.result;
                 if(response.status=='ok'){
                     var data = response.data;

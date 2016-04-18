@@ -349,6 +349,12 @@ div.coverall-div {
 div.coverall-div.saving {
     background-image: url(../images/saving-animation.gif);
 }
+div.loading {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(../images/loading-animation-white.gif);/* override when the load has finished */
+}
+
 #fake-console {
     position: absolute;
     width: 500px;
