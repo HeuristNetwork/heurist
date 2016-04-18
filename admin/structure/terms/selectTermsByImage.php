@@ -79,11 +79,18 @@
         }
     }
     if(count($files)>0){
+        
+        $term_labels = mysql__select_assoc('defTerms', 'trm_ID', 'trm_Label', 'trm_ID in ('.implode(',',$files).')');
+        
+        
     foreach ($files as $id){
-                print '<div style="display:inline-block;padding:4px;margin:4px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);">';
-                print '<a href="#" onclick="onImageSelect(\''.$id.'\')">';
-                print '<img height="'.$dim.'" src="'.HEURIST_FILESTORE_URL.'term-images/'.$id.'.png"/></a></div>';
-                //array_push($results, array( 'filename'=>$filename, 'name'=>$name)); width="'.$dim.'" height="'.$dim.'" width:40px;
+                print '<div style="display:inline-block;text-align:center;padding:4px;margin:4px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);">';
+                print '<a href="#" onclick="onImageSelect(\"'.$id.'\")">';
+                
+                print '<img height="'.$dim.'" '
+                .'src="'.HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.HEURIST_DBNAME.'&ent=term&id='.$id.'"/></a>'
+                .'<br><label>'.$term_labels[$id].'</label></div>';
+//to avoid issues with access   print '<img height="'.$dim.'" src="'.HEURIST_FILESTORE_URL.'term-images/'.$id.'.png"/></a></div>';
     }
     }else{
         print 'No terms images defined<script>setTimeout("closewin()", 2000);</script>';   

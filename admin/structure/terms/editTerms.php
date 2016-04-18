@@ -129,7 +129,7 @@
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" style="display:none;width:500px;">
+                <div id="formEditor" style="display:none;width:600px;">
                     <h3 style="margin-left:10px; margin-top:0px; border-style:none;display:inline-block">Edit selected term / vocabulary</h3>
                             <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                                 <b>term saved</b>
@@ -172,16 +172,17 @@
                         
             <div  class="dtyField" id="divImage">
                             <div style="float:left;">
-                                <label class="dtyLabel" style="margin-top:10px;">
+                                <label class="dtyLabel" style="margin-top:10px;vertical-align: top;">
                                     Image (~400x400):</label>
                 <div style="vertical-align: middle;display:inline-block;">
-                    <div id="termImage" style="border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" ></div>
+                    <div id="termImage" style="border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
+                    </div>
                 </div>
             </div>                        
 
                         <div class="dtyField">
-                            <label class="dtyLabel">Description of term</label>
-                            <input id="edDescription" style="width:350px; margin-top:5px;" title=""/>
+                            <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
+                            <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""></textarea>
                             <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                 A concise but comprehensive description of this term or category.
                             </div>
@@ -219,21 +220,23 @@
                         <div style="display:inline-block; margin-top:30px;width:90%">
                             <input id="btnImport" type="button" value="Import"
                                 title=""
-                                onClick="{editTerms.doImport(false)}"/>&nbsp;&nbsp;&nbsp;
+                                onClick="{editTerms.doImport(false)}"/>
                             <input id="btnSetParent" type="button" value="Move"
+                                style="margin-left:20px;"
                                 title="Change the parent" onClick="{editTerms.selectParent()}"/>
                             <input id="btnMerge" type="button" value="Merge"
                                 title="Merge this term with another term and update all records to reference the new term"
                                 onClick="{editTerms.mergeTerms()}"/>
-                            &nbsp;&nbsp;&nbsp;
                             <input id="btnDelete" type="button" value="Delete"
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
-                            <input id="btnSave" type="button" value="Save changes" style="font-style: bold; colour:black;"
+                            <input id="btnSave" type="button" value="Save changes" 
+                                style="margin-left:100px;font-style: bold !important; color:black;"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
-                            &nbsp;&nbsp;&nbsp;
-                            <div id='div_btnAddChild' style="text-align: right; display:inline-block; margin-left:10px; font-style: bold; colour:black;">
+                            
+                            <div id='div_btnAddChild' 
+                                style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
                                 <input id="btnAddChild" type="button" value="Add Child" onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
@@ -281,8 +284,8 @@
 
                 <div id="divApply" style="margin-left:10px; margin-top:15px; text-align:left; display: block;">
                     Warning: if a field uses individually selected terms, new terms must be selected in record structure edit
-                    <br />to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
-                    <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" />
+                    to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
+                    <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" /></p>
                 </div>
 
             </div>

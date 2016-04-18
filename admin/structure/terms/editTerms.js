@@ -381,10 +381,10 @@ function EditTerms() {
                 if(node.data.id>0){
                     var curtimestamp = (new Date()).getMilliseconds();
                     Dom.get('termImage').innerHTML =
-            "<a href=\"javascript:void(0)\" onClick=\"{editTerms.showFileUploader()}\" title=\"Click to change image\">"+
-            "<img id=\"imgThumb\" src=\""+
-            top.HEURIST.iconBaseURL + node.data.id + "&ent=term&t=" + curtimestamp +
-            "\" height=\"120\"></a>";
+            '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
+            '<img id="imgThumb" src="'+
+            top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
+            '"></a>';
                     Dom.get('termImage').style.display = 'block';
                 }else{
                     Dom.get('termImage').style.display = 'none';

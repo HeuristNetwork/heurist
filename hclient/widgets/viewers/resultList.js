@@ -303,6 +303,10 @@ $.widget( "heurist.resultList", {
 
                     that.span_pagination.hide();
 
+                    that.setSelected(null);
+                    $(that.document).trigger(top.HAPI4.Event.ON_REC_SELECT, 
+                                {selection:null, source:that.element.attr('id')} );
+
                     if(data){
 
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
@@ -330,6 +334,11 @@ $.widget( "heurist.resultList", {
 
                     that._showHideOnWidth();
                     that._renderPagesNavigator();
+                    
+                    if(data==null){
+                        var empty_message = top.HR('No filter defined');
+                        var $emptyres = that._renderMessage( empty_message );
+                    }
 
                 }else if(e.type == top.HAPI4.Event.ON_REC_SELECT){
 
@@ -350,10 +359,6 @@ $.widget( "heurist.resultList", {
         });
         }
         */
-
-
-
-
 
         this._refresh();
 
@@ -605,49 +610,46 @@ $.widget( "heurist.resultList", {
     //
     _renderRecordsIncrementally: function( recordset ){
 
-        if(recordset)
-        {
+        this._currentRecordset = recordset;
 
-            this._currentRecordset = recordset;
-
-            var total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
-
+        var total_count_of_curr_request = 0;
+        
+        if(this._currentRecordset){
+            total_count_of_curr_request = (recordset!=null)?recordset.count_total():0;
             this._renderProgress();
+        }
 
-            if( total_count_of_curr_request > 0 )
-            {
-                if(this._count_of_divs<this.options.pagesize){ // DRAW CURRENT PAGE
+        if( total_count_of_curr_request > 0 )
+        {
+            if(this._count_of_divs<this.options.pagesize){ // DRAW CURRENT PAGE
+                this._renderPage(0, recordset);
+            }
 
-                    this._renderPage(0, recordset);
+        }else if(this._count_of_divs<1) {   // EMPTY RESULT SET
 
-                }
+            this._renderPagesNavigator();
 
-            }else if(this._count_of_divs<1) {   // EMPTY RESULT SET
+            var empty_message = top.HR('No records match the search')+
+            '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
+                ?'Note: some records may only be visible to members of particular workgroups'
+                :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
 
-                this._renderPagesNavigator();
+            if(this.options['empty_remark']!=''){
+                empty_message = empty_message + this.options['empty_remark'];
+            }
 
-                var empty_message = top.HR('No records match the search')+
-                '<div class="prompt">'+top.HR((top.HAPI4.currentUser.ugr_ID>0)
-                    ?'Note: some records may only be visible to members of particular workgroups'
-                    :'To see workgoup-owned and non-public records you may need to log in')+'</div>';
+            var $emptyres = this._renderMessage( empty_message );
 
-                if(this.options['empty_remark']!=''){
-                    empty_message = empty_message + this.options['empty_remark'];
-                }
+            if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
+                var domain = this._query_request.w
+                if((domain=='b' || domain=='bookmark')){
+                    var $al = $('<a href="#">')
+                    .text(top.HR('Click here to search the whole database'))
+                    .appendTo($emptyres);
+                    this._on(  $al, {
+                        click: this._doSearch4
+                    });
 
-                var $emptyres = this._renderMessage( empty_message );
-
-                if(top.HAPI4.currentUser.ugr_ID>0 && this._query_request){ //logged in and current search was by bookmarks
-                    var domain = this._query_request.w
-                    if((domain=='b' || domain=='bookmark')){
-                        var $al = $('<a href="#">')
-                        .text(top.HR('Click here to search the whole database'))
-                        .appendTo($emptyres);
-                        this._on(  $al, {
-                            click: this._doSearch4
-                        });
-
-                    }
                 }
             }
         }
@@ -675,7 +677,7 @@ $.widget( "heurist.resultList", {
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" >'
         + '<div class="recordIcons">'
-        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif" class="unbookmarked">'
+        +     '<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif">'
         + '</div>'
         + '<div class="recordTitle">id ' + recID
         + '...</div>'

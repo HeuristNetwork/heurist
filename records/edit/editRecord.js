@@ -2822,7 +2822,7 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSelectTermsByImage = function(selector){
 
-        var urlSpan = this.document.createElement("span");
+        var urlSpan = this.document.createElement("a");
         //urlSpan.style.paddingLeft = "1em";
         urlSpan.style.color = "blue";
         //        urlSpan.style['float'] = "right";
@@ -2830,6 +2830,7 @@ console.log('heurist not defined');
         var editImg = urlSpan.appendChild(this.document.createElement("img"));
         editImg.src = top.HEURIST.baseURL_V3+"common/images/icon_picture.png";
         urlSpan.appendChild(editImg);
+        urlSpan.appendChild(document.createTextNode('visual'));
 
         urlSpan.thisElement = this;
         //urlSpan.bdValue = bdValue;
@@ -2860,9 +2861,7 @@ console.log('heurist not defined');
                 );
         }; // urlSpan.onclick
 
-        //$(urlSpan).insertAfter($(selector));
-        this.inputCell.insertBefore(urlSpan, selector);
-        //this.inputCell.appendChild(urlSpan);
+        this.inputCell.insertBefore(urlSpan, selector.nextSibling);
 
         this.selectSpan = urlSpan;
 

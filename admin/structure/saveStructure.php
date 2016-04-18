@@ -36,8 +36,6 @@
     require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     require_once('saveStructureLib.php');
 
-    header('Content-type: text/javascript; charset=utf-8');
-
     $rv = array();
 
     if (!is_admin()) {
@@ -400,10 +398,20 @@ else
 
 }//$method!=null
 
-print json_format($rv);
-exit();
+
+ob_start(); 
+echo json_encode($rv);
+$output = gzencode(ob_get_contents(),6); 
+ob_end_clean(); 
+header('Content-Encoding: gzip');
+header('Content-type: text/javascript; charset=utf-8');
+echo $output; 
+unset($output);
+
+//old home-made version  print json_format($rv);
 
 function error_exit($msg){
+    header('Content-type: text/javascript; charset=utf-8');
     print json_format(array('error'=>$msg));
     exit();
 }

@@ -336,17 +336,6 @@ optgroup {
 /* -------------------------------------------- */
 /*  SEARCH RESULT */
 
-/* todo: to remove */
-.bookmarked {
-    background-image: url(hclient/assets/bookmark.png);
-    height:16px;
-    width:12px;
-}
-.unbookmarked {
-    background-image: url(hclient/assets/nobookmark.png);
-}
-
-
 .recordDiv {
     -moz-user-select: none;
     user-select: none;
