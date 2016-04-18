@@ -57,13 +57,23 @@
         $color_new = null; //array(255, 0, 0);    
     }
     
-    if(@$_REQUEST['ent']=='term'){
+    if(@$_REQUEST['ent']=='term'){    //FOR H3 UI
         $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$rectype_id;
+        if (@$_REQUEST['deletemode']=='1'){
+            header('Content-type: text/javascript');
+            //header('Content-type: text/html');
+            if (@$_REQUEST['deletemode']=='1'){
+                unlink($filename);
+                print '{"res":"ok"}';
+            }else{
+                print '{"res":"notfound"}';
+            }
+        }else 
         if(file_exists($filename)){
             download_file($filename);
         }else if (@$_REQUEST['editmode']=='1'){
             download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png');
-        }else{
+        }else {
             download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif');
         }
         exit();

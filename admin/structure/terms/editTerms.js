@@ -317,6 +317,32 @@ function EditTerms() {
             }
         }
     }
+    
+    function _isNodeChanged(){
+        
+        var ischanged = false;
+        
+        if(_currentNode!=null){
+        
+                ischanged =  
+                    Dom.get('edName').value.trim() != _currentNode.label ||
+                    Dom.get('edDescription').value.trim() != _currentNode.data.description || 
+                    Dom.get('edCode').value.trim() != _currentNode.data.termcode ||
+                    Dom.get("trm_Status").value != _currentNode.data.status ||
+                    Dom.get('edInverseTermId').value != _currentNode.data.inverseid; 
+        }
+        
+          var ele = $('#btnSave');
+          if (ischanged) {
+                ele.removeProp('disabled');
+                ele.css('color','black');
+          }else{
+                ele.prop('disabled', 'disabled');
+                ele.css('color','lightgray');
+          }
+            
+    }
+    
 
     /**
     * Loads values to edit form
@@ -357,6 +383,7 @@ function EditTerms() {
                     Dom.get('div_ConceptID').innerHTML = 'Concept ID: '+node.data.conceptid;
                 }
 
+                
                 //	alert("label was clicked"+ node.data.id+"  "+node.data.domain+"  "+node.label);
                 Dom.get('edId').value = node.data.id;
                 Dom.get('edParentId').value = node.data.parent_id;
@@ -466,6 +493,8 @@ function EditTerms() {
             var tv = (ind===0)?_termTree1:_termTree2;
             tv.onEventToggleHighlight(node);
         }
+        
+        _isNodeChanged();
     }
 
     /**
@@ -519,6 +548,7 @@ function EditTerms() {
             Dom.get('btnInverseSetClear').value = 'set';
             Dom.get('edInverseTerm').value = "";
         }
+        _isNodeChanged();
     }
 
     function _setOrclearInverseTermId2(){
@@ -570,6 +600,7 @@ function EditTerms() {
         } else {
             _toggleAll(false, false);
         }
+        _isNodeChanged();
     }
 
     /**
@@ -744,6 +775,12 @@ function EditTerms() {
             (_currentNode.data.status !== sStatus) ||
             (iParentId_prev !== iParentId) ||
             (iInverseId_prev !== iInverseId));
+            
+            
+        if(wasChanged){
+            $('#btnSave').removeProp('disabled');
+            $('#btnSave').css('color','black');
+        }    
 
         //( !(Hul.isempty(_currentNode.data.inverseid)&&Hul.isnull(iInverseId)) &&
         //	Number(_currentNode.data.inverseid) !== iInverseId));
@@ -1506,6 +1543,21 @@ function EditTerms() {
         });
 
     }
+    
+    function _clearImage(){
+        
+        if(_currentNode===null) return;
+        
+        var baseurl = top.HEURIST.iconBaseURL + _currentNode.data.id + "&ent=term&deletemode=1";
+        Hul.getJsonData(baseurl, function(context){
+            if(!Hul.isnull(context) && !context.error){
+                 if(context.res=='ok'){
+                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL_V3 + 'hclient/assets/100x100click.png'); 
+                 }
+            }
+        }, null);
+        
+    }
 
     function _initFileUploader(){
         
@@ -1568,8 +1620,14 @@ function EditTerms() {
         doEdit: function(){ _doEdit(); },
         doSelectInverse: function(){ _doSelectInverse(); },
 
+        clearImage: function(){ _clearImage()},
+
         doImport: function(isRoot){ _import(isRoot); },
 
+        isChanged: function(){
+            _isNodeChanged();
+        },
+        
         applyChanges: function(event){ //for window mode only
             if(_isWindowMode){
                 window.close(_isSomethingChanged);

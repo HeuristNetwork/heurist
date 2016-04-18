@@ -1030,8 +1030,8 @@ function DetailTypeEditor() {
                     "close-on-blur": false,
                     "no-resize": false,
                     title: 'Edit Terms',
-                    height: 620,
-                    width: 900,
+                    height: 750,
+                    width: 1200,
                     callback: function(needTreeReload) {
                         _recreateTermsPreviewSelector(type, vocab_id, "");
                     }

@@ -130,8 +130,8 @@
                     {
                         "close-on-blur": false,
                         "no-resize": false,
-                        height: 620, // height and width of term tree editing popup
-                        width: 900,
+                        height:750,     // height and width of term tree editing popup
+                        width: 1200,
                         callback: function(needTreeReload) {
                             context_return_res = 'ok';
                         }
@@ -230,18 +230,18 @@
                 </div>
 
                 <div style="padding-top: 20px;" id="btnPanel">
-                    <div style="float:left; padding-left:50px;">
+                    <div style="float:left; padding-left:150px;">
                         <input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"
                             title="Add, edit and rearrange terms in the overall tree view of terms defined for this database"/>
-                    </div>
-                    <div style="float:left; text-align: right; padding-left:130px;">
-                        <input id="btnSave" type="submit" style="font-weight:bold; color:black; "
-                            value="&nbsp;Add <?=($parent_id==0?"vocabulary":"term")?>&nbsp;"
-                            title="Add <?=($parent_id==0?"top-level vocabulary":"the term to the current vocabulary")?>"/>&nbsp;&nbsp;
                     </div>
                     <div style="float:right; padding-left:30px;">
                         <input id="btnSaveAndClose" type="button" value="Done" onClick="{submitAndClose();}"
                             title="Close this window and return to the selection of the vocabulary and terms for this field"/> &nbsp;&nbsp;
+                    </div>
+                    <div style="float:right; text-align: right; padding-right:20px;">
+                        <input id="btnSave" type="submit" style="font-weight:bold !important; color:black; "
+                            value="&nbsp;Add <?=($parent_id==0?"vocabulary":"term")?>&nbsp;"
+                            title="Add <?=($parent_id==0?"top-level vocabulary":"the term to the current vocabulary")?>"/>&nbsp;&nbsp;
                     </div>
                 </div>
             </form>

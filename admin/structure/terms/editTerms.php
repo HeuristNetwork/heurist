@@ -112,7 +112,7 @@
 
             </div>
 
-            <div id="formContainer" style="float: left; padding-bottom:5px; padding-left: 10px;">
+            <div id="formContainer" style="position:absolute;left:303px;top:0;bottom:0;right:0; padding-bottom:5px; padding-left: 10px;">
 
                 <h3 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:300px;">
                     Select a term in the tree to edit or add child terms
@@ -160,7 +160,7 @@
                             <div style="float:left;">
                                 <label class="dtyLabel" style="color: red; margin-top:10px;">
                                     Term (label)</label>
-                                <input id="edName" style="width:160px"/>
+                                <input id="edName" style="width:350px" onkeyup="editTerms.isChanged();" />
                                 <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                     The term or label describing the category. The label is the normal<br/>
                                     way of expressing the term. Dropdowns are ordered alphabetically.<br />
@@ -178,11 +178,18 @@
                     <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
                     </div>
                 </div>
+                            
+                <input id="btnClearImage" type="button" value="Clear"
+                                title="Remove image" 
+                                style="margin-top:10px;vertical-align: top;"
+                                onClick="{editTerms.clearImage()}"/>
+                
             </div>                        
 
                         <div class="dtyField">
                             <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
-                            <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""></textarea>
+                            <textarea id="edDescription" rows="3"  style="width:350px; margin-top:5px;" title=""
+                                 onkeyup="editTerms.isChanged();"></textarea>
                             <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                 A concise but comprehensive description of this term or category.
                             </div>
@@ -190,7 +197,7 @@
 
                         <div class="dtyField">
                             <label class="dtyLabel">Standard code</label>
-                            <input id="edCode" style="width:80px; margin-top:5px;"/>
+                            <input id="edCode" style="width:80px; margin-top:5px;" onkeyup="editTerms.isChanged();"/>
                             <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
                                 A domain or international standard code for this term or category.<br/>
                                 May also be used for a local code value to be used in importing data.
@@ -231,7 +238,7 @@
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
                             <input id="btnSave" type="button" value="Save changes" 
-                                style="margin-left:100px;font-style: bold !important; color:black;"
+                                style="margin-left:100px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
                             

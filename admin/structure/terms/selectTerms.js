@@ -788,8 +788,8 @@ END TREE REALTED ROUTINES ---------------------------------------
 		{
 		"close-on-blur": false,
 		"no-resize": false,
-		height: 620,
-		width: 900,
+        height: 750,     // height and width of term tree editing popup
+        width: 1200,
 		callback: function(needTreeReload) {
 			if(true || needTreeReload) { //refresh in any case
 
