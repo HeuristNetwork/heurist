@@ -536,8 +536,7 @@ $.widget( "heurist.search", {
         }else if(e.type == top.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             top.HEURIST4.util.setDisabled(this.input_search, false);
-
-            //ART that.div_search.css('display','inline-block');
+            this.input_search.focus();
 
         }else if(e.type == top.HAPI4.Event.ON_STRUCTURE_CHANGE){
             if(this.search_assistant!=null){
