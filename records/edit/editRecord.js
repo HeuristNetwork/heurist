@@ -325,7 +325,19 @@ if (! top.HEURIST.edit) {
                 }
             }
         },
-
+        
+        _getridGarbageHelp: function(str){
+                    if (str!='' &&
+                       (str=='Please rename to an appropriate heading within each record structure' || 
+                        str.indexOf('Please document the nature of this detail type')==0 ||
+                        str=='Another separator field' ||
+                        str=='Headings serve to break the data entry form up into sections')){
+                            
+                        str='';
+                    }
+                    return str;
+            
+        },
 
         /**
         * put your comment there...
@@ -1921,10 +1933,9 @@ console.log('heurist not defined');
         this.linkSpan = null;
 
         // make sure that the promptDiv is the last item in the input cell
-        var helpText = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
         this.promptDiv = this.inputCell.appendChild(this.document.createElement("div"));
         this.promptDiv.className = "help prompt";
-        var helpPrompt = recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
+        var helpPrompt = top.HEURIST.edit._getridGarbageHelp(recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']]);
         this.promptDiv.innerHTML = helpPrompt;
 
         this.inputs = [];
@@ -1991,7 +2002,7 @@ console.log('heurist not defined');
         this.elementName = "type:" + this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']];
         element.name = (bdValue && bdValue.id)? (this.elementName + "[bd:" + bdValue.id + "]") : (this.elementName + "[]");
 
-        var helpPrompt = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
+        var helpPrompt = top.HEURIST.edit._getridGarbageHelp(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']]);
 
         element.title = helpPrompt ?helpPrompt :this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayName']];
         element.setAttribute("bib-detail-type", this.detailType[dtyFieldNamesToDtIndexMap['dty_ID']]);
@@ -3395,7 +3406,7 @@ console.log('heurist not defined');
         if (this.promptDiv){
             //this.promptDiv.className = "";
             //2016-03-28 this.promptDiv.style.display = "none";
-            newInput.title = this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']];
+            newInput.title = top.HEURIST.edit._getridGarbageHelp(this.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DisplayHelpText']]);
         }
         return newInput;
     }; // top.HEURIST.edit.inputs.BibDetailSeparator.prototype.addInput
