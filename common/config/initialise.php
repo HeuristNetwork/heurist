@@ -83,7 +83,7 @@ HEURIST_CURRENT_URL  - current url
 
 HEURIST_DIR          - full path to heurist    /var/www/html/h4/
 
-HEURIST_BASE_URL     - full url     http://heuristscholar.org:80/h4/  @todo - rename to HEURIST_URL
+HEURIST_BASE_URL     - full url     http://Heurist???.org:80/h4/  @todo - rename to HEURIST_URL
 HEURIST_SITE_PATH    - /h4/       (used only in this file to make other constants)
 
 HEURIST_UPLOAD_ROOT      - path to root filestore folder
@@ -141,7 +141,7 @@ elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED
 $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
 
 
-define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. heuristscholar.org
+define('HEURIST_SERVER_NAME', $serverName); // server host name for the configured name, eg. Heurist.sydney.edu.au
 $serverBaseURL = $REQUEST_PROTOCOL . "://" . HEURIST_SERVER_NAME;
 define('HEURIST_SERVER_URL', $serverBaseURL); //with protocol and port
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
@@ -760,7 +760,7 @@ function returnErrorMsgPage($critical, $msg = null) {
     if ($critical == 1) { // bad connection to MySQL server
 
         $msg2 = "<p>&nbsp;Heurist initialisation error<p> ".$msg?$msg:"".
-        " <p><i>Please consult your system administrator for help, or email: info - a t - heuristscholar.org </i></p>";
+        " <p><i>Please consult your system administrator for help, or email: info - a t - HeuristNetwork.org </i></p>";
         $msg2 = rawurlencode($msg2);
         $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
 
@@ -781,7 +781,7 @@ function returnErrorMsgPage($critical, $msg = null) {
         $list = mysql__getdatabases();
         if (count($list) > 0) {
             $msg2 = "<p>&nbsp;Cannot open database, but cause of error unknown.<p><br><br>".$msg?$msg:"".
-            "<p><br><br><i>Please consult your system administrator for help, or email: info - a t - heuristscholar.org </i></p>";
+            "<p><br><br><i>Please consult your system administrator for help, or email: info - a t - HeuristNetwork.org </i></p>";
             $msg2 = rawurlencode($msg2);
             $redirect = HEURIST_BASE_URL . "common/html/msgErrorMsg.html?msg=" . $msg2;
         }

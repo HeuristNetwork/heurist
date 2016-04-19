@@ -58,7 +58,7 @@ if (! is_logged_in()) {
 
 $_REQUEST = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET["data"]), true);
 
-$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : HEURIST_SERVER_NAME);	// TESTTHIS:  repalced heuristscholar.org with host name
+$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : HEURIST_SERVER_NAME);	// TESTTHIS:  replaced Heurist.sydney.edu.au with host name
 $varName = $_REQUEST["name"];
 
 if (preg_match("/^([a-zA-Z0-9_]+)((?:[.][a-zA-Z0-9_]+)+)$/", $varName, $matches)) {

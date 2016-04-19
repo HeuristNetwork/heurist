@@ -35,7 +35,7 @@ document.writeln("			</table>");
 <!-- detail output template -->
 <xsl:template match="record[id=$bib_id]">
 document.writeln("	<tr>");
-document.writeln("		<td><img><xsl:attribute name="src">http://heuristscholar.org/rectype/<xsl:value-of select="type/@id"/>.gif</xsl:attribute></img></td>");
+document.writeln("		<td><img><xsl:attribute name="src">http://HeuristNetwork.org/rectype/<xsl:value-of select="type/@id"/>.gif</xsl:attribute></img></td>");
 document.writeln('		<td style="font-weight: bold;"><xsl:value-of select="title"/></td>');
 document.writeln("	</tr>");
 document.writeln("	<tr>");

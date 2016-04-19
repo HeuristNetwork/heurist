@@ -111,7 +111,7 @@
                 $res = mysql_query("select sys_dbRegisteredID, sys_dbName, sys_dbDescription, sys_OwnerGroupID from sysIdentification where 1");
                 if (!$res) { // Problem reading current registration ID
                     print "<div class='err_message'>Unable to read database identification record, this database might be incorrectly set up. \n" .
-                    "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice.</div>";
+                    "Please contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice.</div>";
                 }
                 $row = mysql_fetch_row($res); // Get system information for current database
                 $dbID = $row[0];

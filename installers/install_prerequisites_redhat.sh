@@ -107,7 +107,7 @@ echo
 echo Please check for any errors above
 echo
 echo PLEASE NOTE: This installation script has not been thoroughly tested at 21 July 2014
-echo If Heurist fails to run correctly, please contact the Heurist team, email: info@heuristscholar.org
+echo If Heurist fails to run correctly, please contact the Heurist team, email: info - a t - HeuristNetwork.org
 echo
 echo "WARNING: Bug in creation of php.ini at 21/7/14 - please check whether /etc/php5/apache2/php.ini is blank"
 echo "         If so, copy a valid php.ini file into this location, otherwise the search interface fails to "

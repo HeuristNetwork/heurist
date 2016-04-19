@@ -910,9 +910,9 @@ if ($pub_id) {
     openTag('hml');
     /*
     openTag('hml', array(
-	    'xmlns' => 'http://heuristscholar.org/heurist/hml',
+	    'xmlns' => 'http://Heurist.sydney.edu.au/heurist/hml',
 	    'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-	    'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
+	    'xsi:schemaLocation' => 'http://Heurist.sydney.edu.au.au/heurist/hml hHeurist.sydney.edu.auey.edu.au/heurist/schemas/hml.xsd')
     );
     */
     makeTag('query', $query_attrs);

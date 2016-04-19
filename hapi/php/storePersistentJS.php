@@ -65,8 +65,8 @@ $_REQUEST = json_decode(@$_POST["data"]?  $_POST["data"] : base64_decode(@$_GET[
 
 
 
-//$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : "heuristscholar.org");
-$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : HEURIST_SERVER_NAME);	// TESTTHIS:  repalced heuristscholar.org with host name
+//$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : "Heurist.sydney.edu.au");
+$location = @$_REQUEST["crossDomain"]? "*" : ($baseURL? $baseURL : HEURIST_SERVER_NAME);	// TESTTHIS:  replaced Heurist.sydney.edu.au with host name
 $varName = $_REQUEST["name"];
 $value = $_REQUEST["value"];
 

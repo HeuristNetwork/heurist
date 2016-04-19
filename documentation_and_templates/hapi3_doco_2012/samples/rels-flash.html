@@ -9,8 +9,8 @@
 img.icon { margin-right: 4px; }
 </style>
 
-<script src=http://hapi.heuristscholar.org/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
-<script src=http://hapi.heuristscholar.org/02/goi.js></script>
+<script src=http://hapi.Heurist.sydney.edu.au/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
+<script src=http://hapi.Heurist.sydney.edu.au/02/goi.js></script>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2.105&amp;key=ABQIAAAAWXRbJ6-0zaNuAoz9XBmHZRTOHJksE5z9Wm_cd8XHFESSXyKZQhQ6Wa_KV6YE4tIo4Jn1cD3eEmpr8Q" type="text/javascript"></script>
 <xscript src="main-105.js"></xscript>
@@ -44,7 +44,7 @@ var flashmap;
 function load() {
 	if (! HCurrentUser.isLoggedIn()) {
 		alert("You are not logged in to Heurist.\nRedirecting you now ...");
-		location.replace("http://heuristscholar.org/heurist/php/login.php?last_uri=" + encodeURIComponent(location.href));
+		location.replace("http://Heurist.sydney.edu.au/heurist/php/login.php?last_uri=" + encodeURIComponent(location.href));
 	}
 	else if (! HCurrentUser.isInWorkgroup(HWorkgroupManager.getWorkgroupById(19))) {
 		alert("You are not in the EUProject workgroup.\nSome records may not be visible to you.");
@@ -134,8 +134,8 @@ function chooseRecord(record, dontAlterStack) {
 	document.getElementById("loading-div").style.display = "block";
 
 	crt.appendChild(document.createTextNode(record.getTitle()));
-	crl.href = "http://heuristscholar.org/heurist-test/edit?bib_id=" + record.getID();
-	cri.src = "http://heuristscholar.org/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
+	crl.href = "http://Heurist.sydney.edu.au/heurist-test/edit?bib_id=" + record.getID();
+	cri.src = "http://Heurist.sydney.edu.au/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
 	cri.style.display = "";
 	cri.style.verticalAlign = "baseline";
 
@@ -268,10 +268,10 @@ function addRelatedRecordLink(rrList, record) {
 
 	var newA1 = newTd1.appendChild(document.createElement("a"));
 	newA1.title = "View resource details";
-	newA1.href = "http://heuristscholar.org/heurist-test/legacy/view.php?bib_id=" + record.getID();
+	newA1.href = "http://Heurist.sydney.edu.au/heurist-test/legacy/view.php?bib_id=" + record.getID();
 
 	var newImg = newA1.appendChild(document.createElement("img"));
-	newImg.src = "http://heuristscholar.org/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
+	newImg.src = "http://Heurist.sydney.edu.au/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
 	newImg.className = "icon";
 
 	var newA2 = newTd2.appendChild(document.createElement("a"));
@@ -361,7 +361,7 @@ function pointsCallback(vals) {
 
 
 function loadPointsAndLines(id) {
-	HAPI.XHR.sendRequest("http://hapi.heuristscholar.org/get_points.php?bib_id=" + id, pointsCallback);
+	HAPI.XHR.sendRequest("http://hapi.Heurist.sydney.edu.au/get_points.php?bib_id=" + id, pointsCallback);
 }
 
 function map_clearMap() { flashmap.clearMap(); }

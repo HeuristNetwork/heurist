@@ -144,7 +144,7 @@ echo -e "\n\n\n\n"
 
 echo ----- Heurist Prerequisites installed --------------------------------------------------------------------
 echo
-echo Please check for any errors above - please advise info@heuristscholar.org of any errors
+echo Please check for any errors above - please advise info - a t - HeuristNetwork.org of any errors
 echo
 echo "If you are getting lots of warnings along the lines of sudo: unable to resolve host Your-Server-Name"
 echo "we suggest editing /etc/hosts with    sudo nano /etc/hosts    and insert the following:"

@@ -1595,9 +1595,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
     /*
     openTag('hml', array(
-    'xmlns' => 'http://heuristscholar.org/heurist/hml',
+    'xmlns' => 'http://Heurist.sydney.edu.au/heurist/hml',
     'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-    'xsi:schemaLocation' => 'http://heuristscholar.org/heurist/hml http://heuristscholar.org/heurist/schemas/hml.xsd')
+    'xsi:schemaLocation' => 'http://Heurist.sydney.edu.au/heurist/hml httpHeurist.sydney.edu.auorg/heurist/schemas/hml.xsd')
     );
     */
     makeTag('database', array('id' => HEURIST_DBID), HEURIST_DBNAME);

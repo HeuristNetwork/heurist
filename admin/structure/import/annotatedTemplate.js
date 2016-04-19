@@ -56,7 +56,7 @@ function sendMessage(message){
     if (win === null || !window['postMessage'])
         alert("postMessage is not supported");
     else
-        win.postMessage(message, "*"); // "http://heuristscholar.org");
+        win.postMessage(message, "*"); // "http://Heurist.sydney.edu.au");
 }
 
 //
@@ -175,9 +175,9 @@ window.attachEvent("onmessage", receiveMessage);
 function receiveMessage(event)
 {
 var message;
-//if (event.origin !== "http://heuristscholar.org"){
+//if (event.origin !== "http://Heurist.sydney.edu.au"){
 if (false) {
-message = 'Response: ("' + event.origin + '"), but not from HeuristScholar.org';
+message = 'Response: ("' + event.origin + '"), but not from Heurist.sydney.edu.au';
 } else {
 
 var dv = jQuery('#HeuristRecTypeSource');
@@ -220,7 +220,7 @@ var win = window.parent; //contentWindow;
 if (win === null || !window['postMessage'])
 alert("postMessage is not supported");
 else
-win.postMessage("heurist:"+rectypeid, "*"); // "http://heuristscholar.org");
+win.postMessage("heurist:"+rectypeid, "*"); // "http://Heurist.sydney.edu.au");
 
 }
 */

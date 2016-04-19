@@ -63,7 +63,7 @@ if($isAtom){
     <generator>HEURIST search</generator>
     <author>
         <name>Information at Heurist</name>
-        <email>info@heuristscholar.org</email>
+        <email>info@HeuristNetwork.org</email>
     </author>
     <entry>
         <title>HEURIST home</title>
@@ -87,7 +87,7 @@ if($isAtom){
     <pubDate><?=date("r")?></pubDate>
     <copyright>Copyright: (C) University of Sydney Faculty of Arts and Social Sciences</copyright>
     <generator>HEURIST search</generator>
-    <managingEditor>info@heuristscholar.org (Information at Heurist)</managingEditor>
+    <managingEditor>info@HeuristNetwork.org (Information at Heurist)</managingEditor>
     <atom:link href="<?=htmlspecialchars(HEURIST_CURRENT_URL)?>" rel="self" type="application/rss+xml"/>
     <item>
         <title>HEURIST main page</title>

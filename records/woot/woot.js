@@ -33,7 +33,7 @@ if (! window["HAPI"]) {
 	alert(
 		"It seems the Heurist API libraries have failed to load.\n\n" +
 		"This can be caused by network problems, so please try relaoding the page.\n\n" +
-		"If the problem persists, please email info@heuristscholar.org and tell us the URL you are accessing."
+		"If the problem persists, please email info@HeuristNetwork.org and tell us the URL you are accessing."
 	);
 }
 

@@ -85,7 +85,8 @@
       <td colspan="2" style="font-size: 11px; font-weight: bold;">
         <img>
           <xsl:attribute name="align">abstop</xsl:attribute>
-          <xsl:attribute name="src">http://heuristscholar.org/rectype/<xsl:value-of
+          <!--  TODO: Need an appropriate address on HeuristNetwork.org or Heurist.sydney.edu.au -->
+          <xsl:attribute name="src">http://HeuristNetwork.org/rectype/<xsl:value-of
               select="type/@id"/>.gif</xsl:attribute>
         </img> &#160; <xsl:value-of select="title"/> &#160; <span style="font-weight:normal"
           >[id: <xsl:value-of select="id"/>]</span></td>

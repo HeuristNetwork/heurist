@@ -3735,7 +3735,7 @@ var HeuristScholarDB = new HStorageManager();
 			s.height = "0";
 			s.left = "-10000px";
 
-			// ANY.SUB.DOMAIN.hapi.heuristscholar.org will act the same as hapi.heuristscholar.org,
+			// ANY.SUB.DOMAIN.hapi.Heurist.sydney.edu.au will act the same as hapi.Heurist.sydney.edu.au,
 			// but browsers treat it as a different server, so you can have more simultaneous connections.
 			// (in this case, n*101 instead of n, where n is typically equal to 2 on firefox or IE).
 

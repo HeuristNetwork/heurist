@@ -60,7 +60,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 }
 
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
-define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. heuristscholar.org
+define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. Heurist.sydney.edu.au
 define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 define('HEURIST_SERVER_URL', $serverBaseURL);
 define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. http://heurist.sydney.edu.au/h4/
@@ -89,7 +89,7 @@ define('HEURIST_DB_PREFIX', $dbPrefix);
 //---------------------------------
 
 define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2016 The University of Sydney.');
-$talkToSysAdmin="Please advise your system administrator or email info - at - heuristscholar.org for assistance.";
+$talkToSysAdmin="Please advise your system administrator or email info - at - HeuristNetwork.org for assistance.";
 
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js

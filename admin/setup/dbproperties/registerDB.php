@@ -1,7 +1,8 @@
 <?php
 
 /**
-* registerDB.php - Registers the current database with HeuristScholar.org/db=Heurist_Master_Index , stores
+* registerDB.php - Registers the current database with Heurist_Master_Index database, 
+* on the Heurist master server (heurist.sydney.edu.au as at 2016), stores
 * metadata in the index database, sets registration code in sysIdentification table.
 *
 * @package     Heurist academic knowledge management system
@@ -44,7 +45,7 @@ if (!is_admin()) {
 $sError = "You must be logged in as system administrator to register a database";
 } else  if (get_user_id() != 2) {
 $sError = "Only the owner/creator of the database (user #2) may register the database. ".
-"<br/><br/>This user will also own (and be able to edit) the registration record in the heuristscholar.org master index database";
+"<br/><br/>This user will also own (and be able to edit) the registration record in the Heurist master index database";
 return;
 }
 */
@@ -94,7 +95,7 @@ if($sError){
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>Register Database with Heurist Master Index at HeuristScholar.org</title>
+        <title>Register Database with Heurist Master Index</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
     </head>
 
@@ -114,7 +115,7 @@ if($sError){
         }
         ?>
 
-        <div class="banner"><h2>Register Database with Heurist Master Index at HeuristScholar.org</h2></div>
+        <div class="banner"><h2>Register Database with Heurist Master Index</h2></div>
         <div id="page-inner" style="overflow:auto">
             <h3>Registration</h3>
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
@@ -154,7 +155,7 @@ if($sError){
 
             if (!$res) { // Problem reading current registration ID
                 $msg = "Unable to read database identification record. This database might be incorrectly set up. \n" .
-                "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                "Please contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice";
                 echo $msg . "<br />";
                 return;
             }
@@ -239,7 +240,7 @@ if($sError){
 
             <div class="detailRow">
                 <div class="detailType" style="width: 180px !important;">Database &gt; <u>Register</u></div>
-                <div class="detail">Register the database with the central HeuristScholar.org index.<br />
+                <div class="detail">Register the database with the Heurist Master Index.<br />
                     This will give your database a unique code and allow Heurist to check for new versions of
                     the software and database formats. <br/>It also allows other databases to import structural elements
                     (record types, field types and terms) but does NOT confer any form of access to data in this database</div>
@@ -291,7 +292,7 @@ if($sError){
                     }else{
                         $msg = "Problem allocating a database identifier from the Heurist master index, " .
                         "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
-                        " ... \nPlease contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice";
+                        " ... \nPlease contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice";
                     }
                     echo $msg . "<br />";
                     return;
@@ -333,7 +334,7 @@ if($sError){
                     } else {
                         $msg = "<div class=wrap><div id=errorMsg><span>Unable to write database identification record</span>".
                         "this database might be incorrectly set up<br />".
-                        "Please contact <a href=mailto:info@heuristscholar.org>Heurist developers</a> for advice</div></div>";
+                        "Please contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice</div></div>";
                         echo $msg;
                         return;
                     } // unable to write db identification record

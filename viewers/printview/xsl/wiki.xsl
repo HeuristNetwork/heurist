@@ -104,7 +104,7 @@
                     <a style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"
                         target="_new" href="wiki/{id}">[view details]</a>&#160;<a
                         style=" font-family:Verdana,Helvetica,Arial,sans-serif; font-size:10px;"
-                        target="_new" href="http://heuristscholar.org/heurist/edit?bib_id={id}">
+                        target="_new" href="http://HeuristNetwork.org/heurist/edit?bib_id={id}">
                         [edit] </a>
                     <br/>
                     <xsl:if
@@ -141,15 +141,15 @@
         <tr>
             <td class="rectype">
                 <img>
-                    <xsl:attribute name="src">http://heuristscholar.org/rectype/<xsl:value-of
+                    <xsl:attribute name="src">http://HeuristNetwork.org/rectype/<xsl:value-of
                             select="type/@id"/>.gif</xsl:attribute>
                 </img>
             </td>
             <td style="font-weight: bold;">
                 <a style="float: right;" target="_new"
-                    href="http://heuristscholar.org/heurist/bibedit.php?bib_id={id}">
+                    href="http://HeuristNetwork.org/heurist/bibedit.php?bib_id={id}">
                     <img style="border: none;"
-                        src="http://heuristscholar.org/heurist/edit_pencil_16x16.gif"/>
+                        src="http://HeuristNetwork.org/heurist/edit_pencil_16x16.gif"/>
                 </a>
                 <xsl:value-of select="title"/>
             </td>

@@ -269,7 +269,7 @@
         <div id="page-inner" style="overflow:auto">
 
             <div id="statusMsg"><img src="../../../common/images/mini-loading.gif" width="16" height="16" /> &nbspDownloading database list...</div>
-            The list below shows available databases registered with the HeuristScholar.org Index database
+            The list below shows available databases registered with the Heurist Master Index database
             which have the same major/minor version as the current database<br />
             Use the filter to locate a specific term in the name or title.
             Click the database icon on the left to view available record types in that database.
