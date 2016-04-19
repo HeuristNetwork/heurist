@@ -165,6 +165,17 @@ function EditRecStructure() {
 
                     var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
                     var conceptCode = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ConceptID];
+                    
+                    //get rid of garbage help text
+                    if (aval[fi.rst_DisplayHelpText]!='' &&
+                       (aval[fi.rst_DisplayHelpText]=='Please rename to an appropriate heading within each record structure' || 
+                        aval[fi.rst_DisplayHelpText].indexOf('Please document the nature of this detail type')==0 ||
+                        aval[fi.rst_DisplayHelpText]=='Another separator field' ||
+                        aval[fi.rst_DisplayHelpText]=='Headings serve to break the data entry form up into sections')){
+                            
+                        aval[fi.rst_DisplayHelpText]='';
+                    }
+                    
 
                     arr.push([ rst_ID,
                         rst_ID,
@@ -244,9 +255,20 @@ function EditRecStructure() {
                 {
                     key:"expandColumn",
                     label: "Edit",
-                    hidden:true, //width : "16px",
+                    hidden: false, //width : "16px",
                     sortable:false,
-                    formatter:expansionFormatter
+                    formatter: function(elLiner, oRecord, oColumn, oData){
+                        elLiner.innerHTML = '<img src="../../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit" />'; 
+                        
+                        var cell_element = elLiner.parentNode;
+
+                        //Set trigger
+                        if( oData ){ //Row is closed
+                            Dom.addClass( cell_element, "yui-dt-expandablerow-trigger" );
+                        }
+                        
+                    }
+                    //expansionFormatter
                 },
                 {
                     key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
@@ -393,6 +415,10 @@ function EditRecStructure() {
                     function ( obj ) {
                         var rst_ID = obj.data.getData('rst_ID');
                         //var rst_values = obj.data.getData('rst_values');
+                        
+                        var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+                        var allowEditBaseFieldType = (fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
+                        
                         /*
                         THIS IS FORM to edit detail structure. It is located on expandable row of table
                         */
@@ -481,9 +507,11 @@ function EditRecStructure() {
                         // Base field definitions  (button)
                         '<div>'+
                         '<div style="margin-left:190px; padding-top:5px; padding-bottom:15px;">'+
+                        
+                        (allowEditBaseFieldType?
                         '<input style="margin-right:100px;" id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
                         'title="Allows modification of the underlying field definition (shared by all record types that use this base field)"'+
-                        ' onclick="_onAddEditFieldType('+rst_ID+');">'+
+                        ' onclick="_onAddEditFieldType('+rst_ID+','+rty_ID+');">':'<span style="margin-right:220px;">&nbsp;</span>')+
 
                         // Save and cancel (buttons)
                         '<input style="margin-right:20px;" id="btnSave_'+rst_ID+'" type="button" value="Save"'+
@@ -574,9 +602,10 @@ function EditRecStructure() {
                     _isServerOperationInProgress = false;
                 }
 
-                if(elLink.hash === "#edit"){
+                /*if(elLink.hash === "#edit"){
                     _onAddEditFieldType(rst_ID, 0); //NOT USED
-                }else if(elLink.hash === "#delete"){
+                }else */
+                if(elLink.hash === "#delete"){
 
                     var baseurl = top.HEURIST.baseURL_V3 + "admin/structure/saveStructure.php";
 
@@ -1642,7 +1671,7 @@ function EditRecStructure() {
 
         if(!rst_ID) return;
 
-        var index_toinsert = _getRecordById(rst_ID).row_index+1;
+        var index_toinsert = _getRecordById(rst_ID).row_index;
         _myDataTable.unselectAllRows();
 
         onAddNewDetail(index_toinsert);
@@ -1740,7 +1769,7 @@ function EditRecStructure() {
         _isDragEnabled = true;
     }
     //////////////////////////////////////////////////////////////////////////////
-    // Diable drag and drop class
+    // Disable drag and drop class
     //////////////////////////////////////////////////////////////////////////////
     function dragDropDisable() {
         var i, id,
@@ -2397,10 +2426,44 @@ function _onDispNameChange(event){
 }
 
 //
-//   dty_ID (=rst_ID) - field type ID
+//   dty_ID (=rst_ID) - field type ID - edit base field definition
 //
-function _onAddEditFieldType(dty_ID, dtg_ID){
+function _onAddEditFieldType(dty_ID, rty_ID){
 
+    //show warning first
+    
+    //find all records that reference this type
+    var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+    if(!Hul.isnull(aUsage)){
+
+        textTip = '';
+        var k;
+        for (k in aUsage) {
+            if(rty_ID!=aUsage[k]){
+                //textTip = textTip + '<li>'+aUsage[k]+'  '+top.HEURIST.rectypes.names[aUsage[k]]+'</li>';
+                textTip = textTip + aUsage[k]+'  '+top.HEURIST.rectypes.names[aUsage[k]]+'\n';
+            }
+        }
+        if(textTip!=''){
+        
+            var detname = top.HEURIST.detailTypes.names[dty_ID];
+            if(detname.length>40) { detname = detname.substring(0,40)+"..."; }
+
+            textTip = //'<b>Warning: Use with care</b><br>'
+                'Changes made to the base field type "'+detname
+                +'" (changes to vocabulary or list of terms, changes of pointer target type) '
+                +'affect ALL record types which use the base field type:\n\n'
+                +textTip+'\n\nWarning: Use with care. Proceed?';
+                
+           if(!confirm(textTip)) return;
+                
+                
+        }
+    }    
+    
+    
+    
+    
     var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
         (top.HEURIST.database.name?top.HEURIST.database.name:''));
     var url = top.HEURIST.baseURL_V3 + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
