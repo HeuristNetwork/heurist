@@ -138,7 +138,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                         print 'This function combines duplicate records. One record MUST be selected as a master record'.
                         ' and there must be at least one duplicate selected. Processing duplicates allows you to merge,'.
                         'data with the master record.<br/><br/>'.
-                        'Bookmarks, Tags and Relationships from deleted records are added to the master record.'.
+                        'Bookmarks, Tags and Relationships from deleted records are added to the master record.<br/><br/>'.
                         'None of these data are duplicated if they already exist in the master record.';
                     } else{
                         print 'Select the data items which should be retained, added or replaced in the master records.'.
@@ -454,7 +454,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                 if (! $finished_merge) {
                     print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "commit&nbsp;changes":"merge&nbsp;duplicates").'" >';
                 } else{
-                    print '<div> Changes were commited </div>';
+                    print '<div> Changes were commited <br><br></div>';
                     print '<input type="button" name="close_window" id="close_window" value="Close Window"   title="Cick here to close this window" onclick="window.close();">';
                 }
                 ?>
