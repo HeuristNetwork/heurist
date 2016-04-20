@@ -187,7 +187,10 @@ $.widget( "heurist.resultListMenu", {
             .css('position','absolute')
             .appendTo( that.document.find('body') )
             //.addClass('ui-menu-divider-heurist')
-            .menu({select: function(event, ui){ event.preventDefault(); that._menuActionHandler(ui.item.attr('id')); return false; }});
+            .menu({select: function(event, ui){ 
+                    event.preventDefault(); 
+                    that._menuActionHandler(ui.item.attr('id')); 
+                    return false; }});
 
             if(top.HAPI4.is_logged()){
                 that['menu_'+name].find('.logged-in-only').show();
@@ -373,7 +376,8 @@ $.widget( "heurist.resultListMenu", {
                 if(context.problem){
                     top.HEURIST4.msg.showMsgErr(context.problem);
                 }else if(context.none){
-                    top.HEURIST4.msg.showMsgFlash(context.none);
+                    top.HEURIST4.msg.showMsgFlash(context.none, 1000, null, 
+                            { my: "center top", at: "center bottom", of: that.element.parent() });
                 }else if(context.execute){
                     var fname = context.execute.shift();
                     var args = context.execute;
@@ -393,7 +397,8 @@ $.widget( "heurist.resultListMenu", {
                     //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
                 }else if(context.ok){
 
-                    top.HEURIST4.msg.showMsgFlash(context.ok);
+                    top.HEURIST4.msg.showMsgFlash(context.ok, 1000, null, 
+                            { my: "center top", at: "center bottom", of: that.element.parent() });
                     that.reloadSearch();
 
                     /*top.HEURIST4.msg.showMsgDlg(context.ok+

@@ -147,6 +147,14 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         return $dlg.removeClass('ui-heurist-border');
     },
 
+    getMsgFlashDlg: function(){
+        var $dlg = $( "#dialog-flash-messages" );
+        if($dlg.length==0){
+            $dlg = $('<div>',{id:'dialog-flash-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+        }
+        return $dlg.removeClass('ui-heurist-border');
+    },
+    
     //
     // creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
     //
@@ -278,21 +286,26 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             return;
         }
 
-        $dlg = top.HEURIST4.msg.getMsgDlg();
+        $dlg = top.HEURIST4.msg.getMsgFlashDlg();
 
         $dlg.addClass('ui-heurist-border');
 
+        var content;
         if(message!=null){
             $dlg.empty();
-            $dlg.append('<span>'+top.HR(message)+'</span>');
+            content = $('<span>'+top.HR(message)+'</span>');
+            $dlg.append(content);
+        }else{
+            return;
         }
+        
+        var hideTitle = (title==null);
 
         if(!title) title = top.HR(''); // was an unhelpful and inelegant "Info"
-
+                                                          
         var options =  {
             title: top.HR(title),
             resizable: false,
-            //height:140,
             width: 'auto',
             modal: false,
             buttons: {}
@@ -300,11 +313,24 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
 
         if(position_to_element){
-           options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };
+           if($.isPlainObject(position_to_element)){
+                options.position = position_to_element;
+           }else{
+                options.position = { my: "left top", at: "left bottom", of: $(position_to_element) };    
+           } 
+        }else{
+            options.position = { my: "center center", at: "center center", of: $(document) };    
         }
 
         $dlg.dialog(options);
-        $dlg.dialog("option", "buttons", null);
+        content.position({ my: "center center", at: "center center", of: $dlg });
+        
+        //var hh = hideTitle?0:$dlg.parent().find('.ui-dialog-titlebar').height() + $dlg.height() + 20; 
+        
+        $dlg.dialog("option", "buttons", null);      
+        
+        if(hideTitle)
+            $dlg.parent().find('.ui-dialog-titlebar').hide();
 
         if (!(timeout>200)) {
             timeout = 1000;
@@ -312,6 +338,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
         setTimeout(function(){
             $dlg.dialog('close');
+            $dlg.parent().find('.ui-dialog-titlebar').show();
         }, timeout);
 
     },
