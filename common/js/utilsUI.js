@@ -1757,6 +1757,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
     createTermSelectExt: function(termIDTree, disabledTermIDsList, datatype, defaultTermID, isAddFirstEmpty) { // Creates the preview
 
         var selObj = document.createElement("select");
+        
+        var hasTermImage = false;
 
         if(datatype === "relmarker" || datatype === "relationtype"){
             datatype = "relation";
@@ -1808,7 +1810,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         function createSubTreeOptions(optgroup, depth, termSubTree, termLookupInner, defaultTermID) {
             var termID;
             var localLookup = termLookupInner;
-            var termName,
+            var termName, hasImage = false,
             termCode,
             arrterm = [];
 
@@ -1819,6 +1821,8 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 if(localLookup[termID]){
                     termName = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Label']];
                     termCode = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Code']];
+                    hasImage = localLookup[termID][top.HEURIST.terms.fieldNamesToIndex['trm_Image']];
+
                     if(top.HEURIST.util.isempty(termCode)){
                         termCode = '';
                     }else{
@@ -1828,7 +1832,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
                 if(top.HEURIST.util.isempty(termName)) continue;
 
-                arrterm.push([termID, termName, termCode]);
+                arrterm.push([termID, termName, termCode, hasImage]);
             }
 
             //sort by name
@@ -1842,6 +1846,7 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                 termID = arrterm[i][0];
                 termName = arrterm[i][1];
                 termCode = arrterm[i][2];
+                hasImage = arrterm[i][3];
 
                 if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
                     //for non mozilla add manual indent
@@ -1878,6 +1883,10 @@ if (! top.HEURIST.util) top.HEURIST.util = {
                         termName == defaultTermID) {
                         opt.selected = true;
                     }
+                    
+                    if(!isDisabled){
+                        hasTermImage = hasTermImage || hasImage;
+                    }
 
                     if(optgroup==null){
                         selObj.appendChild(opt);
@@ -1900,6 +1909,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
 
         createSubTreeOptions(null, 0,termIDTree, termLookup, defaultTermID);
         if (!defaultTermID) selObj.selectedIndex = 0;
+        if(hasTermImage){
+            selObj['data-images'] = 'hasImages';
+        }
+        
+        
         return selObj;
     },
 

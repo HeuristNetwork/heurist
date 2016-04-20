@@ -2706,8 +2706,8 @@ console.log('heurist not defined');
         }
 
         var newInput = top.HEURIST.util.createTermSelectExt(allTerms, disabledTerms,
-            this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
-            (bdValue && bdValue.value ? bdValue.value : null), true);
+                                this.detailType[dtyFieldNamesToDtIndexMap['dty_Type']],
+                                (bdValue && bdValue.value ? bdValue.value : null), true);
 
         this.addInputHelper.call(this, bdValue, newInput);
         newInput.style.width = "auto";
@@ -2717,10 +2717,10 @@ console.log('heurist not defined');
             this.inputCell.removeChild(this.linkSpan);
             this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
         }
-        /*if(this.selectSpan){
+        if(this.selectSpan){
             this.inputCell.removeChild(this.selectSpan);
             this.inputCell.insertBefore(this.selectSpan, this.linkSpan?this.linkSpan:this.promptDiv);
-        }*/
+        }
 
         return newInput;
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
@@ -2753,6 +2753,8 @@ console.log('heurist not defined');
 
         urlSpan.thisElement = this;
         urlSpan.bdValue = bdValue;
+        
+        var thisRef = this;
 
         //open selectTerms to update detailtype
         urlSpan.onclick = function() {
@@ -2771,8 +2773,16 @@ console.log('heurist not defined');
                     _element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_FilteredJsonTermIDTree']] = editedTermTree;
                     _element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] = editedDisabledTerms;
 
-                    _element.recreateSelector(_bdValue, true);
+                    newInput = _element.recreateSelector(_bdValue, true);
 
+                    if(newInput['data-images']=='hasImages'){
+                        thisRef.selectSpan.style.visibility = 'visible';
+                        thisRef.selectSpan.style.width = '60px';
+                    }else{
+                        thisRef.selectSpan.style.visibility = 'hidden';
+                        thisRef.selectSpan.style.width = '0px';
+                    }
+                    
                     /* update hidden fields  TODO: deprecated? do we need this any more?
                     Dom.get("dty_JsonTermIDTree").value = editedTermTree;
                     Dom.get("dty_TermIDTreeNonSelectableIDs").value = editedDisabledTerms;
@@ -2891,8 +2901,15 @@ console.log('heurist not defined');
             //br = this.document.createElement("br");
             //this.inputCell.insertBefore(br, newInput);
         }
-
+        
         this.createSelectTermsByImage(newInput);
+        if(newInput['data-images']=='hasImages'){
+            this.selectSpan.style.visibility = 'visible';
+            this.selectSpan.style.width = '60px';
+        }else{
+            this.selectSpan.style.visibility = 'hidden';
+            this.selectSpan.style.width = '0px';
+        }
         if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
         this.createSpanLinkTerms();

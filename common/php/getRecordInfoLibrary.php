@@ -534,7 +534,8 @@ function updateTermData() {
 function getTermColNames() {
     return array("trm_ID", "trm_Label", "trm_InverseTermID", "trm_Description", "trm_Status", "trm_OriginatingDBID",
         //					"trm_NameInOriginatingDB",
-        "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", "trm_ConceptID");
+        "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", "trm_ParentTermID", "trm_Depth", 
+        "trm_Modified", "trm_LocallyModified", "trm_Code", "trm_ConceptID");
 }
 /**
 * get term structure with trees from relation and enum domains
@@ -563,9 +564,16 @@ function getTerms($useCachedData = false) {
     }
     $query.= " from defTerms order by trm_Domain, trm_Label";
     $res = mysql_query($query);
-    $terms = array('termsByDomainLookup' => array('relation' => array(), 'enum' => array()), 'commonFieldNames' => array_slice(getTermColNames(), 1), 'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(), 1)));
+    $terms = array('termsByDomainLookup' => array('relation' => array(), 'enum' => array()), 
+        'commonFieldNames' => array_slice(getTermColNames(), 1), 
+        'fieldNamesToIndex' => getColumnNameToIndex(array_slice(getTermColNames(), 1)));
+    $terms['fieldNamesToIndex']['trm_Image'] = count($terms['commonFieldNames']);
+    array_push($terms['commonFieldNames'],'trm_Image');
+        
     while ($row = mysql_fetch_row($res)) {
         $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
+        $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$row[0].'.png';
+        array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], file_exists($filename));
     }
     $terms['treesByDomain'] = array('relation' => getTermTree("relation", "prefix"), 'enum' => getTermTree("enum", "prefix"));
     setCachedData($cacheKey, $terms);
