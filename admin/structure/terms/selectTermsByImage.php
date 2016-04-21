@@ -62,9 +62,9 @@
                  window.close(name);
             }
         </script>
-        <div class="actionButtons" style="position:absolute; right:10px; top:4px">
+        <!-- div class="actionButtons" style="position:absolute; right:10px; top:4px">
                 <input type="button" value="Close window" onClick="closewin()">
-        </div>
+        </div -->
         <div style="margin-bottom:30px;">
 <?php
 //get list of files
@@ -85,7 +85,7 @@
         
     foreach ($files as $id){
                 print '<div style="display:inline-block;text-align:center;padding:4px;margin:4px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);">';
-                print '<a href="#" onclick="onImageSelect(\"'.$id.'\")">';
+                print '<a href="#" onclick="onImageSelect('.$id.')">';
                 
                 print '<img height="'.$dim.'" '
                 .'src="'.HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.HEURIST_DBNAME.'&ent=term&id='.$id.'"/></a>'

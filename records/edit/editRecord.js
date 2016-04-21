@@ -2674,6 +2674,9 @@ console.log('heurist not defined');
             for (i = 0; i < this.inputs.length; i++) {
                 parent.removeChild(this.inputs[i]); //this.inputs.shift()
             }
+            
+            $(parent).find('a[id^="term_by_image"]').remove();
+            
             this.inputs = [];
         }
 
@@ -2717,11 +2720,14 @@ console.log('heurist not defined');
             this.inputCell.removeChild(this.linkSpan);
             this.inputCell.insertBefore(this.linkSpan, this.promptDiv);
         }
+        
+        this.createSelectTermsByImage(newInput);
+/*        
         if(this.selectSpan){
             this.inputCell.removeChild(this.selectSpan);
             this.inputCell.insertBefore(this.selectSpan, this.linkSpan?this.linkSpan:this.promptDiv);
         }
-
+*/
         return newInput;
     } // top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.recreateSelector
 
@@ -2774,14 +2780,6 @@ console.log('heurist not defined');
                     _element.recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_TermIDTreeNonSelectableIDs']] = editedDisabledTerms;
 
                     newInput = _element.recreateSelector(_bdValue, true);
-
-                    if(newInput['data-images']=='hasImages'){
-                        thisRef.selectSpan.style.visibility = 'visible';
-                        thisRef.selectSpan.style.width = '60px';
-                    }else{
-                        thisRef.selectSpan.style.visibility = 'hidden';
-                        thisRef.selectSpan.style.width = '0px';
-                    }
                     
                     /* update hidden fields  TODO: deprecated? do we need this any more?
                     Dom.get("dty_JsonTermIDTree").value = editedTermTree;
@@ -2843,8 +2841,19 @@ console.log('heurist not defined');
 
     top.HEURIST.edit.inputs.BibDetailDropdownInput.prototype.createSelectTermsByImage = function(selector){
 
+        if(selector['data-images']!='hasImages'){
+            return;
+        }
+        /*
+            this.selectSpan.style.display = 'inline-block';
+        }else{
+            this.selectSpan.style.display = 'none';
+        }*/
+        
+        
         var urlSpan = this.document.createElement("a");
         //urlSpan.style.paddingLeft = "1em";
+        urlSpan.id = 'term_by_image'+this.inputs.length;
         urlSpan.style.color = "blue";
         //        urlSpan.style['float'] = "right";
         urlSpan.style.cursor = "pointer";
@@ -2869,8 +2878,8 @@ console.log('heurist not defined');
                     "admin/structure/terms/selectTermsByImage.php?db="+db+"&ids="+allTerms.join(','),
                     {
                         "close-on-blur": false,
-                        "no-resize": true,
-                        height: 280,
+                        "no-resize": false,
+                        height: 320,
                         width: 650,
                         title:'Select Term',
                         callback: function(context) {
@@ -2902,14 +2911,6 @@ console.log('heurist not defined');
             //this.inputCell.insertBefore(br, newInput);
         }
         
-        this.createSelectTermsByImage(newInput);
-        if(newInput['data-images']=='hasImages'){
-            this.selectSpan.style.visibility = 'visible';
-            this.selectSpan.style.width = '60px';
-        }else{
-            this.selectSpan.style.visibility = 'hidden';
-            this.selectSpan.style.width = '0px';
-        }
         if(this.inputs.length>1 || !top.HEURIST.is_admin()) {return newInput}  //only one edit link and if admin
 
         this.createSpanLinkTerms();
