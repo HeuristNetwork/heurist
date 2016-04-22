@@ -319,7 +319,9 @@ function editRecordType(){
     //var document = top.document;
 
     if(top.HEURIST.edit.is_something_chnaged()){
-            var message = "You have unsaved changes in this record.\nClick OK to save changes and modify structure.";
+            var message = "Click OK to save changes and modify the record structure.\n"
++"If you are unable to save changes, click Cancel and open\n"
++"structure modification in a new tab (icon on the right of the link)";
             if (confirm(message)) {
                 top.HEURIST.edit.save_record(editRecordType);
             }

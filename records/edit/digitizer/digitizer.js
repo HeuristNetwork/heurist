@@ -1499,7 +1499,20 @@ function searchAddress(address) {
         // && markerShape==null
         if(toolID == 5) drawPointMarker(pos);  
       } else {
-        alert("Geocode was not successful for the following reason: " + status);
+          if(status=='ZERO_RESULTS'){
+              
+           
+            var el = document.createElement("div");
+             el.setAttribute("style","position:absolute;padding:10px;background-color:#ccc;border:1px solid gray;"); //position:absolute;top:40%;left:20%;
+             el.innerHTML = 'Sorry, address not found';
+             setTimeout(function(){
+              el.parentNode.removeChild(el);
+             },2000);
+             $(el).position({ my: "right top", at: "right bottom", of:$('#btnGeocode') });
+             document.body.appendChild(el);              
+          }else{
+            alert("Geocode was not successful for the following reason: " + status);      
+          }
       }
   });
 }

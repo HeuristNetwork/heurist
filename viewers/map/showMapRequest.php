@@ -517,27 +517,27 @@ function parseValueFromDb($recId, $type, $geovalue, $bbox)
 
     switch ($val[1]) {
         case "p":
-            if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $val[2], $matches)) {
+            if (preg_match("/POINT\s?\((\\S+)\\s+(\\S+)\\)/i", $val[2], $matches)) {
                 $res = array("bibID" => $val[0], "type" => "point", "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2])));
             }
             break;
 
         case "r":
-            if (preg_match("/POLYGON\\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $val[2], $matches)) {
+            if (preg_match("/POLYGON\s?\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $val[2], $matches)) {
                 $res = array("bibID" => $val[0], "type" => "rect",
                     "geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]), "x1" => floatval($matches[5]), "y1" => floatval($matches[6]), "bounds" => $bbox));
             }
             break;
 
         case "c":
-            if (preg_match("/LINESTRING\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $val[2], $matches)) {
+            if (preg_match("/LINESTRING\s?\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $val[2], $matches)) {
                 $res = array("bibID" => $val[0], "type" => "circle",
                     "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]), "radius" => floatval($matches[3] - $matches[1]), "bounds" => $bbox));
             }
             break;
 
         case "pl":
-            if (! preg_match("/POLYGON\\(\\((.+)\\)\\)/i", $val[2], $matches)) return null;
+            if (! preg_match("/POLYGON\s?\(\\((.+)\\)\\)/i", $val[2], $matches)) return null;
             if (! preg_match_all("/\\S+\\s+\\S+(?:,|$)/", $matches[1], $matches)) return null;
             $matches = $matches[0];
 
@@ -551,7 +551,7 @@ function parseValueFromDb($recId, $type, $geovalue, $bbox)
 
         case "l":
 
-            if (! preg_match("/LINESTRING\\((.+)\\)/i", $val[2], $matches)) return null;
+            if (! preg_match("/LINESTRING\s?\((.+)\\)/i", $val[2], $matches)) return null;
             if (! preg_match_all("/\\S+\\s+\\S+(?:,|$)/", $matches[1], $matches)) return null;
 
             $matches = $matches[0];

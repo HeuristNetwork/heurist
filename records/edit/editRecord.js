@@ -1749,7 +1749,8 @@ console.log('heurist not defined');
                         {picker: $.calendars.picker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-                showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" alt="Popup" class="trigger">'}
+                showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" '+
+                 'style="margin-left:10px" alt="Popup" class="trigger">'}
             );            
                 
             return null;
@@ -3893,6 +3894,8 @@ console.log('heurist not defined');
             row.className = "input-row recommended";
             this.required = "optional";
         }
+        row.style['padding-top'] = '10px';
+        
         var headerCell = row.appendChild(this.document.createElement("div"));
         headerCell.className = "input-header-cell";
         headerCell.appendChild(this.document.createTextNode("URL"));
@@ -4038,14 +4041,13 @@ console.log('heurist not defined');
                 if(bdValue.file.thumbURL){
                     thumbUrl = bdValue.file.thumbURL;
                 }
-
             }
         }
 
         newDiv.className = top.HEURIST.util.isempty(valueVisible)? "file-resource-div empty" : "file-resource-div";
 
 
-        var thumbDiv = this.document.createElement("div");
+        var thumbDiv = newDiv.thumbDiv = this.document.createElement("div");
         thumbDiv.className = "thumbPopup";
         thumbDiv.style.backgroundImage = "url("+thumbUrl+")";
         thumbDiv.style.display = "none";
@@ -4199,6 +4201,13 @@ console.log('heurist not defined');
 
         element.className = top.HEURIST.util.isempty(hiddenValue)?"file-resource-div empty":"file-resource-div";
 
+        if(element.hiddenElt.value){
+            var filedata = top.HEURIST.util.expandJsonStructure(element.hiddenElt.value);
+            var thumbURL = filedata.URL.replace('/records/files/downloadFile.php','/common/php/resizeImage.php');
+            element.thumbDiv.style.backgroundImage = "url("+thumbURL+")";       
+        }
+        
+        
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
         if (windowRef.changed) windowRef.changed();
     };

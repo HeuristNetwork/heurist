@@ -707,7 +707,7 @@ input#tags:focus, .input-cell .in:focus, .input-cell .resource-title:focus, .in:
 	display:block !important;
 }
 .resource-div.empty {
-	background-image: url("../images/blue-down-triangle.png");
+	background-image: url("../images/blue-right-triangle.png");
 	background-position: 0 50%;
 	background-repeat: no-repeat;
 	display:block;

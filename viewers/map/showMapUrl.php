@@ -52,11 +52,11 @@
 	}
 
 	if($mapobjects && $mapobjects['cntWithGeo']>0){
-
+        
 		if(@$_REQUEST['width'] && @$_REQUEST['height']){
 			$size = $_REQUEST['width']."x".$_REQUEST['height'];
 		}else{
-			$size = "200x200";
+			$size = "300x300";
 		}
 
 		$url = "http://maps.google.com/maps/api/staticmap";
