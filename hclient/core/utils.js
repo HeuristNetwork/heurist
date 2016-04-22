@@ -331,7 +331,7 @@ top.HEURIST4.util = {
     * @todo 2 - kml
     * @todo 3 - OpenLayers
     */
-    parseCoordinates: function(type, wkt, format) {
+    parseCoordinates: function(type, wkt, format, google) {
 
         if(type==1 && typeof google.maps.LatLng != "function") {
             return null;

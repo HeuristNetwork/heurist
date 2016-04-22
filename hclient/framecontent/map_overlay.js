@@ -121,11 +121,14 @@ function _loadMapDocumentById(mapdocument_id) {
             }
 
             // Zoom to Bounds
-            var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
-            var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
-            var bounds = new google.maps.LatLngBounds(swBound, neBound);
+            var bounds = null;
+            if(doc.lat>=-90 && doc.lat<=90 && doc.long>=-180 && doc.long<=180  && doc.minorSpan>0){
+                var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
+                var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
+                bounds = new google.maps.LatLngBounds(swBound, neBound);
             
-            map.fitBounds(bounds);
+                map.fitBounds(bounds);
+            }
 
             // Map document layers
             var overlay_index = 1;
@@ -327,7 +330,7 @@ function _addLayerOverlay(bounds, layer, index) {
         }else if(source.rectypeID == RT_GEOTIFF_SOURCE) {
             // Map image file (non-tiled)
             console.log("MAP IMAGE FILE (non-tiled)");
-            addUntiledMapImageLayer(source, bounds, index);
+            if(!addUntiledMapImageLayer(source, bounds, index)) return;
 
         /** KML FILE OR SNIPPET */
         }else if(source.rectypeID == RT_KML_SOURCE) {
@@ -441,25 +444,20 @@ function addTiledMapImageLayer(source, bounds, index) {
 * @param source Source object
 */
 function addUntiledMapImageLayer(source, bounds, index) {
-    var overlay = {};
-
     // Image
-    if(source.sourceURL !== undefined) {
-        overlay = new HeuristOverlay(bounds, source.sourceURL, map);
-
-        overlay.visible = true;
-        // Set visibility
-        overlay.setVisibility = function(checked) {
-            this.visible = checked;
-            if(checked) {
-                overlay.setMap(map);
-            }else{
-                overlay.setMap(null);
-            }
-        }
+    if(source.files !== undefined && source.bounds) {
+        var imageURL = source.files[0];
+    
+        var image_bounds = top.HEURIST4.util.parseCoordinates('rect', source.bounds, 1, google);
+        
+        var overlay = new HeuristOverlay(image_bounds.bounds, imageURL, map);
+        
+        overlays[index] = overlay;
+        return true;
+    }else{
+        return false;
     }
-
-    overlays[index] = overlay;
+    
 
 }
 
@@ -532,7 +530,7 @@ function addKMLLayer(source, index) {
 */
 function addShapeLayer(source, index) {
     // File check
-    if(source.zipFile !== undefined) {
+    if(false && source.zipFile !== undefined) {
         // Zip file
         console.log("Zip file: " + source.zipFile);
 
@@ -1102,8 +1100,10 @@ var RT_KML_SOURCE = localIds['RT_KML_SOURCE']; //3-1014;
 var RT_SHP_SOURCE = localIds['RT_SHP_SOURCE']; //3-1017;
 var RT_MAPABLE_QUERY = localIds['RT_QUERY_SOURCE']; //3-1021;
 
-// delirium - to remove
 
+//
+// custom google map overlay
+//
 HeuristOverlay.prototype = new google.maps.OverlayView();
 /**
 * HeuristOverlay constructor
@@ -1120,7 +1120,19 @@ function HeuristOverlay(bounds, image, map) {
 
     // Explicitly call setMap on this overlay.
     this.setMap(map);
+    this.visible = true;
 }
+
+        // Set visibility
+HeuristOverlay.prototype.setVisibility = function(checked) {
+    this.visible = checked;
+    if(checked) {
+        this.setMap(map);
+    }else{
+        this.setMap(null);
+    }
+}
+
 
  /**
  * onAdd is called when the map's panes are ready and the overlay has been
@@ -1134,9 +1146,11 @@ HeuristOverlay.prototype.onAdd = function() {
     div.style.position = 'absolute';
 
     // Title
+    /*
     var span = document.createElement('span');
     span.innerHTML = "Title";
     div.appendChild(span);
+    */
 
     // Create the img element and attach it to the div.
     var img = document.createElement('img');
@@ -1182,7 +1196,7 @@ HeuristOverlay.prototype.onRemove = function() {
     this.div_.parentNode.removeChild(this.div_);
     this.div_ = null;
 };
-
+//end custom overlay
 
 
     /**

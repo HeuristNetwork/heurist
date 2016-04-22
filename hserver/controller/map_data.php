@@ -26,7 +26,7 @@ require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
 $recordWhere = "(not r.rec_FlagTemporary) and (not r.rec_NonOwnerVisibility='hidden') and ";
-$detailQuery = "SELECT * FROM recDetails rd WHERE rd.dtl_RecID=";
+$detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, AsWKT(dtl_Geo) as dtl_Geo FROM recDetails rd WHERE rd.dtl_RecID=";
 
 
 /**
@@ -185,7 +185,8 @@ function getRecordDetails($system, $record) {
             $type = $detail["dtl_DetailTypeID"];
             $value = $detail["dtl_Value"];
             $fileID = $detail["dtl_UploadedFileID"];
-
+            $geo_value = $detail["dtl_Geo"];
+            
             /* GENERAL */
             if($type == DT_SHORT_SUMMARY) {
                 // Description
@@ -302,7 +303,10 @@ function getRecordDetails($system, $record) {
             }else if(defined('DT_ZIP_FILE') && $type == DT_ZIP_FILE) {
                 // Zip file
                 $record->zipFile = getFileURL($system, $fileID);
-
+                
+            }else if(defined('DT_GEO_OBJECT') && $type == DT_GEO_OBJECT) {
+                // Zip file
+                $record->bounds = $geo_value;
             }
         }
     }
