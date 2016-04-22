@@ -48,6 +48,23 @@
             .success { font-weight: bold; color: green; margin-left: 3px; }
             .failure { font-weight: bold; color: red; margin-left: 3px; }
             .input-row div.input-header-cell {width:110px; vertical-align:baseline; min-width:110px;}
+            
+            .itemlist{
+                height:140px;
+                width:130px;
+                display:inline-block;
+                text-align:center;
+                padding:4px;margin:4px;
+                border:gray; 
+                border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);
+            }
+            .itemimage{
+                height:120px;
+                width:120px;
+                background-size: contain;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
         </style>
         <script>
             function closewin(context){
@@ -65,7 +82,7 @@
         <!-- div class="actionButtons" style="position:absolute; right:10px; top:4px">
                 <input type="button" value="Close window" onClick="closewin()">
         </div -->
-        <div style="margin-bottom:30px;">
+        <div style="margin-bottom:30px">
 <?php
 //get list of files
     $dim = 120; //always show icons  ($mode!=1) ?16 :64;
@@ -84,11 +101,12 @@
         
         
     foreach ($files as $id){
-                print '<div style="display:inline-block;text-align:center;padding:4px;margin:4px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);">';
-                print '<a href="#" onclick="onImageSelect('.$id.')">';
-                
-                print '<img height="'.$dim.'" '
-                .'src="'.HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.HEURIST_DBNAME.'&ent=term&id='.$id.'"/></a>'
+        print '<div class="itemlist" style="">';
+        print '<a href="#" onclick="onImageSelect('.$id.')">';
+                           // height="'.$dim.'" max-height:'.$dim.';
+        print '<img class="itemimage" style="background-image:url('
+                .HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.HEURIST_DBNAME.'&ent=term&id='.$id.')" '
+                .'src="'.HEURIST_BASE_URL.'common/images/200.gif"/></a>'
                 .'<br><label>'.$term_labels[$id].'</label></div>';
 //to avoid issues with access   print '<img height="'.$dim.'" src="'.HEURIST_FILESTORE_URL.'term-images/'.$id.'.png"/></a></div>';
     }
