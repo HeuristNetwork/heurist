@@ -134,14 +134,15 @@
             // check for type constraints
             var rectype = window.HEURIST.parameters["t"];
             var rtName;
+            var rectypes = [];
+
             if (rectype) {
-                var rectypes = {};
                 var recTypeName = "";
                 if (rectype.search(",") != -1) {//seems like we have multiple type constraint, test that it is well formed
                     var temp = rectype.split(",");
                     for (var i=0; i<temp.length; i++) {
-                        if (temp[i].search(/\D/) == -1) {
-                            rectypes[temp[i]] = 1;// add entry to lookup as 1 for truthy
+                        if (temp[i].search(/\D/) == -1) {   //numeric
+                            rectypes.push(temp[i]);// add entry to lookup as 1 for truthy
                             rtName = top.HEURIST.rectypes.names[temp[i]];
                             if(!top.HEURIST.util.isnull(rtName)){
                                 recTypeName += rtName.toLowerCase() + ",";
@@ -151,7 +152,7 @@
                     recTypeName = recTypeName.slice(0,-1); // remove the last comma
                     delete temp;
                 }else if (rectype.search(/\D/) == -1 && rectype.search(/\d/) != -1) {
-                    rectypes[rectype] = 1;// add entry to lookup as 1 for truthy
+                    rectypes = [rectype];// add entry to lookup as 1 for truthy
                     rtName = top.HEURIST.rectypes.names[rectype];
                     if(!top.HEURIST.util.isnull(rtName)){
                         recTypeName = rtName.toLowerCase();
@@ -160,7 +161,6 @@
                     rectypes = null;
                 }
             }
-
             /* If a rectype has been chosen then set a custom title -- need to do before onload so the popup code will catch it */
             if (recTypeName) {
                 document.title = "Select / create: " + recTypeName;
@@ -348,8 +348,8 @@
                 var searchScope = top.HEURIST.util.getDisplayPreference("record-search-scope");
                 var lastSelected = top.HEURIST.util.getDisplayPreference("record-search-last");
                 var lastSearchType = window.HEURIST.parameters["deft"]
-                ?window.HEURIST.parameters["deft"]
-                :top.HEURIST.util.getDisplayPreference("record-search-type");
+                            ?window.HEURIST.parameters["deft"]
+                            :top.HEURIST.util.getDisplayPreference("record-search-type");
                 var rectypeIDList = [];
                 //set focus
                 window.setTimeout(function() {
@@ -361,11 +361,8 @@
 
                 //get last selected rectype
                 var initialType = top.HEURIST.util.getDisplayPreference("record-search-type");
-                if (rectypes && !rectypes[initialType]) {//if preferred is not in constrained list choose first rectype
-                    for (var type in rectypes) {	// careful! this only runs once to get and then breaks out.
-                        initialType = type;
-                        break;
-                    }
+                if (!initialType && rectypes.length>0) {//if preferred is not in constrained list choose first rectype
+                    initialType = rectypes[0];
                 }
 
                 //create rectype selector and set intial selection
@@ -411,7 +408,8 @@
                     }
                 }else{ // pointer constrained to rectypes - ignore showTypes
                     var isNotFound = true;
-                    for (var rectypeID in rectypes) {
+                    for (var idx=0; idx<rectypes.length; idx++) {
+                        var rectypeID = rectypes[idx];
                         var name = top.HEURIST.rectypes.names[rectypeID];
                         if(!top.HEURIST.util.isnull(name))
                         {
@@ -437,7 +435,7 @@
                     document.forms[0].elements["q"].value = qVal;
                     document.getElementById("r-all").checked = true;
                 }else{//new record
-                    if(lastSearchType){
+                    if(false && lastSearchType){
                         document.getElementById("t").value = lastSearchType;
                     }
                     document.getElementById(searchScope).checked = true;
