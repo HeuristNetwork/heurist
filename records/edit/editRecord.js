@@ -1940,7 +1940,8 @@ console.log('heurist not defined');
         this.promptDiv.innerHTML = helpPrompt;
 
         this.inputs = [];
-        var defaultValue = (top.HEURIST.edit.isAdditionOfNewRecord()?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]:"");
+        var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
+        var defaultValue = ((windowRef.parent.HEURIST.edit.record.recID>0)?'':recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]);
 
         if (true || this.repeatable=== true) {    //  saw TODO adjust this code for Cardinality , pass in max number and flag red after max
             for (var i=0; i < fieldValues.length; ++i) {
