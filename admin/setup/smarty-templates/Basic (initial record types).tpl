@@ -8,7 +8,7 @@
 
 <i><pre>
      Please use this as an example from which to create your own reports, by copying this template.<br/>
-     To do this, choose <b>Edit Template</b> from the pulldown menu at top right, then click the <b>Save As</b> button.<br/>
+     To do this, choose <b>Edit</b> (first button at top right), then click the <b>Save As</b> button.<br/>
      As you edit, hit the <b>Test</b> button repeatedly to see how your changes are working.<br/>
      Ctrl-Z will undo most recent change - can be repeated to backtrack through changes.<br/>
 </pre></i>
