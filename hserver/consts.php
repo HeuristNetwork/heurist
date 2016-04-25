@@ -261,10 +261,11 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_THUMB_IMAGE_URL' => array(70, 606), // deprecated
     // Map document
     'DT_MAP_LAYER' => array(3, 1081),
-    'DT_TOP_MAP_LAYER' => array(3, 1096),
-    'DT_LONGITUDE_CENTREPOINT' => array(3, 1074),
-    'DT_LATITUDE_CENTREPOINT' => array(3, 1075),
-    'DT_MINOR_SPAN' => array(3, 1076),
+    'DT_TOP_MAP_LAYER' => array(3, 1096),           //deprecated
+    'DT_LONGITUDE_CENTREPOINT' => array(3, 1074),   //deprecated
+    'DT_LATITUDE_CENTREPOINT' => array(3, 1075),    //deprecated
+    'DT_MINOR_SPAN' => array(3, 1076),              //deprecated
+    'DT_MAP_BOOKMARK' => array(3, 1082),
     // Map layer
     'DT_DATA_SOURCE' => array(3, 1083),
     'DT_MINIMUM_ZOOM' => array(3, 1085),

@@ -21,7 +21,6 @@
 //ARTEM:   @todo JJ calls server side directly - need to fix - use hapi!!!!!
 //
 // move all these methods into hMapping class or create new one
-// rename div legend to map_legend
 
 
 /**
@@ -37,6 +36,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     var map; //google map
     var map_data;                  // all map documents/layer/dataset related info
     var overlays = {};             // layers in current map document
+    var map_bookmarks = [];        // geo and time extents
     var overlays_not_in_doc = {};  // main layers(current query) and layers added by user/manually
     var loadingbar = null;         // progress bar - overlay on map 
     var $dlg_edit_layer = null;
@@ -64,6 +64,11 @@ function _loadMapDocuments(startup_mapdocument) {
             ele.append("<option value='-1'>"+(map_data.length>0?'select...':'none available')+"</option>");
             for(var i = 0; i < map_data.length; i++) {
                 ele.append("<option value='"+map_data[i].id+"'>"+map_data[i].title+"</option>"); //["+map_data[i].id+"]
+
+                if(map_data[i].bookmarks==null){
+                    map_data[i].bookmarks = [];
+                }
+                map_data[i].bookmarks.push([top.HR('World'),-180,180,-40,80,1800,2050]); //default
             }
 
             // select listener - load map documents
@@ -101,6 +106,10 @@ function _loadMapDocumentById(mapdocument_id) {
 
         // Clean old data
         _removeMapDocumentOverlays();
+        var selBookmakrs = document.getElementById('selMapBookmarks');
+        $(selBookmakrs).empty();
+        $('#map_extents').hide();
+                        
         
         //find mapdoc data
         var index = -1;
@@ -115,20 +124,96 @@ function _loadMapDocumentById(mapdocument_id) {
         var btnMapEdit = $("#btnMapEdit");
         if(index >= 0) {
             var doc = map_data[index];
-            //show info popup
-            if(!top.HEURIST4.util.isempty( doc['description']) ){
-                top.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, true);
+            
+            var bounds = null, err_msg_all = '';
+            
+            map_bookmarks = [];
+            top.HEURIST4.ui.addoption(selBookmakrs, -1, 'bookmarks...');
+            
+            for(var i=0;i<doc.bookmarks.length;i++){
+                
+                var bookmark = doc.bookmarks[i];
+                var err_msg = '';
+                
+                if(bookmark.length<5){
+                    err_msg = 'no enough parameters';
+                }else{
+                
+                    var x1 = _validateCoord(bookmark[1],false); 
+                    if(isNaN(x1)) err_msg = x1;
+                    var x2 = _validateCoord(bookmark[2],false);
+                    if(isNaN(x2)) err_msg = x1;
+                    var y1 = _validateCoord(bookmark[3],true);
+                    if(isNaN(y1)) err_msg = x1;
+                    var y2 = _validateCoord(bookmark[4],true);
+                    if(isNaN(y2)) err_msg = x1;
+                    
+                    var tmin = null, tmax = null, dres = null;
+                    
+                    if(err_msg==''){
+                    
+                        if(x1>x2 || y1>y2){
+                            err_msg = 'coordinates are inverted';    
+                        }else{
+                            if(bookmark.length>6){
+                                dres = top.HEURIST4.util.parseDates(bookmark[5], bookmark[6]);
+                            }
+                            if(dres!==null){
+                                tmin = dres[0];
+                                tmax = dres[1];
+                                //dres = top.HEURIST4.util.parseDates(1800,2050);
+                            }
+                        }
+                    }
+                
+                }
+                
+                if(err_msg!=''){
+                    err_msg_all = err_msg_all + '<br>"' + bookmark.join(',')+'"  - '+err_msg;
+                    continue;
+                }
+                
+                var swBound = new google.maps.LatLng(y1, x1);
+                var neBound = new google.maps.LatLng(y2, x2);
+                bounds = new google.maps.LatLngBounds(swBound, neBound);
+                
+                top.HEURIST4.ui.addoption(selBookmakrs, map_bookmarks.length, bookmark[0]?bookmark[0]:'Extent '+(map_bookmarks.length+1));
+                
+                map_bookmarks.push({extent:bounds, tmin:tmin, tmax:tmax});
+                
+                if(i==doc.bookmarks.length-2 && map_bookmarks.length>0){
+                    break; //skip last default bookmark if user define its own extents
+                }
+            }//for
+            if(err_msg_all!=''){
+                top.HEURIST4.msg.showMsgErr('<div>Map zoom bookmark is not interpretable, set to xmin,xmax,ymin,ymax,tmin,tmax</div><br>Contains:'
+                +err_msg_all
+                +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map zoom bookmark following the instructions in the field help.</div>'
+                );
+            }else{
+                //show info popup
+                var lt = top.HAPI4.sysinfo['layout'];
+                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
+                    if(!top.HEURIST4.util.isempty( doc['description']) ){
+                        top.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], null, false);
+                    }
+                }
             }
 
-            // Zoom to Bounds
-            var bounds = null;
-            if(doc.lat>=-90 && doc.lat<=90 && doc.long>=-180 && doc.long<=180  && doc.minorSpan>0){
-                var swBound = new google.maps.LatLng(doc.lat-doc.minorSpan, doc.long-doc.minorSpan);
-                var neBound = new google.maps.LatLng(doc.lat+doc.minorSpan, doc.long+doc.minorSpan);
-                bounds = new google.maps.LatLngBounds(swBound, neBound);
             
-                map.fitBounds(bounds);
+               
+            var selBookmakrs = document.getElementById('selMapBookmarks')                  
+            selBookmakrs.onchange = function(){
+                var val = $(selBookmakrs).val();
+                if(val>=0){
+                    map.fitBounds(map_bookmarks[val]['extent']);    
+                    if(map_bookmarks[val]['tmin']!=null)
+                        mapping.timelineZoomToRange(map_bookmarks[val]['tmin'],map_bookmarks[val]['tmax']);
+                }
             }
+            $('#map_extents').show();
+            selBookmakrs.selectedIndex = 1;
+            $(selBookmakrs).change();
 
             // Map document layers
             var overlay_index = 1;
@@ -152,13 +237,27 @@ function _loadMapDocumentById(mapdocument_id) {
 
 }
 
+//
+//
+function _validateCoord(value, islat){
+    var crd = Number(value);
+    if(isNaN(crd)){
+      return value+" is not number value";
+    }else if(!islat && Math.abs(crd)>180){
+      return value+" is wrong longitude value";
+    }else if(islat && Math.abs(crd)>90){
+      return value+" is wrong latitude value";
+    }
+    return crd;
+}
+
 /**
 * Removes all overlays that are in map document (layers added manually remain in the legend and on map)
 * it is invoked on map document load only
 */
 function _removeMapDocumentOverlays() {
     
-    var legend_content = $("#legend .content");
+    var legend_content = $("#map_legend .content");
     
     for(var idx in overlays) {
         _removeOverlayById(idx);
@@ -206,10 +305,9 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_la
             + warning
             + '</div>';
        
-       
     legenditem = $(legenditem);
             
-    var legend_content = $("#legend .content");    
+    var legend_content = $("#map_legend .content");    
             
     if(ontop){
         legend_content.prepend(legenditem);
@@ -300,9 +398,9 @@ function _showHideLayer(event){
 //
 function _initLegendListeners() {
         if(Object.keys(overlays_not_in_doc).length + Object.keys(overlays).length>0){
-            $("#legend").show();
+            $("#map_legend").show();
         }else{
-            $("#legend").hide();
+            $("#map_legend").hide();
         }
 }
 
@@ -311,8 +409,8 @@ function _initLegendListeners() {
 * @param layer Layer object
 */
 function _addLayerOverlay(bounds, layer, index) {
-    console.log("_addLayerOverlay");
-    console.log(layer);
+    //console.log("_addLayerOverlay");
+    //console.log(layer);
 
     // Determine way of displaying
     if(layer !== undefined && layer.dataSource !== undefined) {
@@ -815,7 +913,7 @@ function _addRecordsetLayer(source, index) {
                         for (idx in this.dependent_layers){
                             var mapdata_id = this.dependent_layers[idx].key;
                             mapping.showDataset(mapdata_id, checked);
-                            var cb = $("#legend .content").find('input[data-mapdataid="'+mapdata_id+'"]');
+                            var cb = $("#map_legend .content").find('input[data-mapdataid="'+mapdata_id+'"]');
                             if(cb.length>0){
                                 cb.prop('checked',checked);
                             }
@@ -850,7 +948,7 @@ function _addRecordsetLayer(source, index) {
                     }
                     
                     overlays_not_in_doc[source.id] = overlay;
-                    var legenditem = $("#legend .content").find('#'+source.id);
+                    var legenditem = $("#map_legend .content").find('#'+source.id);
                     if(legenditem.length>0) legenditem.remove();
 
                     //show custom query on top
@@ -893,7 +991,7 @@ function _removeOverlayById( overlay_id ){
     var overlay = ismapdoc ?overlays[overlay_id] :overlays_not_in_doc[overlay_id];
     if(!top.HEURIST4.util.isnull(overlay)){
         try {
-            $("#legend .content").find('#'+((ismapdoc)?'md-':'')+overlay_id).remove();
+            $("#map_legend .content").find('#'+((ismapdoc)?'md-':'')+overlay_id).remove();
 
             //overlay.setVisibility(false);
             if(overlay['removeOverlay']){  // hasOwnProperty
@@ -1004,12 +1102,12 @@ function _editLayerProperties( dataset_id, callback ){
                     
                     if(mapdata.title!=new_title){
                         mapdata.title = new_title;
-                        $("#legend .content").find('#'+mapdata.id+' label').html(new_title);
+                        $("#map_legend .content").find('#'+mapdata.id+' label').html(new_title);
                         //$('#timeline > div > div.vis-panel.vis-left > div.vis-content > div > div:nth-child(2) > div
                         $('#timeline div[data-groupid="'+mapdata.id+'"]').html(new_title);
                     }
                     if(mapdata.color!=new_color){
-                        $("#legend .content").find('#'+mapdata.id+'>div').css('border-color',new_color);
+                        $("#map_legend .content").find('#'+mapdata.id+'>div').css('border-color',new_color);
                     }
                     
                     var idx;
@@ -1206,11 +1304,11 @@ HeuristOverlay.prototype.onRemove = function() {
 
         mapping = _mapping;
         map = _mapping.getNativeMap();
-        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('legend'));
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('map_legend'));
         // Legend collapse listener
         $("#collapse").click(function(e) {
             $(this).text() == "-" ? $(this).text("+") : $(this).text("-");  // Update text to + or -
-            $("#legend .content").toggle(400);
+            $("#map_legend .content").toggle(400);
         });
         
         _loadMapDocuments(startup_mapdocument_id);

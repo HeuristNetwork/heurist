@@ -504,6 +504,67 @@ top.HEURIST4.util = {
         return (format==0)?shape:{bounds:bounds, points:points};
     },//end parseCoordinates
 
+    // @todo change temporal to moment.js for conversion
+    parseDates: function(start, end){
+         if(window['Temporal'] && start){   
+                //Temporal.isValidFormat(start)){
+                
+                            // for VISJS timeline
+                            function __forVis(dt){
+                                if(dt){
+                                    var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
+                                    if(res.indexOf('-')==0){ //BCE
+                                        res = res.substring(1);
+                                        res = '-'+('000000'+res).substring(res.length);
+                                    }
+                                    return res;
+                                }else{
+                                    return '';
+                                }
+                                
+                            }    
+                
+                
+                            try{
+                                var temporal;
+                                if(typeof start==="String" && start.search(/VER=/)){
+                                    temporal = new Temporal(start);
+                                    if(temporal){
+                                        var dt = temporal.getTDate('PDB');  //probable begin
+                                        if(!dt) dt = temporal.getTDate('TPQ');
+                                        
+                                        if(dt){ //this is range - find end date
+                                            var dt2 = temporal.getTDate('PDE'); //probable end
+                                            if(!dt2) dt2 = temporal.getTDate('TAQ');
+                                            end = __forVis(dt2);
+                                        }else{
+                                            dt = temporal.getTDate('DAT');  //simple date
+                                        }
+                                        
+                                        if(dt){
+                                            start = __forVis(dt);
+                                        }else{
+                                            return null;
+                                        }
+                                    }
+                                }
+                                if(start!="" && typeof end==="String"  && end.search(/VER=/)){
+                                    temporal = new Temporal(end);
+                                    if(temporal){
+                                        var dt = temporal.getTDate('PDE'); //probable end
+                                        if(!dt) dt = temporal.getTDate('TAQ');
+                                        if(!dt) dt = temporal.getTDate('DAT');
+                                        end = __forVis(dt);
+                                    }
+                                }
+                            }catch(e){
+                                return null;
+                            }
+                            return [start, end];
+         }
+         return null;
+   },    
+    
     //
     // Get CSS property value for a not yet applied class
     //

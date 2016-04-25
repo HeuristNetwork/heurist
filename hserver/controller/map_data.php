@@ -178,6 +178,9 @@ function getRecordDetails($system, $record) {
     $query = $detailQuery . $record->id;
     $details = $system->get_mysqli()->query($query);
     if($details) {
+        
+        $record->bookmarks = array();
+        
         // [dtl_ID]  [dtl_RecID]  [dtl_DetailTypeID]  [dtl_Value] [dtl_AddedByImport]  [dtl_UploadedFileID]   [dtl_Geo]  [dtl_ValShortened]  [dtl_Modified]
         while($detail = $details->fetch_assoc()) {
             // Fields
@@ -222,6 +225,9 @@ function getRecordDetails($system, $record) {
                 }
                 array_push($record->layers, getDetailedRecord($system, $value));
 
+            }else  if(defined('DT_MAP_BOOKMARK') && $type == DT_MAP_BOOKMARK) {
+                //string in format <xmin>,<xmax>,<ymin>,<ymax>,<tmin>,<tmax>
+                array_push($record->bookmarks, explode(',', $value));
 
                 /* LOCATION */
             }else  if(defined('DT_LONGITUDE_CENTREPOINT') && $type == DT_LONGITUDE_CENTREPOINT) {

@@ -354,7 +354,9 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
     }
 
     function _timelineZoomToRange(range){
-
+                                                        
+            if(!(range && range.min  && range.max && vis_timeline)) return;
+        
             var min = vis_timeline.getDate(range.min), // new Date(range.min).getTime(),
                 max = vis_timeline.getDate(range.max); //new Date(range.max).getTime();
             var delta = 0;
@@ -463,7 +465,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                     vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
 
-            _timelineZoomToRange({min:vis_timeline_range.min.getTime(), max:vis_timeline_range.min.getTime()+interval, nofit:true})
+            _timelineZoomToRange({min:vis_timeline_range.min.getTime(), max:vis_timeline_range.min.getTime()+interval, nofit:true});
         }
 
         function __timelineMoveToRight(){
@@ -475,7 +477,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                     vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
 
-            _timelineZoomToRange({min:vis_timeline_range.max.getTime()-interval+delta, max:vis_timeline_range.max.getTime()+delta, nofit:true})
+            _timelineZoomToRange({min:vis_timeline_range.max.getTime()-interval+delta, max:vis_timeline_range.max.getTime()+delta, nofit:true});
         }
 
 
@@ -1589,6 +1591,10 @@ ed_html +
             if(vis_timeline){
                   vis_timeline.setOptions( {minHeight: $("#"+timelinediv_id).height()} );
             }
+        },
+        
+        timelineZoomToRange: function(tmin, tmax){
+            _timelineZoomToRange({min:tmin, max:tmax, nofit:true});
         },
 
         getNativeMap: function(){

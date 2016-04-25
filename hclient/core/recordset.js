@@ -160,7 +160,7 @@ function hRecordSet(initdata) {
                 }
 
                 //need to verify date and convert from                        
-                 var dres = _parseDates(startDate, endDate);
+                 var dres = top.HEURIST4.util.parseDates(startDate, endDate);
                  if(dres){
                         
                         if(timeenabled<MAXITEMS){
@@ -273,66 +273,7 @@ function hRecordSet(initdata) {
         return dataset;
     }//end _toTimemap
 
-   // @todo change temporal to moment.js for conversion
-   function _parseDates(start, end){
-         if(window['Temporal'] && start){   
-                //Temporal.isValidFormat(start)){
-                
-                            // for VISJS timeline
-                            function __forVis(dt){
-                                if(dt){
-                                    var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
-                                    if(res.indexOf('-')==0){ //BCE
-                                        res = res.substring(1);
-                                        res = '-'+('000000'+res).substring(res.length);
-                                    }
-                                    return res;
-                                }else{
-                                    return '';
-                                }
-                                
-                            }    
-                
-                
-                            try{
-                                var temporal;
-                                if(start && start.search(/VER=/)){
-                                    temporal = new Temporal(start);
-                                    if(temporal){
-                                        var dt = temporal.getTDate('PDB');  //probable begin
-                                        if(!dt) dt = temporal.getTDate('TPQ');
-                                        
-                                        if(dt){ //this is range - find end date
-                                            var dt2 = temporal.getTDate('PDE'); //probable end
-                                            if(!dt2) dt2 = temporal.getTDate('TAQ');
-                                            end = __forVis(dt2);
-                                        }else{
-                                            dt = temporal.getTDate('DAT');  //simple date
-                                        }
-                                        
-                                        if(dt){
-                                            start = __forVis(dt);
-                                        }else{
-                                            return null;
-                                        }
-                                    }
-                                }
-                                if(start!="" && end && end.search(/VER=/)){
-                                    temporal = new Temporal(end);
-                                    if(temporal){
-                                        var dt = temporal.getTDate('PDE'); //probable end
-                                        if(!dt) dt = temporal.getTDate('TAQ');
-                                        if(!dt) dt = temporal.getTDate('DAT');
-                                        end = __forVis(dt);
-                                    }
-                                }
-                            }catch(e){
-                                return null;
-                            }
-                            return [start, end];
-         }
-         return null;
-   }
+
    
     // some important id for record and detail types in local values
     var RT_RELATION = top.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1

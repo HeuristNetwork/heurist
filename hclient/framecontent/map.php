@@ -104,7 +104,6 @@ require_once(dirname(__FILE__)."/initPage.php");
     .vis-item-bbox{
         background-color:lightgray;
     }
-
 </style>
 
 <!-- Initializing -->
@@ -478,9 +477,10 @@ require_once(dirname(__FILE__)."/initPage.php");
             </select>-->
 
             <!-- Legend overlay -->
-            <div id="legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; display:none;">
+            <div id="map_legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; display:none;">
                 <span style="font-size: 1.25em">Legend</span>
                 <span id="collapse" style="font-size: 1.25em; float:right; padding: 0px 5px; cursor: pointer">-</span>
+                <div id="map_extents"  style="font-size: 0.9em;display:none;">Bookmarks:&nbsp;<select id="selMapBookmarks" style="font-size:1.0em;"></select></div>
                 <div class="content"></div>
             </div>
         </div>
