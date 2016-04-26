@@ -34,6 +34,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     
     
     var map; //google map
+    var current_map_document_id = 0;
     var map_data;                  // all map documents/layer/dataset related info
     var overlays = {};             // layers in current map document
     var map_bookmarks = [];        // geo and time extents
@@ -68,12 +69,13 @@ function _loadMapDocuments(startup_mapdocument) {
                 if(map_data[i].bookmarks==null){
                     map_data[i].bookmarks = [];
                 }
-                map_data[i].bookmarks.push([top.HR('World'),-180,180,-40,80,1800,2050]); //default
+                map_data[i].bookmarks.push([top.HR('World'),-90,90,-30,50,1800,2050]); //default
             }
 
             // select listener - load map documents
             ele.change(function(e) {
-                //var map_document_id = Number($(this).val());
+                if(current_map_document_id == $(this).val()) return;
+                current_map_document_id = $(this).val();
                 _loadMapDocumentById( null );
             });
             
@@ -104,6 +106,8 @@ function _loadMapDocumentById(mapdocument_id) {
             mapdocument_id = mapdocs.val();
         }
 
+        current_map_document_id = mapdocument_id;
+        
         // Clean old data
         _removeMapDocumentOverlays();
         var selBookmakrs = document.getElementById('selMapBookmarks');
@@ -219,7 +223,7 @@ function _loadMapDocumentById(mapdocument_id) {
             var overlay_index = 1;
             if(doc.layers.length > 0) {
                 for(var i = 0; i < doc.layers.length; i++) {
-                    _addLayerOverlay(bounds, doc.layers[i], overlay_index);
+                    _addLayerOverlay(bounds, doc.layers[i], overlay_index, true);
                     overlay_index++;
                 }
             }
@@ -268,16 +272,28 @@ function _removeMapDocumentOverlays() {
 //
 // dependent_layers -  dependent map layers  [{key :title}]
 //
-function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_layers, ontop){
+function _addLegendEntryForLayer(overlay_idx, title, rectypeID_or_color, dependent_layers, ontop){
 
     var overlay = null,
         legendid,
+        rectypeID = 0,
         ismapdoc = (overlay_idx>0);
+    var icon_bg;
         
         
     if (ismapdoc) {
         legendid = 'md-'+overlay_idx;
         overlay = overlays[overlay_idx];
+        rectypeID = rectypeID_or_color;
+        
+        icon_bg = ' style="background-image: ';
+        if(rectypeID==RT_SHP_SOURCE && overlay.visible){
+            icon_bg = icon_bg+'url('+top.HAPI4.basePathV4+'hclient/assets/loading-animation-white20.gif);'
+                    + 'background-position: center; background-repeat: no-repeat;"'            
+                    + ' data-icon="'+top.HAPI4.iconBaseURL + rectypeID + '.png"';
+        } else{
+            icon_bg = icon_bg+'url('+ top.HAPI4.iconBaseURL + rectypeID + '.png)"';
+        }
     }else{
         legendid = overlay_idx;
         overlay = overlays_not_in_doc[overlay_idx];
@@ -289,16 +305,17 @@ function _addLegendEntryForLayer(overlay_idx, title, icon_or_color, dependent_la
         warning = title.warning;
         title = title.title;
     }
-
+    
+    
     var legenditem = '<div style="display:block;padding:2px;" id="'
             + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
             + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
             + (overlay.visible?'checked="checked">':'>')
             + ((ismapdoc)
             ? ('<img src="'+top.HAPI4.basePathV4+'hclient/assets/16x16.gif"'
-                + ' align="top" class="rt-icon" '     
-                + ( (ismapdoc)?('style="background-image: url('+icon_or_color+');"'):'')+'>')
-            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+icon_or_color+'" />')
+                + ' align="top" class="rt-icon" ' + icon_bg     
+                + '>')
+            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+rectypeID_or_color+'" />')
             )
             + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
             + '</label>'
@@ -408,7 +425,7 @@ function _initLegendListeners() {
 * Adds an overlay for the Layer object
 * @param layer Layer object
 */
-function _addLayerOverlay(bounds, layer, index) {
+function _addLayerOverlay(bounds, layer, index, is_mapdoc) {
     //console.log("_addLayerOverlay");
     //console.log(layer);
 
@@ -428,12 +445,12 @@ function _addLayerOverlay(bounds, layer, index) {
         }else if(source.rectypeID == RT_GEOTIFF_SOURCE) {
             // Map image file (non-tiled)
             console.log("MAP IMAGE FILE (non-tiled)");
-            if(!addUntiledMapImageLayer(source, bounds, index)) return;
+            addUntiledMapImageLayer(source, bounds, index);
 
         /** KML FILE OR SNIPPET */
         }else if(source.rectypeID == RT_KML_SOURCE) {
             console.log("KML FILE or SNIPPET");
-            addKMLLayer(source, index);
+            addKMLLayer(source, index, is_mapdoc);
 
         /** SHAPE FILE */
         }else if(source.rectypeID == RT_SHP_SOURCE) {
@@ -446,10 +463,17 @@ function _addLayerOverlay(bounds, layer, index) {
             _addQueryLayer(source, index);
         }
         
-        if(source.rectypeID != RT_MAPABLE_QUERY)
-            _addLegendEntryForLayer(index, layer.title, top.HAPI4.iconBaseURL + source.rectypeID + '.png');
+        if(source.rectypeID != RT_MAPABLE_QUERY){
+            _addLegendEntryForLayer(index, layer.title, source.rectypeID);
+        }
         
     }
+}
+
+function _getStubOverlay(){
+    return {visible:true,
+            setVisibility:function(checked){},
+            removeOverlay: function(){}};
 }
 
 /**
@@ -543,7 +567,16 @@ function addTiledMapImageLayer(source, bounds, index) {
 */
 function addUntiledMapImageLayer(source, bounds, index) {
     // Image
-    if(source.files !== undefined && source.bounds) {
+    var msg = '';                   
+    if(top.HEURIST4.util.isempty(source.files) || top.HEURIST4.util.isempty(source.files[0])){
+        msg = 'Image file is not defined';
+    }else if(!source.bounds){        
+        msg = 'Image\'s extent is not defined';
+    }else if(source.files[0].endsWith('.tiff')||source.files[0].endsWith('.tif')){
+        msg = 'At this time the GMaps mapping component used does not support GeoTIFF.';
+    }
+    
+    if(msg=='') {
         var imageURL = source.files[0];
     
         var image_bounds = top.HEURIST4.util.parseCoordinates('rect', source.bounds, 1, google);
@@ -551,22 +584,26 @@ function addUntiledMapImageLayer(source, bounds, index) {
         var overlay = new HeuristOverlay(image_bounds.bounds, imageURL, map);
         
         overlays[index] = overlay;
-        return true;
     }else{
-        return false;
+        overlays[index] = _getStubOverlay();
+                           
+        top.HEURIST4.msg.showMsgErr('Map layer: '+source.title
+                +'<br>Unable to process this dataset. '+msg);
+        //Please check that the file or service specified is in one of the supported formats. 
     }
-    
-
 }
-
 
 
 /**
 * Adds a KML layer to the map
 * @param source Source object
 */
-function addKMLLayer(source, index) {
+function addKMLLayer(source, index, is_mapdoc) {
     var kmlLayer = {};
+    
+    if(is_mapdoc!==true){
+        is_mapdoc = false;
+    }
 
     // KML file
     if(source.files !== undefined) {
@@ -578,7 +615,7 @@ function addKMLLayer(source, index) {
         kmlLayer = new google.maps.KmlLayer({
             url: fileURL,
             suppressInfoWindows: true,
-            preserveViewport: false,
+            preserveViewport: is_mapdoc,
             map: map,
             status_changed: function(){
                 console.log('status: '+kmlLayer.getStatus());
@@ -594,7 +631,7 @@ function addKMLLayer(source, index) {
         // Display on Google Maps
         kmlLayer = new google.maps.KmlLayer(source.kmlSnippet, {
             suppressInfoWindows: true,
-            preserveViewport: false,
+            preserveViewport: is_mapdoc,
             map: map
         });
     }
@@ -627,29 +664,37 @@ function addKMLLayer(source, index) {
 * @param source Source object
 */
 function addShapeLayer(source, index) {
+    
+    overlays[index] = _getStubOverlay();
     // File check
     if(false && source.zipFile !== undefined) {
         // Zip file
         console.log("Zip file: " + source.zipFile);
-
-        var layer = {};
-        overlays[index] = layer;
-
-
     }else{
-        console.log("Reading DATA:");
+        
 
         // Individual components
         if(source.shpFile !== undefined && source.dbfFile !== undefined) {
             // .shp & .dbf
-            new Shapefile({
-                shp: source.shpFile,
-                dbf: source.dbfFile
-            }, function (data) {
-                addGeoJsonToMap(data, index);
-            });
+            
+            function __getShapeData(index){
+                var deferred = $.Deferred();
+                setTimeout(function () { 
+                console.log("Reading DATA:");
+                new Shapefile({
+                    shp: source.shpFile,
+                    dbf: source.dbfFile
+                }, function (data) {
+                    //addGeoJsonToMap(data, index);
+                    deferred.resolve(data, index);
+                });
+                }, 500);
+                    
+                return deferred.promise();
+            }
+            
+            $.when( __getShapeData(index) ).done(addGeoJsonToMap);
         }
-
 
     }
 }
@@ -687,6 +732,9 @@ function addGeoJsonToMap(data, index) {
     overlays[index] = overlay;
     overlay.setVisibility(true);
 
+    var $img = $('#map_legend').find('#md-'+index+' > img.rt-icon');
+    $img.css('background-image','url('+$img.attr('data-icon')+')');
+    
 }
 
 
@@ -938,7 +986,7 @@ function _addRecordsetLayer(source, index) {
                if(index>=0){  //this layer belong to map document
                     overlays[index] = overlay;
                     
-                    _addLegendEntryForLayer(index, mapdata.title, top.HAPI4.iconBaseURL + RT_MAPABLE_QUERY +'.png', dependent_layers);
+                    _addLegendEntryForLayer(index, mapdata.title, RT_MAPABLE_QUERY, dependent_layers);
                     
                }else{ // this layer is explicitely (by user) added
 
