@@ -82,6 +82,13 @@ rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTerm
 rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified
 from defRecStructure where rst_RecTypeID=$old_rt_id";
     $res = mysql_query($query);
+    
+    
+    //remove icon if exists
+    $filename = HEURIST_ICON_DIR . $new_rt_id . '.png';
+    if(file_exists($filename)) unlink($filename);
+    $filename = HEURIST_THUMB_DIR . 'th_' . $new_rt_id . '.png';
+    if(file_exists($filename)) unlink($filename);
 
     $rv['id'] = $new_rt_id;
     $rv['rectypes'] = getAllRectypeStructures();

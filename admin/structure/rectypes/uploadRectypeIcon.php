@@ -52,6 +52,17 @@
     $rt_id = intval($_REQUEST['rty_ID']);
     $mode = intval($_REQUEST['mode']);  //0 - icon, 1 - thumbnail
 
+    if ($mode==4 && $rt_id>0) { // verification of icon existense
+        $filename = HEURIST_ICON_DIR . $rt_id . '.png';
+        if(file_exists($filename)){
+            print 1;
+        }else{
+            print 0;
+        }
+        exit();
+    
+    }
+    
     if ($mode!=3 && !$rt_id) { // no ID set, hopefully this should not occur
         return;
     }

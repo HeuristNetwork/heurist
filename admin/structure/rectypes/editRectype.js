@@ -87,37 +87,45 @@ function _upload_icon(mode) {
 
     function icon_refresh(context) {
         if(mode==3){
-            if(context){
+            if(context){  //icon from library
                var img = document.getElementById('imgIcon2');
                img.src = top.HEURIST.baseURL_V3 + "admin/setup/iconLibrary/16px/" + context;
                img.width = 16;
                img.height = 16;
-            }
-        }else{
+            } 
+        }else{  //uploaded
                var img = document.getElementById('imgIcon');
+               if(!img) img = document.getElementById('imgIcon2');
                img.src = top.HEURIST.iconBaseURL + rectypeID + '&t='+ (new Date()).getTime();
-               //img.src.replace(/\?.*/, '') + '?'+ (new Date()).getTime();
+               img.width = 16;
+               img.height = 16;
         }
         _isIconWasUpdated = true;
     }
     function thumb_refresh(context) {
         if(mode==3){
             if(context){
-               _rectype_icon = context;
+               _rectype_icon = context;   //name  of icon from library
                var img = document.getElementById('imgThumb2');
                img.src = top.HEURIST.baseURL_V3 + "admin/setup/iconLibrary/64px/" + context;
                img.width = 64;
                img.height = 64;
             }
         }else{
+            _rectype_icon = 'set';
             var img = document.getElementById('imgThumb');
+            if(!img) img = document.getElementById('imgThumb2');
             img.src = top.HEURIST.iconBaseURL + 'thumb/th_' + rectypeID + '.png&t='+ (new Date()).getTime();
+            img.width = 64;
+            img.height = 64;
         }
         _isIconWasUpdated = true;
     }
 
 
-    var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="+ db + "&mode="+mode+"&rty_ID="+rectypeID+"&rty_Name=" + document.getElementById("rty_Name").value;
+    var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="
+            + db + "&mode="+mode+"&rty_ID="+rectypeID
+            + "&rty_Name=" + document.getElementById("rty_Name").value;
 
     Hul.popupURL(top, sURL, {
             "close-on-blur": false,
@@ -144,6 +152,8 @@ function initializeEmptyForm() {
     document.getElementById("rty_NonOwnerVisibility").selectedIndex = 0;
     document.getElementById("divIconAndThumb").style.display = "none";
     document.getElementById("divIconAndThumbNew").style.display = "block";
+    
+    document.getElementById("btnSelectIcon").onclick = function(){_upload_icon(3)};
 
 
     getGroups();
@@ -162,17 +172,33 @@ function setRtyValues() {
         document.getElementById("rty_ID").innerHTML = rectypeID;
         try {
 
-            document.getElementById("rectypeIcon").innerHTML =
-            "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(0)\" title=\"Click to change icon\">"+
-            "<img id=\"imgIcon\" src=\""+
-            top.HEURIST.iconBaseURL + rectypeID + "&t=" + curtimestamp +
-            "\" width=\"16\" height=\"16\"></a>";
+            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/rectypes/uploadRectypeIcon.php?db="
+            + db + "&mode=4&rty_ID="+rectypeID;
+            $.get( sURL, function(response){
+            
+                if(response=='1'){
+                    
+                    _rectype_icon = 'set';
+                    
+                    document.getElementById("rectypeIcon").innerHTML =
+                    "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(0)\" title=\"Click to change icon\">"+
+                    "<img id=\"imgIcon\" src=\""+
+                    top.HEURIST.iconBaseURL + rectypeID + "&t=" + curtimestamp +
+                    "\" width=\"16\" height=\"16\"></a>";
 
-            document.getElementById("rectypeThumb").innerHTML =
-            "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(1)\" title=\"Click to change thumbnail\">"+
-            "<img id=\"imgThumb\" src=\""+
-            top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png&t=" + curtimestamp +
-            "\" width=\"64\" height=\"64\"></a>";
+                    document.getElementById("rectypeThumb").innerHTML =
+                    "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(1)\" title=\"Click to change thumbnail\">"+
+                    "<img id=\"imgThumb\" src=\""+
+                    top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png&t=" + curtimestamp +
+                    "\" width=\"64\" height=\"64\"></a>";
+                }else{
+                    _rectype_icon = '';
+                    document.getElementById("divIconAndThumb").style.display = "none";
+                    document.getElementById("divIconAndThumbNew").style.display = "block";
+                    document.getElementById("btnSelectIcon").onclick =  function(){_upload_icon(0)};
+                }
+            
+            });
 
         } catch(e) {
             alert(e);
@@ -391,7 +417,7 @@ function updateRectypeOnServer_continue()
         alert("Title mask is invalid");
         return;
     }
-    if(!(rectypeID>0 || _rectype_icon!='')){
+    if(_rectype_icon==''){
         $('#btnSave').removeAttr('disabled');
         alert("Please select Icon for new record type");
         return;
@@ -411,7 +437,7 @@ function updateRectypeOnServer_continue()
         (document.getElementById("definit").checked?1:0)+
         "&data=" + encodeURIComponent(str);
 
-        if(!(rectypeID>0)){
+        if(!(rectypeID>0)){   //assign for new                                          
             params = params + '&icon='+ encodeURIComponent(_rectype_icon);
         }
 
