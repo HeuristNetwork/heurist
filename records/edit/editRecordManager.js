@@ -85,6 +85,8 @@ function onScriptsReady() {
 
     top.HEURIST.util.setDBName();
     document.getElementById("home-link").href = top.HEURIST.baseURL_V3 + "?db=" +dbname;
+    
+    document.getElementById("version").innerHTML = 'v'+top.HEURIST.VERSION;
 
     //
     // from display preferences

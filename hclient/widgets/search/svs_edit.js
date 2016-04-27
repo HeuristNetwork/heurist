@@ -304,6 +304,8 @@ function hSvsEdit(args) {
                         
                         if(rules!=''){
                             res = res + ',"rules":'+rules+'}';
+                        } else{
+                            res = res + '}';
                         }
                     
                         top.HEURIST4.msg.showPrompt(

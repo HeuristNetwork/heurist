@@ -480,6 +480,9 @@ if (! top.HEURIST.edit) {
                 &&  top.HEURIST.edit.modules['public'].frame.contentWindow;
 
                 if(publicWindow && top.HEURIST.edit.requiredInputsOK(publicWindow.HEURIST.inputs, publicWindow)){
+                    
+                    $("#save-record-buttons").hide();
+                    $("#save-record-buttons2").hide();
 
                     if(callback && typeof(callback)==="function")
                     {
