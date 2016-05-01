@@ -8,17 +8,36 @@ As far as possible, external functions are used without changes. However, the fo
 
 MXN
 
-"    * Artem Osmakov", "mxn.core.js (260:7)"
-"            ((typeof tile_url === "function") //Artem Osmakov changes", "mxn.google.core.js (321:49)"
-"            ((typeof tile_url === "function") //Artem Osmakov changes", "mxn.googlev3.core.js (340:49)"
-"        /*if(map_type) { //Artem Osmakov changes", "mxn.googlev3.core.js (357:28)"
-"    * Artem Osmakov", "mxn.googlev3.core.js (402:7)"
+"    * Artem Osmakov", "mxn.core.js (260:7)"   declaration of new method fromPixelToLatLng
+"            ((typeof tile_url === "function") //Artem Osmakov changes", "mxn.google.core.js (321:49)"   title_url parameter can be custom function
+"            ((typeof tile_url === "function") //Artem Osmakov changes", "mxn.googlev3.core.js (340:49)"  title_url parameter can be custom function
+"        /*if(map_type) { //Artem Osmakov changes", "mxn.googlev3.core.js (357:28)" - do not add tile layer as separate map type
+"    * Artem Osmakov", "mxn.googlev3.core.js (402:7)"  - implementation of fromPixelToLatLng
 
 VIS.JS
 
 "  display:none;/*ARTEM*/", "vis.css (217:18)"
 "  overflow: visible; /* artem by default labels are not in box */", "vis.css (240:25)"
 "  /*ARTEM padding: 5px; */", "vis.css (265:5)"
+
+ext/fancytree/skin-themeroller/ui.fancytree.css (67) fix glitch for Chrome
+
+
+ext/shapefile/dbf.js  (lines: 74-101)  replacement deprecated synchronous request
+ext/shapefile/shapefile.js (lines: 38-63) replacement deprecated synchronous request
+
+
+ext/jquery-file-upload/server/php/UploadHandler.php  (473) assign uniqie name to uploaded file (new param unique_filename)
+ext/jquery-file-upload/server/php/UploadHandler.php  (698, 1063) create thumb and icons as png (new param scale_to_png)
+ext/jquery-file-upload/server/php/UploadHandler.php  (1363) rename upload file to provided name (new param newfilename)
+
+ext/js/evol.colorpicker.css (48, 126) change font-size to em
+ext/js/evol.colorpicker.js  (357)  new positioning using jquery ui position
+ext/js/evol.colorpicker.js  (378)  add palette div to document to guarantee topmost position for iframe environment
+
+ext/js/themeswitchcontrol.js - reimplementation of appearance (css)
+
+
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
