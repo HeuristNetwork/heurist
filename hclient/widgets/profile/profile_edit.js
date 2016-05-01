@@ -282,7 +282,8 @@ $.widget( "heurist.profile_edit", {
             // validate login
             var login = this.edit_form.find("#ugr_Name");
             if(!top.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
-                err_text = err_text + ', '+top.HR('Wrong user name format');   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
+                err_text = err_text + ', '+top.HR('Wrong user name format. It may consist of ')
+                    +'a-z, 0-9, _, @ begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
                 var ss = top.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
@@ -296,14 +297,15 @@ $.widget( "heurist.profile_edit", {
                 err_text = err_text + ', '+top.HR(' Passwords are different');
                 password.addClass( "ui-state-error" );
             }else  if(password.val()!=''){
+                /* restict password to alphanumeric only - removed at 2016-04-29
                 if(!top.HEURIST4.msg.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
                     err_text = err_text + ', '+top.HR('Wrong password format');
-                }else{
-                    var ss = top.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
-                    if(ss!=''){
-                        err_text = err_text + ', '+ss;
-                    }
+                }else{*/
+                var ss = top.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
+                if(ss!=''){
+                    err_text = err_text + ', '+ss;
                 }
+                
             }
 
             if(err_text!=''){
