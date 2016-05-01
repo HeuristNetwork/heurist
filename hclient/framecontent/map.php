@@ -294,13 +294,16 @@ require_once(dirname(__FILE__)."/initPage.php");
             $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
             $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
             ?>
+            $("#btnMapRefresh").button({ text:false,
+                icons: {primary: "ui-icon-arrowrefresh-1-e" }})
+            .click( refreshMapDocument );
             $("#btnMapNew").button({ text:false,
                 icons: {primary: "ui-map-document" }})
             .click( function(){ addNewRecord('<?=checkRt('RT_MAP_DOCUMENT')?>');} )
             .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
             $("#btnMapEdit").button({text:false,
                 icons: {primary: "ui-icon-pencil"}})
-            .click(mapEdit);
+            .click( mapEdit );
             $("#btnMapLayer").button({text:false,
                 icons: {primary: "ui-map-layer"}})
             .click(function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
@@ -380,6 +383,13 @@ require_once(dirname(__FILE__)."/initPage.php");
             var win = window.open(url_kml, "_new");
         }
     }
+    
+    function refreshMapDocument(){
+        var recID = $("#map-doc-select").val();
+        if(recID>0){
+            $("#map-doc-select").change();
+        }
+    }
 
     function mapEdit(){
         var recID = $("#map-doc-select").val();
@@ -407,7 +417,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     }
 
     //
-    // update selector after map document add/edit
+    // update mapdocument selector after map document add/edit
     //
     function updateCallerAfterSave( record ){
         if(record && record.rectypeID=='<?=checkRt('RT_MAP_DOCUMENT')?>'){
@@ -455,6 +465,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </select>
             </span>
             <span id="mapToolbar" class="map-inited" style="display:none">
+                <button id="btnMapRefresh" disabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
                 <button id="btnMapEdit" disabled="disabled" title="Edit current Map Document record (Select the desired map in the dropdown)">Edit current map</button>
                 <button id="btnMapNew" title="Create new Map Document - a record that describes map features and defines what layers will be visible (will be included)">New map document</button>
                 <button id="btnMapLayer" title="Create new Map Layer - a record that describes map layer behaviour (visibility, color scheme) and refers to particular geodata source">New Map Layer</button>

@@ -342,7 +342,7 @@ function getRecordDetails($system, $record) {
 *
 * @param mixed $system System reference
 */
-function getMapDocuments($system) {
+function getMapDocuments($system, $recId) {
     //echo "getMapDocuments() called!";
     global $recordQuery, $recordWhere;
     global $detailQuery;
@@ -351,6 +351,11 @@ function getMapDocuments($system) {
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
         $query = $recordQuery." WHERE ".$recordWhere." rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
+        
+        if($recId){
+            $query = $query . ' and rec_ID='.$recId;
+        }
+        
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if ($res) {
@@ -372,7 +377,7 @@ function getMapDocuments($system) {
 $system = new System();
 if( $system->init(@$_REQUEST['db']) ){
     // Get all Map Documents
-    $documents = getMapDocuments($system);
+    $documents = getMapDocuments($system, @$_REQUEST['id']);
 
     // Return the response object as JSON
     header('Content-type: application/json');

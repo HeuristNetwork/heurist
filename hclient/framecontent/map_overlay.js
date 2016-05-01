@@ -48,7 +48,59 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 */
 function _loadMapDocuments(startup_mapdocument) {
 
-    // Load Map Documents & Map Layers       @TODO - change it to HAPI method!!!!
+    // Load Map Documents & Map Layers       
+    // @TODO - change it to HAPI method!!!!
+        var request = { q: {"t":top.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']},
+            w: 'a',
+            detail: 'header',
+            source: 'map-doc-select'};
+            
+        var ele = $("#map-doc-select");
+        ele.empty();
+            
+        //perform search
+        top.HAPI4.RecordMgr.search(request, function(response){
+            
+            if(response.status == top.HAPI4.ResponseStatus.OK){
+                var resdata = new hRecordSet(response.data);
+                
+                ele.append("<option value='-1'>"+(resdata.length()>0?'select...':'none available')+"</option>");
+                
+                var idx, records = resdata.getRecords();
+                for(idx in records){
+                    if(idx)
+                    {
+                        var record = records[idx];
+                        var recID  = resdata.fld(record, 'rec_ID'),
+                            recName = resdata.fld(record, 'rec_Title');
+                            
+                        ele.append("<option value='"+recID+"'>"+recName+"</option>");
+                    }
+                }//for
+                // select listener - load map documents
+                ele.change(function(e) {
+                    //if(current_map_document_id == $(this).val()) return;
+                    current_map_document_id = $(this).val();
+                    _loadMapDocumentById();
+                });
+                /*ele.click(function(e) {
+                    current_map_document_id = null;
+                    $(this).change();
+                });*/
+            
+                if(startup_mapdocument > 0){
+                    $("#map-doc-select").val(startup_mapdocument);
+                    //_loadMapDocumentById(startup_mapdocument);
+                }
+
+            }else{
+                top.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+    
+    
+/* OLD JJ code    
+    // @TODO - load only list of documents, load document details individually on select
     var api = top.HAPI4.basePathV4 + "hserver/controller/map_data.php?db=" + top.HAPI4.database; // window.location.search;
 //console.log("API call URL: " + api);
     $.getJSON(api, function(_data) {
@@ -88,14 +140,16 @@ function _loadMapDocuments(startup_mapdocument) {
         console.log(msg);
         top.HEURIST4.msg.showMsgErr(msg);
     });
+*/    
 }
 
 //
 //
 //
-function _loadMapDocumentById(mapdocument_id) {
+function _loadMapDocumentById() {
 //console.log('load document '+mapdocument_id);
 
+        /* to avoid recursion
         var mapdocs = $("#map-doc-select");
         if(mapdocument_id){
             if(mapdocs.val()==mapdocument_id){
@@ -105,16 +159,50 @@ function _loadMapDocumentById(mapdocument_id) {
         }else{
             mapdocument_id = mapdocs.val();
         }
-
         current_map_document_id = mapdocument_id;
+        */
         
         // Clean old data
+        $('#map_extents').hide();
         _removeMapDocumentOverlays();
         var selBookmakrs = document.getElementById('selMapBookmarks');
         $(selBookmakrs).empty();
-        $('#map_extents').hide();
-                        
+        var btnMapRefresh = $("#btnMapRefresh");
+        var btnMapEdit = $("#btnMapEdit");
+        top.HEURIST4.util.setDisabled(btnMapEdit, true);
+        top.HEURIST4.util.setDisabled(btnMapRefresh, true);
+        btnMapEdit.attr('title','');
         
+        if(current_map_document_id>0)
+        {
+        
+    var api = top.HAPI4.basePathV4 + "hserver/controller/map_data.php?db=" + top.HAPI4.database+'&id='+current_map_document_id;
+    $.getJSON(api, function(_data) {
+        map_data = _data;
+        // define bookmark by default
+        if(map_data && map_data.length > 0) {
+                if(map_data[0].bookmarks==null){
+                    map_data[0].bookmarks = [];
+                }
+                map_data[0].bookmarks.push([top.HR('World'),-90,90,-30,50,1800,2050]); //default
+                _loadMapDocumentById_continue();
+        }else{
+            top.HEURIST4.msg.showMsgErr('Map document #'+current_map_document_id+' not found');
+        }
+    }).fail(function( jqxhr, textStatus, error ) {
+        var msg = "Map Document API call failed: " + textStatus + ", " + error;
+        console.log(msg);
+        top.HEURIST4.msg.showMsgErr(msg);
+    });
+    
+        }
+        
+}
+
+function _loadMapDocumentById_continue() {    
+    
+        var mapdocument_id =  current_map_document_id;
+    
         //find mapdoc data
         var index = -1;
         if(mapdocument_id>0 && map_data)
@@ -125,6 +213,8 @@ function _loadMapDocumentById(mapdocument_id) {
             }
         }
 
+        var selBookmakrs = document.getElementById('selMapBookmarks');
+        var btnMapRefresh = $("#btnMapRefresh");
         var btnMapEdit = $("#btnMapEdit");
         if(index >= 0) {
             var doc = map_data[index];
@@ -232,10 +322,12 @@ function _loadMapDocumentById(mapdocument_id) {
             
             _initLegendListeners();
             
-            btnMapEdit.button( "enable" );
+            top.HEURIST4.util.setDisabled(btnMapEdit, false);
+            top.HEURIST4.util.setDisabled(btnMapRefresh, false);
             btnMapEdit.attr('title',"Edit current map "+doc.title+" - add or remove map layers, change settings");
         }else{
-            btnMapEdit.button( "disable" );
+            top.HEURIST4.util.setDisabled(btnMapEdit, true);
+            top.HEURIST4.util.setDisabled(btnMapRefresh, true);
             btnMapEdit.attr('title','');
         }
 
@@ -1370,7 +1462,8 @@ HeuristOverlay.prototype.onRemove = function() {
         getVersion: function () {return _version;},
         
         loadMapDocumentById: function(mapdocument_id){
-            _loadMapDocumentById(mapdocument_id);    
+            $("#map-doc-select").val(mapdocument_id);
+            //_loadMapDocumentById(mapdocument_id);    
         },
         
         addQueryLayer: function(params){
