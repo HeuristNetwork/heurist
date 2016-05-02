@@ -373,7 +373,7 @@ bookmark: function(rectype) {
 				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
 				 (rectype ? '&rec_rectype=' + rectype : '') +
 				 '&version=' + version);
-	void(window.setTimeout('w.focus()',200));
+	void(window.setTimeout('window.focus()',200));
 },
 
 

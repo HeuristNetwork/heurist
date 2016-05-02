@@ -40,6 +40,7 @@ if (@$_REQUEST['k']) $_REQUEST['tag'] = $_REQUEST['k'];
 // $_REQUEST['bkmrk_bkmk_description'] = mb_convert_encoding($_REQUEST['bkmrk_bkmk_description'], 'utf-8');
 
 if (! @$_REQUEST['bkmrk_bkmk_title']) $_REQUEST['bkmrk_bkmk_title'] = '';
+if (! @$_REQUEST['bkmrk_bkmk_description']) $_REQUEST['bkmrk_bkmk_description'] = '';
 
 
 define('LATEST_BOOKMARKLET_VERSION', '20060713');	//note! this must be in synch with import/bookmarklet/bookmarkletPopup.php
@@ -70,10 +71,10 @@ require_once(dirname(__FILE__).'/../disambig/testSimilarURLs.php');
 require_once(dirname(__FILE__).'/../woot/woot.php');
 
 if (!is_logged_in()) {
-	if (! (@$_REQUEST['bkmrk_bkmk_url'] or @$_REQUEST['bkmrk_bkmk_title'] or @$_REQUEST['bkmrk_bkmk_description']))
+	if (! (@$_REQUEST['bkmrk_bkmk_url'] || @$_REQUEST['bkmrk_bkmk_title'] || @$_REQUEST['bkmrk_bkmk_description']))
 		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
 	else
-		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&bkmrk_bkmk_title='.urlencode($_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode($_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode($_REQUEST['bkmrk_bkmk_description']));
+		header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&bkmrk_bkmk_title='.urlencode(@$_REQUEST['bkmrk_bkmk_title']).'&bkmrk_bkmk_url='.urlencode(@$_REQUEST['bkmrk_bkmk_url']).'&bkmrk_bkmk_description='.urlencode(@$_REQUEST['bkmrk_bkmk_description']));
 	return;
 }
 $usrID = get_user_id();
@@ -214,6 +215,9 @@ $relTypDT = (defined('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
 $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
 $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
+
+
+
 /* arrive with a new (un-bookmarked) URL to process */
 if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
@@ -261,10 +265,10 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 	}
 //if no similar url's and recID was -1 then force a new record of rec_rectype supplied
 
-
 	if (!isset($rec_id)  ||  (@$force_new && $force_new)) {
 		$isNewRecID = true;
 		$rt = intval($_REQUEST['rec_rectype']);
+        
 		if (! $rt) {
 			if ( isset($userDefaultRectype) && check_rectype_exist($userDefaultRectype)) {
 				 $_REQUEST['rec_rectype']= $rt = $userDefaultRectype;
@@ -282,11 +286,12 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 								. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 			return;
 		}
-
+        
+        $is_AddToExtendedDescription = checkAddToDescription($rt);
 
 		mysql__insert('Records', array('rec_URL' => $url,
 										'rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
-										'rec_ScratchPad' => $description,
+										'rec_ScratchPad' => ($is_AddToExtendedDescription?'':$description),
 										'rec_Added' => date('Y-m-d H:i:s'),
 										'rec_Modified' => date('Y-m-d H:i:s'),
 										'rec_AddedByUGrpID' => intval($usrID),
@@ -304,13 +309,19 @@ if (! @$_REQUEST['_submit']  &&  @$_REQUEST['bkmrk_bkmk_url']) {
 
 		// there are sometimes cases where there is no title set (e.g. webpage with no TITLE tag)
 		if (@$_REQUEST['bkmrk_bkmk_title']) {
-			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
+			mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
+                    .','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
 		}
+        if($is_AddToExtendedDescription){
+            mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
+                    .','.DT_EXTENDED_DESCRIPTION.',"'.mysql_real_escape_string($description).'")');
+        }
 		$inserts = array();
 		foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
 		if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
 		foreach ($isbns as $isbn) array_push($inserts, "($rec_id, $isbnDT, '" . mysql_real_escape_string($isbn) . "')");
 		foreach ($issns as $issn) array_push($inserts, "($rec_id, $issnDT, '" . mysql_real_escape_string($issn) . "')");
+        
 
         //insert arbitrary detail types based on URL parameter defval
         if(@$_REQUEST["defval"]){
@@ -356,9 +367,11 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 							. ' (it may not have been enabled). Please choose the record type from the pulldown '));
 		return;
 	}
+    
+    $is_AddToExtendedDescription = checkAddToDescription($rt);
 
 	mysql__insert('Records', array('rec_Title' => $_REQUEST['bkmrk_bkmk_title'],
-									'rec_ScratchPad' => $description,
+									'rec_ScratchPad' => ($is_AddToExtendedDescription?'':$description),
 									'rec_Added' => date('Y-m-d H:i:s'),
 									'rec_Modified' => date('Y-m-d H:i:s'),
 									'rec_AddedByUGrpID' => intval($usrID),
@@ -376,6 +389,11 @@ if (! @$rec_id  and  ! @$_REQUEST['bkmrk_bkmk_url']) {
 		mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.
 						$rec_id.','.$titleDT.',"'.mysql_real_escape_string($_REQUEST['bkmrk_bkmk_title']).'")');
 	}
+    if($is_AddToExtendedDescription){
+            mysql_query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) values ('.$rec_id
+                    .','.DT_EXTENDED_DESCRIPTION.',"'.mysql_real_escape_string($description).'")');
+    }
+    
 	$inserts = array();
 	foreach ($dois as $doi) array_push($inserts, "($rec_id, $doiDT, '" . mysql_real_escape_string($doi) . "')");
 	if (@$_REQUEST["f"]) array_push($inserts, "($rec_id, $webIconDT, '" . mysql_real_escape_string($_REQUEST["f"]) . "')");
@@ -594,4 +612,17 @@ function insert_thumbnail_content($recid, $url){
 		}
 	}
 }
+        
+//check that DT_EXTENDED_DESCRIPTION is defined for given record type
+function checkAddToDescription($rt) {
+    if(defined('DT_EXTENDED_DESCRIPTION') ){
+        $query = 'select rst_ID from defRecStructure where rst_RecTypeID = '.($rt? $rt : RT_INTERNET_BOOKMARK).' and rst_DetailTypeID='.DT_EXTENDED_DESCRIPTION;
+        $res = mysql_query($query);
+        if (mysql_num_rows($res)>0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 ?>
