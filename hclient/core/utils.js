@@ -373,7 +373,7 @@ top.HEURIST4.util = {
         }
 
 
-        var bounds, southWest, northEast,
+        var bounds = null, southWest, northEast,
         shape  = null,
         points = []; //google points
 
@@ -382,17 +382,21 @@ top.HEURIST4.util = {
             switch (type) {
                 case "p":
                 case "point":
+                
+                    var x0 = parseFloat(matches[1]);
+                    var y0 = parseFloat(matches[2]);
 
                     if(format==0){
-                        shape = { point:{lat: parseFloat(matches[2]), lon:parseFloat(matches[1]) } };
+                        shape = { point:{lat: y0, lon:x0 } };
                     }else{
-                        point = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
-
-                        bounds = new google.maps.LatLngBounds(
-                            new google.maps.LatLng(point.lat() - 0.5, point.lng() - 0.5),
-                            new google.maps.LatLng(point.lat() + 0.5, point.lng() + 0.5));
+                        point = new google.maps.LatLng(y0, x0);
                         points.push(point);
+                        bounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(y0 - 0.5, x0 - 0.5),
+                            new google.maps.LatLng(y0 + 0.5, x0 + 0.5));
                     }
+                    
+                    
 
                     break;
 
@@ -446,7 +450,12 @@ top.HEURIST4.util = {
                             shape.push({lat: y, lon: x});
                         }
                         shape = {polygon:shape};
-
+                        /*
+                        bounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(y0 - radius, x0 - radius),
+                            new google.maps.LatLng(y0 + radius, x0 + radius));
+                         */
+                        
                     }else{
                         /* ARTEM TODO
                         var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
@@ -483,11 +492,12 @@ top.HEURIST4.util = {
                         }else{
                             points.push(new google.maps.LatLng(points.lat, points.lon));
                         }
-
+                        
                         if (point.lat < minLat) minLat = point.lat;
                         if (point.lat > maxLat) maxLat = point.lat;
                         if (point.lon < minLng) minLng = point.lon;
                         if (point.lon > maxLng) maxLng = point.lon;
+                        
                     }
 
                     if(format==0){
@@ -497,11 +507,17 @@ top.HEURIST4.util = {
                         northEast = new google.maps.LatLng(maxLat, maxLng);
                         bounds = new google.maps.LatLngBounds(southWest, northEast);
                     }
+                    
             }
 
         }
+        
+        if(format==0){
+            return shape; //{bounds:bounds, shape:shape};
+        }else{
+            return {bounds:bounds, points:points};
+        }
 
-        return (format==0)?shape:{bounds:bounds, points:points};
     },//end parseCoordinates
 
     // @todo change temporal to moment.js for conversion

@@ -1105,6 +1105,12 @@ function _addRecordsetLayer(source, index) {
             }
 }
 
+function _zoomToMapdata( _mapdataid ) {
+    var overlay = _getOverlayByMapdataId( _mapdataid );
+    if(overlay!=null){
+          mapping.zoomDataset( _mapdataid );
+    }
+}
 //
 //
 //

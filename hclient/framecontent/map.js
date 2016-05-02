@@ -200,7 +200,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
             _loadVisTimeline();
 
 //console.log('TIMELINE ADDED '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
-                top.HEURIST4._time_debug = new Date().getTime() / 1000;
+            top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
 
         }
@@ -260,11 +260,36 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                     dataset.clear();
                     //dataset.changeTheme(datasetTheme)
                 }
+                
+                var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
 
                 dataset.loadItems(mapdata.options.items);
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
+                    
+                    if(item.placemark){
+                        if(item.placemark.points){ //polygone or polyline
+                            for(i=0; i<item.placemark.points.length; i++){
+                                var point = item.placemark.points[i];
+                                if (point.lat < minLat) minLat = point.lat;
+                                if (point.lat > maxLat) maxLat = point.lat;
+                                if (point.lon < minLng) minLng = point.lon;
+                                if (point.lon > maxLng) maxLng = point.lon;
+                            }
+                        }else{
+                                var point = item.getNativePlacemark().getPosition();
+                                if (point.lat() < minLat) minLat = point.lat();
+                                if (point.lat() > maxLat) maxLat = point.lat();
+                                if (point.lng() < minLng) minLng = point.lng();
+                                if (point.lng() > maxLng) maxLng = point.lng();
+                        }
+                    }
+                    
                 });
+                
+                var southWest = new google.maps.LatLng(minLat, minLng);
+                var northEast = new google.maps.LatLng(maxLat, maxLng);
+                mapdata.geoextent = new google.maps.LatLngBounds(southWest, northEast);
 
                 dataset.hide();
                 dataset.show();
@@ -320,6 +345,25 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
         }
     }
 
+    //
+    //
+    //
+    function _zoomDataset(dataset_id){
+        //var dataset = tmap.datasets[dataset_id];
+        var mapdata = _getDataset(dataset_id);
+        if(mapdata && mapdata.geoextent){
+              //zoom to geo extent
+              var nativemap = tmap.getNativeMap();
+              nativemap.fitBounds(mapdata.geoextent);
+        }
+        
+        //zoom to time extent
+        if(mapdata && mapdata.timeenabled>0){
+            //_timelineZoomToRange(map_bookmarks[val]['tmin'],map_bookmarks[val]['tmax']);
+        }
+    }
+    
+    
     // get unix timestamp from vis
     function _getUnixTs(item, field, ds){
 
@@ -650,7 +694,7 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
 
         var is_stack = true;//(timeline_groups.length<2 && timeline_data.length<250);
 
- console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
+ //DEBUG console.log('TIMELINE DATASET '+ ( new Date().getTime() / 1000 - top.HEURIST4._time_debug) );
         top.HEURIST4._time_debug = new Date().getTime() / 1000;
 
         var timeline_ele = document.getElementById(timelinediv_id)
@@ -1111,7 +1155,13 @@ console.log('tileloaded 2');
                 //find selected item in the dataset
                 if(lastSelectedItem)
                     _showPopupInfo.call(lastSelectedItem);
+                    
+            }else if(!fromtimeline){
+                
+                _zoomDataset( 'main' );
             }
+            
+            
     }
 
     //
@@ -1569,6 +1619,10 @@ ed_html +
 
         showDataset: function(dataset_name, is_show){
             _showDataset(dataset_name, is_show);
+        },
+        
+        zoomDataset: function(dataset_name){
+            _zoomDataset(dataset_name);
         },
 
         showSelection: function(_selection){
