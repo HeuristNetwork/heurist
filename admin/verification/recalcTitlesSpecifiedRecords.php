@@ -127,8 +127,8 @@ $reparables = array();
 foreach ($recs as $rec_id => $rec) {
     if ($rec_id % $step_uiupdate == 0) {
         print '<script type="text/javascript">update_counts('.$processed_count.','.$blank_count.','.$repair_count.','.count($updates).')</script>'."\n";
-        ob_flush();
-        flush();
+        @ob_flush();
+        @flush();
     }
 
     $mask = $masks[$rec['rec_RecTypeID']];
@@ -163,8 +163,8 @@ foreach ($recs as $rec_id => $rec) {
     print ' <a target=_blank href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?recID='.$rec_id.'&db='.HEURIST_DBNAME.'">*</a> <br> <br>';
 
     if ($rec_id % $step_uiupdate == 0) {
-        ob_flush();
-        flush();
+        @ob_flush();
+        @flush();
     }
 }
 //print '</ul>';
@@ -193,8 +193,8 @@ if (count($updates) > 0) {
         ++$i;
         if ($rec_id % $step_uiupdate == 0) {
             print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
-            ob_flush();
-            flush();
+            @ob_flush();
+            @flush();
         }
     }
     foreach ($reparables as $rec_id) {
@@ -218,7 +218,7 @@ if (count($updates) > 0) {
 }
 print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q=ids:'.join(',', $blanks).'&db='.HEURIST_DBNAME.'">Unchanged records (title would be blank)</a>';
 
-ob_flush();
-flush();
+@ob_flush();
+@flush();
 
 ?>

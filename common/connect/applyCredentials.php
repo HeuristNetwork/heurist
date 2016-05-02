@@ -334,9 +334,9 @@ function outWarning($role, $message){
 
 function flush_buffers($start=true){
     //ob_end_flush();
-    ob_flush();
-    flush();
-    if($start) ob_start();
+    @ob_flush();
+    @flush();
+    if($start) @ob_start();
 }
 
 //
