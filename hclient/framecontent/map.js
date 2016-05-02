@@ -405,6 +405,9 @@ function hMapping(_mapdiv_id, _timeline, _basePath, _mylayout) {
                 max = vis_timeline.getDate(range.max); //new Date(range.max).getTime();
             var delta = 0;
 
+            if(isNaN(min) || isNaN(max) ) return;
+            
+            
             if(range['nofit']==undefined){
             var interval = max-min;
             var YEAR = 31536000000;

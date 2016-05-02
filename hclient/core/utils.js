@@ -543,7 +543,7 @@ top.HEURIST4.util = {
                 
                             try{
                                 var temporal;
-                                if(typeof start==="String" && start.search(/VER=/)){
+                                if($.type( start ) === "string"  && start.search(/VER=/)){
                                     temporal = new Temporal(start);
                                     if(temporal){
                                         var dt = temporal.getTDate('PDB');  //probable begin
@@ -564,7 +564,7 @@ top.HEURIST4.util = {
                                         }
                                     }
                                 }
-                                if(start!="" && typeof end==="String"  && end.search(/VER=/)){
+                                if(start!="" && $.type( end ) === "string"  && end.search(/VER=/)){
                                     temporal = new Temporal(end);
                                     if(temporal){
                                         var dt = temporal.getTDate('PDE'); //probable end
