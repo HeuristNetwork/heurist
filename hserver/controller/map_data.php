@@ -25,7 +25,10 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
-$recordWhere = "(not r.rec_FlagTemporary) and (not r.rec_NonOwnerVisibility='hidden') and ";
+
+$recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
+                . 'rec_OwnerUGrpID = 0 )';
+
 $detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, AsWKT(dtl_Geo) as dtl_Geo FROM recDetails rd WHERE rd.dtl_RecID=";
 
 
@@ -89,7 +92,7 @@ function getRecordByID($system, $id) {
     $record = new stdClass();
 
     // Select the record
-    $query = $recordQuery." WHERE ".$recordWhere."r.rec_ID=".$id;
+    $query = $recordQuery." WHERE ".$recordWhere." and r.rec_ID=".$id;
     $res = $system->get_mysqli()->query($query);
 
     if ($res) {
@@ -350,7 +353,7 @@ function getMapDocuments($system, $recId) {
 
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
-        $query = $recordQuery." WHERE ".$recordWhere." rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
+        $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".RT_MAP_DOCUMENT; //InOriginatingDB
         
         if($recId){
             $query = $query . ' and rec_ID='.$recId;
@@ -375,7 +378,16 @@ function getMapDocuments($system, $recId) {
 
 // Initialize a System object that uses the requested database
 $system = new System();
+
+
 if( $system->init(@$_REQUEST['db']) ){
+    
+    $wg_ids = $system->get_user_group_ids();
+    if($wg_ids==null) $wg_ids = array();
+    array_push($wg_ids, 0);
+    $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
+                . 'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+    
     // Get all Map Documents
     $documents = getMapDocuments($system, @$_REQUEST['id']);
 
