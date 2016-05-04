@@ -529,7 +529,8 @@ if(@$params['debug']) echo $query."<br>";
             //find main query results
             $fin_result = recordSearch($system, $params);
             //main result set
-            $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] :array_keys($fin_result['data']['records']); //get ids
+            $flat_rules[0]['results'] = $is_ids_only ?$fin_result['data']['records'] 
+                                                     :array_keys($fin_result['data']['records']); //get ids
 
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
 
@@ -561,11 +562,16 @@ if(@$params['debug']) echo $query."<br>";
 
                             //merge with final results
                             if($is_ids_only){
-                                $fin_result['data']['records'] = array_merge($fin_result['data']['records'], $response['data']['records']);
-                            }else{
-                                $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], $response['data']['records']);
 
-                                $fin_result['data']['order'] = array_merge($fin_result['data']['order'], array_keys($response['data']['records']));
+                                $fin_result['data']['records'] = array_merge_unique($fin_result['data']['records'], 
+                                                                             $response['data']['records']);
+                                                                             
+                            }else{
+                                $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], 
+                                                                                 $response['data']['records']);
+
+                                $fin_result['data']['order'] = array_merge($fin_result['data']['order'], 
+                                                                        array_keys($response['data']['records']));
                                 foreach( array_keys($response['data']['records']) as $rt){
                                     $rectype_id = @$rt['4'];
                                     if($rectype_id){
@@ -583,7 +589,7 @@ if(@$params['debug']) echo $query."<br>";
                             }
 
                             if(!$is_last){ //add top ids for next level
-                                $flat_rules[$idx]['results'] = array_merge($flat_rules[$idx]['results'],
+                                $flat_rules[$idx]['results'] = array_merge_unique($flat_rules[$idx]['results'],
                                         $is_ids_only ?$response['data']['records'] :array_keys($response['data']['records']));
                             }
 
@@ -622,7 +628,9 @@ if(@$params['debug']) echo $query."<br>";
                                      }
 
                                      if($is_ids_only){
-                                        $fin_result['data']['relationship'] = array_merge($fin_result['data']['relationship'], $response['data']['records']);
+                                        $fin_result['data']['relationship'] = array_merge_unique(
+                                                                    $fin_result['data']['relationship'],
+                                                                    $response['data']['records']);
                                      }else{
                                         $fin_result['data']['relationship'] = mergeRecordSets($fin_result['data']['relationship'], $response['data']['records']);
                                      }
@@ -651,7 +659,7 @@ if(@$params['debug']) echo $query."<br>";
 
 
             if($is_ids_only){
-                $fin_result['data']['records'] = array_unique($fin_result['data']['records']);
+                //$fin_result['data']['records'] = array_unique($fin_result['data']['records']);
             }
             $fin_result['data']['count'] = count($fin_result['data']['records']);
 
@@ -663,7 +671,6 @@ if(@$params['debug']) echo $query."<br>";
 
             //@todo - assign if size less than 3000? only
             $fin_result['data']['mainset'] = $flat_rules[0]['results'];
-
 
             return $fin_result;
         }//END RULES
@@ -918,6 +925,35 @@ if(@$params['debug']) echo $query."<br>";
         return $response;
 
     }
+    
+    /**
+     * array_merge_unique - return an array of unique values,
+     * composed of merging one or more argument array(s).
+     *
+     * As with array_merge, later keys overwrite earlier keys.
+     * Unlike array_merge, however, this rule applies equally to
+     * numeric keys, but does not necessarily preserve the original
+     * numeric keys.
+     */
+    function array_merge_unique($a, $b) {
+        foreach($b as $item){
+            //if(!in_array($item,$b)){
+            if(array_search($item, $a)===false){
+                $a[] = $item;
+            }
+         }                
+         return $a;
+    }     
+    function array_merge_unique3(array $array1 /* [, array $...] */) {
+      $result = array_flip(array_flip($array1));
+      foreach (array_slice(func_get_args(),1) as $arg) { 
+        $result = 
+          array_flip(
+            array_flip(
+              array_merge($result,$arg)));
+      } 
+      return $result;
+    }    
 
 
     function mergeRecordSets($rec1, $rec2){
