@@ -729,7 +729,7 @@ $.widget( "heurist.ruleBuilder", {
 
                 var rt_source = codes[0];
                 var dt_ID     = codes[1];
-                var rel_type  = codes[2];
+                var rel_type  = codes[2]; //empty string for pointer
                 var rt_target = codes[3];
                 var filter    = codes[4];
                 var linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
@@ -742,7 +742,7 @@ $.widget( "heurist.ruleBuilder", {
                 this.select_fields.val(dt_ID);
                 this._onSelectFieldtype();
 
-                this.select_reltype.val(rel_type);
+                this.select_reltype.val(top.HEURIST4.util.isempty(rel_type)?'pointer':rel_type);
                 this.select_target_rectype.val(rt_target);
                 this.additional_filter.val(filter);
 
