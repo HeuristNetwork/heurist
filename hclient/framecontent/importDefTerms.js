@@ -1,10 +1,8 @@
 /**
-* Class to search and select record 
-* It can be converted to widget later?
+* Class to import terms from CSV
 * 
-* @param rectype_set - allowed record types for search, otherwise all rectypes will be used
+* @param _trm_ParentTermID - id of parent term
 * @returns {Object}
-* @see editing_input.js
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

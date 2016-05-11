@@ -198,7 +198,8 @@ function RectypeManager() {
                         // '&nbsp;&nbsp;&nbsp;'+
                         // '<input id="btnSave'+grpID+'" type="button" value="Save order" '+
                         // 'style="color:red; display: none !important;margin-right:5px;"/>'+ //inline-block
-                        '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
+                        
+                        //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'" value="From templates" class="add"/>'+
                         '<input type="button" id="btnImportFromDb'+grpID+'" value="From databases" class="add" style="margin-right:1em"/>'+
                         '<input type="button" id="btnAddRecordType'+grpID+'" value="New record type / fields" class="add" style="margin-right:1em"/>'+
 
@@ -207,7 +208,7 @@ function RectypeManager() {
                         '<div id="tabContainer'+grpID+'"></div>'+
                         '<div style="position:absolute;bottom:8px;right:425px;">'+
 
-                        '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
+                        //Remarked temporarely 2016-05-11 '<input type="button" id="btnImportFromTemplate'+grpID+'_2" value="From templates" class="add"/>'+
                         '<input type="button" id="btnImportFromDb'+grpID+'_2" value="From databases" class="add" style="margin-right:1em"/>'+
                         '<input type="button" id="btnAddRecordType'+grpID+'_2" value="New record type / fields" class="add" style="margin-right:1em"/>'+
                         '</div>'+
@@ -710,7 +711,7 @@ function RectypeManager() {
             btnAddRecordType2.onclick = btnAddRecordType.onclick
 
             //-------
-
+/*Remarked temporarely 2016-05-11
             btnAddRecordType = Dom.get('btnImportFromTemplate'+grpID);
             btnAddRecordType.onclick = function(){
                 var sURL = top.HEURIST.baseURL_V3 + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ db +
@@ -729,7 +730,7 @@ function RectypeManager() {
             };
             btnAddRecordType2 = Dom.get('btnImportFromTemplate'+grpID+'_2');
             btnAddRecordType2.onclick = btnAddRecordType.onclick
-
+*/
 
             /*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
             btnAddFieldType.onclick = function (e) {

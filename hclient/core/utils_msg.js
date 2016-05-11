@@ -354,8 +354,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
     checkLength: function( input, title, message, min, max ) {
         var message_text = top.HEURIST4.msg.checkLength2( input, title, min, max );
         if(message_text!=''){
-                                                  
-            top.HEURIST4.msg.showMsgFlash('<div class="ui-state-error" style="padding:10px">'+message_text+'</div>', 3000);
+                                          
+                                          //'<div class="ui-state-error" style="padding:10px">XXXX'+        +'</div>'
+            top.HEURIST4.msg.showMsgFlash('<span class="ui-state-error" style="padding:10px">'+message_text+'</span>', 3000);
             
             /*
             if(message){
