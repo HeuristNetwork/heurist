@@ -116,6 +116,12 @@
                 while($rectype = mysql_fetch_assoc($rectypes)) {
                     $OriginatingDBID = $rectype["rty_OriginatingDBID"];
                     $IDInOriginatingDB = $rectype["rty_IDInOriginatingDB"];
+
+                    if(!($OriginatingDBID>0 && $IDInOriginatingDB>0)){
+                        $OriginatingDBID = $source_db_id;
+                        $IDInOriginatingDB = $rectype["rty_ID"];
+                    }
+                    
                     $nameInTempDB = mysql_real_escape_string($rectype["rty_Name"]);
 
                     // Find recordtypes that are already in the local DB (comparing OriginatingDBID and IDInOriginatingDB
@@ -127,8 +133,10 @@
                         // These rectypes are not in the importing database
                         $cnt_identical = mysql_num_rows($identicalMatches);
                     }
+                    
+                    
 
-                    if(!$cnt_identical) {
+                    if(!($cnt_identical>0)) {
                         $approxMatchesRes = mysql_query("select rty_Name, rty_Description from "
                             . DATABASE . ".defRecTypes where (rty_Name like '%$nameInTempDB%')");
                         // TODO: if rectype is more than one word, check for both words
@@ -246,6 +254,8 @@
                     var myColumnDefs = [
                         { key:"arrow", label:"", formatter:YAHOO.widget.RowExpansionDataTable.formatRowExpansion },
                         { key:"import", label:"Import", sortable:false, resizeable:false, width:30 },
+                        { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
+                            sortable:true, resizeable:true, width:150 },
                         { key:"rtyRecTypeGroupID", label:"<u>Group</u>", sortable:true, hidden:false, formatter:function(elLiner, oRecord, oColumn, oData) {
                             var grpid = oRecord.getData("rtyRecTypeGroupID");
                             elLiner.innerHTML = "group #"+grpid+" not found";
@@ -259,8 +269,6 @@
                             }
                         },
                         { key:"rtyID", label:"<u>ID</u>", sortable:true, hidden:true },
-                        { key:"rectype", label:"<span title='Click on row to view information about the record type'><u>Record type</u></span>",
-                            sortable:true, resizeable:true, width:150 },
                         { key:"matches", label:"<span title='Shows the number of record types in the current database with simliar names'>"
                             +"<u>Potential dupes in this DB</u></span>",
                             sortable:true, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
@@ -271,7 +279,7 @@
                                 }else if (isNaN(Number(dup))){
                                     elLiner.innerHTML = '<b>'+dup+'</b> (this database) came from same source (same original database + code)';
                                 }else if (dup>0){
-                                    elLiner.innerHTML = 'Duplicate name (x '+dup+')';
+                                    elLiner.innerHTML = 'Partial name matches (x '+dup+')';
                                 }else{
                                     elLiner.innerHTML = '';
                                 }

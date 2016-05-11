@@ -525,7 +525,7 @@ function processTranslations($dataSet) {
 function unlockDatabase($isdroptemp=true) {
     global $tempDBName;
     if($isdroptemp && $tempDBName){
-        db_drop($tempDBName);
+        db_drop($tempDBName, false);
     }
     mysql_connection_insert(DATABASE); // Use logged into DB
     $res = mysql_query("delete from sysLocks where lck_Action='buildcrosswalks'"); // Remove sysLock
