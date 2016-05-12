@@ -266,7 +266,7 @@ $.widget( "heurist.connections", {
                             count: 0,
                             depth: 1
                            };
-                nodes[i] = node;
+                nodes[recId] = node;
             }
             
             
