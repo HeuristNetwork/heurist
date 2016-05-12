@@ -259,13 +259,26 @@ if(@$params['debug']) echo $query."<br>";
 
         $direct = array();
         $reverse = array();
+        $headers = array(); //record title and type for main record
 
         $mysqli = $system->get_mysqli();
-
+        
+        //find all rectitles and record types for main recordset
+        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.$ids.')';
+        $res = $mysqli->query($query);
+        if (!$res){
+            return $system->addError(HEURIST_DB_ERROR, "Search query error", $mysqli->error);
+        }else{
+                while ($row = $res->fetch_row()) {
+                    $headers[$row[0]] = array($row[1], $row[2]);   
+                }
+                $res->close();
+        }
+        
+        
         //find all target related records
         $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID FROM recLinks '
             .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
-
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -303,7 +316,7 @@ if(@$params['debug']) echo $query."<br>";
         }
 
         $response = array("status"=>HEURIST_OK,
-                     "data"=> array("direct"=>$direct, "reverse"=>$reverse));
+                     "data"=> array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers));
 
 
         return $response;

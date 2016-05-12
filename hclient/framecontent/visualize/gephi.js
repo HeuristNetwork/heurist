@@ -74,11 +74,16 @@ function getGephiFormat() {
     gexf += '<nodes>';
     for(var key in data.nodes) {
         var node = data.nodes[key];
-        gexf += '<node id="'+node.id+'" label="'+node.name+'">';
+        
+        var name = (node.name?node.name.replace(/&/g,'&amp;').replace(/"/g, '&quot;'):'')
+        
+        gexf += '<node id="'+node.id+'" label="'+name+'">';
         gexf +=     '<attvalues>';
-        gexf +=         '<attvalue for="0" value="'+node.name+'"/>';
-        gexf +=         '<attvalue for="1" value="'+node.image.replace('&','&amp;')+'"/>';
+        gexf +=         '<attvalue for="0" value="'+name+'"/>';
+        gexf +=         '<attvalue for="1" value="'+(node.image?node.image.replace(/&/g,'&amp;'):'')+'"/>';
+        if(node.count>0){
         gexf +=         '<attvalue for="2" value="'+node.count+'"/>';
+        }
         gexf +=     '</attvalues>'; 
         gexf += '</node>';
     }
@@ -88,14 +93,19 @@ function getGephiFormat() {
     gexf += '<edges>';
     for(var i = 0; i < data.links.length; i++) {
         var edge = data.links[i]; 
+        var name = (edge.relation.name?edge.relation.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'')
+        
         gexf += '<edge id="'+i+'" source="'+edge.source.id+'" target="'+edge.target.id+'" weight="'
                     +(edge.targetcount>0?edge.targetcount:1)+'">';
         gexf +=     '<attvalues>';  
+        
+        if(!isNaN(Number(edge.relation.id))){
         gexf +=         '<attvalue for="0" value="'+edge.relation.id+'"/>';      
-        gexf +=         '<attvalue for="1" value="'+edge.relation.name+'"/>';
-        gexf +=         '<attvalue for="2" value="'+edge.relation.image.replace('&','&amp;')+'"/>';
-        gexf +=         '<attvalue for="3" value="'+edge.targetcount+'"/>';
-        gexf +=     '</attvalues>'; 
+        }
+        gexf +=         '<attvalue for="1" value="'+name+'"/>';
+        gexf +=         '<attvalue for="2" value="'+(edge.relation.image?edge.relation.image.replace(/&/g,'&amp;'):'')+'"/>';
+        gexf +=         '<attvalue for="3" value="'+(edge.targetcount>0?edge.targetcount:1)+'"/>';
+        gexf +=     '</attvalues>';
         gexf += '</edge>';
     }
     gexf += '</edges>';

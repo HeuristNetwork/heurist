@@ -153,11 +153,11 @@ $.widget( "heurist.connections", {
                         
                     }else{
                     
-                        var records = this.options.recordset.getRecords();
+                        var records_ids = this.options.recordset.getIds(2000);
                         var relations = this.options.relations;
                         
                         // Parse response to spring diagram format
-                        var data = this._parseData(records, relations);
+                        var data = this._parseData(records_ids, relations);
                         this._doVisualize(data);
                     
                     }
@@ -223,7 +223,7 @@ $.widget( "heurist.connections", {
                     that.option("relations", response.data);
                     
                     // Parse response to spring diagram format
-                    var data = that._parseData(recordset.getRecords(), response.data);
+                    var data = that._parseData(records_ids, response.data);
                     that._doVisualize(data);
                 }else{
                     top.HEURIST4.msg.showMsgErr(response);
@@ -250,21 +250,23 @@ $.widget( "heurist.connections", {
     * 
     * @returns {Object}
     */
-    , _parseData: function (records, relations) {
+    , _parseData: function (records_ids, relations) {
         var data = {}; 
-        var nodes = {};
+        var nodes = {};                         
         var links = [];
 
-        if(records !== undefined && relations !== undefined) {
+        if(records_ids !== undefined && relations !== undefined) {
             // Construct nodes for each record
-            for(var id in records) {
-                var node = {id: parseInt(id),
-                            name: records[id][5],
-                            image: top.HAPI4.iconBaseURL+records[id][4],
+            var i;
+            for(i=0;i<records_ids.length;i++) {
+                var recId = records_ids[i];
+                var node = {id: parseInt(recId),
+                            name: relations.headers[recId][0],  //record title   records[id][5]
+                            image: top.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
                             count: 0,
                             depth: 1
                            };
-                nodes[id] = node;
+                nodes[i] = node;
             }
             
             

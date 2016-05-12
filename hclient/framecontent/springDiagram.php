@@ -77,7 +77,8 @@
 
             function showData(data, selectedRecordsIds, onSelectEvent) {
                 // Processing...
-                console.log("showData called inside springDiagram");
+                if(data && data.nodes && data.links)
+                console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
                 $("#d3svg").html('<text x="25" y="25" fill="black">Processing...</text>');
 
                 // Custom data parsing
