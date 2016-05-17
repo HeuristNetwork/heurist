@@ -270,6 +270,14 @@ exit();
                 }else{
                     $query = "update usrReportSchedule set ".$query." where rps_ID = $recID";
                 }
+                
+                //temporary alter the structure of table 2016-05-17 - remark it in one year
+                $res = mysql_query("SHOW FIELDS FROM usrReportSchedule where Field='rps_IntervalMinutes'");
+                $struct = mysql_fetch_assoc($res);
+                if(strpos($struct['Type'],'tinyint')!==false){
+                    mysql_query('ALTER TABLE `usrReportSchedule` CHANGE COLUMN `rps_IntervalMinutes` `rps_IntervalMinutes` INT NULL DEFAULT NULL');
+                }
+
 
                 $rows = execSQL($db, $query, $parameters, true);
 

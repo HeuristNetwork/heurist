@@ -806,7 +806,7 @@ CREATE TABLE usrReportSchedule (
   rps_FileName varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The base name of the report being published - wil lbe compelted with file types',
   rps_HQuery text collate utf8_unicode_ci NOT NULL COMMENT 'The Heurist query to be used in generating this report',
   rps_Template varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The name of the template file to be used in generating this report',
-  rps_IntervalMinutes tinyint(4) default NULL COMMENT 'The interval in minutes between regenerations of the report output, null = never',
+  rps_IntervalMinutes int(11) default NULL COMMENT 'The interval in minutes between regenerations of the report output, null = never',
   rps_Added timestamp NULL default NULL COMMENT 'The date when this specification was added',
   rps_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date this specification was last updated',
   PRIMARY KEY  (rps_ID),

@@ -6,7 +6,7 @@
 * 2) prints out html header with minimum set of scripts
 * 3) init client side hAPI
 * 4) apply theme
-* 5) load and init localoztion
+* 5) load and init localiztion
 * 6) calls for user defined onPageInit function that should perform further page init - IMPORTANT
 *
 * @package     Heurist academic knowledge management system
@@ -74,6 +74,11 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 
 $log_warn = 'To perform this action you must be logged in';
 
+//
+// to limit access to particular page
+// put the call of one of these 3 function just after require_once(dirname(__FILE__)."/initPage.php"); 
+//
+//
 function loginRequired(){
     global $log_warn, $system;
     if(!$system->is_logged_in()){
@@ -96,8 +101,9 @@ function dbOwnerRequired(){
     }
 }
 
-// base does not suit because some jquery widgets uses href (tabcontrol for example)
-//        <base href="<?php echo PDIR;">
+// BASE tag is convenient however it does not suit 
+// reason: some jquery widgets uses href (tabcontrol for example) 
+// <base href="<?php echo PDIR;">
 
 ?>
 <html>
