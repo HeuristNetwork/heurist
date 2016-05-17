@@ -57,8 +57,8 @@ function prepareDbName(){
 }
 
 function errorOut($msg){
-    print '<p class="error ui-state-error"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
-    .$msg.'<p>';
+    print '<p class="error ui-state-error" style="margin:10px"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
+    .$msg.'</p>';
 }
 
 //
@@ -113,6 +113,20 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             <script type="text/javascript" src="../../../hclient/widgets/profile/profile_edit.js"></script>
 
             <script type="text/javascript">
+            
+                
+                var edit_data = {};
+                <?php
+                //restore use registration parameters in case creation fails
+                foreach ($_REQUEST as $param_name => $param_value){
+                    if(strpos($param_name,'ugr_')===0){ //&& $param_name!='ugr_Password' keep password
+                        //print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
+                        print "edit_data['$param_name'] = '$param_value';";
+                    }
+                }
+                ?>
+                var isRegdataEntered = !$.isEmptyObject(edit_data);
+            
                 $(document).ready(function() {
 
                     if($("#createDBForm").length>0){
@@ -123,32 +137,40 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
 
                         <?php if(!$passwordForDatabaseCreation)
                         {
-                            echo 'doRegister();';
+                            echo 'if(!isRegdataEntered){doRegister();}';
                         }
                         ?>
 
 
                         $("#btnRegister").button({label:'Register as User'}).on('click', doRegister);
-                        $("#div_register").show();
-                        $("#div_register_entered").hide();
-                        $("#div_create").hide();
+                        
+                        if(isRegdataEntered){
+                            onRegisterDialogClose(edit_data);
+                        }else{
+                            $("#div_register").show();
+                            $("#div_register_entered").hide();
+                            $("#div_create").hide();
+                        }
                     }
                 });
 
 
                 var profile_edit_dialog = null;
 
-                function onRegisterDialogClose(){
-                    var edit_date = profile_edit_dialog.profile_edit('option','edit_data');
+                function onRegisterDialogClose(new_edit_data){
+                    
+                    if(!new_edit_data){
+                        new_edit_data = profile_edit_dialog.profile_edit('option','edit_data');
+                    }
 
                     var frm = $("#dbForm");
-                    for (var fld_name in edit_date) {
-                        if (edit_date.hasOwnProperty(fld_name)) {
+                    for (var fld_name in new_edit_data) {
+                        if (new_edit_data.hasOwnProperty(fld_name)) {
                             var fld = frm.find('#'+fld_name);
                             if(fld.length>0){
-                                fld.val( edit_date[fld_name] );
+                                fld.val( new_edit_data[fld_name] );
                             }else{
-                                $('<input>', {id:fld_name, type:'hidden', name:fld_name, value:edit_date[fld_name]} ).appendTo(frm);
+                                $('<input>', {id:fld_name, type:'hidden', name:fld_name, value:new_edit_data[fld_name]} ).appendTo(frm);
                             }
                         }
                     }
@@ -164,17 +186,6 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                     top.HEURIST4.util.stopEvent(event);
 
                     if($.isFunction($('body').profile_edit)){
-
-                        var edit_data = {};
-                        <?php
-                        //restore use registration parameters in case creation fails
-                        foreach ($_REQUEST as $param_name => $param_value){
-                            if(strpos($param_name,'ugr_')===0 && $param_name!='ugr_Password'){
-                                //print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
-                                print "edit_data['$param_name'] = '$param_value';";
-                            }
-                        }
-                        ?>
 
                         if(profile_edit_dialog==null){
                             profile_edit_dialog = $('#heurist-profile-dialog');
@@ -303,7 +314,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
             function setUserPartOfName(){
                 var ele = document.getElementById("uname");
                 if(ele.value==""){
-                    ele.value = document.getElementById("ugr_Name").value.substr(0,5);
+                    ele.value = document.getElementById("ugr_Name").value.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,'');
                 }
             }
 
@@ -691,6 +702,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         //check capture
                         if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
                             errorOut('Are you a bot? Please enter the correct answer to the challenge question');
+                            print '<script type="text/javascript">isRegdataEntered=false;</script>';
                             $isDefineNewDatabase = true;
                             return false;
                         }
@@ -705,6 +717,7 @@ function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation,
                         $password = getUsrField('ugr_Password');
                         if($firstName=='' || $lastName=='' || $eMail=='' || $name=='' || $password==''){
                             errorOut('Mandatory data for your registration profile (first and last name, email, password) are not completed. Please fill out registration form');
+                            print '<script type="text/javascript">isRegdataEntered=false;</script>';
                             $isDefineNewDatabase = true;
                             return false;
                         }

@@ -70,7 +70,9 @@ function db_create($db_name, $verbose = true){
             if ($mysqli->query($sql)) {
                 $res = true;
             }else if($verbose) {
-                echo ("<p class='error'>Error ".$mysqli->error.". Unable to create database $db_name<br/></p>");
+                print '<p class="error ui-state-error" style="margin:10px"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
+                    .'Error '.$mysqli->error." Unable to create database $db_name .</p>";
+                //echo ("<p class='error'>Error ".$mysqli->error.". Unable to create database $db_name<br/></p>");
             }
             $mysqli->close();
         }

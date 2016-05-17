@@ -225,6 +225,12 @@ $.widget( "heurist.profile_edit", {
                 //if(inpt){                    inpt.val(this.options.edit_data[id]);                  }
             }
         }
+        //restore repeat password also
+        if(this.options.edit_data['ugr_Password']!=''){
+            this.edit_form.find("#password2").val(this.options.edit_data['ugr_Password']);
+        }
+        //always reset captcha
+        this.edit_form.find('#ugr_Captcha').val('');
 
 
         if(this.options.isdialog){
@@ -239,6 +245,7 @@ $.widget( "heurist.profile_edit", {
 
     _refreshCaptcha: function(){
         var that = this;
+        that.edit_form.find('#ugr_Captcha').val('');
         var $dd = that.edit_form.find('#imgdiv');
         var id = top.HEURIST4.util.random();
         if(true){
