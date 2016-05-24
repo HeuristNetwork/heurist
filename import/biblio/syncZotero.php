@@ -83,10 +83,15 @@
             $mapping_rt_errors = array();
             $mapping_rt_errors2 = array();
             $rep_errors_only = true;
+            
+            $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenu.php?db="
+                    . HEURIST_DBNAME
+                    ."&mode=properties2\">Database administration page > Database > Advanced Properties</a>";
 
 
             if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
-                die("Sorry, library key for Zotero synchronisation is not defined. To set it, go to Admin > Database > Advanced Properties");
+                die(
+        " <p>Library key for Zotero synchronisation is not defined. Please go to $linkToAdvancedProperties to enter access details for your Zotero library");
             }
 
             //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
@@ -138,21 +143,20 @@
     if($group_ID!=null)$group_ID = trim($group_ID);
     if($api_Key!=null)$api_Key = trim($api_Key);
 
-    if( (  is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
+    if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
         print "<div style='color:red'><br />Current Zotero access settings: ' ".$key.
-        " ' <p>Please go to Database administration page > Database > Advanced Properties to enter access details for your Zotero library</div></body>
+        " ' <p>Please go to $linkToAdvancedProperties to enter access details for your Zotero library</div></body>
         </html>";
         exit;
     }
 
 
     if(!file_exists($mapping_file) || !is_readable($mapping_file)){
-        die("Sorry, could not find/read mapping/configuration file .../import/biblio/zoteroMap.xml required for Zotero synchronisation");
+        die("Sorry, could not find/read configuration file .../import/biblio/zoteroMap.xml required for Zotero synchronisation - please ask your system administrator to copy it from Heurist source code");
     }
     $fh_data = simplexml_load_file($mapping_file);
     if($fh_data==null || is_string($fh_data)){
-        die("Sorry, mapping/configuration file import/biblio/zoteroMap.xml for Zotero synchronisation ".
-            "is corrupted - please ask your system administrator to update it");
+        die("Sorry, configuration file import/biblio/zoteroMap.xml for Zotero synchronisation is corrupted - please ask your system administrator to update it from Heurist source code");
     }
 
 
@@ -246,15 +250,16 @@
 
         $code = $zotero->getResponseStatus();
 
-        if($code>499 ){
+            if($code>499 ){
             print "<div style='color:red'><br />Zotero Server Side Error: returns response code: $code.<br /><br />"
             ."Please try this operation later.</div>";
         }else if($code>399){
             $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
             if($code==400 || $code==401 || $code==403){
-                $msg = $msg."Verify API key in Database administration page > Database > Advanced Properties. It can be incorrect or truncated";
+                $msg = $msg."Verify API key in $linkToAdvancedProperties. It can be incorrect or truncated";
+                
             }else if($code==404 ){
-                $msg = $msg."Verify User and Group ID in Database administration page > Database > Advanced Properties";
+                $msg = $msg."Verify User and Group ID in ".$linkToAdvancedProperties;
             }else if($code==407 ){
                 $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
             }
@@ -262,7 +267,7 @@
         }else if(!$items){
             print "<div style='color:red'><br />Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
             if($code==0){
-                print "<div style='color:red'><br />Verify your Heurist proxy settings.</div>";
+                print "<div style='color:red'><br />Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
             }
         }else{
 
@@ -286,11 +291,14 @@
             // 2) show mapping issues report
             if(count($mapping_rt_errors)>0 || count($mapping_rt_errors2)>0 || count($mapping_dt_errors)>0){
 
+                /* old version of message
                 print "<div style='color:red'><br />
+                The following record types required for Zotero synchronisation are not present in your database
                 Synchronisation requires bibliographic record types to be defined in the database (Zotero to Heurist type mappings are defined in the code at /import/biblio/zoteroMap.xml)."; 
+                */
 
                 if(count($mapping_rt_errors)>0){
-                    print "<p style='color:red'>The following record types were not found:";                    
+                    print "<p style='color:red'>The following record types required for Zotero synchronisation are not present in your database:";                    
                     print "<br />".implode("<br />",$mapping_rt_errors).'</p>';
                 }
                 if(count($mapping_rt_errors2)>0){
@@ -301,7 +309,7 @@
                     print "<p style='color:red'><br />Issues with base field (detail) types:<br />".implode("<br />",$mapping_dt_errors).'</p>';
                 }
                 
-                print "<p style='color:red'>Use Database > Structure > Acquire from databases to acquire these record types from the Heurist Core Definitions database (# 2)</p>";
+                print "<p style='color:red'>Please import them from the Heurist_Reference_Set database (# 3) using Database > Structure > From Databases</p>";
                 print "</div>";
             }
 

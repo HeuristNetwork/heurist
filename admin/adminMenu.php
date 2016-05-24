@@ -50,6 +50,8 @@ if (array_key_exists('mode', $_REQUEST)) {
             $rtID = $_REQUEST['rtID'];
             $url = $url . "&rtID=" . $rtID;
         }
+    } else if ($mode == "properties2") { // show advanced properties
+        $url = "setup/dbproperties/editSysIdentificationAdvanced.php?db=" . HEURIST_DBNAME;
     }
 } // end direct access to administration page functions
 ?>

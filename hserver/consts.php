@@ -65,6 +65,7 @@ define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/ww
 define('HEURIST_SERVER_URL', $serverBaseURL);
 define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. http://heurist.sydney.edu.au/h4/
 
+define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 
 if ($dbHost) {
     define('HEURIST_DBSERVER_NAME', $dbHost);

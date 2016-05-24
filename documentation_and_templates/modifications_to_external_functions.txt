@@ -38,6 +38,8 @@ ext/js/evol.colorpicker.js  (378)  add palette div to document to guarantee topm
 ext/js/themeswitchcontrol.js - reimplementation of appearance (css)
 
 
+external/php/phpZotero.php (114-121) support proxy settings
+                           (598) new property totalCount
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
