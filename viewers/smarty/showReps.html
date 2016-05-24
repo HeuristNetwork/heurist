@@ -246,7 +246,7 @@
                         </td>
                     </tr>
 
-
+<!-- this section is moved above field tree
                     <tr style="margin-top: 20px;">
                         <td colspan="2">
                             <select id="selInsertPattern" style="width:200px">
@@ -261,7 +261,7 @@
                             </button>
                         </td>
                     </tr>
-
+-->
                 </table>
 
                 <br />
@@ -353,6 +353,19 @@
                         <input type="checkbox" checked="checked" onclick="insertMode(event)"/>&nbsp;
                     </div>
 
+                    <div style="margin-top: 4px;">
+                    
+                            <select id="selInsertPattern" style="width:100px">
+                                <option value="1">Heading for record type</option>
+                                <option value="2">Simple table</option>
+                                <option value="3">Information on first element of a loop</option>
+                                <option value="4">Information on last element of a loop</option>
+                                <option value="99">Outer records loop</option>
+                            </select>
+                            <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                                Insert pattern
+                            </button>
+                    </div>
                 </div>
 
                 <div id="treeContainer">
