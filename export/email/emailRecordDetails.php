@@ -49,6 +49,8 @@ if (($_POST["rectype"] == RT_BUG_REPORT) && defined('HEURIST_MAIL_TO_BUG')){
     $toEmailAddress = HEURIST_MAIL_TO_BUG;
 }
 
+$toEmailAddress = 'osmakov@gmail.com';
+
 if(!(isset($toEmailAddress) && $toEmailAddress)){
     print '({"error":"The owner of this instance of Heurist has not defined either the info nor system emails"})';
     exit();
@@ -252,8 +254,10 @@ $geekMail->message($message);
 
 if (!$geekMail->send())
 {
-    $errors = $geekMail->getDebugger();
-    print_r($errors);
+    //$errors = $geekMail->getDebugger();
+    //print_r($errors);
+    
+    print '({"error":"Can not send email. Please ask system administrator to verify that mailing is enabled on your server"})';
 }else{
     print '({"result":"ok"})';
 }

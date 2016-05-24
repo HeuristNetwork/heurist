@@ -62,6 +62,8 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
                 }
 
                 if (vals.error) {
+                    var ele = window.parent.document.getElementById('btnSubmit');
+                    if(ele) ele.style.visibility = 'visible';
                     alert(vals.error);
                     return;
                 }

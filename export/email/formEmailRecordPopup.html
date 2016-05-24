@@ -93,11 +93,18 @@
 <div class="header"><b><span id=rectype-val></span></b><span id=title-val></span></div>
 <div id="results"><iframe frameborder=0 class=tab id=edit-frame style="width: 100%; height: 100%;"></iframe></div>
 <div id="add_records_footer" style="width:100%;text-align: center;height:30px">
-	<input id="btnSubmit" type=button onClick="window.HEURIST.edit.save();" value="Email record" class="greyButton" style="padding-left: 20px !important;">
+	<input id="btnSubmit" type=button onClick="submitBugReportForm()" 
+           value="Email record" class="greyButton" style="padding-left: 20px !important;">
 </div>
 
   <script type="text/javascript">
 
+function submitBugReportForm(){
+    var ele = document.getElementById('btnSubmit');
+    ele.style.visibility = 'hidden';
+    window.HEURIST.edit.save();
+}  
+  
 // object to manage this popup form
 window.HEURIST.edit = {
 	publicHasChanged: false,
@@ -128,6 +135,8 @@ window.HEURIST.edit = {
 			form.action = top.HEURIST.baseURL_V3+'export/email/emailRecordDetails.php?db='+db;
 
 			if (form.onsubmit  &&  ! form.onsubmit()) {
+                var ele = document.getElementById('btnSubmit');
+                ele.style.visibility = 'visible';
 				return;	// submit failed ... up to the individual form handlers to display messages
 			}
 			top.HEURIST.registerEvent(editFrame, "load", function() {
