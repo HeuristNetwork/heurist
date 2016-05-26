@@ -31,10 +31,16 @@
     $action = @$_REQUEST['a']; //$system->getError();
      
     $system = new System();
-    if( ! $system->init(@$_REQUEST['db'], ($action!='sysinfo') ) ){ //the only action that is possible without db 
+        
+    
+    if($action=='is_logged'){ //just check only if logged in
+        
+        $res = $system->is_logged(@$_REQUEST['db']);
+        
+    }else if( ! $system->init(@$_REQUEST['db'], ($action!='sysinfo') ) ){ //the only action that is possible without db 
 
         //get error and response
-        $response = $system->getError();
+        //$response = $system->getError();
 
     }else{
 
@@ -140,13 +146,14 @@
 
         }
         
-        if(is_bool($res) && !$res){
-            $response = $system->getError();
-        }else{
-            $response = array("status"=>HEURIST_OK, "data"=> $res);
-        }
-        
     }
+    
+    if(is_bool($res) && !$res){
+        $response = $system->getError();
+    }else{
+        $response = array("status"=>HEURIST_OK, "data"=> $res);
+    }
+        
 
     header('Content-type: text/javascript');
     print json_encode($response);

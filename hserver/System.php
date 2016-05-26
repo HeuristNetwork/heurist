@@ -142,7 +142,6 @@ class System {
     }
 
 
-
     // TODO: JJ Placed here by mistake: there is no reason to resolve all these constants on every request
 
     /**
@@ -649,6 +648,26 @@ class System {
     }
 
 
+    /*
+    * verify session only (without database connection and initialization)
+    */
+    public function is_logged($db){
+       
+       if($db){
+            $this->dbname = $db;
+            if(!(strpos($db, HEURIST_DB_PREFIX)===0)){
+                $db = HEURIST_DB_PREFIX.$db;
+            }
+            $this->dbname_full = $db;
+        }else{
+            $this->addError(HEURIST_INVALID_REQUEST, "Database parameter not defined");
+            $this->mysqli = null;
+            return false;
+        }
+        $this->start_my_session();
+        return $this->login_verify()?'1':'0';        
+    }
+    
 
     /**
     * Load user info from session

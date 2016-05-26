@@ -1132,7 +1132,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     that.element.dialog("close");
 
                 }else{
-                    top.HEURIST4.msg.redirectToError(response.message);
+                    top.HEURIST4.msg.showMsgErr(response, true);
                 }
             }
 

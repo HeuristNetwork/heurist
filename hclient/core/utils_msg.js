@@ -21,6 +21,8 @@ checkLength2 - get message if input value beyound given ranges
 showDialog - creates div with frame, loads url content into it and shows it as popup dialog, on close this div will be removed
 showElementAsDialog
 
+createAlertDiv - return error-state html with alert icon 
+
 */
 if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
@@ -32,7 +34,7 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
         }
     },
 
-    showMsgErr: function(response){
+    showMsgErr: function(response, needlogin){
         var msg = "";
         if(typeof response === "string"){
             msg = response;
@@ -44,8 +46,9 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             }
             msg = top.HR(msg);
 
-            if(response.sysmsg){
-
+            if(response.sysmsg && response.status!=top.HAPI4.ResponseStatus.REQUEST_DENIED){
+                //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired
+                
                 if(typeof response.sysmsg['join'] === "function"){
                     msg = msg + '<br>System error: ' +response.sysmsg.join('<br>');
                 }else{
@@ -65,8 +68,12 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
 
             }else if(response.status==top.HAPI4.ResponseStatus.REQUEST_DENIED){
 
-                msg = msg + "<br><br>This action is not allowed for your current permissions";
-
+                if(needlogin && response.sysmsg==0){
+                    msg = msg + '<br><br>It appears you are not logged in or your session has been experied. You have to re-login';
+                }else{
+                    msg = msg + "<br><br>This action is not allowed for your current permissions";    
+                } 
+                
             }else if(response.status==top.HAPI4.ResponseStatus.DB_ERROR){
                 msg = msg + "<br><br>Please consult your system administrator. Error may be due to an incomplete "
                         +"database eg. missing stored procedures, functions, triggers, or there may be an "
@@ -77,7 +84,17 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
                 msg = 'Error_Empty_Message';
         }
 
-        top.HEURIST4.msg.showMsgDlg(msg, null, "Error");
+        var buttons = {};
+        buttons[top.HR('OK')]  = function() {
+                    var $dlg = top.HEURIST4.msg.getMsgDlg();            
+                    $dlg.dialog( "close" );
+                    if(response.status==top.HAPI4.ResponseStatus.REQUEST_DENIED && needlogin){
+                            //top.HAPI4.setCurrentUser(null);
+                            //$(top.document).trigger(top.HAPI4.Event.LOGOUT);
+                    }
+                }; 
+        top.HEURIST4.msg.showMsgDlg(msg, buttons, "Error");
+        
     },
 
     //
@@ -626,4 +643,15 @@ if (! top.HEURIST4.msg) top.HEURIST4.msg = {
             return $dlg;
     },
 
+    //
+    //
+    //
+    createAlertDiv: function(msg){
+        
+        return '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">'+
+                                '<span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'+
+                                msg+'</div>';
+    },
+
+    
 };

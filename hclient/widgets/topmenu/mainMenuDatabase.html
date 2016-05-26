@@ -27,7 +27,7 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 <li>DATABASE</li>
 
 <li style="padding-left:5px;"><a href="common/connect/getListOfDatabases.php?popup=1&amp;v=4" name="auto-popup" class="portrait h3link"
-    onClick="{return false;}"
+    onClick="{return false;}" data-nologin="1" 
     title="Open and login to another Heurist database - current database remains open">
     Open database</a>
 </li>
@@ -92,7 +92,7 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
 <li style="padding-left:5px;" id="menu-database-refresh">
     <a href="#"
-        onClick="{return false;}"
+        onClick="{return false;}" data-nologin="1" 
         title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
         Refresh</a>
 </li>

@@ -234,7 +234,7 @@ $.widget( "heurist.svs_list", {
             if(response.status == top.HAPI4.ResponseStatus.OK){
                 top.HAPI4.currentUser.ugr_SvsTreeData[groupToSave].modified = response.data;
             }else{
-                top.HEURIST4.msg.showMsgErr(response);
+                top.HEURIST4.msg.showMsgErr(response, true);
             }
 
         } );
@@ -1210,7 +1210,7 @@ $.widget( "heurist.svs_list", {
         if(!svs) return;
 
         top.HEURIST4.msg.showMsgDlg(top.HR("Delete '"+ svsTitle  +"'? Please confirm"),  function(){
-
+                 
             top.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
                     if(response.status == top.HAPI4.ResponseStatus.OK){
@@ -1221,7 +1221,7 @@ $.widget( "heurist.svs_list", {
                         delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response, true);
                     }
                 }
 

@@ -203,6 +203,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   login        - login and get current user info
     *   logout
     *   reset_password
+    *   is_logged
     *   sys_info     - get current user info and database settings
     *   save_prefs   - save user preferences  in session
     *   mygroups     - description of current Workgroups
@@ -243,6 +244,13 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', {a:'logout'}, callback);
             }
 
+            /**
+            * Just check server side that session is not expired. Returns 1 if OK, 0 if expired
+            */
+            ,is_logged: function(callback){
+                _callserver('usr_info', {a:'is_logged'}, callback);
+            }
+            
             /**
             * Get current user if logged in, and global database settings
             */

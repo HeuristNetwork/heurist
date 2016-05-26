@@ -278,7 +278,7 @@ $.widget( "heurist.svs_manager", {
                         delete top.HAPI4.currentUser.usr_SavedSearch[svsID];
 
                     }else{
-                        top.HEURIST4.msg.showMsgErr(response);
+                        top.HEURIST4.msg.showMsgErr(response, true);
                     }
                 }
 

@@ -270,8 +270,6 @@ $.widget( "heurist.mainMenu", {
 
     },
 
-
-
     _initMenu: function(name, parentdiv){
 
         var that = this;
@@ -332,7 +330,10 @@ $.widget( "heurist.mainMenu", {
                 .css({'position':'absolute', 'padding':'5px'})
                 .appendTo( that.document.find('body') )
                 //.addClass('ui-menu-divider-heurist')
-                .menu({select: function(event, ui){ that._menuActionHandler(event, ui.item.attr('id')); return false; }});
+                .menu({select: function(event, ui){ 
+                        that._menuActionHandler(event, ui.item.attr('id'));
+                        return false; 
+                }});
 
                 if(top.HAPI4.is_logged()){
                     that['menu_'+name].find('.logged-in-only').show();
@@ -403,7 +404,13 @@ $.widget( "heurist.mainMenu", {
                options['afterclose'] = this._refreshLists;
         }
 
-        top.HEURIST4.msg.showDialog(url, options);
+        
+        if(event.target && $(event.target).attr('data-nologin')!='1'){
+            //check if login
+            this._isLoggedIn(function(){top.HEURIST4.msg.showDialog(url, options);});
+        }else{
+            top.HEURIST4.msg.showDialog(url, options);
+        }        
 
         event.preventDefault();
         return false;
@@ -459,27 +466,28 @@ $.widget( "heurist.mainMenu", {
     },
 
     _menuActionHandler: function(event, action){
-
+        
         var that = this;
+        
         var p = false;
         if(action == "menu-profile-preferences"){
-            this._editPreferences(); p=true;
+            this._isLoggedIn(this._editPreferences); p=true;
         }else if(action == "menu-database-refresh"){
             this._refreshLists( true ); p=true;
         }else if(action == "menu-export-hml-0"){ // Result set
-            this.exportHML(true,false,false); p=true; // isAll, includeRelated, ishuni
+            this._isLoggedIn(function(){that.exportHML(true,false,false)); p=true; // isAll, includeRelated, ishuni
         }else if(action == "menu-export-hml-1"){ //selected
-            this.exportHML(false,false,false); p=true;
+            this._isLoggedIn(function(){that.exportHML(false,false,false)); p=true;
         }else if(action == "menu-export-hml-2"){ // selected
-            this.exportHML(true,true,false); p=true;
+            this._isLoggedIn(function(){that.exportHML(true,true,false)); p=true;
         }else if(action == "menu-export-hml-3"){ // selected + related
-            this.exportHML(true,false,true); p=true;
+            this._isLoggedIn(function(){that.exportHML(true,false,true)); p=true;
         }else if(action == "menu-export-kml"){
-            this.exportKML(true); p=true;
+            this._isLoggedIn(function(){that.exportKML(true)})); p=true;
         }else if(action == "menu-export-rss"){
-            this.exportFeed('rss'); p=true;
+            this._isLoggedIn(function(){that.exportFeed('rss')); p=true;
         }else if(action == "menu-export-atom"){
-            this.exportFeed('atom'); p=true;
+            this._isLoggedIn(function(){that.exportFeed('atom')); p=true;
         }else if(action == "menu-help-inline"){
 
             var ishelp_on = (top.HAPI4.get_prefs('help_on')=='1')?'0':'1';
@@ -494,6 +502,7 @@ $.widget( "heurist.mainMenu", {
         if( p ){
             event.preventDefault();
         }
+        
     },
 
 
@@ -672,6 +681,24 @@ $.widget( "heurist.mainMenu", {
     },
 
 
+    _isLoggedIn: function(callback){
+        
+            //check if login
+            top.HAPI4.SystemMgr.is_logged(
+                function(response){
+                    if(response.status == top.HAPI4.ResponseStatus.OK && response.data=='0'){
+                            response.status = top.HAPI4.ResponseStatus.REQUEST_DENIED;
+                            response.message = 'To perform this operation you have to be logged in';
+                            response.sysmsg = 0;
+                    }
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                        callback();
+                    }else{
+                        top.HEURIST4.msg.showMsgErr(response, true);
+                    }
+                });
+               
+    },
 
     /**
     * Open Edit Preferences dialog (@todo: ? move into separate file?)

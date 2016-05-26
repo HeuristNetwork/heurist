@@ -381,6 +381,7 @@ function hSvsEdit(args) {
                         //
                         top.HAPI4.SystemMgr.ssearch_save(request,
                             function(response){
+                                
                                 if(response.status == top.HAPI4.ResponseStatus.OK){
 
                                     var svsID = response.data;
@@ -400,8 +401,9 @@ function hSvsEdit(args) {
 
 
                                 }else{
-                                    message.addClass( "ui-state-highlight" );
-                                    message.text(response.message);
+                                    top.HEURIST4.msg.showMsgErr(response, true);
+                                    //message.addClass( "ui-state-highlight" );
+                                    //message.text(response.message);
                                 }
                             }
 

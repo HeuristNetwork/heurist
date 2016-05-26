@@ -181,7 +181,7 @@ $.widget( "heurist.profile_edit", {
                                 top.HEURIST4.msg.showMsgErr("Unexpected user data obtained from server");
                             }
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            top.HEURIST4.msg.showMsgErr(response, true);
                         }
                     }
                 );
@@ -362,7 +362,7 @@ $.widget( "heurist.profile_edit", {
 
                             }
                         }else{
-                            top.HEURIST4.msg.showMsgErr(response);
+                            top.HEURIST4.msg.showMsgErr(response, !that.options.isregistration);
                             if(that.options.isregistration){
                                 that.edit_form.find("#ugr_Captcha").val('');
                                 that._refreshCaptcha();
