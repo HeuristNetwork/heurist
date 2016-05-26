@@ -161,7 +161,7 @@ $.widget( "heurist.mainMenu", {
             .button({icons: {
                 primary: "ui-icon-circle-plus"
             }})
-            .click( function(){ that._addNewRecord(); });
+            .click( function(){top.HAPI4.SystemMgr.is_logged(that._addNewRecord);} );
         }
 
 
@@ -407,7 +407,7 @@ $.widget( "heurist.mainMenu", {
         
         if(event.target && $(event.target).attr('data-nologin')!='1'){
             //check if login
-            this._isLoggedIn(function(){top.HEURIST4.msg.showDialog(url, options);});
+            top.HAPI4.SystemMgr.is_logged(function(){top.HEURIST4.msg.showDialog(url, options);});
         }else{
             top.HEURIST4.msg.showDialog(url, options);
         }        
@@ -471,23 +471,23 @@ $.widget( "heurist.mainMenu", {
         
         var p = false;
         if(action == "menu-profile-preferences"){
-            this._isLoggedIn(this._editPreferences); p=true;
+            top.HAPI4.SystemMgr.is_logged(this._editPreferences); p=true;
         }else if(action == "menu-database-refresh"){
             this._refreshLists( true ); p=true;
         }else if(action == "menu-export-hml-0"){ // Result set
-            this._isLoggedIn(function(){that.exportHML(true,false,false)); p=true; // isAll, includeRelated, ishuni
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,false)}); p=true; // isAll, includeRelated, ishuni
         }else if(action == "menu-export-hml-1"){ //selected
-            this._isLoggedIn(function(){that.exportHML(false,false,false)); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportHML(false,false,false)}); p=true;
         }else if(action == "menu-export-hml-2"){ // selected
-            this._isLoggedIn(function(){that.exportHML(true,true,false)); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,true,false)}); p=true;
         }else if(action == "menu-export-hml-3"){ // selected + related
-            this._isLoggedIn(function(){that.exportHML(true,false,true)); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportHML(true,false,true)}); p=true;
         }else if(action == "menu-export-kml"){
-            this._isLoggedIn(function(){that.exportKML(true)})); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportKML(true)}); p=true;
         }else if(action == "menu-export-rss"){
-            this._isLoggedIn(function(){that.exportFeed('rss')); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportFeed('rss')}); p=true;
         }else if(action == "menu-export-atom"){
-            this._isLoggedIn(function(){that.exportFeed('atom')); p=true;
+            top.HAPI4.SystemMgr.is_logged(function(){that.exportFeed('atom')}); p=true;
         }else if(action == "menu-help-inline"){
 
             var ishelp_on = (top.HAPI4.get_prefs('help_on')=='1')?'0':'1';
@@ -678,26 +678,6 @@ $.widget( "heurist.mainMenu", {
     */
     _refreshLists: function( is_message ){
         top.HAPI4.SystemMgr.get_defs_all( is_message, this.document);
-    },
-
-
-    _isLoggedIn: function(callback){
-        
-            //check if login
-            top.HAPI4.SystemMgr.is_logged(
-                function(response){
-                    if(response.status == top.HAPI4.ResponseStatus.OK && response.data=='0'){
-                            response.status = top.HAPI4.ResponseStatus.REQUEST_DENIED;
-                            response.message = 'To perform this operation you have to be logged in';
-                            response.sysmsg = 0;
-                    }
-                    if(response.status == top.HAPI4.ResponseStatus.OK){
-                        callback();
-                    }else{
-                        top.HEURIST4.msg.showMsgErr(response, true);
-                    }
-                });
-               
     },
 
     /**

@@ -246,10 +246,29 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             /**
             * Just check server side that session is not expired. Returns 1 if OK, 0 if expired
-            */
             ,is_logged: function(callback){
                 _callserver('usr_info', {a:'is_logged'}, callback);
             }
+            */
+            , is_logged: function(callback){
+        
+                //check if login
+                _callserver('usr_info', {a:'is_logged'}, 
+                function(response){
+                    if(response.status == top.HAPI4.ResponseStatus.OK && response.data=='0'){
+                            response.status = top.HAPI4.ResponseStatus.REQUEST_DENIED;
+                            response.message = 'To perform this operation you have to be logged in';
+                            response.sysmsg = 0;
+                    }
+                    if(response.status == top.HAPI4.ResponseStatus.OK){
+                        callback();
+                    }else{
+                        top.HEURIST4.msg.showMsgErr(response, true);
+                    }
+                });
+               
+            }
+            
             
             /**
             * Get current user if logged in, and global database settings

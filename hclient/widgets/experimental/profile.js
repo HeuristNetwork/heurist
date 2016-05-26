@@ -381,23 +381,7 @@ $.widget( "heurist.profile", {
 
     },
 
-    /*
-    islogged: function(){
 
-    var that = this;
-
-    top.HAPI4.SystemMgr.is_logged(
-    function(response){
-    if(response.status == top.HAPI4.ResponseStatus.OK){
-    alert(response.data);
-    }else{
-    top.HEURIST4.msg.showMsgErr(response);
-    }
-    }
-    );
-
-
-    },      */
 
     logout: function(){
 

@@ -267,10 +267,12 @@ $.widget( "heurist.search", {
         }});
 
         this._on( this.btn_search_save, {  click: function(){
+            top.HAPI4.SystemMgr.is_logged(function(){ 
             var  app = top.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //top.HAPI4.LayoutMgr.appGetWidgetById('ha13');
             if(app && app.widget){
                 $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
             }
+            });
         } });
 
         
@@ -306,7 +308,7 @@ $.widget( "heurist.search", {
             .button({icons: {
                 primary: 'ui-icon-plusthick' //"ui-icon-circle-plus"
             }})
-            .click( function(){ that._addNewRecord(); });
+            .click( function(){ top.HAPI4.SystemMgr.is_logged(that._addNewRecord); });
 
             
         } // add record button
@@ -326,11 +328,14 @@ $.widget( "heurist.search", {
             .addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
             .button()
-            .click( function(){ 
+            .click(function(){ 
+                top.HAPI4.SystemMgr.is_logged(function(){ 
                     top.HEURIST4.msg.showDialog(window.HAPI4.basePathV3 + 'admin/structure/rectypes/manageRectypes.php?popup=1&db='+top.HAPI4.database,
                     { width:1200, height:600, title:'Manage Structure', 
-                      afterclose: function(){top.HAPI4.SystemMgr.get_defs_all( false, that.document);} });
+                      afterclose: function(){top.HAPI4.SystemMgr.get_defs_all( false, that.document)}})
+                });
             });
+            
         
 
         this.div_buttons = $('<div>')
