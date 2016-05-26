@@ -49,8 +49,6 @@ if (($_POST["rectype"] == RT_BUG_REPORT) && defined('HEURIST_MAIL_TO_BUG')){
     $toEmailAddress = HEURIST_MAIL_TO_BUG;
 }
 
-$toEmailAddress = 'osmakov@gmail.com';
-
 if(!(isset($toEmailAddress) && $toEmailAddress)){
     print '({"error":"The owner of this instance of Heurist has not defined either the info nor system emails"})';
     exit();

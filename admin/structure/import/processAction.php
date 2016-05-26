@@ -37,6 +37,7 @@
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../saveStructureLib.php');
+require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
 
 if (! is_admin()) {
 	echo "Error: You do not have sufficient privileges for this action";
@@ -171,6 +172,10 @@ function import() {
 		echo "Successfully imported record type '".$importRty["rty_Name"]."' from ".$sourceDBName."<br />";
 		echo "<br />";
         echo "IMPORTED:".implode(",", $importedRecTypes);
+        
+        sendReportEmail( $importRty, $localRtyID );
+
+        
 		return $localRtyID;
 	// duplicate record found
 	} else if (substr(mysql_error(), 0, 9) == "Duplicate") {
@@ -194,6 +199,21 @@ function import() {
 		echo $statusMsg;
 	}
 }
+
+function sendReportEmail($importRty, $localRtyID){
+    global $sourceDBName, $targetDBName, $sourceDBID;
+    
+    if(checkSmtp()){
+        
+        $email_text = 'Import record type '
+         .$importRty["rty_ID"].' ('.$importRty["rty_OriginatingDBID"].'-'.$importRty["rty_IDInOriginatingDB"].') "'.$importRty["rty_Name"]."\"\n"
+         .'From database #'.$sourceDBID.' "'.$sourceDBName.'" to "'.$targetDBName.'" at '.HEURIST_SERVER_URL;    
+        
+        $rv = sendEmail(HEURIST_MAIL_TO_INFO, "Import recordtype", $email_text, null);
+    }
+
+}
+
 
 function importDetailType($importDty) {
 	global $error, $importLog, $tempDBName, $targetDBName, $sourceDBID, $fields_correspondence;

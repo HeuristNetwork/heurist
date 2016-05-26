@@ -596,7 +596,12 @@
                         <label for="inputFilterByGroup">Filter by group:&nbsp;</label><select id="inputFilterByGroup" size="1"
                             style="width:138px;height:16px"><option value="all">all groups</option></select>
                     </div>
-                    <div style="display:inline-block;">
+                    
+                    <div style="display:none;"> <!--  Ian Johnson: 2016-05-26  
+    hide the checkboxes, set the checked choices as defaults (we allowed these incomplete imports because 
+    we used to have a lot of trouble importing structures, but now those problems are mostly indicative 
+    of faulty structures which shouldn't be imported). Importing incomplete or faulty structures will only 
+    cause further problems down the track. -->
                         <input id="inputFilterByExist" type="checkbox"/>
                         <label for="inputFilterByExist">&nbsp;&nbsp;Show record types with same original source</label><br />
                         <input type="checkbox" id="noRecursion" title="Check this to prohibit recursive import of record types."
