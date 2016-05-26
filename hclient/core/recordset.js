@@ -651,7 +651,9 @@ function hRecordSet(initdata) {
             return this.getSubSet(_records, _order);
         },
         
-        //take records from given recordset
+        //
+        // take records from given recordset
+        //
         fillHeader: function( recordset2 ){
             
             if(recordset2==null){

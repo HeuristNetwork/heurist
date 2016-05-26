@@ -520,8 +520,7 @@ $.widget( "heurist.manageEntity", {
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
                 'request_id' : pageno,
-                'dty_ID'     : arr_ids,
-                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
+                'dty_ID'     : arr_ids
         };
         
         top.HAPI4.EntityMgr.doRequest(request, callback);

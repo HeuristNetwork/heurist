@@ -427,6 +427,11 @@ class System {
     * keep error message (for further use with getError)
     */
     public function addError($status, $message='', $sysmsg=null) {
+        
+        if($status==HEURIST_REQUEST_DENIED){
+            $sysmsg = $this->get_user_id();
+        }
+        
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
         return $this->errors;
     }

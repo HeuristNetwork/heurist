@@ -2158,12 +2158,12 @@ function doImport($mysqli, $imp_session, $params){
 
 
 //
-// assign real record ID inot import (source) table
+// assign real record ID into import (source) table
 //
 function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
     global $mysqli;
 
-    if(is_array($new_record_ids) && count($new_record_ids)>0){
+    if(is_array($newids) && count($newids)>0){
     
     $newids = "'".implode($csv_mvsep, $newids)."'";
 

@@ -659,19 +659,11 @@ function hAPI(_db, _oninit) { //, _currentUser
     *
     * see entityScrud.php and db[TableName].php in dbaccess
     *
-    * methods:
-    *   login        - login and get current user info
-    *   logout
-    *   reset_password
-    *   sys_info     - get current user info and database settings
-    *   save_prefs   - save user preferences  in session
-    *   mygroups     - description of current Workgroups
-    *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber
-    *   ssearch_save - save saved search in database
-    *   ssearch_delete - delete saved searches by IDs
-    *   ssearch_savetree - save saved search treeview data
-    *   ssearch_gettree - get saved search treeview data
-    *   get_defs     - get the desired database structure definition
+    * methods: 
+    *   config - loads entity config
+    *   search
+    *   save
+    *   delete
     *
     * @returns {Object}
     */
@@ -747,7 +739,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = top.HEURIST4.util.random();
-                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';
+                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
             

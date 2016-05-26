@@ -546,7 +546,7 @@ top.HEURIST4.ui = {
     /**
     * get SELECT for details of given recordtype
     *
-    * rtyIDs - reccord type ID otherwise returns all field types grouped by field groups
+    * rtyIDs - record type ID otherwise returns all field types grouped by field groups
     * allowedlist - of data types to this list 
     */
     createRectypeDetailSelect: function(selObj, rtyIDs, allowedlist, topOptions) {
@@ -804,7 +804,14 @@ top.HEURIST4.ui = {
             fieldTitle = 'dtg_Name';
             request['entity'] = 'defDetailTypes';
             request['dty_DetailTypeGroupID'] = configMode.filter_group;
+            
+        }else if(configMode.entity=='SysImportSessions'){
+            fieldTitle = 'imp_table';
+            request['entity'] = 'sysImportSessions';
+            request['ugr_ID'] = configMode.filter_group;
         }
+        
+        
         
         top.HAPI4.EntityMgr.doRequest(request,
                     function(response){
@@ -959,7 +966,7 @@ top.HEURIST4.ui = {
                  
                  
     }
-
+    
 }//end ui
 
 }
