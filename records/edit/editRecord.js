@@ -1753,7 +1753,7 @@ console.log('heurist not defined');
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
                 showTrigger: '<img src="'+top.HEURIST.baseURL_V3+'common/images/cal.gif" '+
-                 'style="margin-left:10px" alt="Popup" class="trigger">'}
+                 'style="margin-left:10px;cursor:pointer !important" alt="Popup" class="trigger">'}
             );            
                 
             return null;
