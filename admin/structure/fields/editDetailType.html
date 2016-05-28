@@ -126,16 +126,19 @@
                 <div class="input-cell">
                     <div id="defineTerms">
                         <span class="dtyValue" id="termsVocab"></span>
-                        &nbsp;&nbsp; Preview
                         <!-- ARTEM TODO: This displays the preview but doubles up the first time -->
-                        <span class="dtyValue" id="termsPreview">
+                        <span class="dtyValue" id="termsPreview" style="display:inline-block;margin-left: 1em;">
                         </span>
+                        <span id="divAddVocab2" style="display:none; margin-left: 1em;">
+                            <input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/>
+                        </span>    
+                        
                         <div class="help prompt">The set of terms which may be selected for this field (for enumerated values and relationships)</div>
                         <div>&nbsp;</div>
                         <span id="divAddSelTerm" style="display:inline-block; margin-bottom: 10px;">
                             <input type="submit" value="Select term" id="btnAddSelTerm" style="max-width:100px;" onClick="window.detailTypeEditor.onAddSelectTerms()"/></span>
                         <span id="divAddVocab" style="display:none; margin-left: 10px; margin-right: 10px;">
-                            <input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/>
+                            <!-- input type="submit" value="Add Vocabulary" title="Add Vocabulary" id="btnAddVocab" style="max-width:100px;" onClick="window.detailTypeEditor.onAddVocabulary()"/ -->
                             <input type="submit" value="Edit terms tree" style="margin-left: 10px;"  onClick="{window.detailTypeEditor.showOtherTerms();}"/>
                         </span>
                     </div>
@@ -221,8 +224,8 @@
 
             <br />
             <div class="actionButtons">
-                <input type="button" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
                 <input type="button" value="Save" id="btnSave" onClick="window.detailTypeEditor.save();" />
+                <input type="button" value="Cancel" onClick="window.detailTypeEditor.cancel();" />
             </div>
         </div>
 

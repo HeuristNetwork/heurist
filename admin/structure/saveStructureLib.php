@@ -512,10 +512,10 @@
 			$data = array();
 			$data['dtFields'] = array(
 			DT_NAME => getInitRty($ri, $di, $dt, DT_NAME, array('required',1,40)),
-			DT_CREATOR => getInitRty($ri, $di, $dt, DT_CREATOR, array('optional',0,40)),
-			DT_SHORT_SUMMARY => getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60)),
-			DT_THUMBNAIL => getInitRty($ri, $di, $dt, DT_THUMBNAIL, array('recommended',1,60)),
-			DT_GEO_OBJECT => getInitRty($ri, $di, $dt, DT_GEO_OBJECT, array('recommended',1,40))
+			//DT_CREATOR => getInitRty($ri, $di, $dt, DT_CREATOR, array('optional',0,40)),
+			DT_SHORT_SUMMARY => getInitRty($ri, $di, $dt, DT_SHORT_SUMMARY, array('recommended',1,60))
+			//DT_THUMBNAIL => getInitRty($ri, $di, $dt, DT_THUMBNAIL, array('recommended',1,60)),
+			//DT_GEO_OBJECT => getInitRty($ri, $di, $dt, DT_GEO_OBJECT, array('recommended',1,40))
 			// DT_START_DATE => getInitRty($ri, $di, $dt, DT_START_DATE, array('recommended',1,40)),
 			// DT_END_DATE => getInitRty($ri, $di, $dt, DT_END_DATE, array('recommended',1,40))
 			);

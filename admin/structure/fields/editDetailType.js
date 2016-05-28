@@ -298,7 +298,8 @@ function DetailTypeEditor() {
         var	btn_addsel = Dom.get("btnAddSelTerm"),
         editedTermTree = "",
         divAddSelTerm = Dom.get("divAddSelTerm"),
-        divAddVocab = Dom.get("divAddVocab");
+        divAddVocab = Dom.get("divAddVocab"),
+        divAddVocab2 = Dom.get("divAddVocab2");
 
         //btn_addsel.disabled = false;
 
@@ -307,15 +308,18 @@ function DetailTypeEditor() {
             editedTermTree = el_sel.value;
             divAddSelTerm.style.display = "inline-block";
             divAddVocab.style.display = "inline-block";
+            divAddVocab2.style.display = "inline-block";
         }else if(el_sel.value < 0){
             //btn_addsel.disabled = true;
             //btn_addsel.value = "";
             divAddSelTerm.style.display = "none";
             divAddVocab.style.display = "inline-block";
+            divAddVocab2.style.display = "inline-block";
         }else{
             btn_addsel.value = "Select terms";
             divAddSelTerm.style.display = "inline-block";
             divAddVocab.style.display = "none";
+            divAddVocab2.style.display = "none";
         }
 
         if(event){
@@ -353,11 +357,16 @@ function DetailTypeEditor() {
         }
 
         if(!Hul.isempty(allTerms)) {
+            //$('<label>Preview</label>').appendTo($(prev));
+            prev.appendChild(document.createTextNode('Preview: '));
             var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
             el_sel.style.backgroundColor = "#cccccc";
             el_sel.onchange =  _preventSel;
-            el_sel.style.maxWidth = '155px';
+            el_sel.style.maxWidth = '120px';
             prev.appendChild(el_sel);
+            $(prev).css('display','inline-block');
+        }else{
+            $(prev).css('display','none');
         }
     }
 

@@ -22,6 +22,7 @@
 var Hul = top.HEURIST.util;
 
 var rectypeID = Hul.getUrlParameter('rectypeID', this.location.search);
+
 var db = (top.HEURIST.parameters && top.HEURIST.parameters.db? top.HEURIST.parameters.db :
                         (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
@@ -65,6 +66,10 @@ function init() {
     if(newRectypeCode > 0) { // Create empty form
         initializeEmptyForm();
         document.getElementById("rty_TitleMask_row").style.display = "none";
+        if(newRectypeCode == 1){
+            _upload_icon(3);
+        }
+        
     }else{
         document.getElementById("definitdiv").style.display = "none";
     }

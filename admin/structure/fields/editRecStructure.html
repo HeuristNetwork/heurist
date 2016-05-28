@@ -215,7 +215,18 @@
 
     <body class="popup yui-skin-sam" style="overflow: auto;">
         <h2 id="recordTitle" style="margin:10px 0"></h2>
-        <div id="page-inner" style="top:50px; bottom:60px;">
+        
+        <div  id="divTitleMask">
+            <div style="display:inline-block;vertical-align:top">
+                 <label for="rty_TitleMask">Constructed Title</label><br/>
+                 <span><button onClick="editStructure.doEditTitleMask(false)">Edit mask</button></span>
+            </div>
+            <textarea readonly cols="450" id="rty_TitleMask" rows="2" 
+                style="width:720px;height:40px;display:inline-block; background-color: lightgray;"></textarea>
+        </div>
+        
+        <div id="page-inner" style="top:100px; bottom:60px;">
+        
             <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
             <script src="../../../common/php/displayPreferences.php"></script>
             <script src="../../../common/php/getMagicNumbers.php"></script>

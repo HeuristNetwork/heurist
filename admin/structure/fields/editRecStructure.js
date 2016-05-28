@@ -59,7 +59,35 @@ function EditRecStructure() {
     db,
     warningPopupID = null,
     _structureWasUpdated = false;
+    
+    // buttons on top and bottom of design tab
+    var hToolBar = '<div style=\"display:none;\">'+
+        //<div style="display:inline-block; text-align:left">
+        //'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
+        //'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
 
+        '<input style="visibility:hidden ;width:0; color:red;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
+
+        '<input type="button" style="visibility:hidden; width:0;" value="Define New Base Field Type" onClick="onDefineNewType()" '+
+        'title="Add a new base field type which can be used by all record types - use an existing field (Add Field) if a suitable one exists" class="add"/>'+
+
+        '<input type="button" style="visibility:hidden; width:0;" value="Add Section" onClick="onAddSeparator()" '+
+        'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
+        '</div>'+
+
+        '<span style="float:right; text-align:right">'+
+        '<a href="#" onclick="{onEditRecordType();}">edit general description<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>'+
+        '<input type="button" value="Done" onClick="editStructure.closeWin();"/>'+
+        '</span>'+
+        
+        '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
+        '<input id="btn_addfield" type="button" style="margin:0 5px" value="Add field" onclick="onAddNewDetail()" '+
+        'title="Insert an existing field into the data entry form for this record type" class="add"/>'+
+        // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button      ; margin:0 5px
+        // Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
+        // '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
+        //'Add existing fields where possible &nbsp;&nbsp; '+
+        '</div>';    
 
     /**
     * Initialization of input form
@@ -75,39 +103,9 @@ function EditRecStructure() {
         if (location.search.length > 1) {
             window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
             rty_ID = window.HEURIST.parameters.rty_ID;
-            var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID;
-            var formTitle = document.getElementById('recordTitle');
-            formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>";
         }
-
-        // buttons on top and bottom of design tab
-        var hToolBar = '<div style=\"display:none;\">'+
-        //<div style="display:inline-block; text-align:left">
-        //'<input type="button" value="collapse all" onclick="onCollapseAll()"/>'+
-        //'<input type="button" value="Enable Drag" onclick="onToggleDrag(event)"/></div>'+
-
-        '<input style="visibility:hidden ;width:0; color:red;" type="button" id="btnSaveOrder" value="Save order" onclick="onUpdateStructureOnServer(false)"/>'+
-
-        '<input type="button" style="visibility:hidden; width:0;" value="Define New Base Field Type" onClick="onDefineNewType()" '+
-        'title="Add a new base field type which can be used by all record types - use an existing field (Add Field) if a suitable one exists" class="add"/>'+
-
-        '<input type="button" style="visibility:hidden; width:0;" value="Add Section" onClick="onAddSeparator()" '+
-        'title="Add a new section heading, to break the data entry form up into groups of related fields. Heading is inserted at bottom, drag up into required position." class="add"/>'+
-        '</div>'+
-
-        '<span style="float:right; text-align:right">'+
-        '<input type="button" value="Done" onClick="editStructure.closeWin();"/>'+
-        '</span>'+
-        '<div  id="recStructure_toolbar" style=\"text-align:right;float:right;display:none;\">'+
-        '<input id="btn_addfield" type="button" style="margin:0 5px" value="Add field" onclick="onAddNewDetail()" '+
-        'title="Insert an existing field into the data entry form for this record type" class="add"/>'+
-        // note class=add --> global.css add-button, is set to float:right, but class adds the + to the button      ; margin:0 5px
-        // Removed Ian 8/10/12, moved to within insertion of existing fields to encourge re-use
-        // '<input type="button" value="Done" onclick="onUpdateStructureOnServer(true)"/>'+
-        //'Add existing fields where possible &nbsp;&nbsp; '+
-        '</div>';
-
-        Dom.get("recordTitle").innerHTML += hToolBar;
+        _refreshTitleAndIcon();
+        
         Dom.get("modelTabs").innerHTML = '<div id="tabDesign"><div id="tableContainer"></div></div>';
         _initTabDesign(null);
     }
@@ -1632,7 +1630,7 @@ function EditRecStructure() {
                     /*if($dlg!=null){
                     $dlg.dialog('close');
                     }*/
-                    _doEditTitleMask();
+                    _doEditTitleMask(true);
                 });
 
             }
@@ -1642,8 +1640,8 @@ function EditRecStructure() {
 
 
     //show edit title mask
-    function _doEditTitleMask(){
-        top.HEURIST.util.closePopupLast();
+    function _doEditTitleMask(is_onexit){
+        if(is_onexit) top.HEURIST.util.closePopupLast();
         //top.HEURIST.util.closePopup(warningPopupID);
         warningPopupID = null;
         //top.HEURIST.util.closePopupAll();
@@ -1659,7 +1657,9 @@ function EditRecStructure() {
                 height: 800,
                 width: 800,
                 callback: function(newvalue) {
-
+                    if(!is_onexit && newvalue){
+                        document.getElementById('rty_TitleMask').value = newvalue;    
+                    }
                 }
         });
     }
@@ -1983,6 +1983,20 @@ function EditRecStructure() {
             }
         }
     });
+    
+    
+    function _refreshTitleAndIcon(){
+        var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID+'&t='+(new Date()).getTime();
+        var formTitle = document.getElementById('recordTitle');
+        //formTitle.innerHTML = '';
+        formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+
+                recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>"+
+                hToolBar;
+        
+        var idx =  top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask;
+        document.getElementById('rty_TitleMask').value = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[idx];
+    }
+    
 
     //---------------------------------------------
     // public members
@@ -2048,8 +2062,12 @@ function EditRecStructure() {
             _addFieldMenu(e);
         },
 
-        doEditTitleMask: function(){
-            _doEditTitleMask();
+        doEditTitleMask: function(is_onexit){
+            _doEditTitleMask(is_onexit);
+        },
+        
+        refreshTitleAndIcon:function(){
+            _refreshTitleAndIcon();
         },
 
         closeWarningPopup: function(){
@@ -2514,3 +2532,38 @@ function _onAddEditFieldType(dty_ID, rty_ID){
             }
     });
 }
+
+function onEditRecordType(){
+
+        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+            
+        var url = top.HEURIST.baseURL_V3 
+                    + "admin/structure/rectypes/editRectype.html?supress=1&db="
+                    + db+"&rectypeID="+editStructure.getRty_ID();
+
+        var dim = Hul.innerDimensions(top);                    
+        
+        popupSelect = Hul.popupURL(top, url,
+            {   "close-on-blur": false,
+                "no-resize": false,
+                title:'Edit Record Type',
+                height: dim.h*0.9,
+                width: 800,
+                    
+            callback: function(context) {
+
+                if(!Hul.isnull(context) && context.result){
+
+                     //refresh the local heurist
+                     top.HEURIST.rectypes = context.rectypes;
+                     //var _rtyID = Number(context.result[0]);
+                }
+                //refresh icon, title, mask
+                editStructure.refreshTitleAndIcon();
+            }
+        });
+        
+        return false;
+}
+

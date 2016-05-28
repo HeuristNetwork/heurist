@@ -414,7 +414,9 @@ function RectypeManager() {
                             tit = str;
                             str = str.substr(0,30)+"&#8230";
                         }
-                        elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" title="'+tit+'">'+str+'</label></a>';
+                        elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" id="lblRecTitle'
+                                    + oRecord.getData("id") +'" title="'
+                                    +tit+'">'+str+'</label></a>';
                 }},
 
                  { key: "description", label: "Description", sortable:false, minWidth:400, maxAutoWidth:800, maxWidth:800,
@@ -1075,6 +1077,7 @@ function RectypeManager() {
                     } else {
                         // alert("Structure is saved");
                     }
+                    icon_refresh(rty_ID);
                 }
         });
     }
@@ -1538,6 +1541,8 @@ function icon_refresh(rectypeID) {
             img.css('background-image', 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID+".png&t="+curtimestamp+'")');
             ///img.style.backgroundImage = 'url("' + top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png?" + curtimestamp+'") !important';
         }
+        
+        $('#lblRecTitle'+rectypeID).text(top.HEURIST.rectypes.names[rectypeID]);
 
     }
 }
