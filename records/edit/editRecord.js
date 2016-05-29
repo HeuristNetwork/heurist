@@ -1944,7 +1944,10 @@ console.log('heurist not defined');
 
         this.inputs = [];
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        var defaultValue = ((windowRef.parent.HEURIST.edit.record.recID>0)?'':recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]);
+        var defaultValue = ( windowRef.parent.HEURIST.edit.isAdditionOfNewRecord()
+                                ?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]
+                                :'');   // do not assign default values for existing records
+                                
 
         if (true || this.repeatable=== true) {    //  saw TODO adjust this code for Cardinality , pass in max number and flag red after max
             for (var i=0; i < fieldValues.length; ++i) {
@@ -1955,8 +1958,33 @@ console.log('heurist not defined');
                 }
                 //nonsense typeof fieldValues[i] == "string" ? this.addInput( fieldValues[i]) : this.addInput( fieldValues[i]);
             }
-            if (fieldValues.length == 0) {
-                this.addInput({"value" :  defaultValue} );    // add default value input make it look like bdvalue without id field
+            if (fieldValues.length == 0) {   //add default value for first element of repeatable field
+            
+                if(defaultValue=='increment_new_values_by_1'){
+
+                    var inputEl = this.addInput({"value" :''});
+                    //find incremented value on server side
+                    var baseurl = top.HEURIST.baseURL_V3 + "records/edit/getIncrementedValue.php",
+                    params = 'db='+HAPI.database+'&dtyID='
+                                + detailType[0]
+                                + '&rtyID='+windowRef.parent.HEURIST.edit.record.rectypeID,
+                    that = this;
+                    
+                    top.HEURIST.util.getJsonData(baseurl, 
+                        function(context){
+                            if(!top.HEURIST.util.isnull(context)) {
+                                 if(!top.HEURIST.util.isnull(context.result)){
+                                        inputEl.value = context.result;                 
+                                 }else if(!top.HEURIST.util.isnull(context.error)){
+                                        alert(context.error);
+                                 }
+                            }
+                        }
+                    , params);
+                    
+                }else{
+                    this.addInput({"value" :  defaultValue} );    // add default value input make it look like bdvalue without id field
+                }
             }
         } else { //not used
             if (fieldValues.length > 0) {

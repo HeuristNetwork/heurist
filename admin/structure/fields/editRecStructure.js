@@ -416,6 +416,11 @@ function EditRecStructure() {
                         
                         var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
                         var allowEditBaseFieldType = (fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
+                        var allowIncrement = (fieldType=='freetext') || (fieldType=='integer') || (fieldType=='float');
+                        
+                        var incrementTip = (fieldType=='freetext')
+                                    ?'The default value supplied for new records will be the last value entered for the field with any integer at the end of that value incremented by 1, or the last value entered with 1 appended if the last character is not a numeral'
+                                    :'The default value supplied for new records will be the largest numeric value for this field + 1';
                         
                         /*
                         THIS IS FORM to edit detail structure. It is located on expandable row of table
@@ -450,6 +455,7 @@ function EditRecStructure() {
                         '<option value="optional">optional</option>'+
                         '<option value="forbidden">forbidden</option></select>'+
 
+                        
                         // Default value
                         /*
                         '<div class="input-row"><div class="input-header-cell">Default Value:</div><div class="input-cell">'+
@@ -457,9 +463,18 @@ function EditRecStructure() {
                         '<input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/>'+
                         '</div></div>'+
                         */
-                        '<span><label class="input-header-cell">Default&nbsp;Value:</label>'+
+                        ((allowIncrement)
+                        ?'<span style="padding-left:50px">'+
+                        '<input type="radio" id="incValue_'+rst_ID+'_1" name="incValue_'+rst_ID+'" value="0" checked onchange="onIncrementModeChange('+rst_ID+')">'+
+                        '<label style="min-width: 60px;width: 60px;" for="incValue_'+rst_ID+'_1">Default&nbsp;Value:</label>'+
+                        '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;padding-right:1em"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
+                        '<input type="radio" id="incValue_'+rst_ID+'_2" name="incValue_'+rst_ID+'" value="1"  title="'+incrementTip+'" onchange="onIncrementModeChange('+rst_ID+')">'+
+                        '<label  style="min-width: 120px;width: 120px;" for="incValue_'+rst_ID+'_2" title="'+incrementTip+'">Increament value by 1</label>'+
+                        '</span>'
+                        :'<span style="padding-left:50px">'+
+                        '<label class="input-header-cell" for="ed'+rst_ID+'_rst_DefaultValue">Default&nbsp;Value:</label>'+
                         '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
-                        '</span>'+
+                        '</span>')+
 
                         // Minimum values
                         '<span id="ed'+rst_ID+'_spanMinValue" style="display:none;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
@@ -914,6 +929,11 @@ function EditRecStructure() {
                     //DEBUG if(values[k] != edt.value){
                     //	dbg.value = dbg.value + (fieldnames[k]+'='+edt.value);
                     //}
+                    
+                    if(fieldnames[k]=="rst_DefaultValue" && $('#incValue_'+__rst_ID+'_2').is(':checked')){
+                            edt.value = 'increment_new_values_by_1';
+                    }
+                    
                     if(values[k] !== edt.value){
 
                         if(fieldnames[k]=="rst_DisplayName"){
@@ -923,6 +943,8 @@ function EditRecStructure() {
                         }
 
                         values[k] = edt.value;
+                        
+                        
 
                         isChanged = true;
                         //track the changes for further save
@@ -1028,7 +1050,13 @@ function EditRecStructure() {
             var ed_name = 'ed'+rst_ID+'_'+fieldnames[k];
             var edt = Dom.get(ed_name);
             if( !Hul.isnull(edt) && (isAll || edt.parentNode.id.indexOf("row")<0)){
-                edt.value = values[k];
+                
+                if(values[k]=='increment_new_values_by_1' && fieldnames[k]=="rst_DefaultValue" && $('#incValue_'+rst_ID+'_2').length>0){
+                    $('#incValue_'+rst_ID+'_2').attr('checked',true);
+                    onIncrementModeChange(rst_ID);
+                }else{
+                    edt.value = values[k];
+                }
 
                 if(rst_type === "relmarker" && fieldnames[k] === "rst_DefaultValue"){
                     //hide defaulvalue
@@ -2227,6 +2255,16 @@ function onStatusChange(evt){
 
     sel = Dom.get(name+"_rst_RequirementType");
     sel.disabled = (isReserved && (sel.value==='required'));
+}
+
+function onIncrementModeChange(rst_ID){
+    
+        
+    if($('#incValue_'+rst_ID+'_1').is(':checked')){
+        $('#ed'+rst_ID+'_rst_DefaultValue').css('background-color','#ECF1FB').attr('disabled',false);
+    }else{
+        $('#ed'+rst_ID+'_rst_DefaultValue').css('background-color','lightgray').attr('disabled',true).val('');
+    }
 }
 
 /**

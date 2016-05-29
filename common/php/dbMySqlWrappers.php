@@ -272,7 +272,8 @@ function mysql__update($table, $condition, $pairs_assoc) {
 */
 function mysql__select_array($table, $column, $condition) {
     if (defined('T1000_DEBUG')) error_log("T1000 select: SELECT $column FROM $table WHERE $condition");
-    $res = mysql_query("SELECT $column FROM $table WHERE $condition");
+    $query = "SELECT $column FROM $table WHERE $condition";
+    $res = mysql_query($query);
     if (!$res) return NULL;
     $matches = array();
     while (($row = mysql_fetch_array($res))) array_push($matches, $row[0]);
