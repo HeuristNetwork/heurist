@@ -122,7 +122,7 @@
                     "Your Heurist password has been reset.\n\n".
                     "Your username is: ".$user['ugr_Name']."\n".
                     "Your new password is: ".$new_passwd."\n\n".
-                    "To change your password go to My Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
+                    "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
 
                     $dbowner_Email = user_getDbOwner($mysqli, 'ugr_eMail');
 
@@ -495,7 +495,7 @@
 
             if($tmp_password!=null){
                 $email_text = $email_text." and password: ".$tmp_password.
-                "\n\nTo change your password go to My Profile -> My User Info in the top right menu";
+                "\n\nTo change your password go to Profile -> My User Info in the top right menu";
             }
 
             $email_text = $email_text."\n\nWe recommend visiting http://HeuristNetwork.org and the online Help ".
