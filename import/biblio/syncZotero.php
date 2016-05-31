@@ -330,10 +330,14 @@
         // 1) start loop: fetch items by 100
         $cnt_updated = 0;
         $cnt_added = 0;
+        $cnt_ignored = 0;
+        $arr_ignored = array();
+        
         $start = 0;
         $fetch = min($_REQUEST['cnt'],100);
         $totalitems = $_REQUEST['cnt'];
         $new_recid = 0;
+        $isFailure = false;
 
         while ($start<$totalitems){
 
@@ -346,6 +350,16 @@
             }
 
             $zdata = simplexml_load_string($items);
+            
+            if($zdata===false){
+                print "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch)." </div>";
+                $isFailure = true;
+                break;
+            }else if(count($zdata->children())<1){
+                print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".($start+$fetch)." </div>";
+                $isFailure = true;
+                break;
+            }
 
             foreach ($zdata->children() as $entry){
 
@@ -361,7 +375,8 @@
                     ob_flush();flush();
 
                     if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
-                        print " ignored<br/>";
+                        array_push($arr_ignored, $zotero_itemid.'  '.$itemtype);
+                        $cnt_ignored++;
                         continue;
                     }
 
@@ -531,18 +546,22 @@
                     }//for fields in content
 
 
-                    echo print_r($details, true);
-
-
-                    $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid);
-                    if($new_recid){
-                        if(count($unresolved_records)>0){
-                            $unresolved_pointers[$new_recid] = $unresolved_records;
-                        }
-                        if($recId==$new_recid){
-                            $cnt_updated++;
-                        }else{
-                            $cnt_added++;
+                    
+                    $new_recid = null;
+                    if(count($details)<1){
+                        print "<div style='color:red'>Warning: zotero id $zotero_itemid is skiiped. Details are not defined</div>";
+                    }else{
+                        echo print_r($details, true);
+                        $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid);
+                        if($new_recid){
+                            if(count($unresolved_records)>0){
+                                $unresolved_pointers[$new_recid] = $unresolved_records;
+                            }
+                            if($recId==$new_recid){
+                                $cnt_updated++;
+                            }else{
+                                $cnt_added++;
+                            }
                         }
                     }
 
@@ -558,8 +577,15 @@
 
         print "<div>Added: ".$cnt_added."</div>";
         print "<div>Updated: ".$cnt_updated."</div>";
+        if($cnt_ignored>0){
+            print "<div>Zotero items ignored: ".$cnt_ignored."</div>";
+            print "<div style='color:red;padding-left:20px'>'".implode('<br>',$arr_ignored).'</div>';
+        }
+        if($cnt_ignored>0 || $isFailure){
+            print "<div>Please advise the Heurist development team - info at heuristnetwork dot org - of the circumstances so that we can provide a fix</div>";
+        }
 
-
+        if(count($unresolved_pointers)>0)
         print "<div>Create/update resource records</div>";
 
         ob_flush();flush();
@@ -601,6 +627,8 @@
             }
 
         }
+        
+        if($ptr_cnt>0)
         print "<br><br>Total count of RESOLVED pointers:".$ptr_cnt;
 
         // done - show report log
@@ -736,7 +764,7 @@
     */
     function createResourceRecord($record_type, $recdetails){
 
-        global $alldettypes, $fi_dettype;
+        global $alldettypes, $fi_dettype, $report_log;
 
         if(is_array($recdetails) && array_key_exists(0, $recdetails)){ //these are creators
             $recource_recids = array();
@@ -924,7 +952,7 @@
         $new_recid = null;
 
         if( count($details)>0){
-
+            
             if($zotero_itemid){
                 $details["t:".$dt_SourceRecordID] = array("0"=>$zotero_itemid);
             }
@@ -977,7 +1005,7 @@
 
                 if(!$rep_errors_only){
                     if (@$out['warning']) {
-                        print "<br>Warning: ".implode("; ",$out["warning"])."<br>";
+                        print "<div style='color:red'>Warning: ".implode("; ",$out["warning"])."</div>";
                     }
                 }
 
