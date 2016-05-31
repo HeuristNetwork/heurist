@@ -196,7 +196,7 @@
                     (top.HEURIST.parameters.db?top.HEURIST.parameters.db:
                         (top.HEURIST.database.name? top.HEURIST.database.name:'')));
 
-                top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?rectype='+
+                top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?fromadd=new_bib&rectype='+
                     recTypeId+
                     '&title='+document.getElementById('q').value+	// q is a string to match against rectitle so let's start with this in the title field
                     '&db='+ _db,

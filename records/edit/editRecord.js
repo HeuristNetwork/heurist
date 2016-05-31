@@ -613,9 +613,10 @@ if (! top.HEURIST.edit) {
         *
         * @returns {Boolean}
         */
-        isAdditionOfNewRecord: function(){
-            if(top.HEURIST && top.HEURIST.parameters && top.HEURIST.parameters['fromadd']){
-                return (top.HEURIST.parameters['fromadd']=="new_bib");
+        isAdditionOfNewRecord: function(windowRef){
+            if(!windowRef) windowRef = top;
+            if(windowRef.HEURIST && windowRef.HEURIST.parameters && windowRef.HEURIST.parameters['fromadd']){
+                return (windowRef.HEURIST.parameters['fromadd']=="new_bib");
                 // new_bib is legacy term (bib = bibliographic record)
             }else{
                 return false
@@ -1944,7 +1945,7 @@ console.log('heurist not defined');
 
         this.inputs = [];
         var windowRef = this.document.parentWindow  ||  this.document.defaultView  ||  this.document._parentWindow;
-        var defaultValue = ( windowRef.parent.HEURIST.edit.isAdditionOfNewRecord()
+        var defaultValue = ( top.HEURIST.edit.isAdditionOfNewRecord(windowRef.parent)
                                 ?recFieldRequirements[rstFieldNamesToRdrIndexMap['rst_DefaultValue']]
                                 :'');   // do not assign default values for existing records
                                 

@@ -528,7 +528,7 @@ function ImageAnnotation(imageviewer, _recID) {
                 //was  getRectypeIconAndName
 				var title = "Add new record "+top.HEURIST.util.getRectypeName(rectype);
 
-				top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?rectype='+
+				top.HEURIST.util.popupURL(window, top.HEURIST.baseURL_V3 +'records/add/formAddRecordPopup.html?fromadd=new_bib&rectype='+
 							rectype+ //top.HEURIST.magicNumbers['RT_ANNOTATION_IMAGE']+
 										'&addr='+marker[0]+":"+marker[1]+":"+marker[2]+":"+marker[3]+
 										'&trgRecID='+_recordID +
