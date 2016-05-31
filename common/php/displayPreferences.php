@@ -89,7 +89,7 @@ $prefs = array(
     "defaultPrintView" => "default",
     "showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
-    // Properties which can be set in the My profile > Preferences dialogue
+    // Properties which can be set in the Profile > Preferences dialogue
     "savedSearchDest" => "",  //last saved search destination (workgroup id)
     "defaultSearch" => "", // was "tag:Favourites", then sortby:-m after:\"1 week ago\"
     "searchQueryInBrowser" => "true", // was false, I presume for neatness. But less informative

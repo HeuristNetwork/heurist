@@ -88,7 +88,7 @@ require_once(dirname(__FILE__)."/../../common/php/utilsMail.php");
                                       "Your Heurist password has been reset.\n\n".
                                       "Your username is: ".$username."\n".
                                       "Your new password is: ".$new_passwd."\n\n".
-                                      "To change your password go to My Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
+                                      "To change your password go to Profile -> My User Info in the top right menu.\nYou will first be asked to log in with the new password above.";
                         $email_header = 'From: '.HEURIST_MAIL_TO_INFO;
                         
                         $rv = sendEmail($email, $email_title, $email_text, $email_header);
