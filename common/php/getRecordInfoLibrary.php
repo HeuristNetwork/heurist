@@ -840,7 +840,7 @@ function getAllRectypeConstraint() {
 function getTermOffspringList($termID, $getAllDescentTerms = true) {
     $offspring = array();
     if ($termID) {
-        $res = mysql_query("select * from defTerms where trm_ParentTermID = $termID");
+        $res = mysql_query("select * from defTerms where trm_ParentTermID=$termID");
         if ($res && mysql_num_rows($res)) { //child nodes exist
             while ($row = mysql_fetch_assoc($res)) { // for each child node
                 $subTermID = $row['trm_ID'];

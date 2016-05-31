@@ -828,7 +828,7 @@ function EditTerms() {
                 _currentNode.title = _currentNode.data.description;
 
                 _currentNode.data.parent_id = iParentId;
-
+                            
                 _currTreeView.render();
 
                 _updateTermsOnServer(_currentNode, needReload);
@@ -999,7 +999,6 @@ function EditTerms() {
             Hul.getJsonData(baseurl, callback, params);
         }
     }
-
 
     /**
     * new of existing node
@@ -1249,6 +1248,28 @@ function EditTerms() {
         }
     }
 
+    //
+    // export vocabulary as human readable list
+    //    
+    function _export(isRoot){
+        
+        if(!Hul.isnull(_currentNode)){
+            
+            var term_ID = 0;
+            if(_currentNode.children && _currentNode.children.length>0){
+                term_ID = _currentNode.data.id;
+            }else{
+                term_ID = _currentNode.data.parent_id;
+            }
+            
+            var sURL = top.HEURIST.baseURL_V3 + "admin/structure/terms/printVocabulary.php?db="+ _db 
+                + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
+
+            window.open(sURL, '_blank');
+        }
+        
+    }
+
     /**
     * invokes popup to import list of terms from file
     */
@@ -1257,7 +1278,6 @@ function EditTerms() {
         if(isRoot || !Hul.isnull(_currentNode)){
 
             var term_id = (isRoot)?0:_currentNode.data.id;
-
             var term_label = (isRoot)?'root vocabulary':_currentNode.label;
             
             /* old way
@@ -1267,7 +1287,7 @@ function EditTerms() {
             */
 
             var sURL = top.HEURIST.baseURL_V3 + "hclient/framecontent/importDefTerms.php?db="+ _db +
-            "&trm_ID="+term_id;
+                        "&trm_ID="+term_id;
             
             Hul.popupURL(top, sURL, {
                 "close-on-blur": false,
@@ -1623,6 +1643,7 @@ function EditTerms() {
         clearImage: function(){ _clearImage()},
 
         doImport: function(isRoot){ _import(isRoot); },
+        doExport: function(isRoot){ _export(isRoot); },
 
         isChanged: function(){
             _isNodeChanged();

@@ -72,35 +72,6 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
     $cssLink = 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/'.$layout_theme.'/jquery-ui.css';
 }
 
-$log_warn = 'To perform this action you must be logged in';
-
-//
-// to limit access to particular page
-// put the call of one of these 3 function just after require_once(dirname(__FILE__)."/initPage.php"); 
-//
-//
-function loginRequired(){
-    global $log_warn, $system;
-    if(!$system->is_logged_in()){
-        header('Location: '.ERROR_REDIR.'?msg='.$log_warn);
-        exit();
-    }
-}
-function dbManagerRequired(){
-    global $log_warn, $system;
-    if(!$system->is_admin()){
-        header('Location: '.ERROR_REDIR.'?msg='.$log_warn.' as Administrator of group \'Database Managers\'');
-        exit();
-    }
-}
-function dbOwnerRequired(){
-    global $log_warn, $system;
-    if(!$system->is_dbowner()){
-        header('Location: '.ERROR_REDIR.'?msg='.$log_warn.' as Database Owner');
-        exit();
-    }
-}
-
 // BASE tag is convenient however it does not suit 
 // reason: some jquery widgets uses href (tabcontrol for example) 
 // <base href="<?php echo PDIR;">

@@ -228,6 +228,9 @@
                             <input id="btnImport" type="button" value="Import"
                                 title=""
                                 onClick="{editTerms.doImport(false)}"/>
+                            <input id="btnExport" type="button" value="Export"
+                                title="Print vocabulary as a list"
+                                onClick="{editTerms.doExport(false)}"/>
                             <input id="btnSetParent" type="button" value="Move"
                                 style="margin-left:20px;"
                                 title="Change the parent" onClick="{editTerms.selectParent()}"/>

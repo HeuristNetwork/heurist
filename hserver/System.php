@@ -67,6 +67,8 @@ class System {
     private $current_User = null;
     private $system_settings = null;
 
+    const LOGIN_WARN = 'To perform this action you must be logged in';
+    const ERROR_REDIR2 = '../hclient/framecontent/errorPage.php';
 
     /**
     * Read configuration parameters from config file
@@ -854,6 +856,37 @@ class System {
         }
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
+    
+    //
+    // to limit access to particular page
+    // put the call of one of these 3 function just after require_once(dirname(__FILE__)."/initPage.php"); 
+    //
+    //
+    public function loginRequired(){
+
+        if(!$this->is_logged_in()){
+            header('Location: '.ERROR_REDIR2.'?msg='.LOGIN_WARN);
+            exit();
+        }
+    }
+    public function dbManagerRequired(){
+
+        if(!$this->is_admin()){
+            header('Location: '.ERROR_REDIR2.'?msg='.LOGIN_WARN.' as Administrator of group \'Database Managers\'');
+            exit();
+        }
+    }
+    public function dbOwnerRequired(){
+
+        if(!$this->is_dbowner()){
+            header('Location: '.ERROR_REDIR2.'?msg='.LOGIN_WARN.' as Database Owner');
+            exit();
+        }
+    }
+
 
 }
+
+
+
 ?>

@@ -586,7 +586,7 @@
         }
 
         if(count($unresolved_pointers)>0)
-        print "<div>Create/update resource records</div>";
+        print "<div><br>Create/update resource records</div>";
 
         ob_flush();flush();
 

@@ -310,6 +310,52 @@
         return $terms;
     }
 
+    
+    //
+    // to public method
+    // find tree in term tree
+    // return branch with childs
+    //
+    function getTermInTree($term_id){
+
+        global $terms;
+        
+        $res = null;
+        
+        if($term_id>0){
+
+            $domain = 'enum';
+            $term = @$terms['termsByDomainLookup']['enum'][$term_id];
+            if(null==$term){
+                $domain = 'relation';
+                $term = @$terms['termsByDomainLookup']['relation'][$term_id];
+            }
+            if(null!=$term){
+                  $res = getTermInTree2($terms['treesByDomain'][$domain], $term_id);
+            }
+        }
+        return $res;
+    }    
+    
+    function getTermInTree2($tree, $term_id){
+        
+        if(@$tree[$term_id]){
+            return $tree[$term_id];
+        }else{
+        
+            foreach($tree as $pID => $children){
+                if(count($children)>0){
+                    $res = getTermInTree2($children, $term_id);
+                    if($res!=null){
+                        return $res;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    
     //
     // to public method
     //
@@ -335,16 +381,20 @@
 
         if($term_id>0){
 
-            $idx = @$terms['fieldNamesToIndex'][$field];
-            //if(null==$idx) return 'AAA'.$idx;
-
             $term = @$terms['termsByDomainLookup']['enum'][$term_id];
             if(null==$term){
                 $term = @$terms['termsByDomainLookup']['relation'][$term_id];
             }
 
             if($term){
-                return $term[$idx];
+                
+                $idx = @$terms['fieldNamesToIndex'][$field];
+                    
+                if($idx>=0){
+                    return $term[$idx];
+                }else{
+                    return $term;
+                }
             }
         }
 

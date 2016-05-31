@@ -46,7 +46,7 @@
 require_once(dirname(__FILE__)."/initPage.php");
 
 //verify that user is logged in
-loginRequired();
+$system->loginRequired();
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];

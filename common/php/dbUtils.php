@@ -237,9 +237,13 @@ function db_clone($db_source, $db_target, $verbose=true){
                     if($res){
                         echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
                     }else{
-                        echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
-                        $res = false;
-                        break;
+                        if($table=='usrReportSchedule'){
+                            echo ("<br/><p class=\"error\">Warning: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                        }else{
+                            echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                            $res = false;
+                            break;
+                        }
                     }
 
                     if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
