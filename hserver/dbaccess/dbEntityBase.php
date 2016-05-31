@@ -135,7 +135,7 @@ class DbEntityBase
                     $mysqli->rollback();
                     if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                     $this->system->addError(HEURIST_INVALID_REQUEST, 
-                        'Can not save data in table '.$this->config['entityName'], $ret);
+                        'Cannot save data in table '.$this->config['entityName'], $ret);
                     return false;
             }
             
@@ -160,7 +160,7 @@ class DbEntityBase
         if($ret===true){
             return true;
         }else{
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Can not delete from table ".$this->config['entityName'], $ret);
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Cannot delete from table ".$this->config['entityName'], $ret);
             return false;
         }
         
@@ -251,10 +251,10 @@ class DbEntityBase
            
            if(!$this->isvalid()){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 
-                    "Configuration file $entity_file is invalid. Can not init instance on server");     
+                    "Configuration file $entity_file is invalid. Cannot init instance on server");     
            }
         }else{
-           $this->system->addError(HEURIST_INVALID_REQUEST, "Can not find configuration for entity ".@$data['entity']);     
+           $this->system->addError(HEURIST_INVALID_REQUEST, "Cannot find configuration for entity ".@$data['entity']);     
         }
     }
     

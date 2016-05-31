@@ -262,7 +262,7 @@ if (isForAdminOnly()) exit();
                 ?>
                     <h3>Files not found</h3>
                     <div><?php echo count($files_notfound);?> entries</div>
-                    <div>Path specified in database is wrong and file can not be found. Entries will be removed from database</div>
+                    <div>Path specified in database is wrong and file cannot be found. Entries will be removed from database</div>
                     <br>
                     <input type=checkbox id="fnf_all"
                         onclick="markAllMissed()">

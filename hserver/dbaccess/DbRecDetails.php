@@ -190,7 +190,7 @@ class DbRecDetails
 
             $res = $mysqli->query($query);
             if(!$res){
-                array_push($undefinedFieldsRecIDs, $recID); //can not retrieve limit 
+                array_push($undefinedFieldsRecIDs, $recID); //cannot retrieve limit 
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
             }
@@ -218,7 +218,7 @@ class DbRecDetails
             $rec_update['rec_ID'] = $recID;
             $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
             if (!is_numeric($ret)) {
-                $sqlErrors[$recID] = 'Can not update modify date. '.$ret;
+                $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
             }
         }
         
@@ -329,7 +329,7 @@ class DbRecDetails
                 $rec_update['rec_ID'] = $recID;
                 $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                 if (!is_numeric($ret)) {
-                    $sqlErrors[$recID] = 'Can not update modify date. '.$ret;
+                    $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
                 }
             }
         }//for recors
@@ -438,7 +438,7 @@ class DbRecDetails
                $rec_update['rec_ID'] = $recID;
                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
                if (!is_numeric($ret)) {
-                    $sqlErrors[$recID] = 'Can not update modify date. '.$ret;
+                    $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
                }
                
             } else {

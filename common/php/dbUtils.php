@@ -614,7 +614,7 @@ function createDatabaseFolders($newDBName){
         //copy htaccess
         $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $filethumbs_folder.'/.htaccess');
         if(!$res){
-            echo ("<h3>Warning:</h3> Can not copy htaccess file for filethumbs folder in $uploadPath<br>");
+            echo ("<h3>Warning:</h3> Cannot copy htaccess file for filethumbs folder in $uploadPath<br>");
             $warnings = 1;
         }
     }else{

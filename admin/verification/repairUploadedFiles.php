@@ -71,7 +71,7 @@
     if(count($ids)>0){
         mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$ids).')');
         if (mysql_error()) {
-            $rv['error'] = "Can not delete entries from recUploadedFiles. mySQL error: " . mysql_error();
+            $rv['error'] = "Cannot delete entries from recUploadedFiles. mySQL error: " . mysql_error();
             print json_format($rv);
             return;
         }
@@ -82,13 +82,13 @@
     if(count($file_ids)>0){
         mysql_query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
         if (mysql_error()) {
-            $rv['error'] = "Can not delete entries from recDetails. mySQL error: " . mysql_error();
+            $rv['error'] = "Cannot delete entries from recDetails. mySQL error: " . mysql_error();
             print json_format($rv);
             return;
         }
         mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$file_ids).')');
         if (mysql_error()) {
-            $rv['error'] = "Can not delete entries from recUploadedFiles. mySQL error: " . mysql_error();
+            $rv['error'] = "Cannot delete entries from recUploadedFiles. mySQL error: " . mysql_error();
             print json_format($rv);
             return;
         }

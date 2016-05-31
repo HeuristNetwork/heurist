@@ -199,7 +199,7 @@ _time_debug = new Date().getTime() / 1000;
                         top.HEURIST4.terms = response.data.terms;
                         top.HEURIST4.detailtypes = response.data.detailtypes;
                     }else{
-                        top.HEURIST4.msg.showMsgErr('Can not obtain database definitions, please consult Heurist developers');
+                        top.HEURIST4.msg.showMsgErr('Cannot obtain database definitions, please consult Heurist developers');
                         success = false;
                     }
 

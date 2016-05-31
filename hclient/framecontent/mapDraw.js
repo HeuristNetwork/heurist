@@ -495,7 +495,7 @@ function hMappingDraw(_mapdiv_id) {
               if(resc!=null){
                     coords.push({radius:d});
               }else{
-                    alert("Can not create circle");
+                    alert("Cannot create circle");
                     return null;
               }
               break;

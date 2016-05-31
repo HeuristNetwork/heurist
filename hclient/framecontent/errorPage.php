@@ -1,7 +1,7 @@
 <?php
 
 /**
-* Error page. Either system can not be inited (db connecction, failure with configuration),
+* Error page. Either system cannot be inited (db connecction, failure with configuration),
 * or wrong set of parameters has been provided.
 *
 * Notes:
@@ -43,7 +43,7 @@ if($isSystemInited){
     $err = $system->getError();
     $error_msg = @$err['message'];
     if(!$error_msg){
-        $error_msg = 'Unknown error. Can not init Heurist system';
+        $error_msg = 'Unknown error. Cannot init Heurist system';
     }
 }
 

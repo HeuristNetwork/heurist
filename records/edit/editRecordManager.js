@@ -173,7 +173,7 @@ function onRecordDataLoaded(){
         var recID =  ((rec?rec.bibID : 0) || (window.HEURIST ? window.HEURIST.parameters["recID"]:0) || (top.HEURIST ? top.HEURIST.parameters["recID"]:0));
         if (! rec) {
             //                    window.location.replace(top.HEURIST.baseURL_V3 +"common/html/msgInvalidRecID.html"+ (recID ? "?" + recID : ""));
-             top.HEURIST.util.showError('Can not load record '+recID);
+             top.HEURIST.util.showError('Cannot load record '+recID);
              return;
         }
         if (rec.denied) {

@@ -255,7 +255,7 @@ if (!$geekMail->send())
     //$errors = $geekMail->getDebugger();
     //print_r($errors);
     
-    print '({"error":"Can not send email. Please ask system administrator to verify that mailing is enabled on your server"})';
+    print '({"error":"Cannot send email. Please ask system administrator to verify that mailing is enabled on your server"})';
 }else{
     print '({"result":"ok"})';
 }

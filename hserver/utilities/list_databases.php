@@ -33,7 +33,7 @@ if(isset($system)){
     $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 }
 
-if( !$isSystemInited ){  //can not init system (apparently connection to Database Server is wrong or server is down)
+if( !$isSystemInited ){  //cannot init system (apparently connection to Database Server is wrong or server is down)
     $err = $system->getError();
     $error_msg = @$err['message'];
 }

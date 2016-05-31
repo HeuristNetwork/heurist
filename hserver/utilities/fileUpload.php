@@ -124,7 +124,7 @@ if($response!=null){
 
     foreach($res['files'] as $file){
         if(@$file->error){
-            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File can not be processed", $file->error);
+            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File cannot be processed", $file->error);
             break;            
         }
     }

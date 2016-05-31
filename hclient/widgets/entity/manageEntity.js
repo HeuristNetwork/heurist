@@ -158,7 +158,7 @@ $.widget( "heurist.manageEntity", {
         try{
             $(layout).appendTo(this.element);
         }catch(e){
-            this.element.html('Can not init layout. Please contact developers')
+            this.element.html('Cannot init layout. Please contact developers')
             return;
         }
         

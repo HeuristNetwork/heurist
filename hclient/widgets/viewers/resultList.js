@@ -1542,7 +1542,7 @@ $.widget( "heurist.resultList", {
                                 var recID = rec_toload[i];
                                 if(resp.getById(recID)==null){
                                     that._currentRecordset.removeRecord(recID);
-                                    //that._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Can not get data from server'});
+                                    //that._currentRecordset.setRecord(recID,{rec_ID:recID, rec_Title:'Error! Cannot get data from server'});
                                 }
                             }
 
