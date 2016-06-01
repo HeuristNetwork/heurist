@@ -241,7 +241,7 @@
                                 title=" "
                                 onClick="{editTerms.doDelete()}" />
                             <input id="btnSave" type="button" value="Save changes" 
-                                style="margin-left:100px;font-style: bold !important; color:black; display:none"
+                                style="margin-left:80px;font-style: bold !important; color:black; display:none"
                                 title=" "
                                 onClick="{editTerms.doSave()}" />
                             

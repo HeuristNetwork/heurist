@@ -408,7 +408,7 @@ class Query {
 
         $or_limbs = array();
         // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
-        preg_match_all('/"[^"]+"|(&&|\\OR\\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all('/"[^"]+"|(&&|\\ OR \\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
         $offset = 0;
         if(count($matches[1])>0){
 
